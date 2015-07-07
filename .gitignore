@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+*.egg-info/
+build/
+dist/
+MANIFEST
+*.bak
+*.sas7bcat
+*.sas7bitm
+.ipynb_checkpoints/
+*.png
+*.rej
+*.orig
+*~
