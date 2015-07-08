@@ -28,14 +28,14 @@ if svem_flag in sys.argv:
     # Die, setuptools, die.
     sys.argv.remove(svem_flag)
 
-setup(name='pysas',
+setup(name='saspy',
       version='0.1',
       description='A SAS interpreter for Python',
       long_description=readme,
       author='Jared Dean',
       author_email='jared.dean@sas.com',
       #url='https://github.com/takluyver/bash_kernel',
-      packages=['pysas'],
+      packages=['saspy'],
       cmdclass={},
       install_requires=[],
       classifiers = [
