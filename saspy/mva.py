@@ -1,4 +1,4 @@
-import pysas
+from saspy import pysas
 
 def startsas(path=""):
    pid = pysas.startsas(path)
