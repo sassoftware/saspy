@@ -1,7 +1,7 @@
 from multiprocessing import Process
 from time import sleep
 import subprocess, fcntl, os
-from IPython.display import HTML
+#from IPython.display import HTML
 
 saspid = None
 
@@ -10,7 +10,7 @@ def getdata(table, libref="work"):
    return sasdata(libref, table)
 
 def startsas(path=""):
-   global saspid
+   global saspid 
    defpath ="/opt/sasinside/SASHome"
 
    if len(path) == 0:
@@ -25,9 +25,9 @@ def startsas(path=""):
    saspid = subprocess.Popen(parms, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
    fcntl.fcntl(saspid.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
    fcntl.fcntl(saspid.stderr,fcntl. F_SETFL, os.O_NONBLOCK)
-
+  
    submit("options svgtitle='svgtitle';", "text")
-
+     
    return saspid.pid
 
 def getlog(wait=5):
@@ -65,18 +65,18 @@ def getlst(wait=5):
       lst = saspid.stdout.read1(4096)
       if len(lst) > 0:
          lstf += lst
-
+                          
          if ((not bof) and lst.count(b"<!DOCTYPE html>", 0, 20) > 0):
             bof = True
       else:
          lenf = len(lstf)
-
+   
          if (lenf > 15):
             eof = lstf.count(b"</html>", (lenf - 15), lenf)
-
+   
          if (eof > 0):
                break
-
+         
          if not bof:
             quit -= 1
             if quit < 0:
@@ -103,10 +103,10 @@ def getlsttxt(wait=5):
 
          lenf = len(lstf)
          eof = lstf.find(b"tom was here", lenf - 25, lenf)
-
+   
          if (eof != -1):
             final = lstf.partition(b"tom was here")
-            lstf = final[0]
+            f2 = final[0].decode().rpartition(chr(12))
             break
       else:
          quit -= 1
@@ -114,7 +114,7 @@ def getlsttxt(wait=5):
             break
          sleep(0.5)
 
-   return lstf.decode()
+   return f2[0]
 
 
 def submit(code, results="html"):
@@ -148,9 +148,29 @@ def endsas():
 
 class sasdata:
 
-    def __init__(self, libref, table):
-        self.libref = libref
+    def __init__(self, libref, table, out="HTML"):
+        failed = 0
+        if out == "HTML":
+           try:
+              from IPython.display import HTML 
+           except:
+              failed = 1
+
+           if failed:
+              self.HTML = 0
+           else:
+              self.HTML = 1
+        else:
+           self.HTML = 0
+
+        self.libref = libref 
         self.table  = table
+
+    def __flushlst__(self):
+        lst = b'hi'
+        while(len(lst) > 0):
+           lst = saspid.stdout.read1(4096)
+           continue
 
     def head(self, obs=5):
         code  = "proc print data="
@@ -160,38 +180,62 @@ class sasdata:
         code += "(obs="
         code += str(obs)
         code += ");run;"
-        submit(code)
-        return HTML(getlst())
+        
+        self.__flushlst__()
 
+        if self.HTML:
+           from IPython.display import HTML 
+           submit(code)
+           return HTML(getlst())
+        else:
+           submit(code, "text")
+           print(getlsttxt())
+   
     def contents(self):
         code  = "proc contents data="
         code += self.libref
         code += "."
         code += self.table
         code += ";run;"
-        submit(code)
-        return HTML(getlst())
 
+        self.__flushlst__()
+
+        if self.HTML:
+           from IPython.display import HTML 
+           submit(code)
+           return HTML(getlst())
+        else:
+           submit(code, "text")
+           print(getlsttxt())
+   
     def means(self):
         code  = "proc means data="
         code += self.libref
         code += "."
         code += self.table
         code += ";run;"
-        submit(code)
-        return HTML(getlst())
+        
+        self.__flushlst__()
 
-    def read_csv(self, file, table, libref="work"):
-        code  = "filename x url "+file+";\n"
-        code += "proc import datafile=x out="
-        code += libref+"."+table
-        code += " dbms=csv replace; run;"
-        submit(code)
-        return sasdata(libref, table)
+        if self.HTML:
+           from IPython.display import HTML 
+           submit(code)
+           return HTML(getlst())
+        else:
+           submit(code, "text")
+           print(getlsttxt())
 
 def getdata(table, libref="work"):
    return sasdata(libref, table)
 
+
+def read_csv(file, table, libref="work"):
+   code  = "filename x url \""+file+"\";\n"
+   code += "proc import datafile=x out="
+   code += libref+"."+table
+   code += " dbms=csv replace; run;"
+   submit(code, "text")
+   return sasdata(libref, table)
 
 
 if __name__ == "__main__":
@@ -203,7 +247,4 @@ if __name__ == "__main__":
     print(getlsttxt())
 
     endsas()
-
-
-
 
