@@ -102,3 +102,14 @@
 
 %getdata(COOKSDPLOT);
 */
+
+/*Full Test2 */
+/*
+%macro proccall(d);
+proc hpsplit plots=all data=sashelp.cars;model mpg_city = msrp cylinders length wheelbase weight;run; %mend;
+%mangobj(hps1,hpsplit,cars);
+
+%listdata(hps1);
+
+%getdata(COOKSDPLOT);
+*/
