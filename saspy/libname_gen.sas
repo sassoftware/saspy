@@ -18,7 +18,8 @@
         call symputx('tmpdir',tmpdir);
     run;
     libname &objname. base "&tmpdir.";
-    ods html file="&tmpdir./&objname..html";
+    ods _all_ close;
+/*    ods html file="&tmpdir./&objname..html";*/
     ods document name=&objname.(write);
     /*replace with code generation macro*/
     %proccall(&d.);
@@ -87,4 +88,17 @@
 /*
 %listdata(cars);
 %listdata(lm);
+*/
+
+
+
+/*Full Test*/
+/*
+%macro proccall(dset); proc reg data=&dset. plots(unpack)=all; model MSRP = weight wheelbase length; run; quit; %mend;
+
+%mangobj(cars,reg,sashelp.cars);
+
+%listdata(cars);
+
+%getdata(COOKSDPLOT);
 */
