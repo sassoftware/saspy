@@ -100,7 +100,7 @@
 
 %listdata(cars);
 
-%getdata(COOKSDPLOT);
+%getdata(cars,COOKSDPLOT);
 */
 
 /*Full Test2 */
@@ -111,5 +111,5 @@ proc hpsplit plots=all data=sashelp.cars;model mpg_city = msrp cylinders length 
 
 %listdata(hps1);
 
-%getdata(COOKSDPLOT);
+%getdata(hps1,COOKSDPLOT);
 */
