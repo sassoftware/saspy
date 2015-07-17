@@ -70,7 +70,36 @@ class sasstat:
 
         return (Results(obj1,self.objname))
 
+    def _makeProccallMacro(self):
+        code  = "%macro proccall(d);\n"
+        code += "proc %s data=%s.%s plots(unpack)=all;\n" % (self.objtype, self.data.libref, self.data.table)
+        if len(model):
+            code += "model %s;" % (self.model)
+        if len(self.cls):
+            code += "class %s;" % (self.cls)
+        code += "run; quit; %mend;\n"
+        code += "%mangobj(%s,%s,%s);" % (self.objname, self.objtype,self.data.table)
+        logger.debug("Proc code submission: " + str(code))
+        return (code)
+
+
     def reg(self, model='', data=None, **kwargs):
+        self.model=model
+        self.data=data
+        self.objtype='reg'
+        self.objname='reg1' #how to give this a better name
+        code=_makeProccallMacro()
+        #logger.debug("REG macro submission: " + str(code))
+        sas.submit(code,"text")
+        #time.sleep(.2)
+        try:
+            obj1=self._objectmethods(self.objname)
+            #print(obj1)
+        except Exception:
+            obj1=[]
+        return (Results(obj1,self.objname))
+
+    def reg2(self, model='', data=None, **kwargs):
         self.model=model
         self.data=data
         self.objtype='reg'
@@ -102,6 +131,7 @@ class sasstat:
         except Exception:
             obj1=[]
         return (Results(obj1,self.objname))
+
 
     def glm(self, model='', data=None, **kwargs):
         self.model=model
