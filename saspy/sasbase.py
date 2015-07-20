@@ -356,7 +356,7 @@ def sasdata2dataframe(sd):
    sock.listen(0)
    submit(code, 'text')
    newsock = sock.accept()
-      while True:
+   while True:
       data = newsock[0].recv(4096)
       if len(data):
          datar += data.decode()
