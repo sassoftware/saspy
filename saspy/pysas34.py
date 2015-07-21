@@ -1,12 +1,8 @@
 from multiprocessing import Process
 from time import sleep
 import subprocess, fcntl, os
-#from IPython.display import HTML
 
 saspid = None
-
-def startsas(path="/opt/sasinside/SASHome"):
-    return _startsas(path)
 
 def _startsas(path="/opt/sasinside/SASHome"):
    global saspid 
@@ -25,12 +21,9 @@ def _startsas(path="/opt/sasinside/SASHome"):
    fcntl.fcntl(saspid.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
    fcntl.fcntl(saspid.stderr,fcntl. F_SETFL, os.O_NONBLOCK)
   
-   submit("options svgtitle='svgtitle'; options validvarname=any;", "text")
+   _submit("options svgtitle='svgtitle'; options validvarname=any;", "text")
      
    return saspid.pid
-
-def getlog(wait=5):
-    return _getlog(wait)
 
 def _getlog(wait=5):
    #import pdb; pdb.set_trace()
@@ -58,9 +51,6 @@ def _getlog(wait=5):
          sleep(0.5)
 
    return logf.decode()
-
-def getlst(wait=5):
-    return _getlst(wait)
 
 def _getlst(wait=5):
    #import pdb; pdb.set_trace()
@@ -97,9 +87,6 @@ def _getlst(wait=5):
             sleep(0.5)
 
    return lstf.decode()
-
-def getlsttxt(wait=5):
-    return _getlsttxt(wait)
 
 def _getlsttxt(wait=5):
    #import pdb; pdb.set_trace()
@@ -169,9 +156,6 @@ def _getlstlog(done='used (Total process time):', count=1):
 
    return lstf.decode()
 
-def submit(code, results="html"):
-    return _submit(code, results)
-
 def _submit(code, results="html"):
    #import pdb; pdb.set_trace()
 
@@ -198,9 +182,6 @@ def _submit(code, results="html"):
        saspid.stdin.flush()
 
    return out
-
-def endsas():
-   return _endsas()
 
 def _endsas():
    rc = 0
@@ -263,10 +244,10 @@ class sasdata:
         if self.HTML:
            from IPython.display import HTML 
            _submit(code)
-           return HTML(getlst())
+           return HTML(_getlst())
         else:
            _submit(code, "text")
-           print(getlsttxt())
+           print(_getlsttxt())
    
     def tail(self, obs=5):
         #import pdb; pdb.set_trace()
@@ -299,10 +280,10 @@ class sasdata:
         if self.HTML:
            from IPython.display import HTML 
            _submit(code)
-           return HTML(getlst())
+           return HTML(_getlst())
         else:
            _submit(code, "text")
-           print(getlsttxt())
+           print(_getlsttxt())
    
     def contents(self):
         code  = "proc contents data="
@@ -316,10 +297,10 @@ class sasdata:
         if self.HTML:
            from IPython.display import HTML 
            _submit(code)
-           return HTML(getlst())
+           return HTML(_getlst())
         else:
            _submit(code, "text")
-           print(getlsttxt())
+           print(_getlsttxt())
    
     def describe(self):
         return(self.means())
@@ -336,10 +317,10 @@ class sasdata:
         if self.HTML:
            from IPython.display import HTML 
            _submit(code)
-           return HTML(getlst())
+           return HTML(_getlst())
         else:
            _submit(code, "text")
-           print(getlsttxt())
+           print(_getlsttxt())
 
     def to_csv(self, file):
         code  = "filename x \""+file+"\";\n"
@@ -484,12 +465,12 @@ def sasdata2dataframe(sd):
 
 
 if __name__ == "__main__":
-    startsas()
+    _startsas()
 
-    submit(sys.argv[1], "text")
+    _submit(sys.argv[1], "text")
 
-    print(getlog())
-    print(getlsttxt())
+    print(_getlog())
+    print(_getlsttxt())
 
-    endsas()
+    _endsas()
 
