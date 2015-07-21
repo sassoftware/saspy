@@ -60,7 +60,6 @@ class sasstat:
 
         logger.debug("HPSPLIT macro submission: " + str(code))
         sas._submit(code,"text")
-        #time.sleep(5)
         try:
             obj1=self._objectmethods(self.objname)
             #print("in try block")
@@ -91,7 +90,6 @@ class sasstat:
         code=_makeProccallMacro()
         #logger.debug("REG macro submission: " + str(code))
         sas._submit(code,"text")
-        #time.sleep(.2)
         try:
             obj1=self._objectmethods(self.objname)
             #print(obj1)
@@ -124,7 +122,6 @@ class sasstat:
 
         logger.debug("REG macro submission: " + str(code))
         sas._submit(code,"text")
-        #time.sleep(.2)
         try:
             obj1=self._objectmethods(self.objname)
             #print(obj1)
@@ -160,7 +157,7 @@ class sasstat:
         code += ");"
 
         logger.debug("GLM macro submission: " + str(code))
-        sas._submit(code,"text")
+        _submit(code,"text")
         try:
             obj1=self._objectmethods(self.objname)
         except Exception:
@@ -181,7 +178,7 @@ class Results(object):
         '''Overload dir method to return the attributes'''
         return self._attrs
 
-        def __getattr__(self, attr):
+    def __getattr__(self, attr):
         if attr.startswith('_'):
             return getattr(self, attr)
         if attr.upper() in self._attrs:
