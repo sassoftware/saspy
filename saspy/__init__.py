@@ -13,4 +13,5 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from saspy import pysas
+from saspy import pysas34
+from saspy import sasstat
