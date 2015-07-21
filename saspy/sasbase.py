@@ -20,12 +20,14 @@ import subprocess, fcntl, os
 
 saspid = None
 
-
-def getdata(table, libref="work"):
-   return sasdata(libref, table)
-
 def startsas(path="/opt/sasinside/SASHome"):
+    return _startsas(path)
+
+def _startsas(path="/opt/sasinside/SASHome"):
    global saspid 
+
+   if saspid:
+      return saspid
 
    parms  = [path+"/SASFoundation/9.4/sas"]
    parms += ["-set", "TKPATH", path+"/SASFoundation/9.4/sasexe:"+path+"/SASFoundation/9.4/utilities/bin"]
@@ -43,7 +45,14 @@ def startsas(path="/opt/sasinside/SASHome"):
    return saspid.pid
 
 def getlog(wait=5):
+    return _getlog(wait)
+
+def _getlog(wait=5):
    #import pdb; pdb.set_trace()
+
+   if not saspid:
+      return "Error: No SAS process started"
+
    logf =b''
    quit = wait * 2
 
@@ -66,7 +75,14 @@ def getlog(wait=5):
    return logf.decode()
 
 def getlst(wait=5):
+    return _getlst(wait)
+
+def _getlst(wait=5):
    #import pdb; pdb.set_trace()
+
+   if not saspid:
+      return "Error: No SAS process started"
+
    lstf = b''
    quit = wait * 2
    eof = 0
@@ -98,7 +114,14 @@ def getlst(wait=5):
    return lstf.decode()
 
 def getlsttxt(wait=5):
+    return _getlsttxt(wait)
+
+def _getlsttxt(wait=5):
    #import pdb; pdb.set_trace()
+
+   if not saspid:
+      return "Error: No SAS process started"
+
    lstf = b''
    quit = wait * 2
    eof = 0
@@ -129,8 +152,12 @@ def getlsttxt(wait=5):
    return f2[0]
 
 
-def getlstlog(done='used (Total process time):', count=1):
+def _getlstlog(done='used (Total process time):', count=1):
    #import pdb; pdb.set_trace()
+
+   if not saspid:
+      return "Error: No SAS process started"
+
    lstf = b''
    logf = b''
    quit = False
@@ -158,8 +185,15 @@ def getlstlog(done='used (Total process time):', count=1):
    return lstf.decode()
 
 def submit(code, results="html"):
+    return _submit(code, results)
+
+def _submit(code, results="html"):
    #import pdb; pdb.set_trace()
-   #odsopen  = b"ods listing close;ods html5 file=stdout options(svg_mode='inline'); ods graphics on / outputfmt=svg;\n"
+
+   if not saspid:
+      return "Error: No SAS process started"
+
+   #odsopen = b"ods listing close;ods html5 file=stdout options(svg_mode='inline');               ods graphics on / outputfmt=svg;\n"
    odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
    odsclose = b"ods html5 close;ods listing;\n"
    ods      = True;
@@ -181,17 +215,28 @@ def submit(code, results="html"):
    return out
 
 def endsas():
-   code = b"\n;quit;endsas;\n"
-   saspid.stdin.write(code)
-   saspid.stdin.flush()
-   return saspid.wait(10)
+   return _endsas()
+
+def _endsas():
+   rc = 0
+   if not saspid:
+      code = b"\n;quit;endsas;\n"
+      saspid.stdin.write(code)
+      saspid.stdin.flush()
+      rc = saspid.wait(10)
+      saspid = None
+   return rc
 
 
 class sasdata:
 
     def __init__(self, libref, table, out="HTML"):
+
+        if not saspid:
+           _startsas()
+
         failed = 0
-        if out == "HTML":
+        if out == "HTML" or out == 'html':
            try:
               from IPython.display import HTML 
            except:
@@ -213,6 +258,12 @@ class sasdata:
            lst = saspid.stdout.read1(4096)
            continue
 
+    def set_out(self, out):
+        if out == "HTML" or out == 'html':
+           self.HTML = 1
+        else:
+           self.HTML = 0
+
     def head(self, obs=5):
         code  = "proc print data="
         code += self.libref
@@ -226,10 +277,10 @@ class sasdata:
 
         if self.HTML:
            from IPython.display import HTML 
-           submit(code)
+           _submit(code)
            return HTML(getlst())
         else:
-           submit(code, "text")
+           _submit(code, "text")
            print(getlsttxt())
    
     def tail(self, obs=5):
@@ -240,9 +291,9 @@ class sasdata:
         code += self.table
         code += ")),NOBS));"
 
-        getlog()
-        submit(code, "text")
-        log = getlog()
+        _getlog()
+        _submit(code, "text")
+        log = _getlog()
 
         lastobs = log.rpartition("lastobs=")
         lastobs = lastobs[2].partition(" ")
@@ -262,10 +313,10 @@ class sasdata:
 
         if self.HTML:
            from IPython.display import HTML 
-           submit(code)
+           _submit(code)
            return HTML(getlst())
         else:
-           submit(code, "text")
+           _submit(code, "text")
            print(getlsttxt())
    
     def contents(self):
@@ -279,12 +330,15 @@ class sasdata:
 
         if self.HTML:
            from IPython.display import HTML 
-           submit(code)
+           _submit(code)
            return HTML(getlst())
         else:
-           submit(code, "text")
+           _submit(code, "text")
            print(getlsttxt())
    
+    def describe(self):
+        return(self.means())
+
     def means(self):
         code  = "proc means data="
         code += self.libref
@@ -296,15 +350,59 @@ class sasdata:
 
         if self.HTML:
            from IPython.display import HTML 
-           submit(code)
+           _submit(code)
            return HTML(getlst())
         else:
-           submit(code, "text")
+           _submit(code, "text")
            print(getlsttxt())
 
-def getdata(table, libref="work"):
-   return sasdata(libref, table)
+    def to_csv(self, file):
+        code  = "filename x \""+file+"\";\n"
+        code += "proc export data="+self.libref+"."+self.table+" outfile=x"
+        code += " dbms=csv replace; run;"
+        _submit(code, "text")
+        return 0
 
+        
+def exist(table, libref="work"):
+
+   if not saspid:
+      _startsas()
+
+   code  = "data _null_; e = exist("
+   code += libref+"."+table+");\n" 
+   code += "te='TABLE_EXISTS='; put te e;run;"
+
+   _getlog()
+   _submit(code, "text")
+   log = _getlog()
+
+   l2 = log.rpartition("TABLE_EXISTS= ")
+   l2 = l2[2].partition("\n")
+   exists = int(l2[0])
+
+   return exists
+
+
+def getdata(table, libref="work", out='HTML'):
+   return sasdata(libref, table, out)
+
+def read_csv(file, table, libref="work", out='HTML'):
+
+   code  = "filename x "
+
+   if file.startswith(("http","HTTP")):
+      code += "url "
+
+   code += "\""+file+"\";\n"
+   code += "proc import datafile=x out="
+   code += libref+"."+table
+   code += " dbms=csv replace; run;"
+   _submit(code, "text")
+   return sasdata(libref, table, out)
+
+def df2sd(df, table='a', libref="work", out='HTML'):
+    return dataframe2sasdata(df, table, libref, out)
 
 def dataframe2sasdata(df, table='a', libref="work", out='HTML'):
    #import pdb; pdb.set_trace()
@@ -316,15 +414,15 @@ def dataframe2sasdata(df, table='a', libref="work", out='HTML'):
       if str(df.dtypes[name]) == 'character' or str(df.dtypes[name]) == 'object':
          input += "$ "
 
-   submit("data "+libref+"."+table+";\n input "+input+";\n datalines;\n", "text")
+   _submit("data "+libref+"."+table+";\n input "+input+";\n datalines;\n", "text")
 
    for row in df.iterrows():
       card  = ""
       for col in range(len(row[1])):
          card += str(row[1][col])+" "   
-      submit(card, "text")
+      _submit(card, "text")
 
-   submit(";run;", "text")
+   _submit(";run;", "text")
 
    return sasdata(libref, table, out=out)
 
@@ -346,9 +444,9 @@ def sasdata2dataframe(sd):
    code += "put lr lrecl; put vn nvars; put vl;\n"
    code += "do i = 1 to nvars; var = varname(d, i); put var; end; run;"
 
-   getlog()
-   submit(code, "text")
-   log = getlog()
+   _getlog()
+   _submit(code, "text")
+   log = _getlog()
 
 
    l2 = log.rpartition("LRECL= ")
@@ -377,7 +475,7 @@ def sasdata2dataframe(sd):
    code += "; run;\n"
 
    sock.listen(0)
-   submit(code, 'text')
+   _submit(code, 'text')
    newsock = sock.accept()
 
    while True:
@@ -398,17 +496,6 @@ def sasdata2dataframe(sd):
    df = pd.DataFrame.from_records(r, columns=varlist)
 
    return df.convert_objects(convert_numeric=True)
-
-   #return datar
-   #return pd.DataFrame(data=datar, columns=varlist, coerce_float=True)
-
-def read_csv(file, table, libref="work"):
-   code  = "filename x url \""+file+"\";\n"
-   code += "proc import datafile=x out="
-   code += libref+"."+table
-   code += " dbms=csv replace; run;"
-   submit(code, "text")
-   return sasdata(libref, table)
 
 
 if __name__ == "__main__":
