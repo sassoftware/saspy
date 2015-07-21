@@ -25,7 +25,7 @@ def getdata(table, libref="work"):
    return sasdata(libref, table)
 
 def startsas(path="/opt/sasinside/SASHome"):
-   global saspid
+   global saspid 
 
    parms  = [path+"/SASFoundation/9.4/sas"]
    parms += ["-set", "TKPATH", path+"/SASFoundation/9.4/sasexe:"+path+"/SASFoundation/9.4/utilities/bin"]
@@ -37,12 +37,10 @@ def startsas(path="/opt/sasinside/SASHome"):
    saspid = subprocess.Popen(parms, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
    fcntl.fcntl(saspid.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
    fcntl.fcntl(saspid.stderr,fcntl. F_SETFL, os.O_NONBLOCK)
-
+  
    submit("options svgtitle='svgtitle'; options validvarname=any;", "text")
-
+     
    return saspid.pid
-
-
 
 def getlog(wait=5):
    #import pdb; pdb.set_trace()
@@ -67,7 +65,6 @@ def getlog(wait=5):
 
    return logf.decode()
 
-
 def getlst(wait=5):
    #import pdb; pdb.set_trace()
    lstf = b''
@@ -80,18 +77,18 @@ def getlst(wait=5):
       lst = saspid.stdout.read1(4096)
       if len(lst) > 0:
          lstf += lst
-
+                          
          if ((not bof) and lst.count(b"<!DOCTYPE html>", 0, 20) > 0):
             bof = True
       else:
          lenf = len(lstf)
-
+   
          if (lenf > 15):
             eof = lstf.count(b"</html>", (lenf - 15), lenf)
-
+   
          if (eof > 0):
                break
-
+         
          if not bof:
             quit -= 1
             if quit < 0:
@@ -99,6 +96,37 @@ def getlst(wait=5):
             sleep(0.5)
 
    return lstf.decode()
+
+def getlsttxt(wait=5):
+   #import pdb; pdb.set_trace()
+   lstf = b''
+   quit = wait * 2
+   eof = 0
+   submit("data _null_;file print;put 'tom was here';run;", "text")
+
+   while True:
+      #try:
+      #   lst = saspid.stdout.read(4096)
+      #except IOError as e:
+
+      lst = saspid.stdout.read1(4096)
+      if len(lst) > 0:
+         lstf += lst
+
+         lenf = len(lstf)
+         eof = lstf.find(b"tom was here", lenf - 25, lenf)
+   
+         if (eof != -1):
+            final = lstf.partition(b"tom was here")
+            f2 = final[0].decode().rpartition(chr(12))
+            break
+      else:
+         quit -= 1
+         if quit < 0:
+            break
+         sleep(0.5)
+
+   return f2[0]
 
 
 def getlstlog(done='used (Total process time):', count=1):
@@ -129,14 +157,11 @@ def getlstlog(done='used (Total process time):', count=1):
 
    return lstf.decode()
 
-
-
-
 def submit(code, results="html"):
    #import pdb; pdb.set_trace()
    #odsopen  = b"ods listing close;ods html5 file=stdout options(svg_mode='inline'); ods graphics on / outputfmt=svg;\n"
-   odsopen  = b"ods listing close; ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
-   odsclose = b" ;*\';*\";*/; ods html5 close;ods listing;\n"
+   odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
+   odsclose = b"ods html5 close;ods listing;\n"
    ods      = True;
    htm      = "html HTML"
 
@@ -155,7 +180,6 @@ def submit(code, results="html"):
 
    return out
 
-
 def endsas():
    code = b"\n;quit;endsas;\n"
    saspid.stdin.write(code)
@@ -169,7 +193,7 @@ class sasdata:
         failed = 0
         if out == "HTML":
            try:
-              from IPython.display import HTML
+              from IPython.display import HTML 
            except:
               failed = 1
 
@@ -180,7 +204,7 @@ class sasdata:
         else:
            self.HTML = 0
 
-        self.libref = libref
+        self.libref = libref 
         self.table  = table
 
     def __flushlst__(self):
@@ -197,17 +221,16 @@ class sasdata:
         code += "(obs="
         code += str(obs)
         code += ");run;"
-
+        
         self.__flushlst__()
 
         if self.HTML:
-           from IPython.display import HTML
+           from IPython.display import HTML 
            submit(code)
            return HTML(getlst())
         else:
            submit(code, "text")
            print(getlsttxt())
-
    
     def tail(self, obs=5):
         #import pdb; pdb.set_trace()
@@ -234,17 +257,17 @@ class sasdata:
         code += " obs="
         code += str(lastobs)
         code += ");run;"
-
+        
         self.__flushlst__()
 
         if self.HTML:
-           from IPython.display import HTML
+           from IPython.display import HTML 
            submit(code)
            return HTML(getlst())
         else:
            submit(code, "text")
            print(getlsttxt())
-
+   
     def contents(self):
         code  = "proc contents data="
         code += self.libref
@@ -255,13 +278,12 @@ class sasdata:
         self.__flushlst__()
 
         if self.HTML:
-           from IPython.display import HTML
+           from IPython.display import HTML 
            submit(code)
            return HTML(getlst())
         else:
            submit(code, "text")
            print(getlsttxt())
-
    
     def means(self):
         code  = "proc means data="
@@ -269,11 +291,11 @@ class sasdata:
         code += "."
         code += self.table
         code += " n mean std min p25 p50 p75 max;run;"
-
+        
         self.__flushlst__()
 
         if self.HTML:
-           from IPython.display import HTML
+           from IPython.display import HTML 
            submit(code)
            return HTML(getlst())
         else:
@@ -282,6 +304,7 @@ class sasdata:
 
 def getdata(table, libref="work"):
    return sasdata(libref, table)
+
 
 def dataframe2sasdata(df, table='a', libref="work", out='HTML'):
    #import pdb; pdb.set_trace()
@@ -298,7 +321,7 @@ def dataframe2sasdata(df, table='a', libref="work", out='HTML'):
    for row in df.iterrows():
       card  = ""
       for col in range(len(row[1])):
-         card += str(row[1][col])+" "
+         card += str(row[1][col])+" "   
       submit(card, "text")
 
    submit(";run;", "text")
@@ -356,6 +379,7 @@ def sasdata2dataframe(sd):
    sock.listen(0)
    submit(code, 'text')
    newsock = sock.accept()
+
    while True:
       data = newsock[0].recv(4096)
       if len(data):
@@ -370,12 +394,13 @@ def sasdata2dataframe(sd):
    r = []
    for i in datar.splitlines():
       r.append(tuple(i.split(sep='\t')))
-
+   
    df = pd.DataFrame.from_records(r, columns=varlist)
 
-   return df
+   return df.convert_objects(convert_numeric=True)
+
    #return datar
-   #return pd.DataFrame(data=datar, columns=varlist)
+   #return pd.DataFrame(data=datar, columns=varlist, coerce_float=True)
 
 def read_csv(file, table, libref="work"):
    code  = "filename x url \""+file+"\";\n"
@@ -395,3 +420,4 @@ if __name__ == "__main__":
     print(getlsttxt())
 
     endsas()
+
