@@ -12,8 +12,8 @@ class sasstat:
     def __init__(self, *args, **kwargs):
         '''Submit an initial set of macros to prepare the SAS system'''
         code="options pagesize=max; %include '/root/jared/metis/saspy_pip/saspy/libname_gen.sas'; "
-        sas.submit(code,"text")
-        logger.debug("Initalization of SAS Macro: " + str(sas.getlog()))
+        sas._submit(code,"text")
+        logger.debug("Initalization of SAS Macro: " + str(sas._getlog()))
 
     def __flushlst__(self):
         lst = b'hi'
@@ -59,7 +59,7 @@ class sasstat:
         code += ");"
 
         logger.debug("HPSPLIT macro submission: " + str(code))
-        sas.submit(code,"text")
+        sas._submit(code,"text")
         #time.sleep(5)
         try:
             obj1=self._objectmethods(self.objname)
@@ -90,7 +90,7 @@ class sasstat:
         self.objname='reg1' #how to give this a better name
         code=_makeProccallMacro()
         #logger.debug("REG macro submission: " + str(code))
-        sas.submit(code,"text")
+        sas._submit(code,"text")
         #time.sleep(.2)
         try:
             obj1=self._objectmethods(self.objname)
@@ -123,7 +123,7 @@ class sasstat:
         code += ");"
 
         logger.debug("REG macro submission: " + str(code))
-        sas.submit(code,"text")
+        sas._submit(code,"text")
         #time.sleep(.2)
         try:
             obj1=self._objectmethods(self.objname)
@@ -160,7 +160,7 @@ class sasstat:
         code += ");"
 
         logger.debug("GLM macro submission: " + str(code))
-        sas.submit(code,"text")
+        sas._submit(code,"text")
         try:
             obj1=self._objectmethods(self.objname)
         except Exception:
@@ -207,6 +207,6 @@ class Results(object):
         #print(self._name, attr)
         code = '%%getdata(%s, %s);' % (self._name, attr)
         #print (code)
-        sas.submit(code)
-        return sas.getlst()
+        sas._submit(code)
+        return sas._getlst()
 
