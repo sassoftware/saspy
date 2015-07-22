@@ -5,7 +5,7 @@ import logging
 
 # create logger
 logger = logging.getLogger('')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARN)
 
 
 class sasstat:
@@ -35,52 +35,38 @@ class sasstat:
         logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
+    def _makeProccallMacro(self):
+        code  = "%macro proccall(d);\n"
+        code += "proc %s data=%s.%s plots(unpack)=all;\n" % (self.objtype, self.data.libref, self.data.table)
+        if len(self.model):
+            code += "model %s;" % (self.model)
+        if hasattr(self, 'cls') and len(self.cls):
+            code += "class %s;" % (self.cls)
+        if hasattr(self, 'means') and len(self.means):
+            code += "means %s;" % (self.cls)
+        code += "run; quit; %mend;\n"
+        code += "%%mangobj(%s,%s,%s);" % (self.objname, self.objtype,self.data.table)
+        logger.debug("Proc code submission: " + str(code))
+        return (code)
+
+
     def hpsplit(self, model='', data=None, **kwargs):
         self.model=model
         self.data=data
         self.objtype='hps'
         self.objname='hps1' #how to give this a better name -- translate to a libname so needs to be less than 8
-        code  = "%macro proccall(d);\n"
-        code += "proc hpsplit data="
-        code += self.data.libref
-        code += "."
-        code += self.data.table
-        code += " plots=all ;"
-        if len(model):
-            code += "model "+self.model+";"
-        code += "run; "
-        code += "%mend;\n"
-        code += "%mangobj("
-        code += self.objname
-        code += ","
-        code += self.objtype
-        code += ","
-        code += self.data.table
-        code += ");"
-
+        code=self._makeProccallMacro()
         logger.debug("HPSPLIT macro submission: " + str(code))
         sas._submit(code,"text")
         try:
             obj1=self._objectmethods(self.objname)
-            #print("in try block")
+            logger.debug(obj1)
         except Exception:
             #print("Exception Block:", sys.exc_info()[0])
             obj1=[]
 
         return (Results(obj1,self.objname))
 
-    def _makeProccallMacro(self):
-        code  = "%macro proccall(d);\n"
-        code += "proc %s data=%s.%s plots(unpack)=all;\n" % (self.objtype, self.data.libref, self.data.table)
-        if len(self.model):
-            code += "model %s;" % (self.model)
-        #if hasattr(self.cls):
-        #    if len(self.cls):
-        #       code += "class %s;" % (self.cls)
-        code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,%s);" % (self.objname, self.objtype,self.data.table)
-        logger.debug("Proc code submission: " + str(code))
-        return (code)
 
 
     def reg(self, model='', data=None, **kwargs):
@@ -98,65 +84,18 @@ class sasstat:
             obj1=[]
         return (Results(obj1,self.objname))
 
-    def reg2(self, model='', data=None, **kwargs):
-        self.model=model
-        self.data=data
-        self.objtype='reg'
-        self.objname='reg1' #how to give this a better name
-        code  = "%macro proccall(d);\n"
-        code += "proc reg plots(unpack)=all data="
-        code += self.data.libref
-        code += "."
-        code += self.data.table
-        code += ";"
-        if len(model):
-            code += "model "+self.model+";"
-        code += "run; quit;"
-        code += "%mend;\n"
-        code += "%mangobj("
-        code += self.objname
-        code += ","
-        code += self.objtype
-        code += ","
-        code += self.data.table
-        code += ");"
-
-        logger.debug("REG macro submission: " + str(code))
-        sas._submit(code,"text")
-        try:
-            obj1=self._objectmethods(self.objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]
-        return (Results(obj1,self.objname))
-
-
     def glm(self, model='', data=None, **kwargs):
         self.model=model
         self.data=data
         self.cls=kwargs.get('cls', '')
+        self.by =kwargs.get('by', '')
+        self.est=kwargs.get('estimate','')
+        self.weight=kwargs.get('weight','')
+        self.lsmeans=kwargs.get('lsmeans','')
+        self.means=kwargs.get('means','')
         self.objtype='glm'
         self.objname='glm1' #how to give this a better name
-        code  = "%macro proccall(d);\n"
-        code += "proc glm plots(unpack)=all data="
-        code += self.data.libref
-        code += "."
-        code += self.data.table
-        code += ";"
-        if len(self.cls):
-            code += "class %s;" % (self.cls)
-        if len(model):
-            code += "model "+self.model+";"
-        code += "run; quit;"
-        code += "%mend;\n"
-        code += "%mangobj("
-        code += self.objname
-        code += ","
-        code += self.objtype
-        code += ","
-        code += self.data.table
-        code += ");"
-
+        code=self._makeProccallMacro()
         logger.debug("GLM macro submission: " + str(code))
         sas._submit(code,"text")
         try:
@@ -174,7 +113,7 @@ class Results(object):
 
         self._attrs = attrs
         self._name = objname
-        #logger.debug("attributes passed to Results: "+ self._attrs,self._name)
+        logger.debug("attributes passed to Results: "+ self._attrs,self._name)
 
     def __dir__(self):
         '''Overload dir method to return the attributes'''
