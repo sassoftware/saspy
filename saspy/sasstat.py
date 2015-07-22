@@ -1,11 +1,11 @@
 from IPython.core.display import HTML
-from SAS import pysas34 as sas
+from saspy import pysas34 as sas
 import time
 import logging
 
 # create logger
 logger = logging.getLogger('')
-logger.setLevel(logging.WARN)
+logger.setLevel(logging.DEBUG)
 
 
 class sasstat:
@@ -23,13 +23,13 @@ class sasstat:
 
     def _objectmethods(self,obj,*args):
         self.obj=obj
-        clear=sas.getlog(1)
+        clear=sas._getlog(1)
         code  ="%listdata("
         code +=self.obj
         code +=");"
         logger.debug("Object Method macro call: " + str(code))
-        sas.submit(code,"text")
-        meth=sas.getlog().splitlines()
+        sas._submit(code,"text")
+        meth=sas._getlog().splitlines()
         logger.debug('SAS Log: ' + str(meth))
         objlist=meth[meth.index('startparse9878')+1:meth.index('endparse9878')]
         logger.debug("PROC attr list: " + str(objlist))
@@ -72,12 +72,13 @@ class sasstat:
     def _makeProccallMacro(self):
         code  = "%macro proccall(d);\n"
         code += "proc %s data=%s.%s plots(unpack)=all;\n" % (self.objtype, self.data.libref, self.data.table)
-        if len(model):
+        if len(self.model):
             code += "model %s;" % (self.model)
-        if len(self.cls):
-            code += "class %s;" % (self.cls)
+        #if hasattr(self.cls):
+        #    if len(self.cls):
+        #       code += "class %s;" % (self.cls)
         code += "run; quit; %mend;\n"
-        code += "%mangobj(%s,%s,%s);" % (self.objname, self.objtype,self.data.table)
+        code += "%%mangobj(%s,%s,%s);" % (self.objname, self.objtype,self.data.table)
         logger.debug("Proc code submission: " + str(code))
         return (code)
 
@@ -87,12 +88,12 @@ class sasstat:
         self.data=data
         self.objtype='reg'
         self.objname='reg1' #how to give this a better name
-        code=_makeProccallMacro()
-        #logger.debug("REG macro submission: " + str(code))
+        code=self._makeProccallMacro()
+        logger.debug("REG macro submission: " + str(code))
         sas._submit(code,"text")
         try:
             obj1=self._objectmethods(self.objname)
-            #print(obj1)
+            logger.debug(obj1)
         except Exception:
             obj1=[]
         return (Results(obj1,self.objname))
@@ -124,7 +125,7 @@ class sasstat:
         sas._submit(code,"text")
         try:
             obj1=self._objectmethods(self.objname)
-            #print(obj1)
+            logger.debug(obj1)
         except Exception:
             obj1=[]
         return (Results(obj1,self.objname))
@@ -157,9 +158,10 @@ class sasstat:
         code += ");"
 
         logger.debug("GLM macro submission: " + str(code))
-        _submit(code,"text")
+        sas._submit(code,"text")
         try:
             obj1=self._objectmethods(self.objname)
+            logger.debug(obj1)
         except Exception:
             obj1=[]
         return (Results(obj1,self.objname))
