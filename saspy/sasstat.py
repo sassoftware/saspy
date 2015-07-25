@@ -83,10 +83,10 @@ class sasstat:
         except Exception:
             obj1=[]
         return (Results(obj1,self.objname))
-
-    def glm(self, model='', data=None, **kwargs):
-        self.model=model
-        self.data=data
+    #def glm(self, model='', data=None, **kwargs):
+    def glm(self, **kwargs):
+        self.model=kwargs.get('model','')
+        self.data=kwargs.get('data','')
         self.cls=kwargs.get('cls', '')
         self.by =kwargs.get('by', '')
         self.est=kwargs.get('estimate','')
@@ -113,7 +113,6 @@ class Results(object):
 
         self._attrs = attrs
         self._name = objname
-        logger.debug("attributes passed to Results: "+ self._attrs,self._name)
 
     def __dir__(self):
         '''Overload dir method to return the attributes'''
