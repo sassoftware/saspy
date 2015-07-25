@@ -13,5 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from saspy import pysas34
-from saspy import sasstat
+from saspy.pysas34 import *
+from saspy.sasstat import *
+SAS = sas_session()       
+sas = SAS
+print("SAS session available as 'SAS'. Pid="+str(sas._startsas()))
