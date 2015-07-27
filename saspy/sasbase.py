@@ -26,6 +26,7 @@ class sas_session:
       #import pdb; pdb.set_trace()
 
       self.saspid = None
+      self.obj_cnt = 0
       self._log= ""
       #self._startsas(path)
 
@@ -35,6 +36,10 @@ class sas_session:
       if self.saspid:
          self._endsas()
       self.saspid = None
+   
+   def _objcnt(self):
+       self.obj_cnt+=1
+       return self.obj_cnt
 
    def _startsas(self, path="/opt/sasinside/SASHome"):
    
@@ -239,6 +244,9 @@ class sas_session:
          return sas_data(self, libref, table, out)
       else:
          return None
+   def sasstat(self):
+       from saspy import sasstat 
+       return sasstat.sas_stat(self)
    
    def read_csv(self, file, table, libref="work", out='HTML'):
    
