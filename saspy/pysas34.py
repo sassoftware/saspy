@@ -2,17 +2,18 @@ from multiprocessing import Process
 from time import sleep
 import subprocess, fcntl, os
 #from IPython.display import HTML
+from saspy.sasstat import *
 
 
 
-class sas_session:
+class SAS_session:
    
    def __init__(self, path="/opt/sasinside/SASHome"):
       #import pdb; pdb.set_trace()
 
-      self.saspid = None
+      self.saspid  = None
       self.obj_cnt = 0
-      self._log= ""
+      self._log    = ""
       #self._startsas(path)
 
    def __del__(self):
@@ -21,10 +22,10 @@ class sas_session:
       if self.saspid:
          self._endsas()
       self.saspid = None
-   
+
    def _objcnt(self):
        self.obj_cnt+=1
-       return self.obj_cnt
+       return '%04d' % self.obj_cnt
 
    def _startsas(self, path="/opt/sasinside/SASHome"):
    
@@ -197,7 +198,7 @@ class sas_session:
 
    def _endsas(self):
       rc = 0
-      if not self.saspid:
+      if self.saspid:
          code = b"\n;quit;endsas;\n"
          self._getlog(1)
          self.saspid.stdin.write(code)
@@ -224,14 +225,14 @@ class sas_session:
       return exists
    
    
+   def sasstat(self):
+       return SAS_stat(self)
+
    def sasdata(self, table, libref="work", out='HTML'):
       if self.exist(table, libref):
-         return sas_data(self, libref, table, out)
+         return SAS_data(self, libref, table, out)
       else:
          return None
-   def sasstat(self):
-       from saspy import sasstat 
-       return sasstat.sas_stat(self)
    
    def read_csv(self, file, table, libref="work", out='HTML'):
    
@@ -247,7 +248,7 @@ class sas_session:
       self._submit(code, "text")
    
       if exist(table, libref):
-         return sas_data(self, libref, table, out)
+         return SAS_data(self, libref, table, out)
       else:
          return None
    
@@ -284,7 +285,7 @@ class sas_session:
       self._submit(";run;", "text")
    
       if self.exist(table, libref):
-         return sas_data(self, libref, table, out)
+         return SAS_data(self, libref, table, out)
       else:
          return None
    
@@ -390,7 +391,7 @@ class sas_session:
       return df.convert_objects(convert_numeric=True, convert_dates=True, copy=False)
    
    
-class sas_data:
+class SAS_data:
 
     def __init__(self, sas, libref, table, out="HTML"):
 

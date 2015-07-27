@@ -5,10 +5,10 @@ import logging
 
 # create logger
 logger = logging.getLogger('')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.WARN)
 
 
-class sas_stat:
+class SAS_stat:
     def __init__(self, session, *args, **kwargs):
         '''Submit an initial set of macros to prepare the SAS system'''
         self.sas=session
@@ -31,81 +31,97 @@ class sas_stat:
         logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
-    def _makeProccallMacro(self):
+    def _makeProccallMacro(self,objtype,objname,kwargs):
+        data=kwargs.get('data','')
+        model=kwargs.get('model','')
+        cls=kwargs.get('cls','')
+        means=kwargs.get('means','')
+        by =kwargs.get('by', '')
+        est=kwargs.get('estimate','')
+        weight=kwargs.get('weight','')
+        lsmeans=kwargs.get('lsmeans','')
+
         code  = "%macro proccall(d);\n"
-        code += "proc %s data=%s.%s plots(unpack)=all;\n" % (self.objtype, self.data.libref, self.data.table)
+        if objtype == 'hpsplit':
+           code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
+        else:
+           code += "proc %s data=%s.%s plots(unpack)=all;\n" % (objtype, data.libref, data.table)
         #logger.debug("cls stuff: " +str(hasattr(self,'cls')) + ' ' + str(len(self.cls)))
-        if hasattr(self, 'cls') and len(self.cls):
-            code += "class %s;" % (self.cls)
-        if len(self.model):
-            code += "model %s;" % (self.model)
-        if hasattr(self, 'means') and len(self.means):
-            code += "means %s;" % (self.cls)
+        if len(cls):
+            #logger.debug("cls stuff: " +str(hasattr(self,'cls')) + ' ' + str(len(self.cls)))
+            code += "class %s;" % (cls)
+        if len(model):
+            code += "model %s;" % (model)
+        if len(means):
+            code += "means %s;" % (cls)
         code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,%s);" % (self.objname, self.objtype,self.data.table)
+        code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
         logger.debug("Proc code submission: " + str(code))
         return (code)
 
 
-    def hpsplit(self, model='', data=None, **kwargs):
-        self.model=model
-        self.data=data
-        self.objtype='hps'
-        self.objname='hps1'+self.sas._objcnt  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro()
+    def hpsplit(self, **kwargs):
+        objtype='hpsplit'
+        objname='hps'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
+        code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("HPSPLIT macro submission: " + str(code))
         self.sas._submit(code,"text")
         try:
-            obj1=self._objectmethods(self.objname)
+            obj1=self._objectmethods(objname)
             logger.debug(obj1)
         except Exception:
             #print("Exception Block:", sys.exc_info()[0])
             obj1=[]
 
-        return (Results(obj1, self.sas, self.objname))
+        return (SAS_results(obj1, self.sas, objname))
 
 
 
-    def reg(self, model='', data=None, **kwargs):
-        self.model=model
-        self.data=data
-        self.objtype='reg'
-        self.objname='reg1'+self.sas._objcnt #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro()
+    def reg(self, **kwargs):
+        objtype='reg'
+        objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
+        code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("REG macro submission: " + str(code))
         self.sas._submit(code,"text")
         try:
-            obj1=self._objectmethods(self.objname)
+            obj1=self._objectmethods(objname)
             logger.debug(obj1)
         except Exception:
             obj1=[]
-        return (Results(obj1, self.sas, self.objname))
+        return (SAS_results(obj1, self.sas, objname))
     
     
-    def glm(self, model='', data=None,  **kwargs):
-        self.model=model
-        self.data=data
-        self.cls=kwargs.get('cls', '')
-        self.by =kwargs.get('by', '')
-        self.est=kwargs.get('estimate','')
-        self.weight=kwargs.get('weight','')
-        self.lsmeans=kwargs.get('lsmeans','')
-        self.means=kwargs.get('means','')
-        self.objtype='glm'
-        self.objname='glm1'+self.sas._objcnt #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro()
+    def mixed(self, **kwargs):
+        objtype='mixed'
+        objname='mix'+self.sas._objcnt()
+        code=self._makeProccallMacro(objtype, objname, kwargs)
+        logger.debug("Mixed Macro submission: " + str(code))
+        self.sas._submit(code, "text")
+        try:
+            obj1=self._objectmethods(objname)
+            logger.debug(obj1)
+        except Exception:
+            obj1=[]
+        return (SAS_results(obj1, self.sas, objname))
+
+
+
+    def glm(self, **kwargs):
+        objtype='glm'
+        objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
+        code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("GLM macro submission: " + str(code))
         self.sas._submit(code,"text")
         try:
-            obj1=self._objectmethods(self.objname)
+            obj1=self._objectmethods(objname)
             logger.debug(obj1)
         except Exception:
             obj1=[]
-        return (Results(obj1, self.sas, self.objname))
+        return (SAS_results(obj1, self.sas, objname))
 
 from collections import namedtuple
 
-class Results(object):
+class SAS_results(object):
     '''Return results from a SAS Model object'''
     def __init__(self,attrs, session, objname):
 
