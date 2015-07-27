@@ -1,35 +1,31 @@
 from IPython.core.display import HTML
-from saspy import pysas34 as sas
+#from saspy import pysas34 as sas
 import time
 import logging
 
 # create logger
 logger = logging.getLogger('')
-logger.setLevel(logging.WARN)
+logger.setLevel(logging.DEBUG)
 
 
-class sasstat:
-    def __init__(self, *args, **kwargs):
+class sas_stat:
+    def __init__(self, session, *args, **kwargs):
         '''Submit an initial set of macros to prepare the SAS system'''
+        self.sas=session
         code="options pagesize=max; %include '/root/jared/metis/saspy_pip/saspy/libname_gen.sas'; "
-        sas._submit(code,"text")
-        logger.debug("Initalization of SAS Macro: " + str(sas._getlog()))
+        self.sas._submit(code,"text")
 
-    def __flushlst__(self):
-        lst = b'hi'
-        while(len(lst) > 0):
-           lst = saspid.stdout.read1(4096)
-           continue
+        logger.debug("Initalization of SAS Macro: " + str(self.sas._getlog()))
 
     def _objectmethods(self,obj,*args):
         self.obj=obj
-        clear=sas._getlog(1)
+        clear=self.sas._getlog(1)
         code  ="%listdata("
         code +=self.obj
         code +=");"
         logger.debug("Object Method macro call: " + str(code))
-        sas._submit(code,"text")
-        meth=sas._getlog().splitlines()
+        self.sas._submit(code,"text")
+        meth=self.sas._getlog().splitlines()
         logger.debug('SAS Log: ' + str(meth))
         objlist=meth[meth.index('startparse9878')+1:meth.index('endparse9878')]
         logger.debug("PROC attr list: " + str(objlist))
@@ -38,10 +34,11 @@ class sasstat:
     def _makeProccallMacro(self):
         code  = "%macro proccall(d);\n"
         code += "proc %s data=%s.%s plots(unpack)=all;\n" % (self.objtype, self.data.libref, self.data.table)
-        if len(self.model):
-            code += "model %s;" % (self.model)
+        #logger.debug("cls stuff: " +str(hasattr(self,'cls')) + ' ' + str(len(self.cls)))
         if hasattr(self, 'cls') and len(self.cls):
             code += "class %s;" % (self.cls)
+        if len(self.model):
+            code += "model %s;" % (self.model)
         if hasattr(self, 'means') and len(self.means):
             code += "means %s;" % (self.cls)
         code += "run; quit; %mend;\n"
@@ -54,10 +51,10 @@ class sasstat:
         self.model=model
         self.data=data
         self.objtype='hps'
-        self.objname='hps1' #how to give this a better name -- translate to a libname so needs to be less than 8
+        self.objname='hps1'+self.sas._objcnt  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro()
         logger.debug("HPSPLIT macro submission: " + str(code))
-        sas._submit(code,"text")
+        self.sas._submit(code,"text")
         try:
             obj1=self._objectmethods(self.objname)
             logger.debug(obj1)
@@ -65,7 +62,7 @@ class sasstat:
             #print("Exception Block:", sys.exc_info()[0])
             obj1=[]
 
-        return (Results(obj1,self.objname))
+        return (Results(obj1, self.sas, self.objname))
 
 
 
@@ -73,20 +70,21 @@ class sasstat:
         self.model=model
         self.data=data
         self.objtype='reg'
-        self.objname='reg1' #how to give this a better name
+        self.objname='reg1'+self.sas._objcnt #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro()
         logger.debug("REG macro submission: " + str(code))
-        sas._submit(code,"text")
+        self.sas._submit(code,"text")
         try:
             obj1=self._objectmethods(self.objname)
             logger.debug(obj1)
         except Exception:
             obj1=[]
-        return (Results(obj1,self.objname))
-    #def glm(self, model='', data=None, **kwargs):
-    def glm(self, **kwargs):
-        self.model=kwargs.get('model','')
-        self.data=kwargs.get('data','')
+        return (Results(obj1, self.sas, self.objname))
+    
+    
+    def glm(self, model='', data=None,  **kwargs):
+        self.model=model
+        self.data=data
         self.cls=kwargs.get('cls', '')
         self.by =kwargs.get('by', '')
         self.est=kwargs.get('estimate','')
@@ -94,25 +92,26 @@ class sasstat:
         self.lsmeans=kwargs.get('lsmeans','')
         self.means=kwargs.get('means','')
         self.objtype='glm'
-        self.objname='glm1' #how to give this a better name
+        self.objname='glm1'+self.sas._objcnt #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro()
         logger.debug("GLM macro submission: " + str(code))
-        sas._submit(code,"text")
+        self.sas._submit(code,"text")
         try:
             obj1=self._objectmethods(self.objname)
             logger.debug(obj1)
         except Exception:
             obj1=[]
-        return (Results(obj1,self.objname))
+        return (Results(obj1, self.sas, self.objname))
 
 from collections import namedtuple
 
 class Results(object):
     '''Return results from a SAS Model object'''
-    def __init__(self, attrs, objname):
+    def __init__(self,attrs, session, objname):
 
         self._attrs = attrs
         self._name = objname
+        self.sas=session
 
     def __dir__(self):
         '''Overload dir method to return the attributes'''
@@ -144,6 +143,6 @@ class Results(object):
         #print(self._name, attr)
         code = '%%getdata(%s, %s);' % (self._name, attr)
         #print (code)
-        sas._submit(code)
-        return sas._getlst()
+        self.sas._submit(code)
+        return self.sas._getlst()
 
