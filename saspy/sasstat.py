@@ -18,10 +18,9 @@ class SAS_stat:
         logger.debug("Initalization of SAS Macro: " + str(self.sas._getlog()))
 
     def _objectmethods(self,obj,*args):
-        self.obj=obj
         clear=self.sas._getlog(1)
         code  ="%listdata("
-        code +=self.obj
+        code +=obj
         code +=");"
         logger.debug("Object Method macro call: " + str(code))
         self.sas._submit(code,"text")
@@ -161,4 +160,9 @@ class SAS_results(object):
         #print (code)
         self.sas._submit(code)
         return self.sas._getlst()
+
+    def sasdata(self, table):
+        x=self.sas.sasdata(table,'_'+self._name)
+        return (x)
+
 
