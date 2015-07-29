@@ -12,7 +12,8 @@ class SAS_session:
       #import pdb; pdb.set_trace()
 
       self.saspid  = None
-      self.obj_cnt = 0
+      self._obj_cnt = 0
+      self._log_cnt = 0
       self._log    = ""
       #self._startsas(path)
 
@@ -24,13 +25,17 @@ class SAS_session:
       self.saspid = None
 
    def _objcnt(self):
-       self.obj_cnt+=1
-       return '%04d' % self.obj_cnt
+       self._obj_cnt += 1
+       return '%04d' % self._obj_cnt
+
+   def _logcnt(self):
+       self._log_cnt += 1
+       return '%08d' % self._log_cnt
 
    def _startsas(self, path="/opt/sasinside/SASHome"):
    
       if self.saspid:
-         return self.saspid
+         return self.saspid.pid
    
       parms  = [path+"/SASFoundation/9.4/sas"]
       parms += ["-set", "TKPATH", path+"/SASFoundation/9.4/sasexe:"+path+"/SASFoundation/9.4/utilities/bin"]
@@ -51,9 +56,16 @@ class SAS_session:
    def _getlog(self, wait=5):
       #import pdb; pdb.set_trace()
    
-      logf =b''
-      quit = wait * 2
-   
+      logf   = b''
+      quit   = wait * 2
+      logn   = self._logcnt()
+      #code  = "data _null_; file log; x='tom was here"+self._logcnt()+"'; run;"
+      #code  = "tom was here"+logn
+      #codeb = (code+"\n").encode()
+      code   = "%put tom was here"+logn+";"
+      codeb  = ("\ntom was here"+logn).encode()
+
+      self._submit(code, "text")
       while True:
          #log = ""
    
@@ -64,16 +76,25 @@ class SAS_session:
          log = self.saspid.stderr.read1(4096)
          if len(log) > 0:
             logf += log
-         else:
-            quit -= 1
-            if quit < 0 or len(logf) > 0:
+
+            eof = logf.find(codeb)
+      
+            if (eof != -1):
+               final = logf.partition(code.encode())
+               z = final[0].decode().rpartition(chr(10))
                break
-            sleep(0.5)
+         #else:
+         #   quit -= 1
+         #   if quit < 0 or len(logf) > 0:
+         #      break
+         #   sleep(0.5)
    
-      x = logf.decode()
-      self._log += x
-      return x
-   
+      #x = logf.decode()
+      #self._log += x
+      #return x
+      self._log += logf.decode()
+      return z[0]
+
    def _getlst(self, wait=5):
       #import pdb; pdb.set_trace()
    
@@ -114,7 +135,7 @@ class SAS_session:
       lstf = b''
       quit = wait * 2
       eof = 0
-      self._submit("data _null_;file print;put 'tom was here';run;", "text")
+      self._submit("data _null_;file print;put 'Tom was here';run;", "text")
    
       while True:
          #try:
@@ -126,10 +147,10 @@ class SAS_session:
             lstf += lst
    
             lenf = len(lstf)
-            eof = lstf.find(b"tom was here", lenf - 25, lenf)
+            eof = lstf.find(b"Tom was here", lenf - 25, lenf)
       
             if (eof != -1):
-               final = lstf.partition(b"tom was here")
+               final = lstf.partition(b"Tom was here")
                f2 = final[0].decode().rpartition(chr(12))
                break
          else:
@@ -258,16 +279,19 @@ class SAS_session:
    def dataframe2sasdata(self, df, table='a', libref="work", out='HTML'):
       #import pdb; pdb.set_trace()
 
-      input = ""
-      card  = ""
+      input  = ""
+      card   = ""
       length = ""
+      dts    = []
 
       for name in range(len(df.columns)):
          input += "'"+df.columns[name]+"'n "
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V',):
             col_l = df[df.columns[name]].map(len).max()
             length += " '"+df.columns[name]+"'n $"+str(col_l)
-            #input  += "$ "
+            dts.append('C')
+         else:
+            dts.append('N')
    
       code  = "data "+libref+"."+table+";\n"
       if len(length):
@@ -279,7 +303,10 @@ class SAS_session:
       for row in df.iterrows():
          card  = ""
          for col in range(len(row[1])):
-            card += str(row[1][col])+chr(9)
+            var = str(row[1][col])
+            if dts[col] == 'N' and var == 'nan':
+               var = '.'
+            card += var+chr(9)
          self._submit(card, "text")
    
       self._submit(";run;", "text")

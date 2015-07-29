@@ -60,6 +60,7 @@ class SAS_stat:
 
 
     def hpsplit(self, **kwargs):
+        '''Python method to call the HPSPLIT procedure\nDocumentation link: http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_overview.htm'''
         objtype='hpsplit'
         objname='hps'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
