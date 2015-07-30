@@ -61,7 +61,7 @@ class SAS_session:
       #code   = "%put tom was here"+logn+";"
       #codeb  = ("\ntom was here"+logn).encode()
 
-      self._asubmit(code, "text")
+      #self._asubmit(code, "text")
       while True:
          log = self.saspid.stderr.read1(4096)
          if len(log) > 0:
