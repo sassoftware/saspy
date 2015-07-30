@@ -48,8 +48,7 @@ class SAS_session:
       fcntl.fcntl(self.saspid.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.saspid.stderr,fcntl. F_SETFL, os.O_NONBLOCK)
      
-      self._submit("options svgtitle='svgtitle'; options validvarname=any; options pagesize=max;", "text")
-      self._getlog(1)
+      self._submitll("options svgtitle='svgtitle'; options validvarname=any; options pagesize=max;", "text")
         
       return self.saspid.pid
    
@@ -58,42 +57,34 @@ class SAS_session:
    
       logf   = b''
       quit   = wait * 2
-      logn   = self._logcnt()
-      #code  = "data _null_; file log; x='tom was here"+self._logcnt()+"'; run;"
-      #code  = "tom was here"+logn
-      #codeb = (code+"\n").encode()
-      code   = "%put tom was here"+logn+";"
-      codeb  = ("\ntom was here"+logn).encode()
+      #logn   = self._logcnt()
+      #code   = "%put tom was here"+logn+";"
+      #codeb  = ("\ntom was here"+logn).encode()
 
-      self._submit(code, "text")
+      self._asubmit(code, "text")
       while True:
-         #log = ""
-   
-         #try:
-         #   log = self.saspid.stderr.read(4096)
-         #except IOError as e:
-   
          log = self.saspid.stderr.read1(4096)
          if len(log) > 0:
             logf += log
-
-            eof = logf.find(codeb)
-      
-            if (eof != -1):
-               final = logf.partition(code.encode())
-               z = final[0].decode().rpartition(chr(10))
+         else:
+            quit -= 1
+            if quit < 0 or len(logf) > 0:
                break
-         #else:
-         #   quit -= 1
-         #   if quit < 0 or len(logf) > 0:
-         #      break
-         #   sleep(0.5)
+            sleep(0.5)
    
-      #x = logf.decode()
-      #self._log += x
-      #return x
-      self._log += logf.decode()
-      return z[0]
+      x = logf.decode()
+      self._log += x
+      return x
+
+      #      eof = logf.find(codeb)
+      #
+      #      if (eof != -1):
+      #         final = logf.partition(code.encode())
+      #         z = final[0].decode().rpartition(chr(10))
+      #         break
+      #
+      #self._log += logf.decode()
+      #return z[0]
 
    def _getlst(self, wait=5):
       #import pdb; pdb.set_trace()
@@ -104,6 +95,8 @@ class SAS_session:
       bof = False
       lenf = 0
    
+      #self._getlog()
+
       while True:
          lst = self.saspid.stdout.read1(4096)
          if len(lst) > 0:
@@ -135,13 +128,9 @@ class SAS_session:
       lstf = b''
       quit = wait * 2
       eof = 0
-      self._submit("data _null_;file print;put 'Tom was here';run;", "text")
+      self._asubmit("data _null_;file print;put 'Tom was here';run;", "text")
    
       while True:
-         #try:
-         #   lst = self.saspid.stdout.read(4096)
-         #except IOError as e:
-   
          lst = self.saspid.stdout.read1(4096)
          if len(lst) > 0:
             lstf += lst
@@ -153,46 +142,85 @@ class SAS_session:
                final = lstf.partition(b"Tom was here")
                f2 = final[0].decode().rpartition(chr(12))
                break
-         else:
-            quit -= 1
-            if quit < 0:
-               break
-            sleep(0.5)
+         #else:
+         #   quit -= 1
+         #   if quit < 0:
+         #      break
+         #   sleep(0.5)
 
       lst = f2[0]
       return lst.replace(chr(12), '\n')
 
 
-   def _getlstlog(self, done='used (Total process time):', count=1):
+   def _submitll(self, code, results="html"):
       #import pdb; pdb.set_trace()
    
+      #odsopen = b"ods listing close;ods html5 file=stdout options(svg_mode='inline');               ods graphics on / outputfmt=svg;\n"
+      odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods html5 close;ods listing;\n"
+      ods      = True;
+      htm      = "html HTML"
+      mj       = b";*\';*\";*/;\n"
+
       lstf = b''
       logf = b''
       quit = False
       eof = 5
+
+      logn     = self._logcnt()
+      logcode  = "%put tom was here"+logn+";"
+      logcodeb = ("\ntom was here"+logn).encode()
+
+
+      if (htm.find(results) < 0):
+         ods = False
    
+      if (ods):
+         self.saspid.stdin.write(odsopen)
+   
+      out = self.saspid.stdin.write(mj+code.encode()+mj)
+   
+      if (ods):
+         self.saspid.stdin.write(odsclose)
+
+      out = self.saspid.stdin.write(b'\n'+logcode.encode()+b'\n')
+
+      self.saspid.stdin.flush()
+
+
       while True:
          if quit:
             eof -= 1
          if eof < 0:
             break
-         lst = self.saspid.stdout.read(-1)
-         #if len(lst) > 0:
-         if lst != None:
+         lst = self.saspid.stdout.read1(4096)
+         if len(lst) > 0:
+         #if lst != None:
             lstf += lst
-            print("=====================LST==============\n"+lst.decode()+"\n\n\n\n")
+            #print("=====================LST==============\n"+lst.decode()+"\n\n\n\n")
          else:
-            log = self.saspid.stderr.read(-1)
-            #if len(log) > 0:
-            if log != None:
+            log = self.saspid.stderr.read1(4096)
+            if len(log) > 0:
+            #if log != None:
                logf += log
-               print("=====================LOG==============\n"+log.decode()+"\n\n\n\n")
-               if logf.count(done.encode()) >= count:
+               #print("=====================LOG==============\n"+log.decode()+"\n\n\n\n")
+               if logf.count(logcodeb) >= 1:
                   quit = True
 
+      final = logf.partition(logcode.encode())
+      z = final[0].decode().rpartition(chr(10))
+
+      logd = z[0]
+      lstd = lstf.decode().replace(chr(12), chr(10))
+ 
       self._log += logf.decode()
-      return lstf.decode()
+
+      return dict(LOG=logd, LST=lstd)
+
    
+   def _asubmit(self, code, results="html"):
+      return self._submit(code, results)
+
    def _submit(self, code, results="html"):
       #import pdb; pdb.set_trace()
    
@@ -201,7 +229,7 @@ class SAS_session:
       odsclose = b"ods html5 close;ods listing;\n"
       ods      = True;
       htm      = "html HTML"
-   
+      mj       = b";*\';*\";*/;\n"
       if (htm.find(results) < 0):
          ods = False
    
@@ -235,11 +263,12 @@ class SAS_session:
       code += libref+"."+table+"');\n" 
       code += "te='TABLE_EXISTS='; put te e;run;"
    
-      self._getlog(1)
-      self._submit(code, "text")
-      log = self._getlog()
+      #self._getlog(1)
+      #self._submit(code, "text")
+      #log = self._getlog()
+      ll = self._submitll(code, "text")
    
-      l2 = log.rpartition("TABLE_EXISTS= ")
+      l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
       l2 = l2[2].partition("\n")
       exists = int(l2[0])
    
@@ -266,7 +295,7 @@ class SAS_session:
       code += "proc import datafile=x out="
       code += libref+"."+table
       code += " dbms=csv replace; run;"
-      self._submit(code, "text")
+      self._submitll(code, "text")
    
       if exist(table, libref):
          return SAS_data(self, libref, table, out)
@@ -298,7 +327,7 @@ class SAS_session:
          code += "length"+length+";\n"
       code += "infile datalines delimiter='09'x;\n input "+input+";\n datalines;"
 
-      self._submit(code, "text")
+      self._asubmit(code, "text")
 
       for row in df.iterrows():
          card  = ""
@@ -307,9 +336,9 @@ class SAS_session:
             if dts[col] == 'N' and var == 'nan':
                var = '.'
             card += var+chr(9)
-         self._submit(card, "text")
+         self._asubmit(card, "text")
    
-      self._submit(";run;", "text")
+      self._asubmit(";run;", "text")
    
       if self.exist(table, libref):
          return SAS_data(self, libref, table, out)
@@ -337,11 +366,12 @@ class SAS_session:
       #code += "do i = 1 to nvars; var = varfmt(d, i); put var; end;\n"
       code += "run;"
    
-      self._getlog(1)
-      self._submit(code, "text")
-      log = self._getlog()
+      #self._getlog(1)
+      #self._submit(code, "text")
+      #log = self._getlog()
+      ll = self._submitll(code, "text")
    
-      l2 = log.rpartition("LRECL= ")
+      l2 = ll['LOG'].rpartition("LRECL= ")
       l2 = l2[2].partition("\n")
       lrecl = int(l2[0])
    
@@ -369,10 +399,11 @@ class SAS_session:
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;\n"
    
-      self._submit(code, "text")
-      log = self._getlog()
+      #self._submit(code, "text")
+      #log = self._getlog()
+      ll = self._submitll(code, "text")
 
-      l2 = log.rpartition("FMT_CATS=")
+      l2 = ll['LOG'].rpartition("FMT_CATS=")
       l2 = l2[2].partition("\n")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
@@ -395,7 +426,7 @@ class SAS_session:
       code += "; run;\n"
    
       sock.listen(0)
-      self._submit(code, 'text')
+      self._asubmit(code, 'text')
       newsock = sock.accept()
    
       while True:
@@ -466,11 +497,13 @@ class SAS_data:
 
         if self.HTML:
            from IPython.display import HTML 
-           self.sas._submit(code)
-           return HTML(self.sas._getlst())
+           ll = self.sas._submitll(code)
+           #return HTML(self.sas._getlst())
+           return HTML(ll['LST'])
         else:
-           self.sas._submit(code, "text")
-           print(self.sas._getlsttxt())
+           ll = self.sas._submitll(code, "text")
+           #print(self.sas._getlsttxt())
+           print(ll['LST'])
    
     def tail(self, obs=5):
         #import pdb; pdb.set_trace()
@@ -478,14 +511,15 @@ class SAS_data:
         code += self.libref
         code += "."
         code += self.table
-        code += ")),NOBS));"
+        code += ")),NOBS)) tom;"
 
-        self.sas._getlog()
-        self.sas._submit(code, "text")
-        log = self.sas._getlog()
+        #self.sas._getlog()
+        #self.sas._submit(code, "text")
+        #log = self.sas._getlog()
+        ll = self.sas._submitll(code, "text")
 
-        lastobs = log.rpartition("lastobs=")
-        lastobs = lastobs[2].partition(" ")
+        lastobs = ll['LOG'].rpartition("lastobs=")
+        lastobs = lastobs[2].partition(" tom")
         lastobs = int(lastobs[0])
 
         code  = "proc print data="
@@ -498,15 +532,15 @@ class SAS_data:
         code += str(lastobs)
         code += ");run;"
         
-        self.__flushlst__()
+        #self.__flushlst__()
 
         if self.HTML:
            from IPython.display import HTML 
-           self.sas._submit(code)
-           return HTML(self.sas._getlst())
+           ll = self.sas._submitll(code)
+           return HTML(ll['LST'])
         else:
-           self.sas._submit(code, "text")
-           print(self.sas._getlsttxt())
+           ll = self.sas._submitll(code, "text")
+           print(ll['LST'])
    
     def contents(self):
         code  = "proc contents data="
@@ -519,11 +553,11 @@ class SAS_data:
 
         if self.HTML:
            from IPython.display import HTML 
-           self.sas._submit(code)
-           return HTML(self.sas._getlst())
+           ll = self.sas._submitll(code)
+           return HTML(ll['LST'])
         else:
-           self.sas._submit(code, "text")
-           print(self.sas._getlsttxt())
+           ll = self.sas._submitll(code, "text")
+           print(ll['LST'])
    
     def describe(self):
         return(self.means())
@@ -539,17 +573,17 @@ class SAS_data:
 
         if self.HTML:
            from IPython.display import HTML 
-           self.sas._submit(code)
-           return HTML(self.sas._getlst())
+           ll = self.sas._submitll(code)
+           return HTML(ll['LST'])
         else:
-           self.sas._submit(code, "text")
-           print(self.sas._getlsttxt())
+           ll = self.sas._submitll(code, "text")
+           print(ll['LST'])
 
     def to_csv(self, file):
         code  = "filename x \""+file+"\";\n"
         code += "proc export data="+self.libref+"."+self.table+" outfile=x"
         code += " dbms=csv replace; run;"
-        self.sas._submit(code, "text")
+        self.sas._submitll(code, "text")
         return 0
 
 
