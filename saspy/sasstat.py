@@ -2,6 +2,7 @@ from IPython.core.display import HTML
 #from saspy import pysas34 as sas
 import time
 import logging
+import os
 
 # create logger
 logger = logging.getLogger('')
@@ -12,7 +13,8 @@ class SAS_stat:
     def __init__(self, session, *args, **kwargs):
         '''Submit an initial set of macros to prepare the SAS system'''
         self.sas=session
-        code="options pagesize=max; %include '/root/jared/metis/saspy_pip/saspy/libname_gen.sas'; "
+        macro_path=os.path.dirname(os.path.realpath(__file__))
+        code="options pagesize=max; %include '" + macro_path + '/' + "libname_gen.sas'; "
         self.sas._asubmit(code,"text")
 
         logger.debug("Initalization of SAS Macro: " + str(self.sas._getlog()))
