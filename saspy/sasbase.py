@@ -63,7 +63,7 @@ class SAS_session:
       fcntl.fcntl(self.saspid.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.saspid.stderr,fcntl. F_SETFL, os.O_NONBLOCK)
      
-      self._submitll("options svgtitle='svgtitle'; options validvarname=any; options pagesize=max;", "text")
+      self.submit("options svgtitle='svgtitle'; options validvarname=any; options pagesize=max;", "text")
         
       return self.saspid.pid
    
@@ -167,7 +167,7 @@ class SAS_session:
       return lst.replace(chr(12), '\n')
 
 
-   def _submitll(self, code, results="html"):
+   def submit(self, code, results="html"):
       #import pdb; pdb.set_trace()
    
       #odsopen = b"ods listing close;ods html5 file=stdout options(svg_mode='inline');               ods graphics on / outputfmt=svg;\n"
@@ -234,9 +234,6 @@ class SAS_session:
 
    
    def _asubmit(self, code, results="html"):
-      return self._submit(code, results)
-
-   def _submit(self, code, results="html"):
       #import pdb; pdb.set_trace()
    
       #odsopen = b"ods listing close;ods html5 file=stdout options(svg_mode='inline');               ods graphics on / outputfmt=svg;\n"
@@ -281,7 +278,7 @@ class SAS_session:
       #self._getlog(1)
       #self._submit(code, "text")
       #log = self._getlog()
-      ll = self._submitll(code, "text")
+      ll = self.submit(code, "text")
    
       l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
       l2 = l2[2].partition("\n")
@@ -292,6 +289,9 @@ class SAS_session:
    
    def sasstat(self):
        return SAS_stat(self)
+
+   def sasets(self):
+       return SAS_ets(self)
 
    def sasdata(self, table, libref="work", out='HTML'):
       if self.exist(table, libref):
@@ -310,9 +310,9 @@ class SAS_session:
       code += "proc import datafile=x out="
       code += libref+"."+table
       code += " dbms=csv replace; run;"
-      self._submitll(code, "text")
+      self.submit(code, "text")
    
-      if exist(table, libref):
+      if self.exist(table, libref):
          return SAS_data(self, libref, table, out)
       else:
          return None
@@ -384,7 +384,7 @@ class SAS_session:
       #self._getlog(1)
       #self._submit(code, "text")
       #log = self._getlog()
-      ll = self._submitll(code, "text")
+      ll = self.submit(code, "text")
    
       l2 = ll['LOG'].rpartition("LRECL= ")
       l2 = l2[2].partition("\n")
@@ -416,7 +416,7 @@ class SAS_session:
    
       #self._submit(code, "text")
       #log = self._getlog()
-      ll = self._submitll(code, "text")
+      ll = self.submit(code, "text")
 
       l2 = ll['LOG'].rpartition("FMT_CATS=")
       l2 = l2[2].partition("\n")
@@ -512,11 +512,11 @@ class SAS_data:
 
         if self.HTML:
            from IPython.display import HTML 
-           ll = self.sas._submitll(code)
+           ll = self.sas.submit(code)
            #return HTML(self.sas._getlst())
            return HTML(ll['LST'])
         else:
-           ll = self.sas._submitll(code, "text")
+           ll = self.sas.submit(code, "text")
            #print(self.sas._getlsttxt())
            print(ll['LST'])
    
@@ -531,7 +531,7 @@ class SAS_data:
         #self.sas._getlog()
         #self.sas._submit(code, "text")
         #log = self.sas._getlog()
-        ll = self.sas._submitll(code, "text")
+        ll = self.sas.submit(code, "text")
 
         lastobs = ll['LOG'].rpartition("lastobs=")
         lastobs = lastobs[2].partition(" tom")
@@ -551,10 +551,10 @@ class SAS_data:
 
         if self.HTML:
            from IPython.display import HTML 
-           ll = self.sas._submitll(code)
+           ll = self.sas.submit(code)
            return HTML(ll['LST'])
         else:
-           ll = self.sas._submitll(code, "text")
+           ll = self.sas.submit(code, "text")
            print(ll['LST'])
    
     def contents(self):
@@ -568,10 +568,10 @@ class SAS_data:
 
         if self.HTML:
            from IPython.display import HTML 
-           ll = self.sas._submitll(code)
+           ll = self.sas.submit(code)
            return HTML(ll['LST'])
         else:
-           ll = self.sas._submitll(code, "text")
+           ll = self.sas.submit(code, "text")
            print(ll['LST'])
    
     def describe(self):
@@ -588,17 +588,17 @@ class SAS_data:
 
         if self.HTML:
            from IPython.display import HTML 
-           ll = self.sas._submitll(code)
+           ll = self.sas.submit(code)
            return HTML(ll['LST'])
         else:
-           ll = self.sas._submitll(code, "text")
+           ll = self.sas.submit(code, "text")
            print(ll['LST'])
 
     def to_csv(self, file):
         code  = "filename x \""+file+"\";\n"
         code += "proc export data="+self.libref+"."+self.table+" outfile=x"
         code += " dbms=csv replace; run;"
-        self.sas._submitll(code, "text")
+        self.sas.submit(code, "text")
         return 0
 
 
