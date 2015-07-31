@@ -13,7 +13,7 @@ class SAS_ets:
         '''Submit an initial set of macros to prepare the SAS system'''
         self.sas=session
         code="options pagesize=max; %include '/root/jared/metis/saspy_pip/saspy/libname_gen.sas'; "
-        self.sas._submit(code,"text")
+        self.sas._asubmit(code,"text")
 
         logger.debug("Initalization of SAS Macro: " + str(self.sas._getlog()))
 
@@ -23,8 +23,8 @@ class SAS_ets:
         code +=obj
         code +=");"
         logger.debug("Object Method macro call: " + str(code))
-        self.sas._submit(code,"text")
-        meth=self.sas._getlog().splitlines()
+        res=self.sas.submit(code,"text")
+        meth=res['LOG'].splitlines()
         logger.debug('SAS Log: ' + str(meth))
         objlist=meth[meth.index('startparse9878')+1:meth.index('endparse9878')]
         logger.debug("PROC attr list: " + str(objlist))
@@ -32,7 +32,7 @@ class SAS_ets:
 
     def _makeProccallMacro(self, objtype, objname, data='', by='', corr='',
                            crosscorr='', decomp='', id='', season='', trend='', var='',
-                           crossvar='', identify='', estimate='', outlier='', forecast'', 
+                           crossvar='', identify='', estimate='', outlier='', forecast='', 
                            autoreg='', blockseason='', cycle='', deplag='', irregular='', 
                            level='', model='', nloptions='', performance='', randomreg='', 
                            slope='', splinereg='', splineseason='', fcmport='', outarrays='', 
@@ -142,7 +142,7 @@ class SAS_ets:
         objname='ts1'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("TIMESERIES macro submission: " + str(code))
-        self.sas._submit(code,"text")
+        self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -159,7 +159,7 @@ class SAS_ets:
         objname='arm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("ARIMA macro submission: " + str(code))
-        self.sas._submit(code,"text")
+        self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -175,7 +175,7 @@ class SAS_ets:
         objname='ucm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("UCM macro submission: " + str(code))
-        self.sas._submit(code,"text")
+        self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -191,7 +191,7 @@ class SAS_ets:
         objname='esm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("ESM macro submission: " + str(code))
-        self.sas._submit(code,"text")
+        self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -206,7 +206,7 @@ class SAS_ets:
         objname='tid'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("TIMEID macro submission: " + str(code))
-        self.sas._submit(code,"text")
+        self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -222,7 +222,7 @@ class SAS_ets:
         objname='tda'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("TIMEDATA macro submission: " + str(code))
-        self.sas._submit(code,"text")
+        self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -270,9 +270,8 @@ class SAS_results(object):
     def _go_run_code(self, attr):
         #print(self._name, attr)
         code = '%%getdata(%s, %s);' % (self._name, attr)
-        #print (code)
-        self.sas._submit(code)
-        return self.sas._getlst()
+        res=self.sas.submit(code)
+        return res['LST']
 
     def sasdata(self, table):
         x=self.sas.sasdata(table,'_'+self._name)

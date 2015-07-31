@@ -3,6 +3,7 @@ from time import sleep
 import subprocess, fcntl, os
 #from IPython.display import HTML
 from saspy.sasstat import *
+from saspy.sasets  import *
 
 
 
