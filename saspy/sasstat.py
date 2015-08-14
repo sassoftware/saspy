@@ -41,7 +41,9 @@ class SAS_stat:
         weight=kwargs.get('weight','')
         lsmeans=kwargs.get('lsmeans','')
 
-        code  = "%macro proccall(d);\n"
+        code = ''
+        if self.sas.nosub == False:
+           code  = "%macro proccall(d);\n"
         if objtype == 'hpsplit':
            code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
         else:
@@ -49,15 +51,18 @@ class SAS_stat:
         #logger.debug("cls stuff: " +str(hasattr(self,'cls')) + ' ' + str(len(self.cls)))
         if len(cls):
             #logger.debug("cls stuff: " +str(hasattr(self,'cls')) + ' ' + str(len(self.cls)))
-            code += "class %s;" % (cls)
+            code += "\tclass %s;\n" % (cls)
         if len(model):
-            code += "model %s;" % (model)
+            code += "\tmodel %s;\n" % (model)
         if len(means):
-            code += "means %s;" % (cls)
-        code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
+            code += "\tmeans %s;\n" % (cls)
+        code += "run; quit; \n"
+        if self.sas.nosub == False:
+           code += "%mend;\n"
+           code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
         logger.debug("Proc code submission: " + str(code))
         return (code)
+
 
     def hpsplit(self, **kwargs):
         '''Python method to call the HPSPLIT procedure\nDocumentation link: http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_overview.htm'''
@@ -65,7 +70,12 @@ class SAS_stat:
         objname='hps'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("HPSPLIT macro submission: " + str(code))
-        self.sas._asubmit(code,"text")
+
+        if self.sas.nosub:
+           print(code)
+           return (SAS_results([], self, objname, True))
+
+        res = self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -73,20 +83,27 @@ class SAS_stat:
             #print("Exception Block:", sys.exc_info()[0])
             obj1=[]
 
-        return (SAS_results(obj1, self.sas, objname))
+        return (SAS_results(obj1, self, objname))
+
+
 
     def reg(self, **kwargs):
         objtype='reg'
         objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("REG macro submission: " + str(code))
-        self.sas._asubmit(code,"text")
+
+        if self.sas.nosub:
+           print(code)
+           return (SAS_results([], self, objname, True))
+
+        res = self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
         except Exception:
             obj1=[]
-        return (SAS_results(obj1, self.sas, objname))
+        return (SAS_results(obj1, self, objname))
     
     
     def mixed(self, **kwargs):
@@ -94,13 +111,18 @@ class SAS_stat:
         objname='mix'+self.sas._objcnt()
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("Mixed Macro submission: " + str(code))
-        self.sas._asubmit(code, "text")
+
+        if self.sas.nosub:
+           print(code)
+           return (SAS_results([], self, objname, True))
+
+        res = self.sas._asubmit(code, "text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
         except Exception:
             obj1=[]
-        return (SAS_results(obj1, self.sas, objname))
+        return (SAS_results(obj1, self, objname))
 
 
 
@@ -109,36 +131,47 @@ class SAS_stat:
         objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("GLM macro submission: " + str(code))
-        self.sas._asubmit(code,"text")
+
+        if self.sas.nosub:
+           print(code)
+           return (SAS_results([], self, objname, True))
+
+        res = self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
         except Exception:
             obj1=[]
-        return (SAS_results(obj1, self.sas, objname))
+        return (SAS_results(obj1, self, objname))
 
     def logistic(self, **kwargs):
         objtype='logistic'
         objname='log'+self.sas._objcnt() #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
         logger.debug("LOGISTIC macro submission: " + str(code))
-        self.sas._asubmit(code,"text")
+
+        if self.sas.nosub:
+           print(code)
+           return (SAS_results([], self, objname, True))
+
+        res = self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
         except Exception:
             obj1=[]
-        return (SAS_results(obj1, self.sas, objname))
+        return (SAS_results(obj1, self, objname))
 
 from collections import namedtuple
 
 class SAS_results(object):
     '''Return results from a SAS Model object'''
-    def __init__(self,attrs, session, objname):
+    def __init__(self,attrs, stat, objname, nosub=False):
 
         self._attrs = attrs
-        self._name = objname
-        self.sas=session
+        self._name  = objname
+        self.sas    = stat.sas
+        self.nosub  = nosub
 
     def __dir__(self):
         '''Overload dir method to return the attributes'''
@@ -149,6 +182,9 @@ class SAS_results(object):
             return getattr(self, attr)
         if attr.upper() in self._attrs:
             #print(attr.upper())
+            if self.nosub:
+                print('How did I get here? This SAS Result object was created in teach_me_SAS mode, so it has no results')
+                return
             data = self._go_run_code(attr)
             '''
             if not attr.lower().endswith('plot'):
@@ -163,14 +199,18 @@ class SAS_results(object):
             '''
 
         else:
-             raise AttributeError
+            if self.nosub:
+                print('This SAS Result object was created in teach_me_SAS mode, so it has no results')
+                return
+            else:
+                raise AttributeError
         return HTML(data)
 
     def _go_run_code(self, attr):
         #print(self._name, attr)
         code = '%%getdata(%s, %s);' % (self._name, attr)
         #print (code)
-        res=self.sas.submit(code)
+        res = self.sas.submit(code)
         return res['LST']
 
     def sasdata(self, table):

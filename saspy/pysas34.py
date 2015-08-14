@@ -3,7 +3,8 @@ from time import sleep
 import subprocess, fcntl, os, signal
 #from IPython.display import HTML
 from saspy.sasstat import *
-from saspy.sasets import *
+from saspy.sasets  import *
+
 
 
 class SAS_session:
@@ -54,7 +55,7 @@ class SAS_session:
       return self.saspid.pid
    
    def _break(self, response="1\nY"):
-      import pdb; pdb.set_trace()
+      #import pdb; pdb.set_trace()
       self.saspid.send_signal(signal.SIGINT)
       lst = self.saspid.stdout.read1(4096)
 
@@ -410,6 +411,13 @@ class SAS_session:
       import pandas as pd
       import socket as socks
       datar = ""
+
+      if sd == None:
+         print('The SAS_data object is not valid; it is \'None\'')
+         return None                            
+      if sd == None or self.exist(sd.table, sd.libref) == 0:
+         print('The SAS Data Set '+sd.libref|'.'+sd.table+' does not exist')
+         return None                            
    
       nosub = self.nosub
       self.nosub = False
@@ -607,7 +615,6 @@ class SAS_data:
            return
 
         if self.HTML:
-           from IPython.display import HTML 
            ll = self.sas.submit(code)
            return HTML(ll['LST'])
         else:
@@ -669,6 +676,33 @@ class SAS_data:
            print(ll['LOG'])
         else:
            return 0
+
+    def hist(self, var, title='', label=''):
+        code  = "proc sgplot data="
+        code += self.libref
+        code += "."
+        code += self.table
+        code += ";\n\thistogram "+var+" / scale=count"
+        if len(label) > 0:
+           code += " LegendLABEL='"+label+"'"
+        code += ";\n"
+        if len(title) > 0:
+           code += '\ttitle "'+title+'";\n'
+        code += "\tdensity "+var+';\nrun;\n'+'title \"\";'
+        
+        self.__flushlst__()
+
+        if self.sas.nosub:
+           ll = self.sas.submit(code, "text")
+           print(ll['LOG'])
+           return
+
+        if self.HTML:
+           ll = self.sas.submit(code)
+           return HTML(ll['LST'])
+        else:
+           ll = self.sas.submit(code, "text")
+           print(ll['LST'])
 
 
 if __name__ == "__main__":
