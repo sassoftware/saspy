@@ -1,9 +1,9 @@
 from multiprocessing import Process
 from time import sleep
-import subprocess, fcntl, os
+import subprocess, fcntl, os, signal
 #from IPython.display import HTML
 from saspy.sasstat import *
-from saspy.sasets  import *
+from saspy.sasets import *
 
 
 
@@ -12,10 +12,11 @@ class SAS_session:
    def __init__(self, path="/opt/sasinside/SASHome"):
       #import pdb; pdb.set_trace()
 
-      self.saspid  = None
+      self.saspid   = None
       self._obj_cnt = 0
       self._log_cnt = 0
-      self._log    = ""
+      self._log     = ""
+      self.nosub    = False
       #self._startsas(path)
 
    def __del__(self):
@@ -53,6 +54,48 @@ class SAS_session:
         
       return self.saspid.pid
    
+   def _break(self, response="1\nY"):
+      import pdb; pdb.set_trace()
+      self.saspid.send_signal(signal.SIGINT)
+      lst = self.saspid.stdout.read1(4096)
+
+      lsts = lst.decode().rpartition('Select:')
+      if lsts[0] != '' and lsts[1] != '':
+         opt = lsts[2].partition('Cancel Submitted Statements')
+         if opt[0] != '' and opt[1] != '':
+            response = opt[0].rpartition('.')[0].rpartition(' ')[2]
+         else:
+            opt = lsts[2].partition('Cancel the dialog')
+            if opt[0] != '' and opt[1] != '':
+               response = opt[0].rpartition('.')[0].rpartition(' ')[2]
+            
+
+      self._asubmit(response,'text')
+      lst = self.saspid.stdout.read1(4096)
+
+      lsts = lst.decode().rpartition('Press')
+      if lsts[0] != '' and lsts[1] != '':
+         self._asubmit('Y','text')
+      else:
+         lsts = lst.decode().rpartition('Invalid response,')
+         if lsts[0] != '' and lsts[1] != '':
+            self._asubmit('1\nY','text')
+         else:
+            self._asubmit('','text')
+
+   def _endsas(self):
+      rc = 0
+      if self.saspid:
+         code = b";*\';*\";*/;\n;quit;endsas;\n"
+         self._getlog(1)
+         self.saspid.stdin.write(code)
+         self.saspid.stdin.flush()
+         rc = self.saspid.wait(10)
+         #self.saspid.send_signal(signal.SIGKILL)
+         self.saspid = None
+      return rc
+
+
    def _getlog(self, wait=5):
       #import pdb; pdb.set_trace()
    
@@ -153,6 +196,33 @@ class SAS_session:
       return lst.replace(chr(12), '\n')
 
 
+   def _asubmit(self, code, results="html"):
+      #import pdb; pdb.set_trace()
+   
+      #odsopen = b"ods listing close;ods html5 file=stdout options(svg_mode='inline');               ods graphics on / outputfmt=svg;\n"
+      odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods html5 close;ods listing;\n"
+      ods      = True;
+      htm      = "html HTML"
+      mj       = b";*\';*\";*/;\n"
+      if (htm.find(results) < 0):
+         ods = False
+   
+      if (ods):
+         self.saspid.stdin.write(odsopen)
+   
+      out = self.saspid.stdin.write(code.encode()+b'\n')
+   
+      if (ods):
+         self.saspid.stdin.write(odsclose)
+
+      self.saspid.stdin.flush()
+
+      return out
+
+   def teach_me_SAS(self, nosub):
+      self.nosub = nosub
+
    def submit(self, code, results="html"):
       #import pdb; pdb.set_trace()
    
@@ -167,6 +237,9 @@ class SAS_session:
       logf = b''
       quit = False
       eof = 5
+
+      if self.nosub:
+         return dict(LOG=code, LST='')
 
       logn     = self._logcnt()
       logcode  = "%put tom was here"+logn+";"
@@ -219,41 +292,6 @@ class SAS_session:
       return dict(LOG=logd, LST=lstd)
 
    
-   def _asubmit(self, code, results="html"):
-      #import pdb; pdb.set_trace()
-   
-      #odsopen = b"ods listing close;ods html5 file=stdout options(svg_mode='inline');               ods graphics on / outputfmt=svg;\n"
-      odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods html5 close;ods listing;\n"
-      ods      = True;
-      htm      = "html HTML"
-      mj       = b";*\';*\";*/;\n"
-      if (htm.find(results) < 0):
-         ods = False
-   
-      if (ods):
-         self.saspid.stdin.write(odsopen)
-   
-      out = self.saspid.stdin.write(code.encode()+b'\n')
-   
-      if (ods):
-         self.saspid.stdin.write(odsclose)
-
-      self.saspid.stdin.flush()
-
-      return out
-
-   def _endsas(self):
-      rc = 0
-      if self.saspid:
-         code = b"\n;quit;endsas;\n"
-         self._getlog(1)
-         self.saspid.stdin.write(code)
-         self.saspid.stdin.flush()
-         rc = self.saspid.wait(10)
-         self.saspid = None
-      return rc
-
    def exist(self, table, libref="work"):
       #import pdb; pdb.set_trace()
 
@@ -264,8 +302,12 @@ class SAS_session:
       #self._getlog(1)
       #self._submit(code, "text")
       #log = self._getlog()
+
+      nosub = self.nosub
+      self.nosub = False
       ll = self.submit(code, "text")
-   
+      self.nosub = nosub
+
       l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
       l2 = l2[2].partition("\n")
       exists = int(l2[0])
@@ -285,6 +327,18 @@ class SAS_session:
       else:
          return None
    
+   def saslib(self, libref, engine=' ', path='', options=' '):
+      code  = "libname "+libref+" "+engine+" "
+      if len(path) > 0:
+         code += " '"+path+"' "
+      code += options+";"
+
+      ll = self.submit(code, "text")
+      if self.nosub:
+         print(ll['LOG'])
+      else:
+         print(ll['LOG'].rsplit(";*\';*\";*/;\n")[2]) 
+   
    def read_csv(self, file, table, libref="work", out='HTML'):
    
       code  = "filename x "
@@ -296,8 +350,11 @@ class SAS_session:
       code += "proc import datafile=x out="
       code += libref+"."+table
       code += " dbms=csv replace; run;"
-      self.submit(code, "text")
+      ll = self.submit(code, "text")
    
+      if self.nosub:
+         print(ll['LOG'])
+
       if self.exist(table, libref):
          return SAS_data(self, libref, table, out)
       else:
@@ -355,6 +412,8 @@ class SAS_session:
       import socket as socks
       datar = ""
    
+      nosub = self.nosub
+      self.nosub = False
    
       code  = "data _null_; file STDERR;d = open('"+sd.libref+"."+sd.table+"');\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
@@ -405,7 +464,7 @@ class SAS_session:
       ll = self.submit(code, "text")
 
       l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")
+      l2 = l2[2].partition("\n")              
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
    
@@ -446,6 +505,8 @@ class SAS_session:
          r.append(tuple(i.split(sep='\t')))
       
       df = pd.DataFrame.from_records(r, columns=varlist)
+
+      self.nosub = nosub
    
       return df.convert_objects(convert_numeric=True, convert_dates=True, copy=False)
    
@@ -496,14 +557,16 @@ class SAS_data:
         
         self.__flushlst__()
 
+        if self.sas.nosub:
+           ll = self.sas.submit(code, "text")
+           print(ll['LOG'])
+           return
+
         if self.HTML:
-           from IPython.display import HTML 
            ll = self.sas.submit(code)
-           #return HTML(self.sas._getlst())
            return HTML(ll['LST'])
         else:
            ll = self.sas.submit(code, "text")
-           #print(self.sas._getlsttxt())
            print(ll['LST'])
    
     def tail(self, obs=5):
@@ -517,6 +580,9 @@ class SAS_data:
         #self.sas._getlog()
         #self.sas._submit(code, "text")
         #log = self.sas._getlog()
+
+        nosub = self.sas.nosub
+        self.sas.nosub = False
         ll = self.sas.submit(code, "text")
 
         lastobs = ll['LOG'].rpartition("lastobs=")
@@ -535,6 +601,12 @@ class SAS_data:
         
         #self.__flushlst__()
 
+        self.sas.nosub = nosub
+        if nosub:
+           ll = self.sas.submit(code, "text")
+           print(ll['LOG'])
+           return
+
         if self.HTML:
            from IPython.display import HTML 
            ll = self.sas.submit(code)
@@ -552,8 +624,12 @@ class SAS_data:
 
         self.__flushlst__()
 
+        if self.sas.nosub:
+           ll = self.sas.submit(code, "text")
+           print(ll['LOG'])
+           return
+
         if self.HTML:
-           from IPython.display import HTML 
            ll = self.sas.submit(code)
            return HTML(ll['LST'])
         else:
@@ -572,8 +648,12 @@ class SAS_data:
         
         self.__flushlst__()
 
+        if self.sas.nosub:
+           ll = self.sas.submit(code, "text")
+           print(ll['LOG'])
+           return
+
         if self.HTML:
-           from IPython.display import HTML 
            ll = self.sas.submit(code)
            return HTML(ll['LST'])
         else:
@@ -584,8 +664,12 @@ class SAS_data:
         code  = "filename x \""+file+"\";\n"
         code += "proc export data="+self.libref+"."+self.table+" outfile=x"
         code += " dbms=csv replace; run;"
-        self.sas.submit(code, "text")
-        return 0
+        ll = self.sas.submit(code, "text")
+
+        if self.sas.nosub:
+           print(ll['LOG'])
+        else:
+           return 0
 
 
 if __name__ == "__main__":
@@ -599,524 +683,43 @@ if __name__ == "__main__":
     endsas()
 
 sas_dtdt_fmts = (    
-'AFRDFDD',
-'AFRDFDE',
-'AFRDFDE',
-'AFRDFDN',
-'AFRDFDT',
-'AFRDFDT',
-'AFRDFDWN',
-'AFRDFMN',
-'AFRDFMY',
-'AFRDFMY',
-'AFRDFWDX',
-'AFRDFWKX',
-'ANYDTDTE',
-'ANYDTDTM',
-'ANYDTTME',
-'B8601DA',
-'B8601DA',
-'B8601DJ',
-'B8601DN',
-'B8601DN',
-'B8601DT',
-'B8601DT',
-'B8601DZ',
-'B8601DZ',
-'B8601LZ',
-'B8601LZ',
-'B8601TM',
-'B8601TM',
-'B8601TZ',
-'B8601TZ',
-'CATDFDD',
-'CATDFDE',
-'CATDFDE',
-'CATDFDN',
-'CATDFDT',
-'CATDFDT',
-'CATDFDWN',
-'CATDFMN',
-'CATDFMY',
-'CATDFMY',
-'CATDFWDX',
-'CATDFWKX',
-'CRODFDD',
-'CRODFDE',
-'CRODFDE',
-'CRODFDN',
-'CRODFDT',
-'CRODFDT',
-'CRODFDWN',
-'CRODFMN',
-'CRODFMY',
-'CRODFMY',
-'CRODFWDX',
-'CRODFWKX',
-'CSYDFDD',
-'CSYDFDE',
-'CSYDFDE',
-'CSYDFDN',
-'CSYDFDT',
-'CSYDFDT',
-'CSYDFDWN',
-'CSYDFMN',
-'CSYDFMY',
-'CSYDFMY',
-'CSYDFWDX',
-'CSYDFWKX',
-'DANDFDD',
-'DANDFDE',
-'DANDFDE',
-'DANDFDN',
-'DANDFDT',
-'DANDFDT',
-'DANDFDWN',
-'DANDFMN',
-'DANDFMY',
-'DANDFMY',
-'DANDFWDX',
-'DANDFWKX',
-'DATE',
-'DATE',
-'DATEAMPM',
-'DATETIME',
-'DATETIME',
-'DAY',
-'DDMMYY',
-'DDMMYY',
-'DDMMYYB',
-'DDMMYYC',
-'DDMMYYD',
-'DDMMYYN',
-'DDMMYYP',
-'DDMMYYS',
-'DESDFDD',
-'DESDFDE',
-'DESDFDE',
-'DESDFDN',
-'DESDFDT',
-'DESDFDT',
-'DESDFDWN',
-'DESDFMN',
-'DESDFMY',
-'DESDFMY',
-'DESDFWDX',
-'DESDFWKX',
-'DEUDFDD',
-'DEUDFDE',
-'DEUDFDE',
-'DEUDFDN',
-'DEUDFDT',
-'DEUDFDT',
-'DEUDFDWN',
-'DEUDFMN',
-'DEUDFMY',
-'DEUDFMY',
-'DEUDFWDX',
-'DEUDFWKX',
-'DOWNAME',
-'DTDATE',
-'DTMONYY',
-'DTWKDATX',
-'DTYEAR',
-'DTYYQC',
-'E8601DA',
-'E8601DA',
-'E8601DN',
-'E8601DN',
-'E8601DT',
-'E8601DT',
-'E8601DZ',
-'E8601DZ',
-'E8601LZ',
-'E8601LZ',
-'E8601TM',
-'E8601TM',
-'E8601TZ',
-'E8601TZ',
-'ENGDFDD',
-'ENGDFDE',
-'ENGDFDE',
-'ENGDFDN',
-'ENGDFDT',
-'ENGDFDT',
-'ENGDFDWN',
-'ENGDFMN',
-'ENGDFMY',
-'ENGDFMY',
-'ENGDFWDX',
-'ENGDFWKX',
-'ESPDFDD',
-'ESPDFDE',
-'ESPDFDE',
-'ESPDFDN',
-'ESPDFDT',
-'ESPDFDT',
-'ESPDFDWN',
-'ESPDFMN',
-'ESPDFMY',
-'ESPDFMY',
-'ESPDFWDX',
-'ESPDFWKX',
-'EURDFDD',
-'EURDFDE',
-'EURDFDE',
-'EURDFDN',
-'EURDFDT',
-'EURDFDT',
-'EURDFDWN',
-'EURDFMN',
-'EURDFMY',
-'EURDFMY',
-'EURDFWDX',
-'EURDFWKX',
-'FINDFDD',
-'FINDFDE',
-'FINDFDE',
-'FINDFDN',
-'FINDFDT',
-'FINDFDT',
-'FINDFDWN',
-'FINDFMN',
-'FINDFMY',
-'FINDFMY',
-'FINDFWDX',
-'FINDFWKX',
-'FRADFDD',
-'FRADFDE',
-'FRADFDE',
-'FRADFDN',
-'FRADFDT',
-'FRADFDT',
-'FRADFDWN',
-'FRADFMN',
-'FRADFMY',
-'FRADFMY',
-'FRADFWDX',
-'FRADFWKX',
-'FRSDFDD',
-'FRSDFDE',
-'FRSDFDE',
-'FRSDFDN',
-'FRSDFDT',
-'FRSDFDT',
-'FRSDFDWN',
-'FRSDFMN',
-'FRSDFMY',
-'FRSDFMY',
-'FRSDFWDX',
-'FRSDFWKX',
-'HHMM',
-'HOUR',
-'HUNDFDD',
-'HUNDFDE',
-'HUNDFDE',
-'HUNDFDN',
-'HUNDFDT',
-'HUNDFDT',
-'HUNDFDWN',
-'HUNDFMN',
-'HUNDFMY',
-'HUNDFMY',
-'HUNDFWDX',
-'HUNDFWKX',
-'IS8601DA',
-'IS8601DA',
-'IS8601DN',
-'IS8601DN',
-'IS8601DT',
-'IS8601DT',
-'IS8601DZ',
-'IS8601DZ',
-'IS8601LZ',
-'IS8601LZ',
-'IS8601TM',
-'IS8601TM',
-'IS8601TZ',
-'IS8601TZ',
-'ITADFDD',
-'ITADFDE',
-'ITADFDE',
-'ITADFDN',
-'ITADFDT',
-'ITADFDT',
-'ITADFDWN',
-'ITADFMN',
-'ITADFMY',
-'ITADFMY',
-'ITADFWDX',
-'ITADFWKX',
-'JDATEMD',
-'JDATEMDW',
-'JDATEMNW',
-'JDATEMON',
-'JDATEQRW',
-'JDATEQTR',
-'JDATESEM',
-'JDATESMW',
-'JDATEWK',
-'JDATEYDW',
-'JDATEYM',
-'JDATEYMD',
-'JDATEYMD',
-'JDATEYMW',
-'JDATEYT',
-'JDATEYTW',
-'JNENGO',
-'JNENGO',
-'JNENGOT',
-'JNENGOTW',
-'JNENGOW',
-'JTIMEH',
-'JTIMEHM',
-'JTIMEHMS',
-'JTIMEHW',
-'JTIMEMW',
-'JTIMESW',
-'JULDATE',
-'JULDAY',
-'JULIAN',
-'JULIAN',
-'MACDFDD',
-'MACDFDE',
-'MACDFDE',
-'MACDFDN',
-'MACDFDT',
-'MACDFDT',
-'MACDFDWN',
-'MACDFMN',
-'MACDFMY',
-'MACDFMY',
-'MACDFWDX',
-'MACDFWKX',
-'MDYAMPM',
-'MDYAMPM',
-'MINGUO',
-'MINGUO',
-'MMDDYY',
-'MMDDYY',
-'MMDDYYB',
-'MMDDYYC',
-'MMDDYYD',
-'MMDDYYN',
-'MMDDYYP',
-'MMDDYYS',
-'MMSS',
-'MMYY',
-'MMYYC',
-'MMYYD',
-'MMYYN',
-'MMYYP',
-'MMYYS',
-'MONNAME',
-'MONTH',
-'MONYY',
-'MONYY',
-'ND8601DA',
-'ND8601DN',
-'ND8601DT',
-'ND8601DZ',
-'ND8601TM',
-'ND8601TZ',
-'NENGO',
-'NENGO',
-'NLDATE',
-'NLDATE',
-'NLDATEL',
-'NLDATEM',
-'NLDATEMD',
-'NLDATEMDL',
-'NLDATEMDM',
-'NLDATEMDS',
-'NLDATEMN',
-'NLDATES',
-'NLDATEW',
-'NLDATEW',
-'NLDATEWN',
-'NLDATEYM',
-'NLDATEYML',
-'NLDATEYMM',
-'NLDATEYMS',
-'NLDATEYQ',
-'NLDATEYQL',
-'NLDATEYQM',
-'NLDATEYQS',
-'NLDATEYR',
-'NLDATEYW',
-'NLDATM',
-'NLDATM',
-'NLDATMAP',
-'NLDATMAP',
-'NLDATMDT',
-'NLDATML',
-'NLDATMM',
-'NLDATMMD',
-'NLDATMMDL',
-'NLDATMMDM',
-'NLDATMMDS',
-'NLDATMMN',
-'NLDATMS',
-'NLDATMTM',
-'NLDATMTZ',
-'NLDATMW',
-'NLDATMW',
-'NLDATMWN',
-'NLDATMWZ',
-'NLDATMYM',
-'NLDATMYML',
-'NLDATMYMM',
-'NLDATMYMS',
-'NLDATMYQ',
-'NLDATMYQL',
-'NLDATMYQM',
-'NLDATMYQS',
-'NLDATMYR',
-'NLDATMYW',
-'NLDATMZ',
-'NLDDFDD',
-'NLDDFDE',
-'NLDDFDE',
-'NLDDFDN',
-'NLDDFDT',
-'NLDDFDT',
-'NLDDFDWN',
-'NLDDFMN',
-'NLDDFMY',
-'NLDDFMY',
-'NLDDFWDX',
-'NLDDFWKX',
-'NLTIMAP',
-'NLTIMAP',
-'NLTIME',
-'NLTIME',
-'NORDFDD',
-'NORDFDE',
-'NORDFDE',
-'NORDFDN',
-'NORDFDT',
-'NORDFDT',
-'NORDFDWN',
-'NORDFMN',
-'NORDFMY',
-'NORDFMY',
-'NORDFWDX',
-'NORDFWKX',
-'POLDFDD',
-'POLDFDE',
-'POLDFDE',
-'POLDFDN',
-'POLDFDT',
-'POLDFDT',
-'POLDFDWN',
-'POLDFMN',
-'POLDFMY',
-'POLDFMY',
-'POLDFWDX',
-'POLDFWKX',
-'PTGDFDD',
-'PTGDFDE',
-'PTGDFDE',
-'PTGDFDN',
-'PTGDFDT',
-'PTGDFDT',
-'PTGDFDWN',
-'PTGDFMN',
-'PTGDFMY',
-'PTGDFMY',
-'PTGDFWDX',
-'PTGDFWKX',
-'QTR',
-'QTRR',
-'RUSDFDD',
-'RUSDFDE',
-'RUSDFDE',
-'RUSDFDN',
-'RUSDFDT',
-'RUSDFDT',
-'RUSDFDWN',
-'RUSDFMN',
-'RUSDFMY',
-'RUSDFMY',
-'RUSDFWDX',
-'RUSDFWKX',
-'SLODFDD',
-'SLODFDE',
-'SLODFDE',
-'SLODFDN',
-'SLODFDT',
-'SLODFDT',
-'SLODFDWN',
-'SLODFMN',
-'SLODFMY',
-'SLODFMY',
-'SLODFWDX',
-'SLODFWKX',
-'STIMER',
-'SVEDFDD',
-'SVEDFDE',
-'SVEDFDE',
-'SVEDFDN',
-'SVEDFDT',
-'SVEDFDT',
-'SVEDFDWN',
-'SVEDFMN',
-'SVEDFMY',
-'SVEDFMY',
-'SVEDFWDX',
-'SVEDFWKX',
-'TIME',
-'TIME',
-'TIMEAMPM',
-'TOD',
-'TWMDY',
-'WEEKDATE',
-'WEEKDATX',
-'WEEKDAY',
-'WEEKU',
-'WEEKU',
-'WEEKV',
-'WEEKV',
-'WEEKW',
-'WEEKW',
-'WORDDATE',
-'WORDDATX',
-'XYYMMDD',
-'XYYMMDD',
-'YEAR',
-'YMDDTTM',
-'YYMM',
-'YYMMC',
-'YYMMD',
-'YYMMDD',
-'YYMMDD',
-'YYMMDDB',
-'YYMMDDC',
-'YYMMDDD',
-'YYMMDDN',
-'YYMMDDP',
-'YYMMDDS',
-'YYMMN',
-'YYMMN',
-'YYMMP',
-'YYMMS',
-'YYMON',
-'YYQ',
-'YYQ',
-'YYQC',
-'YYQD',
-'YYQN',
-'YYQP',
-'YYQR',
-'YYQRC',
-'YYQRD',
-'YYQRN',
-'YYQRP',
-'YYQRS',
-'YYQS',
-'YYQZ',
-'YYQZ',
-'YYWEEKU',
-'YYWEEKV',
-'YYWEEKW'
+'AFRDFDD','AFRDFDE','AFRDFDE','AFRDFDN','AFRDFDT','AFRDFDT','AFRDFDWN',
+'AFRDFMN','AFRDFMY','AFRDFMY','AFRDFWDX','AFRDFWKX','ANYDTDTE','ANYDTDTM','ANYDTTME','B8601DA','B8601DA','B8601DJ','B8601DN','B8601DN',
+'B8601DT','B8601DT','B8601DZ','B8601DZ','B8601LZ','B8601LZ','B8601TM','B8601TM','B8601TZ','B8601TZ','CATDFDD','CATDFDE','CATDFDE','CATDFDN',
+'CATDFDT','CATDFDT','CATDFDWN','CATDFMN','CATDFMY','CATDFMY','CATDFWDX','CATDFWKX','CRODFDD','CRODFDE','CRODFDE','CRODFDN','CRODFDT',
+'CRODFDT','CRODFDWN','CRODFMN','CRODFMY','CRODFMY','CRODFWDX','CRODFWKX','CSYDFDD','CSYDFDE','CSYDFDE','CSYDFDN','CSYDFDT','CSYDFDT',
+'CSYDFDWN','CSYDFMN','CSYDFMY','CSYDFMY','CSYDFWDX','CSYDFWKX','DANDFDD','DANDFDE','DANDFDE','DANDFDN','DANDFDT','DANDFDT','DANDFDWN','DANDFMN',
+'DANDFMY','DANDFMY','DANDFWDX','DANDFWKX','DATE','DATE','DATEAMPM','DATETIME','DATETIME','DAY','DDMMYY','DDMMYY','DDMMYYB','DDMMYYC',
+'DDMMYYD','DDMMYYN','DDMMYYP','DDMMYYS','DESDFDD','DESDFDE','DESDFDE','DESDFDN','DESDFDT','DESDFDT','DESDFDWN','DESDFMN','DESDFMY','DESDFMY',
+'DESDFWDX','DESDFWKX','DEUDFDD','DEUDFDE','DEUDFDE','DEUDFDN','DEUDFDT','DEUDFDT','DEUDFDWN','DEUDFMN','DEUDFMY','DEUDFMY','DEUDFWDX',
+'DEUDFWKX','DOWNAME','DTDATE','DTMONYY','DTWKDATX','DTYEAR','DTYYQC','E8601DA','E8601DA','E8601DN','E8601DN','E8601DT','E8601DT','E8601DZ',
+'E8601DZ','E8601LZ','E8601LZ','E8601TM','E8601TM','E8601TZ','E8601TZ','ENGDFDD','ENGDFDE','ENGDFDE','ENGDFDN','ENGDFDT','ENGDFDT','ENGDFDWN',
+'ENGDFMN','ENGDFMY','ENGDFMY','ENGDFWDX','ENGDFWKX','ESPDFDD','ESPDFDE','ESPDFDE','ESPDFDN','ESPDFDT','ESPDFDT','ESPDFDWN','ESPDFMN',
+'ESPDFMY','ESPDFMY','ESPDFWDX','ESPDFWKX','EURDFDD','EURDFDE','EURDFDE','EURDFDN','EURDFDT','EURDFDT','EURDFDWN','EURDFMN','EURDFMY',
+'EURDFMY','EURDFWDX','EURDFWKX','FINDFDD','FINDFDE','FINDFDE','FINDFDN','FINDFDT','FINDFDT','FINDFDWN','FINDFMN','FINDFMY','FINDFMY',
+'FINDFWDX','FINDFWKX','FRADFDD','FRADFDE','FRADFDE','FRADFDN','FRADFDT','FRADFDT','FRADFDWN','FRADFMN','FRADFMY','FRADFMY','FRADFWDX',
+'FRADFWKX','FRSDFDD','FRSDFDE','FRSDFDE','FRSDFDN','FRSDFDT','FRSDFDT','FRSDFDWN','FRSDFMN','FRSDFMY','FRSDFMY','FRSDFWDX','FRSDFWKX','HHMM',
+'HOUR','HUNDFDD','HUNDFDE','HUNDFDE','HUNDFDN','HUNDFDT','HUNDFDT','HUNDFDWN','HUNDFMN','HUNDFMY','HUNDFMY','HUNDFWDX','HUNDFWKX',
+'IS8601DA','IS8601DA','IS8601DN','IS8601DN','IS8601DT','IS8601DT','IS8601DZ','IS8601DZ','IS8601LZ','IS8601LZ','IS8601TM','IS8601TM',
+'IS8601TZ','IS8601TZ','ITADFDD','ITADFDE','ITADFDE','ITADFDN','ITADFDT','ITADFDT','ITADFDWN','ITADFMN','ITADFMY','ITADFMY','ITADFWDX',
+'ITADFWKX','JDATEMD','JDATEMDW','JDATEMNW','JDATEMON','JDATEQRW','JDATEQTR','JDATESEM','JDATESMW','JDATEWK','JDATEYDW','JDATEYM','JDATEYMD',
+'JDATEYMD','JDATEYMW','JDATEYT','JDATEYTW','JNENGO','JNENGO','JNENGOT','JNENGOTW','JNENGOW','JTIMEH','JTIMEHM','JTIMEHMS','JTIMEHW',
+'JTIMEMW','JTIMESW','JULDATE','JULDAY','JULIAN','JULIAN','MACDFDD','MACDFDE','MACDFDE','MACDFDN','MACDFDT','MACDFDT','MACDFDWN','MACDFMN',
+'MACDFMY','MACDFMY','MACDFWDX','MACDFWKX','MDYAMPM','MDYAMPM','MINGUO','MINGUO','MMDDYY','MMDDYY','MMDDYYB','MMDDYYC','MMDDYYD','MMDDYYN',
+'MMDDYYP','MMDDYYS','MMSS','MMYY','MMYYC','MMYYD','MMYYN','MMYYP','MMYYS','MONNAME','MONTH','MONYY','MONYY','ND8601DA','ND8601DN','ND8601DT',
+'ND8601DZ','ND8601TM','ND8601TZ','NENGO','NENGO','NLDATE','NLDATE','NLDATEL','NLDATEM','NLDATEMD','NLDATEMDL','NLDATEMDM','NLDATEMDS',
+'NLDATEMN','NLDATES','NLDATEW','NLDATEW','NLDATEWN','NLDATEYM','NLDATEYML','NLDATEYMM','NLDATEYMS','NLDATEYQ','NLDATEYQL','NLDATEYQM',
+'NLDATEYQS','NLDATEYR','NLDATEYW','NLDATM','NLDATM','NLDATMAP','NLDATMAP','NLDATMDT','NLDATML','NLDATMM','NLDATMMD','NLDATMMDL','NLDATMMDM',
+'NLDATMMDS','NLDATMMN','NLDATMS','NLDATMTM','NLDATMTZ','NLDATMW','NLDATMW','NLDATMWN','NLDATMWZ','NLDATMYM','NLDATMYML','NLDATMYMM',
+'NLDATMYMS','NLDATMYQ','NLDATMYQL','NLDATMYQM','NLDATMYQS','NLDATMYR','NLDATMYW','NLDATMZ','NLDDFDD','NLDDFDE','NLDDFDE','NLDDFDN','NLDDFDT',
+'NLDDFDT','NLDDFDWN','NLDDFMN','NLDDFMY','NLDDFMY','NLDDFWDX','NLDDFWKX','NLTIMAP','NLTIMAP','NLTIME','NLTIME','NORDFDD','NORDFDE',
+'NORDFDE','NORDFDN','NORDFDT','NORDFDT','NORDFDWN','NORDFMN','NORDFMY','NORDFMY','NORDFWDX','NORDFWKX','POLDFDD','POLDFDE','POLDFDE',
+'POLDFDN','POLDFDT','POLDFDT','POLDFDWN','POLDFMN','POLDFMY','POLDFMY','POLDFWDX','POLDFWKX','PTGDFDD','PTGDFDE','PTGDFDE','PTGDFDN',
+'PTGDFDT','PTGDFDT','PTGDFDWN','PTGDFMN','PTGDFMY','PTGDFMY','PTGDFWDX','PTGDFWKX','QTR','QTRR','RUSDFDD','RUSDFDE','RUSDFDE','RUSDFDN',
+'RUSDFDT','RUSDFDT','RUSDFDWN','RUSDFMN','RUSDFMY','RUSDFMY','RUSDFWDX','RUSDFWKX','SLODFDD','SLODFDE','SLODFDE','SLODFDN','SLODFDT',
+'SLODFDT','SLODFDWN','SLODFMN','SLODFMY','SLODFMY','SLODFWDX','SLODFWKX','STIMER','SVEDFDD','SVEDFDE','SVEDFDE','SVEDFDN','SVEDFDT',
+'SVEDFDT','SVEDFDWN','SVEDFMN','SVEDFMY','SVEDFMY','SVEDFWDX','SVEDFWKX','TIME','TIME','TIMEAMPM','TOD','TWMDY','WEEKDATE','WEEKDATX',
+'WEEKDAY','WEEKU','WEEKU','WEEKV','WEEKV','WEEKW','WEEKW','WORDDATE','WORDDATX','XYYMMDD','XYYMMDD','YEAR','YMDDTTM','YYMM','YYMMC',
+'YYMMD','YYMMDD','YYMMDD','YYMMDDB','YYMMDDC','YYMMDDD','YYMMDDN','YYMMDDP','YYMMDDS','YYMMN','YYMMN','YYMMP','YYMMS','YYMON','YYQ',
+'YYQ','YYQC','YYQD','YYQN','YYQP','YYQR','YYQRC','YYQRD','YYQRN','YYQRP','YYQRS','YYQS','YYQZ','YYQZ','YYWEEKU','YYWEEKV','YYWEEKW'
 )
