@@ -117,6 +117,19 @@ class SAS_stat:
             obj1=[]
         return (SAS_results(obj1, self.sas, objname))
 
+    def logistic(self, **kwargs):
+        objtype='logistic'
+        objname='log'+self.sas._objcnt() #translate to a libname so needs to be less than 8
+        code=self._makeProccallMacro(objtype, objname, kwargs)
+        logger.debug("LOGISTIC macro submission: " + str(code))
+        self.sas._asubmit(code,"text")
+        try:
+            obj1=self._objectmethods(objname)
+            logger.debug(obj1)
+        except Exception:
+            obj1=[]
+        return (SAS_results(obj1, self.sas, objname))
+
 from collections import namedtuple
 
 class SAS_results(object):
