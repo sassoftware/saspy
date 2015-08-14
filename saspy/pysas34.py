@@ -6,7 +6,6 @@ from saspy.sasstat import *
 from saspy.sasets import *
 
 
-
 class SAS_session:
    
    def __init__(self, path="/opt/sasinside/SASHome"):
