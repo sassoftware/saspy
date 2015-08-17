@@ -1,4 +1,5 @@
 from IPython.core.display import HTML
+import IPython.display as id
 #from saspy import pysas34 as sas
 import time
 import logging
@@ -197,14 +198,14 @@ class SAS_results(object):
                 res = namedtuple('SAS Result', headers)
                 results = [ res(x) for x in headers[1:] ]
             '''
-
+ 
         else:
             if self.nosub:
                 print('This SAS Result object was created in teach_me_SAS mode, so it has no results')
                 return
             else:
                 raise AttributeError
-        return HTML(data)
+        return HTML('<h1>'+attr+'</h1>'+data)
 
     def _go_run_code(self, attr):
         #print(self._name, attr)
@@ -217,4 +218,6 @@ class SAS_results(object):
         x=self.sas.sasdata(table,'_'+self._name)
         return (x)
 
-
+    def ALL(self):
+        for i in self._attrs:
+            id.display(self.__getattr__(i))
