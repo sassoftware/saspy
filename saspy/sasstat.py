@@ -219,5 +219,8 @@ class SAS_results(object):
         return (x)
 
     def ALL(self):
+        '''
+        This method shows all the results attributes for a given object
+        '''
         for i in self._attrs:
             id.display(self.__getattr__(i))
