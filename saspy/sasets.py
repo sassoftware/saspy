@@ -143,6 +143,13 @@ class SAS_ets:
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_overview.htm
         '''
         data=kwargs.pop('data',None)
+        #required statements
+        req_stmt=[]
+
+        #legal statments
+        # by, corr, crosscorr, decomp, id, season, trend, var, crossvar
+        legal_stmt=[ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar']
+
 
         objtype='timeseries'
         objname='ts1'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
