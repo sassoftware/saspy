@@ -2,6 +2,7 @@ from IPython.core.display import HTML
 import time
 import logging
 import os
+import re
 
 # create logger
 logger = logging.getLogger('')
@@ -14,7 +15,23 @@ class SAS_ets:
         self.sas=session
         macro_path=os.path.dirname(os.path.realpath(__file__))
         code="options pagesize=max; %include '" + macro_path + '/' + "libname_gen.sas'; "
-        self.sas._asubmit(code,"text")
+        init=self.sas.submit(code,"text")
+        logger.debug("LOG: " + init['LOG'])
+        #Did the macro execute error free?
+        lines=re.split(r'[\n]\s*',init['LOG'])
+        i=0
+        elog=[]
+        for line in lines:
+            i+=1
+            if line.startswith('ERROR'):
+                logger.debug("Error line found")
+                elog=lines[(max(i-5,0)):(min(i+6,len(lines)))]
+        tlog='\n'.join(elog)
+        logger.debug("log length: " +str(len(tlog)))
+        if len(tlog)>0:
+            print (tlog)
+
+
 
         logger.debug("Initalization of SAS Macro: " + str(self.sas._getlog()))
 
