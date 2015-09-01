@@ -138,7 +138,7 @@ class SAS_ets:
         logger.debug("Proc code submission: " + str(code))
         return (code)
     
-    def _stmt_check(req,legal,stmt):
+    def _stmt_check(self,req:set =None ,legal:set =None,stmt:dict =None):
         #required statements
         req_set=req
         if (len(req_set)):
@@ -150,7 +150,6 @@ class SAS_ets:
 
         #legal statments
         legal_set=legal
-        data=kwargs.pop('data',None)
         if (len(legal_set)):
             extra_set=set(stmt.keys()).difference(legal_set)
             if extra_set:
@@ -167,7 +166,8 @@ class SAS_ets:
         required_set={'id'}
         legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar'}
         data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
+        logger.debug("kwargs type: " + str(type(kwargs)))
+        chk= self._stmt_check(req=required_set, legal=legal_set,stmt=kwargs)
         if chk:
             objtype='timeseries'
             objname='ts1'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
