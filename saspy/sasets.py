@@ -31,7 +31,7 @@ class SAS_ets:
         logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
-    def _makeProccallMacro(self, objtype, objname, data=None, args=''):
+    def _makeProccallMacro(self, objtype, objname, args=''):
         #by='', corr='',
         #                   crosscorr='', decomp='', id='', season='', trend='', var='',
         #                   crossvar='', identify='', estimate='', outlier='', forecast='', 
@@ -171,7 +171,7 @@ class SAS_ets:
         if chk:
             objtype='timeseries'
             objname='ts1'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, data, kwargs)
+            code=self._makeProccallMacro(objtype, objname, kwargs)
             logger.debug("TIMESERIES macro submission: " + str(code))
             self.sas._asubmit(code,"text")
             try:

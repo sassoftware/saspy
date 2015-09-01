@@ -33,44 +33,151 @@ class SAS_stat:
         return objlist
 
     def _makeProccallMacro(self,objtype,objname,kwargs):
-        data=kwargs.get('data','')
-        model=kwargs.get('model','')
-        cls=kwargs.get('cls','')
-        means=kwargs.get('means','')
-        by =kwargs.get('by', '')
-        est=kwargs.get('estimate','')
-        weight=kwargs.get('weight','')
-        lsmeans=kwargs.get('lsmeans','')
+        code  = "%macro proccall(d);\n"
+        code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
+        logger.debug("args value: " + str(args))
+        logger.debug("args type: " + str(type(args)))
+        #this list is largly alphabetical but there are exceptions in order to 
+        #satisfy the order needs of the statements for the procedure
+        # as an example... http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
 
-        code = ''
-        if self.sas.nosub == False:
-           code  = "%macro proccall(d);\n"
-        if objtype == 'hpsplit':
-           code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
-        else:
-           code += "proc %s data=%s.%s plots(unpack)=all;\n" % (objtype, data.libref, data.table)
-        #logger.debug("cls stuff: " +str(hasattr(self,'cls')) + ' ' + str(len(self.cls)))
-        if len(cls):
-            #logger.debug("cls stuff: " +str(hasattr(self,'cls')) + ' ' + str(len(self.cls)))
-            code += "\tclass %s;\n" % (cls)
-        if len(model):
-            code += "\tmodel %s;\n" % (model)
-        if len(means):
-            code += "\tmeans %s;\n" % (cls)
-        code += "run; quit; \n"
-        if self.sas.nosub == False:
-           code += "%mend;\n"
-           code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
+
+        if 'absorb' in args:
+            logger.debug("absorb statement,length: %s,%s", args['absorb'], len(args['absorb']))
+            code += "absorb %s;\n" % (args['absorb'])
+        if 'add' in args:
+            logger.debug("add statement,length: %s,%s", args['add'], len(args['add']))
+            code += "add %s;\n" % (args['add'])
+        if 'by' in args:
+            logger.debug("by statement,length: %s,%s", args['by'], len(args['by']))
+            code += "by %s;\n" % (args['by'])
+        if 'class' in args:
+            logger.debug("class statement,length: %s,%s", args['class'], len(args['class']))
+            code += "class %s;\n" % (args['class'])
+        #contrast moved
+        if 'effect' in args:
+            logger.debug("effect statement,length: %s,%s", args['effect'], len(args['effect']))
+            code += "effect %s;\n" % (args['effect'])
+        #estimate moved
+        if 'freq' in args:
+            #add check to make sure it is only one variable
+            logger.debug("freq statement,length: %s,%s", args['freq'], len(args['freq']))
+            code += "freq %s;\n" % (args['freq'])
+        if 'id' in args:
+            logger.debug("id statement,length: %s,%s", args['id'], len(args['id']))
+            code += "id %s;\n" % (args['id'])
+        #lsmeans moved
+        #manova moved
+        #means moved
+        if 'model' in args:
+            logger.debug("model statement,length: %s,%s", args['model'], len(args['model']))
+            code += "model %s;\n" % (args['model'])
+        if 'contrast' in args:
+            logger.debug("contrast statement,length: %s,%s", args['contrast'], len(args['contrast']))
+            code += "contrast %s;\n" % (args['contrast']) 
+        if 'estimate' in args:
+            logger.debug("estimate statement,length: %s,%s", args['estimate'], len(args['estimate']))
+            code += "estimate %s;\n" % (args['estimate'])
+        if 'lsmeans' in args:
+            logger.debug("lsmeans statement,length: %s,%s", args['lsmeans'], len(args['lsmeans']))
+            code += "lsmeans %s;\n" % (args['lsmeans'])
+        if 'test' in args:
+            logger.debug("test statement,length: %s,%s", args['test'], len(args['test']))
+            code += "test %s;\n" % (args['test'])
+        if 'manova' in args:
+            logger.debug("manova statement,length: %s,%s", args['manova'], len(args['manova']))
+            code += "manova %s;\n" % (args['manova'])
+        if 'means' in args:
+            logger.debug("means statement,length: %s,%s", args['means'], len(args['means']))
+            code += "means %s;\n" % (args['means'])
+        if 'oddsratio' in args:
+            logger.debug("oddsratio statement,length: %s,%s", args['oddsratio'], len(args['oddsratio']))
+            code += "oddsratio %s;\n" % (args['oddsratio'])
+        if 'parms' in args:
+            logger.debug("parms statement,length: %s,%s", args['parms'], len(args['parms']))
+            code += "parms %s;\n" % (args['parms'])
+        if 'prior' in args:
+            #check that distrbution is in the list
+            logger.debug("prior statement,length: %s,%s", args['prior'], len(args['prior']))
+            code += "prior %s;\n" % (args['prior'])
+        if 'random' in args:
+            logger.debug("random statement,length: %s,%s", args['random'], len(args['random']))
+            code += "random %s;\n" % (args['random'])
+        if 'repeated' in args:
+            logger.debug("repeated statement,length: %s,%s", args['repeated'], len(args['repeated']))
+            code += "repeated %s;\n" % (args['repeated'])
+        if 'roc' in args:
+            logger.debug("roc statement,length: %s,%s", args['roc'], len(args['roc']))
+            code += "roc %s;\n" % (args['roc'])
+        if 'score' in args:
+            logger.debug("score statement,length: %s,%s", args['score'], len(args['score']))
+            code += "score %s;\n" % (args['score'])
+        if 'slice' in args:
+            logger.debug("slice statement,length: %s,%s", args['slice'], len(args['slice']))
+            code += "slice %s;\n" % (args['slice'])
+        if 'strata' in args:
+            logger.debug("strata statement,length: %s,%s", args['strata'], len(args['strata']))
+            code += "strata %s;\n" % (args['strata'])
+        #test moved
+        if 'var' in args:
+            logger.debug("var statement,length: %s,%s", args['var'], len(args['var']))
+            code += "var %s;\n" % (args['var'])
+        if 'weight' in args:
+            #add check to make sure it is only one variable
+            logger.debug("weight statement,length: %s,%s", args['weight'], len(args['weight']))
+            code += "weight %s;\n" % (args['weight'])
+            
+        if 'grow' in args:
+            logger.debug("grow statement,length: %s,%s", args['grow'], len(args['grow']))
+            code += "grow %s;\n" % (args['grow'])
+        if 'prune' in args:
+            logger.debug("prune statement,length: %s,%s", args['prune'], len(args['prune']))
+            code += "prune %s;\n" % (args['prune'])
+        if 'rules' in args:
+            logger.debug("rules statement,length: %s,%s", args['rules'], len(args['rules']))
+            code += "rules %s;\n" % (args['rules'])
+        if 'partition' in args:
+            logger.debug("partition statement,length: %s,%s", args['partition'], len(args['partition']))
+            code += "partition %s;\n" % (args['partition'])
+        '''
+        if 'foobar' in args:
+            logger.debug("foobar statement,length: %s,%s", args['foobar'], len(args['foobar']))
+            code += "foobar %s;\n" % (args['foobar'])
+        '''
+        code += "run; quit; %mend;\n"
+        code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
         logger.debug("Proc code submission: " + str(code))
         return (code)
 
 
     def hpsplit(self, **kwargs):
-        '''Python method to call the HPSPLIT procedure\nDocumentation link: http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_overview.htm'''
-        objtype='hpsplit'
-        objname='hps'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
-        logger.debug("HPSPLIT macro submission: " + str(code))
+        '''
+        Python method to call the HPSPLIT procedure\n
+        Documentation link: 
+        http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_overview.htm
+        '''
+        required_set={'id'}
+        legal_set={'class','code','grow','id','model',
+                   'partition','performance','prune','rules'}
+        data=kwargs.pop('data',None)
+        logger.debug("kwargs type: " + str(type(kwargs)))
+        chk= self._stmt_check(required_set, legal_set,kwargs)
+        if chk:
+            objtype='hpsplit'
+            objname='hps'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
+            code=self._makeProccallMacro(objtype, objname, kwargs)
+            logger.debug("HPSPLIT macro submission: " + str(code))
+            self.sas._asubmit(code,"text")
+            try:
+                obj1=self._objectmethods(objname)
+                logger.debug(obj1)
+            except Exception:
+                obj1=[]
+
+            return (SAS_results(obj1, self.sas, objname))
+        else:
+            Print("Error in code submission")
+
 
         if self.sas.nosub:
            print(code)
@@ -85,14 +192,30 @@ class SAS_stat:
             obj1=[]
 
         return (SAS_results(obj1, self, objname))
-
-
-
     def reg(self, **kwargs):
-        objtype='reg'
-        objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
-        logger.debug("REG macro submission: " + str(code))
+        required_set={'model'}
+        legal_set={'add','by','code','id','var'
+                   'lsmeans','model','random','repeated',
+                   'slice','test','weight'}
+
+        data=kwargs.pop('data',None)
+        logger.debug("kwargs type: " + str(type(kwargs)))
+        chk= self._stmt_check(required_set, legal_set,kwargs)
+        if chk:
+            objtype='reg'
+            objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
+            code=self._makeProccallMacro(objtype, objname, kwargs)
+            logger.debug("REG macro submission: " + str(code))
+            self.sas._asubmit(code,"text")
+            try:
+                obj1=self._objectmethods(objname)
+                logger.debug(obj1)
+            except Exception:
+                obj1=[]
+
+            return (SAS_results(obj1, self.sas, objname))
+        else:
+            Print("Error in code submission")
 
         if self.sas.nosub:
            print(code)
@@ -105,14 +228,30 @@ class SAS_stat:
         except Exception:
             obj1=[]
         return (SAS_results(obj1, self, objname))
-    
-    
     def mixed(self, **kwargs):
-        objtype='mixed'
-        objname='mix'+self.sas._objcnt()
-        code=self._makeProccallMacro(objtype, objname, kwargs)
-        logger.debug("Mixed Macro submission: " + str(code))
+        required_set={'model'}
+        legal_set={'by','class','code','contrast','estimate','id',
+                   'lsmeans','model','random','repeated',
+                   'slice','weight'}
 
+        data=kwargs.pop('data',None)
+        logger.debug("kwargs type: " + str(type(kwargs)))
+        chk= self._stmt_check(required_set, legal_set,kwargs)
+        if chk:
+            objtype='mixed'
+            objname='mix'+self.sas._objcnt()
+            code=self._makeProccallMacro(objtype, objname, kwargs)
+            logger.debug("Mixed Macro submission: " + str(code))
+            self.sas._asubmit(code,"text")
+            try:
+                obj1=self._objectmethods(objname)
+                logger.debug(obj1)
+            except Exception:
+                obj1=[]
+
+            return (SAS_results(obj1, self.sas, objname))
+        else:
+            Print("Error in code submission")
         if self.sas.nosub:
            print(code)
            return (SAS_results([], self, objname, True))
@@ -124,14 +263,30 @@ class SAS_stat:
         except Exception:
             obj1=[]
         return (SAS_results(obj1, self, objname))
-
-
-
     def glm(self, **kwargs):
-        objtype='glm'
-        objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
-        logger.debug("GLM macro submission: " + str(code))
+        required_set={'model'}
+        legal_set={'absorb','by','class','contrast','estimate','freq','id',
+                   'lsmeans','manova','means', 'model','random','repeated',
+                   'test','weight'}
+
+        data=kwargs.pop('data',None)
+        logger.debug("kwargs type: " + str(type(kwargs)))
+        chk= self._stmt_check(required_set, legal_set,kwargs)
+        if chk:
+            objtype='glm'
+            objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
+            code=self._makeProccallMacro(objtype, objname, kwargs)
+            logger.debug("GLM macro submission: " + str(code))
+            self.sas._asubmit(code,"text")
+            try:
+                obj1=self._objectmethods(objname)
+                logger.debug(obj1)
+            except Exception:
+                obj1=[]
+
+            return (SAS_results(obj1, self.sas, objname))
+        else:
+            Print("Error in code submission")
 
         if self.sas.nosub:
            print(code)
@@ -144,12 +299,39 @@ class SAS_stat:
         except Exception:
             obj1=[]
         return (SAS_results(obj1, self, objname))
-
     def logistic(self, **kwargs):
-        objtype='logistic'
-        objname='log'+self.sas._objcnt() #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
-        logger.debug("LOGISTIC macro submission: " + str(code))
+
+        required_set={'model'}
+        '''
+        The PROC LOGISTIC and MODEL statements are required. 
+        The CLASS and EFFECT statements (if specified) must 
+        precede the MODEL statement, and the CONTRAST, EXACT, 
+        and ROC statements (if specified) must follow the MODEL 
+        statement.
+        '''
+        legal_set={'by','class','contrast','effect','effectplot','estimate',
+                   'exact','freq','lsmeans','oddsratio','roc','score','slice',
+                   'store','strata','units','weight'}
+
+        data=kwargs.pop('data',None)
+        logger.debug("kwargs type: " + str(type(kwargs)))
+        chk= self._stmt_check(required_set, legal_set,kwargs)
+        if chk:
+            objtype='logistic'
+            objname='log'+self.sas._objcnt() #translate to a libname so needs to be less than 8
+            code=self._makeProccallMacro(objtype, objname, kwargs)
+            logger.debug("LOGISTIC macro submission: " + str(code))
+            self.sas._asubmit(code,"text")
+            try:
+                obj1=self._objectmethods(objname)
+                logger.debug(obj1)
+            except Exception:
+                obj1=[]
+
+            return (SAS_results(obj1, self.sas, objname))
+        else:
+            Print("Error in code submission")
+
 
         if self.sas.nosub:
            print(code)
