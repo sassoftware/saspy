@@ -138,32 +138,51 @@ class SAS_ets:
         logger.debug("Proc code submission: " + str(code))
         return (code)
     
+    def _stmt_check(req,legal,stmt):
+        #required statements
+        req_set=req
+        if (len(req_set)):
+            missing_set=req_set.difference(set(stmt.keys()))
+            if missing_set:
+                print ("You are missing %d required statements:" % (len(missing_set)))
+                print (missing_set)
+                return False
+
+        #legal statments
+        legal_set=legal
+        data=kwargs.pop('data',None)
+        if (len(legal_set)):
+            extra_set=set(stmt.keys()).difference(legal_set)
+            if extra_set:
+                print ("The following %d statements are invalid and will be ignored: "% len(extra_set))
+                for key in range(0,len(extra_set)):
+                    print (key)
+                    kwargs.pop(extra_set.pop())
+        return True
+
     def timeseries(self, **kwargs):
         '''Python method to call the TIMESERIES procedure
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_overview.htm
         '''
+        required_set={}
+        legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar'}
         data=kwargs.pop('data',None)
-        #required statements
-        req_stmt=[]
+        chk= _stmt_check(required_set,legal_set,kwargs)
+        if chk:
+            objtype='timeseries'
+            objname='ts1'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
+            code=self._makeProccallMacro(objtype, objname, data, kwargs)
+            logger.debug("TIMESERIES macro submission: " + str(code))
+            self.sas._asubmit(code,"text")
+            try:
+                obj1=self._objectmethods(objname)
+                logger.debug(obj1)
+            except Exception:
+                obj1=[]
 
-        #legal statments
-        # by, corr, crosscorr, decomp, id, season, trend, var, crossvar
-        legal_stmt=[ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar']
-
-
-        objtype='timeseries'
-        objname='ts1'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, data, kwargs)
-        #logger.debug("Code type: " + type(code))
-        logger.debug("TIMESERIES macro submission: " + str(code))
-        self.sas._asubmit(code,"text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]
-
-        return (SAS_results(obj1, self.sas, objname))
+            return (SAS_results(obj1, self.sas, objname))
+        else:
+            Print("Error in code submission")
 
     def arima(self, **kwargs):
         '''Python method to call the ARIMA procedure
