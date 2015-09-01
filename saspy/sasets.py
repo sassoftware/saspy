@@ -164,7 +164,7 @@ class SAS_ets:
         '''Python method to call the TIMESERIES procedure
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_overview.htm
         '''
-        required_set={}
+        required_set={'id'}
         legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar'}
         data=kwargs.pop('data',None)
         chk= _stmt_check(required_set,legal_set,kwargs)
