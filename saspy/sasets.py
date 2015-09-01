@@ -139,6 +139,10 @@ class SAS_ets:
         return (code)
     
     def _stmt_check(req,legal,stmt):
+        '''
+        Method checks submitted statments and removes and ignores invalid statements. 
+        If required statements are missing it stops the operation and reports error.
+        '''
         #required statements
         req_set=req
         if (len(req_set)):
@@ -188,6 +192,10 @@ class SAS_ets:
         '''Python method to call the ARIMA procedure
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_overview.htm
         '''
+        required_set={'identify'}
+        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast'}
+        data=kwargs.pop('data',None)
+        chk= _stmt_check(required_set,legal_set,kwargs)
         objtype='arima'
         objname='arm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
@@ -204,6 +212,12 @@ class SAS_ets:
         '''Python method to call the UCM procedure
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_overview.htm
         '''
+        required_set={'model'}
+        legal_set={ 'autoreg','blockseason','by','cycle','deplag','estimate','forecast','id','irregular'
+                    'level','model','nloptions','performance','outlier','randomreg','season','slope'
+                    'splinereg','splineseason'}
+        data=kwargs.pop('data',None)
+        chk= _stmt_check(required_set,legal_set,kwargs)
         objtype='ucm'
         objname='ucm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
@@ -220,6 +234,10 @@ class SAS_ets:
         '''Python method to call the ESM procedure
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_overview.htm
         '''
+        required_set={''}
+        legal_set={ 'by', 'id', 'forecast'}
+        data=kwargs.pop('data',None)
+        chk= _stmt_check(required_set,legal_set,kwargs)
         objtype='esm'
         objname='esm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
@@ -235,6 +253,10 @@ class SAS_ets:
         '''Python method to call the TIMEID procedure
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_overview.htm
         '''
+        required_set={''}
+        legal_set={ 'by', 'id'}
+        data=kwargs.pop('data',None)
+        chk= _stmt_check(required_set,legal_set,kwargs)
         objtype='tid'
         objname='tid'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
@@ -251,6 +273,10 @@ class SAS_ets:
         '''Python method to call the TIMEDATA procedure
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_overview.htm
         '''
+        required_set={''}
+        legal_set={ 'by', 'id', 'fcmport','outarrays','outscalars', 'var', 'prog_stmts'}
+        data=kwargs.pop('data',None)
+        chk= _stmt_check(required_set,legal_set,kwargs)
         objtype='tda'
         objname='tda'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
         code=self._makeProccallMacro(objtype, objname, kwargs)
