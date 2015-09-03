@@ -50,7 +50,7 @@ class SAS_session:
       fcntl.fcntl(self.saspid.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.saspid.stderr,fcntl. F_SETFL, os.O_NONBLOCK)
      
-      self.submit("options svgtitle='svgtitle'; options validvarname=any; options pagesize=max;", "text")
+      self.submit("options svgtitle='svgtitle'; options validvarname=any; options pagesize=max; ods graphics on;", "text")
         
       return self.saspid.pid
    
