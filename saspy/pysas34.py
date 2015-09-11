@@ -175,11 +175,7 @@ class SAS_session:
       fcntl.fcntl(self.sasprocess.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.sasprocess.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
      
-<<<<<<< HEAD
-      self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
-=======
       self.submit("options svgtitle='svgtitle'; options validvarname=any; options pagesize=max; ods graphics on;", "text")
->>>>>>> 36a337f77c6678fb1175b0596d67c67bab3e60c8
         
       return self.sasprocess.pid
    
@@ -392,7 +388,6 @@ class SAS_session:
    def submit(self, code, results="html"):
       #import pdb; pdb.set_trace()
    
-      #odsopen = b"ods listing close;ods html5 file=stdout options(svg_mode='inline');               ods graphics on / outputfmt=svg;\n"
       odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods html5 close;ods listing;\n"
       ods      = True;
