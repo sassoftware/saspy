@@ -175,7 +175,11 @@ class SAS_session:
       fcntl.fcntl(self.sasprocess.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.sasprocess.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
      
+<<<<<<< HEAD
       self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
+=======
+      self.submit("options svgtitle='svgtitle'; options validvarname=any; options pagesize=max; ods graphics on;", "text")
+>>>>>>> 36a337f77c6678fb1175b0596d67c67bab3e60c8
         
       return self.sasprocess.pid
    
