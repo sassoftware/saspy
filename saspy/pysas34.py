@@ -4,7 +4,16 @@ import subprocess, fcntl, os, signal
 #from IPython.display import HTML
 from saspy.sasstat import *
 from saspy.sasets  import *
+#import pty, termios
 
+
+class sasprocess():
+   
+   def __init__(self):
+      self.pid    = None
+      self.stdin  = None
+      self.stderr = None
+      self.stdout = None
 
 
 class SAS_session:
@@ -12,7 +21,7 @@ class SAS_session:
    def __init__(self, path="/opt/sasinside/SASHome"):
       #import pdb; pdb.set_trace()
 
-      self.saspid   = None
+      self.sasprocess   = sasprocess()
       self._obj_cnt = 0
       self._log_cnt = 0
       self._log     = ""
@@ -22,9 +31,9 @@ class SAS_session:
    def __del__(self):
       #import pdb; pdb.set_trace()
 
-      if self.saspid:
+      if self.sasprocess.pid:
          self._endsas()
-      self.saspid = None
+      self.sasprocess.pid = None
 
    def _objcnt(self):
        self._obj_cnt += 1
@@ -34,65 +43,236 @@ class SAS_session:
        self._log_cnt += 1
        return '%08d' % self._log_cnt
 
-   def _startsas(self, path="/opt/sasinside/SASHome"):
+   def _startsas_fork(self, path="/opt/sasinside/SASHome"):
+      #import pdb; pdb.set_trace()
    
-      if self.saspid:
-         return self.saspid.pid
+      if self.sasprocess.pid:
+         return self.sasprocess.pid
+   
+      p      = path+"/SASFoundation/9.4/sas"
+      parms  = [path+"/SASFoundation/9.4/sas"]
+      parms += ["-set", "TKPATH", path+"/SASFoundation/9.4/sasexe:"+path+"/SASFoundation/9.4/utilities/bin"]
+      parms += ["-set", "SASROOT", path+"/SASFoundation/9.4"]
+      parms += ["-set", "SASHOME", path]
+      parms += ["-pagesize", "MAX"]
+      parms += ["-nodms"]
+      parms += ["-stdio"]
+      parms += ["-terminal"]
+      parms += ["-nosyntaxcheck"]
+      parms += ['']
+   
+      #parms  = [path+"/sas"]
+      #parms += ["-set", "TKPATH", path+":"+path+"/utilities/bin"]
+      #parms += ["-set", "SASROOT", path+""]
+      #parms += ["-set", "SASHOME", path]
+      #parms += ["-pagesize", "MAX"]
+      #parms += ["-nodms"]
+      #parms += ["-stdio"]
+      #parms += ["-terminal"]
+      #parms += ["-nosyntaxcheck"]
+      
+      PIPE_READ  = 0
+      PIPE_WRITE = 1
+      
+      pin  = os.pipe() 
+      pout = os.pipe()
+      perr = os.pipe() 
+      
+      pidpty = os.forkpty()
+      if pidpty[0]:
+         # we are the parent
+         #print("Parent. Child pid="+str(pidpty[0])+'. pty fd='+str(pidpty[1]))  
+
+         pid = pidpty[0]
+         os.close(pin[PIPE_READ])
+         os.close(pout[PIPE_WRITE]) 
+         os.close(perr[PIPE_WRITE]) 
+
+      else:
+         # we are the child
+
+         #for i in range(1,signal.NSIG):
+         #   print('SIG'+str(i)+'='+str(signal.getsignal(i)))
+         #   #signal.signal(i, signal.SIG_DFL)
+
+         signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+         os.close(0)
+         os.close(1)
+         os.close(2)
+
+         os.dup2(pin[PIPE_READ],   0)
+         os.dup2(pout[PIPE_WRITE], 1)
+         os.dup2(perr[PIPE_WRITE], 2)
+
+         os.close(pin[PIPE_READ])
+         os.close(pin[PIPE_WRITE])
+         os.close(pout[PIPE_READ])
+         os.close(pout[PIPE_WRITE]) 
+         os.close(perr[PIPE_READ])
+         os.close(perr[PIPE_WRITE]) 
+
+         os.execv(p, parms)
+         #sys.exit(0)
+
+      #sleep(5)
+      self.sasprocess.pid    = pidpty[0]
+      self.sasprocess.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
+      self.sasprocess.stderr = os.fdopen(perr[PIPE_READ], mode='rb')
+      self.sasprocess.stdout = os.fdopen(pout[PIPE_READ], mode='rb')
+
+      fcntl.fcntl(self.sasprocess.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
+      fcntl.fcntl(self.sasprocess.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
+     
+      self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
+        
+      return self.sasprocess.pid
+
+   def _startsas(self, path="/opt/sasinside/SASHome"):
+      #import pdb; pdb.set_trace()
+
+      return self._startsas_fork(path)
+
+      if self.sasprocess.pid:
+         return self.sasprocess.pid
    
       parms  = [path+"/SASFoundation/9.4/sas"]
       parms += ["-set", "TKPATH", path+"/SASFoundation/9.4/sasexe:"+path+"/SASFoundation/9.4/utilities/bin"]
       parms += ["-set", "SASROOT", path+"/SASFoundation/9.4"]
       parms += ["-set", "SASHOME", path]
       parms += ["-pagesize", "MAX"]
+      parms += ["-nodms"]
       parms += ["-stdio"]
+      #parms += ["-SYSIN", "__STDIN__"]
+      #parms += ["-PRINT", "__STDOUT__"]
+      #parms += ["-LOG",   "__STDERR__"]
+      parms += ["-terminal"]
+      parms += ["-nosyntaxcheck"]
    
-      self.saspid = subprocess.Popen(parms, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-      fcntl.fcntl(self.saspid.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
-      fcntl.fcntl(self.saspid.stderr,fcntl. F_SETFL, os.O_NONBLOCK)
+      #parms  = [path+"/sas"]
+      #parms += ["-set", "TKPATH", path+":"+path+"/utilities/bin"]
+      #parms += ["-set", "SASROOT", path+""]
+      #parms += ["-set", "SASHOME", path]
+      #parms += ["-pagesize", "MAX"]
+      #parms += ["-nodms"]
+      #parms += ["-stdio"]
+      #parms += ["-terminal"]
+      #parms += ["-nosyntaxcheck"]
+      
+      self.popenstruct = subprocess.Popen(parms, start_new_session=False, preexec_fn=self._pty(), restore_signals=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+      #parms  = '/opt/sasinside/SASHome/sas -set TKPATH /opt/sasinside/SASHome/sasexe:/opt/sasinside/SASHome/utilities/bin '
+      #parms += ' -set SASROOT /opt/sasinside/SASHome -set SASHOME /opt/sasinside/SASHome -pagesize MAX - SYSIN __STDIN__ -PRINT __STDOUT__ -LOG __STDERR__ -nodms -terminal -nosyntaxcheck '
+      #parms  = '/sasgen/dev/mva-v940m3/SAS/laxnd/sas -verify_paths -set SASROOT /sasgen/dev/mva-v940m3/SAS/laxnd -config /sasgen/dev/mva-v940m3/SAS/laxnd/sasv9.cfg '
+      #parms += ' -config /sasgen/dev/mva-v940m3/SAS/laxnd/nls/en/sasv9.cfg -helphost d72275.na.sas.com'
+      #popenstruct = subprocess.Popen(parms,  shell=False, start_new_session=False, restore_signals=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+      self.sasprocess.pid    = popenstruct.pid   
+      self.sasprocess.stdin  = popenstruct.stdin 
+      self.sasprocess.stderr = popenstruct.stderr
+      self.sasprocess.stdout = popenstruct.stdout
+
+      fcntl.fcntl(self.sasprocess.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
+      fcntl.fcntl(self.sasprocess.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
      
-      self.submit("options svgtitle='svgtitle'; options validvarname=any; options pagesize=max;", "text")
+      self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
         
-      return self.saspid.pid
+      return self.sasprocess.pid
    
-   def _break(self, response="1\nY"):
+   def _break(self, inlst=''):
       #import pdb; pdb.set_trace()
-      self.saspid.send_signal(signal.SIGINT)
-      lst = self.saspid.stdout.read1(4096)
+      found = False
+      lst = inlst
 
-      lsts = lst.decode().rpartition('Select:')
-      if lsts[0] != '' and lsts[1] != '':
-         opt = lsts[2].partition('Cancel Submitted Statements')
-         if opt[0] != '' and opt[1] != '':
-            response = opt[0].rpartition('.')[0].rpartition(' ')[2]
+      interupt = signal.SIGINT
+      #print('new session True, restore signals True  -   Signaling pid='+str(self.sasprocess.pid)+' with signal='+str(interupt))
+      #self.popenstruct.send_signal(signal.SIGINT)
+      os.kill(self.sasprocess.pid, interupt)
+      sleep(.25)
+      self._asubmit('','text')
+      #print('1st estae lst='+lst[0:50]+'...'+lst[len(lst)-50:len(lst)])
+
+      while True:
+         if len(lst) >  0:
+            lsts = lst.rpartition('Select:')
+            if lsts[0] != '' and lsts[1] != '':
+               found = True
+               print('Processing interupt\nAttn handler Query is\n\n'+lsts[1]+lsts[2].rsplit('\n?')[0]+'\n')
+               opt = lsts[2].partition('Cancel Submitted Statements')
+               if opt[0] != '' and opt[1] != '':
+                  response = opt[0].rpartition('.')[0].rpartition(' ')[2]
+               else:
+                  opt = lsts[2].partition('Halt DATA')
+                  if opt[0] != '' and opt[1] != '':
+                     response = opt[0].rpartition('.')[0].rpartition(' ')[2]
+                  else:
+                     opt = lsts[2].partition('Cancel the dialog')
+                     if opt[0] != '' and opt[1] != '':
+                        response = opt[0].rpartition('.')[0].rpartition(' ')[2]
+                     else:
+                        print("Unknown 'Select' choices found: ")
+                        response = ''
+   
+               print("'Select' Response="+response+'\n')
+               self._asubmit(response+'\n','text')
+            else:
+               lsts = lst.rpartition('Press')
+               if lsts[0] != '' and lsts[1] != '':
+                  print('Seconday Query is:\n\n'+lsts[1]+lsts[2].rsplit('\n?')[0]+'\n')
+                  opt = lsts[2].partition(' to exit ')
+                  if opt[0] != '' and opt[1] != '':
+                     response = opt[0].rpartition(' ')[2]
+                  else:
+                     opt = lsts[2].partition('N to continue')
+                     if opt[0] != '' and opt[1] != '':
+                        response = 'Y'
+                     else:
+                        response = 'X'
+
+                  print("'Press' Response="+response+'\n')
+                  self._asubmit(response+'\n','text')
+               else:
+                  #print("******************No 'Select' or 'Press' found in lst=")
+                  pass
+
+            sleep(.25)
+            lst = self.sasprocess.stdout.read1(4096).decode()
+            #print('Post-Sel/Press estae lst='+lst)
          else:
-            opt = lsts[2].partition('Cancel the dialog')
-            if opt[0] != '' and opt[1] != '':
-               response = opt[0].rpartition('.')[0].rpartition(' ')[2]
-            
+            log = self.sasprocess.stderr.read1(4096).decode()
+            self._log += log
+ 
+            if log.count("\ntom was here"+('%08d' % self._log_cnt)) >= 1:
+               print("******************Found end of step. No interupt processed")
+               found = True
 
-      self._asubmit(response,'text')
-      lst = self.saspid.stdout.read1(4096)
+            #print("no lst log ="+log)
+            if found:
+               ll = self.submit('ods html5 close;ods listing close;ods listing;libname work list;\n','text')
+               #print(ll['LST'])
+               #print(ll['LOG'])
+               break
 
-      lsts = lst.decode().rpartition('Press')
-      if lsts[0] != '' and lsts[1] != '':
-         self._asubmit('Y','text')
-      else:
-         lsts = lst.decode().rpartition('Invalid response,')
-         if lsts[0] != '' and lsts[1] != '':
-            self._asubmit('1\nY','text')
-         else:
-            self._asubmit('','text')
+            sleep(.25)
+            lst = self.sasprocess.stdout.read1(4096).decode()
+
+      return log
 
    def _endsas(self):
       rc = 0
-      if self.saspid:
+      if self.sasprocess.pid:
          code = b";*\';*\";*/;\n;quit;endsas;\n"
          self._getlog(1)
-         self.saspid.stdin.write(code)
-         self.saspid.stdin.flush()
-         rc = self.saspid.wait(10)
-         #self.saspid.send_signal(signal.SIGKILL)
-         self.saspid = None
+         self.sasprocess.stdin.write(code)
+         self.sasprocess.stdin.flush()
+         sleep(1)
+         try:
+            #rc = self.popenstruct.wait(5)
+            rc = os.waitid(os.P_PID, self.sasprocess.pid, os.WEXITED | os.WNOHANG)
+         except (subprocess.TimeoutExpired):
+            print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+            os.kill(self.sasprocess.pid, signal.SIGKILL)
+         self.sasprocess.pid = None
       return rc
 
 
@@ -107,7 +287,7 @@ class SAS_session:
 
       #self._asubmit(code, "text")
       while True:
-         log = self.saspid.stderr.read1(4096)
+         log = self.sasprocess.stderr.read1(4096)
          if len(log) > 0:
             logf += log
          else:
@@ -120,16 +300,6 @@ class SAS_session:
       self._log += x
       return x
 
-      #      eof = logf.find(codeb)
-      #
-      #      if (eof != -1):
-      #         final = logf.partition(code.encode())
-      #         z = final[0].decode().rpartition(chr(10))
-      #         break
-      #
-      #self._log += logf.decode()
-      #return z[0]
-
    def _getlst(self, wait=5):
       #import pdb; pdb.set_trace()
    
@@ -139,10 +309,8 @@ class SAS_session:
       bof = False
       lenf = 0
    
-      #self._getlog()
-
       while True:
-         lst = self.saspid.stdout.read1(4096)
+         lst = self.sasprocess.stdout.read1(4096)
          if len(lst) > 0:
             lstf += lst
                              
@@ -175,7 +343,7 @@ class SAS_session:
       self._asubmit("data _null_;file print;put 'Tom was here';run;", "text")
    
       while True:
-         lst = self.saspid.stdout.read1(4096)
+         lst = self.sasprocess.stdout.read1(4096)
          if len(lst) > 0:
             lstf += lst
    
@@ -186,11 +354,6 @@ class SAS_session:
                final = lstf.partition(b"Tom was here")
                f2 = final[0].decode().rpartition(chr(12))
                break
-         #else:
-         #   quit -= 1
-         #   if quit < 0:
-         #      break
-         #   sleep(0.5)
 
       lst = f2[0]
       return lst.replace(chr(12), '\n')
@@ -204,19 +367,18 @@ class SAS_session:
       odsclose = b"ods html5 close;ods listing;\n"
       ods      = True;
       htm      = "html HTML"
-      mj       = b";*\';*\";*/;\n"
       if (htm.find(results) < 0):
          ods = False
    
       if (ods):
-         self.saspid.stdin.write(odsopen)
+         self.sasprocess.stdin.write(odsopen)
    
-      out = self.saspid.stdin.write(code.encode()+b'\n')
+      out = self.sasprocess.stdin.write(code.encode()+b'\n')
    
       if (ods):
-         self.saspid.stdin.write(odsclose)
+         self.sasprocess.stdin.write(odsclose)
 
-      self.saspid.stdin.flush()
+      self.sasprocess.stdin.flush()
 
       return out
 
@@ -250,36 +412,45 @@ class SAS_session:
          ods = False
    
       if (ods):
-         self.saspid.stdin.write(odsopen)
+         self.sasprocess.stdin.write(odsopen)
    
-      out = self.saspid.stdin.write(mj+code.encode()+mj)
+      out = self.sasprocess.stdin.write(mj+code.encode()+mj)
    
       if (ods):
-         self.saspid.stdin.write(odsclose)
+         self.sasprocess.stdin.write(odsclose)
 
-      out = self.saspid.stdin.write(b'\n'+logcode.encode()+b'\n')
+      out = self.sasprocess.stdin.write(b'\n'+logcode.encode()+b'\n')
 
-      self.saspid.stdin.flush()
+      self.sasprocess.stdin.flush()
 
+      try:
+         while True:
+            if quit:
+               eof -= 1
+            if eof < 0:
+               break
+            lst = self.sasprocess.stdout.read1(4096)
+            if len(lst) > 0:
+            #if lst != None:
+               lstf += lst
+               #print("=====================LST==============\n"+lst.decode()+"\n\n\n\n")
+            else:
+               log = self.sasprocess.stderr.read1(4096)
+               if len(log) > 0:
+               #if log != None:
+                  logf += log
+                  #print("=====================LOG==============\n"+log.decode()+"\n\n\n\n")
+                  if logf.count(logcodeb) >= 1:
+                     quit = True
 
-      while True:
-         if quit:
-            eof -= 1
-         if eof < 0:
-            break
-         lst = self.saspid.stdout.read1(4096)
-         if len(lst) > 0:
-         #if lst != None:
-            lstf += lst
-            #print("=====================LST==============\n"+lst.decode()+"\n\n\n\n")
-         else:
-            log = self.saspid.stderr.read1(4096)
-            if len(log) > 0:
-            #if log != None:
-               logf += log
-               #print("=====================LOG==============\n"+log.decode()+"\n\n\n\n")
-               if logf.count(logcodeb) >= 1:
-                  quit = True
+      except (KeyboardInterrupt, SystemExit):
+         print('Exception caught!\n')
+         #print('Current lst='+((lstf+lst).decode())[0:100])
+         #print('Current log='+logf.decode())
+         logr = self._break((lstf+lst).decode())
+         print('Exception handled :)\n')
+         return dict(LOG=logr, LST='')
+
 
       final = logf.partition(logcode.encode())
       z = final[0].decode().rpartition(chr(10))
@@ -299,10 +470,6 @@ class SAS_session:
       code += libref+"."+table+"');\n" 
       code += "te='TABLE_EXISTS='; put te e;run;"
    
-      #self._getlog(1)
-      #self._submit(code, "text")
-      #log = self._getlog()
-
       nosub = self.nosub
       self.nosub = False
       ll = self.submit(code, "text")
@@ -520,9 +687,9 @@ class SAS_session:
    
 class SAS_data:
 
-    def __init__(self, sas, libref, table, out="HTML"):
+    def __init__(self, sassession, libref, table, out="HTML"):
 
-        self.sas =  sas
+        self.sas =  sassession
 
         failed = 0
         if out == "HTML" or out == 'html':
@@ -544,7 +711,7 @@ class SAS_data:
     def __flushlst__(self):
         lst = b'hi'
         while(len(lst) > 0):
-           lst = self.sas.saspid.stdout.read1(4096)
+           lst = self.sas.sasprocess.stdout.read1(4096)
            continue
 
     def set_out(self, out):
