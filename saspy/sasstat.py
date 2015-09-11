@@ -148,6 +148,27 @@ class SAS_stat:
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
         logger.debug("Proc code submission: " + str(code))
         return (code)
+        
+    def _stmt_check(self, req:set ,legal:set,stmt:dict):
+        #required statements
+        req_set=req
+        if (len(req_set)):
+            missing_set=req_set.difference(set(stmt.keys()))
+            if missing_set:
+                print ("You are missing %d required statements:" % (len(missing_set)))
+                print (missing_set)
+                return False
+
+        #legal statments
+        legal_set=legal
+        if (len(legal_set)):
+            extra_set=set(stmt.keys()).difference(legal_set)
+            if extra_set:
+                print ("The following %d statements are invalid and will be ignored: "% len(extra_set))
+                for key in range(0,len(extra_set)):
+                    print (key)
+                    kwargs.pop(extra_set.pop())
+        return True
 
 
     def hpsplit(self, **kwargs):
