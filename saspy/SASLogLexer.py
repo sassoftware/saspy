@@ -11,8 +11,7 @@ class SASLogStyle(Style):
         Comment:                '#0000FF',
         Keyword:                'bold #ff0000',
         Name:                   '#008000',
-        String:                 'bg:#eee #111',
-        Text:                   'bg:#eee #111'
+        String:                 '#111'
     }
 
 class SASLogLexer(RegexLexer):
