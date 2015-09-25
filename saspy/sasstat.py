@@ -32,7 +32,7 @@ class SAS_stat:
         logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
-    def _makeProccallMacro(self,objtype,objname,kwargs):
+    def _makeProccallMacro(self,objtype,objname,data=None, args=''):
         code  = "%macro proccall(d);\n"
         code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
         logger.debug("args value: " + str(args))
@@ -51,9 +51,9 @@ class SAS_stat:
         if 'by' in args:
             logger.debug("by statement,length: %s,%s", args['by'], len(args['by']))
             code += "by %s;\n" % (args['by'])
-        if 'class' in args:
-            logger.debug("class statement,length: %s,%s", args['class'], len(args['class']))
-            code += "class %s;\n" % (args['class'])
+        if 'cls' in args:
+            logger.debug("class statement,length: %s,%s", args['cls'], len(args['cls']))
+            code += "class %s;\n" % (args['cls'])
         #contrast moved
         if 'effect' in args:
             logger.debug("effect statement,length: %s,%s", args['effect'], len(args['effect']))
@@ -186,7 +186,7 @@ class SAS_stat:
         if chk:
             objtype='hpsplit'
             objname='hps'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, kwargs)
+            code=self._makeProccallMacro(objtype, objname, data, kwargs)
             logger.debug("HPSPLIT macro submission: " + str(code))
             self.sas._asubmit(code,"text")
             try:
@@ -225,7 +225,7 @@ class SAS_stat:
         if chk:
             objtype='reg'
             objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, kwargs)
+            code=self._makeProccallMacro(objtype, objname, data, kwargs)
             logger.debug("REG macro submission: " + str(code))
             self.sas._asubmit(code,"text")
             try:
@@ -251,7 +251,7 @@ class SAS_stat:
         return (SAS_results(obj1, self, objname))
     def mixed(self, **kwargs):
         required_set={'model'}
-        legal_set={'by','class','code','contrast','estimate','id',
+        legal_set={'by','cls','code','contrast','estimate','id',
                    'lsmeans','model','random','repeated',
                    'slice','weight'}
 
@@ -261,7 +261,7 @@ class SAS_stat:
         if chk:
             objtype='mixed'
             objname='mix'+self.sas._objcnt()
-            code=self._makeProccallMacro(objtype, objname, kwargs)
+            code=self._makeProccallMacro(objtype, objname, data, kwargs)
             logger.debug("Mixed Macro submission: " + str(code))
             self.sas._asubmit(code,"text")
             try:
@@ -296,7 +296,7 @@ class SAS_stat:
         if chk:
             objtype='glm'
             objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, kwargs)
+            code=self._makeProccallMacro(objtype, objname, data, kwargs)
             logger.debug("GLM macro submission: " + str(code))
             self.sas._asubmit(code,"text")
             try:
@@ -340,7 +340,7 @@ class SAS_stat:
         if chk:
             objtype='logistic'
             objname='log'+self.sas._objcnt() #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, kwargs)
+            code=self._makeProccallMacro(objtype, objname, data, kwargs)
             logger.debug("LOGISTIC macro submission: " + str(code))
             self.sas._asubmit(code,"text")
             try:
@@ -370,11 +370,11 @@ from collections import namedtuple
 
 class SAS_results(object):
     '''Return results from a SAS Model object'''
-    def __init__(self,attrs, stat, objname, nosub=False):
+    def __init__(self,attrs, session, objname, nosub=False):
 
         self._attrs = attrs
         self._name  = objname
-        self.sas    = stat.sas
+        self.sas    = session
         self.nosub  = nosub
 
     def __dir__(self):
