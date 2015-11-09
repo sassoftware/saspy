@@ -157,6 +157,11 @@ class SAS_ets:
         return (code)
     
     def _stmt_check(self, req:set ,legal:set,stmt:dict):
+        # debug the argument list
+        if (logging.getLogger().getEffectiveLevel()==10):
+            for k,v in stmt.items():
+                print ("Key: " +k+", Value: " + v)
+        
         #required statements
         req_set=req
         if (len(req_set)):
@@ -169,7 +174,7 @@ class SAS_ets:
         #legal statments
         legal_set=legal
         if (len(legal_set)):
-            extra_set=set(stmt.keys()).difference(legal_set)
+            extra_set=set(stmt.keys()).difference(legal_set|req_set)
             if extra_set:
                 print ("The following %d statements are invalid and will be ignored: "% len(extra_set))
                 for key in range(0,len(extra_set)):
