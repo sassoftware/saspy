@@ -150,6 +150,10 @@ class SAS_stat:
         return (code)
         
     def _stmt_check(self, req:set ,legal:set,stmt:dict):
+        # debug the argument list
+        if (logging.getLogger().getEffectiveLevel()==10):
+            for k,v in stmt.items():
+                print ("Key: " +k+", Value: " + v)
         #required statements
         req_set=req
         if (len(req_set)):
@@ -162,12 +166,12 @@ class SAS_stat:
         #legal statments
         legal_set=legal
         if (len(legal_set)):
-            extra_set=set(stmt.keys()).difference(legal_set)
+            extra_set=set(stmt.keys()).difference(legal_set|req_set) # find keys not in legal or required sets
             if extra_set:
                 print ("The following %d statements are invalid and will be ignored: "% len(extra_set))
                 for key in range(0,len(extra_set)):
                     print (key)
-                    kwargs.pop(extra_set.pop())
+                    stmt.pop(extra_set.pop())
         return True
 
 
@@ -177,8 +181,8 @@ class SAS_stat:
         Documentation link: 
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_overview.htm
         '''
-        required_set={'id'}
-        legal_set={'class','code','grow','id','model',
+        required_set={}
+        legal_set={'cls','code','grow','id','model',
                    'partition','performance','prune','rules'}
         data=kwargs.pop('data',None)
         logger.debug("kwargs type: " + str(type(kwargs)))
@@ -286,7 +290,7 @@ class SAS_stat:
         return (SAS_results(obj1, self, objname))
     def glm(self, **kwargs):
         required_set={'model'}
-        legal_set={'absorb','by','class','contrast','estimate','freq','id',
+        legal_set={'absorb','by','cls','contrast','estimate','freq','id',
                    'lsmeans','manova','means', 'model','random','repeated',
                    'test','weight'}
 
@@ -330,13 +334,14 @@ class SAS_stat:
         and ROC statements (if specified) must follow the MODEL 
         statement.
         '''
-        legal_set={'by','class','contrast','effect','effectplot','estimate',
+        legal_set={'by','cls','contrast','effect','effectplot','estimate',
                    'exact','freq','lsmeans','oddsratio','roc','score','slice',
                    'store','strata','units','weight'}
 
         data=kwargs.pop('data',None)
         logger.debug("kwargs type: " + str(type(kwargs)))
         chk= self._stmt_check(required_set, legal_set,kwargs)
+        logger.debug("chk value: " + str(chk))
         if chk:
             objtype='logistic'
             objname='log'+self.sas._objcnt() #translate to a libname so needs to be less than 8
