@@ -201,7 +201,7 @@ class SAS_stat:
 
             return (SAS_results(obj1, self.sas, objname))
         else:
-            Print("Error in code submission")
+            print("Error in code submission")
 
 
         if self.sas.nosub:
@@ -240,7 +240,7 @@ class SAS_stat:
 
             return (SAS_results(obj1, self.sas, objname))
         else:
-            Print("Error in code submission")
+            print("Error in code submission")
 
         if self.sas.nosub:
            print(code)
@@ -276,7 +276,7 @@ class SAS_stat:
 
             return (SAS_results(obj1, self.sas, objname))
         else:
-            Print("Error in code submission")
+            print("Error in code submission")
         if self.sas.nosub:
            print(code)
            return (SAS_results([], self, objname, True))
@@ -311,7 +311,7 @@ class SAS_stat:
 
             return (SAS_results(obj1, self.sas, objname))
         else:
-            Print("Error in code submission")
+            print("Error in code submission")
 
         if self.sas.nosub:
            print(code)
@@ -356,7 +356,7 @@ class SAS_stat:
 
             return (SAS_results(obj1, self.sas, objname))
         else:
-            Print("Error in code submission")
+            print("Error in code submission")
 
 
         if self.sas.nosub:
