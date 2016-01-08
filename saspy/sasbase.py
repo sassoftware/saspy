@@ -31,7 +31,7 @@ class sasprocess():
 
 class SAS_session:
    
-   def __init__(self, path="/opt/sasinside/SASHome"):
+   def __init__(self, path="/opt/sasinside/SASHome", version="9.4"):
       #import pdb; pdb.set_trace()
 
       self.sasprocess   = sasprocess()
@@ -122,7 +122,7 @@ class SAS_session:
         
       return self.sasprocess.pid
 
-   def _startsas(self, path="/opt/sasinside/SASHome"):
+   def _startsas(self, path="/opt/sasinside/SASHome", version="9.4"):
       #import pdb; pdb.set_trace()
 
       return self._startsas_fork(path)
