@@ -16,7 +16,7 @@ class sasprocess():
 
 class SAS_session:
    
-   def __init__(self, path="/opt/sasinside/SASHome"):
+   def __init__(self, path="/opt/sasinside/SASHome", version="9.4"):
       #import pdb; pdb.set_trace()
 
       self.sasprocess   = sasprocess()
@@ -42,10 +42,11 @@ class SAS_session:
 
    def _startsas_fork(self, path="/opt/sasinside/SASHome", version='9.4'):
       #import pdb; pdb.set_trace()
+      print ("in _startsas_fork ", path, version)
    
       if self.sasprocess.pid:
          return self.sasprocess.pid
-
+      p  = [path+"/SASFoundation/"+ version +"/sas"]
       parms  = [path+"/SASFoundation/"+ version +"/sas"]
       parms += ["-set", "TKPATH", path+"/SASFoundation/"+ version +"/sasexe:"+path+"/SASFoundation/"+ version +"/utilities/bin"]
       parms += ["-set", "SASROOT", path+"/SASFoundation/"+ version]
@@ -55,6 +56,8 @@ class SAS_session:
       parms += ["-stdio"]
       parms += ["-terminal"]
       parms += ["-nosyntaxcheck"]
+
+      print (" ".join(parms))
       
       PIPE_READ  = 0
       PIPE_WRITE = 1
@@ -99,18 +102,22 @@ class SAS_session:
       self.sasprocess.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
       self.sasprocess.stderr = os.fdopen(perr[PIPE_READ], mode='rb')
       self.sasprocess.stdout = os.fdopen(pout[PIPE_READ], mode='rb')
+      print ("self.sasprocess info",self.sasprocess.pid,self.sasprocess.stdin,self.sasprocess.stderr,self.sasprocess.stdout)
 
       fcntl.fcntl(self.sasprocess.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.sasprocess.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
-     
+      
+      print ("just before self.submit")
       self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
+      print ("just after self.submit")
         
       return self.sasprocess.pid
 
-   def _startsas(self, path="/opt/sasinside/SASHome"):
+   def _startsas(self, path="/opt/sasinside/SASHome", version="9.4"):
       #import pdb; pdb.set_trace()
+      print ("in _startsas " , path , version)
 
-      return self._startsas_fork(path)
+      return self._startsas_fork(path, version)
 
       if self.sasprocess.pid:
          return self.sasprocess.pid
@@ -333,6 +340,7 @@ class SAS_session:
 
    def submit(self, code, results="html"):
       #import pdb; pdb.set_trace()
+      print ("in submit function: ", code)
    
       odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods html5 close;ods listing;\n"
@@ -367,6 +375,7 @@ class SAS_session:
       out = self.sasprocess.stdin.write(b'\n'+logcode.encode()+b'\n')
 
       self.sasprocess.stdin.flush()
+      print ("just before try block in submit", ods, out)
 
       try:
          while True:
@@ -375,6 +384,7 @@ class SAS_session:
             if eof < 0:
                break
             lst = self.sasprocess.stdout.read1(4096)
+            #print ("In try block", quit, eof, lst, len(lst))
             if len(lst) > 0:
                lstf += lst
             else:
@@ -389,7 +399,7 @@ class SAS_session:
          logr = self._break((lstf+lst).decode())
          print('Exception handled :)\n')
          return dict(LOG=logr, LST='')
-
+      print ("after try block in submit")
 
       final = logf.partition(logcode.encode())
       z = final[0].decode().rpartition(chr(10))
