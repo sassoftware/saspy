@@ -42,11 +42,10 @@ class SAS_session:
 
    def _startsas_fork(self, path="/opt/sasinside/SASHome", version='9.4'):
       #import pdb; pdb.set_trace()
-      print ("in _startsas_fork ", path, version)
    
       if self.sasprocess.pid:
          return self.sasprocess.pid
-      p  = [path+"/SASFoundation/"+ version +"/sas"]
+      p  = path+"/SASFoundation/"+ version +"/sas"
       parms  = [path+"/SASFoundation/"+ version +"/sas"]
       parms += ["-set", "TKPATH", path+"/SASFoundation/"+ version +"/sasexe:"+path+"/SASFoundation/"+ version +"/utilities/bin"]
       parms += ["-set", "SASROOT", path+"/SASFoundation/"+ version]
@@ -56,8 +55,8 @@ class SAS_session:
       parms += ["-stdio"]
       parms += ["-terminal"]
       parms += ["-nosyntaxcheck"]
+      parms += ['']
 
-      print (" ".join(parms))
       
       PIPE_READ  = 0
       PIPE_WRITE = 1
@@ -102,20 +101,16 @@ class SAS_session:
       self.sasprocess.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
       self.sasprocess.stderr = os.fdopen(perr[PIPE_READ], mode='rb')
       self.sasprocess.stdout = os.fdopen(pout[PIPE_READ], mode='rb')
-      print ("self.sasprocess info",self.sasprocess.pid,self.sasprocess.stdin,self.sasprocess.stderr,self.sasprocess.stdout)
 
       fcntl.fcntl(self.sasprocess.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.sasprocess.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
       
-      print ("just before self.submit")
       self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
-      print ("just after self.submit")
         
       return self.sasprocess.pid
 
    def _startsas(self, path="/opt/sasinside/SASHome", version="9.4"):
       #import pdb; pdb.set_trace()
-      print ("in _startsas " , path , version)
 
       return self._startsas_fork(path, version)
 
