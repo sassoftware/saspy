@@ -335,8 +335,7 @@ class SAS_session:
 
    def submit(self, code, results="html"):
       #import pdb; pdb.set_trace()
-      print ("in submit function: ", code)
-   
+      
       odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods html5 close;ods listing;\n"
       ods      = True;
@@ -370,7 +369,6 @@ class SAS_session:
       out = self.sasprocess.stdin.write(b'\n'+logcode.encode()+b'\n')
 
       self.sasprocess.stdin.flush()
-      print ("just before try block in submit", ods, out)
 
       try:
          while True:
@@ -379,7 +377,6 @@ class SAS_session:
             if eof < 0:
                break
             lst = self.sasprocess.stdout.read1(4096)
-            #print ("In try block", quit, eof, lst, len(lst))
             if len(lst) > 0:
                lstf += lst
             else:
@@ -394,7 +391,6 @@ class SAS_session:
          logr = self._break((lstf+lst).decode())
          print('Exception handled :)\n')
          return dict(LOG=logr, LST='')
-      print ("after try block in submit")
 
       final = logf.partition(logcode.encode())
       z = final[0].decode().rpartition(chr(10))
