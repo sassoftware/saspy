@@ -13,7 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from distutils.core import setup
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 from distutils.command.install import install
 from distutils import log
 import json
@@ -34,13 +38,13 @@ setup(name='saspy',
       long_description=readme,
       author='Jared Dean',
       author_email='jared.dean@sas.com',
-      #url='https://github.com/takluyver/bash_kernel',
       packages=['saspy'],
       cmdclass={},
       install_requires=[],
       classifiers = [
       #    'License :: OSI Approved :: BSD License',
-      #    'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: SAS    :: 9'
       #    'Topic :: System :: Shells',
       ]
 )
