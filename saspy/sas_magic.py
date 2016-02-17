@@ -134,13 +134,13 @@ class SASMagic(ipym.Magics):
         if len(elog)==0 and len(output)>lst_len: #no error and LST output
             return HTML(output)
         elif len(elog)==0 and len(output)<=lst_len: #no error and no LST
-            color_log=highlight(log,SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>",title="SAS Log"))
+            color_log=highlight(log,SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
             return HTML(color_log)
         elif len(elog)>0 and len(output)<=lst_len: #error and no LST
-            color_log=highlight(log,SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>",title="SAS Log"))
+            color_log=highlight(log,SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
             return HTML(color_log)
         else: #errors and LST
-            color_log=highlight(log,SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>",title="SAS Log"))
+            color_log=highlight(log,SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
             return HTML(color_log+output)
 
     def _clean_output(self,output):
