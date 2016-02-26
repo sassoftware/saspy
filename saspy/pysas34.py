@@ -183,6 +183,8 @@ class SAS_session:
    def _getlog(self, wait=5):
       logf   = b''
       quit   = wait * 2
+      logn   = '%08d' % self._log_cnt
+      code1  = "%put E3969440A681A24088859985"+logn+";\nE3969440A681A24088859985"+logn
 
       while True:
          log = self.sasprocess.stderr.read1(4096)
@@ -194,7 +196,7 @@ class SAS_session:
                break
             sleep(0.5)
    
-      x = logf.decode()
+      x = logf.decode().replace(code1, " ")
       self._log += x
       return x
 
@@ -285,8 +287,9 @@ class SAS_session:
       eof = 5
 
       logn     = self._logcnt()
-      logcode  = "%put tom was here"+logn+";"
-      logcodeb = ("\ntom was here"+logn).encode()
+      logcode  = "%put E3969440A681A24088859985"+logn+";"
+      logcodeb = ("\nE3969440A681A24088859985"+logn).encode()
+      code1  = "%put E3969440A681A24088859985"+logn+";\nE3969440A681A24088859985"+logn
 
 
       if (htm.find(results) < 0):
@@ -339,7 +342,7 @@ class SAS_session:
       logd = z[0]
       lstd = lstf.decode().replace(chr(12), chr(10))
  
-      self._log += logf.decode()
+      self._log += logf.decode().replace(code1, " ")
 
       return dict(LOG=logd, LST=lstd)
 
