@@ -11,7 +11,7 @@ from IPython.display import HTML
 
 class SAS_context:
    
-   def __init__(self, context='', Kernel='', user='', pw='', ip='', port=80):
+   def __init__(self, context='', Kernel=None, user='', pw='', ip='', port=80):
       #import pdb; pdb.set_trace()
 
       self.ip       = ip
@@ -111,7 +111,7 @@ class SAS_context:
                    
 class SAS_session:
    
-   def __init__(self, context='', Kernel='', user='', pw='', ip='', port=80):
+   def __init__(self, context='', Kernel=None, user='', pw='', ip='', port=80):
       #import pdb; pdb.set_trace()
 
       self.sascontext  = SAS_context(context, Kernel, user, pw, ip, port)
