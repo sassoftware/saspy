@@ -11,7 +11,7 @@ from IPython.display import HTML
 
 class SAS_context:
    
-   def __init__(self, user='', pw='', context='', ip='', port=80, Kernel=None):
+   def __init__(self, context='', Kernel='', user='', pw='', ip='', port=80):
       #import pdb; pdb.set_trace()
 
       self.ip       = ip
@@ -54,8 +54,6 @@ class SAS_context:
       while context not in self.contexts:
          context = self._prompt("Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are:"+str(self.contexts))
       self.set_context(context)
-
-      return
 
    def _prompt(self, prompt, pw=False):
       if self._kernel == None:
@@ -113,16 +111,15 @@ class SAS_context:
                    
 class SAS_session:
    
-   def __init__(self, user='', pw='', context='', ip='', port=80, Kernel=None):
+   def __init__(self, context='', Kernel='', user='', pw='', ip='', port=80):
       #import pdb; pdb.set_trace()
 
-      self.nosub       = False
+      self.sascontext  = SAS_context(user, pw, context, ip, port, Kernel)
       self._obj_cnt    = 0
       self._log        = ""
+      self.nosub       = False
       self._sessionid  = None
-      self.sascontext  = SAS_context(user, pw, context, ip, port, Kernel)
-
-      self._startsas()
+      self._startsas(self.sascontext)
 
    def __del__(self):
       #import pdb; pdb.set_trace()
@@ -135,7 +132,7 @@ class SAS_session:
        self._obj_cnt += 1
        return '%04d' % self._obj_cnt
                                                                
-   def _startsas(self):
+   def _startsas(self, context):
       #import pdb; pdb.set_trace()
      
       # POST Session
@@ -157,7 +154,7 @@ class SAS_session:
       
       self._log = self._getlog()
           
-      results = self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
+      self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
       print("SAS server started using Context "+self.sascontext.name+" with SESSION_ID="+self._sessionid)       
    
    def _endsas(self):
@@ -311,9 +308,6 @@ class SAS_session:
 
       return jobid
 
-   def teach_me_SAS(self, nosub):
-      self.nosub = nosub
-
    def submit(self, code, results="html"):
       #import pdb; pdb.set_trace()
    
@@ -378,6 +372,9 @@ class SAS_session:
       return dict(LOG=logd, LST=lstd)
 
    
+   def teach_me_SAS(self, nosub):
+      self.nosub = nosub
+
    def exist(self, table, libref="work"):
       #import pdb; pdb.set_trace()
 
@@ -395,7 +392,6 @@ class SAS_session:
       exists = int(l2[0])
    
       return exists
-   
    
    def sasstat(self):
        return SAS_stat(self)
@@ -511,13 +507,8 @@ class SAS_session:
       code += "do i = 1 to nvars; var = varname(d, i); put var; end;\n"
       code += "put vt;\n"
       code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
-      #code += "put vf;\n"
-      #code += "do i = 1 to nvars; var = varfmt(d, i); put var; end;\n"
       code += "run;"
    
-      #self._getlog(1)
-      #self._submit(code, "text")
-      #log = self._getlog()
       ll = self.submit(code, "text")
    
       l2 = ll['LOG'].rpartition("LRECL= ")
@@ -537,19 +528,12 @@ class SAS_session:
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
    
-      #l2 = l2[2].partition("VARFMT=")
-      #l2 = l2[2].partition("\n")
-      #varfmt = l2[2].split("\n", nvars)
-      #del varfmt[nvars]
    
       code  = "data _null_; set "+sd.libref+"."+sd.table+"(obs=1);put 'FMT_CATS=';\n"
       for i in range(len(varlist)):
-         #code += "_tom = fmtinfo(vformatn('"+varlist[i]+"'n), 'cat'); put _tom;\n"
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;\n"
    
-      #self._submit(code, "text")
-      #log = self._getlog()
       ll = self.submit(code, "text")
 
       l2 = ll['LOG'].rpartition("FMT_CATS=")
@@ -562,12 +546,10 @@ class SAS_session:
       port = sock.getsockname()[1]
    
       code  = ""
-      #code  = "data _null_; x = sleep(1,1);run;\n"
       code += "filename sock socket ':"+str(port)+"' lrecl=32767 recfm=v termstr=LF;\n"
       code += " data _null_; set "+sd.libref+"."+sd.table+";\n file sock; put "
       for i in range(len(varlist)):
          code += "'"+varlist[i]+"'n "
-         #if vartype[i] == 'N' and varcat[i] in ('num', 'curr', 'binary'):
          if vartype[i] == 'N' and varcat[i] not in sas_dtdt_fmts:
             code += 'best32. '
          if i < (len(varlist)-1):
