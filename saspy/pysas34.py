@@ -4,7 +4,7 @@ import json
 import getpass
 
 from time import sleep
-from saspy.sasstathttp import *
+from saspy.sasstat import *
 #from saspy.sasets  import *
 from IPython.display import HTML
 
