@@ -1,5 +1,6 @@
 from pygments import highlight
 from pygments.lexer import RegexLexer
+from pygments.formatters import HtmlFormatter
 from pygments.token import *
 from pygments.style import Style
 
