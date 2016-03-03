@@ -114,7 +114,7 @@ class SAS_session:
    def __init__(self, context='', Kernel='', user='', pw='', ip='', port=80):
       #import pdb; pdb.set_trace()
 
-      self.sascontext  = SAS_context(user, pw, context, ip, port, Kernel)
+      self.sascontext  = SAS_context(context, Kernel, user, pw, ip, port)
       self._obj_cnt    = 0
       self._log        = ""
       self.nosub       = False
