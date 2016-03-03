@@ -28,8 +28,8 @@ class SASLogLexer(RegexLexer):
             (r'^\S+.*$',Keyword.Multiline,'#pop')
         ],
         'note': [
-            (r'^\s+.[\s\S]*',Comment.Multiline),
-            (r'^\S+.[\s\S]*',Comment.Multiline,'#pop')
+            (r'^\s+.*$',Comment.Multiline),
+            (r'^\S+.*$',Comment.Multiline,'#pop')
         ],
         'warning': [
             (r'^\s+.*$',Name.Multiline),
