@@ -46,8 +46,6 @@ class SAS_context:
          context = self._prompt("Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are:"+str(self.contexts))
       self.set_context(context)
 
-      return
-
    def _prompt(self, prompt, pw=False):
       if self._kernel == None:
          if pw == False:
@@ -69,9 +67,7 @@ class SAS_context:
       if context in self.contexts:
          self.name = context
       else:
-         print("context name provided is not in the list of contexts")
-         for i in range(len(self.contexts)):
-            print(self.contexts[i])
+         print("context name provided is not in the list of contexts:"+str(self.contexts))
 
                    
 class SAS_session:
@@ -288,7 +284,7 @@ class SAS_session:
       rc = 0
       if self.pid:
          code = b";*\';*\";*/;\n;quit;endsas;\n"
-         self._getlog(1)
+         self._getlog(wait=1)
          self.stdin.write(code)
          self.stdin.flush()
          sleep(1)
@@ -300,7 +296,7 @@ class SAS_session:
          self.pid = None
       return rc
 
-   def _getlog(self, wait=5):
+   def _getlog(self, wait=5, jobid=None):
       logf   = b''
       quit   = wait * 2
       logn   = self._logcnt(False)
@@ -320,7 +316,7 @@ class SAS_session:
       self._log += x
       return x
 
-   def _getlst(self, wait=5):
+   def _getlst(self, wait=5, jobid=None):
       lstf = b''
       quit = wait * 2
       eof = 0
@@ -351,7 +347,7 @@ class SAS_session:
    
       return lstf.decode()
    
-   def _getlsttxt(self, wait=5):
+   def _getlsttxt(self, wait=5, jobid=None):
       f2 = [None]
       lstf = b''
       quit = wait * 2
@@ -392,7 +388,7 @@ class SAS_session:
 
       self.stdin.flush()
 
-      return out
+      return str(out)
 
    def submit(self, code, results="html"):
       odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
