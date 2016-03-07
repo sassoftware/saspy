@@ -17,6 +17,7 @@ from __future__ import print_function
 from IPython.display import HTML, display
 import IPython.core.magic as ipym
 import re
+import os
 from pygments import highlight
 from saspy.SASLogLexer import *
 
@@ -29,8 +30,15 @@ class SASMagic(ipym.Magics):
     def __init__(self,shell):
         super(SASMagic,self).__init__(shell)
         import saspy as saspy
+        executable = os.environ.get('SAS_EXECUTABLE', 'sas')
+        if executable=='sas':
+            executable='/opt/sasinside/SASHome/SASFoundation/9.4/sas'
+        e2=executable.split('/')
+        self._path='/'.join(e2[0:e2.index('SASHome')+1])
+        self._version=e2[e2.index('SASFoundation')+1]
         self.mva=saspy.SAS_session()
-        self.mva._startsas()#path=self._path, version=self._version)
+        self.mva._startsas(path=self._path, version=self._version)
+
 
             
     @ipym.cell_magic
