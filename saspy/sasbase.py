@@ -15,37 +15,43 @@
 #
 from time import sleep
 import subprocess, fcntl, os, signal
-import sasctx as ctx
+import saspy.sascfg as sascfg
 
-class SAS_context:
+class SAS_config:
    
-   def __init__(self, context='', Kernel=None):
+   def __init__(self, cfgname='', Kernel=None):
       #import pdb; pdb.set_trace()
 
-      self.name     = context
-      self.contexts = []
+      self.name     = cfgname
+      self.configs  = []
       self._kernel  = Kernel
-      self.path     = "/opt/sasinside/SASHome"
-      self.version  = "9.4"
+      self.path     = ""
+      self.version  = ""
       self.options  = ""
 
-      # GET Contexts 
-      self.contexts = self.get_contexts()
+      # GET Config
+      self.configs = getattr(sascfg, "SAS_config_names")
 
-      if len(context) == 0:
-         if len(self.contexts) == 0:
-            print("No Contexts were found")
+      if len(cfgname) == 0:
+         if len(self.configs) == 0:
+            print("No SAS Configuration names found in saspy.sascfg")
             return None
          else:
-            if len(self.contexts) == 1:
-               context = self.contexts[0]
-               print("Using SAS Context:"+context)
+            if len(self.configs) == 1:
+               cfgname = self.configs[0]
+               print("Using SAS Config named: "+cfgname)
             else:
-               context = self._prompt("Please enter the SAS Context you wish to run. Available contexts are:"+str(self.contexts)+" ")
+               cfgname = self._prompt("Please enter the name of the SAS Config you wish to run. Available Configs are: "+str(self.configs)+" ")
 
-      while context not in self.contexts:
-         context = self._prompt("Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are:"+str(self.contexts)+" ")
-      self.set_context(context)
+      while cfgname not in self.configs:
+         cfgname = self._prompt("The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: "+str(self.configs)+" ")
+
+      self.name    = cfgname
+      cfg          = getattr(sascfg, cfgname) 
+      self.path    = cfg.get('path','/opt/sasinside/SASHome')
+      self.ver     = cfg.get('version','9.4')
+      self.options = cfg.get('options','')
+
 
    def _prompt(self, prompt, pw=False):
       if self._kernel == None:
@@ -56,35 +62,20 @@ class SAS_context:
       else:
          return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header, password = pw)
 
-   def get_contexts(self):
-      #import pdb; pdb.set_trace()
-      contexts = []
-
-      contexts = getattr(ctx, "SAS_context_names")
-
-      return contexts
-
-   def set_context(self, context):
-      #import pdb; pdb.set_trace()
-
-      if context in self.contexts:
-         self.name = context
-      else:
-         print("context name provided is not in the list of contexts:"+str(self.contexts))
-
                    
 class SAS_session:
    
-   def __init__(self, context='', Kernel=None):
+   def __init__(self, cfgname='', Kernel=None):
       self.pid    = None
       self.stdin  = None
       self.stderr = None
       self.stdout = None
 
-      self.sascontext = SAS_context(context, Kernel)
+      self.sascfg   = SAS_config(cfgname, Kernel)
       self._log_cnt = 0
       self._log     = ""
-      self._startsas(self.sascontext)
+
+      self._startsas(self.sascfg)
 
    def __del__(self):
       if self.pid:
@@ -96,24 +87,17 @@ class SAS_session:
           self._log_cnt += 1
        return '%08d' % self._log_cnt
 
-   def _startsas(self, context):
+   def _startsas(self, sascfg):
       if self.pid:
          return self.pid
 
-      cx   = getattr(ctx, context.name) 
-      path = cx.get('path','/opt/sasinside/SASHome')
-      ver  = cx.get('version','9.4')
-
-      pv     = path+"/SASFoundation/"+ver
+      pv     = sascfg.path+"/SASFoundation/"+sascfg.ver
       pgm    = pv+"/sas"
       parms  = [pgm]
       parms += ["-set", "TKPATH" , pv+"/sasexe:"+pv+"/utilities/bin"]
       parms += ["-set", "SASROOT", pv]
       parms += ["-set", "SASHOME", pv]
-
-      if 'options' in cx:
-         parms += cx['options']
-
+      parms += sascfg.options
       parms += ["-pagesize", "MAX"]
       parms += ["-nodms"]
       parms += ["-stdio"]
@@ -185,13 +169,13 @@ class SAS_session:
             if lsts[0] != '' and lsts[1] != '':
                found = True
                print('Processing interupt\nAttn handler Query is\n\n'+lsts[1]+lsts[2].rsplit('\n?')[0]+'\n')
-               response = self.sascontext._prompt("Please enter your Response: ")
+               response = self.sascfg._prompt("Please enter your Response: ")
                self._asubmit(response+'\n','text')
             else:
                lsts = lst.rpartition('Press')
                if lsts[0] != '' and lsts[1] != '':
                   print('Seconday Query is:\n\n'+lsts[1]+lsts[2].rsplit('\n?')[0]+'\n')
-                  response = self.sascontext._prompt("Please enter your Response: ")
+                  response = self.sascfg._prompt("Please enter your Response: ")
                   self._asubmit(response+'\n','text')
                else:
                   #print("******************No 'Select' or 'Press' found in lst=")

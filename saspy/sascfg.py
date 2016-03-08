@@ -13,11 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-# Context names for SAS - python List
+# Configuration names for SAS - python List
 # 
-#SAS_context_names=['default', 'sasother']
+#SAS_config_names=['default', 'sasother']
 #
-SAS_context_names=['default']
+SAS_config_names=['default']
 
 
 
