@@ -15,7 +15,9 @@
 #
 # Context names for SAS - python List
 # 
-SAS_context_names=['default'] #, 'sas94', 'saswrong', 'tom1_http', 'stat_http']
+#SAS_context_names=['default', 'sasother']
+#
+SAS_context_names=['default']
 
 
 
@@ -32,32 +34,8 @@ default={'path'    : '/opt/sasinside/SASHome',
          'version' : '9.4'
          }
 
-#sas94={'path'    : '/opt/sasinside/SASHome',
-#       'options' : ["-autoexec", "/u/sastpw/tkpygit/metis/a.sas", "-set", "Env_var", "Value", "-fullstimer"], 
-#       'version' : '9.4',
-#       }
-
-#saswrong={'pathwrong'    : '/opt/sasine/SASHomey',
-#          'versionwrong' : '9.x'
+#sasother={'path'    : '/opt/sasinside/SASHome',
+#          'options' : ["-autoexec", "/u/sastpw/tkpygit/metis/a.sas", "-set", "Env_var", "Value", "-fullstimer"], 
+#          'version' : '9.4',
 #          }
-
-
-# Future
-# These need ip addr and port (which defaults to 80)  - python Dict
-# valid keys are:
-# 'ip'      - host address 
-# 'port'    - port
-# 'context' - context name defined on the compute service
-# 'options' - SAS options to include in the start up command line
-# 'user'    - not suggested
-# 'pw'      - really not suggested
-# 
-#
-             
-#tom1_http={'ip'      : 'tomspc',
-#          'port'    :  80,
-#          'context' : 'tom1'
-#          }
-
-#stat_http={'ip'     : 'tomspc'}
 

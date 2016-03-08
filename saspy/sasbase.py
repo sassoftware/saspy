@@ -15,6 +15,7 @@
 #
 from time import sleep
 import subprocess, fcntl, os, signal
+import sasctx as ctx
 
 class SAS_context:
    
@@ -40,10 +41,10 @@ class SAS_context:
                context = self.contexts[0]
                print("Using SAS Context:"+context)
             else:
-               context = self._prompt("Please enter the SAS Context you wish to run. Available contexts are:"+str(self.contexts))
+               context = self._prompt("Please enter the SAS Context you wish to run. Available contexts are:"+str(self.contexts)+" ")
 
       while context not in self.contexts:
-         context = self._prompt("Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are:"+str(self.contexts))
+         context = self._prompt("Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are:"+str(self.contexts)+" ")
       self.set_context(context)
 
    def _prompt(self, prompt, pw=False):
@@ -57,7 +58,9 @@ class SAS_context:
 
    def get_contexts(self):
       #import pdb; pdb.set_trace()
-      contexts = ['SASHome']
+      contexts = []
+
+      contexts = getattr(ctx, "SAS_context_names")
 
       return contexts
 
@@ -97,19 +100,26 @@ class SAS_session:
       if self.pid:
          return self.pid
 
-      pv     = context.path+"/SASFoundation/"+context.version
+      cx   = getattr(ctx, context.name) 
+      path = cx.get('path','/opt/sasinside/SASHome')
+      ver  = cx.get('version','9.4')
+
+      pv     = path+"/SASFoundation/"+ver
       pgm    = pv+"/sas"
       parms  = [pgm]
       parms += ["-set", "TKPATH" , pv+"/sasexe:"+pv+"/utilities/bin"]
       parms += ["-set", "SASROOT", pv]
       parms += ["-set", "SASHOME", pv]
+
+      if 'options' in cx:
+         parms += cx['options']
+
       parms += ["-pagesize", "MAX"]
       parms += ["-nodms"]
       parms += ["-stdio"]
       parms += ["-terminal"]
       parms += ["-nosyntaxcheck"]
       parms += ['']
-
       
       PIPE_READ  = 0
       PIPE_WRITE = 1
@@ -121,7 +131,6 @@ class SAS_session:
       pidpty = os.forkpty()
       if pidpty[0]:
          # we are the parent
-         
 
          pid = pidpty[0]
          os.close(pin[PIPE_READ])
