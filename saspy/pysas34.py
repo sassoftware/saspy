@@ -4,31 +4,62 @@ import json
 import getpass
 
 from time import sleep
+import saspy.sascfg as sascfg
 from saspy.sasstat import *
 #from saspy.sasets  import *
 from IPython.display import HTML
 
 
-class SAS_context:
+class SAS_config:
    
-   def __init__(self, context='', Kernel=None, user='', pw='', ip='', port=80):
+   def __init__(self, cfgname='', Kernel=None): #, user='', pw='', ip='',port=80, context=''):
       #import pdb; pdb.set_trace()
 
-      self.ip       = ip
-      self.port     = port
-      self.name     = context
-      self.contexts = []
-      self._token   = None
+      self.name     = cfgname
+      self.configs  = []
       self._kernel  = Kernel
+      self.ip       = ""
+      self.port     = ""
+      self.contexts = []
+      self.ctxname  = ""
+      self.options  = ""
+      self._token   = None
+
+      # GET Config
+      self.configs = getattr(sascfg, "SAS_config_names")
+
+      if len(cfgname) == 0:
+         if len(self.configs) == 0:
+            print("No SAS Configuration names found in saspy.sascfg")
+            return None
+         else:
+            if len(self.configs) == 1:
+               cfgname = self.configs[0]
+               print("Using SAS Config named: "+cfgname)
+            else:
+               cfgname = self._prompt("Please enter the name of the SAS Config you wish to run. Available Configs are: "+str(self.configs)+" ")
+
+      while cfgname not in self.configs:
+         cfgname = self._prompt("The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: "+str(self.contexts)+" ")
+
+      self.name    = cfgname
+      cfg          = getattr(sascfg, cfgname) 
+      self.ip      = cfg.get('ip', '')
+      self.port    = cfg.get('port', 80)
+      self.ctxname = cfg.get('context', '')
+      self.options = cfg.get('options', '')
+
+      user = cfg.get('user', '')
+      pw   = cfg.get('pw', '')
 
       while len(self.ip) == 0:
-         self.ip = self._prompt("Please enter the host (ip address) you are trying to connect to:")
+         self.ip = self._prompt("Please enter the host (ip address) you are trying to connect to: ")
 
       while len(user) == 0:
-         user = self._prompt("Please enter userid:")
+         user = self._prompt("Please enter userid: ")
 
       while len(pw) == 0:
-         pw = self._prompt("Please enter password:", pw = True)
+         pw = self._prompt("Please enter password: ", pw = True)
 
       # get AuthToken
       self._token = self._authenticate(user, pw)
@@ -40,20 +71,19 @@ class SAS_context:
       # GET Contexts 
       self.contexts = self.get_contexts()
 
-      if len(context) == 0:
+      if len(self.ctxname) == 0:
          if len(self.contexts) == 0:
-            print("No Contexts found on Compute Service")
+            print("No Contexts found on Compute Service at ip="+self.ip)
             return None
          else:
             if len(self.contexts) == 1:
-               context = self.contexts[0]
-               print("Using SAS Context:"+context)
+               self.ctxname = self.contexts[0]
+               print("Using SAS Context: "+self.ctxname)
             else:
-               context = self._prompt("Please enter the SAS Context you wish to run. Available contexts are:"+str(self.contexts))
+               self.ctxname = self._prompt("Please enter the SAS Context you wish to run. Available contexts are: "+str(self.contexts)+" ")
 
-      while context not in self.contexts:
-         context = self._prompt("Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are:"+str(self.contexts))
-      self.set_context(context)
+      while self.ctxname not in self.contexts:
+         self.ctxname = self._prompt("SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: "+str(self.contexts)+" ")
 
    def _prompt(self, prompt, pw=False):
       if self._kernel == None:
@@ -100,26 +130,19 @@ class SAS_context:
          
       return contexts
 
-   def set_context(self, context):
-      #import pdb; pdb.set_trace()
-
-      if context in self.contexts:
-         self.name = context
-      else:
-         print("context name provided is not in the list of contexts:"+str(self.contexts))
-
                    
 class SAS_session:
    
-   def __init__(self, context='', Kernel=None, user='', pw='', ip='', port=80):
+   def __init__(self, cfgname='', Kernel=None):
       #import pdb; pdb.set_trace()
 
-      self.sascontext  = SAS_context(context, Kernel, user, pw, ip, port)
-      self._obj_cnt    = 0
-      self._log        = ""
-      self.nosub       = False
-      self._sessionid  = None
-      self._startsas(self.sascontext)
+      self.sascfg     = SAS_config(cfgname, Kernel)
+      self._obj_cnt   = 0
+      self._log       = ""
+      self.nosub      = False
+      self._sessionid = None
+
+      self._startsas(self.sascfg)
 
    def __del__(self):
       #import pdb; pdb.set_trace()
@@ -132,39 +155,36 @@ class SAS_session:
        self._obj_cnt += 1
        return '%04d' % self._obj_cnt
                                                                
-   def _startsas(self, context):
+   def _startsas(self, config):
       #import pdb; pdb.set_trace()
      
       # POST Session
-      conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
-      d1 = '{"name":"Stat", "description":"Toms session", "version":1, "environment":{"options":["memsize=1G","encoding=utf8"]}}'
-      headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascontext._token}
-      conn.request('POST', "/compute/sessions?contextName="+self.sascontext.name, body=d1, headers=headers)
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      d1 = '{"name":self.sascfg.ctxname, "description":"pySAS session", "version":1, "environment":{"options":self.sascfg.options}}'
+      headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
+      conn.request('POST', "/compute/sessions?contextName="+self.sascfg.ctxname, body=d1, headers=headers)
       req = conn.getresponse()
       resp = req.read()
       j = json.loads(resp.decode())
       self._sessionid = j.get('id')
 
       if self._sessionid == None:
-         print("Could not acquire a SAS Session for context:"+self.sascontext.name+"\nValid contexts are:")
-         ctxs = self._get_contexts()
-         for i in range(len(ctxs)):
-            print(ctxs[i])
+         print("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
          return None
       
       self._log = self._getlog()
           
       self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
-      print("SAS server started using Context "+self.sascontext.name+" with SESSION_ID="+self._sessionid)       
+      print("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self._sessionid)       
    
    def _endsas(self):
       #import pdb; pdb.set_trace()
       rc = 0
       if self._sessionid:
          # DELETE Session
-         conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
-         d1 = '{"name":"Tom1", "description":"Toms session", "version":1, "environment":{"options":["memsize=1G","encoding=utf8"]}}'
-         headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascontext._token}
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         d1 = '{"name":self.sascfg.ctxname, "description":"pySAS session", "version":1, "environment":{"options":self.sascfg.options}}'
+         headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
          conn.request('DELETE', "/compute/sessions/"+self._sessionid, body=d1, headers=headers)
          req = conn.getresponse()
          resp = req.read()
@@ -181,8 +201,8 @@ class SAS_session:
 
       while True:
          # GET Log
-         conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
-         headers={"Accept":"application/vnd.sas.compute.logoutput+json", "Authorization":"Bearer "+self.sascontext._token}
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         headers={"Accept":"application/vnd.sas.compute.logoutput+json", "Authorization":"Bearer "+self.sascfg._token}
          if jobid:
             conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/log", headers=headers)
          else:
@@ -214,8 +234,8 @@ class SAS_session:
    
 
       # GET the list of results
-      conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
-      headers={"Accept":"application/json", "Authorization":"Bearer "+self.sascontext._token}
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      headers={"Accept":"application/json", "Authorization":"Bearer "+self.sascfg._token}
       if jobid:
          conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/results", headers=headers)
       else:
@@ -229,8 +249,8 @@ class SAS_session:
 
       for i in range(len(results)):
          # GET an ODS Result
-         conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
-         headers={"Accept":"application/json+html", "Authorization":"Bearer "+self.sascontext._token}
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         headers={"Accept":"application/json+html", "Authorization":"Bearer "+self.sascfg._token}
          conn.request('GET', results[i], headers=headers)
          req = conn.getresponse()
          resp = req.read()
@@ -245,8 +265,8 @@ class SAS_session:
    
       while True:
          # GET Log
-         conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
-         headers={"Accept":"application/vnd.sas.compute.listoutput+json", "Authorization":"Bearer "+self.sascontext._token}
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         headers={"Accept":"application/vnd.sas.compute.listoutput+json", "Authorization":"Bearer "+self.sascfg._token}
          if jobid:
             conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/listing", headers=headers)
          else:
@@ -283,10 +303,10 @@ class SAS_session:
          odsclose = '""'
    
       # POST Job
-      conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       jcode = json.dumps(code)
       d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
-      headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json","Authorization":"Bearer "+self.sascontext._token}
+      headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json","Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', "/compute/sessions/"+self._sessionid+"/jobs", body=d1, headers=headers)
       req = conn.getresponse()
       resp = req.read()
@@ -297,8 +317,8 @@ class SAS_session:
       quit = 0
       while True:
          # GET Status for JOB
-         conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
-         headers={"Accept":"text/plain", "Authorization":"Bearer "+self.sascontext._token}
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         headers={"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
          conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/state", headers=headers)
          req = conn.getresponse()
          resp = req.read()
@@ -328,10 +348,10 @@ class SAS_session:
          odsclose = '""'
    
       # POST Job
-      conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       jcode = json.dumps(code)
       d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
-      headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json","Authorization":"Bearer "+self.sascontext._token}
+      headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json","Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', "/compute/sessions/"+self._sessionid+"/jobs", body=d1, headers=headers)
       req = conn.getresponse()
       resp = req.read()
@@ -340,8 +360,8 @@ class SAS_session:
 
       while True:
          # GET Status for JOB
-         conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
-         headers={"Accept":"text/plain", "Authorization":"Bearer "+self.sascontext._token}
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         headers={"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
          conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/state", headers=headers)
          req = conn.getresponse()
          resp = req.read()
@@ -354,8 +374,8 @@ class SAS_session:
          import pdb; pdb.set_trace()
          jobid2 = jobid
          # GET Status for JOB
-         conn = hc.HTTPConnection(self.sascontext.ip, self.sascontext.port)
-         headers={"Accept":"text/plain", "Authorization":"Bearer "+self.sascontext._token}
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         headers={"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
          conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid2+"/state", headers=headers)
          req = conn.getresponse()
          resp = req.read()
