@@ -248,7 +248,6 @@ class SAS_session:
       logcodei = "%put E3969440A681A24088859985"+logn+";"
       logcodeo =    "\nE3969440A681A24088859985"+logn
 
-
       if (htm.find(results) < 0):
          ods = False
    
