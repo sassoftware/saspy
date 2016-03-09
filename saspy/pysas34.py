@@ -12,17 +12,16 @@ from IPython.display import HTML
 
 class SAS_config:
    
-   def __init__(self, cfgname='', Kernel=None): #, user='', pw='', ip='',port=80, context=''):
+   def __init__(self, cfgname='', Kernel=None, user='', pw='', ip='', port='', context='', options=''):
       #import pdb; pdb.set_trace()
 
-      self.name     = cfgname
       self.configs  = []
       self._kernel  = Kernel
-      self.ip       = ""
-      self.port     = ""
+      self.ip       = ip
+      self.port     = port
       self.contexts = []
-      self.ctxname  = ""
-      self.options  = ""
+      self.ctxname  = context
+      self.options  = options
       self._token   = None
 
       # GET Config
@@ -35,22 +34,28 @@ class SAS_config:
          else:
             if len(self.configs) == 1:
                cfgname = self.configs[0]
-               print("Using SAS Config named: "+cfgname)
+               if Kernel == None:
+                  print("Using SAS Config named: "+cfgname)
             else:
                cfgname = self._prompt("Please enter the name of the SAS Config you wish to run. Available Configs are: "+str(self.configs)+" ")
 
       while cfgname not in self.configs:
          cfgname = self._prompt("The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: "+str(self.contexts)+" ")
 
-      self.name    = cfgname
-      cfg          = getattr(sascfg, cfgname) 
-      self.ip      = cfg.get('ip', '')
-      self.port    = cfg.get('port', 80)
-      self.ctxname = cfg.get('context', '')
-      self.options = cfg.get('options', '')
-
-      user = cfg.get('user', '')
-      pw   = cfg.get('pw', '')
+      self.name       = cfgname
+      cfg             = getattr(sascfg, cfgname) 
+      if len(ip)      == 0:
+         self.ip      = cfg.get('ip', '')
+      if len(port)    == 0:
+         self.port    = cfg.get('port', 80)
+      if len(context) == 0:
+         self.ctxname = cfg.get('context', '')
+      if len(options) == 0:
+         self.options = cfg.get('options', '')
+      if len(user)    == 0:
+         user         = cfg.get('user', '')
+      if len(pw)      == 0:
+         pw           = cfg.get('pw', '')
 
       while len(self.ip) == 0:
          self.ip = self._prompt("Please enter the host (ip address) you are trying to connect to: ")
@@ -133,10 +138,10 @@ class SAS_config:
                    
 class SAS_session:
    
-   def __init__(self, cfgname='', Kernel=None):
+   def __init__(self, cfgname='', Kernel=None, user='', pw='', ip='', port='', context='', options=''):
       #import pdb; pdb.set_trace()
 
-      self.sascfg     = SAS_config(cfgname, Kernel)
+      self.sascfg     = SAS_config(cfgname, Kernel, user, pw, ip, port, context, options)
       self._obj_cnt   = 0
       self._log       = ""
       self.nosub      = False
