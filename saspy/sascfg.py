@@ -22,20 +22,18 @@ SAS_config_names=['default']
 
 
 # These need path to SASHome and version number - python Dict
+# The default path to the sas start up script is: /opt/sasinside/SASHome/SASFoundation/9.4/sas
 # A usual install path is: /opt/sasinside/SASHome/SASFoundation/9.4/sas
 # valid keys are:
-# 'path'    - path to SASHome i.e.: /opt/sasinside/SASHome
-# 'version' - version number that is a subdirectory below SASHome subdirectories
+# 'saspath' - path to SAS startup script i.e.: /opt/sasinside/SASHome/SASFoundation/9.4/sas
 # 'options' - SAS options to include in the start up command line - Python List
 #
 #
 #
-default={'path'    : '/opt/sasinside/SASHome',
-         'version' : '9.4'
+default={'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
          }
 
-#sasother={'path'    : '/opt/sasinside/SASHome',
-#          'options' : ["-autoexec", "/u/sastpw/tkpygit/metis/a.sas", "-set", "Env_var", "Value", "-fullstimer"], 
-#          'version' : '9.4',
+#sasother={'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
+#          'options' : ["-autoexec", "/opt/sasinside/SASHome/my_autoexec.sas", "-set", "Env_var", "Value", "-fullstimer"], 
 #          }
 

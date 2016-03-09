@@ -19,15 +19,13 @@ import saspy.sascfg as sascfg
 
 class SAS_config:
    
-   def __init__(self, cfgname='', Kernel=None):
+   def __init__(self, cfgname='', Kernel=None, saspath='', options=''):
       #import pdb; pdb.set_trace()
 
-      self.name     = cfgname
       self.configs  = []
       self._kernel  = Kernel
-      self.path     = ""
-      self.version  = ""
-      self.options  = ""
+      self.saspath  = saspath
+      self.options  = options
 
       # GET Config
       self.configs = getattr(sascfg, "SAS_config_names")
@@ -46,12 +44,12 @@ class SAS_config:
       while cfgname not in self.configs:
          cfgname = self._prompt("The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: "+str(self.configs)+" ")
 
-      self.name    = cfgname
-      cfg          = getattr(sascfg, cfgname) 
-      self.path    = cfg.get('path','/opt/sasinside/SASHome')
-      self.ver     = cfg.get('version','9.4')
-      self.options = cfg.get('options','')
-
+      self.name       = cfgname
+      cfg             = getattr(sascfg, cfgname) 
+      if len(saspath) == 0:
+         self.saspath = cfg.get('saspath', '/opt/sasinside/SASHome/SASFoundation/9.4/sas')
+      if len(options) == 0:
+         self.options = cfg.get('options', '')
 
    def _prompt(self, prompt, pw=False):
       if self._kernel == None:
@@ -65,13 +63,13 @@ class SAS_config:
                    
 class SAS_session:
    
-   def __init__(self, cfgname='', Kernel=None):
+   def __init__(self, cfgname='', Kernel=None, saspath='', options=''):
       self.pid    = None
       self.stdin  = None
       self.stderr = None
       self.stdout = None
 
-      self.sascfg   = SAS_config(cfgname, Kernel)
+      self.sascfg   = SAS_config(cfgname, Kernel, saspath, options)
       self._log_cnt = 0
       self._log     = ""
 
@@ -91,12 +89,8 @@ class SAS_session:
       if self.pid:
          return self.pid
 
-      pv     = sascfg.path+"/SASFoundation/"+sascfg.ver
-      pgm    = pv+"/sas"
+      pgm    = sascfg.saspath
       parms  = [pgm]
-      parms += ["-set", "TKPATH" , pv+"/sasexe:"+pv+"/utilities/bin"]
-      parms += ["-set", "SASROOT", pv]
-      parms += ["-set", "SASHOME", pv]
       parms += sascfg.options
       parms += ["-pagesize", "MAX"]
       parms += ["-nodms"]
@@ -104,7 +98,7 @@ class SAS_session:
       parms += ["-terminal"]
       parms += ["-nosyntaxcheck"]
       parms += ['']
-      
+
       PIPE_READ  = 0
       PIPE_WRITE = 1
       
