@@ -37,7 +37,8 @@ class SAS_config:
          else:
             if len(self.configs) == 1:
                cfgname = self.configs[0]
-               print("Using SAS Config named: "+cfgname)
+               if Kernel == None:
+                  print("Using SAS Config named: "+cfgname)
             else:
                cfgname = self._prompt("Please enter the name of the SAS Config you wish to run. Available Configs are: "+str(self.configs)+" ")
 
