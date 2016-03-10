@@ -237,7 +237,7 @@ class SAS_session:
       odsclose = b"ods html5 close;ods listing;\n"
       ods      = True;
       htm      = "html HTML"
-      mj       = b";*\';*\";*/;\n"
+      mj       = b";*\';*\";*/;"
 
       lstf = b''
       logf = b''
@@ -254,7 +254,7 @@ class SAS_session:
       if (ods):
          self.stdin.write(odsopen)
    
-      out = self.stdin.write(mj+code.encode()+mj)
+      out = self.stdin.write(mj+b'\n'+code.encode()+b'\n'+mj)
    
       if (ods):
          self.stdin.write(odsclose)
@@ -289,7 +289,7 @@ class SAS_session:
       final = logf.partition(logcodei.encode())
       z = final[0].decode().rpartition(chr(10))
 
-      logd = z[0]
+      logd = z[0].replace(mj.decode(), '')
       lstd = lstf.decode().replace(chr(12), chr(10))
  
       self._log += logf.decode().replace(logcodei, " ").replace(logcodeo, " ")
