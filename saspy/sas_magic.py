@@ -49,9 +49,9 @@ class SASMagic(ipym.Magics):
             run;
         '''
         
-        res=self.mva.submit(cell,'html')
-        output=self._clean_output(res['LST'])
-        log=self._clean_log(res['LOG'])
+        res=self.mva.submit(cell)
+        output=res['LST']
+        log=res['LOG']
         dis=self._which_display(log,output)
         return dis
 
@@ -75,8 +75,8 @@ class SASMagic(ipym.Magics):
 
         '''
         res=self.mva.submit("proc iml; "+ self.code + " quit;")
-        output=_clean_output(res['LST'])
-        log=_clean_log(res['LOG'])
+        output=res['LST']
+        log=res['LOG']
         dis=_which_display(log,output)
         return line,dis
 
@@ -111,8 +111,8 @@ class SASMagic(ipym.Magics):
 
         '''
         res=self.mva.submit("proc optmodel; "+ self.code + " quit;")
-        output=_clean_output(res['LST'])
-        log=_clean_log(res['LOG'])
+        output=res['LST']
+        log=res['LOG']
         dis=_which_display(log,output)
         return dis
 
@@ -141,16 +141,6 @@ class SASMagic(ipym.Magics):
         else: #errors and LST
             color_log=highlight(log,SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
             return HTML(color_log+output)
-
-    def _clean_output(self,output):
-        output = output.replace('\\n', chr(10)).replace('\\r',chr(ord('\r'))).replace('\\t',chr(ord('\t'))).replace('\\f',chr(ord('\f')))
-        output=output[0:3].replace('\'',chr(00))+output[3:-4]+output[-4:].replace('\'',chr(00))
-        return output
-
-    def _clean_log(self,log):
-        log    = log.replace('\\n', chr(10)).replace('\\r',chr(ord('\r'))).replace('\\t',        chr(ord('\t'))).replace('\\f',chr(ord('\f')))
-        log=log[0:3].replace('\'',chr(00))+log[3:-4]+log[-4:].replace('\'',chr(00))
-        return log
 
 def load_ipython_extension(ipython):
     """Load the extension in Jupyter"""
