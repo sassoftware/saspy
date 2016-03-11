@@ -156,7 +156,7 @@ class SAS_session:
       interupt = signal.SIGINT
       os.kill(self.pid, interupt)
       sleep(.25)
-      self.stdin.write('\n')
+      self.stdin.write(b'\n')
       self.stdin.flush()
 
       while True:
@@ -166,17 +166,17 @@ class SAS_session:
                found = True
                print('Processing interupt\nAttn handler Query is\n\n'+lsts[1]+lsts[2].rsplit('\n?')[0]+'\n')
                response = self.sascfg._prompt("Please enter your Response: ")
-               self.stdin.write(response+'\n')
+               self.stdin.write(response.encode()+b'\n')
                self.stdin.flush()
             else:
                lsts = lst.rpartition('Press')
                if lsts[0] != '' and lsts[1] != '':
                   print('Seconday Query is:\n\n'+lsts[1]+lsts[2].rsplit('\n?')[0]+'\n')
                   response = self.sascfg._prompt("Please enter your Response: ")
-                  self.stdin.write(response+'\n')
+                  self.stdin.write(response.encode()+b'\n')
                   self.stdin.flush()
                else:
-                  print("******************No 'Select' or 'Press' found in lst=")
+                  #print("******************No 'Select' or 'Press' found in lst=")
                   pass
 
             sleep(.25)
@@ -263,7 +263,7 @@ class SAS_session:
                      quit = True
 
       except (KeyboardInterrupt, SystemExit):
-         print('Exception caught!\n(This may take a moment...)')
+         print('Exception caught!')
          logr = self._breakprompt((lstf+lst).decode())
          print('Exception handled :)\n')
          return dict(LOG=logr, LST='')
