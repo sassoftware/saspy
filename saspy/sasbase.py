@@ -156,7 +156,8 @@ class SAS_session:
       interupt = signal.SIGINT
       os.kill(self.pid, interupt)
       sleep(.25)
-      self._asubmit('','text')
+      self.stdin.write('\n')
+      self.stdin.flush()
 
       while True:
          if len(lst) >  0:
@@ -165,15 +166,17 @@ class SAS_session:
                found = True
                print('Processing interupt\nAttn handler Query is\n\n'+lsts[1]+lsts[2].rsplit('\n?')[0]+'\n')
                response = self.sascfg._prompt("Please enter your Response: ")
-               self._asubmit(response+'\n','text')
+               self.stdin.write(response+'\n')
+               self.stdin.flush()
             else:
                lsts = lst.rpartition('Press')
                if lsts[0] != '' and lsts[1] != '':
                   print('Seconday Query is:\n\n'+lsts[1]+lsts[2].rsplit('\n?')[0]+'\n')
                   response = self.sascfg._prompt("Please enter your Response: ")
-                  self._asubmit(response+'\n','text')
+                  self.stdin.write(response+'\n')
+                  self.stdin.flush()
                else:
-                  #print("******************No 'Select' or 'Press' found in lst=")
+                  print("******************No 'Select' or 'Press' found in lst=")
                   pass
 
             sleep(.25)
@@ -211,26 +214,6 @@ class SAS_session:
             os.kill(self.pid, signal.SIGKILL)
          self.pid = None
       return rc
-
-   def _asubmit(self, code, results="html"):
-      odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods html5 close;ods listing;\n"
-      ods      = True;
-      htm      = "html HTML"
-      if (htm.find(results) < 0):
-         ods = False
-   
-      if (ods):
-         self.stdin.write(odsopen)
-   
-      out = self.stdin.write(code.encode()+b'\n')
-   
-      if (ods):
-         self.stdin.write(odsclose)
-
-      self.stdin.flush()
-
-      return str(out)
 
    def submit(self, code, results="html"):
       odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
@@ -290,7 +273,7 @@ class SAS_session:
       z = final[0].decode().rpartition(chr(10))
 
       logd = z[0].replace(mj.decode(), '')
-      lstd = lstf.decode().replace(chr(12), chr(10))
+      lstd = lstf.decode().replace(chr(12), chr(10)).replace('<body class="c body">', '<body class="l body">').replace("font-size: x-small;", "font-size: normal;")
  
       self._log += logf.decode().replace(logcodei, " ").replace(logcodeo, " ")
 
