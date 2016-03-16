@@ -135,7 +135,10 @@ class SAS_session:
          os.close(perr[PIPE_READ])
          os.close(perr[PIPE_WRITE]) 
 
-         os.execv(pgm, parms)
+         try:
+            os.execv(pgm, parms)
+         except:
+            os._exit(-6)
 
       self.pid    = pidpty[0]
       self.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
@@ -144,7 +147,7 @@ class SAS_session:
 
       fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
-      
+
       self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
         
       return self.pid
@@ -152,6 +155,9 @@ class SAS_session:
    def _breakprompt(self, inlst=''):
       found = False
       lst = inlst
+
+      if self.pid == None:
+         return("No SAS process attached. SAS process has terminated unexpectedly.")
 
       interupt = signal.SIGINT
       os.kill(self.pid, interupt)
@@ -221,15 +227,21 @@ class SAS_session:
       ods      = True;
       htm      = "html HTML"
       mj       = b";*\';*\";*/;"
-
-      lstf = b''
-      logf = b''
-      quit = False
-      eof = 5
-
+      lstf     = b''
+      logf     = b''
+      quit     = False
+      eof      = 5
       logn     = self._logcnt()
       logcodei = "%put E3969440A681A24088859985"+logn+";"
       logcodeo =    "\nE3969440A681A24088859985"+logn
+
+      if self.pid == None:
+         return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
+
+      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+      if rc != None:
+         self.pid = None
+         return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
 
       if (htm.find(results) < 0):
          ods = False
@@ -248,6 +260,10 @@ class SAS_session:
 
       try:
          while True:
+            rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+            if rc != None:
+               self.pid = None
+               return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc)+'\n'+logf.decode()+'\n', LST='')
             if quit:
                eof -= 1
             if eof < 0:
@@ -267,13 +283,12 @@ class SAS_session:
          logr = self._breakprompt((lstf+lst).decode())
          print('Exception handled :)\n')
          return dict(LOG=logr, LST='')
-
-
+            
       final = logf.partition(logcodei.encode())
       z = final[0].decode().rpartition(chr(10))
 
       logd = z[0].replace(mj.decode(), '')
-      lstd = lstf.decode().replace(chr(12), chr(10)).replace('<body class="c body">', '<body class="l body">').replace("font-size: x-small;", "font-size: normal;")
+      lstd = lstf.decode().replace(chr(12), chr(10)).replace('<body class="c body">', '<body class="l body">').replace("font-size: x-small;", "font-size:  normal;")
  
       self._log += logf.decode().replace(logcodei, " ").replace(logcodeo, " ")
 
