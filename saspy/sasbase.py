@@ -27,7 +27,20 @@ class SAS_config:
       self.saspath  = saspath
       self.options  = options
 
-      # GET Config
+      # GET Config options
+      try:
+         self.cfgopts = getattr(sascfg, "SAS_config_options")
+      except:
+         self.cfgopts = {}
+      lock         = self.cfgopts.get('lock_down', True)
+      # in lock down mode, don't allow runtime overrides of option values from the config file.
+      if lock:
+         if len(saspath) > 0 or len(options) > 0:
+            print("Parameters passed to SAS_session were ignored due to configuration restriction.")
+         saspath=''
+         options=''
+
+      # GET Config names
       self.configs = getattr(sascfg, "SAS_config_names")
 
       if len(cfgname) == 0:
