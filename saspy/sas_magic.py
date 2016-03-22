@@ -14,12 +14,13 @@
 #  limitations under the License.
 #
 from __future__ import print_function
-from IPython.display import HTML, display
+from IPython.display import HTML
 import IPython.core.magic as ipym
 import re
-import os
-from pygments import highlight
 from saspy.SASLogLexer import *
+from pygments.formatters import HtmlFormatter
+from pygments import highlight
+
 
 @ipym.magics_class
 class SASMagic(ipym.Magics):
@@ -27,14 +28,14 @@ class SASMagic(ipym.Magics):
     All the SAS magic cells in a single notebook share a SAS session
     """
 
-    def __init__(self,shell):
-        super(SASMagic,self).__init__(shell)
+    def __init__(self, shell):
+        super(SASMagic, self).__init__(shell)
         import saspy as saspy
-        self.mva=saspy.SAS_session(Kernel=None)
-            
+        self.mva = saspy.SASsession(kernel=None)
+
     @ipym.cell_magic
-    def SAS(self,line,cell):
-        '''
+    def SAS(self, line, cell):
+        """
         %%SAS - send the code in the cell to a SAS Server
 
         This cell magic will execute the contents of the cell in a SAS
@@ -47,22 +48,22 @@ class SASMagic(ipym.Magics):
             data a;
                 set sashelp.cars;
             run;
-        '''
-        
-        res=self.mva.submit(cell)
-        output=res['LST']
-        log=res['LOG']
-        dis=self._which_display(log,output)
+        """
+
+        res = self.mva.submit(cell)
+        output = res['LST']
+        log = res['LOG']
+        dis = self._which_display(log, output)
         return dis
 
     @ipym.cell_magic
     def IML(self):
-        '''
+        """
         %%IML - send the code in the cell to a SAS Server
                 for processing by PROC IML
 
         This cell magic will execute the contents of the cell in a
-        PROC IML session and return any generated output. The leading 
+        PROC IML session and return any generated output. The leading
         PROC IML and trailing QUIT; are submitted automatically.
 
         Example:
@@ -73,21 +74,21 @@ class SASMagic(ipym.Magics):
            d=diag({1 2 4});
            e=diag({1 2, 3 4});
 
-        '''
-        res=self.mva.submit("proc iml; "+ self.code + " quit;")
-        output=res['LST']
-        log=res['LOG']
-        dis=_which_display(log,output)
-        return line,dis
+        """
+        res = self.mva.submit("proc iml; " + self.code + " quit;")
+        output = res['LST']
+        log = res['LOG']
+        dis = self._which_display(log, output)
+        return dis
 
     @ipym.cell_magic
     def OPTMODEL(self):
-        '''
+        """
         %%OPTMODEL - send the code in the cell to a SAS Server
                 for processing by PROC OPTMODEL
 
         This cell magic will execute the contents of the cell in a
-        PROC OPTMODEL session and return any generated output. The leading 
+        PROC OPTMODEL session and return any generated output. The leading
         PROC OPTMODEL and trailing QUIT; are submitted automatically.
 
         Example:
@@ -109,44 +110,45 @@ class SASMagic(ipym.Magics):
            print choco toffee;
         quit;
 
-        '''
-        res=self.mva.submit("proc optmodel; "+ self.code + " quit;")
-        output=res['LST']
-        log=res['LOG']
-        dis=_which_display(log,output)
+        """
+        res = self.mva.submit("proc optmodel; " + self.code + " quit;")
+        output = res['LST']
+        log = res['LOG']
+        dis = self._which_display(log, output)
         return dis
 
-    def _which_display(self,log,output):
-        lst_len=30762
-        lines=re.split(r'[\n]\s*',log)
-        i=0
-        elog=[]
-        debug1=0
+    @staticmethod
+    def _which_display(log, output):
+        lst_len = 30762
+        lines = re.split(r'[\n]\s*', log)
+        i = 0
+        elog = []
         for line in lines:
-            #logger.debug("In lines loop")
-            i+=1
-            e=[]
+            # logger.debug("In lines loop")
+            i += 1
+            e = []
             if line.startswith('ERROR'):
-                e=lines[(max(i-15,0)):(min(i+16,len(lines)))]
-            elog=elog+e
-        tlog='\n'.join(elog)
-        if len(elog)==0 and len(output)>lst_len: #no error and LST output
+                e = lines[(max(i - 15, 0)):(min(i + 16, len(lines)))]
+            elog = elog + e
+        if len(elog) == 0 and len(output) > lst_len:   # no error and LST output
             return HTML(output)
-        elif len(elog)==0 and len(output)<=lst_len: #no error and no LST
-            color_log=highlight(log,SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+        elif len(elog) == 0 and len(output) <= lst_len:   # no error and no LST
+            color_log = highlight(log, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
             return HTML(color_log)
-        elif len(elog)>0 and len(output)<=lst_len: #error and no LST
-            color_log=highlight(log,SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+        elif len(elog) > 0 and len(output) <= lst_len:   # error and no LST
+            color_log = highlight(log, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
             return HTML(color_log)
-        else: #errors and LST
-            color_log=highlight(log,SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
-            return HTML(color_log+output)
+        else:   # errors and LST
+            color_log = highlight(log, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+            return HTML(color_log + output)
+
 
 def load_ipython_extension(ipython):
     """Load the extension in Jupyter"""
     ipython.register_magics(SASMagic)
 
-if __name__ == '__main__':
-        from IPython import get_ipython
-        get_ipython().register_magics(SASMagic)
 
+if __name__ == '__main__':
+    from IPython import get_ipython
+
+    get_ipython().register_magics(SASMagic)

@@ -15,18 +15,16 @@
 #
 # Configuration names for SAS - python List
 # 
-#SAS_config_names=['default', 'sasother']
+# SAS_config_names=['default', 'sasother']
 #
-SAS_config_names=['default']
-
+SAS_config_names = ['default']
 
 # Configuration options for pysas - python Dict
 # valid key are:
 # 
 # 'lock_down' - True | False. True = Prevent runtime overrides of SAS_Config values below
 #
-SAS_config_options={'lock_down' : True}
-
+SAS_config_options = {'lock_down': True}
 
 # These need path to SASHome and version number - python Dict
 # The default path to the sas start up script is: /opt/sasinside/SASHome/SASFoundation/9.4/sas
@@ -37,10 +35,10 @@ SAS_config_options={'lock_down' : True}
 #
 #
 #
-default={'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
-         }
+default = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
+           }
 
-#sasother={'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
-#          'options' : ["-autoexec", "/opt/sasinside/SASHome/my_autoexec.sas", "-set", "Env_var", "Value", "-fullstimer"], 
+# sasother={'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
+#          'options' : ["-autoexec", "/opt/sasinside/SASHome/my_autoexec.sas", "-set",
+#                       "Env_var", "Value", "-fullstimer"],
 #          }
-

@@ -18,10 +18,6 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
-from distutils.command.install import install
-from distutils import log
-import json
-import os
 import sys
 
 with open('README.rst') as f:
@@ -39,9 +35,9 @@ setup(name='saspy',
       author_email='Jared.Dean@sas.com',
       packages=['saspy'],
       cmdclass={},
-      install_requires=[],
-      classifiers = [
+      install_requires=['pygments', 'IPython'],
+      classifiers=[
         'Programming Language :: Python :: 3',
         'Programming Language :: SAS    :: 9.4'
       ]
-)
+      )
