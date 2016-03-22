@@ -24,7 +24,22 @@ class SAS_config:
       self.options  = options
       self._token   = None
 
-      # GET Config
+      # GET Config options
+      try:
+         self.cfgopts = getattr(sascfg, "SAS_config_options")
+      except:
+         self.cfgopts = {}
+      lock         = self.cfgopts.get('lock_down', True)
+      # in lock down mode, don't allow runtime overrides of option values from the config file.
+      if lock:
+         if len(ip) > 0 or len(port) > 0 or len(context) > 0 or len(options) > 0:
+            print("Parameters passed to SAS_session were ignored due to configuration restriction.")
+         self.ip       = ''
+         self.port     = ''
+         self.ctxname  = ''
+         self.options  = ''
+
+      # GET Config names
       self.configs = getattr(sascfg, "SAS_config_names")
 
       if len(cfgname) == 0:
@@ -58,7 +73,10 @@ class SAS_config:
          pw           = cfg.get('pw', '')
 
       while len(self.ip) == 0:
-         self.ip = self._prompt("Please enter the host (ip address) you are trying to connect to: ")
+         if not lock:
+            self.ip = self._prompt("Please enter the host (ip address) you are trying to connect to: ")
+         else:
+            print("In lockdown mode and missing ip adress in the config named: "+cfgname )
 
       while len(user) == 0:
          user = self._prompt("Please enter userid: ")
@@ -88,7 +106,10 @@ class SAS_config:
                self.ctxname = self._prompt("Please enter the SAS Context you wish to run. Available contexts are: "+str(self.contexts)+" ")
 
       while self.ctxname not in self.contexts:
-         self.ctxname = self._prompt("SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: "+str(self.contexts)+" ")
+         if not lock:
+            self.ctxname = self._prompt("SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: "+str(self.contexts)+" ")
+         else:
+            print("SAS Context specified in the SA Config was not found and it is in lockdown mode. So no connection can be made to SAS context: "+self.ctxname)
 
    def _prompt(self, prompt, pw=False):
       if self._kernel == None:
