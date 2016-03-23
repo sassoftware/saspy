@@ -17,7 +17,7 @@ from __future__ import print_function
 from IPython.display import HTML
 import IPython.core.magic as ipym
 import re
-from saspy.SASLogLexer import *
+from saspy.SASLogLexer import SASLogStyle, SASLogLexer
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
 
@@ -31,7 +31,10 @@ class SASMagic(ipym.Magics):
     def __init__(self, shell):
         super(SASMagic, self).__init__(shell)
         import saspy as saspy
+        self.lst_len = -99  # initialize the length to a negative number to trigger function
         self.mva = saspy.SASsession(kernel=None)
+        if self.lst_len < 0:
+            self._get_lst_len()
 
     @ipym.cell_magic
     def SAS(self, line, cell):
@@ -116,6 +119,14 @@ class SASMagic(ipym.Magics):
         log = res['LOG']
         dis = self._which_display(log, output)
         return dis
+
+    def _get_lst_len(self):
+        code="data _null_; run;"
+        res = self.mva.submit(code)
+        assert isinstance(res, dict)
+        self.lst_len=len(res['LST'])
+        assert isinstance(self.lst_len,int)
+        return
 
     @staticmethod
     def _which_display(log, output):

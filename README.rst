@@ -12,7 +12,7 @@ Usage
 ~~~~~
 
 As this is currently intended to be used by SAS_kernel, it will be installed automatically
-when installing SAS_kernel. There is a configureation file named sascfg.py in the package
+when installing SAS_kernel. There is a configuration file named sascfg.py in the package
 along wil the rest of the code, where the path to the SAS installation can be configured
 and other SAS startup options can be specified. Defaults are already specified, so this
 isn't a necessary step unless SAS is installed in a different location. The sascfg.py file
