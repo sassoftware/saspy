@@ -38,7 +38,6 @@ SAS_config_options = {'lock_down': True}
 default = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
            }
 
-# sasother={'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
-#          'options' : ["-autoexec", "/opt/sasinside/SASHome/my_autoexec.sas", "-set",
+# sasother={'saspath' : '/some/other/directory/SASHome/SASFoundation/9.4/sas',
+#          'options' : ["-autoexec", "/my/home_dir/my_autoexec.sas", "-set",
 #                       "Env_var", "Value", "-fullstimer"],
-#          }
