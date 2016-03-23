@@ -39,5 +39,7 @@ default = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
            }
 
 # sasother={'saspath' : '/some/other/directory/SASHome/SASFoundation/9.4/sas',
-#          'options' : ["-autoexec", "/my/home_dir/my_autoexec.sas", "-set",
-#                       "Env_var", "Value", "-fullstimer"],
+#           'options' : ["-autoexec", "/my/home_dir/my_autoexec.sas", "-set",
+#                       "Env_var", "Value", "-fullstimer"]
+#           }
+
