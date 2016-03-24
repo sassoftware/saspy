@@ -180,8 +180,8 @@ class SASsession:
         if self.pid is None:
             return "No SAS process attached. SAS process has terminated unexpectedly."
 
-        interupt = signal.SIGINT
-        os.kill(self.pid, interupt)
+        interrupt = signal.SIGINT
+        os.kill(self.pid, interrupt)
         sleep(.25)
         self.stdin.write(b'\n')
         self.stdin.flush()
@@ -191,7 +191,7 @@ class SASsession:
                 lsts = lst.rpartition('Select:')
                 if lsts[0] != '' and lsts[1] != '':
                     found = True
-                    print('Processing interupt\nAttn handler Query is\n\n' + lsts[1] + lsts[2].rsplit('\n?')[0] + '\n')
+                    print('Processing interrupt\nAttn handler Query is\n\n' + lsts[1] + lsts[2].rsplit('\n?')[0] + '\n')
                     response = self.sascfg._prompt("Please enter your Response: ")
                     self.stdin.write(response.encode() + b'\n')
                     self.stdin.flush()
