@@ -1,9 +1,13 @@
 __pycache__
 *.pyc
 *.egg-info/
+bin/
+lib/
+lib64
 build/
 dist/
 MANIFEST
+pyvenv.cfg
 *.bak
 *.sas7bcat
 *.sas7bitm
