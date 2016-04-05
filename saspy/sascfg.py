@@ -41,13 +41,13 @@ SAS_config_options = {'lock_down': True}
 #
 #
 #
-default  = {'saspath': '/opt/tom/sasutf8/SASFoundation/9.4/bin/sas_u8',
+default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
             }
 
-# sas_en   = {'saspath': '/opt/tom/sasutf8/SASFoundation/9.4/sas',
+# sas_en   = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
 #             }
 #
-# sas_utf8 = {'saspath': '/opt/tom/sasutf8/SASFoundation/9.4/sasutf8',
+# sas_utf8 = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sasutf8',
 #             }
 #
 # sasother = {'saspath' : '/some/other/directory/SASHome/SASFoundation/9.4/sas',
