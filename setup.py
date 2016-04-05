@@ -25,7 +25,7 @@ with open('README.rst') as f:
     readme = f.read()
 
 setup(name='saspy',
-      version='1.0',
+      version='1.1',
       description='A SAS interpreter for Python',
       long_description=readme,
       author='Tom Weber',
