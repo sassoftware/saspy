@@ -35,6 +35,6 @@ setup(name='saspy',
       install_requires=['pygments', 'IPython'],
       classifiers=[
         'Programming Language :: Python :: 3',
-        'Programming Language :: SAS    :: 9.4'
+        'License :: OSI Approved :: Apache Software License',
       ]
       )
