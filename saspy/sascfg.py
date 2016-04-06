@@ -15,7 +15,7 @@
 #
 # Configuration names for SAS - python List
 # 
-# SAS_config_names=['default', 'sasother']
+# SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8']
 #
 SAS_config_names = ['default']
 
