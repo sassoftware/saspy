@@ -1,3 +1,18 @@
+#
+# Copyright SAS Institute
+#
+#  Licensed under the Apache License, Version 2.0 (the License);
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
 import http.client as hc
 import base64
 import json
@@ -7,16 +22,16 @@ from time import sleep
 import saspy.sascfg as sascfg
 from saspy.sasstat import *
 #from saspy.sasets  import *
-from IPython.display import HTML
 
+try:
+   from IPython.display import HTML
+except ImportError:
+   pass
 
-class SAS_config:
-   
-   def __init__(self, cfgname='', Kernel=None, user='', pw='', ip='', port='', context='', options=''):
-      #import pdb; pdb.set_trace()
-
+class SASconfig:
+   def __init__(self, cfgname='', kernel=None, user='', pw='', ip='', port='', context='', options=''):
       self.configs  = []
-      self._kernel  = Kernel
+      self._kernel  = kernel
       self.ip       = ip
       self.port     = port
       self.contexts = []
@@ -29,7 +44,7 @@ class SAS_config:
          self.cfgopts = getattr(sascfg, "SAS_config_options")
       except:
          self.cfgopts = {}
-      lock         = self.cfgopts.get('lock_down', True)
+      lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
       if lock:
          if len(ip) > 0 or len(port) > 0 or len(context) > 0 or len(options) > 0:
@@ -49,13 +64,16 @@ class SAS_config:
          else:
             if len(self.configs) == 1:
                cfgname = self.configs[0]
-               if Kernel == None:
+               if kernel == None:
                   print("Using SAS Config named: "+cfgname)
             else:
-               cfgname = self._prompt("Please enter the name of the SAS Config you wish to run. Available Configs are: "+str(self.configs)+" ")
+               cfgname = self._prompt("Please enter the name of the SAS Config you wish to run. Available Configs are: " +
+                                      str(self.configs)+" ")
 
       while cfgname not in self.configs:
-         cfgname = self._prompt("The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: "+str(self.contexts)+" ")
+         cfgname = self._prompt(
+             "The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: " +
+              str(self.contexts)+" ")
 
       self.name       = cfgname
       cfg             = getattr(sascfg, cfgname) 
@@ -96,30 +114,44 @@ class SAS_config:
 
       if len(self.ctxname) == 0:
          if len(self.contexts) == 0:
-            print("No Contexts found on Compute Service at ip="+self.ip)
+            print("No Contexts found on Compute Service at ip=" + self.ip)
             return None
          else:
             if len(self.contexts) == 1:
                self.ctxname = self.contexts[0]
-               print("Using SAS Context: "+self.ctxname)
+               print("Using SAS Context: " + self.ctxname)
             else:
-               self.ctxname = self._prompt("Please enter the SAS Context you wish to run. Available contexts are: "+str(self.contexts)+" ")
+               self.ctxname = self._prompt("Please enter the SAS Context you wish to run. Available contexts are: " +
+                                           str(self.contexts)+" ")
 
       while self.ctxname not in self.contexts:
          if not lock:
-            self.ctxname = self._prompt("SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: "+str(self.contexts)+" ")
+            self.ctxname = self._prompt(
+                "SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: " + 
+                 str(self.contexts)+" ")
          else:
-            print("SAS Context specified in the SA Config was not found and it is in lockdown mode. So no connection can be made to SAS context: "+self.ctxname)
+            print("SAS Context specified in the SA Config was not found and it is in lockdown mode. So no connection can be made to SAS context: "+
+                   self.ctxname)
 
    def _prompt(self, prompt, pw=False):
-      if self._kernel == None:
-         if pw == False:
-            return input(prompt)
-         else:
-            return getpass.getpass(prompt)
+      if self._kernel is None:
+          if not pw:
+              try:
+                 return input(prompt)
+              except (KeyboardInterrupt):
+                 return ''
+          else:
+              try:
+                 return getpass.getpass(prompt)
+              except (KeyboardInterrupt):
+                 return ''
       else:
-         return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header, password = pw)
-
+          try:
+             return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
+                                                password=pw)
+          except (KeyboardInterrupt):
+             return ''
+                   
    def _authenticate(self, user, pw):
       #import pdb; pdb.set_trace()
 
@@ -128,7 +160,8 @@ class SAS_config:
       d1 = ("grant_type=password&username="+user+"&password="+pw).encode()
       basic = base64.encodestring("sas.tkmtrb:".encode())
       authheader = '%s' % basic.splitlines()[0].decode()
-      headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded", "Authorization":"Basic "+authheader}
+      headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
+               "Authorization":"Basic "+authheader}
       conn.request('POST', "/SASLogon/oauth/token", body=d1, headers=headers)
       req = conn.getresponse()
       resp = req.read()
@@ -157,12 +190,20 @@ class SAS_config:
       return contexts
 
                    
-class SAS_session:
-   
-   def __init__(self, cfgname='', Kernel=None, user='', pw='', ip='', port='', context='', options=''):
-      #import pdb; pdb.set_trace()
-
-      self.sascfg     = SAS_config(cfgname, Kernel, user, pw, ip, port, context, options)
+class SASsession:
+   '''
+   cfgname - value in SAS_config_names List of the sascfg.py file
+   kernel  - None - internal use when running the SAS_kernel notebook
+   user    - userid to use to connect to Compute Service
+   pw      - pw for the userid being used to connect to Compute Service
+   ip      - overrides IP      Dict entry of cfgname in sascfg.py file
+   port    - overrides Port    Dict entry of cfgname in sascfg.py file
+   context - overrides Context Dict entry of cfgname in sascfg.py file 
+   options - overrides Options Dict entry of cfgname in sascfg.py file
+   '''
+   def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, user: str ='', pw: str ='', 
+                      ip: str ='', port: int ='', context: str ='', options: list ='') -> '<SASsession object>':
+      self.sascfg     = SASconfig(cfgname, kernel, user, pw, ip, port, context, options)
       self._obj_cnt   = 0
       self._log       = ""
       self.nosub      = False
@@ -171,8 +212,6 @@ class SAS_session:
       self._startsas(self.sascfg)
 
    def __del__(self):
-      #import pdb; pdb.set_trace()
-
       if self._sessionid:
          self._endsas()
       self._sessionid = None
@@ -182,8 +221,6 @@ class SAS_session:
        return '%04d' % self._obj_cnt
                                                                
    def _startsas(self, config):
-      #import pdb; pdb.set_trace()
-     
       # POST Session
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       d1 = '{"name":self.sascfg.ctxname, "description":"pySAS session", "version":1, "environment":{"options":self.sascfg.options}}'
@@ -204,7 +241,6 @@ class SAS_session:
       print("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self._sessionid)       
    
    def _endsas(self):
-      #import pdb; pdb.set_trace()
       rc = 0
       if self._sessionid:
          # DELETE Session
@@ -222,7 +258,6 @@ class SAS_session:
 
 
    def _getlog(self, jobid=None):
-      #import pdb; pdb.set_trace()
       logr = ''
 
       while True:
@@ -238,7 +273,6 @@ class SAS_session:
          status = req.getcode()
                        
          resp = req.read()
-         #resp
 
          j   = json.loads(resp.decode())
          log = j.get('log')
@@ -256,9 +290,6 @@ class SAS_session:
       return logr
 
    def _getlst(self, jobid=None):
-      #import pdb; pdb.set_trace()
-   
-
       # GET the list of results
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       headers={"Accept":"application/json", "Authorization":"Bearer "+self.sascfg._token}
@@ -282,11 +313,12 @@ class SAS_session:
          resp = req.read()
          htm = resp.decode()
    
-      return htm
+      lstd = htm.replace(chr(12), chr(10)).replace('<body class="c body">',
+                                                   '<body class="l body">').replace("font-size: x-small;",
+                                                                                    "font-size:  normal;")
+      return lstd
    
    def _getlsttxt(self, jobid=None):
-      #import pdb; pdb.set_trace()
-   
       lstr = ''
    
       while True:
@@ -314,16 +346,12 @@ class SAS_session:
       return lstr
 
    def _asubmit(self, code, results="html"):
-      #import pdb; pdb.set_trace()
-   
-      #odsopen  = "ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
-      odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
+      #odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
+      odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n")
       odsclose = json.dumps("ods html5 close;ods listing;\n")
       ods      = True;
-      htm      = "html HTML"
-      #mj       = b";*\';*\";*/;\n"
 
-      if (htm.find(results) < 0):
+      if results.upper() != "HTML":
          ods = False
          odsopen  = '""'
          odsclose = '""'
@@ -332,7 +360,8 @@ class SAS_session:
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       jcode = json.dumps(code)
       d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
-      headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json","Authorization":"Bearer "+self.sascfg._token}
+      headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json",
+               "Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', "/compute/sessions/"+self._sessionid+"/jobs", body=d1, headers=headers)
       req = conn.getresponse()
       resp = req.read()
@@ -340,6 +369,7 @@ class SAS_session:
       jobid = j.get('id')
 
       #see if this is the problem, then remove this -  this is a problem, keep it till the bug is fixed!@!!!
+      '''   should be fixed now, verify and remove
       quit = 0
       while True:
          # GET Status for JOB
@@ -351,24 +381,30 @@ class SAS_session:
          if resp == b'completed' or quit > 60:
             break
          quit += 1
-
+      '''
       return jobid
 
-   def submit(self, code, results="html"):
-      #import pdb; pdb.set_trace()
-   
-      #odsopen  = "ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
-      odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
+   def submit(self, code: str, results: str ="html") -> dict:
+      '''
+      code    - the SAS statements you want to execute 
+      results - format of results, HTML is default, TEXT is the alternative
+
+      Returns - a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is 'results' (HTML or TEXT)
+
+      NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()
+      i.e,: results = sas.submit("data a; x=1; run; proc print;run')
+            print(results['LOG'])
+            HTML(results['LST']) 
+      '''
+      #odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
+      odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n")
       odsclose = json.dumps("ods html5 close;ods listing;\n")
       ods      = True;
-      htm      = "html HTML"
-      #mj       = b";*\';*\";*/;\n"
-
 
       if self.nosub:
          return dict(LOG=code, LST='')
 
-      if (htm.find(results) < 0):
+      if results.upper() != "HTML":
          ods = False
          odsopen  = '""'
          odsclose = '""'
@@ -377,7 +413,8 @@ class SAS_session:
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       jcode = json.dumps(code)
       d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
-      headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json","Authorization":"Bearer "+self.sascfg._token}
+      headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json",
+               "Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', "/compute/sessions/"+self._sessionid+"/jobs", body=d1, headers=headers)
       req = conn.getresponse()
       resp = req.read()
@@ -418,12 +455,20 @@ class SAS_session:
       return dict(LOG=logd, LST=lstd)
 
    
-   def teach_me_SAS(self, nosub):
+   def teach_me_SAS(self, nosub: bool):
+      '''
+      nosub - bool. True means don't submit the code, print it out so I can see what the SAS code would be.
+                    False means run normally - submit the code.
+      '''
       self.nosub = nosub
 
-   def exist(self, table, libref="work"):
-      #import pdb; pdb.set_trace()
+   def exist(self, table: str, libref: str ="work") -> bool:
+      '''
+      table  - the name of the SAS Data Set
+      libref - the libref for the Data Set, defaults to WORK
 
+      Returns True it the Data Set exists and False if it does not
+      '''
       code  = "data _null_; e = exist('"
       code += libref+"."+table+"');\n" 
       code += "te='TABLE_EXISTS='; put te e;run;"
@@ -439,19 +484,30 @@ class SAS_session:
    
       return exists
    
-   def sasstat(self):
-       return SAS_stat(self)
+   def sasstat(self) -> '<SASstat object>':
+       return SASstat(self)
 
-   def sasets(self):
-       return SAS_ets(self)
+   def sasets(self) -> '<SASets object>':
+       return SASets(self)
 
-   def sasdata(self, table, libref="work", out='HTML'):
+   def sasdata(self, table: str, libref: str ="work", results: str ='HTML')  -> '<SASdata object>':
+      '''
+      table   - the name of the SAS Data Set
+      libref  - the libref for the Data Set, defaults to WORK
+      results - format of results, HTML is default, TEXT is the alternative
+      '''
       if self.exist(table, libref):
-         return SAS_data(self, libref, table, out)
+         return SASdata(self, libref, table, results)
       else:
          return None
    
-   def saslib(self, libref, engine=' ', path='', options=' '):
+   def saslib(self, libref: str, engine: str =' ', path: str ='', options: str =' ') -> 'The LOG showing the assignment of the libref':
+      '''
+      libref  - the libref for be assigned
+      engine  - the engine name used to access the SAS Library (engine defaults to BASE, per SAS)
+      path    - path to the library (for engines that take a path parameter)
+      options - other engine or engine supervisor options
+      '''
       code  = "libname "+libref+" "+engine+" "
       if len(path) > 0:
          code += " '"+path+"' "
@@ -463,8 +519,13 @@ class SAS_session:
       else:
          print(ll['LOG'])
    
-   def read_csv(self, file, table, libref="work", out='HTML'):
-   
+   def read_csv(self, file: str, table: str, libref: str ="work", results: str ='HTML') -> '<SASdata object>':
+      '''
+      file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
+      table   - the name of the SAS Data Set to create
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      results - format of results, HTML is default, TEXT is the alternative
+      '''
       code  = "filename x "
    
       if file.startswith(("http","HTTP")):
@@ -480,16 +541,26 @@ class SAS_session:
          print(ll['LOG'])
 
       if self.exist(table, libref):
-         return SAS_data(self, libref, table, out)
+         return SASdata(self, libref, table, results)
       else:
          return None
    
-   def df2sd(self, df, table='a', libref="work", out='HTML'):
-       return self.dataframe2sasdata(df, table, libref, out)
+   def df2sd(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="work", results: str ='HTML') -> '<SASdata object>':
+      '''
+      df      - Pandas Data Frame to import to a SAS Data Set
+      table   - the name of the SAS Data Set to create
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      results - format of results, HTML is default, TEXT is the alternative
+      '''
+      return self.dataframe2sasdata(df, table, libref, results)
    
-   def dataframe2sasdata(self, df, table='a', libref="work", out='HTML'):
-      #import pdb; pdb.set_trace()
-
+   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="work", results: str ='HTML') -> '<SASdata object>':
+      '''
+      df      - Pandas Data Frame to import to a SAS Data Set
+      table   - the name of the SAS Data Set to create
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      results - format of results, HTML is default, TEXT is the alternative
+      '''
       input  = ""
       card   = ""
       length = ""
@@ -523,21 +594,26 @@ class SAS_session:
       self._asubmit(";run;", "text")
    
       if self.exist(table, libref):
-         return SAS_data(self, libref, table, out)
+         return SASdata(self, libref, table, results)
       else:
          return None
    
-   def sd2df(self, sd):
-       return self.sasdata2dataframe(sd)
+   def sd2df(self, sd: '<SASdata object>') -> '<Pandas Data Frame object>':
+      '''
+      sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+      '''
+      return self.sasdata2dataframe(sd)
    
-   def sasdata2dataframe(self, sd):
-      #import pdb; pdb.set_trace()
+   def sasdata2dataframe(self, sd: '<SASdata object>') -> '<Pandas Data Frame object>':
+      '''
+      sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+      '''
       import pandas as pd
       import socket as socks
       datar = ""
 
       if sd == None:
-         print('The SAS_data object is not valid; it is \'None\'')
+         print('The SASdata object is not valid; it is \'None\'')
          return None                            
       if sd == None or self.exist(sd.table, sd.libref) == 0:
          print('The SAS Data Set '+sd.libref|'.'+sd.table+' does not exist')
@@ -628,14 +704,14 @@ class SAS_session:
       return df.convert_objects(convert_numeric=True, convert_dates=True, copy=False)
    
    
-class SAS_data:
+class SASdata:
 
-    def __init__(self, sassession, libref, table, out="HTML"):
+    def __init__(self, sassession, libref, table, results="HTML"):
 
         self.sas = sassession
 
         failed = 0
-        if out == "HTML" or out == 'html':
+        if results.upper() == "HTML":
            try:
               from IPython.display import HTML 
            except:
@@ -651,8 +727,11 @@ class SAS_data:
         self.libref = libref 
         self.table  = table
 
-    def set_out(self, out):
-        if out == "HTML" or out == 'html':
+    def set_results(self, results: str):
+        '''
+        results - set the default result type for this SASdata object. 'HTML' = HTML. Anything else = 'TEXT'.
+        '''
+        if results.upper() == "HTML":
            self.HTML = 1
         else:
            self.HTML = 0
@@ -679,7 +758,6 @@ class SAS_data:
            print(ll['LST'])
 
     def tail(self, obs=5):
-        #import pdb; pdb.set_trace()
         code  = "%put lastobs=%sysfunc(attrn(%sysfunc(open("
         code += self.libref
         code += "."
@@ -758,7 +836,10 @@ class SAS_data:
            ll = self.sas.submit(code, "text")
            print(ll['LST'])
 
-    def to_csv(self, file):
+    def to_csv(self, file: str) -> 'The LOG showing the results of the step':
+        '''
+        file    - the OS filesystem path of the file to be created (exported from this SAS Data Set)
+        '''
         code  = "filename x \""+file+"\";\n"
         code += "proc export data="+self.libref+"."+self.table+" outfile=x"
         code += " dbms=csv replace; run;"
@@ -769,7 +850,18 @@ class SAS_data:
         else:
            return 0
 
-    def hist(self, var, title='', label=''):
+    def to_df(self) -> '<Pandas Data Frame object>':
+        '''
+        Export this SAS Data Set to a Pandas Data Frame
+        '''
+        return self.sas.sd2df(self)
+
+    def hist(self, var: str, title: str ='', label: str ='') -> 'a histogram plot of the variable you chose':
+        '''
+        var   - the variable (column) you want to plot
+        title - an optional Title for the chart
+        label - LegendLABEL= value for sgplot
+        '''
         code  = "proc sgplot data="
         code += self.libref
         code += "."
@@ -779,8 +871,8 @@ class SAS_data:
            code += " LegendLABEL='"+label+"'"
         code += ";\n"
         if len(title) > 0:
-           code += '\\ttitle "'+title+'";\n'
-        code += "\\tdensity "+var+';\nrun;\n'+'title \"\";'
+           code += '\ttitle "'+title+'";\n'
+        code += "\tdensity "+var+';\nrun;\n'+'title \"\";'
         
         if self.sas.nosub:
            ll = self.sas.submit(code, "text")
