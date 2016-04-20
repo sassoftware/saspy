@@ -33,7 +33,7 @@ setup(name='saspy',
       url='https://github.com/sassoftware/saspy',
       packages=['saspy'],
       cmdclass={},
-      install_requires=['pygments', 'IPython'],
+      install_requires=['pygments', 'IPython', 'pre-commit'],
       classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: Apache Software License',
