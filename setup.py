@@ -25,16 +25,17 @@ with open('README.rst') as f:
     readme = f.read()
 
 setup(name='saspy',
-      version='1.0',
+      version='1.1.1',
       description='A SAS interpreter for Python',
       long_description=readme,
       author='Tom Weber',
       author_email='Tom.Weber@sas.com',
+      url='https://github.com/sassoftware/saspy',
       packages=['saspy'],
       cmdclass={},
       install_requires=['pygments', 'IPython'],
       classifiers=[
         'Programming Language :: Python :: 3',
-        'Programming Language :: SAS    :: 9.4'
+        'License :: OSI Approved :: Apache Software License',
       ]
       )

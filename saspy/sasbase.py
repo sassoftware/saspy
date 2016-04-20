@@ -76,12 +76,21 @@ class SASconfig:
     def _prompt(self, prompt, pw=False):
         if self._kernel is None:
             if not pw:
-                return input(prompt)
+                try:
+                   return input(prompt)
+                except (KeyboardInterrupt):
+                   return ''
             else:
-                return getpass.getpass(prompt)
+                try:
+                   return getpass.getpass(prompt)
+                except (KeyboardInterrupt):
+                   return ''
         else:
-            return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
-                                               password=pw)
+            try:
+               return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
+                                                  password=pw)
+            except (KeyboardInterrupt):
+                return ''
 
 
 class SASsession:
@@ -173,59 +182,6 @@ class SASsession:
 
         return self.pid
 
-    def _breakprompt(self, inlst=''):
-        found = False
-        lst = inlst
-
-        if self.pid is None:
-            return "No SAS process attached. SAS process has terminated unexpectedly."
-
-        interrupt = signal.SIGINT
-        os.kill(self.pid, interrupt)
-        sleep(.25)
-        self.stdin.write(b'\n')
-        self.stdin.flush()
-
-        while True:
-            if len(lst) > 0:
-                lsts = lst.rpartition('Select:')
-                if lsts[0] != '' and lsts[1] != '':
-                    found = True
-                    print('Processing interrupt\nAttn handler Query is\n\n' + lsts[1] + lsts[2].rsplit('\n?')[0] + '\n')
-                    response = self.sascfg._prompt("Please enter your Response: ")
-                    self.stdin.write(response.encode() + b'\n')
-                    self.stdin.flush()
-                else:
-                    lsts = lst.rpartition('Press')
-                    if lsts[0] != '' and lsts[1] != '':
-                        print('Secondary Query is:\n\n' + lsts[1] + lsts[2].rsplit('\n?')[0] + '\n')
-                        response = self.sascfg._prompt("Please enter your Response: ")
-                        self.stdin.write(response.encode() + b'\n')
-                        self.stdin.flush()
-                    else:
-                        # print("******************No 'Select' or 'Press' found in lst=")
-                        pass
-
-                sleep(.25)
-                lst = self.stdout.read1(4096).decode()
-            else:
-                log = self.stderr.read1(4096).decode()
-                self._log += log
-                logn = self._logcnt(False)
-
-                if log.count("\nE3969440A681A24088859985" + logn) >= 1:
-                    print("******************Found end of step. No interrupt processed")
-                    found = True
-
-                if found:
-                    self.submit('ods html5 close;ods listing close;ods listing;libname work list;\n', 'text')
-                    break
-
-                sleep(.25)
-                lst = self.stdout.read1(4096).decode()
-
-        return log
-
     def _endsas(self):
         rc = 0
         if self.pid:
@@ -248,10 +204,12 @@ class SASsession:
         ods = True
         htm = "html HTML"
         mj = b";*\';*\";*/;"
-        lstf = b''
-        logf = b''
+        lstf = '' 
+        logf = '' 
         bail = False
         eof = 5
+        bc = False
+        done = False
         logn = self._logcnt()
         logcodei = "%put E3969440A681A24088859985" + logn + ";"
         logcodeo = "\nE3969440A681A24088859985" + logn
@@ -276,47 +234,137 @@ class SASsession:
             self.stdin.write(odsclose)
 
         out = self.stdin.write(b'\n' + logcodei.encode() + b'\n')
-
         self.stdin.flush()
 
-        try:
-            while True:
-                rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-                if rc is not None:
-                    self.pid = None
-                    return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' + str(
-                        rc) + '\n' + logf.decode() + '\n', LST='')
-                if bail:
-                    eof -= 1
-                if eof < 0:
-                    break
-                lst = self.stdout.read1(4096)
-                if len(lst) > 0:
-                    lstf += lst
-                else:
-                    log = self.stderr.read1(4096)
-                    if len(log) > 0:
-                        logf += log
-                        if logf.count(logcodeo.encode()) >= 1:
-                            bail = True
+        while not done:
+           try:
+               while True:
+                   rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+                   if rc is not None:
+                       self.pid = None
+                       return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
+                                   str(rc), LST='')
+                   if bail:
+                       eof -= 1
+                   if eof < 0:
+                       break
+                   lst = self.stdout.read1(4096).decode()
+                   if len(lst) > 0:
+                       lstf += lst
+                   else:
+                       log = self.stderr.read1(4096).decode() 
+                       if len(log) > 0:
+                           logf += log
+                           if logf.count(logcodeo) >= 1:
+                               bail = True
+                           if not bail and bc:
+                               self.stdin.write(odsclose+logcodei.encode() + b'\n')
+                               self.stdin.flush()
+                               bc = False
+               done = True
 
-        except (KeyboardInterrupt, SystemExit):
-            print('Exception caught!')
-            logr = self._breakprompt((lstf + lst).decode())
-            print('Exception handled :)\n')
-            return dict(LOG=logr, LST='')
+           except (KeyboardInterrupt, SystemExit):
+               print('Exception caught!')
+               ll = self._breakprompt(logcodeo)
 
-        final = logf.partition(logcodei.encode())
-        z = final[0].decode().rpartition(chr(10))
+               if ll.get('ABORT', False):
+                  return ll
 
-        logd = z[0].replace(mj.decode(), '')
-        lstd = lstf.decode().replace(chr(12), chr(10)).replace('<body class="c body">',
-                                                               '<body class="l body">').replace("font-size: x-small;",
-                                                                                                "font-size:  normal;")
+               logf += ll['LOG']
+               lstf += ll['LST']
+               bc    = ll['BC']
 
-        self._log += logf.decode().replace(logcodei, " ").replace(logcodeo, " ")
+               if not bc:
+                  print('Exception handled :)\n')
+               else:
+                  print('Exception ignored, continuing to process...\n')
 
+               self.stdin.write(odsclose+logcodei.encode()+b'\n')
+               self.stdin.flush()
+
+        trip = lstf.rpartition("/*]]>*/")      
+        if len(trip[1]) > 0 and len(trip[2]) < 100:
+           lstf = ''
+
+        self._log += logf
+        final = logf.partition(logcodei)
+        z = final[0].rpartition(chr(10))
+        prev = '%08d' %  (self._log_cnt - 1)
+        zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
+        logd = zz[2].replace(mj.decode(), '')
+
+        lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
+                                                      '<body class="l body">').replace("font-size: x-small;",
+                                                                                       "font-size:  normal;")
         return dict(LOG=logd, LST=lstd)
+
+    def _breakprompt(self, eos):
+        found = False
+        logf  = ''
+        lstf  = ''
+        bc    = False
+
+        if self.pid is None:
+            return dict(LOG=b"No SAS process attached. SAS process has terminated unexpectedly.", LST=b'', ABORT=True)
+
+        interrupt = signal.SIGINT
+        os.kill(self.pid, interrupt)
+        sleep(.25)
+
+        while True:
+            rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+            if rc is not None:
+                self.pid = None
+                outrc = str(rc)
+                return dict(LOG=b'SAS process has terminated unexpectedly. Pid State= ' +
+                            outrc.encode(), LST=b'',ABORT=True)
+
+            lst = self.stdout.read1(4096).decode()
+            lstf += lst
+            if len(lst) > 0:
+                lsts = lst.rpartition('Select:')
+                if lsts[0] != '' and lsts[1] != '':
+                    found = True
+                    query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
+                    print('Processing interrupt\nAttn handler Query is\n\n' + query)
+                    response = self.sascfg._prompt("Please enter your Response: ")
+                    self.stdin.write(response.encode() + b'\n')
+                    self.stdin.flush()
+                    if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
+                       bc = True
+                       break
+                else:
+                    lsts = lst.rpartition('Press')
+                    if lsts[0] != '' and lsts[1] != '':
+                        query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
+                        print('Secondary Query is:\n\n' + query)
+                        response = self.sascfg._prompt("Please enter your Response: ")
+                        self.stdin.write(response.encode() + b'\n')
+                        self.stdin.flush()
+                        if (response == 'N' or response == 'n') and query.count("N to continue") >= 1:
+                           bc = True
+                           break
+                    else:
+                        #print("******************No 'Select' or 'Press' found in lst=")
+                        pass
+            else:
+                log = self.stderr.read1(4096).decode()
+                logf += log
+                self._log += log
+
+                if log.count(eos) >= 1:
+                    print("******************Found end of step. No interrupt processed")
+                    found = True
+
+                if found:
+                    break
+
+            sleep(.25)
+
+        lstr = lstf
+        logr = logf
+
+        return dict(LOG=logr, LST=lstr, BC=bc)
 
 """
 if __name__ == "__main__":
