@@ -120,6 +120,33 @@ class SASMagic(ipym.Magics):
         dis = self._which_display(log, output)
         return dis
 
+    @ipym.line_magic
+    def sasSmallLog(self,line):
+        """suppress the notes and source code from the SAS Log for that cell
+        The following statements are submitted before and after the code within the cell
+        prepend: options nosource nonotes;
+        postpend: options source notes;
+        :param line: string
+        """
+        prepend = "options nosource nonotes;"
+        postpend = "options source notes;"
+        self.code=prepend + self.code + postpend
+        return self.code
+
+    @ipym.line_magic
+    def sasOptions(self,line):
+        """suppress the notes and source code from the SAS Log for that cell
+        The following statements are submitted before and after the code within the cell
+        prepend: options nosource nonotes;
+        postpend: options source notes;
+        """
+        prepend = "options {0};".format(line)
+        self.code=prepend + self.code
+
+        return self.code
+
+
+
     def _get_lst_len(self):
         code="data _null_; run;"
         res = self.mva.submit(code)
