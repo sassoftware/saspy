@@ -30,12 +30,17 @@ class SASconfig:
         self._kernel = kernel
         self.saspath = saspath
         self.options = options
-
+        self.sasenc = "utf8"
         # GET Config options
         try:
             self.cfgopts = getattr(sascfg, "SAS_config_options")
         except:
             self.cfgopts = {}
+        try:
+            self.sasenc = getattr(sascfg, "sasenc")
+        except:
+            self.sasenc = "utf8"
+
         lock = self.cfgopts.get('lock_down', True)
         # in lock down mode, don't allow runtime overrides of option values from the config file.
         if lock:
@@ -228,12 +233,12 @@ class SASsession:
         if ods:
             self.stdin.write(odsopen)
 
-        out = self.stdin.write(mj + b'\n' + code.encode() + b'\n' + mj)
+        out = self.stdin.write(mj + b'\n' + code.encode(encoding=self.sascfg.sasenc) + b'\n' + mj)
 
         if ods:
             self.stdin.write(odsclose)
 
-        out = self.stdin.write(b'\n' + logcodei.encode() + b'\n')
+        out = self.stdin.write(b'\n' + logcodei.encode(encoding=self.sascfg.sasenc) + b'\n')
         self.stdin.flush()
 
         while not done:
@@ -248,17 +253,18 @@ class SASsession:
                        eof -= 1
                    if eof < 0:
                        break
+                   # ODS HTML5 is UTF8 even for single byte encoded SAS session
                    lst = self.stdout.read1(4096).decode()
                    if len(lst) > 0:
                        lstf += lst
                    else:
-                       log = self.stderr.read1(4096).decode() 
+                       log = self.stderr.read1(4096).decode(self.sascfg.sasenc) 
                        if len(log) > 0:
                            logf += log
                            if logf.count(logcodeo) >= 1:
                                bail = True
                            if not bail and bc:
-                               self.stdin.write(odsclose+logcodei.encode() + b'\n')
+                               self.stdin.write(odsclose+logcodei.encode(encoding=self.sascfg.sasenc) + b'\n')
                                self.stdin.flush()
                                bc = False
                done = True
@@ -279,7 +285,7 @@ class SASsession:
                else:
                   print('Exception ignored, continuing to process...\n')
 
-               self.stdin.write(odsclose+logcodei.encode()+b'\n')
+               self.stdin.write(odsclose+logcodei.encode(encoding=self.sascfg.sasenc)+b'\n')
                self.stdin.flush()
 
         trip = lstf.rpartition("/*]]>*/")      
@@ -291,7 +297,7 @@ class SASsession:
         z = final[0].rpartition(chr(10))
         prev = '%08d' %  (self._log_cnt - 1)
         zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
-        logd = zz[2].replace(mj.decode(), '')
+        logd = zz[2].replace(mj.decode(self.sascfg.sasenc), '')
 
         lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                       '<body class="l body">').replace("font-size: x-small;",
@@ -317,9 +323,9 @@ class SASsession:
                 self.pid = None
                 outrc = str(rc)
                 return dict(LOG=b'SAS process has terminated unexpectedly. Pid State= ' +
-                            outrc.encode(), LST=b'',ABORT=True)
+                            outrc.encode(encoding=self.sascfg.sasenc), LST=b'',ABORT=True)
 
-            lst = self.stdout.read1(4096).decode()
+            lst = self.stdout.read1(4096).decode(self.sascfg.sasenc)
             lstf += lst
             if len(lst) > 0:
                 lsts = lst.rpartition('Select:')
@@ -328,7 +334,7 @@ class SASsession:
                     query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                     print('Processing interrupt\nAttn handler Query is\n\n' + query)
                     response = self.sascfg._prompt("Please enter your Response: ")
-                    self.stdin.write(response.encode() + b'\n')
+                    self.stdin.write(response.encode(encoding=self.sascfg.sasenc) + b'\n')
                     self.stdin.flush()
                     if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
                        bc = True
@@ -339,7 +345,7 @@ class SASsession:
                         query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                         print('Secondary Query is:\n\n' + query)
                         response = self.sascfg._prompt("Please enter your Response: ")
-                        self.stdin.write(response.encode() + b'\n')
+                        self.stdin.write(response.encode(encoding=self.sascfg.sasenc) + b'\n')
                         self.stdin.flush()
                         if (response == 'N' or response == 'n') and query.count("N to continue") >= 1:
                            bc = True
@@ -348,7 +354,7 @@ class SASsession:
                         #print("******************No 'Select' or 'Press' found in lst=")
                         pass
             else:
-                log = self.stderr.read1(4096).decode()
+                log = self.stderr.read1(4096).decode(self.sascfg.sasenc)
                 logf += log
                 self._log += log
 

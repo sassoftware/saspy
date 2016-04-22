@@ -55,3 +55,5 @@ default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 #                          "Env_var", "Value", "-fullstimer"]
 #             }
 
+# Encoding of SAS session, needed if other than utf8
+encoding = "utf8"
