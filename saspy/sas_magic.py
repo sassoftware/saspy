@@ -52,11 +52,26 @@ class SASMagic(ipym.Magics):
                 set sashelp.cars;
             run;
         """
+        
+        saveOpts="proc optsave out=__jupyterSASKernel__; run;"
+        restoreOpts="proc optload data=__jupyterSASKernel__; run;"
+        if len(line)>0:  # Save current SAS Options
+            self.mva.submit(saveOpts)
+
+        if line.lower()=='smalllog':
+            self.mva.submit("options nosource nonotes;")
+
+        elif line is not None and line.startswith('option'):
+            self.mva.submit(line + ';')
 
         res = self.mva.submit(cell)
         output = res['LST']
         log = res['LOG']
         dis = self._which_display(log, output)
+
+        if len(line)>0:  # Restore SAS options 
+            self.mva.submit(restoreOpts)
+
         return dis
 
     @ipym.cell_magic
