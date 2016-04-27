@@ -52,11 +52,26 @@ class SASMagic(ipym.Magics):
                 set sashelp.cars;
             run;
         """
+        
+        saveOpts="proc optsave out=__jupyterSASKernel__; run;"
+        restoreOpts="proc optload data=__jupyterSASKernel__; run;"
+        if len(line)>0:  # Save current SAS Options
+            self.mva.submit(saveOpts)
+
+        if line.lower()=='smalllog':
+            self.mva.submit("options nosource nonotes;")
+
+        elif line is not None and line.startswith('option'):
+            self.mva.submit(line + ';')
 
         res = self.mva.submit(cell)
         output = res['LST']
         log = res['LOG']
         dis = self._which_display(log, output)
+
+        if len(line)>0:  # Restore SAS options 
+            self.mva.submit(restoreOpts)
+
         return dis
 
     @ipym.cell_magic
@@ -119,33 +134,6 @@ class SASMagic(ipym.Magics):
         log = res['LOG']
         dis = self._which_display(log, output)
         return dis
-
-    @ipym.line_magic
-    def sasSmallLog(self,line):
-        """suppress the notes and source code from the SAS Log for that cell
-        The following statements are submitted before and after the code within the cell
-        prepend: options nosource nonotes;
-        postpend: options source notes;
-        :param line: string
-        """
-        prepend = "options nosource nonotes;"
-        postpend = "options source notes;"
-        self.code=prepend + self.code + postpend
-        return self.code
-
-    @ipym.line_magic
-    def sasOptions(self,line):
-        """suppress the notes and source code from the SAS Log for that cell
-        The following statements are submitted before and after the code within the cell
-        prepend: options nosource nonotes;
-        postpend: options source notes;
-        """
-        prepend = "options {0};".format(line)
-        self.code=prepend + self.code
-
-        return self.code
-
-
 
     def _get_lst_len(self):
         code="data _null_; run;"
