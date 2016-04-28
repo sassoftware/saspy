@@ -82,9 +82,44 @@ class SASMagic(ipym.Magics):
     	any options for the proc can be specified after the PROCNAME
     	the magic will not check for missing required options like data= as these differ by proc
 
-	Example:
+	Example 1:
 		%%PROC PRINT data=sashelp.cars
 		var name age;
+		
+	Example 2:
+		%%PROC IML
+		a = I(6); * 6x6 identity matrix;
+		b = j(5,5,0); *5x5 matrix of 0's;
+		c = j(6,1); *6x1 column vector of 1's;
+		d=diag({1 2 4});
+		e=diag({1 2, 3 4});
+		
+	Example 3:
+		%%PROC OPTMODEL PRINTLEVEL=2
+		/* declare variables */
+		var choco >= 0, toffee >= 0;
+		
+		/* maximize objective function (profit) */
+		maximize profit = 0.25*choco + 0.75*toffee;
+		
+		/* subject to constraints */
+		con process1:    15*choco +40*toffee <= 27000;
+		con process2:           56.25*toffee <= 27000;
+		con process3: 18.75*choco            <= 27000;
+		con process4:    12*choco +50*toffee <= 27000;
+		/* solve LP using primal simplex solver */
+		solve with lp / solver = primal_spx;
+		/* display solution */
+		print choco toffee;
+		
+	Example 4:
+		%%PROC SQL UNDOPOLICY=NONE
+		create table work.class as
+		    select * from sashelp.class;
+		create table work.class as
+		    select sex, avg(age) as age
+		    from work.class
+		    group by sex;
 	"""
         
         saveOpts="proc optsave out=__jupyterSASKernel__; run;"
