@@ -73,6 +73,28 @@ class SASMagic(ipym.Magics):
         return dis
 
     @ipym.cell_magic
+    def PROC(self,line,cell):
+        """
+        %%PROC PROCNAME <options>
+    	
+    	This cell magic will execute the contents of the cell in a SAS session
+    	It will send the code the proc given by PROCNAME
+    	any options for the proc can be specified after the PROCNAME
+    	the magic will not check for missing required options like data= as these differ by proc
+
+	Example:
+		%%PROC PRINT data=sashelp.cars
+		var name age;
+	"""
+        
+        saveOpts="proc optsave out=__jupyterSASKernel__; run;"
+        restoreOpts="proc optload data=__jupyterSASKernel__; run;"
+        
+        res = self.mva.submit("proc " + line + ";" + cell + " run; quit;")
+        dis = self._which_display(res['LOG'], res['LST'])
+        return dis
+        
+    @ipym.cell_magic
     def IML(self,line,cell):
         """
         %%IML - send the code in the cell to a SAS Server
