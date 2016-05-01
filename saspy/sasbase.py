@@ -103,6 +103,7 @@ class SASsession:
         self.sascfg = SASconfig(cfgname, kernel, saspath, options)
         self._log_cnt = 0
         self._log = ""
+        self._logr = ""
 
         self._startsas(self.sascfg)
 
@@ -287,6 +288,7 @@ class SASsession:
            lstf = ''
 
         self._log += logf
+        self._logr = logf
         final = logf.partition(logcodei)
         z = final[0].rpartition(chr(10))
         prev = '%08d' %  (self._log_cnt - 1)
@@ -351,6 +353,7 @@ class SASsession:
                 log = self.stderr.read1(4096).decode()
                 logf += log
                 self._log += log
+                self._logr = log
 
                 if log.count(eos) >= 1:
                     print("******************Found end of step. No interrupt processed")
