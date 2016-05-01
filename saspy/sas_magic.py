@@ -72,6 +72,30 @@ class SASMagic(ipym.Magics):
 
         return dis
 
+    @ipym.line_magic
+    def FULLOG(self,line):
+    	"""
+    	%FULLLOG
+    	
+    	This line magic will return the full SAS log for the current notebooks SAS session.
+    	This includes the log for all Cells that have used a SAS Cell magic like these: %%SAS, %%PROC, %%IML, %%OPTMODEL
+    	"""
+            res = self.mva._log
+	    color_log = highlight(res, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+	    return HTML(color_log)    	
+
+    @ipym.line_magic
+    def LOG(self,line):
+    	"""
+    	%LOG
+    	
+    	This cell magic will return the log for the last submitted cell that requested SAS execution.
+    	For instance the last cell that ran one of these magics: %%SAS, %%PROC, %%IML, %%OPTMODEL
+    	"""
+            res = self.mva._logr
+	    color_log = highlight(res, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+	    return HTML(color_log)
+
     @ipym.cell_magic
     def PROC(self,line,cell):
         """
@@ -125,7 +149,7 @@ class SASMagic(ipym.Magics):
         saveOpts="proc optsave out=__jupyterSASKernel__; run;"
         restoreOpts="proc optload data=__jupyterSASKernel__; run;"
         
-        res = self.mva.submit("proc " + line + ";" + cell + " run; quit;")
+        res = self.mva.submit("proc " + line + ";" + '\n' + cell + '\n' + "run;\nquit;")
         dis = self._which_display(res['LOG'], res['LST'])
         return dis
         
