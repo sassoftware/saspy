@@ -55,3 +55,10 @@ default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 #                          "Env_var", "Value", "-fullstimer"]
 #             }
 
+# Small trick to run remote session - SSH is program called
+# sas_ssh = {'saspath' : '/bin/ssh',
+#            'options' : ["spljaa", "/opt/sas94/SASHome/SASFoundation/9.4/sas"]
+#                        }
+
+# Encoding of SAS session, needed if other than utf8
+encoding = "utf8"

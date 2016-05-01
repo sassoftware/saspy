@@ -73,6 +73,63 @@ class SASMagic(ipym.Magics):
         return dis
 
     @ipym.cell_magic
+    def PROC(self,line,cell):
+        """
+        %%PROC PROCNAME <options>
+    	
+    	This cell magic will execute the contents of the cell in a SAS session
+    	It will send the code the proc given by PROCNAME
+    	any options for the proc can be specified after the PROCNAME
+    	the magic will not check for missing required options like data= as these differ by proc
+
+	Example 1:
+		%%PROC PRINT data=sashelp.cars
+		var name age;
+		
+	Example 2:
+		%%PROC IML
+		a = I(6); * 6x6 identity matrix;
+		b = j(5,5,0); *5x5 matrix of 0's;
+		c = j(6,1); *6x1 column vector of 1's;
+		d=diag({1 2 4});
+		e=diag({1 2, 3 4});
+		
+	Example 3:
+		%%PROC OPTMODEL PRINTLEVEL=2
+		/* declare variables */
+		var choco >= 0, toffee >= 0;
+		
+		/* maximize objective function (profit) */
+		maximize profit = 0.25*choco + 0.75*toffee;
+		
+		/* subject to constraints */
+		con process1:    15*choco +40*toffee <= 27000;
+		con process2:           56.25*toffee <= 27000;
+		con process3: 18.75*choco            <= 27000;
+		con process4:    12*choco +50*toffee <= 27000;
+		/* solve LP using primal simplex solver */
+		solve with lp / solver = primal_spx;
+		/* display solution */
+		print choco toffee;
+		
+	Example 4:
+		%%PROC SQL UNDOPOLICY=NONE
+		create table work.class as
+		    select * from sashelp.class;
+		create table work.class as
+		    select sex, avg(age) as age
+		    from work.class
+		    group by sex;
+	"""
+        
+        saveOpts="proc optsave out=__jupyterSASKernel__; run;"
+        restoreOpts="proc optload data=__jupyterSASKernel__; run;"
+        
+        res = self.mva.submit("proc " + line + ";" + cell + " run; quit;")
+        dis = self._which_display(res['LOG'], res['LST'])
+        return dis
+        
+    @ipym.cell_magic
     def IML(self,line,cell):
         """
         %%IML - send the code in the cell to a SAS Server
@@ -128,6 +185,33 @@ class SASMagic(ipym.Magics):
         res = self.mva.submit("proc optmodel; " + cell + " quit;")
         dis = self._which_display(res['LOG'], res['LST'])
         return dis
+
+    @ipym.line_magic
+    def sasSmallLog(self,line):
+        """suppress the notes and source code from the SAS Log for that cell
+        The following statements are submitted before and after the code within the cell
+        prepend: options nosource nonotes;
+        postpend: options source notes;
+        :param line: string
+        """
+        prepend = "options nosource nonotes;"
+        postpend = "options source notes;"
+        self.code=prepend + self.code + postpend
+        return self.code
+
+    @ipym.line_magic
+    def sasOptions(self,line):
+        """suppress the notes and source code from the SAS Log for that cell
+        The following statements are submitted before and after the code within the cell
+        prepend: options nosource nonotes;
+        postpend: options source notes;
+        """
+        prepend = "options {0};".format(line)
+        self.code=prepend + self.code
+
+        return self.code
+
+
 
     def _get_lst_len(self):
         code="data _null_; run;"
