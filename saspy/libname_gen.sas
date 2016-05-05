@@ -1,6 +1,6 @@
 *filename  d1 url 'http://www-bcf.usc.edu/~gareth/ISL/Advertising.csv'; 
 *proc import datafile=d1 out=work.data dbms=csv replace; run;
-
+options pagesize=max;
 /*
 %macro proccall(dset);
     proc reg data=&dset. plots(unpack)=all;

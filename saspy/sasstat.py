@@ -1,4 +1,4 @@
-from   IPython.core.display import HTML
+from IPython.core.display import HTML
 import IPython.display as id
 import time
 import logging
@@ -9,75 +9,11 @@ logger = logging.getLogger('')
 logger.setLevel(logging.WARN)
 
 
-class SAS_stat:
+class SASstat:
     def __init__(self, session, *args, **kwargs):
         '''Submit an initial set of macros to prepare the SAS system'''
         self.sas=session
-        macro_path=os.path.dirname(os.path.realpath(__file__))
-        #code="options pagesize=max; %include '" + macro_path + '/' + "libname_gen.sas'; "
-
-        code = ''' options pagesize=max;
-        %macro mangobj(objname,objtype,d);
-            data _null_;
-                guid=uuidgen();
-                tmpdir=dcreate(guid,getoption('work'));
-                call symputx('tmpdir',tmpdir);
-            run;
-            libname &objname. base "&tmpdir.";
-            ods _all_ close;
-            ods document name=&objname.(write);
-            %proccall(&d.);
-            ods document close;
-            
-            proc document name=&objname.;
-                ods output Properties=_&objname.properties;
-                list \(where=(_type_='Dir')) /levels=all;
-            quit; 
-            filename file1 temp;
-            data _null_;
-                length path $1000;
-                set _&objname.properties end=last;
-                file file1;
-                if _n_=1 then do;
-                    put "libname _&objname. sasedoc (";
-                end;
-                p=cat("'\&objname.", catt(path) , "'");
-                put p;
-                if last then do;
-                    put ');';
-                end;
-            run;
-            %include file1;
-            data _&objname.filelist;
-                length objtype $32 objname $32.;
-                set sashelp.vmember(where=(lower(libname)=lower("_&objname.")));
-                ds="&d.";
-                objtype="&objtype";
-                objname="&objname";
-                method=memname;
-                keep ds objtype objname method;
-            run;
-        %mend;
-        
-        %macro getdata(objname, method);
-            proc document name=&objname.;
-                replay \ (where=(lower(_name_)=lower("&method.")));;
-            run;
-            quit;
-        %mend;
-
-        %macro listdata(objname);
-            data _null_;
-                set _&objname.filelist end=last;
-                if _n_=1 then put "startparse9878";
-                put method;
-                if  last then put "endparse9878";
-            run;
-        %mend;
-        '''
-        jobid = self.sas._asubmit(code,"text")
-
-        logger.debug("Initalization of SAS Macro: " + str(self.sas._getlog(jobid)))
+        logger.debug("Initalization of SAS Macro: " + self.sas.saslog())
 
     def _objectmethods(self,obj,*args):
         code  ="%listdata("
@@ -86,9 +22,9 @@ class SAS_stat:
         logger.debug("Object Method macro call: " + str(code))
         res=self.sas.submit(code,"text")
         meth=res['LOG'].splitlines()
-        logger.debug('SAS Log: ' + res['LOG'])
         for i in range(len(meth)):
            meth[i] = meth[i].lstrip().rstrip()
+        logger.debug('SAS Log: ' + res['LOG'])
         objlist=meth[meth.index('startparse9878')+1:meth.index('endparse9878')]
         logger.debug("PROC attr list: " + str(objlist))
         return objlist
@@ -227,7 +163,11 @@ class SAS_stat:
         #legal statments
         legal_set=legal
         if (len(legal_set)):
-            extra_set=set(stmt.keys()).difference(legal_set|req_set) # find keys not in legal or required sets
+            if len(req_set):
+               tot_set = legal_set | req_set
+            else:
+               tot_set = legal_set
+            extra_set=set(stmt.keys()).difference(tot_set) # find keys not in legal or required sets
             if extra_set:
                 print ("The following %d statements are invalid and will be ignored: "% len(extra_set))
                 for key in range(0,len(extra_set)):
@@ -253,7 +193,7 @@ class SAS_stat:
             objname='hps'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
             code=self._makeProccallMacro(objtype, objname, data, kwargs)
             logger.debug("HPSPLIT macro submission: " + str(code))
-            jobid = self.sas._asubmit(code,"text")
+            self.sas._asubmit(code,"text")
             try:
                 obj1=self._objectmethods(objname)
                 logger.debug(obj1)
@@ -269,7 +209,7 @@ class SAS_stat:
            print(code)
            return (SAS_results([], self, objname, True))
 
-        jobid = self.sas._asubmit(code,"text")
+        res = self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -292,7 +232,7 @@ class SAS_stat:
             objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
             code=self._makeProccallMacro(objtype, objname, data, kwargs)
             logger.debug("REG macro submission: " + str(code))
-            jobid = self.sas._asubmit(code,"text")
+            self.sas._asubmit(code,"text")
             try:
                 obj1=self._objectmethods(objname)
                 logger.debug(obj1)
@@ -307,7 +247,7 @@ class SAS_stat:
            print(code)
            return (SAS_results([], self, objname, True))
 
-        jobid = self.sas._asubmit(code,"text")
+        res = self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -328,7 +268,7 @@ class SAS_stat:
             objname='mix'+self.sas._objcnt()
             code=self._makeProccallMacro(objtype, objname, data, kwargs)
             logger.debug("Mixed Macro submission: " + str(code))
-            jobid = self.sas._asubmit(code,"text")
+            self.sas._asubmit(code,"text")
             try:
                 obj1=self._objectmethods(objname)
                 logger.debug(obj1)
@@ -342,7 +282,7 @@ class SAS_stat:
            print(code)
            return (SAS_results([], self, objname, True))
 
-        jobid = self.sas._asubmit(code, "text")
+        res = self.sas._asubmit(code, "text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -363,7 +303,7 @@ class SAS_stat:
             objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
             code=self._makeProccallMacro(objtype, objname, data, kwargs)
             logger.debug("GLM macro submission: " + str(code))
-            jobid = self.sas._asubmit(code,"text")
+            self.sas._asubmit(code,"text")
             try:
                 obj1=self._objectmethods(objname)
                 logger.debug(obj1)
@@ -378,7 +318,7 @@ class SAS_stat:
            print(code)
            return (SAS_results([], self, objname, True))
 
-        jobid = self.sas._asubmit(code,"text")
+        res = self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -408,7 +348,7 @@ class SAS_stat:
             objname='log'+self.sas._objcnt() #translate to a libname so needs to be less than 8
             code=self._makeProccallMacro(objtype, objname, data, kwargs)
             logger.debug("LOGISTIC macro submission: " + str(code))
-            jobid = self.sas._asubmit(code,"text")
+            self.sas._asubmit(code,"text")
             try:
                 obj1=self._objectmethods(objname)
                 logger.debug(obj1)
@@ -424,7 +364,7 @@ class SAS_stat:
            print(code)
            return (SAS_results([], self, objname, True))
 
-        jobid = self.sas._asubmit(code,"text")
+        res = self.sas._asubmit(code,"text")
         try:
             obj1=self._objectmethods(objname)
             logger.debug(obj1)
@@ -493,3 +433,4 @@ class SAS_results(object):
         '''
         for i in self._attrs:
             id.display(self.__getattr__(i))
+
