@@ -196,6 +196,9 @@ class SASsession:
             print(results['LOG'])
             HTML(results['LST']) 
       '''
+      if self.nosub:
+         return dict(LOG=code, LST='')
+
       return self.io.submit(code, results, prompt)
 
    def saslog(self):
@@ -222,7 +225,10 @@ class SASsession:
       code += libref+"."+table+"');\n" 
       code += "te='TABLE_EXISTS='; put te e;run;"
    
+      nosub = self.nosub
+      self.nosub = False
       ll = self.io.submit(code, "text")
+      self.nosub = nosub
 
       l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
       l2 = l2[2].partition("\n")
@@ -332,7 +338,11 @@ class SASsession:
       libref  - the libref for the SAS Data Set being created. Defaults to WORK
       results - format of results, HTML is default, TEXT is the alternative
       '''
-      self.io.dataframe2sasdata(df, table, libref, results)
+      if self.nosub:
+         print("too comlicated to show the code, read the source :), sorry.")
+         return None
+      else
+         self.io.dataframe2sasdata(df, table, libref, results)
 
       if self.exist(table, libref):
          return SASdata(self, libref, table, results)
@@ -358,7 +368,11 @@ class SASsession:
          print('The SAS Data Set '+sd.libref|'.'+sd.table+' does not exist')
          return None                            
    
-      return self.io.sasdata2dataframe(sd)
+      if self.nosub:
+         print("too comlicated to show the code, read the source :), sorry.")
+         return None
+      else
+         return self.io.sasdata2dataframe(sd)
    
 class SASdata:
 
@@ -430,6 +444,8 @@ class SASdata:
         code += self.table
         code += ")),NOBS)) tom;"
 
+        nosub = self.sas.nosub
+        self.sas.nosub = False
         ll = self.sas.submit(code, "text")
 
         lastobs = ll['LOG'].rpartition("lastobs=")
@@ -446,6 +462,7 @@ class SASdata:
         code += str(lastobs)
         code += ");run;"
         
+        self.sas.nosub = nosub
         if self.sas.nosub:
            print(code)
            return
