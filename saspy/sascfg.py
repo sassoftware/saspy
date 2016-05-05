@@ -17,7 +17,7 @@
 # 
 # SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8']
 #
-SAS_config_names = ['default', 'http']
+SAS_config_names = ['default', 'http', 'ssh', 'forest', 'httptest']
 
 # Configuration options for pysas - python Dict
 # valid key are:
@@ -38,16 +38,22 @@ SAS_config_options = {'lock_down': True}
 # valid keys are:
 # 'saspath' - path to SAS startup script i.e.: /opt/sasinside/SASHome/SASFoundation/9.4/sas
 # 'options' - SAS options to include in the start up command line - Python List
+# For passwordless ssh connection, the following are also reuqired:
+# 'ssh'     - the ssh command to run
+# 'host'    - the host to connect to
 #
-#
-#
-default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
             }
 
-# sas_en   = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sas',
+ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+            'ssh'    : '/usr/bin/ssh',
+            'host'   : 'tom64'
+            }
+
+# sas_en   = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sas'
 #             }
 #
-# sas_utf8 = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sasutf8',
+# sas_utf8 = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sasutf8'
 #             }
 #
 # sasother = {'saspath' : '/some/other/directory/SASHome/SASFoundation/9.4/sas',
@@ -70,7 +76,15 @@ default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
              
 http     = {'ip'      : 'tomspc',
             'port'    :  80,
-            'context' : 'Stat'
+            'context' : 'Tom1'
+            }
+
+httptest = {'ip'      : 'tomspc',
+            'port'    :  80
+            }
+
+forest   = {'ip'      : 'mitlaxvm01.unx.sas.com',
+            'port'    :  7980
             }
 
 #tom1_http={'ip'      : 'tomspc'}
