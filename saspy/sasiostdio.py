@@ -19,7 +19,7 @@ import signal
 import subprocess
 from time import sleep
 import saspy.sascfg as sascfg
-from saspy.sasbase import *
+#from saspy.sasbase import *
 
 try:
    from IPython.display import HTML
@@ -84,7 +84,7 @@ class SASconfigSTDIO:
           except (KeyboardInterrupt):
              return ''
                    
-class SASsessionSTDIO(SASsession):
+class SASsessionSTDIO():
    '''
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
    cfgname - value in SAS_config_names List of the sascfg.py file

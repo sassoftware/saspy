@@ -152,35 +152,35 @@ class SASsession:
          return
 
       if self.sascfg.mode in ['STDIO', 'SSH', '']:
-         self.io = sasiostdio.SASsessionSTDIO(**kwargs, sascfgname=self.sascfg.name)
+         self._io = sasiostdio.SASsessionSTDIO(**kwargs, sascfgname=self.sascfg.name)
       else:
          if self.sascfg.mode == 'HTTP':
-            self.io = sasiohttp.SASsessionHTTP(**kwargs, sascfgname=self.sascfg.name)
+            self._io = sasiohttp.SASsessionHTTP(**kwargs, sascfgname=self.sascfg.name)
 
    def __del__(self):
-      return self.io.__del__()
+      return self._io.__del__()
 
    def _objcnt(self):
        self._obj_cnt += 1
        return '%04d' % self._obj_cnt
 
    def _startsas(self):
-      return self.io._startsas()
+      return self._io._startsas()
 
    def _endsas(self):
-      return self.io._endsas()
+      return self._io._endsas()
 
    def _getlog(self, **kwargs):
-      return self.io._getlog(**kwargs)
+      return self._io._getlog(**kwargs)
 
    def _getlst(self, **kwargs):
-      return self.io._getlst(**kwargs)
+      return self._io._getlst(**kwargs)
 
    def _getlsttxt(self, **kwargs):
-      return self.io._getlsttxt(**kwargs)
+      return self._io._getlsttxt(**kwargs)
 
    def _asubmit(self, code, result): 
-      return self.io._asubmit(code, result)
+      return self._io._asubmit(code, result)
 
    def submit(self, code: str, results: str ="html", prompt: list = []) -> dict:
       '''
@@ -199,13 +199,13 @@ class SASsession:
       if self.nosub:
          return dict(LOG=code, LST='')
 
-      return self.io.submit(code, results, prompt)
+      return self._io.submit(code, results, prompt)
 
    def saslog(self):
       '''
       this method is used to get the current, full contents of the SASLOG
       '''
-      return self.io.saslog()
+      return self._io.saslog()
 
    def teach_me_SAS(self, nosub: bool):
       '''
@@ -227,7 +227,7 @@ class SASsession:
    
       nosub = self.nosub
       self.nosub = False
-      ll = self.io.submit(code, "text")
+      ll = self._io.submit(code, "text")
       self.nosub = nosub
 
       l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
@@ -260,7 +260,7 @@ class SASsession:
       macro_path=os.path.dirname(os.path.realpath(__file__))
       fd = os.open(macro_path+'/'+'libname_gen.sas', os.O_RDONLY)
       code = os.read(fd, 32767)
-      self.io._asubmit(code.decode(), results='text')
+      self._io._asubmit(code.decode(), results='text')
 
    def sasdata(self, table: str, libref: str ="work", results: str ='HTML')  -> '<SASdata object>':
       '''
@@ -290,7 +290,7 @@ class SASsession:
       if self.nosub:
          print(code)
       else:
-         ll = self.io.submit(code, "text")
+         ll = self._io.submit(code, "text")
          print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0]) 
 
    def read_csv(self, file: str, table: str, libref: str ="work", results: str ='HTML') -> '<SASdata object>':
@@ -314,7 +314,7 @@ class SASsession:
       if self.nosub:
          print(code)
       else:
-         ll = self.io.submit(code, "text")
+         ll = self._io.submit(code, "text")
          if self.exist(table, libref):
             return SASdata(self, libref, table, results)
          else:
@@ -341,8 +341,8 @@ class SASsession:
       if self.nosub:
          print("too comlicated to show the code, read the source :), sorry.")
          return None
-      else
-         self.io.dataframe2sasdata(df, table, libref, results)
+      else:
+         self._io.dataframe2sasdata(df, table, libref, results)
 
       if self.exist(table, libref):
          return SASdata(self, libref, table, results)
@@ -371,8 +371,8 @@ class SASsession:
       if self.nosub:
          print("too comlicated to show the code, read the source :), sorry.")
          return None
-      else
-         return self.io.sasdata2dataframe(sd)
+      else:
+         return self._io.sasdata2dataframe(sd)
    
 class SASdata:
 
@@ -426,10 +426,10 @@ class SASdata:
            return
 
         if self.HTML:
-           ll = self.sas.io.submit(code)
+           ll = self.sas._io.submit(code)
            return HTML(ll['LST'])
         else:
-           ll = self.sas.io.submit(code, "text")
+           ll = self.sas._io.submit(code, "text")
            print(ll['LST'])
    
     def tail(self, obs=5):
@@ -468,10 +468,10 @@ class SASdata:
            return
 
         if self.HTML:
-           ll = self.sas.io.submit(code)
+           ll = self.sas._io.submit(code)
            return HTML(ll['LST'])
         else:
-           ll = self.sas.io.submit(code, "text")
+           ll = self.sas._io.submit(code, "text")
            print(ll['LST'])
    
     def contents(self):
@@ -490,10 +490,10 @@ class SASdata:
            return
 
         if self.HTML:
-           ll = self.sas.io.submit(code)
+           ll = self.sas._io.submit(code)
            return HTML(ll['LST'])
         else:
-           ll = self.sas.io.submit(code, "text")
+           ll = self.sas._io.submit(code, "text")
            print(ll['LST'])
    
     def describe(self):
@@ -519,10 +519,10 @@ class SASdata:
            return
 
         if self.HTML:
-           ll = self.sas.io.submit(code)
+           ll = self.sas._io.submit(code)
            return HTML(ll['LST'])
         else:
-           ll = self.sas.io.submit(code, "text")
+           ll = self.sas._io.submit(code, "text")
            print(ll['LST'])
 
     def to_csv(self, file: str) -> 'The LOG showing the results of the step':
@@ -537,7 +537,7 @@ class SASdata:
         if self.sas.nosub:
            print(code)
         else:
-           ll = self.sas.io.submit(code, "text")
+           ll = self.sas._io.submit(code, "text")
            return 0
 
     def to_df(self) -> '<Pandas Data Frame object>':
@@ -570,10 +570,10 @@ class SASdata:
            return
 
         if self.HTML:
-           ll = self.sas.io.submit(code)
+           ll = self.sas._io.submit(code)
            return HTML(ll['LST'])
         else:
-           ll = self.sas.io.submit(code, "text")
+           ll = self.sas._io.submit(code, "text")
            print(ll['LST'])
 
     def series(self, x: str, y: list, title: str ='') -> 'a line plot of the x,y coordinates':
@@ -606,10 +606,10 @@ class SASdata:
            return
 
         if self.HTML:
-           ll = self.sas.io.submit(code)
+           ll = self.sas._io.submit(code)
            return HTML(ll['LST'])
         else:
-           ll = self.sas.io.submit(code, "text")
+           ll = self.sas._io.submit(code, "text")
            print(ll['LST'])
 
 if __name__ == "__main__":
