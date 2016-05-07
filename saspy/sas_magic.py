@@ -36,8 +36,8 @@ class SASMagic(ipym.Magics):
         if self.lst_len < 0:
             self._get_lst_len()
 
-    @ipym.cell_magic
-    def SAS(self, line, cell):
+    @ipym.line_cell_magic
+    def SAS(self, line, cell=None):
         """
         %%SAS - send the code in the cell to a SAS Server
 
@@ -52,74 +52,83 @@ class SASMagic(ipym.Magics):
                 set sashelp.cars;
             run;
         """
-        
-        saveOpts="proc optsave out=__jupyterSASKernel__; run;"
-        restoreOpts="proc optload data=__jupyterSASKernel__; run;"
-        if len(line)>0:  # Save current SAS Options
-            self.mva.submit(saveOpts)
+        if cell is None:
+            res = self.mva.submit(line + ";" + "run;\nquit;")
+            dis = self._which_display(res['LOG'], res['LST'])
+        else:
+            saveOpts="proc optsave out=__jupyterSASKernel__; run;"
+            restoreOpts="proc optload data=__jupyterSASKernel__; run;"
+            if len(line)>0:  # Save current SAS Options
+                self.mva.submit(saveOpts)
 
-        if line.lower()=='smalllog':
-            self.mva.submit("options nosource nonotes;")
+            if line.lower()=='smalllog':
+                self.mva.submit("options nosource nonotes;")
 
-        elif line is not None and line.startswith('option'):
-            self.mva.submit(line + ';')
+            elif line is not None and line.startswith('option'):
+                self.mva.submit(line + ';')
 
-        res = self.mva.submit(cell)
-        dis = self._which_display(res['LOG'], res['LST'])
+            res = self.mva.submit(cell)
+            dis = self._which_display(res['LOG'], res['LST'])
 
-        if len(line)>0:  # Restore SAS options 
-            self.mva.submit(restoreOpts)
+            if len(line)>0:  # Restore SAS options 
+                self.mva.submit(restoreOpts)
 
         return dis
 
     @ipym.line_magic
-    def FULLLOG(self,line):
+    def SASLOG(self,line):
         """
-        %FULLLOG
+        %SASLOG
 
-        This line magic will return the full SAS log for the current notebooks SAS session.
-        This includes the log for all Cells that have used a SAS Cell magic like these: %%SAS, %%PROC, %%IML, %%OPTMODEL
+        This line magic will return the SAS log from the current notebooks SAS session.
+        A SAS session is created with the first submit of a cell with an associated SAS magic such as:
+              %%SAS, %%OPTMODEL, %%IML, %%SASPROC
+        Without any line options the magic will return the log from the last cell that used a SAS magic.  
+        
+        Use the line option -FULL to request the full log of the current SAS Session.
+        This will include the log for all cells that have been computed with a SAS magic in the current session
+        
+        Note that a session will only include submissions within the current notebook session.  
+        A SAS session clears when notebooks are halted.
+
         """
-        res = self.mva._log
+        if line.lower()=='-full':
+            res = self.mva._log
+        else:
+            res = self.mva._logr
         color_log = highlight(res, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
         return HTML(color_log)    	
 
-    @ipym.line_magic
-    def LOG(self,line):
+    @ipym.line_cell_magic
+    def SASPROC(self,line,cell=None):
         """
-        %LOG
-
-        This cell magic will return the log for the last submitted cell that requested SAS execution.
-        For instance the last cell that ran one of these magics: %%SAS, %%PROC, %%IML, %%OPTMODEL
-        """
-        res = self.mva._logr
-        color_log = highlight(res, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
-        return HTML(color_log)
-
-    @ipym.cell_magic
-    def PROC(self,line,cell):
-        """
-        %%PROC PROCNAME <options>
+        %%SASPROC PROCNAME <options>
     	
     	This cell magic will execute the contents of the cell in a SAS session
-    	It will send the code the proc given by PROCNAME
-    	any options for the proc can be specified after the PROCNAME
+    	It will send the cell contents to the proc given by PROCNAME
+    	any options for the proc can be specified after the PROCNAME on the line
     	the magic will not check for missing required options like data= as these differ by proc
+        
+        If the magic does not have cell content you should use the similar %SASPROC line magic
+             The error message will recommend the %SASPROC line magic
 
 	Example 1:
-		%%PROC PRINT data=sashelp.cars
+		%%SASPROC PRINT data=sashelp.cars
 		var name age;
-		
-	Example 2:
-		%%PROC IML
+
+        Example 2:
+                %SASPROC PRINT data=sashelp.class
+
+	Example 3:
+		%%SASPROC IML
 		a = I(6); * 6x6 identity matrix;
 		b = j(5,5,0); *5x5 matrix of 0's;
 		c = j(6,1); *6x1 column vector of 1's;
 		d=diag({1 2 4});
 		e=diag({1 2, 3 4});
 		
-	Example 3:
-		%%PROC OPTMODEL PRINTLEVEL=2
+	Example 4:
+		%%SASPROC OPTMODEL PRINTLEVEL=2
 		/* declare variables */
 		var choco >= 0, toffee >= 0;
 		
@@ -136,8 +145,8 @@ class SASMagic(ipym.Magics):
 		/* display solution */
 		print choco toffee;
 		
-	Example 4:
-		%%PROC SQL UNDOPOLICY=NONE
+	Example 5:
+		%%SASPROC SQL UNDOPOLICY=NONE
 		create table work.class as
 		    select * from sashelp.class;
 		create table work.class as
@@ -145,11 +154,10 @@ class SASMagic(ipym.Magics):
 		    from work.class
 		    group by sex;
 	"""
-        
-        saveOpts="proc optsave out=__jupyterSASKernel__; run;"
-        restoreOpts="proc optload data=__jupyterSASKernel__; run;"
-        
-        res = self.mva.submit("proc " + line + ";" + '\n' + cell + '\n' + "run;\nquit;")
+        if cell is None:
+            res = self.mva.submit("proc " + line + ";" + ";\nrun;\nquit;")
+        else:
+            res = self.mva.submit("proc " + line + ";" + '\n' + cell + '\n' + ";\nrun;\nquit;")
         dis = self._which_display(res['LOG'], res['LST'])
         return dis
         
