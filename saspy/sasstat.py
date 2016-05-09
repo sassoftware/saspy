@@ -175,6 +175,30 @@ class SASstat:
                     stmt.pop(extra_set.pop())
         return True
 
+    def _run_proc(self, procname, required_set, legal_set, **kwargs):
+        data=kwargs.pop('data',None)
+        chk= self._stmt_check(required_set, legal_set, kwargs)
+        obj1=[]; nosub=False; objname=''
+        if chk:
+            objtype=procname.lower()
+            objname='sta'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
+            code=self._makeProccallMacro(objtype, objname, data, kwargs)
+            logger.debug(procname+" macro submission: " + str(code))
+            if not self.sas.nosub:
+                self.sas._asubmit(code,"text")
+                try:
+                    obj1=self._objectmethods(objname)
+                    logger.debug(obj1)
+                except Exception:
+                    pass
+            else:
+                print(code)
+                nosub=True
+        else:
+            print("Error in code submission")
+
+        return (SAS_results(obj1, self.sas, objname, nosub))
+
 
     def hpsplit(self, **kwargs):
         '''
@@ -185,146 +209,36 @@ class SASstat:
         required_set={}
         legal_set={'cls','code','grow','id','model',
                    'partition','performance','prune','rules'}
-        data=kwargs.pop('data',None)
         logger.debug("kwargs type: " + str(type(kwargs)))
-        chk= self._stmt_check(required_set, legal_set,kwargs)
-        if chk:
-            objtype='hpsplit'
-            objname='hps'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, data, kwargs)
-            logger.debug("HPSPLIT macro submission: " + str(code))
-            self.sas._asubmit(code,"text")
-            try:
-                obj1=self._objectmethods(objname)
-                logger.debug(obj1)
-            except Exception:
-                obj1=[]
+        return self._run_proc("HPSPLIT", required_set, legal_set, **kwargs)
 
-            return (SAS_results(obj1, self.sas, objname))
-        else:
-            print("Error in code submission")
-
-
-        if self.sas.nosub:
-           print(code)
-           return (SAS_results([], self, objname, True))
-
-        res = self.sas._asubmit(code,"text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            #print("Exception Block:", sys.exc_info()[0])
-            obj1=[]
-
-        return (SAS_results(obj1, self, objname))
     def reg(self, **kwargs):
         required_set={'model'}
         legal_set={'add','by','code','id','var'
                    'lsmeans','model','random','repeated',
                    'slice','test','weight'}
 
-        data=kwargs.pop('data',None)
         logger.debug("kwargs type: " + str(type(kwargs)))
-        chk= self._stmt_check(required_set, legal_set,kwargs)
-        if chk:
-            objtype='reg'
-            objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, data, kwargs)
-            logger.debug("REG macro submission: " + str(code))
-            self.sas._asubmit(code,"text")
-            try:
-                obj1=self._objectmethods(objname)
-                logger.debug(obj1)
-            except Exception:
-                obj1=[]
+        return self._run_proc("REG", required_set, legal_set, **kwargs)
 
-            return (SAS_results(obj1, self.sas, objname))
-        else:
-            print("Error in code submission")
-
-        if self.sas.nosub:
-           print(code)
-           return (SAS_results([], self, objname, True))
-
-        res = self.sas._asubmit(code,"text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]
-        return (SAS_results(obj1, self, objname))
     def mixed(self, **kwargs):
         required_set={'model'}
         legal_set={'by','cls','code','contrast','estimate','id',
                    'lsmeans','model','random','repeated',
                    'slice','weight'}
 
-        data=kwargs.pop('data',None)
         logger.debug("kwargs type: " + str(type(kwargs)))
-        chk= self._stmt_check(required_set, legal_set,kwargs)
-        if chk:
-            objtype='mixed'
-            objname='mix'+self.sas._objcnt()
-            code=self._makeProccallMacro(objtype, objname, data, kwargs)
-            logger.debug("Mixed Macro submission: " + str(code))
-            self.sas._asubmit(code,"text")
-            try:
-                obj1=self._objectmethods(objname)
-                logger.debug(obj1)
-            except Exception:
-                obj1=[]
+        return self._run_proc("Mixed", required_set, legal_set, **kwargs)
 
-            return (SAS_results(obj1, self.sas, objname))
-        else:
-            print("Error in code submission")
-        if self.sas.nosub:
-           print(code)
-           return (SAS_results([], self, objname, True))
-
-        res = self.sas._asubmit(code, "text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]
-        return (SAS_results(obj1, self, objname))
     def glm(self, **kwargs):
         required_set={'model'}
         legal_set={'absorb','by','cls','contrast','estimate','freq','id',
                    'lsmeans','manova','means', 'model','random','repeated',
                    'test','weight'}
 
-        data=kwargs.pop('data',None)
         logger.debug("kwargs type: " + str(type(kwargs)))
-        chk= self._stmt_check(required_set, legal_set,kwargs)
-        if chk:
-            objtype='glm'
-            objname=objtype+self.sas._objcnt() #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, data, kwargs)
-            logger.debug("GLM macro submission: " + str(code))
-            self.sas._asubmit(code,"text")
-            try:
-                obj1=self._objectmethods(objname)
-                logger.debug(obj1)
-            except Exception:
-                obj1=[]
+        return self._run_proc("GLM", required_set, legal_set, **kwargs)
 
-            return (SAS_results(obj1, self.sas, objname))
-        else:
-            print("Error in code submission")
-
-        if self.sas.nosub:
-           print(code)
-           return (SAS_results([], self, objname, True))
-
-        res = self.sas._asubmit(code,"text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]
-        return (SAS_results(obj1, self, objname))
     def logistic(self, **kwargs):
 
         required_set={'model'}
@@ -339,38 +253,8 @@ class SASstat:
                    'exact','freq','lsmeans','oddsratio','roc','score','slice',
                    'store','strata','units','weight'}
 
-        data=kwargs.pop('data',None)
         logger.debug("kwargs type: " + str(type(kwargs)))
-        chk= self._stmt_check(required_set, legal_set,kwargs)
-        logger.debug("chk value: " + str(chk))
-        if chk:
-            objtype='logistic'
-            objname='log'+self.sas._objcnt() #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, data, kwargs)
-            logger.debug("LOGISTIC macro submission: " + str(code))
-            self.sas._asubmit(code,"text")
-            try:
-                obj1=self._objectmethods(objname)
-                logger.debug(obj1)
-            except Exception:
-                obj1=[]
-
-            return (SAS_results(obj1, self.sas, objname))
-        else:
-            print("Error in code submission")
-
-
-        if self.sas.nosub:
-           print(code)
-           return (SAS_results([], self, objname, True))
-
-        res = self.sas._asubmit(code,"text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]
-        return (SAS_results(obj1, self, objname))
+        return self._run_proc("LOGISTIC", required_set, legal_set, **kwargs)
 
 from collections import namedtuple
 
@@ -392,9 +276,6 @@ class SAS_results(object):
             return getattr(self, attr)
         if attr.upper() in self._attrs:
             #print(attr.upper())
-            if self.nosub:
-                print('How did I get here? This SAS Result object was created in teach_me_SAS mode, so it has no results')
-                return
             data = self._go_run_code(attr)
             '''
             if not attr.lower().endswith('plot'):
@@ -413,7 +294,10 @@ class SAS_results(object):
                 print('This SAS Result object was created in teach_me_SAS mode, so it has no results')
                 return
             else:
-                raise AttributeError
+                #raise AttributeError
+                print("Result named "+attr+" not found. Valid results are:"+str(self._attrs))
+                return
+
         return HTML('<h1>'+attr+'</h1>'+data)
 
     def _go_run_code(self, attr):
