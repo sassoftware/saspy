@@ -153,7 +153,7 @@ class SASsession:
    '''
    #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list ='') -> '<SASsession object>':
    def __init__(self, **kwargs) -> '<SASsession object>':
-      self.loaded_macros = False
+      self._loaded_macros = False
       self._obj_cnt      = 0
       self.nosub         = False
       self.sascfg        = SASconfig(**kwargs)
@@ -250,9 +250,9 @@ class SASsession:
       '''
       This methods creates a SASstat object which you can use to run various analytics. See the sasstat.py module.
       '''
-      if not self.loaded_macros:
+      if not self._loaded_macros:
          self._loadmacros()
-         loaded_marcos = True
+         self._loaded_macros = True
 
       return SASstat(self)
 
@@ -260,9 +260,9 @@ class SASsession:
       '''
       This methods creates a SASets object which you can use to run various analytics. See the sasets.py module.
       '''
-      if not self.loaded_macros:
+      if not self._loaded_macros:
          self._loadmacros()
-         loaded_marcos = True
+         self._loaded_macros = True
 
       return SASets(self)
 
@@ -271,6 +271,7 @@ class SASsession:
       fd = os.open(macro_path+'/'+'libname_gen.sas', os.O_RDONLY)
       code = os.read(fd, 32767)
       self._io._asubmit(code.decode(), results='text')
+      os.close(fd)
 
    def sasdata(self, table: str, libref: str ="work", results: str ='HTML')  -> '<SASdata object>':
       '''

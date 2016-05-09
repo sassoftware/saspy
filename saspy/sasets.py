@@ -1,4 +1,5 @@
 from IPython.core.display import HTML
+import IPython.display as id
 import time
 import logging
 import os
@@ -16,7 +17,6 @@ class SASets:
         logger.debug("Initalization of SAS Macro: " + str(self.sas.saslog()))
 
     def _objectmethods(self,obj,*args):
-        clear=self.sas._getlog(1)
         code  ="%listdata("
         code +=obj
         code +=");"
@@ -341,4 +341,11 @@ class SAS_results(object):
     def sasdata(self, table):
         x=self.sas.sasdata(table,'_'+self._name)
         return (x)
+
+    def ALL(self):
+        '''
+        This method shows all the results attributes for a given object
+        '''
+        for i in self._attrs:
+            id.display(self.__getattr__(i))
 
