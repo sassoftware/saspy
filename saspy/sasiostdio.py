@@ -203,7 +203,7 @@ class SASsessionSTDIO():
          except (subprocess.TimeoutExpired):
             print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
             os.kill(self.pid, signal.SIGKILL)
-         print("SAS Connection terminated.")
+         print("SAS Connection terminated. Subprocess id was "+str(self.pid))
          self.pid = None
       return rc
 
@@ -359,6 +359,10 @@ class SASsessionSTDIO():
       if rc != None:
          self.pid = None
          return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+
+      #to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
+      while(len(self.stdout.read1(4096)) > 0):
+         continue
 
       if results.upper() != "HTML":
          ods = False
@@ -585,12 +589,6 @@ class SASsessionSTDIO():
             lst = self.stdout.read1(4096).decode()
 
       return log
-
-   def __flushlst__(self):
-      lst = b'hi'
-      while(len(lst) > 0):
-         lst = self.stdout.read1(4096)
-         continue
 
    def saslog(self):
       '''
