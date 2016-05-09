@@ -155,7 +155,11 @@ class SASets:
         #legal statments
         legal_set=legal
         if (len(legal_set)):
-            extra_set=set(stmt.keys()).difference(legal_set|req_set)
+            if len(req_set):
+               tot_set = legal_set | req_set
+            else:
+               tot_set = legal_set
+            extra_set=set(stmt.keys()).difference(tot_set)
             if extra_set:
                 print ("The following %d statements are invalid and will be ignored: "% len(extra_set))
                 for key in range(0,len(extra_set)):
@@ -195,10 +199,10 @@ class SASets:
         required_set={'identify'}
         legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast'}
         data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
+        chk= self._stmt_check(required_set,legal_set,kwargs)
         objtype='arima'
         objname='arm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
+        code=self._makeProccallMacro(objtype, objname, data, kwargs)
         logger.debug("ARIMA macro submission: " + str(code))
         self.sas._asubmit(code,"text")
         try:
@@ -217,10 +221,10 @@ class SASets:
                     'level','model','nloptions','performance','outlier','randomreg','season','slope'
                     'splinereg','splineseason'}
         data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
+        chk= self._stmt_check(required_set,legal_set,kwargs)
         objtype='ucm'
         objname='ucm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
+        code=self._makeProccallMacro(objtype, objname, data, kwargs)
         logger.debug("UCM macro submission: " + str(code))
         self.sas._asubmit(code,"text")
         try:
@@ -234,13 +238,13 @@ class SASets:
         '''Python method to call the ESM procedure
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_overview.htm
         '''
-        required_set={''}
+        required_set={}
         legal_set={ 'by', 'id', 'forecast'}
         data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
+        chk= self._stmt_check(required_set,legal_set,kwargs)
         objtype='esm'
         objname='esm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
+        code=self._makeProccallMacro(objtype, objname, data, kwargs)
         logger.debug("ESM macro submission: " + str(code))
         self.sas._asubmit(code,"text")
         try:
@@ -253,13 +257,13 @@ class SASets:
         '''Python method to call the TIMEID procedure
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_overview.htm
         '''
-        required_set={''}
+        required_set={}
         legal_set={ 'by', 'id'}
         data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
-        objtype='tid'
+        chk= self._stmt_check(required_set,legal_set,kwargs)
+        objtype='timeid'
         objname='tid'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
+        code=self._makeProccallMacro(objtype, objname, data, kwargs)
         logger.debug("TIMEID macro submission: " + str(code))
         self.sas._asubmit(code,"text")
         try:
@@ -273,13 +277,13 @@ class SASets:
         '''Python method to call the TIMEDATA procedure
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_overview.htm
         '''
-        required_set={''}
+        required_set={}
         legal_set={ 'by', 'id', 'fcmport','outarrays','outscalars', 'var', 'prog_stmts'}
         data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
-        objtype='tda'
+        chk= self._stmt_check(required_set,legal_set,kwargs)
+        objtype='timedata'
         objname='tda'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
+        code=self._makeProccallMacro(objtype, objname, data, kwargs)
         logger.debug("TIMEDATA macro submission: " + str(code))
         self.sas._asubmit(code,"text")
         try:
@@ -323,7 +327,9 @@ class SAS_results(object):
             '''
 
         else:
-             raise AttributeError
+             #raise AttributeError
+             print("Result named "+attr+" not found. Valid results are:"+str(self._attrs))
+             return
         return HTML(data)
 
     def _go_run_code(self, attr):

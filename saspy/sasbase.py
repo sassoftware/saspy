@@ -21,7 +21,7 @@
 # to SAS. Currently supported methods are STDIO, connecting to a local (same machine) Linux SAS using
 # stdio methods (fork, exec, and pipes). The is also support for running STDIO over ssh, which can 
 # connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interupt
-# handling, as the local STDIO method can. An interupt on this method will terminate the SAS process; 
+# handling, as the local STDIO method can. An interupt on this method can only terminate the SAS process; 
 # you'll be prompted to terminate or wait for completion. The third method is HTTP, which can connect
 # to SAS Viya via the Compute Servie, a restfull micro service in the Viay system.
 #
@@ -134,12 +134,22 @@ class SASsession:
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
    cfgname - value in SAS_config_names List of the sascfg.py file
    kernel  - None - internal use when running the SAS_kernel notebook
+
+   For the STDIO IO Module
    saspath - overrides saspath Dict entry of cfgname in sascfg.py file
    options - overrides options Dict entry of cfgname in sascfg.py file
 
-   and for running over passwordless ssh
+   and for running STDIO over passwordless ssh
    ssh     - full path of the ssh command; /usr/bin/ssh for instance
    host    - host name of the remote machine
+
+   and for the HTTP IO module to comnnect to Viya
+   ip      - host address 
+   port    - port; the code Defaults this to 80 (the Compute Services default port)
+   context - context name defined on the compute service
+   options - SAS options to include in the start up command line
+   user    - user name to authenticate with
+   pw      - password to authenticate with
    '''
    #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list ='') -> '<SASsession object>':
    def __init__(self, **kwargs) -> '<SASsession object>':

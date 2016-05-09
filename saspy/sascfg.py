@@ -13,11 +13,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-# Configuration names for SAS - python List
-# 
-# SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8']
+# Configuration Names for SAS - python List
+# This is the list of allowed configuration definitions that can be used. The definition are defined below.
+# The various options for the different access methods can be specified on the SASsession() i.e.:
+# sas = SASsession(cfgname='default', options='-fullstimer', user='me')
 #
-SAS_config_names = ['default', 'http', 'ssh', 'forest', 'httptest']
+# based upon the lock_down configuration option below, you may or may not be able to override option
+# that are defined already. Any necessary option (like user, pw for HTTP) that are not defined will be 
+# prompted for at run time. To dissallow overrides of OPTION, when you don't have any specified, simply
+# specify options=' '. This way it's specified so it can't be overridden, even though you don't have any
+# extra options you want applied.
+# 
+# SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', 'forest', 'httptest']
+#
+SAS_config_names = ['default', 'http', 'ssh']
 
 # Configuration options for pysas - python Dict
 # valid key are:
@@ -26,7 +35,10 @@ SAS_config_names = ['default', 'http', 'ssh', 'forest', 'httptest']
 #
 SAS_config_options = {'lock_down': True}
 
-# These need path to SASHome and version number - python Dict
+# Configuration Definitions
+#
+# For STDIO and STDIO over SSH access methods
+# These need path to SASHome and optional startup options - python Dict
 # The default path to the sas start up script is: /opt/sasinside/SASHome/SASFoundation/9.4/sas
 # A usual install path is: /opt/sasinside/SASHome
 #
@@ -36,11 +48,12 @@ SAS_config_options = {'lock_down': True}
 # to point to the utf8 start up script (bin/sas_u8), or another link made (sasutf8) to point to that.  
 #
 # valid keys are:
-# 'saspath' - path to SAS startup script i.e.: /opt/sasinside/SASHome/SASFoundation/9.4/sas
+# 'saspath' - [REQUIRED] path to SAS startup script i.e.: /opt/sasinside/SASHome/SASFoundation/9.4/sas
 # 'options' - SAS options to include in the start up command line - Python List
+#
 # For passwordless ssh connection, the following are also reuqired:
-# 'ssh'     - the ssh command to run
-# 'host'    - the host to connect to
+# 'ssh'     - [REQUIRED] the ssh command to run
+# 'host'    - [REQUIRED] the host to connect to
 #
 default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
             }
@@ -62,15 +75,15 @@ ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 #             }
 
 
-# Future - for the Compute Service
-# These need ip addr and port - python Dict
+# Future - for the HTTP access method to connect to the Compute Service
+# These need ip addr and port, other values will be prompted for - python Dict
 # valid keys are:
-# 'ip'      - host address 
-# 'port'    - port; the code Defaults this to 80 (the Compute Services default port)
-# 'context' - context name defined on the compute service
+# 'ip'      - [REQUIRED] host address 
+# 'port'    - [REQUIRED] port; the code Defaults this to 80 (the Compute Services default port)
+# 'context' - context name defined on the compute service  [PROMTED for at runtime if more than one defined]
 # 'options' - SAS options to include in the start up command line
-# 'user'    - not suggested
-# 'pw'      - really not suggested
+# 'user'    - not suggested [REQUIRED but PROMTED for at runtime]
+# 'pw'      - really not suggested [REQUIRED but PROMTED for at runtime]
 # 
 #
              
