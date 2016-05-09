@@ -91,6 +91,10 @@ class SASsessionSTDIO():
    kernel  - None - internal use when running the SAS_kernel notebook
    saspath - overrides saspath Dict entry of cfgname in sascfg.py file
    options - overrides options Dict entry of cfgname in sascfg.py file
+
+   and for running STDIO over passwordless ssh
+   ssh     - full path of the ssh command; /usr/bin/ssh for instance
+   host    - host name of the remote machine
    '''
    #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list ='') -> '<SASsession object>':
    def __init__(self, **kwargs):

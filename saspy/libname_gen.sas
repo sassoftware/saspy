@@ -57,6 +57,7 @@ options pagesize=max;
         method=memname;
         keep ds objtype objname method;
     run;
+    ods listing;
 %mend;
 *%mangobj(cars,reg,sashelp.cars);
 /*
