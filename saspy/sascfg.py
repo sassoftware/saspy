@@ -60,7 +60,7 @@ default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
 
 ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
             'ssh'    : '/usr/bin/ssh',
-            'host'   : 'tom64'
+            'host'   : 'tom64-2'
             }
 
 # sas_en   = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sas'
