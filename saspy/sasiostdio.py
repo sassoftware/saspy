@@ -305,6 +305,11 @@ class SASsessionSTDIO():
       return lst.replace(chr(12), '\n')
 
    def _asubmit(self, code, results="html"):
+      # as this is an _ method, it's not really to be used. Of note is that if this is used and if what it submitted generates
+      # anything to the lst, then unless _getlst[txt] is called, then next submit will happen to get the lst this wrote, plus
+      # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
+      # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
+      # unnecessary read in submit as this can't happen in the current code. 
       odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods html5 close;ods listing;\n"
       ods      = True;
@@ -360,9 +365,10 @@ class SASsessionSTDIO():
          self.pid = None
          return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
 
-      #to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
-      while(len(self.stdout.read1(4096)) > 0):
-         continue
+      # to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
+      # removing this and adding comment in _asubmit to use _getlst[txt] so this will never be necessary; delete later
+      #while(len(self.stdout.read1(4096)) > 0):
+      #   continue
 
       if results.upper() != "HTML":
          ods = False
