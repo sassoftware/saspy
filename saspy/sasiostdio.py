@@ -106,6 +106,7 @@ class SASsessionSTDIO():
       self.sascfg   = SASconfigSTDIO(**kwargs)
       self._log_cnt = 0
       self._log     = ""
+      self._sb      = kwargs.get('sb', None)
 
       self._startsas()
 
@@ -601,6 +602,50 @@ class SASsessionSTDIO():
       this method is used to get the current, full contents of the SASLOG
       '''
       return self._log
+
+   def read_csv(self, file: str, table: str, libref: str ="work", results: str ='HTML', nosub: bool =False) -> '<SASdata object>':
+      '''
+      This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
+      file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
+      table   - the name of the SAS Data Set to create
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      results - format of results, HTML is default, TEXT is the alternative
+      '''
+      code  = "filename x "
+   
+      if file.lower().startswith("http"):
+         code += "url "
+   
+      code += "\""+file+"\";\n"
+      code += "proc import datafile=x out="
+      code += libref+"."+table
+      code += " dbms=csv replace; run;"
+   
+      if nosub:
+         print(code)
+      else:
+         ll = self.submit(code, "text")
+         if self._sb.exist(table, libref):
+            return self._sb.sasdata(table, libref, results)
+         else:
+            return None
+   
+   def to_csv(self, file: str, data: '<SASdata object>', nosub: bool =False) -> 'The LOG showing the results of the step':
+      '''
+      This method will export a SAS Data Set to a file in CSV format.
+      file    - the OS filesystem path of the file to be created (exported from this SAS Data Set)
+      '''
+      code  = "options nosource;\n"
+      code += "filename x \""+file+"\";\n"
+      code += "proc export data="+data.libref+"."+data.table+" outfile=x"
+      code += " dbms=csv replace; run;"
+      code += "options source;\n"
+
+      if nosub:
+         print(code)
+      else:
+         ll = self.submit(code, "text")
+         print(ll['LOG'])
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="work", results: str ='HTML') -> '<SASdata object>':
       '''

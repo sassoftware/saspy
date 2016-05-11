@@ -162,10 +162,10 @@ class SASsession:
          return
 
       if self.sascfg.mode in ['STDIO', 'SSH', '']:
-         self._io = sasiostdio.SASsessionSTDIO(**kwargs, sascfgname=self.sascfg.name)
+         self._io = sasiostdio.SASsessionSTDIO(**kwargs, sascfgname=self.sascfg.name, sb=self)
       else:
          if self.sascfg.mode == 'HTTP':
-            self._io = sasiohttp.SASsessionHTTP(**kwargs, sascfgname=self.sascfg.name)
+            self._io = sasiohttp.SASsessionHTTP(**kwargs, sascfgname=self.sascfg.name, sb=self)
 
    def __del__(self):
       return self._io.__del__()
@@ -312,24 +312,7 @@ class SASsession:
       libref  - the libref for the SAS Data Set being created. Defaults to WORK
       results - format of results, HTML is default, TEXT is the alternative
       '''
-      code  = "filename x "
-   
-      if file.startswith(("http","HTTP")):
-         code += "url "
-   
-      code += "\""+file+"\";\n"
-      code += "proc import datafile=x out="
-      code += libref+"."+table
-      code += " dbms=csv replace; run;"
-   
-      if self.nosub:
-         print(code)
-      else:
-         ll = self._io.submit(code, "text")
-         if self.exist(table, libref):
-            return SASdata(self, libref, table, results)
-         else:
-            return None
+      return self._io.read_csv(file, table, libref, results, self.nosub)
    
    def df2sd(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="work", results: str ='HTML') -> '<SASdata object>':
       '''
@@ -538,18 +521,10 @@ class SASdata:
 
     def to_csv(self, file: str) -> 'The LOG showing the results of the step':
         '''
-        This method will export a SAS Data Set to a file in CCSV format.
+        This method will export a SAS Data Set to a file in CSV format.
         file    - the OS filesystem path of the file to be created (exported from this SAS Data Set)
         '''
-        code  = "filename x \""+file+"\";\n"
-        code += "proc export data="+self.libref+"."+self.table+" outfile=x"
-        code += " dbms=csv replace; run;"
-
-        if self.sas.nosub:
-           print(code)
-        else:
-           ll = self.sas._io.submit(code, "text")
-           return 0
+        return self.sas._io.to_csv(file, self, self.sas.nosub)
 
     def to_df(self) -> '<Pandas Data Frame object>':
         '''
