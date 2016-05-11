@@ -14,4 +14,6 @@
 #  limitations under the License.
 #
 from saspy.sasbase import *
+from saspy.sasstat import *
+from saspy.sasets  import *
 from saspy.SASLogLexer import *
