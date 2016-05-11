@@ -725,7 +725,7 @@ class SASsessionSTDIO():
       del vartype[nvars]
    
       code  = "data _null_; set "+sd.libref+"."+sd.table+"(obs=1);put 'FMT_CATS=';\n"
-      for i in range(len(varlist)):
+      for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;\n"
    
@@ -748,7 +748,7 @@ class SASsessionSTDIO():
       code  = ""
       code += "filename sock socket '"+host+":"+str(port)+"' lrecl=32767 recfm=v termstr=LF;\n"
       code += " data _null_; set "+sd.libref+"."+sd.table+";\n file sock; put "
-      for i in range(len(varlist)):
+      for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N' and varcat[i] not in sas_dtdt_fmts:
             code += 'best32. '
@@ -777,7 +777,15 @@ class SASsessionSTDIO():
       
       df = pd.DataFrame.from_records(r, columns=varlist)
 
-      return df.convert_objects(convert_numeric=True, convert_dates=True, copy=False)
+      for i in range(nvars):
+         if vartype[i] == 'N':
+            if varcat[i] not in sas_dtdt_fmts:
+               df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce') 
+               df[varlist[i]] = df[varlist[i]].astype('float64')
+            else:
+               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce') 
+
+      return df
    
 if __name__ == "__main__":
     startsas()
