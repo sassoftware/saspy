@@ -330,7 +330,7 @@ class SASsessionSTDIO():
 
       return str(out)
 
-   def submit(self, code: str, results: str ="html", prompt: list = []) -> dict:
+   def submit(self, code: str, results: str ="html", prompt: list =[]) -> dict:
       '''
       This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
       code    - the SAS statements you want to execute 
@@ -755,7 +755,7 @@ class SASsessionSTDIO():
          if i < (len(varlist)-1):
             code += "'09'x "
       code += "; run;\n"
-   
+
       sock.listen(0)
       self._asubmit(code, 'text')
       newsock = sock.accept()
@@ -774,16 +774,16 @@ class SASsessionSTDIO():
       r = []
       for i in datar.splitlines():
          r.append(tuple(i.split(sep='\t')))
-      
+
       df = pd.DataFrame.from_records(r, columns=varlist)
 
       for i in range(nvars):
          if vartype[i] == 'N':
             if varcat[i] not in sas_dtdt_fmts:
                df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce') 
-               df[varlist[i]] = df[varlist[i]].astype('float64')
+               #df[varlist[i]] = df[varlist[i]].astype('float64')
             else:
-               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce') 
+               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='ignore') 
 
       return df
    
