@@ -217,7 +217,7 @@ class SASsessionHTTP():
    def _startsas(self):
       # POST Session
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-      d1 = '{"name":self.sascfg.ctxname, "description":"pySAS session", "version":1, "environment":{"options":self.sascfg.options}}'
+      d1 = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":"'+self.sascfg.options+'"}}'
       headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', "/compute/sessions?contextName="+self.sascfg.ctxname, body=d1, headers=headers)
       req = conn.getresponse()
@@ -245,7 +245,7 @@ class SASsessionHTTP():
       if self._sessionid:
          # DELETE Session
          conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-         d1 = '{"name":self.sascfg.ctxname, "description":"pySAS session", "version":1, "environment":{"options":self.sascfg.options}}'
+         d1 = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":"'+self.sascfg.options+'"}}'
          headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
          conn.request('DELETE', "/compute/sessions/"+self._sessionid, body=d1, headers=headers)
          req = conn.getresponse()
