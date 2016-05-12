@@ -19,13 +19,11 @@ import signal
 import subprocess
 from time import sleep
 
-import saspy.sascfg as sascfg
+import saspy.sascfg as SAScfg
 
 
 class SASconfig:
     def __init__(self, cfgname='', kernel=None, saspath='', options=''):
-        # import pdb; pdb.set_trace()
-
         self.configs = []
         self._kernel = kernel
         self.saspath = saspath
@@ -33,7 +31,7 @@ class SASconfig:
 
         # GET Config options
         try:
-            self.cfgopts = getattr(sascfg, "SAS_config_options")
+            self.cfgopts = getattr(SAScfg, "SAS_config_options")
         except:
             self.cfgopts = {}
         lock = self.cfgopts.get('lock_down', True)
@@ -45,7 +43,7 @@ class SASconfig:
             options = ''
 
         # GET Config names
-        self.configs = getattr(sascfg, "SAS_config_names")
+        self.configs = getattr(SAScfg, "SAS_config_names")
 
         if len(cfgname) == 0:
             if len(self.configs) == 0:
@@ -57,9 +55,8 @@ class SASconfig:
                     if kernel is None:
                         print("Using SAS Config named: " + cfgname)
                 else:
-                    cfgname = self._prompt(
-                        "Please enter the name of the SAS Config you wish to run. Available Configs are: " + str(
-                            self.configs) + " ")
+                    cfgname = self._prompt("Please enter the name of the SAS Config you wish to run. Available Configs are: " +
+                                           str(self.configs) + " ")
 
         while cfgname not in self.configs:
             cfgname = self._prompt(
@@ -67,11 +64,14 @@ class SASconfig:
                     self.configs) + " ")
 
         self.name = cfgname
-        cfg = getattr(sascfg, cfgname)
+        cfg = getattr(SAScfg, cfgname)
         if len(saspath) == 0:
             self.saspath = cfg.get('saspath', '/opt/sasinside/SASHome/SASFoundation/9.4/sas')
         if len(options) == 0:
             self.options = cfg.get('options', '')
+
+        self.ssh         = cfg.get('ssh', None)
+        self.host        = cfg.get('host', None)
 
     def _prompt(self, prompt, pw=False):
         if self._kernel is None:
@@ -104,7 +104,7 @@ class SASsession:
         self._log_cnt = 0
         self._log = ""
 
-        self._startsas(self.sascfg)
+        self._startsas()
 
     def __del__(self):
         if self.pid:
@@ -116,13 +116,19 @@ class SASsession:
             self._log_cnt += 1
         return '%08d' % self._log_cnt
 
-    def _startsas(self, sasconfig):
+    def _startsas(self):
         if self.pid:
             return self.pid
 
-        pgm = sasconfig.saspath
-        parms = [pgm]
-        parms += sasconfig.options
+        if self.sascfg.ssh:
+           pgm    = self.sascfg.ssh
+           parms  = [pgm]
+           parms += ["-t", self.sascfg.host, self.sascfg.saspath]
+        else:
+           pgm    = self.sascfg.saspath
+           parms  = [pgm]
+
+        parms += self.sascfg.options
         parms += ["-pagesize", "MAX"]
         parms += ["-nodms"]
         parms += ["-stdio"]
@@ -307,6 +313,16 @@ class SASsession:
         if self.pid is None:
             return dict(LOG=b"No SAS process attached. SAS process has terminated unexpectedly.", LST=b'', ABORT=True)
 
+        if self.sascfg.ssh:
+           response = self.sascfg._prompt(
+                     "SAS attention handling not supported over ssh. Please enter (T) to terminate SAS or (C) to continue.")
+           while True:
+              if response.upper() == 'C':
+                 return dict(LOG='', LST='', BC=True)
+              if response.upper() == 'T':
+                 break
+              response = self.sascfg._prompt("Please enter (T) to terminate SAS or (C) to continue.")
+              
         interrupt = signal.SIGINT
         os.kill(self.pid, interrupt)
         sleep(.25)
