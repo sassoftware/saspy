@@ -192,7 +192,7 @@ class SASsession:
    def _asubmit(self, code, result): 
       return self._io._asubmit(code, result)
 
-   def submit(self, code: str, results: str ="html", prompt: list = []) -> dict:
+   def submit(self, code: str, results: str ="html", prompt: list =[]) -> dict:
       '''
       This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
       code    - the SAS statements you want to execute 
