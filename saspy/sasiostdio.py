@@ -57,7 +57,7 @@ class SASconfigSTDIO:
       self.name            = kwargs.get('sascfgname', '')
       cfg                  = getattr(SAScfg, self.name) 
       if len(self.saspath) == 0:
-         self.saspath  = cfg.get('saspath', '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8')
+         self.saspath      = cfg.get('saspath', '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8')
       if len(self.options) == 0:
          self.options      = cfg.get('options', '')
       if len(self.ssh)     == 0:

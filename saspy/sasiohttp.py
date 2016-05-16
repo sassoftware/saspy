@@ -19,7 +19,7 @@ import json
 import getpass
 
 from time import sleep
-import saspy.sascfg as sascfg
+import saspy.sascfg as SAScfg
 #from saspy.sasbase import *
 
 try:
@@ -29,7 +29,7 @@ except ImportError:
 
 class SASconfigHTTP:
    '''
-   This object is not intended to be used directly. Instantiate a VIYAsession object instead 
+   This object is not intended to be used directly. Instantiate a SASsession object instead 
    '''
    #def __init__(self, cfgname='', kernel=None, user='', pw='', ip='', port='', context='', options=''):
    def __init__(self, **kwargs):
@@ -44,9 +44,10 @@ class SASconfigHTTP:
 
       # GET Config options
       try:
-         self.cfgopts = getattr(sascfg, "SAS_config_options")
+         self.cfgopts = getattr(SAScfg, "SAS_config_options")
       except:
          self.cfgopts = {}
+
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
       if lock:
@@ -58,7 +59,7 @@ class SASconfigHTTP:
          self.options  = ''
 
       self.name            = kwargs.get('sascfgname', '')  
-      cfg                  = getattr(sascfg, self.name) 
+      cfg                  = getattr(SAScfg, self.name) 
       if len(self.ip)      == 0:
          self.ip           = cfg.get('ip', '')
       if len(self.port)    == 0:

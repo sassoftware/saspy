@@ -41,7 +41,7 @@ import os
 import signal
 import subprocess
 from time import sleep
-import saspy.sascfg as sascfg
+import saspy.sascfg as SAScfg
 import saspy.sasiostdio as sasiostdio
 import saspy.sasiohttp  as sasiohttp
 from saspy.sasstat import *
@@ -64,12 +64,12 @@ class SASconfig:
 
       # GET Config options
       try:
-         self.cfgopts = getattr(sascfg, "SAS_config_options")
+         self.cfgopts = getattr(SAScfg, "SAS_config_options")
       except:
          self.cfgopts = {}
 
       # GET Config names
-      configs = getattr(sascfg, "SAS_config_names")
+      configs = getattr(SAScfg, "SAS_config_names")
 
       cfgname = kwargs.get('cfgname', '')
 
@@ -93,7 +93,7 @@ class SASconfig:
               str(configs)+" ")
 
       self.name = cfgname
-      cfg       = getattr(sascfg, cfgname) 
+      cfg       = getattr(SAScfg, cfgname) 
 
       ip   = cfg.get('ip', '')
       ssh  = cfg.get('ssh', '')
@@ -157,6 +157,7 @@ class SASsession:
       self._obj_cnt      = 0
       self.nosub         = False
       self.sascfg        = SASconfig(**kwargs)
+      self.batch         = False
 
       if not self.sascfg.valid:
          return
@@ -223,6 +224,20 @@ class SASsession:
                     False means run normally - submit the code.
       '''
       self.nosub = nosub
+
+   def set_batch(self, batch: bool):
+      '''
+      This method sets the batch attribute for the SASsession object; it stays in effect untill changed. For methods that just
+      display results like SASdata object methods (head, tail, hist, series) and SASresult object results, you can set 'batch'
+      to true to get the results back directly so you can write them to files or whatever you want to do with them. This is intended
+      for use in python batch scripts so you can still get ODS results and save them to files, which you couldn't otherwise do for
+      these methods. When running interactivly, the expectation is that you want to have the results directly rendered, but you can
+      run this way too; get the objects display them yourself and/or write to to somewhere. Whe true, you get the same dictionary
+      returned from the SASsession.submit() method.
+      
+      batch - set the default result type for this SASsession. True = return dict([LOG, LST]. False = display LST to screen. 
+      '''
+      self.batch = batch
 
    def exist(self, table: str, libref: str ="work") -> bool:
       '''
@@ -372,7 +387,7 @@ class SASdata:
 
     def __init__(self, sassession, libref, table, results="HTML"):
 
-        self.sas =  sassession
+        self.sas   = sassession
 
         failed = 0 
         if results.upper() == "HTML":
@@ -381,7 +396,7 @@ class SASdata:
            except:
               failed = 1
 
-           if failed:
+           if failed and not self.sas.batch:
               self.HTML = 0
            else:
               self.HTML = 1
@@ -421,10 +436,16 @@ class SASdata:
 
         if self.HTML:
            ll = self.sas._io.submit(code)
-           return HTML(ll['LST'])
+           if not self.sas.batch:
+              return HTML(ll['LST'])
+           else:
+              return ll
         else:
            ll = self.sas._io.submit(code, "text")
-           print(ll['LST'])
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
    
     def tail(self, obs=5):
         '''
@@ -463,10 +484,16 @@ class SASdata:
 
         if self.HTML:
            ll = self.sas._io.submit(code)
-           return HTML(ll['LST'])
+           if not self.sas.batch:
+              return HTML(ll['LST'])
+           else:
+              return ll
         else:
            ll = self.sas._io.submit(code, "text")
-           print(ll['LST'])
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
    
     def contents(self):
         '''
@@ -485,10 +512,16 @@ class SASdata:
 
         if self.HTML:
            ll = self.sas._io.submit(code)
-           return HTML(ll['LST'])
+           if not self.sas.batch:
+              return HTML(ll['LST'])
+           else:
+              return ll
         else:
            ll = self.sas._io.submit(code, "text")
-           print(ll['LST'])
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
    
     def describe(self):
         '''
@@ -514,11 +547,17 @@ class SASdata:
 
         if self.HTML:
            ll = self.sas._io.submit(code)
-           return HTML(ll['LST'])
+           if not self.sas.batch:
+              return HTML(ll['LST'])
+           else:
+              return ll
         else:
            ll = self.sas._io.submit(code, "text")
-           print(ll['LST'])
-
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
+   
     def to_csv(self, file: str) -> 'The LOG showing the results of the step':
         '''
         This method will export a SAS Data Set to a file in CSV format.
@@ -557,11 +596,17 @@ class SASdata:
 
         if self.HTML:
            ll = self.sas._io.submit(code)
-           return HTML(ll['LST'])
+           if not self.sas.batch:
+              return HTML(ll['LST'])
+           else:
+              return ll
         else:
            ll = self.sas._io.submit(code, "text")
-           print(ll['LST'])
-
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
+   
     def series(self, x: str, y: list, title: str ='') -> 'a line plot of the x,y coordinates':
         '''
         This method plots a series of x,y coordinates. You can provide a list of y columns for multiple line plots.
@@ -593,11 +638,17 @@ class SASdata:
 
         if self.HTML:
            ll = self.sas._io.submit(code)
-           return HTML(ll['LST'])
+           if not self.sas.batch:
+              return HTML(ll['LST'])
+           else:
+              return ll
         else:
            ll = self.sas._io.submit(code, "text")
-           print(ll['LST'])
-
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
+   
 if __name__ == "__main__":
     startsas()
 
