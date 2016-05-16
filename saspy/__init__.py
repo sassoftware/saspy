@@ -13,7 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from saspy.sasbase import *
-from saspy.sasstat import *
-from saspy.sasets  import *
+from saspy.sasbase     import *
+from saspy.sasstat     import *
+from saspy.sasets      import *
+from saspy.sasqc       import *
+from saspy.sasresults  import *
 from saspy.SASLogLexer import *

@@ -13,11 +13,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from IPython.core.display import HTML
-import IPython.display as id
-import time
 import logging
-import os
+from saspy.sasresults import SASresults
 
 # create logger
 logger = logging.getLogger('')
@@ -26,11 +23,21 @@ logger.setLevel(logging.WARN)
 
 class SASstat:
     def __init__(self, session, *args, **kwargs):
-        '''Submit an initial set of macros to prepare the SAS system'''
+        """
+        Submit an initial set of macros to prepare the SAS system
+        """
         self.sas=session
-        logger.debug("Initalization of SAS Macro: " + self.sas.saslog())
+        logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def _objectmethods(self,obj,*args):
+    def _objectmethods(self, obj: str, *args):
+        """
+        This method parses the SAS log for artifacts (tables and graphics) that were created
+        from the procedure method call
+
+        :param obj: str -- proc object
+        :param args: list likely none
+        :return: list -- the tables and graphs available for tab complete
+        """
         code  ="%listdata("
         code +=obj
         code +=");"
@@ -44,13 +51,25 @@ class SASstat:
         logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
-    def _makeProccallMacro(self,objtype,objname,data=None, args=''):
+    def _makeProcCallMacro(self, objtype: str, objname: str, data: object =None, args: dict =None):
+        """
+        This method generates the SAS code from the python objects and included data and arguments.
+        The list of args in this method is largely alphabetical but there are exceptions in order to
+        satisfy the order needs of the statements for the procedure. as an example...
+        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
+
+        :param objtype: str -- proc name
+        :param objname: str -- 3 digit code for proc
+        :param data: sas dataset object
+        :param args: dict --  proc arguments
+        :return: str -- the SAS code needed to execute on the server
+        """
         code  = "%macro proccall(d);\n"
         code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
         logger.debug("args value: " + str(args))
         logger.debug("args type: " + str(type(args)))
-        #this list is largly alphabetical but there are exceptions in order to 
-        #satisfy the order needs of the statements for the procedure
+        # this list is largly alphabetical but there are exceptions in order to
+        # satisfy the order needs of the statements for the procedure
         # as an example... http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
 
 
@@ -66,11 +85,11 @@ class SASstat:
         if 'cls' in args:
             logger.debug("class statement,length: %s,%s", args['cls'], len(args['cls']))
             code += "class %s;\n" % (args['cls'])
-        #contrast moved
+        # contrast moved
         if 'effect' in args:
             logger.debug("effect statement,length: %s,%s", args['effect'], len(args['effect']))
             code += "effect %s;\n" % (args['effect'])
-        #estimate moved
+        # estimate moved
         if 'freq' in args:
             #add check to make sure it is only one variable
             logger.debug("freq statement,length: %s,%s", args['freq'], len(args['freq']))
@@ -78,15 +97,15 @@ class SASstat:
         if 'id' in args:
             logger.debug("id statement,length: %s,%s", args['id'], len(args['id']))
             code += "id %s;\n" % (args['id'])
-        #lsmeans moved
-        #manova moved
-        #means moved
+        # lsmeans moved
+        # manova moved
+        # means moved
         if 'model' in args:
             logger.debug("model statement,length: %s,%s", args['model'], len(args['model']))
             code += "model %s;\n" % (args['model'])
         if 'contrast' in args:
             logger.debug("contrast statement,length: %s,%s", args['contrast'], len(args['contrast']))
-            code += "contrast %s;\n" % (args['contrast']) 
+            code += "contrast %s;\n" % (args['contrast'])
         if 'estimate' in args:
             logger.debug("estimate statement,length: %s,%s", args['estimate'], len(args['estimate']))
             code += "estimate %s;\n" % (args['estimate'])
@@ -130,7 +149,7 @@ class SASstat:
         if 'strata' in args:
             logger.debug("strata statement,length: %s,%s", args['strata'], len(args['strata']))
             code += "strata %s;\n" % (args['strata'])
-        #test moved
+        # test moved
         if 'var' in args:
             logger.debug("var statement,length: %s,%s", args['var'], len(args['var']))
             code += "var %s;\n" % (args['var'])
@@ -138,7 +157,7 @@ class SASstat:
             #add check to make sure it is only one variable
             logger.debug("weight statement,length: %s,%s", args['weight'], len(args['weight']))
             code += "weight %s;\n" % (args['weight'])
-            
+
         if 'grow' in args:
             logger.debug("grow statement,length: %s,%s", args['grow'], len(args['grow']))
             code += "grow %s;\n" % (args['grow'])
@@ -159,25 +178,33 @@ class SASstat:
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
         logger.debug("Proc code submission: " + str(code))
-        return (code)
-        
-    def _stmt_check(self, req:set ,legal:set,stmt:dict):
+        return code
+
+    def _stmt_check(self, req: set, legal: set, stmt: dict):
+        """
+        This method checks to make sure that the proc has all required statements and removes any statements
+        aren't valid. Missing required statements is an error. Extra statements are not.
+        :param req: set
+        :param legal: set
+        :param stmt: dict
+        :return: binary
+        """
         # debug the argument list
-        if (logging.getLogger().getEffectiveLevel()==10):
+        if logging.getLogger().getEffectiveLevel()==10:
             for k,v in stmt.items():
                 print ("Key: " +k+", Value: " + v)
-        #required statements
+        # required statements
         req_set=req
-        if (len(req_set)):
+        if len(req_set):
             missing_set=req_set.difference(set(stmt.keys()))
             if missing_set:
                 print ("You are missing %d required statements:" % (len(missing_set)))
                 print (missing_set)
                 return False
 
-        #legal statments
+        # legal statements
         legal_set=legal
-        if (len(legal_set)):
+        if len(legal_set):
             if len(req_set):
                tot_set = legal_set | req_set
             else:
@@ -190,14 +217,24 @@ class SASstat:
                     stmt.pop(extra_set.pop())
         return True
 
-    def _run_proc(self, procname, required_set, legal_set, **kwargs):
+    def _run_proc(self, procname: str, required_set: set, legal_set: set, **kwargs: dict):
+        """
+        This internal method takes the options and statements from the PROC and generates
+        the code needed to submit it to SAS. It then submits the code.
+        :param self:
+        :param procname: str
+        :param required_set: set of options
+        :param legal_set: set of valid options
+        :param kwargs: dict (optional)
+        :return: sas result object
+        """
         data=kwargs.pop('data',None)
         chk= self._stmt_check(required_set, legal_set, kwargs)
         obj1=[]; nosub=False; objname=''
         if chk:
             objtype=procname.lower()
             objname='sta'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, data, kwargs)
+            code=self._makeProcCallMacro(objtype, objname, data, kwargs)
             logger.debug(procname+" macro submission: " + str(code))
             if not self.sas.nosub:
                 self.sas._asubmit(code,"text")
@@ -212,22 +249,33 @@ class SASstat:
         else:
             print("Error in code submission")
 
-        return (SAS_results(obj1, self.sas, objname, nosub))
+        return SASresults(obj1, self.sas, objname, nosub)
 
 
-    def hpsplit(self, **kwargs):
-        '''
-        Python method to call the HPSPLIT procedure\n
-        Documentation link: 
+    def hpsplit(self, **kwargs: dict):
+        """
+        Python method to call the HPSPLIT procedure
+        Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_overview.htm
-        '''
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
         required_set={}
         legal_set={'cls','code','grow','id','model',
                    'partition','performance','prune','rules'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("HPSPLIT", required_set, legal_set, **kwargs)
 
-    def reg(self, **kwargs):
+    def reg(self, **kwargs: dict):
+        """
+        Python method to call the REG procedure
+        Documentation link:
+        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_gettingstarted01.htm
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
         required_set={'model'}
         legal_set={'add','by','code','id','var'
                    'lsmeans','model','random','repeated',
@@ -236,16 +284,32 @@ class SASstat:
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("REG", required_set, legal_set, **kwargs)
 
-    def mixed(self, **kwargs):
+    def mixed(self, **kwargs: dict):
+        """
+        Python method to call the MIXED procedure
+        Documentation link:
+        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
         required_set={'model'}
         legal_set={'by','cls','code','contrast','estimate','id',
                    'lsmeans','model','random','repeated',
                    'slice','weight'}
 
         logger.debug("kwargs type: " + str(type(kwargs)))
-        return self._run_proc("Mixed", required_set, legal_set, **kwargs)
+        return self._run_proc("MIXED", required_set, legal_set, **kwargs)
 
-    def glm(self, **kwargs):
+    def glm(self, **kwargs: dict):
+        """
+        Python method to call the GLM procedure
+        Documentation link:
+        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_toc.htm
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
         required_set={'model'}
         legal_set={'absorb','by','cls','contrast','estimate','freq','id',
                    'lsmeans','manova','means', 'model','random','repeated',
@@ -254,82 +318,26 @@ class SASstat:
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("GLM", required_set, legal_set, **kwargs)
 
-    def logistic(self, **kwargs):
+    def logistic(self, **kwargs: dict):
+        """
+        Python method to call the LOGISTIC procedure
+        Documentation link:
+        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_logistic_toc.htm
 
-        required_set={'model'}
-        '''
-        The PROC LOGISTIC and MODEL statements are required. 
-        The CLASS and EFFECT statements (if specified) must 
-        precede the MODEL statement, and the CONTRAST, EXACT, 
-        and ROC statements (if specified) must follow the MODEL 
+        The PROC LOGISTIC and MODEL statements are required.
+        The CLASS and EFFECT statements (if specified) must
+        precede the MODEL statement, and the CONTRAST, EXACT,
+        and ROC statements (if specified) must follow the MODEL
         statement.
-        '''
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set={'model'}
         legal_set={'by','cls','contrast','effect','effectplot','estimate',
                    'exact','freq','lsmeans','oddsratio','roc','score','slice',
                    'store','strata','units','weight'}
 
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("LOGISTIC", required_set, legal_set, **kwargs)
-
-from collections import namedtuple
-
-class SAS_results(object):
-    '''Return results from a SAS Model object'''
-    def __init__(self,attrs, session, objname, nosub=False):
-
-        self._attrs = attrs
-        self._name  = objname
-        self.sas    = session
-        self.nosub  = nosub
-
-    def __dir__(self):
-        '''Overload dir method to return the attributes'''
-        return self._attrs
-
-    def __getattr__(self, attr):
-        if attr.startswith('_'):
-            return getattr(self, attr)
-        if attr.upper() in self._attrs:
-            #print(attr.upper())
-            data = self._go_run_code(attr)
-            '''
-            if not attr.lower().endswith('plot'):
-                libname, table = data.split()
-                table_data = sasdata(libname, table)
-                content = table_data.contents()
-                # parse content
-                headers = content[0]
-
-                res = namedtuple('SAS Result', headers)
-                results = [ res(x) for x in headers[1:] ]
-            '''
- 
-        else:
-            if self.nosub:
-                print('This SAS Result object was created in teach_me_SAS mode, so it has no results')
-                return
-            else:
-                #raise AttributeError
-                print("Result named "+attr+" not found. Valid results are:"+str(self._attrs))
-                return
-
-        return HTML('<h1>'+attr+'</h1>'+data)
-
-    def _go_run_code(self, attr):
-        #print(self._name, attr)
-        code = '%%getdata(%s, %s);' % (self._name, attr)
-        #print (code)
-        res = self.sas.submit(code)
-        return res['LST']
-
-    def sasdata(self, table):
-        x=self.sas.sasdata(table,'_'+self._name)
-        return (x)
-
-    def ALL(self):
-        '''
-        This method shows all the results attributes for a given object
-        '''
-        for i in self._attrs:
-            id.display(self.__getattr__(i))
 
