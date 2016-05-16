@@ -58,14 +58,18 @@ class SASresults(object):
                 print("Result named "+attr+" not found. Valid results are:"+str(self._attrs))
                 return
 
-        return HTML('<h1>' + attr + '</h1>' + data)
+        if not self.sas.batch:
+           return HTML('<h1>' + attr + '</h1>' + data['LST'])
+        else:
+           return data
 
     def _go_run_code(self, attr):
         # print(self._name, attr)
         code = '%%getdata(%s, %s);' % (self._name, attr)
         # print (code)
         res = self.sas.submit(code)
-        return res['LST']
+        return res
+        #return res['LST']
 
     def sasdata(self, table):
         x = self.sas.sasdata(table, '_' + self._name)
@@ -75,6 +79,12 @@ class SASresults(object):
         """
         This method shows all the results attributes for a given object
         """
-        for i in self._attrs:
-            dis.display(self.__getattr__(i))
+        if not self.sas.batch:
+           for i in self._attrs:
+               dis.display(self.__getattr__(i))
+        else:
+           ret = []
+           for i in self._attrs:
+               ret.append(self.__getattr__(i))
+           return ret
 
