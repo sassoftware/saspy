@@ -18,7 +18,7 @@ import os
 import signal
 import subprocess
 from time import sleep
-import saspy.sascfg as sascfg
+import saspy.sascfg as SAScfg
 #from saspy.sasbase import *
 
 try:
@@ -40,7 +40,7 @@ class SASconfigSTDIO:
 
       # GET Config options
       try:
-         self.cfgopts = getattr(sascfg, "SAS_config_options")
+         self.cfgopts = getattr(SAScfg, "SAS_config_options")
       except:
          self.cfgopts = {}
 
@@ -55,7 +55,7 @@ class SASconfigSTDIO:
          self.host    = ''
 
       self.name            = kwargs.get('sascfgname', '')
-      cfg                  = getattr(sascfg, self.name) 
+      cfg                  = getattr(SAScfg, self.name) 
       if len(self.saspath) == 0:
          self.saspath  = cfg.get('saspath', '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8')
       if len(self.options) == 0:
@@ -781,7 +781,6 @@ class SASsessionSTDIO():
          if vartype[i] == 'N':
             if varcat[i] not in sas_dtdt_fmts:
                df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce') 
-               #df[varlist[i]] = df[varlist[i]].astype('float64')
             else:
                df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='ignore') 
 
