@@ -687,11 +687,13 @@ class SASsessionSTDIO():
    
       self._asubmit(";run;", "text")
    
-   def sasdata2dataframe(self, sd: '<SASdata object>') -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, sd: '<SASdata object>', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+      port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       '''
+      port =  kwargs.get('port', 0)
       import pandas as pd
       import socket as socks
       datar = ""
@@ -736,9 +738,13 @@ class SASsessionSTDIO():
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
    
-      sock = socks.socket()
-      sock.bind(("",0))
-      port = sock.getsockname()[1]
+      try:
+         sock = socks.socket()
+         sock.bind(("",port))
+         port = sock.getsockname()[1]
+      except OSError:
+         print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
+         return None
 
       if self.sascfg.ssh:
          host = socks.gethostname()

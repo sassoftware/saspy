@@ -358,14 +358,14 @@ class SASsession:
       else:
          return None
    
-   def sd2df(self, sd: '<SASdata object>') -> '<Pandas Data Frame object>':
+   def sd2df(self, sd: '<SASdata object>', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This is an alias for 'sasdata2dataframe'. Why type all that?
       sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
       '''
-      return self.sasdata2dataframe(sd)
+      return self.sasdata2dataframe(sd, **kwargs)
    
-   def sasdata2dataframe(self, sd: '<SASdata object>') -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, sd: '<SASdata object>', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -381,7 +381,7 @@ class SASsession:
          print("too comlicated to show the code, read the source :), sorry.")
          return None
       else:
-         return self._io.sasdata2dataframe(sd)
+         return self._io.sasdata2dataframe(sd, **kwargs)
    
 class SASdata:
 
