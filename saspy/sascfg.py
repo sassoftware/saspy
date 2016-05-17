@@ -28,7 +28,7 @@
 #
 SAS_config_names = ['default']
 
-# Configuration options for pysas - python Dict
+# Configuration options for saspy - python Dict
 # valid key are:
 # 
 # 'lock_down' - True | False. True = Prevent runtime overrides of SAS_Config values below
@@ -80,10 +80,10 @@ ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 # valid keys are:
 # 'ip'      - [REQUIRED] host address 
 # 'port'    - [REQUIRED] port; the code Defaults this to 80 (the Compute Services default port)
-# 'context' - context name defined on the compute service  [PROMTED for at runtime if more than one defined]
+# 'context' - context name defined on the compute service  [PROMPTED for at runtime if more than one defined]
 # 'options' - SAS options to include in the start up command line
-# 'user'    - not suggested [REQUIRED but PROMTED for at runtime]
-# 'pw'      - really not suggested [REQUIRED but PROMTED for at runtime]
+# 'user'    - not suggested [REQUIRED but PROMPTED for at runtime]
+# 'pw'      - really not suggested [REQUIRED but PROMPTED for at runtime]
 # 
 #
              
