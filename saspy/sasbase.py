@@ -193,12 +193,22 @@ class SASsession:
    def _asubmit(self, code, result): 
       return self._io._asubmit(code, result)
 
-   def submit(self, code: str, results: str ="html", prompt: list =[]) -> dict:
+   def submit(self, code: str, results: str ="html", prompt: dict =[]) -> dict:
       '''
       This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
       code    - the SAS statements you want to execute 
       results - format of results, HTML is default, TEXT is the alternative
-      prompt  - list of names to prompt for; create marco variables (used in submitted code), then delete
+      prompt  - dict of names,flag to prompt for; create marco variables (used in submitted code), then delete
+                The keys are the names of the macro variables and the boolean flag is to hide what you type or not
+                for example (what you type for pw will not be displayed, user and dsname will):
+
+                results = sas.submit(
+                   """
+                   libname tera teradata server=teracop1 user=&user pw=&pw;
+                   proc print data=tera.&dsname (obs=10); run;
+                   """ ,
+                   prompt = {'user': False, 'pw': True, 'dsname': False}
+                   )
 
       Returns - a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is 'results' (HTML or TEXT)
 

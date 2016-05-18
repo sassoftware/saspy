@@ -20,7 +20,6 @@ import getpass
 
 from time import sleep
 import saspy.sascfg as SAScfg
-#from saspy.sasbase import *
 
 try:
    from IPython.display import HTML
@@ -411,10 +410,21 @@ class SASsessionHTTP():
       '''
       return jobid
 
-   def submit(self, code: str, results: str ="html", prompt: list = []) -> dict:
+   def submit(self, code: str, results: str ="html", prompt: dict = []) -> dict:
       '''
       code    - the SAS statements you want to execute 
       results - format of results, HTML is default, TEXT is the alternative
+      prompt  - dict of names,flag to prompt for; create marco variables (used in submitted code), then delete
+                The keys are the names of the macro variables and the boolean flag is to hide what you type or not
+                for example:
+
+                results = sas.submit(
+                   """
+                   libname tera teradata server=teracop1 user=&user pw=&pw;
+                   proc print data=tera.&dsname (obs=10); run;
+                   """ ,
+                   prompt = {'user': False, 'pw': True, 'dsname': False}
+                   )
 
       Returns - a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is 'results' (HTML or TEXT)
 
@@ -427,15 +437,27 @@ class SASsessionHTTP():
       odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n")
       odsclose = json.dumps("ods html5 close;ods listing;\n")
       ods      = True;
+      pcodei   = ''
+      pcodeo   = ''
 
       if results.upper() != "HTML":
          ods = False
          odsopen  = '""'
          odsclose = '""'
    
+      if len(prompt):
+         pcodei += 'options nosource nonotes;\n'
+         pcodeo += 'options nosource nonotes;\n'
+         for key in prompt:
+            var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
+            pcodei += '%let '+key+'='+var+';\n'
+            pcodeo += '%symdel '+key+';\n'
+         pcodei += 'options source notes;\n'
+         pcodeo += 'options source notes;\n'
+
       # POST Job
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-      jcode = json.dumps(code)
+      jcode = json.dumps(pcodei+code+'\n'+pcodeo)
       d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
       headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json",
                "Authorization":"Bearer "+self.sascfg._token}
