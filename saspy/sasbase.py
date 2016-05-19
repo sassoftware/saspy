@@ -45,6 +45,7 @@ from saspy.sasets  import *
 
 try:
    from IPython.display import HTML
+   from IPython.display import display as DISPLAY  
 except ImportError:
    pass
 
@@ -218,7 +219,7 @@ class SASsession:
 
       return self._io.submit(code, results, prompt)
 
-   def saslog(self):
+   def saslog(self) -> 'The SAS Log for the session':
       '''
       this method is used to get the current, full contents of the SASLOG
       '''
@@ -398,7 +399,7 @@ class SASdata:
         failed = 0 
         if results.upper() == "HTML":
            try:
-              from IPython.display import HTML 
+              from IPython.display import HTML
            except:
               failed = 1
 
@@ -443,7 +444,7 @@ class SASdata:
         if self.HTML:
            ll = self.sas._io.submit(code)
            if not self.sas.batch:
-              return HTML(ll['LST'])
+              DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
@@ -491,7 +492,7 @@ class SASdata:
         if self.HTML:
            ll = self.sas._io.submit(code)
            if not self.sas.batch:
-              return HTML(ll['LST'])
+              DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
@@ -519,7 +520,7 @@ class SASdata:
         if self.HTML:
            ll = self.sas._io.submit(code)
            if not self.sas.batch:
-              return HTML(ll['LST'])
+              DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
@@ -534,7 +535,7 @@ class SASdata:
         display descriptive statistics for the table; summary statistics.
 
         '''
-        return(self.means())
+        self.means()
 
     def means(self):
         '''
@@ -554,7 +555,7 @@ class SASdata:
         if self.HTML:
            ll = self.sas._io.submit(code)
            if not self.sas.batch:
-              return HTML(ll['LST'])
+              DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
@@ -603,7 +604,7 @@ class SASdata:
         if self.HTML:
            ll = self.sas._io.submit(code)
            if not self.sas.batch:
-              return HTML(ll['LST'])
+              DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
@@ -645,7 +646,7 @@ class SASdata:
         if self.HTML:
            ll = self.sas._io.submit(code)
            if not self.sas.batch:
-              return HTML(ll['LST'])
+              DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
