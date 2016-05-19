@@ -117,8 +117,9 @@ class SASconfigHTTP:
                 "SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: " + 
                  str(self.contexts)+" ")
          else:
-            print("SAS Context specified in the SASconfig ("+self.ctxname+") was not found on this server, and because " +
-                   the SASconfig is in lockdown mode, there is no prompting for other contexts. No connection established."
+            msg  = "SAS Context specified in the SASconfig ("+self.ctxname+") was not found on this server, and because " 
+            msg += "the SASconfig is in lockdown mode, there is no prompting for other contexts. No connection established."
+            print(msg)
             self._token = None
             return 
 
