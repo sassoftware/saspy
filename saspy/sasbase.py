@@ -36,11 +36,7 @@
 # sas.[have_at_it]()
 #
 
-import fcntl
 import os
-import signal
-import subprocess
-from time import sleep
 import saspy.sascfg as SAScfg
 import saspy.sasiostdio as sasiostdio
 import saspy.sasiohttp  as sasiohttp

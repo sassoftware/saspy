@@ -94,7 +94,7 @@ class SASconfigHTTP:
 
       # GET Contexts 
       self.contexts = self._get_contexts()
-      if not self.contexts:
+      if self.contexts == None:
          self._token = None
          return 
 
@@ -117,8 +117,8 @@ class SASconfigHTTP:
                 "SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: " + 
                  str(self.contexts)+" ")
          else:
-            print("SAS Context specified in the SAS Config was not found and it is in lockdown mode. So no connection can be made to SAS context: "+
-                   self.ctxname)
+            print("SAS Context specified in the SASconfig ("+self.ctxname+") was not found on this server, and because " +
+                   the SASconfig is in lockdown mode, there is no prompting for other contexts. No connection established."
             self._token = None
             return 
 
@@ -156,7 +156,7 @@ class SASconfigHTTP:
       status = req.getcode()
       resp = req.read()
       if status > 299:
-         print("Failure in GET AuthToken \n"+resp.decode())
+         print("Failure in GET AuthToken. Status="+str(status)+"\nResponse="+resp.decode())
          return None
 
       j = json.loads(resp.decode())
@@ -175,7 +175,7 @@ class SASconfigHTTP:
       status = req.getcode()
       resp = req.read()
       if status > 299:
-         print("Failure in GET Contexts \n"+resp.decode())
+         print("Failure in GET Contexts. Status="+str(status)+"\nResponse="+resp.decode())
          return None
 
       j = json.loads(resp.decode())
