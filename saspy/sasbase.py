@@ -166,7 +166,7 @@ class SASsession:
 
       if self.sascfg.mode in ['STDIO', 'SSH', '']:
          if not running_on_win:
-            self._io = sasiostdio.SASsessionSTDIO(ascfgname=self.sascfg.name, sb=self, **kwargs)
+            self._io = sasiostdio.SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
          else:
             print("Cannot use STDIO I/O module on Windows. No SASsession established. Choose an HTTP SASconfig definition")
             return
