@@ -38,10 +38,15 @@
 
 import os
 import saspy.sascfg as SAScfg
-import saspy.sasiostdio as sasiostdio
+try:
+   import saspy.sasiostdio as sasiostdio
+   running_on_win = False
+except:
+   running_on_win = True
 import saspy.sasiohttp  as sasiohttp
 from saspy.sasstat import *
 from saspy.sasets  import *
+from saspy.sasqc   import *
 
 try:
    from IPython.display import HTML
@@ -160,10 +165,14 @@ class SASsession:
          return
 
       if self.sascfg.mode in ['STDIO', 'SSH', '']:
-         self._io = sasiostdio.SASsessionSTDIO(**kwargs, sascfgname=self.sascfg.name, sb=self)
+         if not running_on_win:
+            self._io = sasiostdio.SASsessionSTDIO(ascfgname=self.sascfg.name, sb=self, **kwargs)
+         else:
+            print("Cannot use STDIO I/O module on Windows. No SASsession established. Choose an HTTP SASconfig definition")
+            return
       else:
          if self.sascfg.mode == 'HTTP':
-            self._io = sasiohttp.SASsessionHTTP(**kwargs, sascfgname=self.sascfg.name, sb=self)
+            self._io = sasiohttp.SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
    def __del__(self):
       return self._io.__del__()
@@ -287,6 +296,16 @@ class SASsession:
          self._loaded_macros = True
 
       return SASets(self)
+
+   def sasqc(self) -> '<SASqc object>':
+      '''
+      This methods creates a SASqc object which you can use to run various analytics. See the sasqc.py module.
+      '''
+      if not self._loaded_macros:
+         self._loadmacros()
+         self._loaded_macros = True
+
+      return SASqc(self)
 
    def _loadmacros(self):
       macro_path=os.path.dirname(os.path.realpath(__file__))
