@@ -234,8 +234,12 @@ class SASets:
 
 
     def timeseries(self, **kwargs):
-        """Python method to call the TIMESERIES procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_overview.htm
+        """
+        Python method to call the TIMESERIES procedure
+        required_set={'id'}
+        legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar'}
+
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm
         """
         required_set={'id'}
         legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar'}
@@ -243,16 +247,26 @@ class SASets:
         return self._run_proc("TIMESERIES", required_set, legal_set, **kwargs)
 
     def arima(self, **kwargs):
-        """Python method to call the ARIMA procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_overview.htm
+        """
+        Python method to call the ARIMA procedure
+        required_set={'identify'}
+        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast'}
+
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
         """
         required_set={'identify'}
         legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast'}
         return self._run_proc("ARIMA", required_set, legal_set, **kwargs)
 
     def ucm(self, **kwargs):
-        """Python method to call the UCM procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_overview.htm
+        """
+        Python method to call the UCM procedure
+        required_set={'model'}
+        legal_set={ 'autoreg','blockseason','by','cycle','deplag','estimate','forecast','id','irregular'
+                    'level','model','nloptions','performance','outlier','randomreg','season','slope'
+                    'splinereg','splineseason'}
+
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm
         """
         required_set={'model'}
         legal_set={ 'autoreg','blockseason','by','cycle','deplag','estimate','forecast','id','irregular'
@@ -261,24 +275,36 @@ class SASets:
         return self._run_proc("UCM", required_set, legal_set, **kwargs)
 
     def esm(self, **kwargs):
-        """Python method to call the ESM procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_overview.htm
+        """
+        Python method to call the ESM procedure
+        required_set={}
+        legal_set={ 'by', 'id', 'forecast'}
+
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm
         """
         required_set={}
         legal_set={ 'by', 'id', 'forecast'}
         return self._run_proc("ESM", required_set, legal_set, **kwargs)
 
     def timeid(self, **kwargs):
-        """Python method to call the TIMEID procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_overview.htm
+        """
+        Python method to call the TIMEID procedure
+        required_set={}
+        legal_set={ 'by', 'id'}
+
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm
         """
         required_set={}
         legal_set={ 'by', 'id'}
         return self._run_proc("TIMEID", required_set, legal_set, **kwargs)
 
     def timedata(self, **kwargs):
-        """Python method to call the TIMEDATA procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_overview.htm
+        """
+        Python method to call the TIMEDATA procedure
+        required_set={}
+        legal_set={ 'by', 'id', 'fcmport','outarrays','outscalars', 'var', 'prog_stmts'}
+
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm
         """
         required_set={}
         legal_set={ 'by', 'id', 'fcmport','outarrays','outscalars', 'var', 'prog_stmts'}

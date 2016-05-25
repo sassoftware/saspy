@@ -216,7 +216,9 @@ class SASqc:
 
     def cusum(self, **kwargs):
         """
-        Python method to call the CUSUM procedure\n
+        Python method to call the CUSUM procedure
+        required_set = {}
+        legal_set = {'by','xchart'}
         Documentation link:
         http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_cusum_sect001.htm
         """
@@ -227,7 +229,8 @@ class SASqc:
 
     def macontrol(self, **kwargs):
         """
-        Python method to call the MACONTROL procedure\n
+        Python method to call the MACONTROL procedure
+
         Documentation link:
         http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_macontrol_toc.htm
         """
@@ -238,7 +241,10 @@ class SASqc:
 
     def capability(self, **kwargs):
         """
-        Python method to call the CUSUM procedure\n
+        Python method to call the CUSUM procedure
+        required_set = {}
+        legal_set = {'cdfplot', 'comphist', 'histogram', 'inset', 'intervals', 'output', 'ppplot', 'probplot',
+                     'qqplot', 'freq', 'weight', 'id', 'by', 'spec'}
         Documentation link:
         http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_capability_sect001.htm
         """

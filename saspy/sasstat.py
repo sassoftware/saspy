@@ -255,9 +255,14 @@ class SASstat:
     def hpsplit(self, **kwargs: dict):
         """
         Python method to call the HPSPLIT procedure
-        Documentation link:
-        http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_overview.htm
 
+        required_set={}
+        legal_set={'cls','code','grow','id','model',
+                   'partition','performance','prune','rules'}
+        For more information on the statements see the Documentation link.
+        cls is an alias for the class statement
+        Documentation link:
+        http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
         :param kwargs: dict
         :return: SAS result object
         """
@@ -270,8 +275,13 @@ class SASstat:
     def reg(self, **kwargs: dict):
         """
         Python method to call the REG procedure
+        For more information on the statements see the Documentation link.
+        required_set={'model'}
+        legal_set={'add','by','code','id','var'
+                   'lsmeans','model','random','repeated',
+                   'slice','test','weight'}
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_gettingstarted01.htm
+        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm
 
         :param kwargs: dict
         :return: SAS result object
@@ -287,6 +297,12 @@ class SASstat:
     def mixed(self, **kwargs: dict):
         """
         Python method to call the MIXED procedure
+        For more information on the statements see the Documentation link.
+        required_set={'model'}
+        legal_set={'by','cls','code','contrast','estimate','id',
+                   'lsmeans','model','random','repeated',
+                   'slice','weight'}
+        cls is an alias for the class statement
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm
 
@@ -304,6 +320,13 @@ class SASstat:
     def glm(self, **kwargs: dict):
         """
         Python method to call the GLM procedure
+        For more information on the statements see the Documentation link.
+        required_set={'model'}
+        legal_set={'absorb','by','cls','contrast','estimate','freq','id',
+                   'lsmeans','manova','means', 'model','random','repeated',
+                   'test','weight'}
+
+        cls is an alias for the class statement
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_toc.htm
 
@@ -321,6 +344,14 @@ class SASstat:
     def logistic(self, **kwargs: dict):
         """
         Python method to call the LOGISTIC procedure
+        For more information on the statements see the Documentation link.
+
+        required_set={'model'}
+        legal_set={'by','cls','contrast','effect','effectplot','estimate',
+                   'exact','freq','lsmeans','oddsratio','roc','score','slice',
+                   'store','strata','units','weight'}
+
+        cls is an alias for the class statement
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_logistic_toc.htm
 
