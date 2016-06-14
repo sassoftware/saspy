@@ -15,7 +15,7 @@ be viewed directly in a browser later.
 Usage
 ~~~~~
 
-This module can be installed independant of the SAS_Kernel and used directly in python.
+This module can be installed independent of the SAS_Kernel and used directly in python.
 It is currently installed automatically when installing SAS_kernel. There is a configuration
 file named sascfg.py in the package along with the rest of the code, where the path to the
 SAS installation can be configured and other SAS startup options can be specified. Defaults
