@@ -24,7 +24,7 @@
 # specify options=' '. This way it's specified so it can't be overridden, even though you don't have any
 # extra options you want applied.
 # 
-# SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', 'forest', 'httptest']
+# SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', 'httptest']
 #
 SAS_config_names = ['default', 'http', 'httptest', 'ssh']
 
@@ -95,11 +95,5 @@ http     = {'ip'      : 'tomspc',
 httptest = {'ip'      : 'tomspc',
             'port'    :  80
             }
-
-forest   = {'ip'      : 'mitlaxvm01.unx.sas.com',
-            'port'    :  7980
-            }
-
-#tom1_http={'ip'      : 'tomspc'}
 
 

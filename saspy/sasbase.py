@@ -19,7 +19,7 @@
 # it provides base functionality, data access and processing, and includes analytics and ODS results.
 # There is a configuration file named sascfg.py in the saspy package used to configure connections
 # to SAS. Currently supported methods are STDIO, connecting to a local (same machine) Linux SAS using
-# stdio methods (fork, exec, and pipes). The is also support for running STDIO over ssh, which can 
+# stdio methods (fork, exec, and pipes). The is also support for running STDIO over SSH, which can 
 # connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interupt
 # handling, as the local STDIO method can. An interupt on this method can only terminate the SAS process; 
 # you'll be prompted to terminate or wait for completion. The third method is HTTP, which can connect
@@ -246,10 +246,10 @@ class SASsession:
       This method sets the batch attribute for the SASsession object; it stays in effect untill changed. For methods that just
       display results like SASdata object methods (head, tail, hist, series) and SASresult object results, you can set 'batch'
       to true to get the results back directly so you can write them to files or whatever you want to do with them. This is intended
-      for use in python batch scripts so you can still get ODS results and save them to files, which you couldn't otherwise do for
+      for use in python batch scripts so you can still get ODS XML5 results and save them to files, which you couldn't otherwise do for
       these methods. When running interactivly, the expectation is that you want to have the results directly rendered, but you can
-      run this way too; get the objects display them yourself and/or write to to somewhere. Whe true, you get the same dictionary
-      returned from the SASsession.submit() method.
+      run this way too; get the objects display them yourself and/or write them to somewhere. When true, you get the same dictionary
+      returned as from the SASsession.submit() method.
       
       batch - set the default result type for this SASsession. True = return dict([LOG, LST]. False = display LST to screen. 
       '''
