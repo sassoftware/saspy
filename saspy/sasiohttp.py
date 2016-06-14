@@ -33,13 +33,17 @@ class SASconfigHTTP:
    #def __init__(self, cfgname='', kernel=None, user='', pw='', ip='', port='', context='', options=''):
    def __init__(self, **kwargs):
       self._kernel  = kwargs.get('kernel', None)   
-      self.ip       = kwargs.get('ip', '')   
-      self.port     = kwargs.get('port', None)   
-      self.ctxname  = kwargs.get('context', '')   
-      self.options  = kwargs.get('options', '')   
       self._token   = None
-      user          = kwargs.get('user', '')  
-      pw            = kwargs.get('pw', '')  
+
+      self.name     = kwargs.get('sascfgname', '')  
+      cfg           = getattr(SAScfg, self.name) 
+
+      self.ip       = cfg.get('ip', '')
+      self.port     = cfg.get('port', None)
+      self.ctxname  = cfg.get('context', '')
+      self.options  = cfg.get('options', '')
+      user          = cfg.get('user', '')
+      pw            = cfg.get('pw', '')
 
       # GET Config options
       try:
@@ -49,28 +53,48 @@ class SASconfigHTTP:
 
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
-      if lock:
-         if len(self.ip) > 0 or self.port or len(self.ctxname) > 0 or len(self.options) > 0:
-            print("Parameters passed to SAS_session were ignored due to configuration restriction.")
-         self.ip       = ''
-         self.port     = ''
-         self.ctxname  = ''
-         self.options  = ''
 
-      self.name            = kwargs.get('sascfgname', '')  
-      cfg                  = getattr(SAScfg, self.name) 
-      if len(self.ip)      == 0:
-         self.ip           = cfg.get('ip', '')
-      if len(self.port)    == 0:
-         self.port         = cfg.get('port', 80)
-      if len(self.ctxname) == 0:
-         self.ctxname = cfg.get('context', '')
-      if len(self.options) == 0:
-         self.options = cfg.get('options', '')
-      if len(user)         == 0:
-         user              = cfg.get('user', '')
-      if len(pw)           == 0:
-         pw                = cfg.get('pw', '')
+      inip = kwargs.get('ip', '')             
+      if len(inip) > 0:
+         if lock and len(self.ip):
+            print("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.ip = inip   
+
+      inport = kwargs.get('port', None)         
+      if inport:
+         if lock and self.port:
+            print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.port = inport
+
+      inctxname = kwargs.get('context', '')   
+      if len(inctxname) > 0:
+         if lock and len(self.ctxname):
+            print("Parameter 'context' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.ctxname = inctxname
+
+      inoptions = kwargs.get('options', '')   
+      if len(inoptions) > 0:
+         if lock and len(self.options):
+           print("Parameter 'options' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.options = inoptions
+
+      inuser = kwargs.get('user', '')              
+      if len(inuser) > 0:
+         if lock and len(user):
+            print("Parameter 'user' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            user = inuser
+
+      inpw = kwargs.get('pw', '')                  
+      if len(inpw) > 0:
+         if lock and len(pw):
+            print("Parameter 'pw' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            pw = inpw
 
       while len(self.ip) == 0:
          if not lock:
@@ -78,6 +102,9 @@ class SASconfigHTTP:
          else:
             print("In lockdown mode and missing ip adress in the config named: "+cfgname )
             return
+
+      if not self.port:
+         port = 80
 
       while len(user) == 0:
          user = self._prompt("Please enter userid: ")
@@ -308,21 +335,6 @@ class SASsessionHTTP():
 
       j = json.loads(resp.decode())
       results = j.get('items')
-
-
-      # this is all a kludge as get results for job isn't actually implemented (gets all results for session) 
-      if jobid:
-         i = len(results) -1
-         while i >= 0:
-            if results[i].get('type') == 'ODS':
-               break
-            i -=  1
-      else:
-         i = 0
-
-      # shouldn't be able to happen, but ... for now
-      if i < 0:
-         return ''
 
       while i < len(results):
          # GET an ODS Result
@@ -576,7 +588,73 @@ class SASsessionHTTP():
       sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
       '''
       print("sasdata2dataframe is not currently implemented in this SAS Connection Interface; HTTP")
-      return None
+      import pandas as pd
+
+      # GET Data Table
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      headers={"Accept":"application/vnd.sas.compute.data.table+json", "Authorization":"Bearer "+self.sascfg._token}
+      conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+sd.libref+"/"+sd.table, headers=headers)
+      req = conn.getresponse()
+      status = req.getcode()
+
+      resp = req.read()
+      j = json.loads(resp.decode())
+
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
+      conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+sd.libref+"/"+sd.table+"/columns", headers=headers)
+      req = conn.getresponse()
+      status = req.getcode()
+
+      resp = req.read()
+      j = json.loads(resp.decode())
+
+      varlist = []
+      vartype = []
+      nvars = j.get('count')
+      lst = j.get('items')
+      for i in range(len(lst)):
+         varlist.append(lst[i].get('name'))
+         vartype.append(lst[i].get('type'))
+
+      code  = "data _null_; set "+sd.libref+"."+sd.table+"(obs=1);put 'FMT_CATS=';\n"
+      for i in range(nvars):
+         code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
+      code += "run;\n"
+   
+      ll = self.submit(code, "text")
+
+      l2 = ll['LOG'].rpartition("FMT_CATS=")
+      l2 = l2[2].partition("\n")              
+      varcat = l2[2].split("\n", nvars)
+      del varcat[nvars]
+
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
+      conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+sd.libref+"/"+sd.table+"/rows", headers=headers)
+      req = conn.getresponse()
+      status = req.getcode()
+
+
+      # BUG for missing values. should come back as null on their own, remove the replace() when they do
+      resp = req.read()
+      j = json.loads(resp.decode().replace('-nan', 'null'))
+
+      r = []
+      lst = j.get('items')
+      for i in range(len(lst)):
+         r.append(lst[i]['cells'])
+
+      df = pd.DataFrame.from_records(r, columns=varlist)
+
+      for i in range(nvars):
+         if vartype[i] == 'N':
+            if varcat[i] not in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
+               df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce') 
+            else:
+               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='ignore') 
+
+      return df
 
 if __name__ == "__main__":
     startsas()
@@ -587,4 +665,58 @@ if __name__ == "__main__":
     print(_getlsttxt())
 
     endsas()
+
+sas_date_fmts = (
+'AFRDFDD','AFRDFDE','AFRDFDE','AFRDFDN','AFRDFDWN','AFRDFMN','AFRDFMY','AFRDFMY','AFRDFWDX','AFRDFWKX','ANYDTDTE','B8601DA',
+'B8601DA','B8601DJ','CATDFDD','CATDFDE','CATDFDE','CATDFDN','CATDFDWN','CATDFMN','CATDFMY','CATDFMY','CATDFWDX','CATDFWKX',
+'CRODFDD','CRODFDE','CRODFDE','CRODFDN','CRODFDWN','CRODFMN','CRODFMY','CRODFMY','CRODFWDX','CRODFWKX','CSYDFDD','CSYDFDE',
+'CSYDFDE','CSYDFDN','CSYDFDWN','CSYDFMN','CSYDFMY','CSYDFMY','CSYDFWDX','CSYDFWKX','DANDFDD','DANDFDE','DANDFDE','DANDFDN',
+'DANDFDWN','DANDFMN','DANDFMY','DANDFMY','DANDFWDX','DANDFWKX','DATE','DATE','DAY','DDMMYY','DDMMYY','DDMMYYB',
+'DDMMYYC','DDMMYYD','DDMMYYN','DDMMYYP','DDMMYYS','DESDFDD','DESDFDE','DESDFDE','DESDFDN','DESDFDWN','DESDFMN','DESDFMY',
+'DESDFMY','DESDFWDX','DESDFWKX','DEUDFDD','DEUDFDE','DEUDFDE','DEUDFDN','DEUDFDWN','DEUDFMN','DEUDFMY','DEUDFMY','DEUDFWDX',
+'DEUDFWKX','DOWNAME','E8601DA','E8601DA','ENGDFDD','ENGDFDE','ENGDFDE','ENGDFDN','ENGDFDWN','ENGDFMN','ENGDFMY','ENGDFMY',
+'ENGDFWDX','ENGDFWKX','ESPDFDD','ESPDFDE','ESPDFDE','ESPDFDN','ESPDFDWN','ESPDFMN','ESPDFMY','ESPDFMY','ESPDFWDX','ESPDFWKX',
+'EURDFDD','EURDFDE','EURDFDE','EURDFDN','EURDFDWN','EURDFMN','EURDFMY','EURDFMY','EURDFWDX','EURDFWKX','FINDFDD','FINDFDE',
+'FINDFDE','FINDFDN','FINDFDWN','FINDFMN','FINDFMY','FINDFMY','FINDFWDX','FINDFWKX','FRADFDD','FRADFDE','FRADFDE','FRADFDN',
+'FRADFDWN','FRADFMN','FRADFMY','FRADFMY','FRADFWDX','FRADFWKX','FRSDFDD','FRSDFDE','FRSDFDE','FRSDFDN','FRSDFDWN','FRSDFMN',
+'FRSDFMY','FRSDFMY','FRSDFWDX','FRSDFWKX','HUNDFDD','HUNDFDE','HUNDFDE','HUNDFDN','HUNDFDWN','HUNDFMN','HUNDFMY','HUNDFMY',
+'HUNDFWDX','HUNDFWKX','IS8601DA','IS8601DA','ITADFDD','ITADFDE','ITADFDE','ITADFDN','ITADFDWN','ITADFMN','ITADFMY','ITADFMY',
+'ITADFWDX','ITADFWKX','JDATEMD','JDATEMDW','JDATEMNW','JDATEMON','JDATEQRW','JDATEQTR','JDATESEM','JDATESMW','JDATEWK','JDATEYDW',
+'JDATEYM','JDATEYMD','JDATEYMD','JDATEYMW','JNENGO','JNENGO','JNENGOW','JULDATE','JULDAY','JULIAN','JULIAN','MACDFDD',
+'MACDFDE','MACDFDE','MACDFDN','MACDFDWN','MACDFMN','MACDFMY','MACDFMY','MACDFWDX','MACDFWKX','MINGUO','MINGUO','MMDDYY',
+'MMDDYY','MMDDYYB','MMDDYYC','MMDDYYD','MMDDYYN','MMDDYYP','MMDDYYS','MMYY','MMYYC','MMYYD','MMYYN','MMYYP',
+'MMYYS','MONNAME','MONTH','MONYY','MONYY','ND8601DA','NENGO','NENGO','NLDATE','NLDATE','NLDATEL','NLDATEM',
+'NLDATEMD','NLDATEMDL','NLDATEMDM','NLDATEMDS','NLDATEMN','NLDATES','NLDATEW','NLDATEW','NLDATEWN','NLDATEYM','NLDATEYML','NLDATEYMM',
+'NLDATEYMS','NLDATEYQ','NLDATEYQL','NLDATEYQM','NLDATEYQS','NLDATEYR','NLDATEYW','NLDDFDD','NLDDFDE','NLDDFDE','NLDDFDN','NLDDFDWN',
+'NLDDFMN','NLDDFMY','NLDDFMY','NLDDFWDX','NLDDFWKX','NORDFDD','NORDFDE','NORDFDE','NORDFDN','NORDFDWN','NORDFMN','NORDFMY',
+'NORDFMY','NORDFWDX','NORDFWKX','POLDFDD','POLDFDE','POLDFDE','POLDFDN','POLDFDWN','POLDFMN','POLDFMY','POLDFMY','POLDFWDX',
+'POLDFWKX','PTGDFDD','PTGDFDE','PTGDFDE','PTGDFDN','PTGDFDWN','PTGDFMN','PTGDFMY','PTGDFMY','PTGDFWDX','PTGDFWKX','QTR',
+'QTRR','RUSDFDD','RUSDFDE','RUSDFDE','RUSDFDN','RUSDFDWN','RUSDFMN','RUSDFMY','RUSDFMY','RUSDFWDX','RUSDFWKX','SLODFDD',
+'SLODFDE','SLODFDE','SLODFDN','SLODFDWN','SLODFMN','SLODFMY','SLODFMY','SLODFWDX','SLODFWKX','SVEDFDD','SVEDFDE','SVEDFDE',
+'SVEDFDN','SVEDFDWN','SVEDFMN','SVEDFMY','SVEDFMY','SVEDFWDX','SVEDFWKX','WEEKDATE','WEEKDATX','WEEKDAY','WEEKU','WEEKU',
+'WEEKV','WEEKV','WEEKW','WEEKW','WORDDATE','WORDDATX','XYYMMDD','XYYMMDD','YEAR','YYMM','YYMMC','YYMMD',
+'YYMMDD','YYMMDD','YYMMDDB','YYMMDDC','YYMMDDD','YYMMDDN','YYMMDDP','YYMMDDS','YYMMN','YYMMN','YYMMP','YYMMS',
+'YYMON','YYQ','YYQ','YYQC','YYQD','YYQN','YYQP','YYQR','YYQRC','YYQRD','YYQRN','YYQRP',
+'YYQRS','YYQS','YYQZ','YYQZ','YYWEEKU','YYWEEKV','YYWEEKW',
+)
+
+sas_time_fmts = (
+'ANYDTTME','B8601LZ','B8601LZ','B8601TM','B8601TM','B8601TZ','B8601TZ','E8601LZ','E8601LZ','E8601TM','E8601TM','E8601TZ',
+'E8601TZ','HHMM','HOUR','IS8601LZ','IS8601LZ','IS8601TM','IS8601TM','IS8601TZ','IS8601TZ','JTIMEH','JTIMEHM','JTIMEHMS',
+'JTIMEHW','JTIMEMW','JTIMESW','MMSS','ND8601TM','ND8601TZ','NLTIMAP','NLTIMAP','NLTIME','NLTIME','STIMER','TIME',
+'TIME','TIMEAMPM','TOD',
+)
+
+sas_datetime_fmts = (
+'AFRDFDT','AFRDFDT','ANYDTDTM','B8601DN','B8601DN','B8601DT','B8601DT','B8601DZ','B8601DZ','CATDFDT','CATDFDT','CRODFDT',
+'CRODFDT','CSYDFDT','CSYDFDT','DANDFDT','DANDFDT','DATEAMPM','DATETIME','DATETIME','DESDFDT','DESDFDT','DEUDFDT','DEUDFDT',
+'DTDATE','DTMONYY','DTWKDATX','DTYEAR','DTYYQC','E8601DN','E8601DN','E8601DT','E8601DT','E8601DZ','E8601DZ','ENGDFDT',
+'ENGDFDT','ESPDFDT','ESPDFDT','EURDFDT','EURDFDT','FINDFDT','FINDFDT','FRADFDT','FRADFDT','FRSDFDT','FRSDFDT','HUNDFDT',
+'HUNDFDT','IS8601DN','IS8601DN','IS8601DT','IS8601DT','IS8601DZ','IS8601DZ','ITADFDT','ITADFDT','JDATEYT','JDATEYTW','JNENGOT',
+'JNENGOTW','MACDFDT','MACDFDT','MDYAMPM','MDYAMPM','ND8601DN','ND8601DT','ND8601DZ','NLDATM','NLDATM','NLDATMAP','NLDATMAP',
+'NLDATMDT','NLDATML','NLDATMM','NLDATMMD','NLDATMMDL','NLDATMMDM','NLDATMMDS','NLDATMMN','NLDATMS','NLDATMTM','NLDATMTZ','NLDATMW',
+'NLDATMW','NLDATMWN','NLDATMWZ','NLDATMYM','NLDATMYML','NLDATMYMM','NLDATMYMS','NLDATMYQ','NLDATMYQL','NLDATMYQM','NLDATMYQS','NLDATMYR',
+'NLDATMYW','NLDATMZ','NLDDFDT','NLDDFDT','NORDFDT','NORDFDT','POLDFDT','POLDFDT','PTGDFDT','PTGDFDT','RUSDFDT','RUSDFDT',
+'SLODFDT','SLODFDT','SVEDFDT','SVEDFDT','TWMDY','YMDDTTM',
+)
 

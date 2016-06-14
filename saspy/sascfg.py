@@ -26,7 +26,7 @@
 # 
 # SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', 'forest', 'httptest']
 #
-SAS_config_names = ['default', 'http', 'ssh']
+SAS_config_names = ['default', 'http', 'httptest', 'ssh']
 
 # Configuration options for pysas - python Dict
 # valid key are:
