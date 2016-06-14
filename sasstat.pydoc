@@ -1,0 +1,124 @@
+Help on module sasstat:
+
+NAME
+    sasstat
+
+DESCRIPTION
+    # Copyright SAS Institute
+    #
+    #  Licensed under the Apache License, Version 2.0 (the License);
+    #  you may not use this file except in compliance with the License.
+    #  You may obtain a copy of the License at
+    #
+    #      http://www.apache.org/licenses/LICENSE-2.0
+    #
+    #  Unless required by applicable law or agreed to in writing, software
+    #  distributed under the License is distributed on an "AS IS" BASIS,
+    #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    #  See the License for the specific language governing permissions and
+    #  limitations under the License.
+    #
+
+CLASSES
+    builtins.object
+        SASstat
+    
+    class SASstat(builtins.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, session, *args, **kwargs)
+     |      Submit an initial set of macros to prepare the SAS system
+     |  
+     |  glm(self, **kwargs:dict)
+     |      Python method to call the GLM procedure
+     |      For more information on the statements see the Documentation link.
+     |      required_set={'model'}
+     |      legal_set={'absorb','by','cls','contrast','estimate','freq','id',
+     |                 'lsmeans','manova','means', 'model','random','repeated',
+     |                 'test','weight'}
+     |      
+     |      cls is an alias for the class statement
+     |      Documentation link:
+     |      http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_toc.htm
+     |      
+     |      :param kwargs: dict
+     |      :return: SAS result object
+     |  
+     |  hpsplit(self, **kwargs:dict)
+     |      Python method to call the HPSPLIT procedure
+     |      
+     |      required_set={}
+     |      legal_set={'cls','code','grow','id','model',
+     |                 'partition','performance','prune','rules'}
+     |      For more information on the statements see the Documentation link.
+     |      cls is an alias for the class statement
+     |      Documentation link:
+     |      http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+     |      :param kwargs: dict
+     |      :return: SAS result object
+     |  
+     |  logistic(self, **kwargs:dict)
+     |      Python method to call the LOGISTIC procedure
+     |      For more information on the statements see the Documentation link.
+     |      
+     |      required_set={'model'}
+     |      legal_set={'by','cls','contrast','effect','effectplot','estimate',
+     |                 'exact','freq','lsmeans','oddsratio','roc','score','slice',
+     |                 'store','strata','units','weight'}
+     |      
+     |      cls is an alias for the class statement
+     |      Documentation link:
+     |      http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_logistic_toc.htm
+     |      
+     |      The PROC LOGISTIC and MODEL statements are required.
+     |      The CLASS and EFFECT statements (if specified) must
+     |      precede the MODEL statement, and the CONTRAST, EXACT,
+     |      and ROC statements (if specified) must follow the MODEL
+     |      statement.
+     |      
+     |      :param kwargs: dict
+     |      :return: SAS result object
+     |  
+     |  mixed(self, **kwargs:dict)
+     |      Python method to call the MIXED procedure
+     |      For more information on the statements see the Documentation link.
+     |      required_set={'model'}
+     |      legal_set={'by','cls','code','contrast','estimate','id',
+     |                 'lsmeans','model','random','repeated',
+     |                 'slice','weight'}
+     |      cls is an alias for the class statement
+     |      Documentation link:
+     |      http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm
+     |      
+     |      :param kwargs: dict
+     |      :return: SAS result object
+     |  
+     |  reg(self, **kwargs:dict)
+     |      Python method to call the REG procedure
+     |      For more information on the statements see the Documentation link.
+     |      required_set={'model'}
+     |      legal_set={'add','by','code','id','var'
+     |                 'lsmeans','model','random','repeated',
+     |                 'slice','test','weight'}
+     |      Documentation link:
+     |      http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm
+     |      
+     |      :param kwargs: dict
+     |      :return: SAS result object
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+DATA
+    logger = <logging.RootLogger object>
+
+FILE
+    /net/sanyo.unx.sas.com/vol/vol810/u81/sastpw/tkpygit/metis/tomhttp/metis/saspy_pip/saspy/sasstat.py
+
+
