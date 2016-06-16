@@ -59,18 +59,18 @@ CLASSES
      |  __init__(self, **kwargs)
      |      Initialize self.  See help(type(self)) for accurate signature.
      |  
-     |  dataframe2sasdata(self, df:'<Pandas Data Frame object>', table:str='a', libref:str='work', results:str='HTML') -> '<SASdata object>'
+     |  dataframe2sasdata(self, df:'<Pandas Data Frame object>', table:str='a', libref:str='', results:str='HTML') -> '<SASdata object>'
      |      This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
      |      df      - Pandas Data Frame to import to a SAS Data Set
      |      table   - the name of the SAS Data Set to create
-     |      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+     |      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
      |      results - format of results, HTML is default, TEXT is the alternative
      |  
-     |  read_csv(self, file:str, table:str, libref:str='work', results:str='HTML', nosub:bool=False) -> '<SASdata object>'
+     |  read_csv(self, file:str, table:str, libref:str='', results:str='HTML', nosub:bool=False) -> '<SASdata object>'
      |      This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
      |      file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
      |      table   - the name of the SAS Data Set to create
-     |      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+     |      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
      |      results - format of results, HTML is default, TEXT is the alternative
      |  
      |  sasdata2dataframe(self, sd:'<SASdata object>') -> '<Pandas Data Frame object>'
