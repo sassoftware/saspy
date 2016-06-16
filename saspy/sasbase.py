@@ -316,7 +316,7 @@ class SASsession:
       self._io._asubmit(code.decode(), results='text')
       os.close(fd)
 
-   def sasdata(self, table: str, libref: str ="", results: str ='HTML')  -> '<SASdata object>':
+   def sasdata(self, table: str, libref: str ='', results: str ='HTML')  -> '<SASdata object>':
       '''
       This method creates a SASdata object for the SAS Data Set you specify
       table   - the name of the SAS Data Set
@@ -326,7 +326,10 @@ class SASsession:
       if self.exist(table, libref):
          return SASdata(self, libref, table, results)
       else:
-         print("Table "+table+" does not exist. No SASdata object returned")
+         if len(libref):
+            print("Table "+libref+'.'+table+" does not exist. No SASdata object returned")
+         else:
+            print("Table "+table+" does not exist. No SASdata object returned")
          return None
    
    def saslib(self, libref: str, engine: str =' ', path: str ='', options: str =' ') -> 'The LOG showing the assignment of the libref':
@@ -403,7 +406,7 @@ class SASsession:
          print('The SAS_data object is not valid; it is \'None\'')
          return None                            
       if sd == None or self.exist(sd.table, sd.libref) == 0:
-         print('The SAS Data Set '+sd.libref|'.'+sd.table+' does not exist')
+         print('The SAS Data Set '+sd.libref'.'+sd.table+' does not exist')
          return None                            
    
       if self.nosub:
@@ -457,13 +460,7 @@ class SASdata:
         obs - the number of rows of the table that you want to display. The default is 5
 
         '''
-        code  = "proc print data="
-        if len(self.libref):
-           code += self.libref+'.'
-        code += self.table
-        code += "(obs="
-        code += str(obs)
-        code += ");run;"
+        code = "proc print data="+self.libref+'.'+self.table+"(obs="+str(obs)+");run;"
         
         if self.sas.nosub:
            print(code)
@@ -488,11 +485,7 @@ class SASdata:
         obs - the number of rows of the table that you want to display. The default is 5
 
         '''
-        code  = "%put lastobs=%sysfunc(attrn(%sysfunc(open("
-        if len(self.libref):
-           code += self.libref+'.'
-        code += self.table
-        code += ")),NOBS)) tom;"
+        code = "%put lastobs=%sysfunc(attrn(%sysfunc(open("+self.libref+'.'+self.table+")),NOBS)) tom;"
 
         nosub = self.sas.nosub
         self.sas.nosub = False
@@ -502,15 +495,9 @@ class SASdata:
         lastobs = lastobs[2].partition(" tom")
         lastobs = int(lastobs[0])
 
-        code  = "proc print data="
-        if len(self.libref):
-           code += self.libref+'.'
-        code += self.table
-        code += "(firstobs="
-        code += str(lastobs-(obs-1))
-        code += " obs="
-        code += str(lastobs)
-        code += ");run;"
+        code  = "proc print data="+self.libref+'.'+self.table
+        code += "(firstobs="+str(lastobs-(obs-1))
+        code += " obs="+str(lastobs)+");run;"
         
         self.sas.nosub = nosub
         if self.sas.nosub:
@@ -535,11 +522,7 @@ class SASdata:
         display metadata about the table. size, number of rows, columns and their data type ...
 
         '''
-        code  = "proc contents data="
-        if len(self.libref):
-           code += self.libref+'.'
-        code += self.table
-        code += ";run;"
+        code  = "proc contents data="+self.libref+'.'+self.table+";run;"
 
         if self.sas.nosub:
            print(code)
@@ -570,11 +553,7 @@ class SASdata:
         display descriptive statistics for the table; summary statistics. This is an alias for 'describe'
 
         '''
-        code  = "proc means data="
-        if len(self.libref):
-           code += self.libref+'.'
-        code += self.table
-        code += " n mean std min p25 p50 p75 max;run;"
+        code  = "proc means data="+self.libref+'.'+self.table+" n mean std min p25 p50 p75 max;run;"
         
         if self.sas.nosub:
            print(code)
@@ -613,10 +592,7 @@ class SASdata:
         title - an optional Title for the chart
         label - LegendLABEL= value for sgplot
         '''
-        code  = "proc sgplot data="
-        if len(self.libref):
-           code += self.libref+'.'
-        code += self.table
+        code  = "proc sgplot data="+self.libref+'.'+self.table
         code += ";\n\thistogram "+var+" / scale=count"
         if len(label) > 0:
            code += " LegendLABEL='"+label+"'"
@@ -649,10 +625,7 @@ class SASdata:
         y     - the y axis variable(s), you can specify a single column or a list of columns 
         title - an optional Title for the chart
         '''
-        code  = "proc sgplot data="
-        if len(self.libref):
-           code += self.libref+'.'
-        code += self.table+";\n"
+        code  = "proc sgplot data="+self.libref+'.'+self.table+";\n"
         if len(title) > 0:
            code += '\ttitle "'+title+'";\n'
 
