@@ -255,15 +255,17 @@ class SASsession:
       '''
       self.batch = batch
 
-   def exist(self, table: str, libref: str ="work") -> bool:
+   def exist(self, table: str, libref: str ="") -> bool:
       '''
       table  - the name of the SAS Data Set
-      libref - the libref for the Data Set, defaults to WORK
+      libref - the libref for the Data Set, defaults to WORK, or USER if assigned
 
       Returns True it the Data Set exists and False if it does not
       '''
       code  = "data _null_; e = exist('"
-      code += libref+"."+table+"');\n" 
+      if len(libref):
+         code += libref+"."
+      code += table+"');\n" 
       code += "te='TABLE_EXISTS='; put te e;run;"
    
       nosub = self.nosub
@@ -314,16 +316,17 @@ class SASsession:
       self._io._asubmit(code.decode(), results='text')
       os.close(fd)
 
-   def sasdata(self, table: str, libref: str ="work", results: str ='HTML')  -> '<SASdata object>':
+   def sasdata(self, table: str, libref: str ="", results: str ='HTML')  -> '<SASdata object>':
       '''
       This method creates a SASdata object for the SAS Data Set you specify
       table   - the name of the SAS Data Set
-      libref  - the libref for the Data Set, defaults to WORK
+      libref  - the libref for the Data Set, defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
       '''
       if self.exist(table, libref):
          return SASdata(self, libref, table, results)
       else:
+         print("Table "+table+" does not exist. No SASdata object returned")
          return None
    
    def saslib(self, libref: str, engine: str =' ', path: str ='', options: str =' ') -> 'The LOG showing the assignment of the libref':
@@ -345,32 +348,32 @@ class SASsession:
          ll = self._io.submit(code, "text")
          print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0]) 
 
-   def read_csv(self, file: str, table: str, libref: str ="work", results: str ='HTML') -> '<SASdata object>':
+   def read_csv(self, file: str, table: str, libref: str ='', results: str ='HTML') -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
       table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
       '''
       return self._io.read_csv(file, table, libref, results, self.nosub)
    
-   def df2sd(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="work", results: str ='HTML') -> '<SASdata object>':
+   def df2sd(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ='', results: str ='HTML') -> '<SASdata object>':
       '''
       This is an alias for 'dataframe2sasdata'. Why type all that?
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
       '''
       return self.dataframe2sasdata(df, table, libref, results)
    
-   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="work", results: str ='HTML') -> '<SASdata object>':
+   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ='', results: str ='HTML') -> '<SASdata object>':
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
       '''
       if self.nosub:
@@ -429,7 +432,13 @@ class SASdata:
         else:
            self.HTML = 0
 
-        self.libref = libref 
+        if len(libref):
+           self.libref = libref 
+        else:
+           if (self.sas.exist(table, libref='user')):
+              self.libref = 'USER'
+           else:
+              self.libref = 'WORK'
         self.table  = table
 
     def set_results(self, results: str):
@@ -449,8 +458,8 @@ class SASdata:
 
         '''
         code  = "proc print data="
-        code += self.libref
-        code += "."
+        if len(self.libref):
+           code += self.libref+'.'
         code += self.table
         code += "(obs="
         code += str(obs)
@@ -480,8 +489,8 @@ class SASdata:
 
         '''
         code  = "%put lastobs=%sysfunc(attrn(%sysfunc(open("
-        code += self.libref
-        code += "."
+        if len(self.libref):
+           code += self.libref+'.'
         code += self.table
         code += ")),NOBS)) tom;"
 
@@ -494,8 +503,8 @@ class SASdata:
         lastobs = int(lastobs[0])
 
         code  = "proc print data="
-        code += self.libref
-        code += "."
+        if len(self.libref):
+           code += self.libref+'.'
         code += self.table
         code += "(firstobs="
         code += str(lastobs-(obs-1))
@@ -527,8 +536,8 @@ class SASdata:
 
         '''
         code  = "proc contents data="
-        code += self.libref
-        code += "."
+        if len(self.libref):
+           code += self.libref+'.'
         code += self.table
         code += ";run;"
 
@@ -562,8 +571,8 @@ class SASdata:
 
         '''
         code  = "proc means data="
-        code += self.libref
-        code += "."
+        if len(self.libref):
+           code += self.libref+'.'
         code += self.table
         code += " n mean std min p25 p50 p75 max;run;"
         
@@ -605,8 +614,8 @@ class SASdata:
         label - LegendLABEL= value for sgplot
         '''
         code  = "proc sgplot data="
-        code += self.libref
-        code += "."
+        if len(self.libref):
+           code += self.libref+'.'
         code += self.table
         code += ";\n\thistogram "+var+" / scale=count"
         if len(label) > 0:
@@ -641,8 +650,8 @@ class SASdata:
         title - an optional Title for the chart
         '''
         code  = "proc sgplot data="
-        code += self.libref
-        code += "."
+        if len(self.libref):
+           code += self.libref+'.'
         code += self.table+";\n"
         if len(title) > 0:
            code += '\ttitle "'+title+'";\n'

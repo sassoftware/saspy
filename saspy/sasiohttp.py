@@ -533,12 +533,12 @@ class SASsessionHTTP():
       '''
       return self._getlog()
 
-   def read_csv(self, file: str, table: str, libref: str ="work", results: str ='HTML', nosub: bool=False) -> '<SASdata object>':
+   def read_csv(self, file: str, table: str, libref: str ="", results: str ='HTML', nosub: bool=False) -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
       table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
       '''
       print("read_csv is not currently implemented in this SAS Connection Interface; HTTP")
@@ -551,8 +551,9 @@ class SASsessionHTTP():
    
       code += "\""+file+"\";\n"
       code += "proc import datafile=x out="
-      code += libref+"."+table
-      code += " dbms=csv replace; run;"
+      if len(libref):
+         code += libref+"."
+      code += table+" dbms=csv replace; run;"
    
       if nosub:
          print(code)
@@ -571,12 +572,12 @@ class SASsessionHTTP():
       print("to_csv is not currently implemented in this SAS Connection Interface; HTTP")
       return None
 
-   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="work", results: str ='HTML') -> '<SASdata object>':
+   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="", results: str ='HTML') -> '<SASdata object>':
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
       '''
       print("dataframe2sasdata is not currently implemented in this SAS Connection Interface; HTTP")

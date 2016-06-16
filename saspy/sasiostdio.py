@@ -647,12 +647,12 @@ class SASsessionSTDIO():
       '''
       return self._log
 
-   def read_csv(self, file: str, table: str, libref: str ="work", results: str ='HTML', nosub: bool =False) -> '<SASdata object>':
+   def read_csv(self, file: str, table: str, libref: str ="", results: str ='HTML', nosub: bool =False) -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
       table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
       '''
       code  = "filename x "
@@ -662,8 +662,9 @@ class SASsessionSTDIO():
    
       code += "\""+file+"\";\n"
       code += "proc import datafile=x out="
-      code += libref+"."+table
-      code += " dbms=csv replace; run;"
+      if len(libref):
+         code += libref+"."
+      code += table+" dbms=csv replace; run;"
    
       if nosub:
          print(code)
@@ -691,12 +692,12 @@ class SASsessionSTDIO():
          ll = self.submit(code, "text")
          print(ll['LOG'])
 
-   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="work", results: str ='HTML') -> '<SASdata object>':
+   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="", results: str ='HTML') -> '<SASdata object>':
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
       '''
       input  = ""
@@ -713,7 +714,10 @@ class SASsessionSTDIO():
          else:
             dts.append('N')
    
-      code  = "data "+libref+"."+table+";\n"
+      code = "data "
+      if len(libref):
+         code += libref+"."
+      code += table+";\n"
       if len(length):
          code += "length"+length+";\n"
       code += "infile datalines delimiter='09'x;\n input "+input+";\n datalines;"
