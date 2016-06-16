@@ -406,7 +406,7 @@ class SASsession:
          print('The SAS_data object is not valid; it is \'None\'')
          return None                            
       if sd == None or self.exist(sd.table, sd.libref) == 0:
-         print('The SAS Data Set '+sd.libref'.'+sd.table+' does not exist')
+         print('The SAS Data Set '+sd.libref+'.'+sd.table+' does not exist')
          return None                            
    
       if self.nosub:
