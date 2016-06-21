@@ -412,7 +412,13 @@ class SASsessionSTDIO():
          pcodei += 'options nosource nonotes;\n'
          pcodeo += 'options nosource nonotes;\n'
          for key in prompt:
-            var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
+            gotit = False
+            while not gotit:
+               var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
+               if len(var) > 0:
+                  gotit = True
+               else:
+                  print("Sorry, didn't get a value for that variable.")
             pcodei += '%let '+key+'='+var+';\n'
             pcodeo += '%symdel '+key+';\n'
          pcodei += 'options source notes;\n'
