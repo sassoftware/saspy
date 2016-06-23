@@ -63,7 +63,10 @@ class SASets:
         :return: str -- the SAS code needed to execute on the server
         """
         code  = "%macro proccall(d);\n"
-        code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
+        if 'out' in args:
+            code += "proc %s data=%s.%s out=%s plots=all;\n" % (objtype, data.libref, data.table, args['out'])
+        else:
+            code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
         logger.debug("args value: " + str(args))
         logger.debug("args type: " + str(type(args)))
         if 'by' in args:
@@ -250,12 +253,12 @@ class SASets:
         """
         Python method to call the ARIMA procedure
         required_set={'identify'}
-        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast'}
+        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
 
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
         """
         required_set={'identify'}
-        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast'}
+        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
         return self._run_proc("ARIMA", required_set, legal_set, **kwargs)
 
     def ucm(self, **kwargs):

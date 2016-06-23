@@ -680,7 +680,7 @@ class SASsessionSTDIO():
             return self._sb.sasdata(table, libref, results)
          else:
             return None
-   
+      
    def to_csv(self, file: str, data: '<SASdata object>', nosub: bool =False) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CSV format.
@@ -698,6 +698,7 @@ class SASsessionSTDIO():
          ll = self.submit(code, "text")
          print(ll['LOG'])
 
+
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="", results: str ='HTML') -> '<SASdata object>':
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
@@ -708,26 +709,37 @@ class SASsessionSTDIO():
       '''
       input  = ""
       card   = ""
+      format = ""
       length = ""
       dts    = []
 
       for name in range(len(df.columns)):
          input += "'"+df.columns[name]+"'n "
-         if df.dtypes[df.columns[name]].kind in ('O','S','U','V',):
+         if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
             col_l = df[df.columns[name]].map(len).max()
             length += " '"+df.columns[name]+"'n $"+str(col_l)
             dts.append('C')
          else:
-            dts.append('N')
-   
+            if df.dtypes[df.columns[name]].kind in ('M'):
+               length += " '"+df.columns[name]+"'n 8"
+               input  += " E8601DT. "
+               format += "'"+df.columns[name]+"'n E8601DT. "
+               dts.append('D')
+            else:
+               length += " '"+df.columns[name]+"'n 8"
+               dts.append('N')
+
+
       code = "data "
       if len(libref):
          code += libref+"."
       code += table+";\n"
       if len(length):
          code += "length"+length+";\n"
+      if len(format):\
+         code += "format "+format+";\n"
       code += "infile datalines delimiter='09'x;\n input "+input+";\n datalines;"
-
+      print(code)
       self._asubmit(code, "text")
 
       for row in df.iterrows():
@@ -736,11 +748,17 @@ class SASsessionSTDIO():
             var = str(row[1][col])
             if dts[col] == 'N' and var == 'nan':
                var = '.'
+            if dts[col] == 'D': 
+               if var == 'nan':
+                  var = '.'
+               else:
+                  var = str(row[1][col].isoformat())
             card += var+chr(9)
+         print(card)
          self._asubmit(card, "text")
    
       self._asubmit(";run;", "text")
-   
+
    def sasdata2dataframe(self, sd: '<SASdata object>', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
