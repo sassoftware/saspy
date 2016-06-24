@@ -739,7 +739,7 @@ class SASsessionSTDIO():
       if len(format):\
          code += "format "+format+";\n"
       code += "infile datalines delimiter='09'x;\n input "+input+";\n datalines;"
-      print(code)
+      #print(code)
       self._asubmit(code, "text")
 
       for row in df.iterrows():
@@ -754,7 +754,7 @@ class SASsessionSTDIO():
                else:
                   var = str(row[1][col].isoformat())
             card += var+chr(9)
-         print(card)
+         #print(card)
          self._asubmit(card, "text")
    
       self._asubmit(";run;", "text")
