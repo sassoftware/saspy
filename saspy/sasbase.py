@@ -497,10 +497,11 @@ class SASdata:
         '''
         code = "%put lastobs=%sysfunc(attrn(%sysfunc(open("+self.libref+'.'+self.table+")),NOBS)) tom;"
 
+        nosub = self.sas.nosub
+        self.sas.nosub = False
+
         ll = self._is_valid()
         if not ll:
-           nosub = self.sas.nosub
-           self.sas.nosub = False
            ll = self.sas.submit(code, "text")
          
            lastobs = ll['LOG'].rpartition("lastobs=")
