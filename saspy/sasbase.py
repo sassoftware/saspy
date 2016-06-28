@@ -323,14 +323,12 @@ class SASsession:
       libref  - the libref for the Data Set, defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
       '''
-      if self.exist(table, libref):
-         return SASdata(self, libref, table, results)
-      else:
+      if not self.exist(table, libref):
          if len(libref):
-            print("Table "+libref+'.'+table+" does not exist. No SASdata object returned")
+            print("Table "+libref+'.'+table+" does not exist. This SASdata object will not be useful until the data set is created.")
          else:
-            print("Table "+table+" does not exist. No SASdata object returned")
-         return None
+            print("Table "+table+" does not exist. This SASdata object will not be useful until the data set is created.")
+      return SASdata(self, libref, table, results)
    
    def saslib(self, libref: str, engine: str =' ', path: str ='', options: str =' ') -> 'The LOG showing the assignment of the libref':
       '''
@@ -419,7 +417,7 @@ class SASdata:
 
     def __init__(self, sassession, libref, table, results="HTML"):
 
-        self.sas   = sassession
+        self.sas = sassession
 
         failed = 0 
         if results.upper() == "HTML":

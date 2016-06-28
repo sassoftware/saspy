@@ -72,7 +72,6 @@ class SASstat:
         # satisfy the order needs of the statements for the procedure
         # as an example... http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
 
-
         if 'absorb' in args:
             logger.debug("absorb statement,length: %s,%s", args['absorb'], len(args['absorb']))
             code += "absorb %s;\n" % (args['absorb'])
@@ -175,6 +174,11 @@ class SASstat:
             logger.debug("foobar statement,length: %s,%s", args['foobar'], len(args['foobar']))
             code += "foobar %s;\n" % (args['foobar'])
         '''
+        if 'out' in args:
+            outds = args['out']
+            outstr = outds.libref+'.'+outds.table
+            code += "output out=%s;\n" % (outstr)
+
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
         logger.debug("Proc code submission: " + str(code))
@@ -279,7 +283,7 @@ class SASstat:
         required_set={'model'}
         legal_set={'add','by','code','id','var'
                    'lsmeans','model','random','repeated',
-                   'slice','test','weight'}
+                   'slice','test','weight', 'out'}
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm
 
@@ -289,7 +293,7 @@ class SASstat:
         required_set={'model'}
         legal_set={'add','by','code','id','var'
                    'lsmeans','model','random','repeated',
-                   'slice','test','weight'}
+                   'slice','test','weight', 'out'}
 
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("REG", required_set, legal_set, **kwargs)
