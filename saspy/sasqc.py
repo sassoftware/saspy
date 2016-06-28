@@ -142,6 +142,11 @@ class SASqc:
             logger.debug("xchart statement,length: %s,%s", args['xchart'], len(args['xchart']))
             code += "xchart %s;\n" % (args['xchart'])
 
+        if 'out' in args:
+            outds = args['out']
+            outstr = outds.libref+'.'+outds.table
+            code += "output out=%s;\n" % (outstr)
+
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
         logger.debug("Proc code submission: " + str(code))
@@ -251,7 +256,7 @@ class SASqc:
         """
         required_set = {}
         legal_set = {'cdfplot', 'comphist', 'histogram', 'inset', 'intervals', 'output', 'ppplot', 'probplot',
-                     'qqplot', 'freq', 'weight', 'id', 'by', 'spec'}
+                     'qqplot', 'freq', 'weight', 'id', 'by', 'spec', 'out'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("CAPABILITY", required_set, legal_set, **kwargs)
 

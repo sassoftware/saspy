@@ -31,7 +31,7 @@ class SASresults(object):
         self.nosub = nosub
         self._log = log
 
-    def __dir__(self):
+    def __dir__(self) -> list:
         """Overload dir method to return the attributes"""
         return self._attrs
 
@@ -70,7 +70,7 @@ class SASresults(object):
         else:
            return data
 
-    def _go_run_code(self, attr):
+    def _go_run_code(self, attr) -> dict:
         # print(self._name, attr)
         code = '%%getdata(%s, %s);' % (self._name, attr)
         # print (code)
@@ -78,7 +78,7 @@ class SASresults(object):
         return res
         #return res['LST']
 
-    def sasdata(self, table):
+    def sasdata(self, table) -> object:
         x = self.sas.sasdata(table, '_' + self._name)
         return x
 

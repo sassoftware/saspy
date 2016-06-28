@@ -29,7 +29,7 @@ class SASstat:
         self.sas=session
         logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def _objectmethods(self, obj: str, *args):
+    def _objectmethods(self, obj: str, *args) -> list:
         """
         This method parses the SAS log for artifacts (tables and graphics) that were created
         from the procedure method call
@@ -38,20 +38,20 @@ class SASstat:
         :param args: list likely none
         :return: list -- the tables and graphs available for tab complete
         """
-        code  ="%listdata("
-        code +=obj
-        code +=");"
+        code  = "%listdata("
+        code += obj
+        code += ");"
         logger.debug("Object Method macro call: " + str(code))
         res=self.sas.submit(code,"text")
-        meth=res['LOG'].splitlines()
+        meth = res['LOG'].splitlines()
         for i in range(len(meth)):
            meth[i] = meth[i].lstrip().rstrip()
         logger.debug('SAS Log: ' + res['LOG'])
-        objlist=meth[meth.index('startparse9878')+1:meth.index('endparse9878')]
+        objlist = meth[meth.index('startparse9878')+1:meth.index('endparse9878')]
         logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
-    def _makeProcCallMacro(self, objtype: str, objname: str, data: object =None, args: dict =None):
+    def _makeProcCallMacro(self, objtype: str, objname: str, data: object =None, args: dict =None) -> str:
         """
         This method generates the SAS code from the python objects and included data and arguments.
         The list of args in this method is largely alphabetical but there are exceptions in order to
@@ -68,7 +68,7 @@ class SASstat:
         code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
         logger.debug("args value: " + str(args))
         logger.debug("args type: " + str(type(args)))
-        # this list is largly alphabetical but there are exceptions in order to
+        # this list is largely alphabetical but there are exceptions in order to
         # satisfy the order needs of the statements for the procedure
         # as an example... http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
 
@@ -90,7 +90,7 @@ class SASstat:
             code += "effect %s;\n" % (args['effect'])
         # estimate moved
         if 'freq' in args:
-            #add check to make sure it is only one variable
+            # TODO: add check to make sure it is only one variable
             logger.debug("freq statement,length: %s,%s", args['freq'], len(args['freq']))
             code += "freq %s;\n" % (args['freq'])
         if 'id' in args:
@@ -127,7 +127,7 @@ class SASstat:
             logger.debug("parms statement,length: %s,%s", args['parms'], len(args['parms']))
             code += "parms %s;\n" % (args['parms'])
         if 'prior' in args:
-            #check that distrbution is in the list
+            # TODO: check that distrbution is in the list
             logger.debug("prior statement,length: %s,%s", args['prior'], len(args['prior']))
             code += "prior %s;\n" % (args['prior'])
         if 'random' in args:
@@ -153,7 +153,7 @@ class SASstat:
             logger.debug("var statement,length: %s,%s", args['var'], len(args['var']))
             code += "var %s;\n" % (args['var'])
         if 'weight' in args:
-            #add check to make sure it is only one variable
+            # TODO: add check to make sure it is only one variable
             logger.debug("weight statement,length: %s,%s", args['weight'], len(args['weight']))
             code += "weight %s;\n" % (args['weight'])
 
@@ -169,11 +169,6 @@ class SASstat:
         if 'partition' in args:
             logger.debug("partition statement,length: %s,%s", args['partition'], len(args['partition']))
             code += "partition %s;\n" % (args['partition'])
-        '''
-        if 'foobar' in args:
-            logger.debug("foobar statement,length: %s,%s", args['foobar'], len(args['foobar']))
-            code += "foobar %s;\n" % (args['foobar'])
-        '''
         if 'out' in args:
             outds = args['out']
             outstr = outds.libref+'.'+outds.table
@@ -184,7 +179,7 @@ class SASstat:
         logger.debug("Proc code submission: " + str(code))
         return code
 
-    def _stmt_check(self, req: set, legal: set, stmt: dict):
+    def _stmt_check(self, req: set, legal: set, stmt: dict) -> bool:
         """
         This method checks to make sure that the proc has all required statements and removes any statements
         aren't valid. Missing required statements is an error. Extra statements are not.
@@ -237,7 +232,7 @@ class SASstat:
         obj1=[]; nosub=False; objname=''; log=''
         if chk:
             objtype=procname.lower()
-            objname='sta'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
+            objname='sta'+self.sas._objcnt()  # translate to a libname so needs to be less than 8
             code=self._makeProcCallMacro(objtype, objname, data, kwargs)
             logger.debug(procname+" macro submission: " + str(code))
             if not self.sas.nosub:
@@ -256,14 +251,13 @@ class SASstat:
 
         return SASresults(obj1, self.sas, objname, nosub, log)
 
-
-    def hpsplit(self, **kwargs: dict):
+    def hpsplit(self, **kwargs: dict) -> object:
         """
         Python method to call the HPSPLIT procedure
 
-        required_set={}
-        legal_set={'cls','code','grow','id','model',
-                   'partition','performance','prune','rules'}
+        required_set = {}
+        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
+                    'partition', 'performance', 'prune', 'rules'}
         For more information on the statements see the Documentation link.
         cls is an alias for the class statement
         Documentation link:
@@ -271,20 +265,20 @@ class SASstat:
         :param kwargs: dict
         :return: SAS result object
         """
-        required_set={}
-        legal_set={'cls','code','grow','id','model',
-                   'partition','performance','prune','rules'}
+        required_set = {}
+        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
+                    'partition', 'performance', 'prune', 'rules'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("HPSPLIT", required_set, legal_set, **kwargs)
 
-    def reg(self, **kwargs: dict):
+    def reg(self, **kwargs: dict) -> object:
         """
         Python method to call the REG procedure
         For more information on the statements see the Documentation link.
         required_set={'model'}
-        legal_set={'add','by','code','id','var'
-                   'lsmeans','model','random','repeated',
-                   'slice','test','weight', 'out'}
+        legal_set= {'add', 'by', 'code', 'id', 'var',
+                    'lsmeans', 'model', 'random', 'repeated',
+                    'slice', 'test', 'weight', 'out'}
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm
 
@@ -292,21 +286,21 @@ class SASstat:
         :return: SAS result object
         """
         required_set={'model'}
-        legal_set={'add','by','code','id','var'
-                   'lsmeans','model','random','repeated',
-                   'slice','test','weight', 'out'}
+        legal_set= {'add', 'by', 'code', 'id', 'var',
+                    'lsmeans', 'model', 'random', 'repeated',
+                    'slice', 'test', 'weight', 'out'}
 
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("REG", required_set, legal_set, **kwargs)
 
-    def mixed(self, **kwargs: dict):
+    def mixed(self, **kwargs: dict) -> object:
         """
         Python method to call the MIXED procedure
         For more information on the statements see the Documentation link.
         required_set={'model'}
-        legal_set={'by','cls','code','contrast','estimate','id',
-                   'lsmeans','model','random','repeated',
-                   'slice','weight'}
+        legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id',
+                    'lsmeans', 'model', 'out', 'random', 'repeated',
+                    'slice', 'weight'}
         cls is an alias for the class statement
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm
@@ -315,21 +309,21 @@ class SASstat:
         :return: SAS result object
         """
         required_set={'model'}
-        legal_set={'by','cls','code','contrast','estimate','id',
-                   'lsmeans','model','random','repeated',
-                   'slice','weight'}
+        legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id',
+                    'lsmeans', 'model', 'out', 'random', 'repeated',
+                    'slice', 'weight'}
 
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("MIXED", required_set, legal_set, **kwargs)
 
-    def glm(self, **kwargs: dict):
+    def glm(self, **kwargs: dict) -> object:
         """
         Python method to call the GLM procedure
         For more information on the statements see the Documentation link.
         required_set={'model'}
-        legal_set={'absorb','by','cls','contrast','estimate','freq','id',
-                   'lsmeans','manova','means', 'model','random','repeated',
-                   'test','weight'}
+        legal_set= {'absorb', 'by', 'cls', 'contrast', 'estimate', 'freq', 'id',
+                    'lsmeans', 'manova', 'means', 'model', 'out', 'random', 'repeated',
+                    'test', 'weight'}
 
         cls is an alias for the class statement
         Documentation link:
@@ -339,22 +333,22 @@ class SASstat:
         :return: SAS result object
         """
         required_set={'model'}
-        legal_set={'absorb','by','cls','contrast','estimate','freq','id',
-                   'lsmeans','manova','means', 'model','random','repeated',
-                   'test','weight'}
+        legal_set= {'absorb', 'by', 'cls', 'contrast', 'estimate', 'freq', 'id',
+                    'lsmeans', 'manova', 'means', 'model', 'out', 'random', 'repeated',
+                    'test', 'weight'}
 
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("GLM", required_set, legal_set, **kwargs)
 
-    def logistic(self, **kwargs: dict):
+    def logistic(self, **kwargs: dict) -> object:
         """
         Python method to call the LOGISTIC procedure
         For more information on the statements see the Documentation link.
 
         required_set={'model'}
-        legal_set={'by','cls','contrast','effect','effectplot','estimate',
-                   'exact','freq','lsmeans','oddsratio','roc','score','slice',
-                   'store','strata','units','weight'}
+        legal_set= {'by', 'cls', 'contrast', 'effect', 'effectplot', 'estimate',
+                    'exact', 'freq', 'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice',
+                    'store', 'strata', 'units', 'weight'}
 
         cls is an alias for the class statement
         Documentation link:
@@ -370,9 +364,9 @@ class SASstat:
         :return: SAS result object
         """
         required_set={'model'}
-        legal_set={'by','cls','contrast','effect','effectplot','estimate',
-                   'exact','freq','lsmeans','oddsratio','roc','score','slice',
-                   'store','strata','units','weight'}
+        legal_set= {'by', 'cls', 'contrast', 'effect', 'effectplot', 'estimate',
+                    'exact', 'freq', 'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice',
+                    'store', 'strata', 'units', 'weight'}
 
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("LOGISTIC", required_set, legal_set, **kwargs)
