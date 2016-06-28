@@ -452,6 +452,15 @@ class SASdata:
         else:
            self.HTML = 0
 
+    def _is_valid(self):
+        msg = "The SAS Data Set that this SASdata object refers to, "+self.libref+'.'+self.table+", does not exist in this SAS session at this time."
+        ll = {'LOG': msg, 'LST': msg}
+
+        if self.sas.exist(self.table, self.libref):
+           return None
+        else:
+           return ll
+
     def head(self, obs=5):
         '''
         display the first n rows of a table
@@ -459,19 +468,22 @@ class SASdata:
 
         '''
         code = "proc print data="+self.libref+'.'+self.table+"(obs="+str(obs)+");run;"
-        
+
         if self.sas.nosub:
            print(code)
            return
 
+        ll = self._is_valid()
         if self.HTML:
-           ll = self.sas._io.submit(code)
+           if not ll:
+              ll = self.sas._io.submit(code)
            if not self.sas.batch:
               DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
-           ll = self.sas._io.submit(code, "text")
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
            if not self.sas.batch:
               print(ll['LST'])
            else:
@@ -485,14 +497,18 @@ class SASdata:
         '''
         code = "%put lastobs=%sysfunc(attrn(%sysfunc(open("+self.libref+'.'+self.table+")),NOBS)) tom;"
 
-        nosub = self.sas.nosub
-        self.sas.nosub = False
-        ll = self.sas.submit(code, "text")
-
-        lastobs = ll['LOG'].rpartition("lastobs=")
-        lastobs = lastobs[2].partition(" tom")
-        lastobs = int(lastobs[0])
-
+        ll = self._is_valid()
+        if not ll:
+           nosub = self.sas.nosub
+           self.sas.nosub = False
+           ll = self.sas.submit(code, "text")
+         
+           lastobs = ll['LOG'].rpartition("lastobs=")
+           lastobs = lastobs[2].partition(" tom")
+           lastobs = int(lastobs[0])
+        else:
+           lastobs = obs
+ 
         code  = "proc print data="+self.libref+'.'+self.table
         code += "(firstobs="+str(lastobs-(obs-1))
         code += " obs="+str(lastobs)+");run;"
@@ -503,13 +519,15 @@ class SASdata:
            return
 
         if self.HTML:
-           ll = self.sas._io.submit(code)
+           if not ll:
+              ll = self.sas._io.submit(code)
            if not self.sas.batch:
               DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
-           ll = self.sas._io.submit(code, "text")
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
            if not self.sas.batch:
               print(ll['LST'])
            else:
@@ -526,14 +544,17 @@ class SASdata:
            print(code)
            return
 
+        ll = self._is_valid()
         if self.HTML:
-           ll = self.sas._io.submit(code)
+           if not ll:
+              ll = self.sas._io.submit(code)
            if not self.sas.batch:
               DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
-           ll = self.sas._io.submit(code, "text")
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
            if not self.sas.batch:
               print(ll['LST'])
            else:
@@ -544,7 +565,7 @@ class SASdata:
         display descriptive statistics for the table; summary statistics.
 
         '''
-        self.means()
+        return self.means()
 
     def means(self):
         '''
@@ -557,14 +578,17 @@ class SASdata:
            print(code)
            return
 
+        ll = self._is_valid()
         if self.HTML:
-           ll = self.sas._io.submit(code)
+           if not ll:
+              ll = self.sas._io.submit(code)
            if not self.sas.batch:
               DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
-           ll = self.sas._io.submit(code, "text")
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
            if not self.sas.batch:
               print(ll['LST'])
            else:
@@ -575,13 +599,22 @@ class SASdata:
         This method will export a SAS Data Set to a file in CSV format.
         file    - the OS filesystem path of the file to be created (exported from this SAS Data Set)
         '''
-        return self.sas._io.to_csv(file, self, self.sas.nosub)
+        ll = self._is_valid()
+        if ll:
+           print(ll['LOG'])
+        else:
+           return self.sas._io.to_csv(file, self, self.sas.nosub)
 
     def to_df(self) -> '<Pandas Data Frame object>':
         '''
         Export this SAS Data Set to a Pandas Data Frame
         '''
-        return self.sas.sasdata2dataframe(self)
+        ll = self._is_valid()
+        if ll:
+           print(ll['LOG'])
+           return None
+        else:
+           return self.sas.sasdata2dataframe(self)
 
     def hist(self, var: str, title: str ='', label: str ='') -> 'a histogram plot of the (numeric) variable you chose':
         '''
@@ -603,14 +636,17 @@ class SASdata:
            print(code)
            return
 
+        ll = self._is_valid()
         if self.HTML:
-           ll = self.sas._io.submit(code)
+           if not ll:
+              ll = self.sas._io.submit(code)
            if not self.sas.batch:
               DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
-           ll = self.sas._io.submit(code, "text")
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
            if not self.sas.batch:
               print(ll['LST'])
            else:
@@ -642,14 +678,17 @@ class SASdata:
            print(code)
            return
 
+        ll = self._is_valid()
         if self.HTML:
-           ll = self.sas._io.submit(code)
+           if not ll:
+              ll = self.sas._io.submit(code)
            if not self.sas.batch:
               DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
-           ll = self.sas._io.submit(code, "text")
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
            if not self.sas.batch:
               print(ll['LST'])
            else:
