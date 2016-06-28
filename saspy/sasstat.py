@@ -234,7 +234,7 @@ class SASstat:
         """
         data=kwargs.pop('data',None)
         chk= self._stmt_check(required_set, legal_set, kwargs)
-        obj1=[]; nosub=False; objname=''
+        obj1=[]; nosub=False; objname=''; log=''
         if chk:
             objtype=procname.lower()
             objname='sta'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
@@ -242,6 +242,7 @@ class SASstat:
             logger.debug(procname+" macro submission: " + str(code))
             if not self.sas.nosub:
                 ll = self.sas.submit(code,"text")
+                log = ll['LOG']
                 try:
                     obj1=self._objectmethods(objname)
                     logger.debug(obj1)
@@ -253,7 +254,7 @@ class SASstat:
         else:
             print("Error in code submission")
 
-        return SASresults(obj1, self.sas, objname, nosub, ll['LOG'])
+        return SASresults(obj1, self.sas, objname, nosub, log)
 
 
     def hpsplit(self, **kwargs: dict):
