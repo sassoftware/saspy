@@ -20,12 +20,16 @@ from IPython.core.display import HTML
 class SASresults(object):
     """Return results from a SAS Model object"""
 
-    def __init__(self, attrs, session, objname, nosub=False):
+    def __init__(self, attrs, session, objname, nosub=False, log=''):
 
-        self._attrs = attrs
+        if len(attrs) > 0:
+           self._attrs = attrs
+        else:
+           self._attrs = ['ERROR_LOG']
         self._name = objname
         self.sas = session
         self.nosub = nosub
+        self._log = log
 
     def __dir__(self):
         """Overload dir method to return the attributes"""
@@ -34,6 +38,9 @@ class SASresults(object):
     def __getattr__(self, attr):
         if attr.startswith('_'):
             return getattr(self, attr)
+        if attr.upper() == 'ERROR_LOG':
+            print(self._log)
+            return
         if attr.upper() in self._attrs:
             # print(attr.upper())
             data = self._go_run_code(attr)

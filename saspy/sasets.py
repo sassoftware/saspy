@@ -63,10 +63,7 @@ class SASets:
         :return: str -- the SAS code needed to execute on the server
         """
         code  = "%macro proccall(d);\n"
-        if 'out' in args:
-            code += "proc %s data=%s.%s out=%s plots=all;\n" % (objtype, data.libref, data.table, args['out'])
-        else:
-            code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
+        code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
         logger.debug("args value: " + str(args))
         logger.debug("args type: " + str(type(args)))
         if 'by' in args:
@@ -221,7 +218,7 @@ class SASets:
             code=self._makeProcCallMacro(objtype, objname, data, kwargs)
             logger.debug(procname+" macro submission: " + str(code))
             if not self.sas.nosub:
-                self.sas._asubmit(code,"text")
+                ll = self.sas.submit(code,"text")
                 try:
                     obj1=self._objectmethods(objname)
                     logger.debug(obj1)
@@ -233,7 +230,7 @@ class SASets:
         else:
             print("Error in code submission")
 
-        return SASresults(obj1, self.sas, objname, nosub)
+        return SASresults(obj1, self.sas, objname, nosub, ll['LOG'])
 
 
     def timeseries(self, **kwargs):
@@ -253,12 +250,12 @@ class SASets:
         """
         Python method to call the ARIMA procedure
         required_set={'identify'}
-        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
+        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast'}
 
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
         """
         required_set={'identify'}
-        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
+        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast'}
         return self._run_proc("ARIMA", required_set, legal_set, **kwargs)
 
     def ucm(self, **kwargs):

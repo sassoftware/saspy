@@ -680,7 +680,7 @@ class SASsessionSTDIO():
             return self._sb.sasdata(table, libref, results)
          else:
             return None
-      
+   
    def to_csv(self, file: str, data: '<SASdata object>', nosub: bool =False) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CSV format.
@@ -697,7 +697,6 @@ class SASsessionSTDIO():
       else:
          ll = self.submit(code, "text")
          print(ll['LOG'])
-
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="", results: str ='HTML') -> '<SASdata object>':
       '''
@@ -722,13 +721,12 @@ class SASsessionSTDIO():
          else:
             if df.dtypes[df.columns[name]].kind in ('M'):
                length += " '"+df.columns[name]+"'n 8"
-               input  += " E8601DT. "
-               format += "'"+df.columns[name]+"'n E8601DT. "
+               input  += ":E8601DT26.6 "
+               format += "'"+df.columns[name]+"'n E8601DT26.6 "
                dts.append('D')
             else:
                length += " '"+df.columns[name]+"'n 8"
                dts.append('N')
-
 
       code = "data "
       if len(libref):
@@ -736,10 +734,9 @@ class SASsessionSTDIO():
       code += table+";\n"
       if len(length):
          code += "length"+length+";\n"
-      if len(format):\
+      if len(format):
          code += "format "+format+";\n"
       code += "infile datalines delimiter='09'x;\n input "+input+";\n datalines;"
-      #print(code)
       self._asubmit(code, "text")
 
       for row in df.iterrows():
@@ -752,13 +749,12 @@ class SASsessionSTDIO():
                if var == 'nan':
                   var = '.'
                else:
-                  var = str(row[1][col].isoformat())
+                  var = str(row[1][col].to_datetime64())
             card += var+chr(9)
-         #print(card)
          self._asubmit(card, "text")
    
       self._asubmit(";run;", "text")
-
+   
    def sasdata2dataframe(self, sd: '<SASdata object>', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -830,13 +826,13 @@ class SASsessionSTDIO():
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
             if varcat[i] in sas_date_fmts:
-               code += 'E8601DA. '
+               code += 'E8601DA10. '
             else:
                if varcat[i] in sas_time_fmts:
-                  code += 'E8601TM. '
+                  code += 'E8601TM15.6 '
                else:
                   if varcat[i] in sas_datetime_fmts:
-                     code += 'E8601DT. '
+                     code += 'E8601DT26.6 '
                   else:
                      code += 'best32. '
          if i < (len(varlist)-1):

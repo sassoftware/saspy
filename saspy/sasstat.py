@@ -237,7 +237,7 @@ class SASstat:
             code=self._makeProcCallMacro(objtype, objname, data, kwargs)
             logger.debug(procname+" macro submission: " + str(code))
             if not self.sas.nosub:
-                self.sas._asubmit(code,"text")
+                ll = self.sas.submit(code,"text")
                 try:
                     obj1=self._objectmethods(objname)
                     logger.debug(obj1)
@@ -249,7 +249,7 @@ class SASstat:
         else:
             print("Error in code submission")
 
-        return SASresults(obj1, self.sas, objname, nosub)
+        return SASresults(obj1, self.sas, objname, nosub, ll['LOG'])
 
 
     def hpsplit(self, **kwargs: dict):
