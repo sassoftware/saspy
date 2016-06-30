@@ -60,7 +60,8 @@ default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
 
 ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
             'ssh'    : '/usr/bin/ssh',
-            'host'   : 'tom64-2'
+            'host'   : 'tom64-2', 
+            'options' : ["-fullstimer"]
             }
 
 # sas_en   = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sas'
@@ -81,7 +82,7 @@ ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 # 'ip'      - [REQUIRED] host address 
 # 'port'    - [REQUIRED] port; the code Defaults this to 80 (the Compute Services default port)
 # 'context' - context name defined on the compute service  [PROMTED for at runtime if more than one defined]
-# 'options' - SAS options to include in the start up command line
+# 'options' - SAS options to include (no '-' (dashes), just option names and values)
 # 'user'    - not suggested [REQUIRED but PROMTED for at runtime]
 # 'pw'      - really not suggested [REQUIRED but PROMTED for at runtime]
 # 
@@ -89,11 +90,12 @@ ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
              
 http     = {'ip'      : 'tomspc',
             'port'    :  80,
-            'context' : 'Tom1'
+            'context' : 'Tom2'
             }
 
 httptest = {'ip'      : 'tomspc',
-            'port'    :  80
+            'port'    :  80, 
+            'options' : ["fullstimer", "memsize 2G"]
             }
 
 

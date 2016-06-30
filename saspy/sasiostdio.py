@@ -37,7 +37,7 @@ class SASconfigSTDIO:
       cfg           = getattr(SAScfg, self.name) 
 
       self.saspath  = cfg.get('saspath', '')
-      self.options  = cfg.get('options', '')
+      self.options  = cfg.get('options', [])
       self.ssh      = cfg.get('ssh', '')
       self.host     = cfg.get('host', '')
 
@@ -117,7 +117,7 @@ class SASsessionSTDIO():
    ssh     - full path of the ssh command; /usr/bin/ssh for instance
    host    - host name of the remote machine
    '''
-   #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list ='') -> '<SASsession object>':
+   #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list =[]) -> '<SASsession object>':
    def __init__(self, **kwargs):
       self.pid    = None
       self.stdin  = None
@@ -160,7 +160,7 @@ class SASsessionSTDIO():
       parms += ["-terminal"]
       parms += ["-nosyntaxcheck"]
       parms += ['']
-      
+
       PIPE_READ  = 0
       PIPE_WRITE = 1
       
@@ -389,6 +389,7 @@ class SASsessionSTDIO():
       logcodei = "%put E3969440A681A24088859985" + logn + ";"
       logcodeo = "\nE3969440A681A24088859985" + logn
       pcodei   = ''
+      pcodeiv  = ''
       pcodeo   = ''
 
       if self.pid == None:
@@ -419,15 +420,19 @@ class SASsessionSTDIO():
                   gotit = True
                else:
                   print("Sorry, didn't get a value for that variable.")
-            pcodei += '%let '+key+'='+var+';\n'
-            pcodeo += '%symdel '+key+';\n'
+            if prompt[key]:
+               pcodei  += '%let '+key+'='+var+';\n'
+            else:
+               pcodeiv += '%let '+key+'='+var+';\n'
+            if prompt[key]:
+               pcodeo += '%symdel '+key+';\n'
          pcodei += 'options source notes;\n'
          pcodeo += 'options source notes;\n'
 
       if ods:
          self.stdin.write(odsopen)
    
-      out = self.stdin.write(mj+b'\n'+pcodei.encode()+code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj)
+      out = self.stdin.write(mj+b'\n'+pcodei.encode()+pcodeiv.encode()+code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj)
    
       if ods:
          self.stdin.write(odsclose)

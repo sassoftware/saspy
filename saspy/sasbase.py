@@ -153,7 +153,7 @@ class SASsession:
    user    - user name to authenticate with
    pw      - password to authenticate with
    '''
-   #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list ='') -> '<SASsession object>':
+   #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list =[]) -> '<SASsession object>':
    def __init__(self, **kwargs) -> '<SASsession object>':
       self._loaded_macros = False
       self._obj_cnt      = 0
@@ -500,8 +500,8 @@ class SASdata:
         nosub = self.sas.nosub
         self.sas.nosub = False
 
-        ll = self._is_valid()
-        if not ll:
+        le = self._is_valid()
+        if not le:
            ll = self.sas.submit(code, "text")
          
            lastobs = ll['LOG'].rpartition("lastobs=")
@@ -520,14 +520,14 @@ class SASdata:
            return
 
         if self.HTML:
-           if not ll:
+           if not le:
               ll = self.sas._io.submit(code)
            if not self.sas.batch:
               DISPLAY(HTML(ll['LST']))
            else:
               return ll
         else:
-           if not ll:
+           if not le:
               ll = self.sas._io.submit(code, "text")
            if not self.sas.batch:
               print(ll['LST'])

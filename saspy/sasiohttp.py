@@ -30,7 +30,7 @@ class SASconfigHTTP:
    '''
    This object is not intended to be used directly. Instantiate a SASsession object instead 
    '''
-   #def __init__(self, cfgname='', kernel=None, user='', pw='', ip='', port='', context='', options=''):
+   #def __init__(self, cfgname='', kernel=None, user='', pw='', ip='', port='', context='', options=[]):
    def __init__(self, **kwargs):
       self._kernel  = kwargs.get('kernel', None)   
       self._token   = None
@@ -41,7 +41,7 @@ class SASconfigHTTP:
       self.ip       = cfg.get('ip', '')
       self.port     = cfg.get('port', None)
       self.ctxname  = cfg.get('context', '')
-      self.options  = cfg.get('options', '')
+      self.options  = cfg.get('options', [])
       user          = cfg.get('user', '')
       pw            = cfg.get('pw', '')
 
@@ -75,7 +75,7 @@ class SASconfigHTTP:
          else:
             self.ctxname = inctxname
 
-      inoptions = kwargs.get('options', '')   
+      inoptions = kwargs.get('options', [])   
       if len(inoptions) > 0:
          if lock and len(self.options):
            print("Parameter 'options' passed to SAS_session was ignored due to configuration restriction.")
@@ -228,7 +228,7 @@ class SASsessionHTTP():
    options - overrides Options Dict entry of cfgname in sascfg.py file
    '''
    #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, user: str ='', pw: str ='', 
-   #                   ip: str ='', port: int ='', context: str ='', options: list ='') -> '<SASsession object>':
+   #                   ip: str ='', port: int ='', context: str ='', options: list =[]) -> '<SASsession object>':
    def __init__(self, **kwargs):
       self.sascfg     = SASconfigHTTP(**kwargs)
       self._sessionid = None
@@ -243,9 +243,17 @@ class SASsessionHTTP():
       self._sessionid = None
 
    def _startsas(self):
+      if len(self.sascfg.options):
+         options = '[';
+         for opt in self.sascfg.options:
+            options += '"'+opt+'", '
+         options = (options.rpartition(','))[0]+']'                                
+      else:
+         options = '[]'
+
       # POST Session
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-      d1 = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":"'+self.sascfg.options+'"}}'
+      d1 = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":'+options+'}}'
       headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', "/compute/sessions?contextName="+self.sascfg.ctxname, body=d1, headers=headers)
       req = conn.getresponse()
@@ -273,13 +281,10 @@ class SASsessionHTTP():
       if self._sessionid:
          # DELETE Session
          conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-         d1 = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":"'+self.sascfg.options+'"}}'
          headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
-         conn.request('DELETE', "/compute/sessions/"+self._sessionid, body=d1, headers=headers)
+         conn.request('DELETE', "/compute/sessions/"+self._sessionid, headers=headers)
          req = conn.getresponse()
          resp = req.read()
-         #resp
-         
          print("SAS server terminated for SESSION_ID="+self._sessionid)       
          self._sessionid = None
       return rc
@@ -321,7 +326,7 @@ class SASsessionHTTP():
 
    def _getlst(self, jobid=None):
       htm = ''
-
+      i   = 0
       # GET the list of results
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
@@ -451,6 +456,7 @@ class SASsessionHTTP():
       odsclose = json.dumps("ods html5 close;ods listing;\n")
       ods      = True;
       pcodei   = ''
+      pcodeiv  = ''
       pcodeo   = ''
 
       if results.upper() != "HTML":
@@ -469,14 +475,18 @@ class SASsessionHTTP():
                   gotit = True
                else:
                   print("Sorry, didn't get a value for that variable.")
-            pcodei += '%let '+key+'='+var+';\n'
-            pcodeo += '%symdel '+key+';\n'
+            if prompt[key]:
+               pcodei  += '%let '+key+'='+var+';\n'
+            else:
+               pcodeiv += '%let '+key+'='+var+';\n'
+            if prompt[key]:
+               pcodeo += '%symdel '+key+';\n'
          pcodei += 'options source notes;\n'
          pcodeo += 'options source notes;\n'
 
       # POST Job
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-      jcode = json.dumps(pcodei+code+'\n'+pcodeo)
+      jcode = json.dumps(pcodei+pcodeiv+code+'\n'+pcodeo)
       d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
       headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json",
                "Authorization":"Bearer "+self.sascfg._token}
