@@ -95,7 +95,7 @@ http     = {'ip'      : 'tomspc',
 
 httptest = {'ip'      : 'tomspc',
             'port'    :  80, 
-            'options' : ["fullstimer", "memsize 2G"]
+            'options' : ["fullstimer", "memsize=1G"]
             }
 
 
