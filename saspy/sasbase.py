@@ -263,22 +263,7 @@ class SASsession:
 
       Returns True it the Data Set exists and False if it does not
       '''
-      code  = "data _null_; e = exist('"
-      if len(libref):
-         code += libref+"."
-      code += table+"');\n" 
-      code += "te='TABLE_EXISTS='; put te e;run;"
-   
-      nosub = self.nosub
-      self.nosub = False
-      ll = self._io.submit(code, "text")
-      self.nosub = nosub
-
-      l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
-      l2 = l2[2].partition("\n")
-      exists = int(l2[0])
-   
-      return exists
+      return self._io.exist(table, libref)
    
    def sasstat(self) -> '<SASstat object>':
       '''
@@ -313,7 +298,10 @@ class SASsession:
    def _loadmacros(self):
       macro_path=os.path.dirname(os.path.realpath(__file__))
       fd = os.open(macro_path+'/'+'libname_gen.sas', os.O_RDONLY)
-      code = os.read(fd, 32767)
+      code  = 'options nosource;\n' 
+      code += os.read(fd, 32767)
+      code += '\noptions source;' 
+
       self._io._asubmit(code.decode(), results='text')
       os.close(fd)
 

@@ -658,6 +658,27 @@ class SASsessionSTDIO():
       '''
       return self._log
 
+   def exist(self, table: str, libref: str ="") -> bool:
+      '''
+      table  - the name of the SAS Data Set
+      libref - the libref for the Data Set, defaults to WORK, or USER if assigned
+
+      Returns True it the Data Set exists and False if it does not
+      '''
+      code  = "data _null_; e = exist('"
+      if len(libref):
+         code += libref+"."
+      code += table+"');\n" 
+      code += "te='TABLE_EXISTS='; put te e;run;"
+   
+      ll = self.submit(code, "text")
+
+      l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
+      l2 = l2[2].partition("\n")
+      exists = int(l2[0])
+   
+      return exists
+   
    def read_csv(self, file: str, table: str, libref: str ="", results: str ='HTML', nosub: bool =False) -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.

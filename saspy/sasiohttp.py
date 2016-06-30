@@ -550,6 +550,27 @@ class SASsessionHTTP():
       '''
       return self._getlog()
 
+   def exist(self, table: str, libref: str ="") -> bool:
+      '''
+      table  - the name of the SAS Data Set
+      libref - the libref for the Data Set, defaults to WORK, or USER if assigned
+
+      Returns True it the Data Set exists and False if it does not
+      '''
+      # HEAD Data Table
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      headers={"Accept":"*/*", "Authorization":"Bearer "+self.sascfg._token}
+      conn.request('HEAD', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table, headers=headers)
+      req = conn.getresponse()
+      status = req.getcode()
+
+      if status == 200:
+         exists = True
+      else:
+         exists = False
+   
+      return exists
+   
    def read_csv(self, file: str, table: str, libref: str ="", results: str ='HTML', nosub: bool=False) -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
