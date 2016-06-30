@@ -421,11 +421,10 @@ class SASsessionSTDIO():
                else:
                   print("Sorry, didn't get a value for that variable.")
             if prompt[key]:
-               pcodei  += '%let '+key+'='+var+';\n'
+               pcodei += '%let '+key+'='+var+';\n'
+               pcodeo += '%symdel '+key+';\n'
             else:
                pcodeiv += '%let '+key+'='+var+';\n'
-            if prompt[key]:
-               pcodeo += '%symdel '+key+';\n'
          pcodei += 'options source notes;\n'
          pcodeo += 'options source notes;\n'
 
