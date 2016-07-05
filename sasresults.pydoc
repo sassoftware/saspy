@@ -31,15 +31,15 @@ CLASSES
      |  ALL(self)
      |      This method shows all the results attributes for a given object
      |  
-     |  __dir__(self)
+     |  __dir__(self) -> list
      |      Overload dir method to return the attributes
      |  
      |  __getattr__(self, attr)
      |  
-     |  __init__(self, attrs, session, objname, nosub=False)
+     |  __init__(self, attrs, session, objname, nosub=False, log='')
      |      Initialize self.  See help(type(self)) for accurate signature.
      |  
-     |  sasdata(self, table)
+     |  sasdata(self, table) -> object
      |  
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:
