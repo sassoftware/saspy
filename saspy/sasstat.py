@@ -197,9 +197,10 @@ class SASstat:
         if len(req_set):
             missing_set=req_set.difference(set(stmt.keys()))
             if missing_set:
-                print ("You are missing %d required statements:" % (len(missing_set)))
-                print (missing_set)
-                return False
+                msg  = "You are missing %d required statements:" % (len(missing_set))
+                msg += "\n"+str(missing_set)
+                print(msg)
+                return msg
 
         # legal statements
         legal_set=legal
@@ -214,7 +215,7 @@ class SASstat:
                 for key in range(0,len(extra_set)):
                     print (key)
                     stmt.pop(extra_set.pop())
-        return True
+        return None
 
     def _run_proc(self, procname: str, required_set: set, legal_set: set, **kwargs: dict):
         """
@@ -228,9 +229,9 @@ class SASstat:
         :return: sas result object
         """
         data=kwargs.pop('data',None)
-        chk= self._stmt_check(required_set, legal_set, kwargs)
-        obj1=[]; nosub=False; objname=''; log=''
-        if chk:
+        log = self._stmt_check(required_set, legal_set, kwargs)
+        obj1=[]; nosub=False; objname=''; 
+        if not log:
             objtype=procname.lower()
             objname='sta'+self.sas._objcnt()  # translate to a libname so needs to be less than 8
             code=self._makeProcCallMacro(objtype, objname, data, kwargs)
@@ -245,6 +246,7 @@ class SASstat:
                     pass
             else:
                 print(code)
+                log = ''
                 nosub=True
         else:
             print("Error in code submission")
