@@ -24,6 +24,10 @@ import sys
 with open('README.rst') as f:
     readme = f.read()
 
+svem_flag = '--single-version-externally-managed'
+if svem_flag in sys.argv:
+    sys.argv.remove(svem_flag)
+
 setup(name='saspy',
       version='1.2.1',
       description='A SAS interpreter for Python',
@@ -33,6 +37,7 @@ setup(name='saspy',
       url='https://github.com/sassoftware/saspy',
       packages=['saspy'],
       cmdclass={},
+      package_data={'saspy': ['*.sas']},
       install_requires=['pygments', 'IPython', 'pre-commit'],
       classifiers=[
         'Programming Language :: Python :: 3',

@@ -1,0 +1,91 @@
+Help on module sasets:
+
+NAME
+    sasets
+
+DESCRIPTION
+    # Copyright SAS Institute
+    #
+    #  Licensed under the Apache License, Version 2.0 (the License);
+    #  you may not use this file except in compliance with the License.
+    #  You may obtain a copy of the License at
+    #
+    #      http://www.apache.org/licenses/LICENSE-2.0
+    #
+    #  Unless required by applicable law or agreed to in writing, software
+    #  distributed under the License is distributed on an "AS IS" BASIS,
+    #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    #  See the License for the specific language governing permissions and
+    #  limitations under the License.
+    #
+
+CLASSES
+    builtins.object
+        SASets
+    
+    class SASets(builtins.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, session, *args, **kwargs)
+     |      Submit an initial set of macros to prepare the SAS system
+     |  
+     |  arima(self, **kwargs)
+     |      Python method to call the ARIMA procedure
+     |      required_set={'identify'}
+     |      legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
+     |      
+     |      Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
+     |  
+     |  esm(self, **kwargs)
+     |      Python method to call the ESM procedure
+     |      required_set = {}
+     |      legal_set = { 'by', 'id', 'forecast', 'out'}
+     |      
+     |      Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm
+     |  
+     |  timedata(self, **kwargs)
+     |      Python method to call the TIMEDATA procedure
+     |      required_set = {}
+     |      legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts'}
+     |      
+     |      Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm
+     |  
+     |  timeid(self, **kwargs)
+     |      Python method to call the TIMEID procedure
+     |      required_set = {}
+     |      legal_set = { 'by', 'id', 'out'}
+     |      
+     |      Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm
+     |  
+     |  timeseries(self, **kwargs)
+     |      Python method to call the TIMESERIES procedure
+     |      required_set={'id'}
+     |      legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out'}
+     |      
+     |      Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm
+     |  
+     |  ucm(self, **kwargs)
+     |      Python method to call the UCM procedure
+     |      required_set={'model'}
+     |      legal_set= {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular'
+     |                  'level', 'model', 'nloptions', 'performance', 'out', 'outlier', 'randomreg', 'season', 'slope'
+     |                  'splinereg', 'splineseason'}
+     |      
+     |      Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+DATA
+    logger = <logging.RootLogger object>
+
+FILE
+    /net/sanyo.unx.sas.com/vol/vol810/u81/sastpw/tkpygit/metis/tomhttp/metis/saspy_pip/saspy/sasets.py
+
+
