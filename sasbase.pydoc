@@ -28,7 +28,7 @@ DESCRIPTION
     # connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interupt
     # handling, as the local STDIO method can. An interupt on this method can only terminate the SAS process; 
     # you'll be prompted to terminate or wait for completion. The third method is HTTP, which can connect
-    # to SAS Viya via the Compute Servie, a restfull micro service in the Viay system.
+    # to SAS Viya via the Compute Servie, a restfull micro service in the Viay system. 
     #
     # Each of these connection methods (access methods) are handled by their own IO module. This main
     # module determines which IO module to use based upon the configuration chosen at runtime. More
