@@ -65,9 +65,9 @@ class SASets:
         code  = "%macro proccall(d);\n"
         if 'out' in args:
             outds = args['out']
-            code += "proc %s data=%s.%s out=%s.%s plots=all;\n" % (objtype, data.libref, data.table, outds.libref, outds.table)
+            code += "proc %s data=%s.%s out=%s.%s plot=all;\n" % (objtype, data.libref, data.table, outds.libref, outds.table)
         else:
-            code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
+            code += "proc %s data=%s.%s plot=all;\n" % (objtype, data.libref, data.table)
         logger.debug("args value: " + str(args))
         logger.debug("args type: " + str(type(args)))
         if 'by' in args:

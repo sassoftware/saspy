@@ -298,9 +298,9 @@ class SASsession:
    def _loadmacros(self):
       macro_path=os.path.dirname(os.path.realpath(__file__))
       fd = os.open(macro_path+'/'+'libname_gen.sas', os.O_RDONLY)
-      code  = 'options nosource;\n' 
+      code  = b'options nosource;\n' 
       code += os.read(fd, 32767)
-      code += '\noptions source;' 
+      code += b'\noptions source;' 
 
       self._io._asubmit(code.decode(), results='text')
       os.close(fd)
@@ -511,6 +511,8 @@ class SASdata:
         if self.HTML:
            if not le:
               ll = self.sas._io.submit(code)
+           else:
+              ll = le
            if not self.sas.batch:
               DISPLAY(HTML(ll['LST']))
            else:
@@ -518,6 +520,8 @@ class SASdata:
         else:
            if not le:
               ll = self.sas._io.submit(code, "text")
+           else:
+              ll = le
            if not self.sas.batch:
               print(ll['LST'])
            else:
