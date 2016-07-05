@@ -1,7 +1,3 @@
-PLEASE DON'T USE THIS REPO AT THE MOMENT
-======
-This repo was accidently synched with 3 month old code. Until we can reapply all the changes we've lost, this code is to be considered broke. We have the 'latest' good code in a pypi package which can be installed from Pypi. I'll remove this warning once the repo has been restored. 
-
 saspy
 ======
 
@@ -26,6 +22,4 @@ SAS installation can be configured and other SAS startup options can be specifie
 are already specified, so this isn't a necessary step unless SAS is installed in a different
 location. The sascfg.py file has commented out examples of how to edit this if necessary.
 There is also pydoc to describe the interface available at this time.
-
-
 
