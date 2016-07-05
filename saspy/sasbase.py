@@ -18,8 +18,7 @@ import os
 import signal
 import subprocess
 import getpass
-from time import sleep		from time import sleep
-
+from time import sleep
 import saspy.sascfg as SAScfg
 
 
