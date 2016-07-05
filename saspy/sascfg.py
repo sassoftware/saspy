@@ -24,7 +24,7 @@
 # specify options=' '. This way it's specified so it can't be overridden, even though you don't have any
 # extra options you want applied.
 # 
-# SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh']
+# SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', httptest]
 #
 SAS_config_names = ['default']
 
@@ -81,7 +81,7 @@ ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 # 'ip'      - [REQUIRED] host address 
 # 'port'    - [REQUIRED] port; the code Defaults this to 80 (the Compute Services default port)
 # 'context' - context name defined on the compute service  [PROMPTED for at runtime if more than one defined]
-# 'options' - SAS options to include in the start up command line
+# 'options' - SAS options to include (no '-' (dashes), just option names and values)
 # 'user'    - not suggested [REQUIRED but PROMPTED for at runtime]
 # 'pw'      - really not suggested [REQUIRED but PROMPTED for at runtime]
 # 
@@ -92,8 +92,9 @@ http     = {'ip'      : 'tomspc',
             'context' : 'Tom1'
             }
 
-httptest = {'ip'      : 'tomspc',
-            'port'    :  80
-            }
+#httptest = {'ip'      : 'tomspc',
+#            'port'    :  80, 
+#            'options' : ["fullstimer", "memsize=1G"]
+#            }
 
 
