@@ -52,15 +52,28 @@ class SASMagic(ipym.Magics):
                 set sashelp.cars;
             run;
         """
+        
+        saveOpts="proc optsave out=__jupyterSASKernel__; run;"
+        restoreOpts="proc optload data=__jupyterSASKernel__; run;"
+        if len(line)>0:  # Save current SAS Options
+            self.mva.submit(saveOpts)
+
+        if line.lower()=='smalllog':
+            self.mva.submit("options nosource nonotes;")
+
+        elif line is not None and line.startswith('option'):
+            self.mva.submit(line + ';')
 
         res = self.mva.submit(cell)
-        output = res['LST']
-        log = res['LOG']
-        dis = self._which_display(log, output)
+        dis = self._which_display(res['LOG'], res['LST'])
+
+        if len(line)>0:  # Restore SAS options 
+            self.mva.submit(restoreOpts)
+
         return dis
 
     @ipym.cell_magic
-    def IML(self):
+    def IML(self,line,cell):
         """
         %%IML - send the code in the cell to a SAS Server
                 for processing by PROC IML
@@ -78,14 +91,12 @@ class SASMagic(ipym.Magics):
            e=diag({1 2, 3 4});
 
         """
-        res = self.mva.submit("proc iml; " + self.code + " quit;")
-        output = res['LST']
-        log = res['LOG']
-        dis = self._which_display(log, output)
+        res = self.mva.submit("proc iml; " + cell + " quit;")
+        dis = self._which_display(res['LOG'], res['LST'])
         return dis
 
     @ipym.cell_magic
-    def OPTMODEL(self):
+    def OPTMODEL(self, line, cell):
         """
         %%OPTMODEL - send the code in the cell to a SAS Server
                 for processing by PROC OPTMODEL
@@ -114,10 +125,8 @@ class SASMagic(ipym.Magics):
         quit;
 
         """
-        res = self.mva.submit("proc optmodel; " + self.code + " quit;")
-        output = res['LST']
-        log = res['LOG']
-        dis = self._which_display(log, output)
+        res = self.mva.submit("proc optmodel; " + cell + " quit;")
+        dis = self._which_display(res['LOG'], res['LST'])
         return dis
 
     def _get_lst_len(self):
