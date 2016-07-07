@@ -312,12 +312,10 @@ class SASsession:
       libref  - the libref for the Data Set, defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
       '''
-      if not self.exist(table, libref):
-         if len(libref):
-            print("Table "+libref+'.'+table+" does not exist. This SASdata object will not be useful until the data set is created.")
-         else:
-            print("Table "+table+" does not exist. This SASdata object will not be useful until the data set is created.")
-      return SASdata(self, libref, table, results)
+      sd = SASdata(self, libref, table, results)
+      if not self.exist(sd.table, sd.libref):
+         print("Table "+sd.libref+'.'+sd.table+" does not exist. This SASdata object will not be useful until the data set is created.")
+      return sd
    
    def saslib(self, libref: str, engine: str =' ', path: str ='', options: str =' ') -> 'The LOG showing the assignment of the libref':
       '''
@@ -348,6 +346,15 @@ class SASsession:
       '''
       return self._io.read_csv(file, table, libref, results, self.nosub)
    
+   def write_csv(self, file: str, table: str, libref: str ='') -> 'The LOG showing the results of the step':
+      '''
+      This method will export a SAS Data Set to a file in CSV format.
+      file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
+      table   - the name of the SAS Data Set you want to export to a CSV file
+      libref  - the libref for the SAS Data Set.
+      '''
+      return self._io.write_csv(file, table, libref, self.nosub)
+   
    def df2sd(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ='', results: str ='HTML') -> '<SASdata object>':
       '''
       This is an alias for 'dataframe2sasdata'. Why type all that?
@@ -377,30 +384,30 @@ class SASsession:
       else:
          return None
    
-   def sd2df(self, sd: '<SASdata object>', **kwargs) -> '<Pandas Data Frame object>':
+   def sd2df(self, table: str, libref: str ='', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This is an alias for 'sasdata2dataframe'. Why type all that?
       sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+      table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref  - the libref for the SAS Data Set.
       '''
-      return self.sasdata2dataframe(sd, **kwargs)
+      return self.sasdata2dataframe(table, libref, **kwargs)
    
-   def sasdata2dataframe(self, sd: '<SASdata object>', **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-      sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+      table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref  - the libref for the SAS Data Set.
       '''
-      if sd == None:
-         print('The SAS_data object is not valid; it is \'None\'')
-         return None                            
-      if sd == None or self.exist(sd.table, sd.libref) == 0:
-         print('The SAS Data Set '+sd.libref+'.'+sd.table+' does not exist')
+      if self.exist(table, libref) == 0:
+         print('The SAS Data Set '+libref+'.'+table+' does not exist')
          return None                            
    
       if self.nosub:
          print("too comlicated to show the code, read the source :), sorry.")
          return None
       else:
-         return self._io.sasdata2dataframe(sd, **kwargs)
+         return self._io.sasdata2dataframe(table, libref, **kwargs)
    
 class SASdata:
 
@@ -429,6 +436,11 @@ class SASdata:
               self.libref = 'USER'
            else:
               self.libref = 'WORK'
+
+           #hack till the bug gets fixed
+           if self.sas.sascfg.mode == 'HTTP':
+              self.libref = 'WORK'
+
         self.table  = table
 
     def set_results(self, results: str):
@@ -597,9 +609,9 @@ class SASdata:
         if ll:
            print(ll['LOG'])
         else:
-           return self.sas._io.to_csv(file, self, self.sas.nosub)
+           return self.sas.write_csv(file, self.table, self.libref)
 
-    def to_df(self) -> '<Pandas Data Frame object>':
+    def to_df(self, **kwargs) -> '<Pandas Data Frame object>':
         '''
         Export this SAS Data Set to a Pandas Data Frame
         '''
@@ -608,7 +620,7 @@ class SASdata:
            print(ll['LOG'])
            return None
         else:
-           return self.sas.sasdata2dataframe(self)
+           return self.sas.sasdata2dataframe(self.table, self.libref, **kwargs)
 
     def hist(self, var: str, title: str ='', label: str ='') -> 'a histogram plot of the (numeric) variable you chose':
         '''

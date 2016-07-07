@@ -331,7 +331,7 @@ class SASsessionHTTP():
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
       if jobid:
-         conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/results", headers=headers)
+         conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/results?includeTypes=ODS", headers=headers)
       else:
          conn.request('GET', "/compute/sessions/"+self._sessionid+"/results", headers=headers)
       req = conn.getresponse()
@@ -496,6 +496,9 @@ class SASsessionHTTP():
       resp = req.read()
       j = json.loads(resp.decode())
       jobid = j.get('id')
+      if not jobid:
+         print("Problem submitting job to Compute Service.\n   Status code="+str(j.get('httpStatusCode'))+"\n   Message="+j.get('message'))
+         return dict(LOG=j, LST='')
 
       done = False
       while not done:
@@ -557,6 +560,23 @@ class SASsessionHTTP():
 
       Returns True it the Data Set exists and False if it does not
       '''
+      #can't have an empty libref, so check for user or work
+      if not libref:
+         # HEAD Libref USER
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         headers={"Accept":"*/*", "Authorization":"Bearer "+self.sascfg._token}
+         # this is broke now, always says it's there, so set to work for now till it's fixed
+         #conn.request('HEAD', "/compute/sessions/"+self._sessionid+"/data/user", headers=headers)
+
+         conn.request('HEAD', "/compute/sessions/"+self._sessionid+"/data/WORK", headers=headers)
+         req = conn.getresponse()
+         status = req.getcode()
+    
+         if status == 200:
+            libref = 'USER'
+         #else:              this is broke now, always says it's there, so set to work for now till it's fixed
+            libref = 'WORK'
+
       # HEAD Data Table
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       headers={"Accept":"*/*", "Authorization":"Bearer "+self.sascfg._token}
@@ -602,12 +622,14 @@ class SASsessionHTTP():
          else:
             return None
    
-   def to_csv(self, file: str, data: '<SASdata object>', nosub: bool =False) -> 'The LOG showing the results of the step':
+   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CCSV format.
-      file    - the OS filesystem path of the file to be created (exported from this SAS Data Set)
+      file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
+      table   - the name of the SAS Data Set you want to export to a CSV file
+      libref  - the libref for the SAS Data Set.
       '''
-      print("to_csv is not currently implemented in this SAS Connection Interface; HTTP")
+      print("write_csv is not currently implemented in this SAS Connection Interface; HTTP")
       return None
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="", results: str ='HTML') -> '<SASdata object>':
@@ -621,27 +643,28 @@ class SASsessionHTTP():
       print("dataframe2sasdata is not currently implemented in this SAS Connection Interface; HTTP")
       return None
 
-   def sasdata2dataframe(self, sd: '<SASdata object>') -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='') -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-      sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+      table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref  - the libref for the SAS Data Set.
       '''
-      print("sasdata2dataframe is not currently implemented in this SAS Connection Interface; HTTP")
+      print("sasdata2dataframe is not currently FULLY implemented in this SAS Connection Interface; HTTP")
       import pandas as pd
 
-      # GET Data Table
-      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-      headers={"Accept":"application/vnd.sas.compute.data.table+json", "Authorization":"Bearer "+self.sascfg._token}
-      conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+sd.libref+"/"+sd.table, headers=headers)
-      req = conn.getresponse()
-      status = req.getcode()
+      # GET Data Table      I don't think this is necessary at all
+      #conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      #headers={"Accept":"application/vnd.sas.compute.data.table+json", "Authorization":"Bearer "+self.sascfg._token}
+      #conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table, headers=headers)
+      #req = conn.getresponse()
+      #status = req.getcode()
 
-      resp = req.read()
-      j = json.loads(resp.decode())
+      #resp = req.read()
+      #j = json.loads(resp.decode())
 
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
-      conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+sd.libref+"/"+sd.table+"/columns", headers=headers)
+      conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table+"/columns", headers=headers)
       req = conn.getresponse()
       status = req.getcode()
 
@@ -656,7 +679,7 @@ class SASsessionHTTP():
          varlist.append(lst[i].get('name'))
          vartype.append(lst[i].get('type'))
 
-      code  = "data _null_; set "+sd.libref+"."+sd.table+"(obs=1);put 'FMT_CATS=';\n"
+      code  = "data _null_; set "+libref+"."+table+"(obs=1);put 'FMT_CATS=';\n"
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;\n"
@@ -668,16 +691,37 @@ class SASsessionHTTP():
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
+
+      '''   until view access start working  or I can supply my own formats
+      code  = "data work.saspy_ds2df / view=work.saspy_ds2df; set "+libref+"."+table+";\n format "
+      for i in range(nvars):
+         if vartype[i] == 'FLOAT':
+            if varcat[i] in sas_date_fmts:
+               code += "'"+varlist[i]+"'n E8601DA10. "
+            else:
+               if varcat[i] in sas_time_fmts:
+                  code += "'"+varlist[i]+"'n E8601TM15.6 "
+               else:
+                  if varcat[i] in sas_datetime_fmts:
+                     code += "'"+varlist[i]+"'n E8601DT26.6 "
+                  else:
+                     code += "'"+varlist[i]+"'n best32. "
+      code += ";run;\n"
+      ll = self.submit(code, "text")
+      '''
+
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
-      conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+sd.libref+"/"+sd.table+"/rows", headers=headers)
+
+      #    until view access start working  or I can supply my own formats
+      #conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/WORK/saspy_ds2df/rows", headers=headers)
+
+      conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table+"/rows", headers=headers)
       req = conn.getresponse()
       status = req.getcode()
 
-
-      # BUG for missing values. should come back as null on their own, remove the replace() when they do
       resp = req.read()
-      j = json.loads(resp.decode().replace('-nan', 'null'))
+      j = json.loads(resp.decode())
 
       r = []
       lst = j.get('items')

@@ -707,14 +707,16 @@ class SASsessionSTDIO():
          else:
             return None
    
-   def to_csv(self, file: str, data: '<SASdata object>', nosub: bool =False) -> 'The LOG showing the results of the step':
+   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CSV format.
-      file    - the OS filesystem path of the file to be created (exported from this SAS Data Set)
+      file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
+      table   - the name of the SAS Data Set you want to export to a CSV file
+      libref  - the libref for the SAS Data Set.
       '''
       code  = "options nosource;\n"
       code += "filename x \""+file+"\";\n"
-      code += "proc export data="+data.libref+"."+data.table+" outfile=x"
+      code += "proc export data="+libref+"."+table+" outfile=x"
       code += " dbms=csv replace; run;"
       code += "options source;\n"
 
@@ -781,10 +783,11 @@ class SASsessionSTDIO():
    
       self._asubmit(";run;", "text")
    
-   def sasdata2dataframe(self, sd: '<SASdata object>', **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-      sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+      table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref  - the libref for the SAS Data Set.
       port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       '''
       port =  kwargs.get('port', 0)
@@ -792,7 +795,7 @@ class SASsessionSTDIO():
       import socket as socks
       datar = ""
 
-      code  = "data _null_; file STDERR;d = open('"+sd.libref+"."+sd.table+"');\n"
+      code  = "data _null_; file STDERR;d = open('"+libref+"."+table+"');\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
       code += "put lr lrecl; put vn nvars; put vl;\n"
@@ -820,7 +823,7 @@ class SASsessionSTDIO():
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
    
-      code  = "data _null_; set "+sd.libref+"."+sd.table+"(obs=1);put 'FMT_CATS=';\n"
+      code  = "data _null_; set "+libref+"."+table+"(obs=1);put 'FMT_CATS=';\n"
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;\n"
@@ -847,7 +850,7 @@ class SASsessionSTDIO():
    
       code  = ""
       code += "filename sock socket '"+host+":"+str(port)+"' lrecl=32767 recfm=v termstr=LF;\n"
-      code += " data _null_; set "+sd.libref+"."+sd.table+";\n file sock; put "
+      code += " data _null_; set "+libref+"."+table+";\n file sock; put "
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
