@@ -46,6 +46,7 @@ except:
 import saspy.sasiohttp  as sasiohttp
 from saspy.sasstat import *
 from saspy.sasets  import *
+from saspy.sasml   import *
 from saspy.sasqc   import *
 
 try:
@@ -284,6 +285,16 @@ class SASsession:
          self._loaded_macros = True
 
       return SASets(self)
+
+   def sasml(self) -> '<SASqc object>':
+      '''
+      This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.
+      '''
+      if not self._loaded_macros:
+         self._loadmacros()
+         self._loaded_macros = True
+
+      return SASml(self)
 
    def sasqc(self) -> '<SASqc object>':
       '''
