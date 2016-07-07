@@ -1,64 +1,73 @@
-from IPython.core.display import HTML
-import time
+#
+# Copyright SAS Institute
+#
+#  Licensed under the Apache License, Version 2.0 (the License);
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
 import logging
-import os
-import re
+from saspy.sasresults import SASresults
 
 # create logger
 logger = logging.getLogger('')
 logger.setLevel(logging.WARN)
 
 
-class SAS_ets:
+class SASets:
     def __init__(self, session, *args, **kwargs):
-        '''Submit an initial set of macros to prepare the SAS system'''
+        """Submit an initial set of macros to prepare the SAS system"""
         self.sas=session
-        macro_path=os.path.dirname(os.path.realpath(__file__))
-        code="options pagesize=max; %include '" + macro_path + '/' + "libname_gen.sas'; "
-        init=self.sas.submit(code,"text")
-        logger.debug("LOG: " + init['LOG'])
-        logger.debug("Log Contents: " +self.sas._log)
-        #Did the macro execute error free?
-        lines=re.split(r'[\n]\s*',init['LOG'])
-        i=0
-        elog=[]
-        for line in lines:
-            i+=1
-            if line.startswith('ERROR'):
-                logger.debug("Error line found")
-                elog=lines[(max(i-5,0)):(min(i+6,len(lines)))]
-        tlog='\n'.join(elog)
-        logger.debug("log length: " +str(len(tlog)))
-        if len(tlog)>0:
-            print (tlog)
+        logger.debug("Initialization of SAS Macro: " + str(self.sas.saslog()))
 
+    def _objectmethods(self, obj: str, *args) -> list:
+        """
+        This method parses the SAS log for artifacts (tables and graphics) that were created
+        from the procedure method call
 
-
-        logger.debug("Initalization of SAS Macro: " + str(self.sas._getlog()))
-
-    def _objectmethods(self,obj,*args):
-        clear=self.sas._getlog(1)
-        code  ="%listdata("
-        code +=obj
-        code +=");"
+        :param obj: str -- proc object
+        :param args: list likely none
+        :return: list -- the tables and graphs available for tab complete
+        """
+        code  = "%listdata("
+        code += obj
+        code += ");"
         logger.debug("Object Method macro call: " + str(code))
-        res=self.sas.submit(code,"text")
-        meth=res['LOG'].splitlines()
+        res = self.sas.submit(code,"text")
+        meth = res['LOG'].splitlines()
+        for i in range(len(meth)):
+           meth[i] = meth[i].lstrip().rstrip()
         logger.debug('SAS Log: ' + str(meth))
-        objlist=meth[meth.index('startparse9878')+1:meth.index('endparse9878')]
+        objlist = meth[meth.index('startparse9878')+1:meth.index('endparse9878')]
         logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
-    def _makeProccallMacro(self, objtype, objname, data=None, args=''):
-        #by='', corr='',
-        #                   crosscorr='', decomp='', id='', season='', trend='', var='',
-        #                   crossvar='', identify='', estimate='', outlier='', forecast='', 
-        #                   autoreg='', blockseason='', cycle='', deplag='', irregular='', 
-        #                   level='', model='', nloptions='', performance='', randomreg='', 
-        #                   slope='', splinereg='', splineseason='', fcmport='', outarrays='', 
-        #                   outscalars='', prog_stmts=''):
+    def _makeProcCallMacro(self, objtype: str, objname: str, data: object =None, args: dict =None) -> str:
+        """
+        This method generates the SAS code from the python objects and included data and arguments.
+        The list of args in this method is largely alphabetical but there are exceptions in order to
+        satisfy the order needs of the statements for the procedure. as an example...
+        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
+
+        :param objtype: str -- proc name
+        :param objname: str -- 3 digit code for proc
+        :param data: sas dataset object
+        :param args: dict --  proc arguments
+        :return: str -- the SAS code needed to execute on the server
+        """
         code  = "%macro proccall(d);\n"
-        code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
+        if 'out' in args:
+            outds = args['out']
+            code += "proc %s data=%s.%s out=%s.%s plot=all;\n" % (objtype, data.libref, data.table, outds.libref, outds.table)
+        else:
+            code += "proc %s data=%s.%s plot=all;\n" % (objtype, data.libref, data.table)
         logger.debug("args value: " + str(args))
         logger.debug("args type: " + str(type(args)))
         if 'by' in args:
@@ -150,209 +159,161 @@ class SAS_ets:
             code += "outscalars %s;\n" % (args['outscalars'])
         if 'prog_stmts' in args:
             logger.debug("prog_stmts statement,length: %s,%s", args['prog_stmts'], len(args['prog_stmts']))
-            code += " %s;\n" % (args['prog_stmts'])   
+            code += " %s;\n" % (args['prog_stmts'])
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
         logger.debug("Proc code submission: " + str(code))
-        return (code)
-    
-    def _stmt_check(self, req:set ,legal:set,stmt:dict):
-        # debug the argument list
-        if (logging.getLogger().getEffectiveLevel()==10):
+        return code
+
+    def _stmt_check(self, req:set, legal:set, stmt:dict) -> bool:
+        """
+        This method checks to make sure that the proc has all required statements and removes any statements
+        aren't valid. Missing required statements is an error. Extra statements are not.
+        :param req: set
+        :param legal: set
+        :param stmt: dict
+        :return: binary
+        """
+        if logging.getLogger().getEffectiveLevel()==10:
             for k,v in stmt.items():
                 print ("Key: " +k+", Value: " + v)
-        
-        #required statements
+
+        # required statements
         req_set=req
-        if (len(req_set)):
+        if len(req_set):
             missing_set=req_set.difference(set(stmt.keys()))
             if missing_set:
-                print ("You are missing %d required statements:" % (len(missing_set)))
-                print (missing_set)
-                return False
+                msg  = "You are missing %d required statements:" % (len(missing_set))
+                msg += "\n"+str(missing_set)
+                print(msg)
+                return msg
 
-        #legal statments
+        # legal statements
         legal_set=legal
-        if (len(legal_set)):
-            extra_set=set(stmt.keys()).difference(legal_set|req_set)
+        if len(legal_set):
+            if len(req_set):
+               tot_set = legal_set | req_set
+            else:
+               tot_set = legal_set
+            extra_set=set(stmt.keys()).difference(tot_set) # find keys not in legal or required sets
             if extra_set:
                 print ("The following %d statements are invalid and will be ignored: "% len(extra_set))
                 for key in range(0,len(extra_set)):
                     print (key)
                     kwargs.pop(extra_set.pop())
-        return True
+        return None
+
+    def _run_proc(self, procname: str, required_set: set, legal_set: set, **kwargs: dict) -> object:
+        """
+        This internal method takes the options and statements from the PROC and generates
+        the code needed to submit it to SAS. It then submits the code.
+        :param self:
+        :param procname: str
+        :param required_set: set of options
+        :param legal_set: set of valid options
+        :param kwargs: dict (optional)
+        :return: sas result object
+        """
+        data=kwargs.pop('data',None)
+        log = self._stmt_check(required_set, legal_set, kwargs)
+        obj1=[]; nosub=False; objname='';
+        if not log:
+            objtype=procname.lower()
+            objname='ets'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
+            code=self._makeProcCallMacro(objtype, objname, data, kwargs)
+            logger.debug(procname+" macro submission: " + str(code))
+            if not self.sas.nosub:
+                ll = self.sas.submit(code,"text")
+                log = ll['LOG']
+                try:
+                    obj1=self._objectmethods(objname)
+                    logger.debug(obj1)
+                except Exception:
+                    pass
+            else:
+                print(code)
+                log = ''
+                nosub=True
+        else:
+            print("Error in code submission")
+
+        return SASresults(obj1, self.sas, objname, nosub, log)
+
 
     def timeseries(self, **kwargs):
-        '''Python method to call the TIMESERIES procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_overview.htm
-        '''
+        """
+        Python method to call the TIMESERIES procedure
         required_set={'id'}
-        legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar'}
-        data=kwargs.pop('data',None)
-        logger.debug("kwargs type: " + str(type(kwargs)))
-        chk= self._stmt_check(required_set, legal_set,kwargs)
-        if chk:
-            objtype='timeseries'
-            objname='ts1'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-            code=self._makeProccallMacro(objtype, objname, data, kwargs)
-            logger.debug("TIMESERIES macro submission: " + str(code))
-            self.sas._asubmit(code,"text")
-            try:
-                obj1=self._objectmethods(objname)
-                logger.debug(obj1)
-            except Exception:
-                obj1=[]
+        legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out'}
 
-            return (SAS_results(obj1, self.sas, objname))
-        else:
-            Print("Error in code submission")
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm
+        """
+        required_set = {'id'}
+        legal_set = { 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out'}
+        logger.debug("kwargs type: " + str(type(kwargs)))
+        return self._run_proc("TIMESERIES", required_set, legal_set, **kwargs)
 
     def arima(self, **kwargs):
-        '''Python method to call the ARIMA procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_overview.htm
-        '''
+        """
+        Python method to call the ARIMA procedure
         required_set={'identify'}
-        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast'}
-        data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
-        objtype='arima'
-        objname='arm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
-        logger.debug("ARIMA macro submission: " + str(code))
-        self.sas._asubmit(code,"text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]
-        return (SAS_results(obj1, self.sas, objname))
-        
+        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
+
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
+        """
+        required_set = {'identify'}
+        legal_set = { 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
+        return self._run_proc("ARIMA", required_set, legal_set, **kwargs)
+
     def ucm(self, **kwargs):
-        '''Python method to call the UCM procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_overview.htm
-        '''
+        """
+        Python method to call the UCM procedure
         required_set={'model'}
-        legal_set={ 'autoreg','blockseason','by','cycle','deplag','estimate','forecast','id','irregular'
-                    'level','model','nloptions','performance','outlier','randomreg','season','slope'
-                    'splinereg','splineseason'}
-        data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
-        objtype='ucm'
-        objname='ucm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
-        logger.debug("UCM macro submission: " + str(code))
-        self.sas._asubmit(code,"text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]
-        return (SAS_results(obj1, self.sas, objname))    
-    
+        legal_set= {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular'
+                    'level', 'model', 'nloptions', 'performance', 'out', 'outlier', 'randomreg', 'season', 'slope'
+                    'splinereg', 'splineseason'}
+
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm
+        """
+        required_set = {'model'}
+        legal_set = {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular'
+                    'level', 'model', 'nloptions', 'performance', 'out', 'outlier', 'randomreg', 'season', 'slope'
+                    'splinereg', 'splineseason'}
+        return self._run_proc("UCM", required_set, legal_set, **kwargs)
+
     def esm(self, **kwargs):
-        '''Python method to call the ESM procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_overview.htm
-        '''
-        required_set={''}
-        legal_set={ 'by', 'id', 'forecast'}
-        data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
-        objtype='esm'
-        objname='esm'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
-        logger.debug("ESM macro submission: " + str(code))
-        self.sas._asubmit(code,"text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]        
-        return (SAS_results(obj1, self.sas, objname))
+        """
+        Python method to call the ESM procedure
+        required_set = {}
+        legal_set = { 'by', 'id', 'forecast', 'out'}
+
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm
+        """
+        required_set = {}
+        legal_set = { 'by', 'id', 'forecast', 'out'}
+        return self._run_proc("ESM", required_set, legal_set, **kwargs)
+
     def timeid(self, **kwargs):
-        '''Python method to call the TIMEID procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_overview.htm
-        '''
-        required_set={''}
-        legal_set={ 'by', 'id'}
-        data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
-        objtype='tid'
-        objname='tid'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
-        logger.debug("TIMEID macro submission: " + str(code))
-        self.sas._asubmit(code,"text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]        
-        return (SAS_results(obj1, self.sas, objname))
-        
+        """
+        Python method to call the TIMEID procedure
+        required_set = {}
+        legal_set = { 'by', 'id', 'out'}
+
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm
+        """
+        required_set = {}
+        legal_set = { 'by', 'id', 'out'}
+        return self._run_proc("TIMEID", required_set, legal_set, **kwargs)
+
     def timedata(self, **kwargs):
-        '''Python method to call the TIMEDATA procedure
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_overview.htm
-        '''
-        required_set={''}
-        legal_set={ 'by', 'id', 'fcmport','outarrays','outscalars', 'var', 'prog_stmts'}
-        data=kwargs.pop('data',None)
-        chk= _stmt_check(required_set,legal_set,kwargs)
-        objtype='tda'
-        objname='tda'+self.sas._objcnt()  #translate to a libname so needs to be less than 8
-        code=self._makeProccallMacro(objtype, objname, kwargs)
-        logger.debug("TIMEDATA macro submission: " + str(code))
-        self.sas._asubmit(code,"text")
-        try:
-            obj1=self._objectmethods(objname)
-            logger.debug(obj1)
-        except Exception:
-            obj1=[]                
-        return (SAS_results(obj1, self.sas, objname))
-    
+        """
+        Python method to call the TIMEDATA procedure
+        required_set = {}
+        legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts'}
 
-from collections import namedtuple
-
-class SAS_results(object):
-    '''Return results from a SAS Model object'''
-    def __init__(self,attrs, session, objname):
-
-        self._attrs = attrs
-        self._name = objname
-        self.sas=session
-
-    def __dir__(self):
-        '''Overload dir method to return the attributes'''
-        return self._attrs
-
-    def __getattr__(self, attr):
-        if attr.startswith('_'):
-            return getattr(self, attr)
-        if attr.upper() in self._attrs:
-            #print(attr.upper())
-            data = self._go_run_code(attr)
-            '''
-            if not attr.lower().endswith('plot'):
-                libname, table = data.split()
-                table_data = sasdata(libname, table)
-                content = table_data.contents()
-                # parse content
-                headers = content[0]
-
-                res = namedtuple('SAS Result', headers)
-                results = [ res(x) for x in headers[1:] ]
-            '''
-
-        else:
-             raise AttributeError
-        return HTML(data)
-
-    def _go_run_code(self, attr):
-        #print(self._name, attr)
-        code = '%%getdata(%s, %s);' % (self._name, attr)
-        res=self.sas.submit(code)
-        return res['LST']
-
-    def sasdata(self, table):
-        x=self.sas.sasdata(table,'_'+self._name)
-        return (x)
-
+        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm
+        """
+        required_set = {}
+        legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts'}
+        return self._run_proc("TIMEIDATA", required_set, legal_set, **kwargs)
 
