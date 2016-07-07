@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-from pygments import highlight
-=======
 #
 # Copyright SAS Institute
 #
@@ -16,7 +13,6 @@ from pygments import highlight
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
->>>>>>> tomhttp
 from pygments.lexer import RegexLexer
 import pygments.token
 from pygments.style import Style
@@ -37,25 +33,6 @@ class SASLogLexer(RegexLexer):
     name = 'Lexer to Color SAS Logs equivilent to DMS'
     tokens = {
         'root': [
-<<<<<<< HEAD
-            (r'^\d+.*((\n|\t|\n\t)[ ]([^WEN].*)(.*))*', String),
-            (r'^NOTE.*((\n|\t|\n\t)[ ]([^WEN].*)(.*))*', Comment.Multiline, 'note'),
-            (r'^ERROR.*((\n|\t|\n\t)[ ]([^WEN].*)(.*))*', Keyword.Multiline, 'error'),
-            (r'^WARNING.*((\n|\t|\n\t)[ ]([^WEN].*)(.*))*', Name.Multiline, 'warning'),
-            (r'\s', Text)
-        ],
-        'error': [
-            (r'^\s+.*$',Keyword.Multiline),
-            (r'^\S+.*$',Keyword.Multiline,'#pop')
-        ],
-        'note': [
-            (r'^\s+.*$',Comment.Multiline),
-            (r'^\S+.*$',Comment.Multiline,'#pop')
-        ],
-        'warning': [
-            (r'^\s+.*$',Name.Multiline),
-            (r'^\S+.*$',Name.Multiline,'#pop')
-=======
             (r'^\d+.*((\n|\t|\n\t)[ ]([^WEN].*)(.*))*', pygments.token.String),
             (r'^NOTE.*((\n|\t|\n\t)[ ]([^WEN].*)(.*))*', pygments.token.Comment.Multiline, 'note'),
             (r'^ERROR.*((\n|\t|\n\t)[ ]([^WEN].*)(.*))*', pygments.token.Keyword.Multiline, 'error'),
@@ -73,7 +50,6 @@ class SASLogLexer(RegexLexer):
         'warning': [
             (r'^\s+.*$', pygments.token.Name.Multiline),
             (r'^\S+.*$', pygments.token.Name.Multiline, '#pop')
->>>>>>> tomhttp
         ]
         
     }
