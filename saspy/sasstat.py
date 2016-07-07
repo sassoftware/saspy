@@ -212,9 +212,7 @@ class SASstat:
             extra_set=set(stmt.keys()).difference(tot_set) # find keys not in legal or required sets
             if extra_set:
                 print ("The following %d statements are invalid and will be ignored: "% len(extra_set))
-                for key in range(0,len(extra_set)):
-                    print (key)
-                    stmt.pop(extra_set.pop())
+                print(extra_set)
         return None
 
     def _run_proc(self, procname: str, required_set: set, legal_set: set, **kwargs: dict):
