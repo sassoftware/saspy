@@ -1,0 +1,8 @@
+The tests in this directory can be run by changing to the saspy_pip directory (above saspy) and
+running the following command. There may be other ways to run these, but this works so far. You
+can specify specific tests on this command instead of the discovery, like in the second example.
+
+python3.5 -m unittest discover -s saspy/tests
+
+python3.5 -m unittest saspy/tests/test_test1.py
+
