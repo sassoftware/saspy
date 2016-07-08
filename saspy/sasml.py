@@ -14,6 +14,7 @@
 #  limitations under the License.
 #
 import logging
+
 from saspy.sasresults import SASresults
 
 # create logger
@@ -26,7 +27,7 @@ class SASml:
         """
         Submit an initial set of macros to prepare the SAS system
         """
-        self.sas=session
+        self.sas = session
         logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     def _objectmethods(self, obj: str, *args) -> list:
@@ -38,20 +39,21 @@ class SASml:
         :param args: list likely none
         :return: list -- the tables and graphs available for tab complete
         """
-        code  = "%listdata("
+        code = "%listdata("
         code += obj
         code += ");"
         logger.debug("Object Method macro call: " + str(code))
-        res=self.sas.submit(code,"text")
+        res = self.sas.submit(code, "text")
         meth = res['LOG'].splitlines()
         for i in range(len(meth)):
-           meth[i] = meth[i].lstrip().rstrip()
+            meth[i] = meth[i].lstrip().rstrip()
         logger.debug('SAS Log: ' + res['LOG'])
-        objlist = meth[meth.index('startparse9878')+1:meth.index('endparse9878')]
+        objlist = meth[meth.index('startparse9878') + 1:meth.index('endparse9878')]
         logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
-    def _makeProcCallMacro(self, objtype: str, objname: str, data: object =None, args: dict =None) -> str:
+    @staticmethod
+    def _makeProcCallMacro(objtype: str, objname: str, data: object = None, args: dict = None) -> str:
         """
         This method generates the SAS code from the python objects and included data and arguments.
         The list of args in this method is largely alphabetical but there are exceptions in order to
@@ -64,8 +66,12 @@ class SASml:
         :param args: dict --  proc arguments
         :return: str -- the SAS code needed to execute on the server
         """
-        code  = "%macro proccall(d);\n"
-        code += "proc %s data=%s.%s ;\n" % (objtype, data.libref, data.table)
+        code = "%macro proccall(d);\n"
+        if 'procopts' in args:
+            logger.debug("procopts statement,length: %s,%s", args['procopts'], len(args['procopts']))
+            code += "proc %s data=%s.%s %s;\n" % (objtype, data.libref, data.table, args['procopts'])
+        else:
+            code += "proc %s data=%s.%s ;\n" % (objtype, data.libref, data.table)
         logger.debug("args value: " + str(args))
         logger.debug("args type: " + str(type(args)))
         # this list is largely alphabetical but there are exceptions in order to
@@ -97,7 +103,7 @@ class SASml:
             # TODO: add check to make sure it is only one variable
             logger.debug("freq statement,length: %s,%s", args['freq'], len(args['freq']))
             code += "freq %s;\n" % (args['freq'])
-        # TODO: make a dictonary?
+        # TODO: make a dictionary?
         if 'hidden' in args:
             logger.debug("hidden statement,length: %s,%s", args['hidden'], len(args['hidden']))
             code += "hidden %s;\n" % (args['hidden'])
@@ -189,15 +195,16 @@ class SASml:
             code += "partition %s;\n" % (args['partition'])
         if 'out' in args:
             outds = args['out']
-            outstr = outds.libref+'.'+outds.table
-            code += "output out=%s;\n" % (outstr)
+            outstr = outds.libref + '.' + outds.table
+            code += "output out=%s;\n" % outstr
 
         code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
+        code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
         logger.debug("Proc code submission: " + str(code))
         return code
 
-    def _stmt_check(self, req: set, legal: set, stmt: dict) -> bool:
+    @staticmethod
+    def _stmt_check(req: set, legal: set, stmt: dict) -> bool:
         """
         This method checks to make sure that the proc has all required statements and removes any statements
         aren't valid. Missing required statements is an error. Extra statements are not.
@@ -207,29 +214,29 @@ class SASml:
         :return: binary
         """
         # debug the argument list
-        if logging.getLogger().getEffectiveLevel()==10:
-            for k,v in stmt.items():
-                print ("Key: " +k+", Value: " + v)
+        if logging.getLogger().getEffectiveLevel() == 10:
+            for k, v in stmt.items():
+                print("Key: " + k + ", Value: " + v)
         # required statements
-        req_set=req
+        req_set = req
         if len(req_set):
-            missing_set=req_set.difference(set(stmt.keys()))
+            missing_set = req_set.difference(set(stmt.keys()))
             if missing_set:
-                msg  = "You are missing %d required statements:" % (len(missing_set))
-                msg += "\n"+str(missing_set)
+                msg = "You are missing %d required statements:" % (len(missing_set))
+                msg += "\n" + str(missing_set)
                 print(msg)
                 return msg
 
         # legal statements
-        legal_set=legal
+        legal_set = legal
         if len(legal_set):
             if len(req_set):
-               tot_set = legal_set | req_set
+                tot_set = legal_set | req_set
             else:
-               tot_set = legal_set
-            extra_set=set(stmt.keys()).difference(tot_set) # find keys not in legal or required sets
+                tot_set = legal_set
+            extra_set = set(stmt.keys()).difference(tot_set)  # find keys not in legal or required sets
             if extra_set:
-                print ("The following %d statements are invalid and will be ignored: "% len(extra_set))
+                print("The following %d statements are invalid and will be ignored: " % len(extra_set))
                 print(extra_set)
         return None
 
@@ -244,26 +251,28 @@ class SASml:
         :param kwargs: dict (optional)
         :return: sas result object
         """
-        data=kwargs.pop('data',None)
+        data = kwargs.pop('data', None)
         log = self._stmt_check(required_set, legal_set, kwargs)
-        obj1=[]; nosub=False; objname='';
+        obj1 = []
+        nosub = False
+        objname = ''
         if not log:
-            objtype=procname.lower()
-            objname='ml'+self.sas._objcnt()  # translate to a libname so needs to be less than 8
-            code=self._makeProcCallMacro(objtype, objname, data, kwargs)
-            logger.debug(procname+" macro submission: " + str(code))
+            objtype = procname.lower()
+            objname = 'ml' + self.sas._objcnt()  # translate to a libname so needs to be less than 8
+            code = self._makeProcCallMacro(objtype, objname, data, kwargs)
+            logger.debug(procname + " macro submission: " + str(code))
             if not self.sas.nosub:
-                ll = self.sas.submit(code,"text")
+                ll = self.sas.submit(code, "text")
                 log = ll['LOG']
                 try:
-                    obj1=self._objectmethods(objname)
+                    obj1 = self._objectmethods(objname)
                     logger.debug(obj1)
                 except Exception:
                     pass
             else:
                 print(code)
                 log = ''
-                nosub=True
+                nosub = True
         else:
             print("Error in code submission")
 
@@ -273,13 +282,16 @@ class SASml:
         """
         Python method to call the HPFOREST procedure
 
+        required_set = {'input', 'target'}
+        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score'}
+
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
         :param kwargs: dict
         :return: SAS result object
         """
         required_set = {'input', 'target'}
-        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score'}
+        legal_set = {'freq', 'input', 'id', 'target', 'save', 'score', 'procopts'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("HPFOREST", required_set, legal_set, **kwargs)
 
@@ -287,13 +299,16 @@ class SASml:
         """
         Python method to call the HPCLUS procedure
 
+        required_set = {'input'}
+        legal_set= {'freq', 'input', 'id', 'score'}
+
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
         :param kwargs: dict
         :return: SAS result object
         """
         required_set = {'input'}
-        legal_set= {'freq', 'input', 'id', 'score'}
+        legal_set = {'freq', 'input', 'id', 'score', 'procopts'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("HPCLUS", required_set, legal_set, **kwargs)
 
@@ -301,19 +316,23 @@ class SASml:
         """
         Python method to call the HPNEURAL procedure
 
+        required_set = {'input', 'target', 'train'}
+        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score',
+                    'architecture', 'weight', 'hidden', 'partition', 'train'}
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
         :param kwargs: dict
         :return: SAS result object
         """
         required_set = {'input', 'target', 'train'}
-        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score',
-                    'architecture', 'weight', 'hidden', 'partition', 'train'}
+        legal_set = {'freq', 'input', 'id', 'target', 'save', 'score',
+                     'architecture', 'weight', 'hidden', 'partition', 'train', 'procopts'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("HPNEURAL", required_set, legal_set, **kwargs)
+
     def svm(self, **kwargs: dict) -> object:
         """
-        Python method to call the HPFOREST procedure
+        Python method to call the HPSVM procedure
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
@@ -324,7 +343,7 @@ class SASml:
 
     def bnet(self, **kwargs: dict) -> object:
         """
-        Python method to call the HPFOREST procedure
+        Python method to call the HPBNET procedure
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
@@ -332,5 +351,3 @@ class SASml:
         :return: SAS result object
         """
         pass
-
-
