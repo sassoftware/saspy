@@ -46,6 +46,7 @@ except:
 import saspy.sasiohttp  as sasiohttp
 from saspy.sasstat import *
 from saspy.sasets  import *
+from saspy.sasml   import *
 from saspy.sasqc   import *
 
 try:
@@ -284,6 +285,16 @@ class SASsession:
          self._loaded_macros = True
 
       return SASets(self)
+
+   def sasml(self) -> '<SASqc object>':
+      '''
+      This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.
+      '''
+      if not self._loaded_macros:
+         self._loadmacros()
+         self._loaded_macros = True
+
+      return SASml(self)
 
    def sasqc(self) -> '<SASqc object>':
       '''
@@ -621,6 +632,51 @@ class SASdata:
            return None
         else:
            return self.sas.sasdata2dataframe(self.table, self.libref, **kwargs)
+
+    def heatmap(self, x: str, y: str, options: str = '', title: str = '', label: str = '') -> 'a heatmap plot of the (numeric) variables you chose':
+        """
+        Documentation link: http://support.sas.com/documentation/cdl/en/grstatproc/67909/HTML/default/viewer.htm#n0w12m4cn1j5c6n12ak64u1rys4w.htm
+        :param x: x variable
+        :param y: y variable
+        :param options: display options (string)
+        :param title: graph title
+        :param label:
+        :return:
+        """
+        code = "proc sgplot data=%s.%s;" % (self.libref,self.table)
+        if len(options):
+            code += "\n\theatmap x=%s y=%s / %s;" % (x, y, options)
+        else:
+            code += "\n\theatmap x=%s y=%s;" % (x, y)
+
+        if len(label) > 0:
+           code += " LegendLABEL='"+label+"'"
+        code += ";\n"
+        if len(title) > 0:
+           code += "\ttitle '%s';\n" % (title)
+        code += "run;\ntitle;"
+
+        if self.sas.nosub:
+           print(code)
+           return
+
+        ll = self._is_valid()
+        if self.HTML:
+           if not ll:
+              ll = self.sas._io.submit(code)
+           if not self.sas.batch:
+              DISPLAY(HTML(ll['LST']))
+           else:
+              return ll
+        else:
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
+
+
 
     def hist(self, var: str, title: str ='', label: str ='') -> 'a histogram plot of the (numeric) variable you chose':
         '''
