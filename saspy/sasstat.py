@@ -175,7 +175,7 @@ class SASstat:
             code += "output out=%s;\n" % (outstr)
 
         code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,%s);" % (objname, objtype,data.table)
+        code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
         logger.debug("Proc code submission: " + str(code))
         return code
 
@@ -266,7 +266,7 @@ class SASstat:
         :return: SAS result object
         """
         required_set = {}
-        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
+        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out',
                     'partition', 'performance', 'prune', 'rules'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("HPSPLIT", required_set, legal_set, **kwargs)

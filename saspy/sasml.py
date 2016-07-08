@@ -150,9 +150,6 @@ class SASml:
         if 'roc' in args:
             logger.debug("roc statement,length: %s,%s", args['roc'], len(args['roc']))
             code += "roc %s;\n" % (args['roc'])
-        if 'score' in args:
-            logger.debug("score statement,length: %s,%s", args['score'], len(args['score']))
-            code += "score %s;\n" % (args['score'])
         if 'slice' in args:
             logger.debug("slice statement,length: %s,%s", args['slice'], len(args['slice']))
             code += "slice %s;\n" % (args['slice'])
@@ -161,7 +158,7 @@ class SASml:
             code += "strata %s;\n" % (args['strata'])
         if 'score' in args:
             scoreds = args['score']
-            code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table )
+            code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
         # TODO: make sure target is a single variable
         if 'target' in args:
             logger.debug("target statement,length: %s,%s", args['target'], len(args['target']))
@@ -279,8 +276,7 @@ class SASml:
         :return: SAS result object
         """
         required_set = {'input', 'target'}
-        legal_set= {'freq', 'input', 'id', 'target', 'save'
-                    'score'}
+        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return self._run_proc("HPFOREST", required_set, legal_set, **kwargs)
 
