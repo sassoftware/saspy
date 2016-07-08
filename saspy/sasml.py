@@ -65,7 +65,7 @@ class SASml:
         :return: str -- the SAS code needed to execute on the server
         """
         code  = "%macro proccall(d);\n"
-        code += "proc %s data=%s.%s plots=all;\n" % (objtype, data.libref, data.table)
+        code += "proc %s data=%s.%s ;\n" % (objtype, data.libref, data.table)
         logger.debug("args value: " + str(args))
         logger.debug("args type: " + str(type(args)))
         # this list is largely alphabetical but there are exceptions in order to
@@ -163,6 +163,9 @@ class SASml:
         if 'target' in args:
             logger.debug("target statement,length: %s,%s", args['target'], len(args['target']))
             code += "target %s;\n" % (args['target'])
+        if 'train' in args:
+            logger.debug("train statement,length: %s,%s", args['train'], len(args['train']))
+            code += "train %s;\n" % (args['train'])
         # test moved
         if 'var' in args:
             logger.debug("var statement,length: %s,%s", args['var'], len(args['var']))
