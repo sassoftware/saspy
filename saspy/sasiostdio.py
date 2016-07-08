@@ -739,8 +739,9 @@ class SASsessionSTDIO():
       format = ""
       length = ""
       dts    = []
+      ncols  = len(df.columns)
 
-      for name in range(len(df.columns)):
+      for name in range(ncols):
          input += "'"+df.columns[name]+"'n "
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
             col_l = df[df.columns[name]].map(len).max()
@@ -767,20 +768,24 @@ class SASsessionSTDIO():
       code += "infile datalines delimiter='09'x;\n input "+input+";\n datalines;"
       self._asubmit(code, "text")
 
-      for row in df.iterrows():
+      for row in df.itertuples(index=False):
+      #for row in df.iterrows():
          card  = ""
-         for col in range(len(row[1])):
-            var = str(row[1][col])
+         for col in range(ncols):
+            var = str(row[col])
+            #var = str(row[1][col])
             if dts[col] == 'N' and var == 'nan':
                var = '.'
             if dts[col] == 'D': 
                if var == 'nan':
                   var = '.'
                else:
-                  var = str(row[1][col].to_datetime64())
+                  var = str(row[col].to_datetime64())
+                  #var = str(row[1][col].to_datetime64())
             card += var+chr(9)
-         self._asubmit(card, "text")
-   
+         self.stdin.write(card.encode()+b'\n')
+         #self._asubmit(card, "text")
+
       self._asubmit(";run;", "text")
    
    def sasdata2dataframe(self, table: str, libref: str ='', **kwargs) -> '<Pandas Data Frame object>':
