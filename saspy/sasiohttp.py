@@ -173,7 +173,7 @@ class SASconfigHTTP:
       #import pdb; pdb.set_trace()
 
       # POST AuthToken
-      conn = hc.HTTPConnection(self.ip, self.port)
+      conn = hc.HTTPConnection(self.ip, self.port);conn.connect()
       d1 = ("grant_type=password&username="+user+"&password="+pw).encode()
       basic = base64.encodestring("sas.tkmtrb:".encode())
       authheader = '%s' % basic.splitlines()[0].decode()
@@ -183,12 +183,14 @@ class SASconfigHTTP:
       req = conn.getresponse()
       status = req.getcode()
       resp = req.read()
+      conn.close()
+
       if status > 299:
          print("Failure in GET AuthToken. Status="+str(status)+"\nResponse="+resp.decode())
          return None
 
-      j = json.loads(resp.decode())
-      token = j.get('access_token')
+      js = json.loads(resp.decode())
+      token = js.get('access_token')
       return token
 
    def _get_contexts(self):
@@ -196,18 +198,20 @@ class SASconfigHTTP:
       contexts = []
 
       # GET Contexts 
-      conn = hc.HTTPConnection(self.ip, self.port)
+      conn = hc.HTTPConnection(self.ip, self.port);conn.connect()
       headers={"Accept":"application/vnd.sas.collection+json","Authorization":"Bearer "+self._token}
       conn.request('GET', "/compute/contexts", headers=headers)
       req = conn.getresponse()
       status = req.getcode()
       resp = req.read()
+      conn.close()
+
       if status > 299:
          print("Failure in GET Contexts. Status="+str(status)+"\nResponse="+resp.decode())
          return None
 
-      j = json.loads(resp.decode())
-      items = j.get('items')
+      js = json.loads(resp.decode())
+      items = js.get('items')
 
       for i in range(len(items)):
           contexts.append(dict(items[i]).get('name')) 
@@ -252,20 +256,22 @@ class SASsessionHTTP():
          options = '[]'
 
       # POST Session
-      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
       d1 = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":'+options+'}}'
       headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', "/compute/sessions?contextName="+self.sascfg.ctxname, body=d1, headers=headers)
       req = conn.getresponse()
       status = req.getcode()
       resp = req.read()
+      conn.close()
+
       if status > 299:
          print("Failure in POST Session \n"+resp.decode())
          print("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
          return None
 
-      j = json.loads(resp.decode())
-      self._sessionid = j.get('id')
+      js = json.loads(resp.decode())
+      self._sessionid = js.get('id')
 
       if self._sessionid == None:
          print("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
@@ -280,11 +286,13 @@ class SASsessionHTTP():
       rc = 0
       if self._sessionid:
          # DELETE Session
-         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
          headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
          conn.request('DELETE', "/compute/sessions/"+self._sessionid, headers=headers)
          req = conn.getresponse()
          resp = req.read()
+         conn.close()
+
          print("SAS server terminated for SESSION_ID="+self._sessionid)       
          self._sessionid = None
       return rc
@@ -296,7 +304,7 @@ class SASsessionHTTP():
 
       while True:
          # GET Log
-         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
          headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
          if jobid:
             conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/log?start="+str(start)+"&limit=999999", headers=headers)
@@ -305,9 +313,10 @@ class SASsessionHTTP():
          req = conn.getresponse()
          status = req.getcode()
          resp = req.read()
+         conn.close()
 
-         j   = json.loads(resp.decode())
-         log = j.get('items')
+         js  = json.loads(resp.decode())
+         log = js.get('items')
 
          lines = len(log)
 
@@ -328,7 +337,7 @@ class SASsessionHTTP():
       htm = ''
       i   = 0
       # GET the list of results
-      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
       if jobid:
          conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/results?includeTypes=ODS", headers=headers)
@@ -337,21 +346,23 @@ class SASsessionHTTP():
       req = conn.getresponse()
       status = req.getcode()
       resp = req.read()
+      conn.close()
 
-      j = json.loads(resp.decode())
-      results = j.get('items')
+      js = json.loads(resp.decode())
+      results = js.get('items')
 
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
+      headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
       while i < len(results):
          # GET an ODS Result
          if results[i].get('type') == 'ODS':
-            conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-            headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
             conn.request('GET', results[i].get('links')[0].get('href'), headers=headers)
             req = conn.getresponse()
             status = req.getcode()
             resp = req.read()
             htm += resp.decode()
          i += 1
+      conn.close()
 
       lstd = htm.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                    '<body class="l body">').replace("font-size: x-small;",
@@ -364,7 +375,7 @@ class SASsessionHTTP():
    
       while True:
          # GET Log
-         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
          headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
          if jobid:
             conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/listing?start="+str(start)+"limit=999999", headers=headers)
@@ -373,9 +384,10 @@ class SASsessionHTTP():
          req = conn.getresponse()
          status = req.getcode()
          resp = req.read()
+         conn.close()
 
-         j   = json.loads(resp.decode())
-         lst = j.get('items')
+         js  = json.loads(resp.decode())
+         lst = js.get('items')
 
          lines = len(lst)
 
@@ -401,7 +413,7 @@ class SASsessionHTTP():
          odsclose = '""'
    
       # POST Job
-      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
       jcode = json.dumps(code)
       d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
       headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json",
@@ -409,23 +421,11 @@ class SASsessionHTTP():
       conn.request('POST', "/compute/sessions/"+self._sessionid+"/jobs", body=d1, headers=headers)
       req = conn.getresponse()
       resp = req.read()
-      j = json.loads(resp.decode())
-      jobid = j.get('id')
+      conn.close()
 
-      #see if this is the problem, then remove this -  this is a problem, keep it till the bug is fixed!@!!!
-      '''   should be fixed now, verify and remove
-      quit = 0
-      while True:
-         # GET Status for JOB
-         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-         headers={"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
-         conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/state", headers=headers)
-         req = conn.getresponse()
-         resp = req.read()
-         if resp == b'completed' or quit > 60:
-            break
-         quit += 1
-      '''
+      js = json.loads(resp.decode())
+      jobid = js.get('id')
+
       return jobid
 
    def submit(self, code: str, results: str ="html", prompt: dict = []) -> dict:
@@ -486,7 +486,7 @@ class SASsessionHTTP():
          pcodeo += 'options source notes;\n'
 
       # POST Job
-      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
       jcode = json.dumps(pcodei+pcodeiv+code+'\n'+pcodeo)
       d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
       headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json",
@@ -494,19 +494,22 @@ class SASsessionHTTP():
       conn.request('POST', "/compute/sessions/"+self._sessionid+"/jobs", body=d1, headers=headers)
       req = conn.getresponse()
       resp = req.read()
-      j = json.loads(resp.decode())
-      jobid = j.get('id')
+      conn.close()
+
+      js = json.loads(resp.decode())
+      jobid = js.get('id')
       if not jobid:
-         print("Problem submitting job to Compute Service.\n   Status code="+str(j.get('httpStatusCode'))+"\n   Message="+j.get('message'))
+         print("Problem submitting job to Compute Service.\n   Status code="+str(js.get('httpStatusCode'))+"\n   Message="+js.get('message'))
          return dict(LOG=j, LST='')
 
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
+      headers={"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
       done = False
+
       while not done:
          try:
             while True:
                # GET Status for JOB
-               conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-               headers={"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
                conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid+"/state", headers=headers)
                req = conn.getresponse()
                resp = req.read()
@@ -525,18 +528,7 @@ class SASsessionHTTP():
                   break
                response = self.sascfg._prompt("Please enter (Q) to Quit waiting for results or (C) to continue waiting.")
 
-      '''
-      if quit > 10:
-         import pdb; pdb.set_trace()
-         jobid2 = jobid
-         # GET Status for JOB
-         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
-         headers={"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
-         conn.request('GET', "/compute/sessions/"+self._sessionid+"/jobs/"+jobid2+"/state", headers=headers)
-         req = conn.getresponse()
-         resp = req.read()
-      '''
-
+      conn.close()
 
       logd = self._getlog(jobid)
 
@@ -563,7 +555,7 @@ class SASsessionHTTP():
       #can't have an empty libref, so check for user or work
       if not libref:
          # HEAD Libref USER
-         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+         conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
          headers={"Accept":"*/*", "Authorization":"Bearer "+self.sascfg._token}
          # this is broke now, always says it's there, so set to work for now till it's fixed
          #conn.request('HEAD', "/compute/sessions/"+self._sessionid+"/data/user", headers=headers)
@@ -571,18 +563,21 @@ class SASsessionHTTP():
          conn.request('HEAD', "/compute/sessions/"+self._sessionid+"/data/WORK", headers=headers)
          req = conn.getresponse()
          status = req.getcode()
+         conn.close()
     
          if status == 200:
             libref = 'USER'
-         #else:              this is broke now, always says it's there, so set to work for now till it's fixed
+            libref = 'WORK' #this is broke now, always says it's there, so set to WORK for now till it's fixed
+         else:
             libref = 'WORK'
 
       # HEAD Data Table
-      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
       headers={"Accept":"*/*", "Authorization":"Bearer "+self.sascfg._token}
       conn.request('HEAD', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table, headers=headers)
       req = conn.getresponse()
       status = req.getcode()
+      conn.close()
 
       if status == 200:
          exists = True
@@ -652,29 +647,31 @@ class SASsessionHTTP():
       print("sasdata2dataframe is not currently FULLY implemented in this SAS Connection Interface; HTTP")
       import pandas as pd
 
-      # GET Data Table      I don't think this is necessary at all
-      #conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      # GET Data Table      I don't think this is necessary at all - maybe to get the links?
+      #conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
       #headers={"Accept":"application/vnd.sas.compute.data.table+json", "Authorization":"Bearer "+self.sascfg._token}
       #conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table, headers=headers)
       #req = conn.getresponse()
       #status = req.getcode()
+      #conn.close()
 
       #resp = req.read()
-      #j = json.loads(resp.decode())
+      #js = json.loads(resp.decode())
 
-      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
       conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table+"/columns", headers=headers)
       req = conn.getresponse()
       status = req.getcode()
-
       resp = req.read()
-      j = json.loads(resp.decode())
+      conn.close()
+
+      js = json.loads(resp.decode())
 
       varlist = []
       vartype = []
-      nvars = j.get('count')
-      lst = j.get('items')
+      nvars = js.get('count')
+      lst = js.get('items')
       for i in range(len(lst)):
          varlist.append(lst[i].get('name'))
          vartype.append(lst[i].get('type'))
@@ -710,7 +707,7 @@ class SASsessionHTTP():
       ll = self.submit(code, "text")
       '''
 
-      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port)
+      conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
 
       #    until view access start working  or I can supply my own formats
@@ -719,12 +716,13 @@ class SASsessionHTTP():
       conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table+"/rows", headers=headers)
       req = conn.getresponse()
       status = req.getcode()
-
       resp = req.read()
-      j = json.loads(resp.decode())
+      conn.close()
+
+      js = json.loads(resp.decode())
 
       r = []
-      lst = j.get('items')
+      lst = js.get('items')
       for i in range(len(lst)):
          r.append(lst[i]['cells'])
 
