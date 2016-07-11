@@ -364,8 +364,12 @@ class SASsession:
       table   - the name of the SAS Data Set you want to export to a CSV file
       libref  - the libref for the SAS Data Set.
       '''
-      return self._io.write_csv(file, table, libref, self.nosub)
-   
+      log = self._io.write_csv(file, table, libref, self.nosub)
+      if not self.batch:
+         print(log)
+      else:
+         return log   
+
    def df2sd(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ='', results: str ='HTML') -> '<SASdata object>':
       '''
       This is an alias for 'dataframe2sasdata'. Why type all that?
@@ -618,7 +622,10 @@ class SASdata:
         '''
         ll = self._is_valid()
         if ll:
-           print(ll['LOG'])
+           if not self.sas.batch:
+              print(ll['LOG'])
+           else:
+              return ll
         else:
            return self.sas.write_csv(file, self.table, self.libref)
 

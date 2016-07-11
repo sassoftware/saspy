@@ -724,7 +724,7 @@ class SASsessionSTDIO():
          print(code)
       else:
          ll = self.submit(code, "text")
-         print(ll['LOG'])
+         return ll['LOG']
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="", results: str ='HTML') -> '<SASdata object>':
       '''
