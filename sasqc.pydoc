@@ -69,6 +69,6 @@ DATA
     logger = <logging.RootLogger object>
 
 FILE
-    /net/sanyo.unx.sas.com/vol/vol810/u81/sastpw/tkpygit/metis/tomhttp/metis/saspy_pip/saspy/sasqc.py
+    /opt/tom/gitlab/metis/saspy_pip/saspy/sasqc.py
 
 

@@ -1,0 +1,96 @@
+Help on module sasml:
+
+NAME
+    sasml
+
+DESCRIPTION
+    # Copyright SAS Institute
+    #
+    #  Licensed under the Apache License, Version 2.0 (the License);
+    #  you may not use this file except in compliance with the License.
+    #  You may obtain a copy of the License at
+    #
+    #      http://www.apache.org/licenses/LICENSE-2.0
+    #
+    #  Unless required by applicable law or agreed to in writing, software
+    #  distributed under the License is distributed on an "AS IS" BASIS,
+    #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    #  See the License for the specific language governing permissions and
+    #  limitations under the License.
+    #
+
+CLASSES
+    builtins.object
+        SASml
+    
+    class SASml(builtins.object)
+     |  Methods defined here:
+     |  
+     |  __init__(self, session, *args, **kwargs)
+     |      Submit an initial set of macros to prepare the SAS system
+     |  
+     |  bnet(self, **kwargs:dict) -> object
+     |      Python method to call the HPBNET procedure
+     |      
+     |      Documentation link:
+     |      https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+     |      :param kwargs: dict
+     |      :return: SAS result object
+     |  
+     |  cluster(self, **kwargs:dict) -> object
+     |      Python method to call the HPCLUS procedure
+     |      
+     |      required_set = {'input'}
+     |      legal_set= {'freq', 'input', 'id', 'score'}
+     |      
+     |      Documentation link:
+     |      https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+     |      :param kwargs: dict
+     |      :return: SAS result object
+     |  
+     |  forest(self, **kwargs:dict) -> object
+     |      Python method to call the HPFOREST procedure
+     |      
+     |      required_set = {'input', 'target'}
+     |      legal_set= {'freq', 'input', 'id', 'target', 'save', 'score'}
+     |      
+     |      Documentation link:
+     |      https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+     |      :param kwargs: dict
+     |      :return: SAS result object
+     |  
+     |  neural(self, **kwargs:dict) -> object
+     |      Python method to call the HPNEURAL procedure
+     |      
+     |      required_set = {'input', 'target', 'train'}
+     |      legal_set= {'freq', 'input', 'id', 'target', 'save', 'score',
+     |                  'architecture', 'weight', 'hidden', 'partition', 'train'}
+     |      Documentation link:
+     |      https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+     |      :param kwargs: dict
+     |      :return: SAS result object
+     |  
+     |  svm(self, **kwargs:dict) -> object
+     |      Python method to call the HPSVM procedure
+     |      
+     |      Documentation link:
+     |      https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+     |      :param kwargs: dict
+     |      :return: SAS result object
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+DATA
+    logger = <logging.RootLogger object>
+
+FILE
+    /opt/tom/gitlab/metis/saspy_pip/saspy/sasml.py
+
+

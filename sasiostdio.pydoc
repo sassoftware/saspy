@@ -79,9 +79,10 @@ CLASSES
      |      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
      |      results - format of results, HTML is default, TEXT is the alternative
      |  
-     |  sasdata2dataframe(self, sd:'<SASdata object>', **kwargs) -> '<Pandas Data Frame object>'
+     |  sasdata2dataframe(self, table:str, libref:str='', **kwargs) -> '<Pandas Data Frame object>'
      |      This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-     |      sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+     |      table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
+     |      libref  - the libref for the SAS Data Set.
      |      port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
      |  
      |  saslog(self)
@@ -111,9 +112,11 @@ CLASSES
      |            print(results['LOG'])
      |            HTML(results['LST'])
      |  
-     |  to_csv(self, file:str, data:'<SASdata object>', nosub:bool=False) -> 'The LOG showing the results of the step'
+     |  write_csv(self, file:str, table:str, libref:str='', nosub:bool=False) -> 'The LOG showing the results of the step'
      |      This method will export a SAS Data Set to a file in CSV format.
-     |      file    - the OS filesystem path of the file to be created (exported from this SAS Data Set)
+     |      file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
+     |      table   - the name of the SAS Data Set you want to export to a CSV file
+     |      libref  - the libref for the SAS Data Set.
      |  
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:
@@ -137,6 +140,6 @@ DATA
     sas_time_fmts = ('ANYDTTME', 'B8601LZ', 'B8601LZ', 'B8601TM', 'B8601TM...
 
 FILE
-    /net/sanyo.unx.sas.com/vol/vol810/u81/sastpw/tkpygit/metis/tomhttp/metis/saspy_pip/saspy/sasiostdio.py
+    /opt/tom/gitlab/metis/saspy_pip/saspy/sasiostdio.py
 
 
