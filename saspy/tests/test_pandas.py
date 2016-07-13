@@ -35,5 +35,10 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         self.assertIsInstance(td2, saspy.SASdata, msg="td2 = sas.df2sd((...) failed")
 
         ll = td2.head()
-        self.assertIn("1       1      1997-07-25T00:00:00.000000", ll['LST'], msg="td2.head() result didn't contain row 1")
+        expected = ['1', '1', '1997-07-25T00:00:00.000000']
+        rows = ll['LST'].splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="td2.head() result didn't contain row 1")
 

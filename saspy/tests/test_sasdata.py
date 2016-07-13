@@ -27,10 +27,21 @@ class TestSASdataObject(unittest.TestCase):
 
         self.sas.set_batch(True)
         ll = self.cars.head()
-        self.assertIn("1 Acura MDX", ll['LST'], msg="cars.head() result didn't contain row 1")
+        expected = ['1', 'Acura', 'MDX', 'SUV', 'Asia', 'All', '$36,945', '$33,337',
+                    '3.5', '6', '265', '17', '23', '4451', '106', '189']
+        rows = ll['LST'].splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="cars.head() result didn't contain row 1")
 
         self.sas.set_batch(True)
         ll = self.cars.tail()
-        self.assertIn("428   Volvo   XC70", ll['LST'], msg="cars.tail() result didn't contain row 1")
-
-
+        expected = ['424', 'Volvo', 'C70', 'LPT', 'convertible', '2dr', 'Sedan', 'Europe', 'Front',
+                    '$40,565', '$38,203', '2.4', '5', '197', '21', '28', '3450', '105', '186']
+        rows = ll['LST'].splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="cars.tail() result didn't contain row 1")
+        

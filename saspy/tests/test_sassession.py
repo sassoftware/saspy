@@ -49,7 +49,12 @@ class TestSASsessionObject(unittest.TestCase):
         self.assertNotIn("ERROR", log, msg="sas.write_csv() failed")
         csvdata = self.sas.read_csv('/tmp/sas_csv_test.csv', 'csvcars', results='text')
         ll = csvdata.head()
-        self.assertIn("1    Acura    MDX ", ll['LST'], msg="csvcars.head() result didn't contain row 1")
+        expected = ['1', 'Acura', 'MDX', 'SUV', 'Asia', 'All', '$36,945', '$33,337', '3.5']
+        rows = ll['LST'].splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="csvcars.head() result didn't contain row 1")
 
         #test stat
         stat = self.sas.sasstat()
