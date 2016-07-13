@@ -325,7 +325,8 @@ class SASsession:
       '''
       sd = SASdata(self, libref, table, results)
       if not self.exist(sd.table, sd.libref):
-         print("Table "+sd.libref+'.'+sd.table+" does not exist. This SASdata object will not be useful until the data set is created.")
+         if not self.batch:
+            print("Table "+sd.libref+'.'+sd.table+" does not exist. This SASdata object will not be useful until the data set is created.")
       return sd
    
    def saslib(self, libref: str, engine: str =' ', path: str ='', options: str =' ') -> 'The LOG showing the assignment of the libref':

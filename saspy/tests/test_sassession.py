@@ -27,6 +27,7 @@ class TestSASsessionObject(unittest.TestCase):
         self.assertTrue(exists, msg="exists = self.sas.exist(...) failed")
 
         #test exist false
+        self.sas.set_batch(True)
         exists = self.sas.exist('notable', libref='sashelp')
         self.assertFalse(exists, msg="exists = self.sas.exist(...) failed")
 
@@ -55,7 +56,27 @@ class TestSASsessionObject(unittest.TestCase):
         for i in range(len(rows)):
            retrieved.append(rows[i].split())
         self.assertIn(expected, retrieved, msg="csvcars.head() result didn't contain row 1")
+        
+        #test datasets()
+        self.sas.set_batch(True)
+        log = self.sas.datasets()
+        expected = ['Libref', 'WORK']
+        rows = log.splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="cars.datasets() result didn't contain expected result")
 
+        log = self.sas.datasets('sashelp')
+        expected = ['Libref', 'SASHELP']
+        rows = log.splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+           if i > 20:
+              break  #it'll be in the first 20 rows for sure. don't need all of it
+        self.assertIn(expected, retrieved, msg="cars.datasets(...) result didn't contain expected result")
+        
         #test stat
         stat = self.sas.sasstat()
         self.assertIsInstance(stat, saspy.SASstat, msg="stat = self.sas.sasstat() failed")
@@ -72,22 +93,3 @@ class TestSASsessionObject(unittest.TestCase):
         ml = self.sas.sasml()
         self.assertIsInstance(ml, saspy.SASml, msg="ml = self.sas.sasml() failed")
 
-        #test datasets()
-        self.sas.set_batch(True)
-        log = self.sas.datasets()
-        expected = ['Libref', 'WORK']
-        rows = log.splitlines()
-        retrieved = []
-        for i in range(len(rows)):
-           retrieved.append(rows[i].split())
-        self.assertIn(expected, retrieved, msg="cars.datasets() result didn't contain expected result")
-        
-        log = self.sas.datasets('sashelp')
-        expected = ['Libref', 'SASHELP']
-        rows = log.splitlines()
-        retrieved = []
-        for i in range(len(rows)):
-           retrieved.append(rows[i].split())
-        self.assertIn(expected, retrieved, msg="cars.datasets(...) result didn't contain expected result")
-        
-        

@@ -163,6 +163,10 @@ CLASSES
      |      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
      |      results - format of results, HTML is default, TEXT is the alternative
      |  
+     |  datasets(self, libref:str='') -> 'The LOG showing the output'
+     |      This method is used to quesy a libref. The results show information about the libref including members.
+     |      libref  - the libref to query
+     |  
      |  df2sd(self, df:'<Pandas Data Frame object>', table:str='a', libref:str='', results:str='HTML') -> '<SASdata object>'
      |      This is an alias for 'dataframe2sasdata'. Why type all that?
      |      df      - Pandas Data Frame to import to a SAS Data Set
