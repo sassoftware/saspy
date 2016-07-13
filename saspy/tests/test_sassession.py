@@ -21,7 +21,7 @@ class TestSASsessionObject(unittest.TestCase):
         #   self.sas._endsas()
         pass
 
-    def test_SASdata(self):
+    def test_SASsession(self):
         #test exist true
         exists = self.sas.exist('cars', libref='sashelp')
         self.assertTrue(exists, msg="exists = self.sas.exist(...) failed")
@@ -72,4 +72,22 @@ class TestSASsessionObject(unittest.TestCase):
         ml = self.sas.sasml()
         self.assertIsInstance(ml, saspy.SASml, msg="ml = self.sas.sasml() failed")
 
+        #test datasets()
+        self.sas.set_batch(True)
+        log = self.sas.datasets()
+        expected = ['Libref', 'WORK']
+        rows = log.splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="cars.datasets() result didn't contain expected result")
+        
+        log = self.sas.datasets('sashelp')
+        expected = ['Libref', 'SASHELP']
+        rows = log.splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="cars.datasets(...) result didn't contain expected result")
+        
         
