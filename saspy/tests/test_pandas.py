@@ -21,19 +21,27 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         #   self.sas._endsas()
         pass
 
-    def test_Panda(self):
+    def test_Pandas(self):
         import pandas
         self.sas.set_batch(True)
 
         td = self.sas.sasdata('timedata', libref='sashelp', results='text')
         self.assertIsInstance(td, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
 
+        #test sas data to data frame
         df = td.to_df()
         self.assertIsInstance(df, pandas.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        result = df.head()
+        expected = ['0', '1', '1997-07-25', '00:00:00']
+        rows = result.to_string().splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="df.head() result didn't contain row 1")
 
+        #test data frame to sas data
         td2 = self.sas.df2sd(df, 'td2', results='text')
         self.assertIsInstance(td2, saspy.SASdata, msg="td2 = sas.df2sd((...) failed")
-
         ll = td2.head()
         expected = ['1', '1', '1997-07-25T00:00:00.000000']
         rows = ll['LST'].splitlines()
