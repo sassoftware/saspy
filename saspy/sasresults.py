@@ -13,11 +13,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+from __future__ import print_function
+from saspy.SASLogLexer import SASLogStyle, SASLogLexer
+from pygments.formatters import HtmlFormatter
+from pygments import highlight
+
 try:
    from IPython import display as dis
    from IPython.core.display import HTML
 except ImportError:
    pass
+
 
 class SASresults(object):
     """Return results from a SAS Model object"""
@@ -26,6 +32,8 @@ class SASresults(object):
 
         if len(attrs) > 0:
            self._attrs = attrs
+           if len(log)>0:
+               self._attrs.append("LOG")
         else:
            self._attrs = ['ERROR_LOG']
         self._name = objname
@@ -40,30 +48,16 @@ class SASresults(object):
     def __getattr__(self, attr):
         if attr.startswith('_'):
             return getattr(self, attr)
-        if attr.upper() == 'ERROR_LOG':
-            print(self._log)
-            return
+        if attr.upper() == 'LOG' or attr.upper() == 'ERROR_LOG':
+            return HTML(self._colorLog(self._log))
         if attr.upper() in self._attrs:
-            # print(attr.upper())
             data = self._go_run_code(attr)
-            '''
-            if not attr.lower().endswith('plot'):
-                libname, table = data.split()
-                table_data = sasdata(libname, table)
-                content = table_data.contents()
-                # parse content
-                headers = content[0]
-
-                res = namedtuple('SAS Result', headers)
-                results = [ res(x) for x in headers[1:] ]
-            '''
 
         else:
             if self.nosub:
                 print('This SAS Result object was created in teach_me_SAS mode, so it has no results')
                 return
             else:
-                #raise AttributeError
                 print("Result named "+attr+" not found. Valid results are:"+str(self._attrs))
                 return
 
@@ -72,13 +66,15 @@ class SASresults(object):
         else:
            return data
 
+    def _colorLog(self,log:str)-> str:
+        color_log = highlight(log, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+        return color_log
+
     def _go_run_code(self, attr) -> dict:
-        # print(self._name, attr)
         code = '%%getdata(%s, %s);' % (self._name, attr)
-        # print (code)
         res = self.sas.submit(code)
         return res
-        #return res['LST']
+
 
     def sasdata(self, table) -> object:
         x = self.sas.sasdata(table, '_' + self._name)
