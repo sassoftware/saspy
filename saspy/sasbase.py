@@ -668,22 +668,15 @@ class SASdata:
            return
 
         ll = self._is_valid()
-        if self.HTML:
-           if not ll:
-              ll = self.sas._io.submit(code)
-           if not self.sas.batch:
-              DISPLAY(HTML(ll['LST']))
-           else:
-              return ll
+        if not ll:
+           html = self.HTML
+           self.HTML = 1
+           ll = self.sas._io.submit(code)
+           self.HTML = html
+        if not self.sas.batch:
+           DISPLAY(HTML(ll['LST']))
         else:
-           if not ll:
-              ll = self.sas._io.submit(code, "text")
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
-
-
+           return ll
 
     def hist(self, var: str, title: str ='', label: str ='') -> 'a histogram plot of the (numeric) variable you chose':
         '''
@@ -706,21 +699,16 @@ class SASdata:
            return
 
         ll = self._is_valid()
-        if self.HTML:
-           if not ll:
-              ll = self.sas._io.submit(code)
-           if not self.sas.batch:
-              DISPLAY(HTML(ll['LST']))
-           else:
-              return ll
+        if not ll:
+           html = self.HTML
+           self.HTML = 1
+           ll = self.sas._io.submit(code)
+           self.HTML = html
+        if not self.sas.batch:
+           DISPLAY(HTML(ll['LST']))
         else:
-           if not ll:
-              ll = self.sas._io.submit(code, "text")
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
-   
+           return ll
+
     def series(self, x: str, y: list, title: str ='') -> 'a line plot of the x,y coordinates':
         '''
         This method plots a series of x,y coordinates. You can provide a list of y columns for multiple line plots.
@@ -748,21 +736,16 @@ class SASdata:
            return
 
         ll = self._is_valid()
-        if self.HTML:
-           if not ll:
-              ll = self.sas._io.submit(code)
-           if not self.sas.batch:
-              DISPLAY(HTML(ll['LST']))
-           else:
-              return ll
+        if not ll:
+           html = self.HTML
+           self.HTML = 1
+           ll = self.sas._io.submit(code)
+           self.HTML = html
+        if not self.sas.batch:
+           DISPLAY(HTML(ll['LST']))
         else:
-           if not ll:
-              ll = self.sas._io.submit(code, "text")
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
-   
+           return ll
+
 if __name__ == "__main__":
     startsas()
 
