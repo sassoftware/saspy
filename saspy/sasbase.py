@@ -345,7 +345,29 @@ class SASsession:
          print(code)
       else:
          ll = self._io.submit(code, "text")
-         print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0]) 
+         if self.batch:
+            return ll['LOG'].rsplit(";*\';*\";*/;\n")[0]
+         else:
+            print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0]) 
+
+   def datasets(self, libref: str ='') -> 'The LOG showing the output':
+      '''
+      This method is used to quesy a libref. The results show information about the libref including members.
+      libref  - the libref to query
+      '''
+      code = "proc datasets"
+      if libref:
+         code +=" dd="+libref
+      code += "; quit;"
+
+      if self.nosub:
+         print(code)
+      else:
+         ll = self._io.submit(code, "text")
+         if self.batch:
+            return ll['LOG'].rsplit(";*\';*\";*/;\n")[0]
+         else:
+            print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0]) 
 
    def read_csv(self, file: str, table: str, libref: str ='', results: str ='HTML') -> '<SASdata object>':
       '''
