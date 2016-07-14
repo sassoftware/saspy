@@ -15,31 +15,30 @@
 #
 import logging
 import re
-
-from pygments import highlight
-from pygments.formatters import HtmlFormatter
-from saspy.SASLogLexer import SASLogStyle, SASLogLexer
 from saspy.sasresults import SASresults
 
 
-class SAShelper:
+class SASProcCommons:
     def __init__(self, session, *args, **kwargs):
         self.sas = session
 
-    def _errorLog(self, log):
-        lines = re.split(r'[\n]\s*', log)
-        i = 0
-        elog = []
-        for line in lines:
-            i += 1
-            e = []
-            if line.startswith('ERROR'):
-                e = lines[(max(i - 1, 0)):(min(i + 0, len(lines)))]
-            elog = elog + e
-        color_log = highlight(elog, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
-        return color_log
+    @staticmethod
+    def _errorLog(log):
+        if isinstance(log, str):
+            lines = re.split(r'[\n]\s*', log)
+            i = 0
+            elog = []
+            for line in lines:
+                i += 1
+                e = []
+                if line.startswith('ERROR'):
+                    e = lines[(max(i - 1, 0)):(min(i + 0, len(lines)))]
+                elog = elog + e
+            return "\n".join(elog)
+        else:
+            print("log is not a string but type:%s" % (str(type(log))))
 
-    def _makeProcCallMacro(objtype: str, objname: str, data: object = None, args: dict = None) -> str:
+    def _makeProcCallMacro(self, objtype: str, objname: str, data: object = None, args: dict = None) -> str:
         """
         This method generates the SAS code from the python objects and included data and arguments.
         The list of args in this method is largely alphabetical but there are exceptions in order to
@@ -62,10 +61,10 @@ class SAShelper:
             code += "proc %s data=%s.%s ;\n" % (objtype, data.libref, data.table)
         logging.debug("args value: " + str(args))
         logging.debug("args type: " + str(type(args)))
+
         # this list is largely alphabetical but there are exceptions in order to
         # satisfy the order needs of the statements for the procedure
         # as an example... http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
-
         if 'absorb' in args:
             logging.debug("absorb statement,length: %s,%s", args['absorb'], len(args['absorb']))
             code += "absorb %s;\n" % (args['absorb'])
@@ -160,7 +159,6 @@ class SAShelper:
         if 'level' in args:
             logger.debug("level statement,length: %s,%s", args['level'], len(args['level']))
             code += "level %s;\n" % (args['level'])
-
         # lsmeans moved
         # manova moved
         # means moved
@@ -249,171 +247,160 @@ class SAShelper:
         if 'trend' in args:
             logger.debug("trend statement,length: %s,%s", args['trend'], len(args['trend']))
             code += "trend %s;\n" % (args['trend'])
+        if 'slice' in args:
+            logging.debug("slice statement,length: %s,%s", args['slice'], len(args['slice']))
+            code += "slice %s;\n" % (args['slice'])
+        if 'spec' in args:
+            logger.debug("spec statement,length: %s,%s", args['spec'], len(args['spec']))
+            code += "spec %s;\n" % (args['spec'])
+        if 'strata' in args:
+            logging.debug("strata statement,length: %s,%s", args['strata'], len(args['strata']))
+            code += "strata %s;\n" % (args['strata'])
+        if 'score' in args:
+            scoreds = args['score']
+            code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
+        # TODO: make sure target is a single variable
+        if 'target' in args:
+            logging.debug("target statement,length: %s,%s", args['target'], len(args['target']))
+            code += "target %s;\n" % (args['target'])
+        if 'train' in args:
+            logging.debug("train statement,length: %s,%s", args['train'], len(args['train']))
+            code += "train %s;\n" % (args['train'])
+        # test moved
+        if 'var' in args:
+            logging.debug("var statement,length: %s,%s", args['var'], len(args['var']))
+            code += "var %s;\n" % (args['var'])
+        if 'weight' in args:
+            # TODO: add check to make sure it is only one variable
+            logging.debug("weight statement,length: %s,%s", args['weight'], len(args['weight']))
+            code += "weight %s;\n" % (args['weight'])
 
-    if 'slice' in args:
-        logging.debug("slice statement,length: %s,%s", args['slice'], len(args['slice']))
-        code += "slice %s;\n" % (args['slice'])
-    if 'spec' in args:
-        logger.debug("spec statement,length: %s,%s", args['spec'], len(args['spec']))
-        code += "spec %s;\n" % (args['spec'])
-    if 'strata' in args:
-        logging.debug("strata statement,length: %s,%s", args['strata'], len(args['strata']))
-        code += "strata %s;\n" % (args['strata'])
-    if 'score' in args:
-        scoreds = args['score']
-        code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
-    # TODO: make sure target is a single variable
-    if 'target' in args:
-        logging.debug("target statement,length: %s,%s", args['target'], len(args['target']))
-        code += "target %s;\n" % (args['target'])
-    if 'train' in args:
-        logging.debug("train statement,length: %s,%s", args['train'], len(args['train']))
-        code += "train %s;\n" % (args['train'])
-    # test moved
-    if 'var' in args:
-        logging.debug("var statement,length: %s,%s", args['var'], len(args['var']))
-        code += "var %s;\n" % (args['var'])
-    if 'weight' in args:
-        # TODO: add check to make sure it is only one variable
-        logging.debug("weight statement,length: %s,%s", args['weight'], len(args['weight']))
-        code += "weight %s;\n" % (args['weight'])
+        if 'grow' in args:
+            logging.debug("grow statement,length: %s,%s", args['grow'], len(args['grow']))
+            code += "grow %s;\n" % (args['grow'])
+        if 'prune' in args:
+            logging.debug("prune statement,length: %s,%s", args['prune'], len(args['prune']))
+            code += "prune %s;\n" % (args['prune'])
+        if 'rules' in args:
+            logging.debug("rules statement,length: %s,%s", args['rules'], len(args['rules']))
+            code += "rules %s;\n" % (args['rules'])
+        if 'partition' in args:
+            logging.debug("partition statement,length: %s,%s", args['partition'], len(args['partition']))
+            code += "partition %s;\n" % (args['partition'])
+        if 'out' in args:
+            outds = args['out']
+            outstr = outds.libref + '.' + outds.table
+            code += "output out=%s;\n" % outstr
+        if 'xchart' in args:
+            logger.debug("xchart statement,length: %s,%s", args['xchart'], len(args['xchart']))
+            code += "xchart %s;\n" % (args['xchart'])
 
-    if 'grow' in args:
-        logging.debug("grow statement,length: %s,%s", args['grow'], len(args['grow']))
-        code += "grow %s;\n" % (args['grow'])
-    if 'prune' in args:
-        logging.debug("prune statement,length: %s,%s", args['prune'], len(args['prune']))
-        code += "prune %s;\n" % (args['prune'])
-    if 'rules' in args:
-        logging.debug("rules statement,length: %s,%s", args['rules'], len(args['rules']))
-        code += "rules %s;\n" % (args['rules'])
-    if 'partition' in args:
-        logging.debug("partition statement,length: %s,%s", args['partition'], len(args['partition']))
-        code += "partition %s;\n" % (args['partition'])
-    if 'out' in args:
-        outds = args['out']
-        outstr = outds.libref + '.' + outds.table
-        code += "output out=%s;\n" % outstr
-    if 'xchart' in args:
-        logger.debug("xchart statement,length: %s,%s", args['xchart'], len(args['xchart']))
-        code += "xchart %s;\n" % (args['xchart'])
+        code += "run; quit; %mend;\n"
+        code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
+        logging.debug("Proc code submission: " + str(code))
+        return code
 
-    code += "run; quit; %mend;\n"
-    code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
-    logging.debug("Proc code submission: " + str(code))
-    return code
+    def _objectmethods(self, obj: str, *args) -> list:
+        """
+        This method parses the SAS log for artifacts (tables and graphics) that were created
+        from the procedure method call
 
+        :param obj: str -- proc object
+        :param args: list likely none
+        :return: list -- the tables and graphs available for tab complete
+        """
+        code = "%listdata("
+        code += obj
+        code += ");"
+        logging.debug("Object Method macro call: " + str(code))
+        res = self.sas.submit(code, "text")
+        meth = res['LOG'].splitlines()
+        for i in range(len(meth)):
+            meth[i] = meth[i].lstrip().rstrip()
+        logging.debug('SAS Log: ' + res['LOG'])
+        objlist = meth[meth.index('startparse9878') + 1:meth.index('endparse9878')]
+        logging.debug("PROC attr list: " + str(objlist))
+        return objlist
 
-def _objectmethods(self, obj: str, *args) -> list:
-    """
-    This method parses the SAS log for artifacts (tables and graphics) that were created
-    from the procedure method call
-
-    :param obj: str -- proc object
-    :param args: list likely none
-    :return: list -- the tables and graphs available for tab complete
-    """
-    print("In SASHelper")
-    code = "%listdata("
-    code += obj
-    code += ");"
-    logging.debug("Object Method macro call: " + str(code))
-    res = self.sas.submit(code, "text")
-    meth = res['LOG'].splitlines()
-    for i in range(len(meth)):
-        meth[i] = meth[i].lstrip().rstrip()
-    logging.debug('SAS Log: ' + res['LOG'])
-    objlist = meth[meth.index('startparse9878') + 1:meth.index('endparse9878')]
-    logging.debug("PROC attr list: " + str(objlist))
-    return objlist
-
-
-def _run_proc(self, procname: str, required_set: set, legal_set: set, **kwargs: dict):
-    """
-    This internal method takes the options and statements from the PROC and generates
-    the code needed to submit it to SAS. It then submits the code.
-    :param self:
-    :param procname: str
-    :param required_set: set of options
-    :param legal_set: set of valid options
-    :param kwargs: dict (optional)
-    :return: sas result object
-    """
-    print("In SASHelper")
-    print("_run_proc", dir(self))
-    data = kwargs.pop('data', None)
-    log = SAShelper._stmt_check(required_set, legal_set, kwargs)
-    obj1 = []
-    nosub = False
-    objname = ''
-    if not log:
-        objtype = procname.lower()
-        objname = procname[:3].lower() + self.sas._objcnt()  # translate to a libname so needs to be less than 8
-        code = SAShelper._makeProcCallMacro(objtype, objname, data, kwargs)
-        logging.debug(procname + " macro submission: " + str(code))
-        if not self.sas.nosub:
-            ll = self.sas.submit(code, "text")
-            error = SAShelper._errorLog(ll['LOG'])
-            isinstance(error, str)
-            if len(error) > 1:
-                raise SyntaxError("ERROR in submission: %s" % error)
-
-            try:
-                obj1 = SAShelper._objectmethods(self, objname)
-                logging.debug(obj1)
-            except Exception:
-                pass
-        else:
-            print(code)
-            log = ''
-            nosub = True
-    else:
-        print("Error in code submission")
-
-    return SASresults(obj1, self.sas, objname, nosub, log)
-
-
-def _stmt_check(req: set, legal: set, stmt: dict) -> bool:
-    """
-    This method checks to make sure that the proc has all required statements and removes any statements
-    aren't valid. Missing required statements is an error. Extra statements are not.
-    :param req: set
-    :param legal: set
-    :param stmt: dict
-    :return: binary
-    """
-    # debug the argument list
-    print("In SASHelper")
-    if logging.getLogger().getEffectiveLevel() == 10:
-        for k, v in stmt.items():
-            if type(v) is str:
-                print("Key: " + k + ", Value: " + v)
+    def _run_proc(self, procname: str, required_set: set, legal_set: set, **kwargs: dict):
+        """
+        This internal method takes the options and statements from the PROC and generates
+        the code needed to submit it to SAS. It then submits the code.
+        :param self:
+        :param procname: str
+        :param required_set: set of options
+        :param legal_set: set of valid options
+        :param kwargs: dict (optional)
+        :return: sas result object
+        """
+        data = kwargs.pop('data', None)
+        log = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
+        obj1 = []
+        nosub = False
+        objname = ''
+        if not log:
+            objtype = procname.lower()
+            objname = procname[:3].lower() + self.sas._objcnt()  # translate to a libname so needs to be less than 8
+            code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, kwargs)
+            logging.debug(procname + " macro submission: " + str(code))
+            if not self.sas.nosub:
+                ll = self.sas.submit(code, "text")
+                error = SASProcCommons._errorLog(ll['LOG'])
+                isinstance(error, str)
+                if len(error) > 1:
+                    raise SyntaxError("ERROR in submission: \n%s" % error)
+                log = ll['LOG']
+                try:
+                    obj1 = SASProcCommons._objectmethods(self, objname)
+                    logging.debug(obj1)
+                except Exception:
+                    pass
             else:
-                print("Key: " + k + ", Value: " + str(type(v)))
-    # required statements
-    req_set = req
-    if len(req_set):
-        missing_set = req_set.difference(set(stmt.keys()))
-        if missing_set:
-            msg = "You are missing %d required statements:" % (len(missing_set))
-            msg += "\n" + str(missing_set)
-            print(msg)
-            return msg
-
-    # legal statements
-    legal_set = legal
-    if len(legal_set):
-        if len(req_set):
-            tot_set = legal_set | req_set
+                print(code)
+                log = ''
+                nosub = True
         else:
-            tot_set = legal_set
-        extra_set = set(stmt.keys()).difference(tot_set)  # find keys not in legal or required sets
-        if extra_set:
-            print("The following %d statements are invalid and will be ignored: " % len(extra_set))
-            print(extra_set)
-    return None
+            print("Error in code submission")
 
+        return SASresults(obj1, self.sas, objname, nosub, log)
 
+    @staticmethod
+    def _stmt_check(self, req: set, legal: set, stmt: dict) -> bool:
+        """
+        This method checks to make sure that the proc has all required statements and removes any statements
+        aren't valid. Missing required statements is an error. Extra statements are not.
+        :param req: set
+        :param legal: set
+        :param stmt: dict
+        :return: binary
+        """
+        # debug the argument list
+        if logging.getLogger().getEffectiveLevel() == 10:
+            for k, v in stmt.items():
+                if type(v) is str:
+                    print("Key: " + k + ", Value: " + v)
+                else:
+                    print("Key: " + k + ", Value: " + str(type(v)))
 
-    # return SAShelper._run_proc(self, "REG", required_set, legal_set, **kwargs)
-    # self._io = sasiostdio.SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
+        # required statements
+        req_set = req
+        if len(req_set):
+            missing_set = req_set.difference(set(stmt.keys()))
+            if missing_set:
+                msg = "You are missing %d required statements:" % (len(missing_set))
+                msg += "\n" + str(missing_set)
+                print(msg)
+                return msg
+
+        # legal statements
+        legal_set = legal
+        if len(legal_set):
+            if len(req_set):
+                tot_set = legal_set | req_set
+            else:
+                tot_set = legal_set
+            extra_set = set(stmt.keys()).difference(tot_set)  # find keys not in legal or required sets
+            if extra_set:
+                print("The following %d statements are invalid and will be ignored: " % len(extra_set))
+                print(extra_set)
+        return None

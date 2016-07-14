@@ -49,7 +49,10 @@ class SASresults(object):
         if attr.startswith('_'):
             return getattr(self, attr)
         if attr.upper() == 'LOG' or attr.upper() == 'ERROR_LOG':
-            return HTML(self._colorLog(self._log))
+            if not self.sas.batch:
+                return HTML(self._colorLog(self._log))
+            else:
+                return self._log
         if attr.upper() in self._attrs:
             data = self._go_run_code(attr)
 

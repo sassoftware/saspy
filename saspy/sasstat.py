@@ -15,7 +15,7 @@
 #
 import re
 import logging
-from saspy.sashelper import SAShelper
+from saspy.sasproccommons import SASProcCommons
 
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
 
@@ -50,7 +50,7 @@ class SASstat:
         legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out',
                     'partition', 'performance', 'prune', 'rules', 'target','input'}
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "HPSPLIT", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "HPSPLIT", required_set, legal_set, **kwargs)
 
     def reg(self, **kwargs: dict) -> object:
         """
@@ -72,7 +72,7 @@ class SASstat:
                     'slice', 'test', 'weight', 'out'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "REG", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "REG", required_set, legal_set, **kwargs)
 
     def mixed(self, **kwargs: dict) -> object:
         """
@@ -95,7 +95,7 @@ class SASstat:
                     'slice', 'weight'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "MIXED", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "MIXED", required_set, legal_set, **kwargs)
 
     def glm(self, **kwargs: dict) -> object:
         """
@@ -119,7 +119,7 @@ class SASstat:
                     'test', 'weight'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc("GLM", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc("GLM", required_set, legal_set, **kwargs)
 
     def logistic(self, **kwargs: dict) -> object:
         """
@@ -150,5 +150,5 @@ class SASstat:
                     'store', 'strata', 'units', 'weight'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc("LOGISTIC", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc("LOGISTIC", required_set, legal_set, **kwargs)
 

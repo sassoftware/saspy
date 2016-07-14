@@ -16,8 +16,7 @@
 import logging
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
 
-from saspy.sasresults import SASresults
-from saspy.sashelper import SAShelper
+from saspy.sasproccommons import SASProcCommons
 
 # create logging
 #logging = logging.getLogger(__name__)
@@ -48,7 +47,7 @@ class SASml:
         required_set = {'input', 'target'}
         legal_set = {'freq', 'input', 'id', 'target', 'save', 'score', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "HPFOREST", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "HPFOREST", required_set, legal_set, **kwargs)
 
     def cluster(self, **kwargs: dict) -> object:
         """
@@ -65,7 +64,7 @@ class SASml:
         required_set = {'input'}
         legal_set = {'freq', 'input', 'id', 'score', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "HPCLUS", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "HPCLUS", required_set, legal_set, **kwargs)
 
     def neural(self, **kwargs: dict) -> object:
         """
@@ -83,7 +82,7 @@ class SASml:
         legal_set = {'freq', 'input', 'id', 'target', 'save', 'score',
                      'architecture', 'weight', 'hidden', 'partition', 'train', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "HPNEURAL", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "HPNEURAL", required_set, legal_set, **kwargs)
 
     def svm(self, **kwargs: dict) -> object:
         """

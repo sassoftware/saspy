@@ -14,7 +14,7 @@
 #  limitations under the License.
 #
 import logging
-from saspy.sashelper import SAShelper
+from saspy.sasproccommons import SASProcCommons
 
 # create logging
 logger = logging.getLogger('')
@@ -38,7 +38,7 @@ class SASets:
         required_set = {'id'}
         legal_set = { 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out'}
         logger.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "TIMESERIES", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "TIMESERIES", required_set, legal_set, **kwargs)
 
     def arima(self, **kwargs):
         """
@@ -50,7 +50,7 @@ class SASets:
         """
         required_set = {'identify'}
         legal_set = { 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
-        return SAShelper._run_proc(self, "ARIMA", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "ARIMA", required_set, legal_set, **kwargs)
 
     def ucm(self, **kwargs):
         """
@@ -66,7 +66,7 @@ class SASets:
         legal_set = {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular'
                     'level', 'model', 'nloptions', 'performance', 'out', 'outlier', 'randomreg', 'season', 'slope'
                     'splinereg', 'splineseason'}
-        return SAShelper._run_proc(self, "UCM", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "UCM", required_set, legal_set, **kwargs)
 
     def esm(self, **kwargs):
         """
@@ -78,7 +78,7 @@ class SASets:
         """
         required_set = {}
         legal_set = { 'by', 'id', 'forecast', 'out'}
-        return SAShelper._run_proc(self, "ESM", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "ESM", required_set, legal_set, **kwargs)
 
     def timeid(self, **kwargs):
         """
@@ -90,7 +90,7 @@ class SASets:
         """
         required_set = {}
         legal_set = { 'by', 'id', 'out'}
-        return SAShelper._run_proc(self, "TIMEID", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "TIMEID", required_set, legal_set, **kwargs)
 
     def timedata(self, **kwargs):
         """
@@ -102,5 +102,5 @@ class SASets:
         """
         required_set = {}
         legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts'}
-        return SAShelper._run_proc(self, "TIMEIDATA", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "TIMEIDATA", required_set, legal_set, **kwargs)
 

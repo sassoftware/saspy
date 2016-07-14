@@ -15,8 +15,7 @@
 #
 
 import logging
-import os
-from saspy.sashelper import SAShelper
+from saspy.sasproccommons import SASProcCommons
 
 # create logging
 logger = logging.getLogger('')
@@ -39,7 +38,7 @@ class SASqc:
         required_set = {}
         legal_set = {'by','xchart'}
         logger.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "CUSUM", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "CUSUM", required_set, legal_set, **kwargs)
 
     def macontrol(self, **kwargs):
         """
@@ -51,7 +50,7 @@ class SASqc:
         required_set = {}
         legal_set = {}
         logger.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "MACONTROL", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "MACONTROL", required_set, legal_set, **kwargs)
 
     def capability(self, **kwargs):
         """
@@ -66,7 +65,7 @@ class SASqc:
         legal_set = {'cdfplot', 'comphist', 'histogram', 'inset', 'intervals', 'output', 'ppplot', 'probplot',
                      'qqplot', 'freq', 'weight', 'id', 'by', 'spec', 'out'}
         logger.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "CAPABILITY", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "CAPABILITY", required_set, legal_set, **kwargs)
 
     def shewhart(self, **kwargs):
         """
@@ -77,5 +76,5 @@ class SASqc:
         required_set = {}
         legal_set = {}
         logger.debug("kwargs type: " + str(type(kwargs)))
-        return SAShelper._run_proc(self, "SHEWHART", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "SHEWHART", required_set, legal_set, **kwargs)
 
