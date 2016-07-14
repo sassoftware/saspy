@@ -36,7 +36,7 @@ class SASqc:
         http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_cusum_sect001.htm
         """
         required_set = {}
-        legal_set = {'by','xchart'}
+        legal_set = {'by','xchart', 'procopts'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "CUSUM", required_set, legal_set, **kwargs)
 
@@ -48,7 +48,7 @@ class SASqc:
         http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_macontrol_toc.htm
         """
         required_set = {}
-        legal_set = {}
+        legal_set = {'procopts'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "MACONTROL", required_set, legal_set, **kwargs)
 
@@ -63,7 +63,7 @@ class SASqc:
         """
         required_set = {}
         legal_set = {'cdfplot', 'comphist', 'histogram', 'inset', 'intervals', 'output', 'ppplot', 'probplot',
-                     'qqplot', 'freq', 'weight', 'id', 'by', 'spec', 'out'}
+                     'qqplot', 'freq', 'weight', 'id', 'by', 'spec', 'out', 'procopts'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "CAPABILITY", required_set, legal_set, **kwargs)
 
@@ -74,7 +74,7 @@ class SASqc:
         http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_shewhart_toc.htm
         """
         required_set = {}
-        legal_set = {}
+        legal_set = {'procopts'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "SHEWHART", required_set, legal_set, **kwargs)
 

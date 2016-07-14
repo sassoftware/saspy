@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-import re
 import logging
 from saspy.sasproccommons import SASProcCommons
 
@@ -48,7 +47,7 @@ class SASstat:
         """
         required_set = {}
         legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out',
-                    'partition', 'performance', 'prune', 'rules', 'target','input'}
+                    'partition', 'performance', 'prune', 'rules', 'target','input', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPSPLIT", required_set, legal_set, **kwargs)
 
@@ -69,7 +68,7 @@ class SASstat:
         required_set={'model'}
         legal_set= {'add', 'by', 'code', 'id', 'var',
                     'lsmeans', 'model', 'random', 'repeated',
-                    'slice', 'test', 'weight', 'out'}
+                    'slice', 'test', 'weight', 'out', 'procopts'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "REG", required_set, legal_set, **kwargs)
@@ -92,7 +91,7 @@ class SASstat:
         required_set={'model'}
         legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id',
                     'lsmeans', 'model', 'out', 'random', 'repeated',
-                    'slice', 'weight'}
+                    'slice', 'weight', 'procopts'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "MIXED", required_set, legal_set, **kwargs)
@@ -116,7 +115,7 @@ class SASstat:
         required_set={'model'}
         legal_set= {'absorb', 'by', 'cls', 'contrast', 'estimate', 'freq', 'id',
                     'lsmeans', 'manova', 'means', 'model', 'out', 'random', 'repeated',
-                    'test', 'weight'}
+                    'test', 'weight', 'procopts'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc("GLM", required_set, legal_set, **kwargs)
@@ -147,7 +146,7 @@ class SASstat:
         required_set={'model'}
         legal_set= {'by', 'cls', 'contrast', 'effect', 'effectplot', 'estimate',
                     'exact', 'freq', 'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice',
-                    'store', 'strata', 'units', 'weight'}
+                    'store', 'strata', 'units', 'weight', 'procopts'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc("LOGISTIC", required_set, legal_set, **kwargs)
