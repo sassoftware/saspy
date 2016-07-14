@@ -179,8 +179,14 @@ class SASconfigHTTP:
       authheader = '%s' % basic.splitlines()[0].decode()
       headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
                "Authorization":"Basic "+authheader}
-      conn.request('POST', "/SASLogon/oauth/token", body=d1, headers=headers)
-      req = conn.getresponse()
+      try:
+         conn.request('POST', "/SASLogon/oauth/token", body=d1, headers=headers)
+         req = conn.getresponse()
+      except:
+         import sys
+         print("Failure in GET AuthToken. Could not connect to the logon service. Exception info:\n"+str(sys.exc_info()))
+         return None
+
       status = req.getcode()
       resp = req.read()
       conn.close()
