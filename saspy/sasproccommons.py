@@ -53,7 +53,7 @@ class SASProcCommons:
         """
         code = "%macro proccall(d);\n"
         # TODO: resolve issues withe Proc options, out= and plots=
-
+        # The procopts statement should be in every procedure as a way to pass arbitrary options to the procedures
         if 'procopts' in args:
             logging.debug("procopts statement,length: %s,%s", args['procopts'], len(args['procopts']))
             code += "proc %s data=%s.%s %s;\n" % (objtype, data.libref, data.table, args['procopts'])
