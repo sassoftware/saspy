@@ -20,14 +20,14 @@
 # There is a configuration file named sascfg.py in the saspy package used to configure connections
 # to SAS. Currently supported methods are STDIO, connecting to a local (same machine) Linux SAS using
 # stdio methods (fork, exec, and pipes). The is also support for running STDIO over SSH, which can 
-# connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interupt
-# handling, as the local STDIO method can. An interupt on this method can only terminate the SAS process; 
+# connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interrupt
+# handling, as the local STDIO method can. An interrupt on this method can only terminate the SAS process;
 # you'll be prompted to terminate or wait for completion. The third method is HTTP, which can connect
-# to SAS Viya via the Compute Servie, a restfull micro service in the Viay system.
+# to SAS Viya via the Compute Servie, a restful micro service in the Viya system.
 #
 # Each of these connection methods (access methods) are handled by their own IO module. This main
 # module determines which IO module to use based upon the configuration chosen at runtime. More
-# IO modules can be seemlessly plugged in, if needed, in the future.
+# IO modules can be seamlessly plugged in, if needed, in the future.
 #
 # The expected use is to simply import this package and establish a SAS session, then use the methods:
 #
@@ -146,7 +146,7 @@ class SASsession:
    ssh     - full path of the ssh command; /usr/bin/ssh for instance
    host    - host name of the remote machine
 
-   and for the HTTP IO module to comnnect to Viya
+   and for the HTTP IO module to connect to SAS Viya
    ip      - host address 
    port    - port; the code Defaults this to 80 (the Compute Services default port)
    context - context name defined on the compute service
@@ -353,7 +353,7 @@ class SASsession:
 
    def datasets(self, libref: str ='') -> 'The LOG showing the output':
       '''
-      This method is used to quesy a libref. The results show information about the libref including members.
+      This method is used to query a libref. The results show information about the libref including members.
       libref  - the libref to query
       '''
       code = "proc datasets"
@@ -373,7 +373,7 @@ class SASsession:
    def read_csv(self, file: str, table: str, libref: str ='', results: str ='HTML') -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
-      file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
+      file    - either the OS filesystem path of the file, or HTTP://... for a url accessible file
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
@@ -475,7 +475,7 @@ class SASdata:
            else:
               self.libref = 'WORK'
 
-           #hack till the bug gets fixed
+           # hack till the bug gets fixed
            if self.sas.sascfg.mode == 'HTTP':
               self.libref = 'WORK'
 
@@ -582,7 +582,7 @@ class SASdata:
         display metadata about the table. size, number of rows, columns and their data type ...
 
         '''
-        code  = "proc contents data="+self.libref+'.'+self.table+";run;"
+        code = "proc contents data="+self.libref+'.'+self.table+";run;"
 
         if self.sas.nosub:
            print(code)
