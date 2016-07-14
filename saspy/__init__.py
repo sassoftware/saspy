@@ -19,5 +19,6 @@ from saspy.sasets      import *
 from saspy.sasml       import *
 from saspy.sasqc       import *
 from saspy.sasresults  import *
+from saspy.sasproccommons import *
 from saspy.SASLogLexer import *
 

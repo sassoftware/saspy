@@ -144,7 +144,6 @@ class SASMagic(ipym.Magics):
         i = 0
         elog = []
         for line in lines:
-            # logger.debug("In lines loop")
             i += 1
             e = []
             if line.startswith('ERROR'):
