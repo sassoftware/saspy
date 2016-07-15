@@ -14,9 +14,8 @@
 #  limitations under the License.
 #
 import logging
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
-
 from saspy.sasproccommons import SASProcCommons
+
 
 class SASml:
     def __init__(self, session, *args, **kwargs):
@@ -27,10 +26,9 @@ class SASml:
         logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
-        self.sas=session
+        self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
-        logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
-    
+
     def forest(self, **kwargs: dict) -> object:
         """
         Python method to call the HPFOREST procedure

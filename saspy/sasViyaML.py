@@ -14,14 +14,13 @@
 #  limitations under the License.
 #
 import logging
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
-
 from saspy.sasproccommons import SASProcCommons
 
+
 # create logging
-#logging = logging.getLogger(__name__)
-#logging.addHandler(logging.NullHandler)
-#logging.setLevel(logging.DEBUG)
+# logging = logging.getLogger(__name__)
+# logging.addHandler(logging.NullHandler)
+# logging.setLevel(logging.DEBUG)
 
 
 class SASml:
@@ -29,10 +28,13 @@ class SASml:
         """
         Submit an initial set of macros to prepare the SAS system
         """
+        self.sasproduct = "dmml"
+        # create logging
+        logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
         self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
-
-
 
     def factmac(self, **kwargs: dict) -> object:
         """
@@ -48,7 +50,7 @@ class SASml:
         """
         required_set = {'input', 'target'}
         legal_set = {'freq', 'input', 'id', 'target', 'save', 'score', 'procopts'}
-        #print ("I am HERE")
+        # print ("I am HERE")
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc("HPFOREST", required_set, legal_set, **kwargs)
 
@@ -125,4 +127,3 @@ class SASml:
         :return: SAS result object
         """
         pass
-

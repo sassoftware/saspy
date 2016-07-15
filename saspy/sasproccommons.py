@@ -23,9 +23,8 @@ class SASProcCommons:
         self.sas = session
         logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
-        #self.logger.addHandler(logging.NullHandler)
         self.logger.setLevel(logging.DEBUG)
-        self.sas=session
+        self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @staticmethod
@@ -57,32 +56,35 @@ class SASProcCommons:
         :param args: dict --  proc arguments
         :return: str -- the SAS code needed to execute on the server
         """
-        plot=''
-        outmeth=''
-        procopts=''
-        if self.sasproduct.lower()=='stat':
-            outmeth=''
-            plot='plot=all'
-        if self.sasproduct.lower()=='qc':
-            outmeth=''
-            plot=''
-        if self.sasproduct.lower()=='ets':
-            outmeth='out'
-            plot='plots=all'
-        if self.sasproduct.lower()=='em':
-            outmeth=''
-            plot=''
+        plot = ''
+        outmeth = ''
+        procopts = ''
+        if self.sasproduct.lower() == 'stat':
+            outmeth = ''
+            plot = 'plot=all'
+        if self.sasproduct.lower() == 'qc':
+            outmeth = ''
+            plot = ''
+        if self.sasproduct.lower() == 'ets':
+            outmeth = 'out'
+            plot = 'plots=all'
+        if self.sasproduct.lower() == 'em':
+            outmeth = ''
+            plot = ''
+        if self.sasproduct.lower() == 'dmml':
+            outmeth = 'out'
+            plot = ''
         self.logger.debug("product caller: " + self.sasproduct.lower())
         code = "%macro proccall(d);\n"
         # resolve issues withe Proc options, out= and plots=
         # The procopts statement should be in every procedure as a way to pass arbitrary options to the procedures
         if 'procopts' in args:
             self.logger.debug("procopts statement,length: %s,%s", args['procopts'], len(args['procopts']))
-            procopts=args['procopts']
+            procopts = args['procopts']
         if 'outmeth' in args:
-            outmeth=args['outmeth']
+            outmeth = args['outmeth']
         if 'plot' in args:
-            plot=args['plot']
+            plot = args['plot']
         if len(outmeth) and 'out' in args:
             outds = args['out']
             outstr = outds.libref + '.' + outds.table
@@ -160,7 +162,7 @@ class SASProcCommons:
             # add check to make sure it is only one variable
             self.logger.debug("freq statement,length: %s,%s", args['freq'], len(args['freq']))
             # check to make sure it is only one variable
-            if len(args['freq'].split())==1:
+            if len(args['freq'].split()) == 1:
                 code += "freq %s;\n" % (args['freq'])
             else:
                 print("ERROR in code submission. FREQ can only have one variable and you submitted: %s", args['freq'])
@@ -170,11 +172,11 @@ class SASProcCommons:
         # handle a string or list of strings
         if 'hidden' in args:
             if isinstance(args['hidden'], str):
-                logger.debug("hidden statement,length: %s,%s", args['hidden'], len(args['hidden']))
+                self.logger.debug("hidden statement,length: %s,%s", args['hidden'], len(args['hidden']))
                 code += "hidden %s;\n" % (args['hidden'])
             else:
                 for item in args['hidden']:
-                    code += "hidden %s;\n" % (item)
+                    code += "hidden %s;\n" % item
         if 'histogram' in args:
             self.logger.debug("histogram statement,length: %s,%s", args['histogram'], len(args['histogram']))
             code += "histogram %s;\n" % (args['histogram'])
@@ -186,11 +188,11 @@ class SASProcCommons:
             code += "identify %s;\n" % (args['identify'])
         if 'input' in args:
             if isinstance(args['input'], str):
-                logger.debug("input statement,length: %s,%s", args['input'], len(args['input']))
+                self.logger.debug("input statement,length: %s,%s", args['input'], len(args['input']))
                 code += "input %s;\n" % (args['input'])
             else:
                 for item in args['input']:
-                    code += "input %s;\n" % (item)
+                    code += "input %s;\n" % item
         if 'inset' in args:
             self.logger.debug("inset statement,length: %s,%s", args['inset'], len(args['inset']))
             code += "inset %s;\n" % (args['inset'])
@@ -320,13 +322,10 @@ class SASProcCommons:
         if 'weight' in args:
             self.logger.debug("weight statement,length: %s,%s", args['weight'], len(args['weight']))
             # check to make sure it is only one variable
-            if len(args['weight'].split())==1:
+            if len(args['weight'].split()) == 1:
                 code += "weight %s;\n" % (args['weight'])
             else:
                 print("ERROR in code submission. WEIGHT can only have one variable and you submitted: %s", args['weight'])
-
-
-
         if 'grow' in args:
             self.logger.debug("grow statement,length: %s,%s", args['grow'], len(args['grow']))
             code += "grow %s;\n" % (args['grow'])
@@ -403,7 +402,7 @@ class SASProcCommons:
                 error = SASProcCommons._errorLog(log)
                 isinstance(error, str)
                 if len(error) > 1:
-                    print ("SubmissionError: ERRORS found in SAS log: \n%s" % error)
+                    print("SubmissionError: ERRORS found in SAS log: \n%s" % error)
                     return SASresults(obj1, self.sas, objname, nosub, log)
                 try:
                     obj1 = SASProcCommons._objectmethods(self, objname)
@@ -453,7 +452,7 @@ class SASProcCommons:
             extraSet = set(stmt.keys()).difference(totSet)  # find keys not in legal or required sets
             if extraSet:
                 for item in extraSet:
-                    stmt.pop(item,None)
+                    stmt.pop(item, None)
                 print("The following %d statements are invalid and will be ignored: " % len(extraSet))
                 print(extraSet)
         return stmt
