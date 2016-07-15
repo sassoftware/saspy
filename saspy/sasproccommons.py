@@ -165,7 +165,7 @@ class SASProcCommons:
             if len(args['freq'].split()) == 1:
                 code += "freq %s;\n" % (args['freq'])
             else:
-                print("ERROR in code submission. FREQ can only have one variable and you submitted: %s", args['freq'])
+                raise SyntaxError("ERROR in code submission. FREQ can only have one variable and you submitted: %s", args['freq'])
         if 'forecast' in args:
             self.logger.debug("forecast statement,length: %s,%s", args['forecast'], len(args['forecast']))
             code += "forecast %s;\n" % (args['forecast'])
@@ -308,10 +308,10 @@ class SASProcCommons:
         if 'target' in args:
             self.logger.debug("target statement,length: %s,%s", args['target'], len(args['target']))
             # make sure target is a single variable extra split to account for level= option
-            if len(args['target'].split('/')[0].split()):
+            if len(args['target'].split('/')[0].split()) == 1:
                 code += "target %s;\n" % (args['target'])
             else:
-                print("ERROR in code submission. TARGET can only have one variable and you submitted: %s", args['target'])
+                raise SyntaxError("ERROR in code submission. TARGET can only have one variable and you submitted: %s" % args['target'])
         if 'train' in args:
             self.logger.debug("train statement,length: %s,%s", args['train'], len(args['train']))
             code += "train %s;\n" % (args['train'])
@@ -325,7 +325,7 @@ class SASProcCommons:
             if len(args['weight'].split()) == 1:
                 code += "weight %s;\n" % (args['weight'])
             else:
-                print("ERROR in code submission. WEIGHT can only have one variable and you submitted: %s", args['weight'])
+                raise SyntaxError("ERROR in code submission. WEIGHT can only have one variable and you submitted: %s", args['weight'])
         if 'grow' in args:
             self.logger.debug("grow statement,length: %s,%s", args['grow'], len(args['grow']))
             code += "grow %s;\n" % (args['grow'])
