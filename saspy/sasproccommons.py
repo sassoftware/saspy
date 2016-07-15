@@ -386,7 +386,6 @@ class SASProcCommons:
         """
         data = kwargs.pop('data', None)
         verifiedKwargs = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
-        print(verifiedKwargs)
         obj1 = []
         nosub = False
         objname = ''
