@@ -21,9 +21,9 @@ from saspy.sasresults import SASresults
 class SASProcCommons:
     def __init__(self, session, *args, **kwargs):
         self.sas = session
-        logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+        # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.WARN)
         self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
@@ -171,9 +171,9 @@ class SASProcCommons:
             code += "forecast %s;\n" % (args['forecast'])
         # handle a string or list of strings
         if 'hidden' in args:
-            if isinstance(args['hidden'], str):
-                self.logger.debug("hidden statement,length: %s,%s", args['hidden'], len(args['hidden']))
-                code += "hidden %s;\n" % (args['hidden'])
+            if isinstance(args['hidden'], (str,int)):
+                self.logger.debug("hidden statement,length: %s,%s", str(args['hidden']), len(str(args['hidden'])))
+                code +=  "hidden %s;\n" % (str(args['hidden']))
             else:
                 for item in args['hidden']:
                     code += "hidden %s;\n" % item
