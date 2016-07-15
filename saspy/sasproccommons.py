@@ -386,14 +386,16 @@ class SASProcCommons:
         :return: sas result object
         """
         data = kwargs.pop('data', None)
-        log = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
+        verifiedKwargs = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
+        print(verifiedKwargs)
         obj1 = []
         nosub = False
         objname = ''
-        if not log:
+        log = ''
+        if len(verifiedKwargs):
             objtype = procname.lower()
             objname = procname[:3].lower() + self.sas._objcnt()  # translate to a libname so needs to be less than 8
-            code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, kwargs)
+            code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, verifiedKwargs)
             self.logger.debug(procname + " macro submission: " + str(code))
             if not self.sas.nosub:
                 ll = self.sas.submit(code, "text")
@@ -410,7 +412,6 @@ class SASProcCommons:
                     pass
             else:
                 print(code)
-                log = ''
                 nosub = True
         else:
             print("Error in code submission")
@@ -418,14 +419,14 @@ class SASProcCommons:
         return SASresults(obj1, self.sas, objname, nosub, log)
 
     @staticmethod
-    def _stmt_check(self, req: set, legal: set, stmt: dict) -> bool:
+    def _stmt_check(self, req: set, legal: set, stmt: dict) -> dict:
         """
         This method checks to make sure that the proc has all required statements and removes any statements
         aren't valid. Missing required statements is an error. Extra statements are not.
         :param req: set
         :param legal: set
         :param stmt: dict
-        :return: binary
+        :return: dictonary of verified statements
         """
         # debug the argument list
         if self.logger.level == 10:
@@ -436,24 +437,23 @@ class SASProcCommons:
                     print("Key: " + k + ", Value: " + str(type(v)))
 
         # required statements
-        req_set = req
-        if len(req_set):
-            missing_set = req_set.difference(set(stmt.keys()))
+        reqSet = req
+        if len(reqSet):
+            missing_set = reqSet.difference(set(stmt.keys()))
             if missing_set:
-                msg = "You are missing %d required statements:" % (len(missing_set))
-                msg += "\n" + str(missing_set)
-                print(msg)
-                return msg
+                raise SyntaxError("You are missing %d required statements:\n%s" % (len(missing_set), str(missing_set)))
 
         # legal statements
-        legal_set = legal
-        if len(legal_set):
-            if len(req_set):
-                tot_set = legal_set | req_set
+        legalSet = legal
+        if len(legalSet):
+            if len(reqSet):
+                totSet = legalSet | reqSet
             else:
-                tot_set = legal_set
-            extra_set = set(stmt.keys()).difference(tot_set)  # find keys not in legal or required sets
-            if extra_set:
-                print("The following %d statements are invalid and will be ignored: " % len(extra_set))
-                print(extra_set)
-        return None
+                totSet = legalSet
+            extraSet = set(stmt.keys()).difference(totSet)  # find keys not in legal or required sets
+            if extraSet:
+                for item in extraSet:
+                    stmt.pop(item,None)
+                print("The following %d statements are invalid and will be ignored: " % len(extraSet))
+                print(extraSet)
+        return stmt
