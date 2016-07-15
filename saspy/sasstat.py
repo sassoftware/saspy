@@ -16,11 +16,9 @@
 import logging
 from saspy.sasproccommons import SASProcCommons
 
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
 
-# create logging
-# logging = logging.getLogger('')
-# logging.setLevel(logging.WARN)
+
+
 
 
 class SASstat:
@@ -28,7 +26,13 @@ class SASstat:
         """
         Submit an initial set of macros to prepare the SAS system
         """
-        self.sas=session
+        self.sasproduct="stat"
+        # create logging
+        logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
+        #self.logger.addHandler(logging.NullHandler)
+        self.logger.setLevel(logging.DEBUG)
+        self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     def hpsplit(self, **kwargs: dict) -> object:

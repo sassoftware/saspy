@@ -18,20 +18,23 @@ logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S
 
 from saspy.sasproccommons import SASProcCommons
 
+# create logging
+#logging = logging.getLogger(__name__)
+#logging.addHandler(logging.NullHandler)
+#logging.setLevel(logging.DEBUG)
+
+
 class SASml:
     def __init__(self, session, *args, **kwargs):
         """
         Submit an initial set of macros to prepare the SAS system
         """
-        self.sasproduct = "em"
-        logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        self.sas=session
+        self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
-        logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
-    
-    def forest(self, **kwargs: dict) -> object:
+
+
+
+    def factmac(self, **kwargs: dict) -> object:
         """
         Python method to call the HPFOREST procedure
 
@@ -45,10 +48,11 @@ class SASml:
         """
         required_set = {'input', 'target'}
         legal_set = {'freq', 'input', 'id', 'target', 'save', 'score', 'procopts'}
+        #print ("I am HERE")
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPFOREST", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc("HPFOREST", required_set, legal_set, **kwargs)
 
-    def cluster(self, **kwargs: dict) -> object:
+    def forest(self, **kwargs: dict) -> object:
         """
         Python method to call the HPCLUS procedure
 
@@ -63,9 +67,26 @@ class SASml:
         required_set = {'input'}
         legal_set = {'freq', 'input', 'id', 'score', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPCLUS", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc("HPCLUS", required_set, legal_set, **kwargs)
 
-    def neural(self, **kwargs: dict) -> object:
+    def gradboost(self, **kwargs: dict) -> object:
+        """
+        Python method to call the HPCLUS procedure
+
+        required_set = {'input'}
+        legal_set= {'freq', 'input', 'id', 'score'}
+
+        Documentation link:
+        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'input'}
+        legal_set = {'freq', 'input', 'id', 'score', 'procopts'}
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc("HPCLUS", required_set, legal_set, **kwargs)
+
+    def nnet(self, **kwargs: dict) -> object:
         """
         Python method to call the HPNEURAL procedure
 
@@ -81,9 +102,9 @@ class SASml:
         legal_set = {'freq', 'input', 'id', 'target', 'save', 'score',
                      'architecture', 'weight', 'hidden', 'partition', 'train', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPNEURAL", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc("HPNEURAL", required_set, legal_set, **kwargs)
 
-    def svm(self, **kwargs: dict) -> object:
+    def svmachine(self, **kwargs: dict) -> object:
         """
         Python method to call the HPSVM procedure
 
@@ -94,7 +115,7 @@ class SASml:
         """
         pass
 
-    def bnet(self, **kwargs: dict) -> object:
+    def textmine(self, **kwargs: dict) -> object:
         """
         Python method to call the HPBNET procedure
 
@@ -104,3 +125,4 @@ class SASml:
         :return: SAS result object
         """
         pass
+

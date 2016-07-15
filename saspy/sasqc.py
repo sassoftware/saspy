@@ -17,13 +17,15 @@
 import logging
 from saspy.sasproccommons import SASProcCommons
 
-# create logging
-logger = logging.getLogger('')
-logger.setLevel(logging.WARN)
-
 class SASqc:
     def __init__(self, session, *args, **kwargs):
         """Submit an initial set of macros to prepare the SAS system"""
+        self.sasproduct="qc"
+        # create logging
+        logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
+        #self.logger.addHandler(logging.NullHandler)
+        self.logger.setLevel(logging.DEBUG)
         self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
     

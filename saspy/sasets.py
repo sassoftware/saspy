@@ -16,16 +16,17 @@
 import logging
 from saspy.sasproccommons import SASProcCommons
 
-# create logging
-logger = logging.getLogger('')
-logger.setLevel(logging.WARN)
-
-
 class SASets:
     def __init__(self, session, *args, **kwargs):
         """Submit an initial set of macros to prepare the SAS system"""
+        self.sasproduct="ets"
+        # create logging
+        logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
+        # self.logger.addHandler(logging.NullHandler)
+        self.logger.setLevel(logging.DEBUG)
         self.sas=session
-        logger.debug("Initialization of SAS Macro: " + str(self.sas.saslog()))
+        self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     def timeseries(self, **kwargs):
         """
@@ -37,7 +38,7 @@ class SASets:
         """
         required_set = {'id'}
         legal_set = { 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out', 'procopts'}
-        logger.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TIMESERIES", required_set, legal_set, **kwargs)
 
     def arima(self, **kwargs):
