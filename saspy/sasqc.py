@@ -17,13 +17,15 @@
 import logging
 from saspy.sasproccommons import SASProcCommons
 
-# create logging
-logger = logging.getLogger('')
-logger.setLevel(logging.WARN)
 
 class SASqc:
     def __init__(self, session, *args, **kwargs):
         """Submit an initial set of macros to prepare the SAS system"""
+        self.sasproduct = "qc"
+        # create logging
+        # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.WARN)
         self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
     
@@ -36,7 +38,7 @@ class SASqc:
         http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_cusum_sect001.htm
         """
         required_set = {}
-        legal_set = {'by','xchart', 'procopts'}
+        legal_set = {'by', 'xchart', 'procopts'}
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "CUSUM", required_set, legal_set, **kwargs)
 
