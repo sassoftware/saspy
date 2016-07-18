@@ -13,9 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from IPython import display as dis
-from IPython.core.display import HTML
-
+try:
+   from IPython import display as dis
+   from IPython.core.display import HTML
+except ImportError:
+   pass
 
 class SASresults(object):
     """Return results from a SAS Model object"""
