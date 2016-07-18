@@ -14,11 +14,15 @@
 #  limitations under the License.
 #
 from __future__ import print_function
-from IPython import display as dis
-from IPython.core.display import HTML
 from saspy.SASLogLexer import SASLogStyle, SASLogLexer
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
+
+try:
+    from IPython import display as dis
+    from IPython.core.display import HTML
+except ImportError:
+    pass
 
 
 class SASresults(object):
