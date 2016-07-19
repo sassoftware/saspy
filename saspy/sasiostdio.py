@@ -780,7 +780,7 @@ class SASsessionSTDIO():
                if var == 'nan':
                   var = '.'
                else:
-                  var = str(row[col].to_datetime64())
+                  var = str(row[col].to_datetime64())[:26]
                   #var = str(row[1][col].to_datetime64())
             card += var+chr(9)
          self.stdin.write(card.encode()+b'\n')
