@@ -3,24 +3,15 @@ import saspy
 
 
 class TestSASdataObject(unittest.TestCase):
-    def __init__(self, *args):
-        super(TestSASdataObject, self).__init__(*args)
-        #self.sas = saspy.SASsession()#cfgname='default')
-        #self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
+    @classmethod    
+    def setUpClass(cls):
+        cls.sas = saspy.SASsession() #cfgname='default')
+        #cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
 
-    def __del__(self, *args):
-        #if self.sas:
-        #   self.sas._endsas()
-        pass
-
-    def setUp(self):
-        self.sas = saspy.SASsession()
-        #pass
-
-    def tearDown(self):
-        if self.sas:
-           self.sas._endsas()
-        #pass
+    @classmethod
+    def tearDownClass(cls):
+        if cls.sas:
+           cls.sas._endsas()
 
     def test_SASdata(self):
         #test sasdata method

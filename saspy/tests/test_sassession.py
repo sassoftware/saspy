@@ -3,23 +3,15 @@ import saspy
 
 
 class TestSASsessionObject(unittest.TestCase):
-    def __init__(self, *args):
-        super(TestSASsessionObject, self).__init__(*args)
-        self.sas = saspy.SASsession()#cfgname='default')
-        self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
+    @classmethod    
+    def setUpClass(cls):
+        cls.sas = saspy.SASsession() #cfgname='default')
+        #cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
 
-    def __del__(self, *args):
-        if self.sas:
-           self.sas._endsas()
-
-    def setUp(self):
-        #self.sas = saspy.SASsession()
-        pass
-
-    def tearDown(self):
-        #if self.sas:
-        #   self.sas._endsas()
-        pass
+    @classmethod
+    def tearDownClass(cls):
+        if cls.sas:
+           cls.sas._endsas()
 
     def test_SASsession(self):
         #test exist true
@@ -35,9 +27,10 @@ class TestSASsessionObject(unittest.TestCase):
         self.cars = self.sas.sasdata('cars', libref='sashelp', results='text')
         self.assertIsInstance(self.cars, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
 
+    def test_SASsession2(self):
         #test sasdata not existing
         self.notable = self.sas.sasdata('notable', results='text')
-        self.assertIsInstance(self.cars, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
+        self.assertIsInstance(self.notable, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
 
         #test create non-existing table
         ll = self.sas.submit("data notable;x=1;run;")
@@ -77,6 +70,7 @@ class TestSASsessionObject(unittest.TestCase):
               break  #it'll be in the first 20 rows for sure. don't need all of it
         self.assertIn(expected, retrieved, msg="cars.datasets(...) result didn't contain expected result")
         
+    def test_SASsession3(self):
         #test stat
         stat = self.sas.sasstat()
         self.assertIsInstance(stat, saspy.SASstat, msg="stat = self.sas.sasstat() failed")
