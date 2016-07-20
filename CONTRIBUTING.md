@@ -35,4 +35,5 @@
 
 0. Also, follow the instructions in the saspy/ContributorAgreement.txt file 
 
-And *thanks* for contributing! It will make this project better for everyone!
+And **thanks** for contributing! It will make this project better for everyone!
+
