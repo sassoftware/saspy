@@ -6,7 +6,6 @@ class TestSASsessionObject(unittest.TestCase):
     @classmethod    
     def setUpClass(cls):
         cls.sas = saspy.SASsession() #cfgname='default')
-        #cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
 
     @classmethod
     def tearDownClass(cls):
@@ -14,29 +13,32 @@ class TestSASsessionObject(unittest.TestCase):
            cls.sas._endsas()
 
     def test_SASsession(self):
+        self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
+
+    def test_SASsession_exist(self):
         #test exist true
         exists = self.sas.exist('cars', libref='sashelp')
         self.assertTrue(exists, msg="exists = self.sas.exist(...) failed")
 
         #test exist false
-        self.sas.set_batch(True)
         exists = self.sas.exist('notable', libref='sashelp')
         self.assertFalse(exists, msg="exists = self.sas.exist(...) failed")
 
+    def test_SASsession_sasdata(self):
         #test sasdata existing
-        self.cars = self.sas.sasdata('cars', libref='sashelp', results='text')
-        self.assertIsInstance(self.cars, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
+        cars = self.sas.sasdata('cars', libref='sashelp', results='text')
+        self.assertIsInstance(cars, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
 
-    def test_SASsession2(self):
         #test sasdata not existing
-        self.notable = self.sas.sasdata('notable', results='text')
-        self.assertIsInstance(self.notable, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
+        notable = self.sas.sasdata('notable', results='text')
+        self.assertIsInstance(notable, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
 
         #test create non-existing table
         ll = self.sas.submit("data notable;x=1;run;")
         exists = self.sas.exist('notable')
         self.assertTrue(exists, msg="exists = self.sas.exist(...) failed")
 
+    def test_SASsession_csv(self):
         #test write and read csv
         self.sas.set_batch(True)
         log = self.sas.write_csv('/tmp/sas_csv_test.csv', 'cars', libref='sashelp')
@@ -50,6 +52,7 @@ class TestSASsessionObject(unittest.TestCase):
            retrieved.append(rows[i].split())
         self.assertIn(expected, retrieved, msg="csvcars.head() result didn't contain row 1")
         
+    def test_SASsession_datasets(self):
         #test datasets()
         self.sas.set_batch(True)
         log = self.sas.datasets()
@@ -70,7 +73,7 @@ class TestSASsessionObject(unittest.TestCase):
               break  #it'll be in the first 20 rows for sure. don't need all of it
         self.assertIn(expected, retrieved, msg="cars.datasets(...) result didn't contain expected result")
         
-    def test_SASsession3(self):
+    def test_SASsession_procobjs(self):
         #test stat
         stat = self.sas.sasstat()
         self.assertIsInstance(stat, saspy.SASstat, msg="stat = self.sas.sasstat() failed")
