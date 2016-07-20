@@ -29,8 +29,8 @@ if svem_flag in sys.argv:
     sys.argv.remove(svem_flag)
 
 setup(name='saspy',
-      version='1.2.1',
-      description='A SAS interpreter for Python',
+      version='2.0',
+      description='A Python interface to SAS',
       long_description=readme,
       author='Tom Weber',
       author_email='Tom.Weber@sas.com',
