@@ -1,7 +1,7 @@
 #To contribute to saspy, there are a few rules and conventions to follow.
 
-0contributions must pass the existing regression tests; see saspy/tests
-0contributions must add unit tests to saspy/tests to validate the changes being added in the code
+1contributions must pass the existing regression tests; see saspy/tests
+2contributions must add unit tests to saspy/tests to validate the changes being added in the code
  0if there's already a test file where your tests would make sense; put them in there
  0if it's something new or you feel it needs its own file, create a new file
 0contributions should follow the conventions of the saspy architecture
