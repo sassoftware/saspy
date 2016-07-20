@@ -1,4 +1,4 @@
-#To contribute to saspy, there are a few rules and conventions to follow.
+# To contribute to saspy, there are a few rules and conventions to follow.
 
 0. contributions must pass the existing regression tests; see saspy/tests
 0. contributions must add unit tests to saspy/tests to validate the changes being added in the code
