@@ -129,5 +129,56 @@ class TestSASdataObject(unittest.TestCase):
         self.assertGreater(len(ll['LST']), 30000, msg="cars.heatmap(...) result were too short")
         self.assertIn(expected, ll['LST'], msg="cars.heatmap(...) result weren't what was expected")
         
+    def test_SASdata_sort1(self):
+        # Create dataset in WORK
+        self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
+        wkcars = self.sas.sasdata('cars')
+        # Sort data in place by one variable
+        wkcars.sort('type')
+        self.assertIsInstance(wkcars, saspy.SASdata, msg="Sort didn't return SASdata Object")
+        
+    def test_SASdata_sort2(self):
+        # Create dataset in WORK
+        self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
+        wkcars = self.sas.sasdata('cars')
+        # Sort data in plce by multiple variables
+        wkcars.sort('type descending origin')
+        self.assertIsInstance(wkcars, saspy.SASdata, msg="Sort didn't return SASdata Object")
+        
+    def test_SASdata_sort3(self):
+        # Create dataset in WORK
+        self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
+        wkcars = self.sas.sasdata('cars')
+        # create a second object pointing to the same data set
+        dup=wkcars.sort('type')
+        self.assertEqual(wkcars, dup, msg="Sort objects are not equal but should be")
+        
+    def test_SASdata_sort4(self):
+        # Create dataset in WORK
+        self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
+        wkcars = self.sas.sasdata('cars')
+        # create a second object with a different sort order
+        diff=self.sas.sasdata('diff')
+        diff=wkcars.sort('origin',diff)
+        self.assertNotEqual(wkcars, diff, msg="Sort objects are equal but should not be")
+        
+    def test_SASdata_sort5(self):
+        # Create dataset in WORK
+        self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
+        wkcars = self.sas.sasdata('cars')
+        # create object within call
+        wkcars.sort('type')
+        out1=wkcars.sort('origin', self.sas.sasdata('out1'))
+        self.assertIsInstance(out1, saspy.SASdata, msg="Sort didn't return new SASdata Object")
+        self.assertNotEqual(wkcars, out1, msg="Sort objects are equal but should not be")
+        
+    def test_SASdata_sort6(self):
+        # Create dataset in WORK
+        self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
+        wkcars = self.sas.sasdata('cars')
+        # sort by missing variable
+        self.assertRaises(RuntimeError, lambda: wkcars.sort('foobar'))
+        
+        
         
         

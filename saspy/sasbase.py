@@ -679,28 +679,32 @@ class SASdata:
         code = "proc sort data=%s.%s %s %s ;\n" % (self.libref, self.table, outstr, options)
         code += "by %s;" % by
         code += "run\n;"
- 
+        runcode = True
         if self.sas.nosub:
             print(code)
-            return None
+            runcode = False
+            
        
         ll = self._is_valid()
         if ll:
-            return None
-        ll = self.sas.submit(code, "text")
-        elog=[]
-        for line in ll['LOG'].splitlines():
-            if line.startswith('ERROR'):
-                elog.append(line)
-        if len(elog):
-            raise RuntimeError("\n".join(elog))
- 
+            runcode = False
+        if runcode:
+            ll = self.sas.submit(code, "text")
+            elog=[]
+            for line in ll['LOG'].splitlines():
+                if line.startswith('ERROR'):
+                    elog.append(line)
+            if len(elog):
+                raise RuntimeError("\n".join(elog))
         if out:
-            if self.HTML:
-                results = 'HTML'
+            if not isinstance(out, str):
+                return out
             else:
-                results = 'text'
-            return self.sas.sasdata(table, libref, results)
+                if self.HTML:
+                    results = 'HTML'
+                else:
+                    results = 'text'
+                return self.sas.sasdata(table, libref, results)
         else:
             return self
  
