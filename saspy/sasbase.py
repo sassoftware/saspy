@@ -637,7 +637,73 @@ class SASdata:
               print(ll['LST'])
            else:
               return ll
-   
+
+    def sort(self, by: str, out: 'str or sas data object' = '', **kwargs) -> '<SASdata object>':
+        """
+        This method will sort the SAS Data Set
+        by  - REQUIRED variable to sort by (BY <DESCENDING> variable-1 <<DESCENDING> variable-2 ...>;)
+        out - OPTIONAL takes either a string 'libref.table' or 'table' which will go to WORK or USER if assigned or a sas data object'' will sort in place if allowed
+        returns this SASdata object if out= not specified, or a new SASdata object for out= when specified
+        
+        Examples:
+        1. wkcars.sort('type')
+        2. wkcars2 = sas.sasdata('cars2')
+           wkcars.sort('cylinders', wkcars2)
+        3. cars2=cars.sort('DESCENDING origin', out='foobar')
+        4. cars.sort('type').head()
+        5. stat_results = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type'))
+        6. stat_results2 = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type','work.cars'))
+        
+        """
+        outstr  = ''
+        options = ''
+        if out:
+            if isinstance(out, str):
+                fn = out.partition('.')
+                if fn[1] == '.':
+                   libref = fn[0]
+                   table  = fn[2]
+                   outstr = "out=%s.%s" % (libref, table)
+                else:
+                   libref = ''
+                   table  = fn[0]
+                   outstr = "out="+table
+            else:
+                libref=out.libref
+                table=out.table
+                outstr = "out=%s.%s" % (out.libref, out.table)
+         
+        if 'options' in kwargs:
+            options = kwargs['options']   
+ 
+        code = "proc sort data=%s.%s %s %s ;\n" % (self.libref, self.table, outstr, options)
+        code += "by %s;" % by
+        code += "run\n;"
+ 
+        if self.sas.nosub:
+            print(code)
+            return None
+       
+        ll = self._is_valid()
+        if ll:
+            return None
+        ll = self.sas.submit(code, "text")
+        elog=[]
+        for line in ll['LOG'].splitlines():
+            if line.startswith('ERROR'):
+                elog.append(line)
+        if len(elog):
+            raise RuntimeError("\n".join(elog))
+ 
+        if out:
+            if self.HTML:
+                results = 'HTML'
+            else:
+                results = 'text'
+            return self.sas.sasdata(table, libref, results)
+        else:
+            return self
+ 
     def to_csv(self, file: str) -> 'The LOG showing the results of the step':
         '''
         This method will export a SAS Data Set to a file in CSV format.
@@ -778,4 +844,3 @@ if __name__ == "__main__":
     print(_getlsttxt())
 
     endsas()
-
