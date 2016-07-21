@@ -50,6 +50,9 @@ CLASSES
      |  __weakref__
      |      list of weak references to the object (if defined)
 
+DATA
+    print_function = _Feature((2, 6, 0, 'alpha', 2), (3, 0, 0, 'alpha', 0)...
+
 FILE
     /opt/tom/gitlab/metis/saspy_pip/saspy/sasresults.py
 
