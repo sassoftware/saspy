@@ -186,13 +186,34 @@ class SASProcCommons:
         if 'identify' in args:
             self.logger.debug("identify statement,length: %s,%s", args['identify'], len(args['identify']))
             code += "identify %s;\n" % (args['identify'])
+
+
         if 'input' in args:
             if isinstance(args['input'], str):
                 self.logger.debug("input statement,length: %s,%s", args['input'], len(args['input']))
                 code += "input %s;\n" % (args['input'])
+            elif isinstance(args['input'], dict):
+                try:
+                    if isinstance(args['input']['interval'], str):
+                        code += "input %s /level=interval;\n" % args['input']['interval']
+                    if isinstance(args['input']['interval'], list):
+                        code += "input %s /level=interval;\n" % " ".join(args['input']['interval'])
+                    if isinstance(args['input']['nominal'], str):
+                        code += "input %s /level=nominal;\n" % args['input']['nominal']
+                    if isinstance(args['input']['nominal'], list):
+                        code += "input %s /level=nominal;\n" % " ".join(args['input']['nominal'])
+                except:
+                    raise SyntaxError("Proper Keys not found for dictionary: %s" % args['input'].keys())
+            elif isinstance(args['input'], list):
+                if len(args['input'])==1:
+                    code += "input %s;\n" % str(args['input'][0])
+                elif len(args['input'])>1:
+                    code += "input %s;\n" % " ".join(args['input'])
+                else:
+                    raise SyntaxError("The input list has no members")
             else:
-                for item in args['input']:
-                    code += "input %s;\n" % item
+                raise SyntaxError("INPUT is in an unknown format: %s" % str(args['input']))
+
         if 'inset' in args:
             self.logger.debug("inset statement,length: %s,%s", args['inset'], len(args['inset']))
             code += "inset %s;\n" % (args['inset'])
