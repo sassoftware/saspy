@@ -603,6 +603,11 @@ class SASdata:
               print(ll['LST'])
            else:
               return ll
+    def columnInfo(self):
+        """
+        display metadata about he table, size, number of rows, columns and their data type 
+        """
+        return self.contents()
    
     def describe(self):
         '''
@@ -611,6 +616,11 @@ class SASdata:
         '''
         return self.means()
 
+    def summary(self):
+        """
+        display descriptive statistics for the table; summary statistics.
+        """
+        return self.means()
     def means(self):
         '''
         display descriptive statistics for the table; summary statistics. This is an alias for 'describe'
