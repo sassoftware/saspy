@@ -135,7 +135,7 @@ class SASstat:
                      'test', 'weight', 'procopts'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("GLM", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "GLM", required_set, legal_set, **kwargs)
 
     def logistic(self, **kwargs: dict) -> object:
         """
@@ -166,4 +166,4 @@ class SASstat:
                      'store', 'strata', 'units', 'weight', 'procopts'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("LOGISTIC", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "LOGISTIC", required_set, legal_set, **kwargs)
