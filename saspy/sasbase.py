@@ -732,6 +732,17 @@ class SASdata:
         else:
            return self.sas.write_csv(file, self.table, self.libref)
 
+    def to_frame(self, **kwargs) -> '<Pandas Data Frame object>':
+        '''
+        Export this SAS Data Set to a Pandas Data Frame
+        '''
+        ll = self._is_valid()
+        if ll:
+           print(ll['LOG'])
+           return None
+        else:
+           return self.sas.sasdata2dataframe(self.table, self.libref, **kwargs)
+
     def to_df(self, **kwargs) -> '<Pandas Data Frame object>':
         '''
         Export this SAS Data Set to a Pandas Data Frame
