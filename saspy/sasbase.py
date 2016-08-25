@@ -817,6 +817,75 @@ class SASdata:
         else:
            return ll
 
+    def top(self, var: str, n: int = 10, order: str = 'freq', title: str = '') -> 'a frequency analysis of a variable':
+        """
+        This method finds the most common levels of a variable
+        var   - the CHAR variable (column) you want to count
+        n     - the top N to be displayed (defaults to 10)
+        order - default to most common use order='data' to get then in alphbetic order
+        title - an optional Title for the chart
+        label - LegendLABEL= value for sgplot
+        """
+        code  = "proc freq data=%s.%s order=%s noprint;" % (self.libref, self.table, order)
+        code += "\n\ttables %s / out=tmpFreqOut;" % var
+        code += "\nrun;"
+        if len(title) > 0:
+           code += '\ttitle "'+title+'";\n'
+        code += "proc print data=tmpFreqOut(obs=%s); \nrun;" % n       
+        code += 'title \"\";'
+
+        if self.sas.nosub:
+           print(code)
+           return
+
+        ll = self._is_valid()
+        if not ll:
+           html = self.HTML
+           self.HTML = 1
+           ll = self.sas._io.submit(code)
+           self.HTML = html
+        if not self.sas.batch:
+           DISPLAY(HTML(ll['LST']))
+        else:
+           return ll
+
+
+
+    def bar(self, var: str, title: str ='', label: str ='') -> 'a barchart plot of the (numeric) variable you chose':
+        '''
+        This method requires a numeric column (use the contents method to see column types) and generates a histogram.
+        var   - the CHAR variable (column) you want to plot
+        title - an optional Title for the chart
+        label - LegendLABEL= value for sgplot
+        '''
+        code  = "proc sgplot data="+self.libref+'.'+self.table
+        code += ";\n\tvbar "+var+" ; "
+        if len(label) > 0:
+           code += " LegendLABEL='"+label+"'"
+        code += ";\n"
+        if len(title) > 0:
+           code += '\ttitle "'+title+'";\n'
+        code += 'title \"\";'
+
+        if self.sas.nosub:
+           print(code)
+           return
+
+        ll = self._is_valid()
+        if not ll:
+           html = self.HTML
+           self.HTML = 1
+           ll = self.sas._io.submit(code)
+           self.HTML = html
+        if not self.sas.batch:
+           DISPLAY(HTML(ll['LST']))
+        else:
+           return ll
+
+
+
+
+
     def series(self, x: str, y: list, title: str ='') -> 'a line plot of the x,y coordinates':
         '''
         This method plots a series of x,y coordinates. You can provide a list of y columns for multiple line plots.
