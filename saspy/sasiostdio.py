@@ -744,7 +744,7 @@ class SASsessionSTDIO():
       for name in range(ncols):
          input += "'"+df.columns[name]+"'n "
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
-            col_l = df[df.columns[name]].map(len).max()
+            col_l = df[df.columns[name]].map(len, 'ignore').max()
             length += " '"+df.columns[name]+"'n $"+str(col_l)
             dts.append('C')
          else:

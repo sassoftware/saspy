@@ -492,12 +492,11 @@ class SASdata:
            self.HTML = 0
 
     def _is_valid(self):
-        msg = "The SAS Data Set that this SASdata object refers to, "+self.libref+'.'+self.table+", does not exist in this SAS session at this time."
-        ll = {'LOG': msg, 'LST': msg}
-
         if self.sas.exist(self.table, self.libref):
            return None
         else:
+           msg = "The SAS Data Set that this SASdata object refers to, "+self.libref+'.'+self.table+", does not exist in this SAS session at this time."
+           ll = {'LOG': msg, 'LST': msg}
            return ll
 
     def head(self, obs=5):
@@ -736,12 +735,7 @@ class SASdata:
         '''
         Export this SAS Data Set to a Pandas Data Frame
         '''
-        ll = self._is_valid()
-        if ll:
-           print(ll['LOG'])
-           return None
-        else:
-           return self.sas.sasdata2dataframe(self.table, self.libref, **kwargs)
+        return self.to_df(**kwargs)
 
     def to_df(self, **kwargs) -> '<Pandas Data Frame object>':
         '''
