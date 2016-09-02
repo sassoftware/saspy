@@ -547,9 +547,13 @@ class SASdata:
            lastobs = int(lastobs[0])
         else:
            lastobs = obs
+
+        firstobs = lastobs-(obs-1)
+        if firstobs < 1:
+           firstobs = 1
  
         code  = "proc print data="+self.libref+'.'+self.table
-        code += "(firstobs="+str(lastobs-(obs-1))
+        code += "(firstobs="+str(firstobs)
         code += " obs="+str(lastobs)+");run;"
         
         self.sas.nosub = nosub
