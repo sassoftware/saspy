@@ -24,10 +24,6 @@ import sys
 with open('README.rst') as f:
     readme = f.read()
 
-svem_flag = '--single-version-externally-managed'
-if svem_flag in sys.argv:
-    sys.argv.remove(svem_flag)
-
 setup(name='saspy',
       version='1.2.1',
       description='A python interface to SAS',
