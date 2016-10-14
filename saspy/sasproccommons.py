@@ -59,6 +59,8 @@ class SASProcCommons:
         plot = ''
         outmeth = ''
         procopts = ''
+        # The different SAS products vary slightly in plotting and out methods.
+        # this block sets the options correctly for plotting and output statements
         if self.sasproduct.lower() == 'stat':
             outmeth = ''
             plot = 'plot=all'
@@ -88,7 +90,8 @@ class SASProcCommons:
         if len(outmeth) and 'out' in args:
             outds = args['out']
             outstr = outds.libref + '.' + outds.table
-            code += "proc %s data=%s.%s %s %s=%s %s ;\n" % (objtype, data.libref, data.table, plot, outmeth, outstr, procopts)
+            code += "proc %s data=%s.%s %s %s=%s %s ;\n" % (
+                objtype, data.libref, data.table, plot, outmeth, outstr, procopts)
         else:
             code += "proc %s data=%s.%s %s %s ;\n" % (objtype, data.libref, data.table, plot, procopts)
         self.logger.debug("args value: " + str(args))
@@ -165,15 +168,16 @@ class SASProcCommons:
             if len(args['freq'].split()) == 1:
                 code += "freq %s;\n" % (args['freq'])
             else:
-                raise SyntaxError("ERROR in code submission. FREQ can only have one variable and you submitted: %s", args['freq'])
+                raise SyntaxError("ERROR in code submission. FREQ can only have one variable and you submitted: %s",
+                                  args['freq'])
         if 'forecast' in args:
             self.logger.debug("forecast statement,length: %s,%s", args['forecast'], len(args['forecast']))
             code += "forecast %s;\n" % (args['forecast'])
         # handle a string or list of strings
         if 'hidden' in args:
-            if isinstance(args['hidden'], (str,int)):
+            if isinstance(args['hidden'], (str, int)):
                 self.logger.debug("hidden statement,length: %s,%s", str(args['hidden']), len(str(args['hidden'])))
-                code +=  "hidden %s;\n" % (str(args['hidden']))
+                code += "hidden %s;\n" % (str(args['hidden']))
             else:
                 for item in args['hidden']:
                     code += "hidden %s;\n" % item
@@ -186,7 +190,6 @@ class SASProcCommons:
         if 'identify' in args:
             self.logger.debug("identify statement,length: %s,%s", args['identify'], len(args['identify']))
             code += "identify %s;\n" % (args['identify'])
-
 
         if 'input' in args:
             if isinstance(args['input'], str):
@@ -205,9 +208,9 @@ class SASProcCommons:
                 except:
                     raise SyntaxError("Proper Keys not found for dictionary: %s" % args['input'].keys())
             elif isinstance(args['input'], list):
-                if len(args['input'])==1:
+                if len(args['input']) == 1:
                     code += "input %s;\n" % str(args['input'][0])
-                elif len(args['input'])>1:
+                elif len(args['input']) > 1:
                     code += "input %s;\n" % " ".join(args['input'])
                 else:
                     raise SyntaxError("The input list has no members")
@@ -329,10 +332,32 @@ class SASProcCommons:
         if 'target' in args:
             self.logger.debug("target statement,length: %s,%s", args['target'], len(args['target']))
             # make sure target is a single variable extra split to account for level= option
-            if len(args['target'].split('/')[0].split()) == 1:
-                code += "target %s;\n" % (args['target'])
+            if isinstance(args['target'], str):
+                if len(args['target'].split('/')[0].split()) == 1:
+                    code += "target %s;\n" % (args['target'])
+                else:
+                    raise SyntaxError(
+                        "ERROR in code submission. TARGET can only have one variable and you submitted: %s" % args[
+                            'target'])
+            elif isinstance(args['target'], list):
+                if len(args['target']) == 1:
+                    code += "target %s;\n" % str(args['input'][0])
+                else:
+                    raise SyntaxError("The target list must have exactly one member")
+            elif isinstance(args['target'], dict):
+                try:
+                    if isinstance(args['target']['interval'], str):
+                        code += "target %s /level=interval;\n" % args['target']['interval']
+                    if isinstance(args['target']['interval'], list):
+                        code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
+                    if isinstance(args['target']['nominal'], str):
+                        code += "target %s /level=nominal;\n" % args['target']['nominal']
+                    if isinstance(args['target']['nominal'], list):
+                        code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
+                except:
+                    raise SyntaxError("Proper Keys not found for dictionary: %s" % args['target'].keys())
             else:
-                raise SyntaxError("ERROR in code submission. TARGET can only have one variable and you submitted: %s" % args['target'])
+                raise SyntaxError("TARGET is in an unknown format: %s" % str(args['target']))
         if 'train' in args:
             self.logger.debug("train statement,length: %s,%s", args['train'], len(args['train']))
             code += "train %s;\n" % (args['train'])
@@ -346,7 +371,8 @@ class SASProcCommons:
             if len(args['weight'].split()) == 1:
                 code += "weight %s;\n" % (args['weight'])
             else:
-                raise SyntaxError("ERROR in code submission. WEIGHT can only have one variable and you submitted: %s", args['weight'])
+                raise SyntaxError("ERROR in code submission. WEIGHT can only have one variable and you submitted: %s",
+                                  args['weight'])
         if 'grow' in args:
             self.logger.debug("grow statement,length: %s,%s", args['grow'], len(args['grow']))
             code += "grow %s;\n" % (args['grow'])
