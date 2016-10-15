@@ -608,10 +608,29 @@ class SASdata:
               return ll
     def columnInfo(self):
         """
-        display metadata about he table, size, number of rows, columns and their data type 
+        display metadata about the table, size, number of rows, columns and their data type
         """
-        return self.contents()
-   
+        code = "proc contents data="+self.libref+'.'+self.table+";ods select Variables;run;"
+
+        if self.sas.nosub:
+           print(code)
+           return
+
+        ll = self._is_valid()
+        if self.HTML:
+           if not ll:
+              ll = self.sas._io.submit(code)
+           if not self.sas.batch:
+              DISPLAY(HTML(ll['LST']))
+           else:
+              return ll
+        else:
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
     def describe(self):
         '''
         display descriptive statistics for the table; summary statistics.
