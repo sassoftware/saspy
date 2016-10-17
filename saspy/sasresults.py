@@ -17,6 +17,7 @@ from __future__ import print_function
 from saspy.SASLogLexer import SASLogStyle, SASLogLexer
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
+import pandas as pd
 
 try:
     from IPython import display as dis
@@ -65,7 +66,10 @@ class SASresults(object):
                 return
 
         if not self.sas.batch:
-           return HTML('<h1>' + attr + '</h1>' + data['LST'])
+           if isinstance(data, pd.DataFrame):
+               return data
+           else:
+               return HTML('<h1>' + attr + '</h1>' + data['LST'])
         else:
            return data
 
@@ -74,9 +78,13 @@ class SASresults(object):
         return color_log
 
     def _go_run_code(self, attr) -> dict:
-        code = '%%getdata(%s, %s);' % (self._name, attr)
-        res = self.sas.submit(code)
-        return res
+        if 'PLOT' in attr:
+            code = '%%getdata(%s, %s);' % (self._name, attr)
+            res = self.sas.submit(code)
+            return res
+        else:
+            df = self.sas.sasdata2dataframe(attr, libref='_'+self._name)
+            return df
 
 
     def sasdata(self, table) -> object:
