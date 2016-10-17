@@ -197,16 +197,18 @@ class SASProcCommons:
                 code += "input %s;\n" % (args['input'])
             elif isinstance(args['input'], dict):
                 try:
-                    if isinstance(args['input']['interval'], str):
-                        code += "input %s /level=interval;\n" % args['input']['interval']
-                    if isinstance(args['input']['interval'], list):
-                        code += "input %s /level=interval;\n" % " ".join(args['input']['interval'])
-                    if isinstance(args['input']['nominal'], str):
-                        code += "input %s /level=nominal;\n" % args['input']['nominal']
-                    if isinstance(args['input']['nominal'], list):
-                        code += "input %s /level=nominal;\n" % " ".join(args['input']['nominal'])
+                    if 'interval' in args['input'].keys():
+                        if isinstance(args['input']['interval'], str):
+                            code += "input %s /level=interval;\n" % args['input']['interval']
+                        if isinstance(args['input']['interval'], list):
+                            code += "input %s /level=interval;\n" % " ".join(args['input']['interval'])
+                    if 'nominal' in args['input'].keys():
+                        if isinstance(args['input']['nominal'], str):
+                            code += "input %s /level=nominal;\n" % args['input']['nominal']
+                        if isinstance(args['input']['nominal'], list):
+                            code += "input %s /level=nominal;\n" % " ".join(args['input']['nominal'])
                 except:
-                    raise SyntaxError("Proper Keys not found for dictionary: %s" % args['input'].keys())
+                    raise SyntaxError("Proper Keys not found for INPUT dictionary: %s" % args['input'].keys())
             elif isinstance(args['input'], list):
                 if len(args['input']) == 1:
                     code += "input %s;\n" % str(args['input'][0])
@@ -346,16 +348,18 @@ class SASProcCommons:
                     raise SyntaxError("The target list must have exactly one member")
             elif isinstance(args['target'], dict):
                 try:
-                    if isinstance(args['target']['interval'], str):
-                        code += "target %s /level=interval;\n" % args['target']['interval']
-                    if isinstance(args['target']['interval'], list):
-                        code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
-                    if isinstance(args['target']['nominal'], str):
-                        code += "target %s /level=nominal;\n" % args['target']['nominal']
-                    if isinstance(args['target']['nominal'], list):
-                        code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
+                    if 'interval' in args['target'].keys():
+                        if isinstance(args['target']['interval'], str):
+                            code += "target %s /level=interval;\n" % args['target']['interval']
+                        if isinstance(args['target']['interval'], list):
+                            code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
+                    if 'nominal' in args['target'].keys():
+                        if isinstance(args['target']['nominal'], str):
+                            code += "target %s /level=nominal;\n" % args['target']['nominal']
+                        if isinstance(args['target']['nominal'], list):
+                            code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
                 except:
-                    raise SyntaxError("Proper Keys not found for dictionary: %s" % args['target'].keys())
+                    raise SyntaxError("Proper Keys not found for TARGET dictionary: %s" % args['target'].keys())
             else:
                 raise SyntaxError("TARGET is in an unknown format: %s" % str(args['target']))
         if 'train' in args:
