@@ -363,8 +363,15 @@ class SASProcCommons:
             else:
                 raise SyntaxError("TARGET is in an unknown format: %s" % str(args['target']))
         if 'train' in args:
-            self.logger.debug("train statement,length: %s,%s", args['train'], len(args['train']))
-            code += "train %s;\n" % (args['train'])
+            if isinstance(args['train'], dict):
+                try:
+                    if all (k in args['train'] for k in ("numtries", "maxiter")):
+                        code += "train numtries=%s maxiter=%s;\n" % (args['train']["numtries"], args['train']["maxiter"])
+                except:
+                    raise SyntaxError("Proper Keys not found for TRAIN dictionary: %s" % args['train'].keys())
+            else:
+                self.logger.debug("train statement,length: %s,%s", args['train'], len(args['train']))
+                code += "train %s;\n" % (args['train'])
         # test moved
         if 'var' in args:
             self.logger.debug("var statement,length: %s,%s", args['var'], len(args['var']))
