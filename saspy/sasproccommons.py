@@ -132,6 +132,9 @@ class SASProcCommons:
             #   if 'class' in args:
             #       self.logger.debug("class statement,length: %s,%s", args['class'], len(args['class']))
             #       code += "class %s;\n" % (args['class'])
+        if 'code' in args:
+            self.logger.debug("code statement,length: %s,%s", args['code'], len(args['code']))
+            code += "code file='%s';\n" % (args['code'])
         if 'comphist' in args:
             self.logger.debug("comphistogram statement,length: %s,%s", args['comphist'], len(args['comphist']))
             code += "comphist %s;\n" % (args['comphist'])
