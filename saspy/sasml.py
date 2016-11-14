@@ -64,6 +64,23 @@ class SASml:
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPFOREST", required_set, legal_set, **kwargs)
 
+    def hp4score(self, **kwargs: dict) -> object:
+        """
+        Python method to call the HP4SCORE procedure
+
+        required_set = {'input', 'target'}
+        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score'}
+
+        Documentation link:
+        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {}
+        legal_set = {'id', 'importance', 'performance', 'score', 'procopts'}
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc(self, "HP4SCORE", required_set, legal_set, **kwargs)
+
     def cluster(self, **kwargs: dict) -> object:
         """
         Python method to call the HPCLUS procedure
@@ -98,6 +115,24 @@ class SASml:
                      'architecture', 'weight', 'hidden', 'partition', 'train', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPNEURAL", required_set, legal_set, **kwargs)
+
+    def treeboost(self, **kwargs: dict) -> object:
+        """
+        Python method to call the HPNEURAL procedure
+
+        required_set = {'input', 'target', 'train'}
+        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score',
+                    'architecture', 'weight', 'hidden', 'partition', 'train'}
+        Documentation link:
+        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'input', 'target'}
+        legal_set = {'assess', 'code', 'freq', 'importance', 'input', 'performance', 'target', 'save', 'score',
+                     'subseries', 'procopts'}
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc(self, "TREEBOOST", required_set, legal_set, **kwargs)
 
     def svm(self, **kwargs: dict) -> object:
         """
