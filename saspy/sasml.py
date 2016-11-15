@@ -131,6 +131,8 @@ class SASml:
         required_set = {'input', 'target'}
         legal_set = {'assess', 'code', 'freq', 'importance', 'input', 'performance', 'target', 'save', 'score',
                      'subseries', 'procopts'}
+        print(dir(self.treeboost))
+        
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TREEBOOST", required_set, legal_set, **kwargs)
 

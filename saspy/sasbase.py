@@ -48,6 +48,7 @@ from saspy.sasstat import *
 from saspy.sasets  import *
 from saspy.sasml   import *
 from saspy.sasqc   import *
+from saspy.sasutil import *
 
 try:
    from IPython.display import HTML
@@ -286,7 +287,7 @@ class SASsession:
 
       return SASets(self)
 
-   def sasml(self) -> '<SASqc object>':
+   def sasml(self) -> '<SASml object>':
       '''
       This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.
       '''
@@ -305,6 +306,16 @@ class SASsession:
          self._loaded_macros = True
 
       return SASqc(self)
+
+   def sasutil(self) -> '<SASutil object>':
+      '''
+      This methods creates a SASutil object which you can use to run various analytics. See the sasutil.py module.
+      '''
+      if not self._loaded_macros:
+         self._loadmacros()
+         self._loaded_macros = True
+
+      return SASutil(self)
 
    def _loadmacros(self):
       macro_path=os.path.dirname(os.path.realpath(__file__))

@@ -409,6 +409,9 @@ class SASProcCommons:
         if 'xchart' in args:
             self.logger.debug("xchart statement,length: %s,%s", args['xchart'], len(args['xchart']))
             code += "xchart %s;\n" % (args['xchart'])
+        # passthrough facility from procedures with special circumstances
+        if 'stmtpassthrough' in args:
+            code += str(args['stmtpassthrough'])
 
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
