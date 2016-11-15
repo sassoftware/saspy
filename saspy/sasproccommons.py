@@ -135,9 +135,24 @@ class SASProcCommons:
         if 'code' in args:
             self.logger.debug("code statement,length: %s,%s", args['code'], len(args['code']))
             code += "code file='%s';\n" % (args['code'])
+        # The save statement is used by few procs but it doesn't have a consistent pattern
+        # Here we case it correctly or throw an error.
         if 'save' in args:
+            print("objtype", objtype)
             self.logger.debug("save statement,length: %s,%s", args['save'], len(args['save']))
-            code += "save file='%s';\n" % (args['save'])
+            if objtype=="hpforest":
+                code += "save file='%s';\n" % (args['save'])
+            elif objtype=="treeboost":
+                if isinstance(args['save'], bool):
+                    code += "save fit=%s.%s importance=%s.%s model=%s.%s nodestats=%s.%s rules=%s.%s" % \
+                            (objname, "fit", objname, "importance", objname, "model",
+                             objname, "nodestats", objname, "rules" )
+                elif isinstance(args['save'], dict):
+                    code += "save %s ;"  % ' '.join('{}={}'.format(key, val) for key, val in save.items())
+                else:
+                    raise SyntaxError("SAVE statement object type is not recognized, must be a bool or dict. You provided: %s" % str(type(save)))
+            else:
+                raise SyntaxError("SAVE statement is not recognized for this procedure: %s" % str(objtype))
         if 'comphist' in args:
             self.logger.debug("comphistogram statement,length: %s,%s", args['comphist'], len(args['comphist']))
             code += "comphist %s;\n" % (args['comphist'])

@@ -68,8 +68,8 @@ class SASml:
         """
         Python method to call the HP4SCORE procedure
 
-        required_set = {'input', 'target'}
-        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score'}
+        required_set = {}
+        legal_set = {'id', 'importance', 'performance', 'score', 'procopts'}
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
@@ -103,16 +103,18 @@ class SASml:
         Python method to call the HPNEURAL procedure
 
         required_set = {'input', 'target', 'train'}
-        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score',
-                    'architecture', 'weight', 'hidden', 'partition', 'train'}
+        legal_set = {'architecture', 'code', 'hidden', 'id', 'input',
+                     'partition', 'score', 'target', 'train',
+                     'procopts'}
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
         :param kwargs: dict
         :return: SAS result object
         """
         required_set = {'input', 'target', 'train'}
-        legal_set = {'freq', 'input', 'id', 'target', 'save', 'score',
-                     'architecture', 'weight', 'hidden', 'partition', 'train', 'procopts'}
+        legal_set = {'architecture', 'code', 'hidden', 'id', 'input',
+                     'partition', 'score', 'target', 'train',
+                     'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPNEURAL", required_set, legal_set, **kwargs)
 
@@ -120,9 +122,9 @@ class SASml:
         """
         Python method to call the HPNEURAL procedure
 
-        required_set = {'input', 'target', 'train'}
-        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score',
-                    'architecture', 'weight', 'hidden', 'partition', 'train'}
+        required_set = {'input', 'target'}
+        legal_set = {'assess', 'code', 'freq', 'importance', 'input', 'performance', 'target', 'save', 'score',
+                     'subseries', 'procopts'}
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
         :param kwargs: dict
