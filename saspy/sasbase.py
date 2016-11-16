@@ -453,7 +453,7 @@ class SASsession:
          return None                            
    
       if self.nosub:
-         print("too comlicated to show the code, read the source :), sorry.")
+         print("too complicated to show the code, read the source :), sorry.")
          return None
       else:
          return self._io.sasdata2dataframe(table, libref, **kwargs)

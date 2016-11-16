@@ -62,18 +62,36 @@ options pagesize=max;
             put ');';
         end;
     run;
-    /*concatentate all the directories in the ods document to the top level directory*/
+    /* concatenate all the directories in the ods document to the top level directory */
     %include file1;
-    /*Create a table of all the datasets using sashelp.vmember*/
-    data _&objname.filelist;
+    /* Create a table of all the datasets using sashelp.vmember */
+    data _&objname.filelistODS;
         length objtype $32 objname $32.;
         set sashelp.vmember(where=(lower(libname)=lower("_&objname.")));
-        ds="&d.";
+        *ds="&d.";
+        datatype="ODS";
         objtype="&objtype";
         objname="&objname";
         method=memname;
         keep ds objtype objname method;
     run;
+    data _&objname.filelistDATA;
+        length objtype $32 objname $32.;
+        set sashelp.vmember(where=(lower(libname)=lower("&objname.")));
+        *ds="&d.";
+        datatype="DATA";
+        objtype="&objtype";
+        objname="&objname";
+        method=memname;
+        keep ds objtype objname method;
+    run;
+    proc append base=_&objname.filelist data=_&objname.filelistODS;
+    proc append base=_&objname.filelist data=_&objname.filelistDATA;
+    run;
+    proc delete data=_&objname.filelistODS;
+    proc delete data=_&objname.filelistDATA;
+    run;
+
     ods listing;
 %mend;
 *%mangobj(cars,reg,sashelp.cars);
@@ -84,7 +102,10 @@ options pagesize=max;
 %let method=ANOVA;
 */
 
-%macro getdata(objname, method);
+%macro getdata(objname, method, datatype);
+    %if &datatype="DATA" %then %do;
+
+    %end;
     proc document name=&objname.;
         replay \ (where=(lower(_name_)=lower("&method.")));;
     run;

@@ -84,6 +84,8 @@ class SASresults(object):
             return res
         else:
             df = self.sas.sasdata2dataframe(attr, libref='_'+self._name)
+            if df==None:
+                df = self.sas.sasdata2dataframe(attr, libref=self._name)
             return df
 
 
