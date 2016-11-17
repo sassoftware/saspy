@@ -32,7 +32,6 @@ class SASresults(object):
     def __init__(self, attrs, session, objname, nosub=False, log=''):
 
         if len(attrs) > 0:
-           attrs.remove('')
            self._attrs = attrs
            if len(log)>0:
                self._attrs.append("LOG")
