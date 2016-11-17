@@ -426,7 +426,7 @@ class SASProcCommons:
                             (libref, "fit", libref, "importance", libref, "model",
                              libref, "nodestats", libref, "rules" )
                 elif isinstance(args['save'], dict):
-                    code += "save %s ;"  % ' '.join('{}={}'.format(key, val) for key, val in save.items())
+                    code += "save %s ;"  % ' '.join('{}={}'.format(key, val) for key, val in args['save'].items())
                 else:
                     raise SyntaxError("SAVE statement object type is not recognized, must be a bool or dict. You provided: %s" % str(type(save)))
             else:
@@ -529,7 +529,8 @@ class SASProcCommons:
         if len(reqSet):
             missing_set = reqSet.difference(set(stmt.keys()))
             if missing_set:
-                raise SyntaxError("You are missing %d required statements:\n%s" % (len(missing_set), str(missing_set)))
+                if not stmt.get('score'): # till we handle either/or required. proc can be called more than one way w/ diff requirements
+                   raise SyntaxError("You are missing %d required statements:\n%s" % (len(missing_set), str(missing_set)))
 
         # legal statements
         legalSet = legal
