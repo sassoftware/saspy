@@ -65,33 +65,15 @@ options pagesize=max;
     /* concatenate all the directories in the ods document to the top level directory */
     %include file1;
     /* Create a table of all the datasets using sashelp.vmember */
-    data _&objname.filelistODS;
+    data _&objname.filelist;
         length objtype $32 objname $32.;
-        set sashelp.vmember(where=(lower(libname)=lower("_&objname.")));
-        *ds="&d.";
-        datatype="ODS";
+        set sashelp.vmember(where=(lower(libname)=lower("_&objname.")))
+            sashelp.vmember(where=(lower(libname)=lower("&objname.")));
         objtype="&objtype";
         objname="&objname";
         method=memname;
-        keep ds objtype objname method;
+        keep objtype objname method;
     run;
-    data _&objname.filelistDATA;
-        length objtype $32 objname $32.;
-        set sashelp.vmember(where=(lower(libname)=lower("&objname.")));
-        *ds="&d.";
-        datatype="DATA";
-        objtype="&objtype";
-        objname="&objname";
-        method=memname;
-        keep ds objtype objname method;
-    run;
-    proc append base=_&objname.filelist data=_&objname.filelistODS;
-    proc append base=_&objname.filelist data=_&objname.filelistDATA;
-    run;
-    proc delete data=_&objname.filelistODS;
-    proc delete data=_&objname.filelistDATA;
-    run;
-
     ods listing;
 %mend;
 *%mangobj(cars,reg,sashelp.cars);
@@ -118,7 +100,7 @@ options pagesize=max;
 */;
 %macro listdata(objname);
     data _null_;
-        set _&objname.filelist end=last;
+        set _&objname.filelist(where=(length(method)>1)) end=last;
         if _n_=1 then put "startparse9878";
         put method;
         if  last then put "endparse9878";
