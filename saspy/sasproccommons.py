@@ -335,7 +335,13 @@ class SASProcCommons:
             code += "strata %s;\n" % (args['strata'])
         if 'score' in args:
             scoreds = args['score']
-            code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
+            if objtype.upper() == "HP4SCORE":
+               f = scoreds.get('file') 
+               d = scoreds.get('out')
+               o = d.libref+'.'+d.table
+               code += "score file='"+f+"' out="+o+";\n"
+            else:
+               code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
         if 'target' in args:
             self.logger.debug("target statement,length: %s,%s", args['target'], len(args['target']))
             # make sure target is a single variable extra split to account for level= option
