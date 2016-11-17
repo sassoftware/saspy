@@ -431,7 +431,6 @@ class SASProcCommons:
             code += str(args['stmtpassthrough'])
 
         code += "run; quit; %mend;\n"
-        code += "libname _all_ list;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
         self.logger.debug("Proc code submission: " + str(code))
         return code

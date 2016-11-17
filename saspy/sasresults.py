@@ -83,7 +83,7 @@ class SASresults(object):
             res = self.sas.submit(code)
             return res
         else:
-            df = self.sas.sasdata2dataframe(attr, libref='_'+self._name)
+            df = self.sas.sasdata2dataframe(attr, libref='_'+self._name, silent=True)
             if df==None:
                 df = self.sas.sasdata2dataframe(attr, libref=self._name)
             return df

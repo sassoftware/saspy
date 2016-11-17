@@ -448,9 +448,13 @@ class SASsession:
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref  - the libref for the SAS Data Set.
       '''
-      if self.exist(table, libref) == 0:
+      silent=kwargs.get('silent', False)
+      if self.exist(table, libref) == 0 and not silent:
          print('The SAS Data Set '+libref+'.'+table+' does not exist')
          return None                            
+
+      elif self.exist(table, libref) == 0 and silent:
+         return None
    
       if self.nosub:
          print("too complicated to show the code, read the source :), sorry.")
