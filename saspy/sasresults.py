@@ -32,6 +32,7 @@ class SASresults(object):
     def __init__(self, attrs, session, objname, nosub=False, log=''):
 
         if len(attrs) > 0:
+           attrs.remove('')
            self._attrs = attrs
            if len(log)>0:
                self._attrs.append("LOG")
@@ -56,7 +57,6 @@ class SASresults(object):
                 return self._log
         if attr.upper() in self._attrs:
             data = self._go_run_code(attr)
-
         else:
             if self.nosub:
                 print('This SAS Result object was created in teach_me_SAS mode, so it has no results')
@@ -83,9 +83,10 @@ class SASresults(object):
             res = self.sas.submit(code)
             return res
         else:
-            df = self.sas.sasdata2dataframe(attr, libref='_'+self._name, silent=True)
-            if df==None:
-                df = self.sas.sasdata2dataframe(attr, libref=self._name)
+            if (self.sas.exist(attr, '_'+self._name)):
+               df = self.sas.sasdata2dataframe(attr, libref='_'+self._name)
+            else:
+               df = self.sas.sasdata2dataframe(attr, libref=self._name)
             return df
 
 
