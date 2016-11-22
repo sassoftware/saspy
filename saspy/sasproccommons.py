@@ -463,6 +463,34 @@ class SASProcCommons:
         self.logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
+
+    def _processNominals(kwargs):
+        nom = kwargs.pop('nominals', None)
+        input_list = kwargs.pop('input', None)
+        tgt = kwargs.pop('target', None)
+        target = {'nominal':tgt}
+
+        if nom is not None:
+            # make lists case insensitive
+            nom = [x.casefold() for x in nom]
+            input_list = [x.casefold() for x in input_list]
+            nom_inputs = [x.casefold() for x in nom]
+
+            if len(nom_inputs)>1:
+                nom_inputs = [val for val in input_list if val in nom]
+                int_inputs = [val for val in input_list if val not in nom]
+            if not tgt in nom:
+                target = {'interval': tgt}
+            inputs = {'nominal': nom_inputs,
+                     'interval': int_inputs}
+        else:
+            inputs = {'interval': input_list}
+
+        kwargs['input'] = inputs
+        kwargs['target'] = target
+        return kwargs
+
+
     def _run_proc(self, procname: str, required_set: set, legal_set: set, **kwargs: dict):
         """
         This internal method takes the options and statements from the PROC and generates
@@ -475,7 +503,9 @@ class SASProcCommons:
         :return: sas result object
         """
         data = kwargs.pop('data', None)
+        kwargs = SASProcCommons._processNominals(kwargs)
         verifiedKwargs = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
+        print(verifiedKwargs.items())
         obj1 = []
         nosub = False
         objname = ''
