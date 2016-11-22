@@ -73,6 +73,7 @@ options pagesize=max;
         objname="&objname";
         method=memname;
         keep objtype objname method;
+        if length(method)>1 then output;
     run;
     ods listing;
 %mend;
