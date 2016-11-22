@@ -470,7 +470,7 @@ class SASProcCommons:
         tgt = kwargs.pop('target', None)
         target = {'nominal':tgt}
 
-        if nom is not None:
+        if nom is not None and not (len(nom)==1 and tgt.casefold() == nom[0].casefold()):
             # make lists case insensitive
             nom = [x.casefold() for x in nom]
             input_list = [x.casefold() for x in input_list]
@@ -479,7 +479,7 @@ class SASProcCommons:
             if len(nom_inputs)>1:
                 nom_inputs = [val for val in input_list if val in nom]
                 int_inputs = [val for val in input_list if val not in nom]
-            if not tgt in nom:
+            if tgt.casefold() not in nom:
                 target = {'interval': tgt}
             inputs = {'nominal': nom_inputs,
                      'interval': int_inputs}
@@ -505,7 +505,6 @@ class SASProcCommons:
         data = kwargs.pop('data', None)
         kwargs = SASProcCommons._processNominals(kwargs)
         verifiedKwargs = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
-        print(verifiedKwargs.items())
         obj1 = []
         nosub = False
         objname = ''
