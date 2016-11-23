@@ -486,8 +486,11 @@ class SASProcCommons:
         else:
             inputs = {'interval': input_list}
 
-        kwargs['input'] = inputs
-        kwargs['target'] = target
+        if any(v is not None for v in inputs.values()):
+            kwargs['input'] = inputs
+        if any(v is not None for v in target.values()):
+            kwargs['target'] = target
+
         return kwargs
 
 
