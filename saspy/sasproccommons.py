@@ -464,25 +464,62 @@ class SASProcCommons:
         return objlist
 
 
-    def _processNominals(kwargs):
+    def _processNominals(self, kwargs, data):
         nom = kwargs.pop('nominals', None)
         input_list = kwargs.pop('input', None)
         tgt = kwargs.pop('target', None)
+        charlist1=[]
+        # default target to nominal
         target = {'nominal':tgt}
 
+        # Get list of character varaibles to add to nominal list
+        char_string="""
+        proc contents data={0}.{1};
+            ods output variables=_charlist;
+        run;
+        data _charlist;
+            set _charlist;
+            where Type='Char';
+            keep Variable;
+        run;
+        """
+        self.sas.submit(char_string.format(data.libref, data.table))
+        charlist1=list(self.sas.sasdata2dataframe('_charlist', libref='WORK').values.flatten())
+        self.sas.submit("proc delete data=work._charlist; run;")
+        charlist1 = [x.casefold() for x in charlist1]
+        try:
+            input_list = [x.casefold() for x in input_list]        
+            charlist2 = list(set(charlist1) & (set(input_list) | set([tgt])))
+        except TypeError:
+            charlist2 = list(set(charlist1) & set([tgt]))
+
+        # if there is no nominals in the list or it it only the target variable
         if nom is not None and not (len(nom)==1 and tgt.casefold() == nom[0].casefold()):
+            # add char variables in the input list to nom
+            nom.extend(charlist2)
             # make lists case insensitive
             nom = [x.casefold() for x in nom]
-            input_list = [x.casefold() for x in input_list]
             nom_inputs = [x.casefold() for x in nom]
 
+            # if there are is a list of nominals make two lists based on inputs and nominals
             if len(nom_inputs)>1:
                 nom_inputs = [val for val in input_list if val in nom]
+                print("nom_inputs:")
+                print(nom_inputs, nom, charlist2)
                 int_inputs = [val for val in input_list if val not in nom]
             if tgt.casefold() not in nom:
                 target = {'interval': tgt}
+            # Add char variables to nom_inputs
+            #nom_inputs.extend(charlist)
             inputs = {'nominal': nom_inputs,
                      'interval': int_inputs}
+        # no nominal list but there are char variables
+        elif len(charlist2)>0:
+            nom_inputs = [val for val in input_list if val in charlist2]
+            int_inputs = [val for val in input_list if val not in charlist2]
+            inputs = {'nominal': nom_inputs,
+                     'interval': int_inputs}
+
         else:
             inputs = {'interval': input_list}
 
@@ -490,6 +527,8 @@ class SASProcCommons:
             kwargs['input'] = inputs
         if any(v is not None for v in target.values()):
             kwargs['target'] = target
+       
+        #print(kwargs.items())
 
         return kwargs
 
@@ -506,7 +545,7 @@ class SASProcCommons:
         :return: sas result object
         """
         data = kwargs.pop('data', None)
-        kwargs = SASProcCommons._processNominals(kwargs)
+        kwargs = SASProcCommons._processNominals(self, kwargs, data)
         verifiedKwargs = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
         obj1 = []
         nosub = False
