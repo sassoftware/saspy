@@ -504,8 +504,6 @@ class SASProcCommons:
             # if there are is a list of nominals make two lists based on inputs and nominals
             if len(nom_inputs)>1:
                 nom_inputs = [val for val in input_list if val in nom]
-                print("nom_inputs:")
-                print(nom_inputs, nom, charlist2)
                 int_inputs = [val for val in input_list if val not in nom]
             if tgt.casefold() not in nom:
                 target = {'interval': tgt}
