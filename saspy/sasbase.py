@@ -162,6 +162,7 @@ class SASsession:
       self.nosub         = False
       self.sascfg        = SASconfig(**kwargs)
       self.batch         = False
+      self.returnTableType = 'pandas'
 
       if not self.sascfg.valid:
          return
@@ -522,21 +523,24 @@ class SASdata:
            print(code)
            return
 
-        ll = self._is_valid()
-        if self.HTML:
-           if not ll:
-              ll = self.sas._io.submit(code)
-           if not self.sas.batch:
-              DISPLAY(HTML(ll['LST']))
-           else:
-              return ll
+        if self.returnTableType == 'pandas':
+            pass
         else:
-           if not ll:
-              ll = self.sas._io.submit(code, "text")
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
+            ll = self._is_valid()
+            if self.HTML:
+               if not ll:
+                  ll = self.sas._io.submit(code)
+               if not self.sas.batch:
+                  DISPLAY(HTML(ll['LST']))
+               else:
+                  return ll
+            else:
+               if not ll:
+                  ll = self.sas._io.submit(code, "text")
+               if not self.sas.batch:
+                  print(ll['LST'])
+               else:
+                  return ll
    
     def tail(self, obs=5):
         '''
@@ -572,24 +576,27 @@ class SASdata:
            print(code)
            return
 
-        if self.HTML:
-           if not le:
-              ll = self.sas._io.submit(code)
-           else:
-              ll = le
-           if not self.sas.batch:
-              DISPLAY(HTML(ll['LST']))
-           else:
-              return ll
+        if self.returnTableType == 'pandas':
+            pass
         else:
-           if not le:
-              ll = self.sas._io.submit(code, "text")
-           else:
-              ll = le
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
+            if self.HTML:
+               if not le:
+                  ll = self.sas._io.submit(code)
+               else:
+                  ll = le
+               if not self.sas.batch:
+                  DISPLAY(HTML(ll['LST']))
+               else:
+                  return ll
+            else:
+               if not le:
+                  ll = self.sas._io.submit(code, "text")
+               else:
+                  ll = le
+               if not self.sas.batch:
+                  print(ll['LST'])
+               else:
+                  return ll
    
     def contents(self):
         '''
@@ -617,6 +624,11 @@ class SASdata:
               print(ll['LST'])
            else:
               return ll
+    def _returnPD(self, tablename):
+        pd = self.to_df(tablename)
+        self.sas._io.submit("proc delete data=%s; run;" % tablename)
+        return pd
+
     def columnInfo(self):
         """
         display metadata about the table, size, number of rows, columns and their data type
@@ -627,21 +639,27 @@ class SASdata:
            print(code)
            return
 
-        ll = self._is_valid()
-        if self.HTML:
-           if not ll:
-              ll = self.sas._io.submit(code)
-           if not self.sas.batch:
-              DISPLAY(HTML(ll['LST']))
-           else:
-              return ll
+        if self.returnTableType == 'pandas':
+            code = "proc contents data=%s.%s ;ods output Variables=_variables ;run;" %(self.libref, self.table)
+            self.sas._io.submit(code)
+            return self._returnPD('_variables')
+
         else:
-           if not ll:
-              ll = self.sas._io.submit(code, "text")
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
+            ll = self._is_valid()
+            if self.HTML:
+               if not ll:
+                  ll = self.sas._io.submit(code)
+               if not self.sas.batch:
+                  DISPLAY(HTML(ll['LST']))
+               else:
+                  return ll
+            else:
+               if not ll:
+                  ll = self.sas._io.submit(code, "text")
+               if not self.sas.batch:
+                  print(ll['LST'])
+               else:
+                  return ll
     def describe(self):
         '''
         display descriptive statistics for the table; summary statistics.
