@@ -624,8 +624,9 @@ class SASdata:
               print(ll['LST'])
            else:
               return ll
-    def _returnPD(self, tablename):
-        pd = self.to_df(tablename)
+    def _returnPD(self, code, tablename, **kwargs):
+        self.sas._io.submit(code)
+        pd = self.sas._io.sasdata2dataframe(tablename,'work')
         self.sas._io.submit("proc delete data=%s; run;" % tablename)
         return pd
 
@@ -639,10 +640,9 @@ class SASdata:
            print(code)
            return
 
-        if self.returnTableType == 'pandas':
+        if vars(self.sas)['returnTableType']=='pandas':
             code = "proc contents data=%s.%s ;ods output Variables=_variables ;run;" %(self.libref, self.table)
-            self.sas._io.submit(code)
-            return self._returnPD('_variables')
+            return self._returnPD(code, '_variables')
 
         else:
             ll = self._is_valid()
