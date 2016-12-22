@@ -511,6 +511,22 @@ class SASdata:
            ll = {'LOG': msg, 'LST': msg}
            return ll
 
+    def _returnPD(self, code, tablename, **kwargs):
+        self.sas._io.submit(code)
+        if isinstance(tablename, str):
+            pd = self.sas._io.sasdata2dataframe(tablename,'work')
+            self.sas._io.submit("proc delete data=%s; run;" % tablename)
+        elif isinstance(tablename, list):
+            pd=dict()
+            for t in tablename:
+                # strip leading '_' from names and capitalize for dictionary labels
+                pd[t.replace('_','').capitalize()] = self.sas._io.sasdata2dataframe(t,'work')
+                self.sas._io.submit("proc delete data=%s; run;" % t)
+        else:
+            raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))
+
+        return pd
+
     def head(self, obs=5):
         '''
         display the first n rows of a table
@@ -523,8 +539,9 @@ class SASdata:
            print(code)
            return
 
-        if self.returnTableType == 'pandas':
-            pass
+        if vars(self.sas)['returnTableType']=='pandas':
+            code  = "data=_tail ; set %s.%s(obs=%s); run;" % (self.libref, self.table, obs)
+            return self._returnPD(code, '_tail')
         else:
             ll = self._is_valid()
             if self.HTML:
@@ -576,8 +593,9 @@ class SASdata:
            print(code)
            return
 
-        if self.returnTableType == 'pandas':
-            pass
+        if vars(self.sas)['returnTableType']=='pandas':
+            code  = "data=_tail ; set %s.%s(firstobs=%s obs=%s); run;" % (self.libref, self.table, firstobs, lastobs)
+            return self._returnPD(code, '_tail')
         else:
             if self.HTML:
                if not le:
@@ -610,25 +628,30 @@ class SASdata:
            return
 
         ll = self._is_valid()
-        if self.HTML:
-           if not ll:
-              ll = self.sas._io.submit(code)
-           if not self.sas.batch:
-              DISPLAY(HTML(ll['LST']))
-           else:
-              return ll
+        if vars(self.sas)['returnTableType']=='pandas':
+            code = "proc contents data=%s.%s ;" %(self.libref, self.table)
+            code += "ods output Attributes=_attributes;"
+            code += "ods output EngineHost=_EngineHost;"
+            code += "ods output Variables=_Variables;"
+            code += "ods output Sortedby=_Sortedby;"
+            code += "run;"
+            return self._returnPD(code, ['_attributes','_EngineHost','_Variables','_Sortedby'])
+
         else:
-           if not ll:
-              ll = self.sas._io.submit(code, "text")
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
-    def _returnPD(self, code, tablename, **kwargs):
-        self.sas._io.submit(code)
-        pd = self.sas._io.sasdata2dataframe(tablename,'work')
-        self.sas._io.submit("proc delete data=%s; run;" % tablename)
-        return pd
+            if self.HTML:
+               if not ll:
+                  ll = self.sas._io.submit(code)
+               if not self.sas.batch:
+                  DISPLAY(HTML(ll['LST']))
+               else:
+                  return ll
+            else:
+               if not ll:
+                  ll = self.sas._io.submit(code, "text")
+               if not self.sas.batch:
+                  print(ll['LST'])
+               else:
+                  return ll
 
     def columnInfo(self):
         """
@@ -684,20 +707,25 @@ class SASdata:
            return
 
         ll = self._is_valid()
-        if self.HTML:
-           if not ll:
-              ll = self.sas._io.submit(code)
-           if not self.sas.batch:
-              DISPLAY(HTML(ll['LST']))
-           else:
-              return ll
+
+        if vars(self.sas)['returnTableType']=='pandas':
+            code = "proc means data=%s.%s n mean std min p25 p50 p75 max; ods output Summary=_summary; run;" %(self.libref, self.table)
+            return self._returnPD(code, '_summary')
         else:
-           if not ll:
-              ll = self.sas._io.submit(code, "text")
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
+            if self.HTML:
+               if not ll:
+                  ll = self.sas._io.submit(code)
+               if not self.sas.batch:
+                  DISPLAY(HTML(ll['LST']))
+               else:
+                  return ll
+            else:
+               if not ll:
+                  ll = self.sas._io.submit(code, "text")
+               if not self.sas.batch:
+                  print(ll['LST'])
+               else:
+                  return ll
 
     def sort(self, by: str, out: 'str or sas data object' = '', **kwargs) -> '<SASdata object>':
         """
@@ -891,15 +919,22 @@ class SASdata:
            return
 
         ll = self._is_valid()
-        if not ll:
-           html = self.HTML
-           self.HTML = 1
-           ll = self.sas._io.submit(code)
-           self.HTML = html
-        if not self.sas.batch:
-           DISPLAY(HTML(ll['LST']))
+        if vars(self.sas)['returnTableType']=='pandas':
+            code  = "proc freq data=%s.%s order=%s noprint;" % (self.libref, self.table, order)
+            code += "\n\ttables %s / out=tmpFreqOut;" % var
+            code += "\nrun;"
+            code += "\ndata tmpFreqOut; set tmpFreqOut(obs=%s); run;" % n
+            return self._returnPD(code, 'tmpFreqOut')
         else:
-           return ll
+            if not ll:
+               html = self.HTML
+               self.HTML = 1
+               ll = self.sas._io.submit(code)
+               self.HTML = html
+            if not self.sas.batch:
+               DISPLAY(HTML(ll['LST']))
+            else:
+               return ll
 
 
 
@@ -933,10 +968,6 @@ class SASdata:
            DISPLAY(HTML(ll['LST']))
         else:
            return ll
-
-
-
-
 
     def series(self, x: str, y: list, title: str ='') -> 'a line plot of the x,y coordinates':
         '''
