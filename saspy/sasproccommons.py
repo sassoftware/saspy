@@ -496,6 +496,8 @@ class SASProcCommons:
         # if there is no nominals in the list or it it only the target variable
         if nom is not None and not (len(nom)==1 and tgt.casefold() == nom[0].casefold()):
             # add char variables in the input list to nom
+            if isinstance(nom, str):
+                nom=nom.split(' ')
             nom.extend(charlist2)
             # make lists case insensitive
             nom = [x.casefold() for x in nom]
