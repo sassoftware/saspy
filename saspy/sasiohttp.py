@@ -573,7 +573,6 @@ class SASsessionHTTP():
     
          if status == 200:
             libref = 'USER'
-            libref = 'WORK' #this is broke now, always says it's there, so set to WORK for now till it's fixed
          else:
             libref = 'WORK'
 
@@ -623,7 +622,7 @@ class SASsessionHTTP():
          else:
             return None
    
-   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False) -> 'The LOG showing the results of the step':
+   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict ={}) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CCSV format.
       file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
@@ -644,7 +643,7 @@ class SASsessionHTTP():
       print("dataframe2sasdata is not currently implemented in this SAS Connection Interface; HTTP")
       return None
 
-   def sasdata2dataframe(self, table: str, libref: str ='') -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -712,14 +711,35 @@ class SASsessionHTTP():
       code += ";run;\n"
       ll = self.submit(code, "text")
       '''
+      code  = "data work.saspy_ds2df / view=work.saspy_ds2df; set "+libref+"."+table+";\n format "
+      for i in range(nvars):
+         if vartype[i] == 'FLOAT':
+            if varcat[i] in sas_date_fmts:
+               code += "'"+varlist[i]+"'n E8601DA10. "
+            else:
+               if varcat[i] in sas_time_fmts:
+                  code += "'"+varlist[i]+"'n E8601TM15.6 "
+               else:
+                  if varcat[i] in sas_datetime_fmts:
+                     code += "'"+varlist[i]+"'n E8601DT26.6 "
+                  else:
+                     code += "'"+varlist[i]+"'n best32. "
+      code += ";run;\n"
+      ll = self.submit(code, "text")
+
+
+
+
+
+
 
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
 
       #    until view access start working  or I can supply my own formats
-      #conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/WORK/saspy_ds2df/rows", headers=headers)
+      conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/WORK/saspy_ds2df/rows", headers=headers)
 
-      conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table+"/rows", headers=headers)
+      #conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table+"/rows", headers=headers)
       req = conn.getresponse()
       status = req.getcode()
       resp = req.read()

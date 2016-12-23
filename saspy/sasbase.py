@@ -40,6 +40,7 @@ import os
 import saspy.sascfg as SAScfg
 try:
    import saspy.sasiostdio as sasiostdio
+   import saspy.sasioiom   as sasioiom
    running_on_win = False
 except:
    running_on_win = True
@@ -99,20 +100,21 @@ class SASconfig:
       self.name = cfgname
       cfg       = getattr(SAScfg, cfgname) 
 
-      ip   = cfg.get('ip', '')
-      ssh  = cfg.get('ssh', '')
-      path = cfg.get('saspath', '')
+      ip    = cfg.get('ip', '')
+      ssh   = cfg.get('ssh', '')
+      path  = cfg.get('saspath', '')
+      java  = cfg.get('java', '')
 
-      if len(ip) > 0:
+      if len(java) > 0:
+         self.mode = 'IOM'
+      elif  len(ip) > 0:
          self.mode = 'HTTP'
+      elif len(ssh) > 0:
+         self.mode = 'SSH'
+      elif len(path) > 0:
+         self.mode = 'STDIO'
       else:
-         if len(ssh) > 0:
-            self.mode = 'SSH'
-         else:
-            if len(path) > 0:
-               self.mode = 'STDIO'
-            else:
-               self.valid = False
+         self.valid = False
 
    def _prompt(self, prompt, pw=False):
       if self._kernel is None:
@@ -154,6 +156,14 @@ class SASsession:
    options - SAS options to include in the start up command line
    user    - user name to authenticate with
    pw      - password to authenticate with
+
+   and for the IOM IO module to connect to SAS9 via Java IOM
+   ip      - host address 
+   port    - port; the code Defaults this to 80 (the Compute Services default port)
+   context - context name defined on the compute service
+   options - SAS options to include in the start up command line
+   omruser - user name to authenticate with
+   omrpw   - password to authenticate with
    '''
    #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list =[]) -> '<SASsession object>':
    def __init__(self, **kwargs) -> '<SASsession object>':
@@ -172,9 +182,11 @@ class SASsession:
          else:
             print("Cannot use STDIO I/O module on Windows. No SASsession established. Choose an HTTP SASconfig definition")
             return
-      else:
-         if self.sascfg.mode == 'HTTP':
-            self._io = sasiohttp.SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
+      elif self.sascfg.mode == 'HTTP':
+         self._io = sasiohttp.SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
+
+      elif self.sascfg.mode == 'IOM':
+         self._io = sasioiom.SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
    def __del__(self):
       return self._io.__del__()
@@ -327,14 +339,22 @@ class SASsession:
       self._io._asubmit(code.decode(), results='text')
       os.close(fd)
 
-   def sasdata(self, table: str, libref: str ='', results: str ='HTML')  -> '<SASdata object>':
+   def sasdata(self, table: str, libref: str ='', results: str ='HTML', dsopts: dict ={})  -> '<SASdata object>':
       '''
       This method creates a SASdata object for the SAS Data Set you specify
       table   - the name of the SAS Data Set
       libref  - the libref for the Data Set, defaults to WORK, or USER if assigned
       results - format of results, HTML is default, TEXT is the alternative
+      dsopts - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+               where is a sting, keep and drop are strings or list of strings. obs and first obs are numbers - either string or int
+               {'where'    : 'msrp < 20000 and make = "Ford"' 
+                'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
+                'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
+                'obs'      :  10 
+                'firstobs' : '12'
+               }
       '''
-      sd = SASdata(self, libref, table, results)
+      sd = SASdata(self, libref, table, results, dsopts)
       if not self.exist(sd.table, sd.libref):
          if not self.batch:
             print("Table "+sd.libref+'.'+sd.table+" does not exist. This SASdata object will not be useful until the data set is created.")
@@ -391,14 +411,14 @@ class SASsession:
       '''
       return self._io.read_csv(file, table, libref, results, self.nosub)
    
-   def write_csv(self, file: str, table: str, libref: str ='') -> 'The LOG showing the results of the step':
+   def write_csv(self, file: str, table: str, libref: str ='', dsopts: dict ={}) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CSV format.
       file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
       table   - the name of the SAS Data Set you want to export to a CSV file
       libref  - the libref for the SAS Data Set.
       '''
-      log = self._io.write_csv(file, table, libref, self.nosub)
+      log = self._io.write_csv(file, table, libref, self.nosub, dsopts)
       if not self.batch:
          print(log)
       else:
@@ -433,16 +453,16 @@ class SASsession:
       else:
          return None
    
-   def sd2df(self, table: str, libref: str ='', **kwargs) -> '<Pandas Data Frame object>':
+   def sd2df(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
       '''
       This is an alias for 'sasdata2dataframe'. Why type all that?
       sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref  - the libref for the SAS Data Set.
       '''
-      return self.sasdata2dataframe(table, libref, **kwargs)
+      return self.sasdata2dataframe(table, libref, dsopts, **kwargs)
    
-   def sasdata2dataframe(self, table: str, libref: str ='', **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -456,11 +476,44 @@ class SASsession:
          print("too complicated to show the code, read the source :), sorry.")
          return None
       else:
-         return self._io.sasdata2dataframe(table, libref, **kwargs)
+         return self._io.sasdata2dataframe(table, libref, dsopts, **kwargs)
    
+   def _dsopts(self, dsopts):
+       '''
+       This method builds out data set optiond clause for this SASdata object: '(where= , keeep=, obs=, ...)'
+       '''
+       opts = ''
+
+       if len(dsopts):
+          for key in dsopts:
+             if len(str(dsopts[key])):
+                if   key == 'where':
+                   opts  += 'where=('+dsopts[key]+') '
+                elif key == 'drop':
+                   opts += 'drop='
+                   if isinstance(dsopts[key], list):
+                      for var in dsopts[key]:
+                         opts += var+' '
+                   else:
+                      opts += dsopts[key]+' '
+                elif key == 'keep':
+                   opts  += 'keep='
+                   if isinstance(dsopts[key], list):
+                      for var in dsopts[key]:
+                         opts += var+' '
+                   else:
+                      opts += dsopts[key]+' '
+                elif key == 'obs':
+                   opts  += 'obs='+str(dsopts[key])+' '
+                elif key == 'firstobs':
+                   opts  += 'firstobs='+str(dsopts[key])+' '
+          if len(opts):
+             opts = '('+opts+')'
+       return opts
+
 class SASdata:
 
-    def __init__(self, sassession, libref, table, results="HTML"):
+    def __init__(self, sassession, libref, table, results="HTML", dsopts={}):
 
         self.sas = sassession
 
@@ -491,6 +544,7 @@ class SASdata:
               self.libref = 'WORK'
 
         self.table  = table
+        self.dsopts = dsopts
 
     def set_results(self, results: str):
         '''
@@ -510,13 +564,32 @@ class SASdata:
            ll = {'LOG': msg, 'LST': msg}
            return ll
 
+    def _dsopts(self):
+        '''
+        This method builds out data set optiond clause for this SASdata object: '(where= , keeep=, obs=, ...)'
+        '''
+        return self.sas._dsopts(self.dsopts)
+
+    def where(self, where: str) -> '<SASdata object>': 
+        '''
+        This method returns a clone of the SASdata object, with the where attribute set. The original SASdata object is not affected.
+        where - the where clause to apply
+
+        '''
+        sd = SASdata(self.sas, self.libref, self.table, dsopts=dict(self.dsopts))
+        sd.HTML = self.HTML
+        sd.dsopts['where'] = where
+        return sd
+
     def head(self, obs=5):
         '''
         display the first n rows of a table
         obs - the number of rows of the table that you want to display. The default is 5
 
         '''
-        code = "proc print data="+self.libref+'.'+self.table+"(obs="+str(obs)+");run;"
+        topts = dict(self.dsopts)
+        topts['obs'] = obs
+        code = "proc print data="+self.libref+'.'+self.table+self.sas._dsopts(topts)+";run;"
 
         if self.sas.nosub:
            print(code)
@@ -544,7 +617,8 @@ class SASdata:
         obs - the number of rows of the table that you want to display. The default is 5
 
         '''
-        code = "%put lastobs=%sysfunc(attrn(%sysfunc(open("+self.libref+'.'+self.table+")),NOBS)) tom;"
+        #code = "%put lastobs=%sysfunc(attrn(%sysfunc(open("+self.libref+'.'+self.table+")),NOBS)) tom;"
+        code = "proc sql;select count(*) into :lastobs from "+self.libref+'.'+self.table+self._dsopts()+";%put lastobs=&lastobs tom;"
 
         nosub = self.sas.nosub
         self.sas.nosub = False
@@ -563,9 +637,11 @@ class SASdata:
         if firstobs < 1:
            firstobs = 1
  
-        code  = "proc print data="+self.libref+'.'+self.table
-        code += "(firstobs="+str(firstobs)
-        code += " obs="+str(lastobs)+");run;"
+        topts             = dict(self.dsopts)
+        topts['obs']      = lastobs
+        topts['firstobs'] = firstobs
+
+        code  = "proc print data="+self.libref+'.'+self.table+self.sas._dsopts(topts)+";run;"
         
         self.sas.nosub = nosub
         if self.sas.nosub:
@@ -596,7 +672,7 @@ class SASdata:
         display metadata about the table. size, number of rows, columns and their data type ...
 
         '''
-        code = "proc contents data="+self.libref+'.'+self.table+";run;"
+        code = "proc contents data="+self.libref+'.'+self.table+self._dsopts()+";run;"
 
         if self.sas.nosub:
            print(code)
@@ -617,11 +693,12 @@ class SASdata:
               print(ll['LST'])
            else:
               return ll
+
     def columnInfo(self):
         """
         display metadata about the table, size, number of rows, columns and their data type
         """
-        code = "proc contents data="+self.libref+'.'+self.table+";ods select Variables;run;"
+        code = "proc contents data="+self.libref+'.'+self.table++self._dsopts()+";ods select Variables;run;"
 
         if self.sas.nosub:
            print(code)
@@ -642,6 +719,7 @@ class SASdata:
               print(ll['LST'])
            else:
               return ll
+
     def describe(self):
         '''
         display descriptive statistics for the table; summary statistics.
@@ -654,12 +732,13 @@ class SASdata:
         display descriptive statistics for the table; summary statistics.
         """
         return self.means()
+
     def means(self):
         '''
         display descriptive statistics for the table; summary statistics. This is an alias for 'describe'
 
         '''
-        code  = "proc means data="+self.libref+'.'+self.table+" n mean std min p25 p50 p75 max;run;"
+        code  = "proc means data="+self.libref+'.'+self.table+self._dsopts()+" n mean std min p25 p50 p75 max;run;"
         
         if self.sas.nosub:
            print(code)
@@ -719,7 +798,7 @@ class SASdata:
         if 'options' in kwargs:
             options = kwargs['options']   
  
-        code = "proc sort data=%s.%s %s %s ;\n" % (self.libref, self.table, outstr, options)
+        code = "proc sort data=%s.%s%s %s %s ;\n" % (self.libref, self.table, self._dsopts(), outstr, options)
         code += "by %s;" % by
         code += "run\n;"
         runcode = True
@@ -763,7 +842,7 @@ class SASdata:
            else:
               return ll
         else:
-           return self.sas.write_csv(file, self.table, self.libref)
+           return self.sas.write_csv(file, self.table, self.libref, self.dsopts)
 
     def to_frame(self, **kwargs) -> '<Pandas Data Frame object>':
         '''
@@ -780,7 +859,7 @@ class SASdata:
            print(ll['LOG'])
            return None
         else:
-           return self.sas.sasdata2dataframe(self.table, self.libref, **kwargs)
+           return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, **kwargs)
 
     def heatmap(self, x: str, y: str, options: str = '', title: str = '', label: str = '') -> 'a heatmap plot of the (numeric) variables you chose':
         """
@@ -792,7 +871,7 @@ class SASdata:
         :param label:
         :return:
         """
-        code = "proc sgplot data=%s.%s;" % (self.libref,self.table)
+        code = "proc sgplot data=%s.%s%s;" % (self.libref, self.table, self._dsopts())
         if len(options):
             code += "\n\theatmap x=%s y=%s / %s;" % (x, y, options)
         else:
@@ -827,7 +906,7 @@ class SASdata:
         title - an optional Title for the chart
         label - LegendLABEL= value for sgplot
         '''
-        code  = "proc sgplot data="+self.libref+'.'+self.table
+        code  = "proc sgplot data="+self.libref+'.'+self.table+self._dsopts()
         code += ";\n\thistogram "+var+" / scale=count"
         if len(label) > 0:
            code += " LegendLABEL='"+label+"'"
@@ -860,7 +939,7 @@ class SASdata:
         title - an optional Title for the chart
         label - LegendLABEL= value for sgplot
         """
-        code  = "proc freq data=%s.%s order=%s noprint;" % (self.libref, self.table, order)
+        code  = "proc freq data=%s.%s%s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
         code += "\n\ttables %s / out=tmpFreqOut;" % var
         code += "\nrun;"
         if len(title) > 0:
@@ -873,17 +952,20 @@ class SASdata:
            return
 
         ll = self._is_valid()
-        if not ll:
-           html = self.HTML
-           self.HTML = 1
-           ll = self.sas._io.submit(code)
-           self.HTML = html
-        if not self.sas.batch:
-           DISPLAY(HTML(ll['LST']))
+        if self.HTML:
+           if not ll:
+              ll = self.sas._io.submit(code)
+           if not self.sas.batch:
+              DISPLAY(HTML(ll['LST']))
+           else:
+              return ll
         else:
-           return ll
-
-
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
 
     def bar(self, var: str, title: str ='', label: str ='') -> 'a barchart plot of the (numeric) variable you chose':
         '''
@@ -892,7 +974,7 @@ class SASdata:
         title - an optional Title for the chart
         label - LegendLABEL= value for sgplot
         '''
-        code  = "proc sgplot data="+self.libref+'.'+self.table
+        code  = "proc sgplot data="+self.libref+'.'+self.table+self._dsopts()
         code += ";\n\tvbar "+var+" ; "
         if len(label) > 0:
            code += " LegendLABEL='"+label+"'"
@@ -916,10 +998,6 @@ class SASdata:
         else:
            return ll
 
-
-
-
-
     def series(self, x: str, y: list, title: str ='') -> 'a line plot of the x,y coordinates':
         '''
         This method plots a series of x,y coordinates. You can provide a list of y columns for multiple line plots.
@@ -927,7 +1005,7 @@ class SASdata:
         y     - the y axis variable(s), you can specify a single column or a list of columns 
         title - an optional Title for the chart
         '''
-        code  = "proc sgplot data="+self.libref+'.'+self.table+";\n"
+        code  = "proc sgplot data="+self.libref+'.'+self.table+self._dsopts()+";\n"
         if len(title) > 0:
            code += '\ttitle "'+title+'";\n'
 

@@ -26,7 +26,7 @@
 # 
 # SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', 'httptest']
 #
-SAS_config_names = ['default', 'http', 'httptest', 'ssh']
+SAS_config_names = ['default', 'http', 'httptest', 'ssh', 'httpfred', 'grid', 'tdi', 'iom']
 
 # Configuration options for pysas - python Dict
 # valid key are:
@@ -58,10 +58,30 @@ SAS_config_options = {'lock_down': True}
 default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
             }
 
-ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'ssh'    : '/usr/bin/ssh',
-            'host'   : 'tom64-2', 
+tdi      = {'saspath' : '/tdi/mva-v940m4/usrlibsas/laxno/SASFoundation/9.4/bin/sas_u8'
+            }
+
+ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+            'ssh'     : '/usr/bin/ssh',
+            'host'    : 'tom64-2', 
             'options' : ["-fullstimer"]
+            }
+
+grid     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
+            'ssh'     : '/usr/bin/ssh',
+            'omrpw'   : '1connect',
+            'host'    : 'sascnn@sgm001.unx.sas.com',
+            'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridrunsaslm"]
+            }
+#           'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridruncmdint"]
+#           'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridrunsaslm"]
+
+iom      = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
+            'java'    : '/usr/bin/java',
+            'omruser' : 'sas',
+            'omrpw'   : 'sas',
+            'host'    : 'tom64-3.na.sas.com',
+            'port'    : 8591
             }
 
 # sas_en   = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sas'
@@ -90,6 +110,11 @@ ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
              
 http     = {'ip'      : 'tomspc',
             'port'    :  80,
+            'context' : 'Tom2'
+            }
+
+httpfred = {'ip'      : '10.63.24.180',
+            'port'    :  7980,
             'context' : 'Tom2'
             }
 
