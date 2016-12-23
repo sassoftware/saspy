@@ -20,13 +20,15 @@ import subprocess
 import getpass
 from time import sleep
 import saspy.sascfg as SAScfg
+import pandas as pd
+import socket as socks
 
 try:
    from IPython.display import HTML
 except ImportError:
    pass
 
-class SASconfigSTDIO:
+class SASconfigIOM:
    '''
    This object is not intended to be used directly. Instantiate a SASsession object instead 
    '''
@@ -36,11 +38,11 @@ class SASconfigSTDIO:
       self.name     = kwargs.get('sascfgname', '')
       cfg           = getattr(SAScfg, self.name) 
 
-      self.saspath  = cfg.get('saspath', '')
-      self.options  = cfg.get('options', [])
-      self.ssh      = cfg.get('ssh', '')
+      self.java     = cfg.get('java', '')
       self.host     = cfg.get('host', '')
-      self.metapw   = cfg.get('metapw', '')
+      self.port     = cfg.get('port', '')
+      self.omruser  = cfg.get('omruser', '')
+      self.omrpw    = cfg.get('omrpw', '')
 
       # GET Config options
       try:
@@ -51,14 +53,6 @@ class SASconfigSTDIO:
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
 
-
-      insaspath = kwargs.get('saspath', '')   
-      if len(insaspath) > 0:
-         if lock and len(self.saspath):
-            print("Parameter 'saspath' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.saspath = insaspath   
-
       inoptions = kwargs.get('options', '')
       if len(inoptions) > 0:
          if lock and len(self.options):
@@ -66,12 +60,12 @@ class SASconfigSTDIO:
          else:
             self.options = inoptions   
 
-      inssh = kwargs.get('ssh', '')
-      if len(inssh) > 0:
-         if lock and len(self.ssh):
-            print("Parameter 'ssh' passed to SAS_session was ignored due to configuration restriction.")
+      injava = kwargs.get('java', '')
+      if len(injava) > 0:
+         if lock and len(self.java):
+            print("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.ssh = inssh   
+            self.java = injava   
 
       inhost = kwargs.get('host', '')
       if len(inhost) > 0:
@@ -80,12 +74,28 @@ class SASconfigSTDIO:
          else:
             self.host = inhost   
 
-      while len(self.saspath) == 0:
-         if not lock:
-            self.saspath = self._prompt("Please enter the path to the SAS start up script: ")
+      inport = kwargs.get('port', '')
+      if len(inport) > 0:
+         if lock and len(self.port):
+            print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            print("In lockdown mode and missing saspath in the config named: "+cfgname )
-            return
+            self.port = inport   
+
+      inomruser = kwargs.get('omruser', '')
+      if len(inomruser) > 0:
+         if lock and len(self.omruser):
+            print("Parameter 'omruser' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.omruser = inomruser   
+
+      inomrpw = kwargs.get('omrpw', '')
+      if len(inomrpw) > 0:
+         if lock and len(self.omrpw):
+            print("Parameter 'omrpw' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.omrpw = inomrpw   
+
+      return
 
    def _prompt(self, prompt, pw=False):
       if self._kernel is None:
@@ -106,7 +116,7 @@ class SASconfigSTDIO:
           except (KeyboardInterrupt):
              return ''
                    
-class SASsessionSTDIO():
+class SASsessionIOM():
    '''
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
    cfgname - value in SAS_config_names List of the sascfg.py file
@@ -125,7 +135,7 @@ class SASsessionSTDIO():
       self.stderr = None
       self.stdout = None
 
-      self.sascfg   = SASconfigSTDIO(**kwargs)
+      self.sascfg   = SASconfigIOM(**kwargs)
       self._log_cnt = 0
       self._log     = ""
       self._sb      = kwargs.get('sb', None)
@@ -143,34 +153,59 @@ class SASsessionSTDIO():
        return '%08d' % self._log_cnt
 
    def _startsas(self):
-      #import pdb;pdb.set_trace()
+      import pdb;pdb.set_trace()
       if self.pid:
          return self.pid
 
-      if self.sascfg.ssh:
-         pgm    = self.sascfg.ssh
-         parms  = [pgm]
-         parms += ["-t", self.sascfg.host, self.sascfg.saspath]
-      else:
-         pgm    = self.sascfg.saspath
-         parms  = [pgm]
+      classpath  =  "/opt/tom/gitlab/metis/java/lib/sas.svc.connection.jar"
+      classpath += ":/opt/tom/gitlab/metis/java/lib/sas.codepolicy.jar"
+      classpath += ":/opt/tom/gitlab/metis/java/lib/log4j.jar"
+      classpath += ":/opt/tom/gitlab/metis/java/lib/sas.security.sspi.jar"
+      classpath += ":/opt/tom/gitlab/metis/java/lib/sas.core.jar"
+      classpath += ":/opt/tom/gitlab/metis/java/tools/ConnectionHelper.java"
+      classpath += ":/opt/tom/gitlab/metis/java/pyiom"
+      classpath += ":/opt/tom/gitlab/metis/java/tools"
+      classpath += ":/opt/tom/gitlab/metis/java"
 
-      # temporary hack for testing grid w/ sasgsub
-      if self.sascfg.metapw:
-         pgm    = self.sascfg.ssh
-         parms  = [pgm]
-         parms += ["-t", "-i", "/u/sastpw/idrsacnn", self.sascfg.host]
-         parms += self.sascfg.options
-         #parms += ['"'+self.sascfg.saspath+' -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX"']
-         parms += ['']
-      else:
-         parms += self.sascfg.options
-         parms += ["-nodms"]
-         parms += ["-stdio"]
-         parms += ["-terminal"]
-         parms += ["-nosyntaxcheck"]
-         parms += ["-pagesize", "MAX"]
-         parms += ['']
+      port = 0
+      try:
+         self.sockin  = socks.socket()
+         self.sockin.bind(("",port))
+         self.sockout = socks.socket()
+         self.sockout.bind(("",port))
+         self.sockerr = socks.socket()
+         self.sockerr.bind(("",port))
+      except OSError:
+         print('Error try to open a socket in the _startsas method. Call failed.')
+         return None
+      self.sockin.listen(0)
+      self.sockout.listen(0)
+      self.sockerr.listen(0)
+
+
+      pw = self.sascfg.omrpw
+      while len(pw) == 0:
+         pw = self.sascfg._prompt("Please enter the OMR password for OMR user "+self.sascfg.omruser+": ", pw=True)
+      pw += '\n'
+
+      pgm    = self.sascfg.java
+      parms  = [pgm]
+      parms += ["-classpath", classpath, "pyiom.test1"]
+      parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
+      parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
+      parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
+      parms += ["-host", self.sascfg.host, "-port", str(self.sascfg.port)]     
+      parms += ["-user", self.sascfg.omruser]     
+      parms += ['']
+
+
+      #parms += ["-classpath", classpath, "-Djava.awt.headless=true", "pyiom.test1"]
+      #parms += ["-classpath", "/opt/tom/gitlab/metis/java", "pyiom.test1", "-sockport", str(self.port)]
+      #parms += ["-verbose", "-Djava.awt.headless=true"]
+      #parms += ["-classpath", classpath, "workspace.TestSimpleExecute"]
+      #parms += ["-host", self.sascfg.host, "-port", self.sascfg.port]     
+      #parms += ["-user", self.sascfg.omruser, "-pass", pw, "-source", "/opt/tom/gitlab/metis/java/test.sas"]     
+
 
       PIPE_READ  = 0
       PIPE_WRITE = 1
@@ -178,7 +213,7 @@ class SASsessionSTDIO():
       pin  = os.pipe() 
       pout = os.pipe()
       perr = os.pipe() 
-      
+
       pidpty = os.forkpty()
       if pidpty[0]:
          # we are the parent
@@ -190,7 +225,7 @@ class SASsessionSTDIO():
 
       else:
          # we are the child
-         signal.signal(signal.SIGINT, signal.SIG_DFL)
+         #signal.signal(signal.SIGINT, signal.SIG_DFL)
 
          os.close(0)
          os.close(1)
@@ -208,36 +243,32 @@ class SASsessionSTDIO():
          os.close(perr[PIPE_WRITE]) 
 
          try:
-            #sleep(5)
+            #sleep(15)
             os.execv(pgm, parms)
          except:
-            print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
+            print("Subprocess failed to start. Double check you settings in sascfg.py file.\n") 
+            sleep(60)
             os._exit(-6)
 
       self.pid    = pidpty[0]
-      self.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
-      self.stderr = os.fdopen(perr[PIPE_READ], mode='rb')
-      self.stdout = os.fdopen(pout[PIPE_READ], mode='rb')
-
-      fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
-      fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
 
       if self.pid is None:
          print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
          return NULL
       else:
-         # temporary hack for testing grid w/ sasgsub
-         if self.sascfg.metapw:
-            gotit = False
-            while not gotit:
-               pw = self.sascfg._prompt('Please enter metadata password: ', pw=True)
-               if len(pw) > 0:
-                  gotit = True
-               else:
-                  print("Sorry, didn't get a value, please enter the metadata password.")
-            self.stdin.write(pw.encode()+b'\n')
-            self.stdin.flush()
+         self.stdin  = self.sockin.accept()
+         self.stdout = self.sockout.accept()
+         self.stderr = self.sockerr.accept()
+         self.stdout[0].setblocking(False)
+         self.stderr[0].setblocking(False)
+
+         rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+         if rc != None:
+            self.pid = None
+         print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")  
+             
+         self.stdin[0].send(pw.encode())
 
          self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
          if self.pid is None:
@@ -251,11 +282,21 @@ class SASsessionSTDIO():
    def _endsas(self):
       rc = 0
       if self.pid:
-         code = ";*\';*\";*/;\n;quit;endsas;"
-         self._getlog(wait=1)
-         self._asubmit(code,'text')
-         sleep(1)
          try:
+
+            self.stdin[0].shutdown(socks.SHUT_RDWR)
+            self.stdin[0].close()
+            self.sockin.close()
+
+            self.stdout[0].shutdown(socks.SHUT_RDWR)
+            self.stdout[0].close()
+            self.sockout.close()
+   
+            self.stderr[0].shutdown(socks.SHUT_RDWR)
+            self.stderr[0].close()
+            self.sockerr.close()
+   
+   
             rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
          except (subprocess.TimeoutExpired):
             print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
@@ -271,7 +312,11 @@ class SASsessionSTDIO():
       code1  = "%put E3969440A681A24088859985"+logn+";\nE3969440A681A24088859985"+logn
 
       while True:
-         log = self.stderr.read1(4096)
+         try:
+            log =  self.stderr[0].recv(4096)
+         except (BlockingIOError):
+            log = b''
+
          if len(log) > 0:
             logf += log
          else:
@@ -300,7 +345,11 @@ class SASsessionSTDIO():
       lenf = 0
    
       while True:
-         lst = self.stdout.read1(4096)
+         try:
+            lst = self.stdout[0].recv(4096)
+         except (BlockingIOError):
+            lst = b''
+
          if len(lst) > 0:
             lstf += lst
                              
@@ -338,7 +387,11 @@ class SASsessionSTDIO():
       self._asubmit("data _null_;file print;put 'Tom was here';run;", "text")
    
       while True:
-         lst = self.stdout.read1(4096)
+         try:
+            lst = self.stdout[0].recv(4096)
+         except (BlockingIOError):
+            lst = b''
+
          if len(lst) > 0:
             lstf += lst
    
@@ -367,24 +420,25 @@ class SASsessionSTDIO():
       # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
       # unnecessary read in submit as this can't happen in the current code. 
-      odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen  = b"ods listing close;ods html5 file=PRINT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods html5 close;ods listing;\n"
-      ods      = True;
+      ods      = True
+      pgm      = b""
 
       if results.upper() != "HTML":
          ods = False
    
       if (ods):
-         self.stdin.write(odsopen)
+         pgm += odsopen
    
-      out = self.stdin.write(code.encode()+b'\n')
+      pgm += code.encode()+b'\n'
    
       if (ods):
-         self.stdin.write(odsclose)
+         pgm += odsclose
 
-      self.stdin.flush()
+      self.stdin[0].send(pgm)
 
-      return str(out)
+      return 
 
    def submit(self, code: str, results: str ="html", prompt: dict ={}) -> dict:
       '''
@@ -411,7 +465,8 @@ class SASsessionSTDIO():
             print(results['LOG'])
             HTML(results['LST']) 
       '''
-      odsopen  = b"ods listing close;ods html5 file=stdout options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      #odsopen  = b"ods listing close;ods html5 file=PRINT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen  = b"ods listing close;ods html5  options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods html5 close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
@@ -427,6 +482,7 @@ class SASsessionSTDIO():
       pcodei   = ''
       pcodeiv  = ''
       pcodeo   = ''
+      pgm      = b''
 
       if self.pid == None:
          print("No SAS process attached. SAS process has terminated unexpectedly.")
@@ -465,15 +521,15 @@ class SASsessionSTDIO():
          pcodeo += 'options source notes;\n'
 
       if ods:
-         self.stdin.write(odsopen)
+         pgm += odsopen
    
-      out = self.stdin.write(mj+b'\n'+pcodei.encode()+pcodeiv.encode()+code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj)
+      pgm += mj+b'\n'+pcodei.encode()+pcodeiv.encode()+code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj
    
       if ods:
-         self.stdin.write(odsclose)
+         pgm += odsclose
 
-      out = self.stdin.write(b'\n'+logcodei.encode()+b'\n')
-      self.stdin.flush()
+      pgm += b'\n'+logcodei.encode()+b'\n'
+      self.stdin[0].send(pgm)
 
       while not done:
          try:
@@ -484,22 +540,29 @@ class SASsessionSTDIO():
                      return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
                                  str(rc), LST='')
                  if bail:
-                     eof -= 1
+                    eof -= 1
                  if eof < 0:
-                     break
-                 lst = self.stdout.read1(4096).decode()
+                    break
+                 try:
+                    lst = self.stdout[0].recv(4096).decode()
+                 except (BlockingIOError):
+                    lst = b''
+
                  if len(lst) > 0:
-                     lstf += lst
+                    lstf += lst
                  else:
-                     log = self.stderr.read1(4096).decode() 
-                     if len(log) > 0:
-                         logf += log
-                         if logf.count(logcodeo) >= 1:
-                             bail = True
-                         if not bail and bc:
-                             self.stdin.write(odsclose+logcodei.encode() + b'\n')
-                             self.stdin.flush()
-                             bc = False
+                    try:
+                       log = self.stderr[0].recv(4096).decode() 
+                    except (BlockingIOError):
+                       log = b''
+
+                    if len(log) > 0:
+                        logf += log
+                        if logf.count(logcodeo) >= 1:
+                            bail = True
+                        if not bail and bc:
+                            self.stdin[0].send(odsclose+logcodei.encode() + b'\n')
+                            bc = False
              done = True
 
          except (KeyboardInterrupt, SystemExit):
@@ -518,8 +581,7 @@ class SASsessionSTDIO():
              else:
                 print('Exception ignored, continuing to process...\n')
 
-             self.stdin.write(odsclose+logcodei.encode()+b'\n')
-             self.stdin.flush()
+             self.stdin[0].send(odsclose+logcodei.encode()+b'\n')
 
       trip = lstf.rpartition("/*]]>*/")      
       if len(trip[1]) > 0 and len(trip[2]) < 100:
@@ -577,8 +639,7 @@ class SASsessionSTDIO():
                     query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                     print('Processing interrupt\nAttn handler Query is\n\n' + query)
                     response = self.sascfg._prompt("Please enter your Response: ")
-                    self.stdin.write(response.encode() + b'\n')
-                    self.stdin.flush()
+                    self.stdin[0].send(response.encode() + b'\n')
                     if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
                        bc = True
                        break
@@ -588,8 +649,7 @@ class SASsessionSTDIO():
                         query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                         print('Secondary Query is:\n\n' + query)
                         response = self.sascfg._prompt("Please enter your Response: ")
-                        self.stdin.write(response.encode() + b'\n')
-                        self.stdin.flush()
+                        self.stdin[0].send(response.encode() + b'\n')
                         if (response == 'N' or response == 'n') and query.count("N to continue") >= 1:
                            bc = True
                            break
@@ -597,7 +657,7 @@ class SASsessionSTDIO():
                         #print("******************No 'Select' or 'Press' found in lst=")
                         pass
             else:
-                log = self.stderr.read1(4096).decode()
+                log = self.stderr[0].recv(4096).decode()
                 logf += log
                 self._log += log
 
@@ -668,9 +728,9 @@ class SASsessionSTDIO():
                   pass
 
             sleep(.25)
-            lst = self.stdout.read1(4096).decode()
+            lst = self.stdout[0].recv(4096).decode()
          else:
-            log = self.stderr.read1(4096).decode()
+            log = self.stderr[0].recv(4096).decode()
             self._log += log
             logn = self._logcnt(False)
 
@@ -683,7 +743,7 @@ class SASsessionSTDIO():
                break
 
             sleep(.25)
-            lst = self.stdout.read1(4096).decode()
+            lst = self.stdout[0].recv(4096).decode()
 
       return log
 
@@ -751,7 +811,7 @@ class SASsessionSTDIO():
       '''
       code  = "options nosource;\n"
       code += "filename x \""+file+"\";\n"
-      code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x"
+      code += "proc export data="+libref+"."+table+" outfile=x"
       code += " dbms=csv replace; run;"
       code += "options source;\n"
 
@@ -818,7 +878,7 @@ class SASsessionSTDIO():
                   var = str(row[col].to_datetime64())[:26]
                   #var = str(row[1][col].to_datetime64())
             card += var+chr(9)
-         self.stdin.write(card.encode()+b'\n')
+         self.stdin[0].send(card.encode()+b'\n')
          #self._asubmit(card, "text")
 
       self._asubmit(";run;", "text")
@@ -831,12 +891,11 @@ class SASsessionSTDIO():
       port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       '''
       port =  kwargs.get('port', 0)
-      import pandas as pd
-      import socket as socks
+      #import pandas as pd
+      #import socket as socks
       datar = ""
 
-      code  = "proc sql; create view sasdata2dataframe as select * from "+libref+"."+table+self._sb._dsopts(dsopts)+";quit;\n"
-      code += "data _null_; file STDERR;d = open('sasdata2dataframe');\n"
+      code  = "data _null_; file STDERR;d = open('"+libref+"."+table+"');\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
       code += "put lr lrecl; put vn nvars; put vl;\n"
@@ -864,11 +923,7 @@ class SASsessionSTDIO():
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
    
-      topts             = dict(dsopts)
-      topts['obs']      = 1
-      topts['firstobs'] = ''
-      
-      code  = "data _null_; set "+libref+"."+table+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+      code  = "data _null_; set "+libref+"."+table+"(obs=1);put 'FMT_CATS=';\n"
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;\n"
@@ -895,7 +950,7 @@ class SASsessionSTDIO():
    
       code  = ""
       code += "filename sock socket '"+host+":"+str(port)+"' lrecl=32767 recfm=v termstr=LF;\n"
-      code += " data _null_; set "+libref+"."+table+self._sb._dsopts(dsopts)+";\n file sock; put "
+      code += " data _null_; set "+libref+"."+table+";\n file sock; put "
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
