@@ -565,6 +565,7 @@ class SASdata:
            ll = {'LOG': msg, 'LST': msg}
            return ll
 
+<<<<<<< HEAD
     def _returnPD(self, code, tablename, **kwargs):
         self.sas._io.submit(code)
         if isinstance(tablename, str):
@@ -580,6 +581,8 @@ class SASdata:
             raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))
 
         return pd
+=======
+>>>>>>> master
     def _dsopts(self):
         '''
         This method builds out data set optiond clause for this SASdata object: '(where= , keeep=, obs=, ...)'
@@ -713,6 +716,7 @@ class SASdata:
             return self._returnPD(code, ['_attributes','_EngineHost','_Variables','_Sortedby'])
 
         else:
+<<<<<<< HEAD
             if self.HTML:
                if not ll:
                   ll = self.sas._io.submit(code)
@@ -727,6 +731,14 @@ class SASdata:
                   print(ll['LST'])
                else:
                   return ll
+=======
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
+>>>>>>> master
 
     def columnInfo(self):
         """
@@ -743,6 +755,7 @@ class SASdata:
             return self._returnPD(code, '_variables')
 
         else:
+<<<<<<< HEAD
             ll = self._is_valid()
             if self.HTML:
                if not ll:
@@ -758,6 +771,14 @@ class SASdata:
                   print(ll['LST'])
                else:
                   return ll
+=======
+           if not ll:
+              ll = self.sas._io.submit(code, "text")
+           if not self.sas.batch:
+              print(ll['LST'])
+           else:
+              return ll
+>>>>>>> master
 
     def describe(self):
         '''
@@ -996,6 +1017,7 @@ class SASdata:
            return
 
         ll = self._is_valid()
+<<<<<<< HEAD
         if vars(self.sas)['returnTableType']=='pandas':
             code  = "proc freq data=%s.%s order=%s noprint;" % (self.libref, self.table, order)
             code += "\n\ttables %s / out=tmpFreqOut;" % var
@@ -1011,6 +1033,16 @@ class SASdata:
            else:
               return ll
         else:
+=======
+        if self.HTML:
+           if not ll:
+              ll = self.sas._io.submit(code)
+           if not self.sas.batch:
+              DISPLAY(HTML(ll['LST']))
+           else:
+              return ll
+        else:
+>>>>>>> master
            if not ll:
               ll = self.sas._io.submit(code, "text")
            if not self.sas.batch:
