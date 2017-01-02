@@ -735,7 +735,7 @@ class SASdata:
         """
         display metadata about the table, size, number of rows, columns and their data type
         """
-        code = "proc contents data="+self.libref+'.'+self.table++self._dsopts()+";ods select Variables;run;"
+        code = "proc contents data="+self.libref+'.'+self.table+' '+self._dsopts()+";ods select Variables;run;"
 
         if self.sas.nosub:
            print(code)
