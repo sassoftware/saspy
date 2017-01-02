@@ -37,7 +37,9 @@
 #
 
 import os
+
 import saspy.sascfg as SAScfg
+
 try:
    import saspy.sasiostdio as sasiostdio
    import saspy.sasioiom   as sasioiom
@@ -565,7 +567,6 @@ class SASdata:
            ll = {'LOG': msg, 'LST': msg}
            return ll
 
-<<<<<<< HEAD
     def _returnPD(self, code, tablename, **kwargs):
         self.sas._io.submit(code)
         if isinstance(tablename, str):
@@ -581,8 +582,7 @@ class SASdata:
             raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))
 
         return pd
-=======
->>>>>>> master
+
     def _dsopts(self):
         '''
         This method builds out data set optiond clause for this SASdata object: '(where= , keeep=, obs=, ...)'
@@ -716,7 +716,6 @@ class SASdata:
             return self._returnPD(code, ['_attributes','_EngineHost','_Variables','_Sortedby'])
 
         else:
-<<<<<<< HEAD
             if self.HTML:
                if not ll:
                   ll = self.sas._io.submit(code)
@@ -725,20 +724,12 @@ class SASdata:
                else:
                   return ll
             else:
-               if not ll:
-                  ll = self.sas._io.submit(code, "text")
-               if not self.sas.batch:
-                  print(ll['LST'])
-               else:
-                  return ll
-=======
-           if not ll:
-              ll = self.sas._io.submit(code, "text")
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
->>>>>>> master
+                if not ll:
+                    ll = self.sas._io.submit(code, "text")
+                if not self.sas.batch:
+                    print(ll['LST'])
+                else:
+                    return ll
 
     def columnInfo(self):
         """
@@ -755,7 +746,6 @@ class SASdata:
             return self._returnPD(code, '_variables')
 
         else:
-<<<<<<< HEAD
             ll = self._is_valid()
             if self.HTML:
                if not ll:
@@ -766,19 +756,11 @@ class SASdata:
                   return ll
             else:
                if not ll:
-                  ll = self.sas._io.submit(code, "text")
+                   ll = self.sas._io.submit(code, "text")
                if not self.sas.batch:
-                  print(ll['LST'])
+                   print(ll['LST'])
                else:
-                  return ll
-=======
-           if not ll:
-              ll = self.sas._io.submit(code, "text")
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
->>>>>>> master
+                   return ll
 
     def describe(self):
         '''
@@ -1017,7 +999,6 @@ class SASdata:
            return
 
         ll = self._is_valid()
-<<<<<<< HEAD
         if vars(self.sas)['returnTableType']=='pandas':
             code  = "proc freq data=%s.%s order=%s noprint;" % (self.libref, self.table, order)
             code += "\n\ttables %s / out=tmpFreqOut;" % var
@@ -1026,29 +1007,19 @@ class SASdata:
             return self._returnPD(code, 'tmpFreqOut')
         else:
             if self.HTML:
-           if not ll:
-              ll = self.sas._io.submit(code)
-           if not self.sas.batch:
-              DISPLAY(HTML(ll['LST']))
-           else:
-              return ll
-        else:
-=======
-        if self.HTML:
-           if not ll:
-              ll = self.sas._io.submit(code)
-           if not self.sas.batch:
-              DISPLAY(HTML(ll['LST']))
-           else:
-              return ll
-        else:
->>>>>>> master
-           if not ll:
-              ll = self.sas._io.submit(code, "text")
-           if not self.sas.batch:
-              print(ll['LST'])
-           else:
-              return ll
+                if not ll:
+                    ll = self.sas._io.submit(code)
+                if not self.sas.batch:
+                    DISPLAY(HTML(ll['LST']))
+                else:
+                    return ll
+            else:
+                if not ll:
+                    ll = self.sas._io.submit(code, "text")
+                if not self.sas.batch:
+                    print(ll['LST'])
+                else:
+                    return ll
 
     def bar(self, var: str, title: str ='', label: str ='') -> 'a barchart plot of the (numeric) variable you chose':
         '''
