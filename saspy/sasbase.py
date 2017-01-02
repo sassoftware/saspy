@@ -60,9 +60,9 @@ except ImportError:
    pass
 
 class SASconfig:
-   '''
-   This object is not intended to be used directly. Instantiate a SASsession object instead 
-   '''
+    """
+    This object is not intended to be used directly. Instantiate a SASsession object instead
+    """
    def __init__(self, **kwargs):
       configs       = []
       self._kernel  = kwargs.get('kernel', None)
@@ -123,50 +123,50 @@ class SASconfig:
           if not pw:
               try:
                  return input(prompt)
-              except (KeyboardInterrupt):
+              except KeyboardInterrupt:
                  return ''
           else:
               try:
                  return getpass.getpass(prompt)
-              except (KeyboardInterrupt):
+              except KeyboardInterrupt:
                  return ''
       else:
           try:
              return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
                                                 password=pw)
-          except (KeyboardInterrupt):
+          except KeyboardInterrupt:
              return ''
                    
 class SASsession:
-   '''
-   The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-   cfgname - value in SAS_config_names List of the sascfg.py file
-   kernel  - None - internal use when running the SAS_kernel notebook
+    """
+    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
+    cfgname - value in SAS_config_names List of the sascfg.py file
+    kernel  - None - internal use when running the SAS_kernel notebook
 
-   For the STDIO IO Module
-   saspath - overrides saspath Dict entry of cfgname in sascfg.py file
-   options - overrides options Dict entry of cfgname in sascfg.py file
+    For the STDIO IO Module
+    saspath - overrides saspath Dict entry of cfgname in sascfg.py file
+    options - overrides options Dict entry of cfgname in sascfg.py file
 
-   and for running STDIO over passwordless ssh
-   ssh     - full path of the ssh command; /usr/bin/ssh for instance
-   host    - host name of the remote machine
+    and for running STDIO over passwordless ssh
+    ssh     - full path of the ssh command; /usr/bin/ssh for instance
+    host    - host name of the remote machine
 
-   and for the HTTP IO module to connect to SAS Viya
-   ip      - host address 
-   port    - port; the code Defaults this to 80 (the Compute Services default port)
-   context - context name defined on the compute service
-   options - SAS options to include in the start up command line
-   user    - user name to authenticate with
-   pw      - password to authenticate with
+    and for the HTTP IO module to connect to SAS Viya
+    ip      - host address
+    port    - port; the code Defaults this to 80 (the Compute Services default port)
+    context - context name defined on the compute service
+    options - SAS options to include in the start up command line
+    user    - user name to authenticate with
+    pw      - password to authenticate with
 
-   and for the IOM IO module to connect to SAS9 via Java IOM
-   ip      - host address 
-   port    - port; the code Defaults this to 80 (the Compute Services default port)
-   context - context name defined on the compute service
-   options - SAS options to include in the start up command line
-   omruser - user name to authenticate with
-   omrpw   - password to authenticate with
-   '''
+    and for the IOM IO module to connect to SAS9 via Java IOM
+    ip      - host address
+    port    - port; the code Defaults this to 80 (the Compute Services default port)
+    context - context name defined on the compute service
+    options - SAS options to include in the start up command line
+    omruser - user name to authenticate with
+    omrpw   - password to authenticate with
+    """
    #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list =[]) -> '<SASsession object>':
    def __init__(self, **kwargs) -> '<SASsession object>':
       self._loaded_macros = False
@@ -537,7 +537,7 @@ class SASdata:
         if len(libref):
            self.libref = libref 
         else:
-           if (self.sas.exist(table, libref='user')):
+           if self.sas.exist(table, libref='user'):
               self.libref = 'USER'
            else:
               self.libref = 'WORK'
@@ -928,7 +928,7 @@ class SASdata:
            code += " LegendLABEL='"+label+"'"
         code += ";\n"
         if len(title) > 0:
-           code += "\ttitle '%s';\n" % (title)
+           code += "\ttitle '%s';\n" % title
         code += "run;\ntitle;"
 
         if self.sas.nosub:
