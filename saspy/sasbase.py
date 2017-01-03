@@ -215,9 +215,15 @@ class SASsession:
       return self._io._getlsttxt(**kwargs)
 
    def _asubmit(self, code, result): 
+      if results == '':
+         if self.results.upper() == 'PANDAS':
+            results = 'HTML'
+         else:
+            results = self.results
+
       return self._io._asubmit(code, result)
 
-   def submit(self, code: str, results: str ='HTML', prompt: dict =[]) -> dict:
+   def submit(self, code: str, results: str ='', prompt: dict =[]) -> dict:
       '''
       This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
       code    - the SAS statements you want to execute 
@@ -244,6 +250,12 @@ class SASsession:
       '''
       if self.nosub:
          return dict(LOG=code, LST='')
+
+      if results == '':
+         if self.results.upper() == 'PANDAS':
+            results = 'HTML'
+         else:
+            results = self.results
 
       return self._io.submit(code, results, prompt)
 
@@ -414,7 +426,7 @@ class SASsession:
          else:
             print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0]) 
 
-   def read_csv(self, file: str, table: str, libref: str ='', results: str ='') -> '<SASdata object>':
+   def read_csv(self, file: str, table: str, libref: str ='_csv', results: str ='') -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - either the OS filesystem path of the file, or HTTP://... for a url accessible file
@@ -444,7 +456,7 @@ class SASsession:
       else:
          return log   
 
-   def df2sd(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ='', results: str ='') -> '<SASdata object>':
+   def df2sd(self, df: '<Pandas Data Frame object>', table: str ='_df', libref: str ='', results: str ='') -> '<SASdata object>':
       '''
       This is an alias for 'dataframe2sasdata'. Why type all that?
       df      - Pandas Data Frame to import to a SAS Data Set
@@ -454,7 +466,7 @@ class SASsession:
       '''
       return self.dataframe2sasdata(df, table, libref, results)
    
-   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ='', results: str='') -> '<SASdata object>':
+   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='_df', libref: str ='', results: str='') -> '<SASdata object>':
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
