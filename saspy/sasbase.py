@@ -142,6 +142,7 @@ class SASsession:
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
    cfgname - value in SAS_config_names List of the sascfg.py file
    kernel  - None - internal use when running the SAS_kernel notebook
+   results - Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
 
    For the STDIO IO Module
    saspath - overrides saspath Dict entry of cfgname in sascfg.py file
@@ -174,7 +175,7 @@ class SASsession:
       self.nosub         = False
       self.sascfg        = SASconfig(**kwargs)
       self.batch         = False
-      self.returnTableType = 'pandas'
+      self.results       = kwargs.get('results', 'Pandas')
 
       if not self.sascfg.valid:
          return
@@ -216,17 +217,17 @@ class SASsession:
    def _asubmit(self, code, result): 
       return self._io._asubmit(code, result)
 
-   def submit(self, code: str, results: str ="html", prompt: dict =[]) -> dict:
+   def submit(self, code: str, results: str ='HTML', prompt: dict =[]) -> dict:
       '''
       This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
       code    - the SAS statements you want to execute 
-      results - format of results, HTML is default, TEXT is the alternative
+      results - format of results, HTLML and TEXT is the alternative
       prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete
                 The keys are the names of the macro variables and the boolean flag is to either hide what you type and delete
                 the macros, or show what you type and keep the macros (they will still be available later)
                 for example (what you type for pw will not be displayed, user and dsname will):
 
-                results = sas.submit(
+                results_dict = sas.submit(
                    """
                    libname tera teradata server=teracop1 user=&user pw=&pw;
                    proc print data=tera.&dsname (obs=10); run;
@@ -273,6 +274,13 @@ class SASsession:
       '''
       self.batch = batch
 
+   def set_results(self, results: str):
+      '''
+      This method set the results attribute for the SASsession object; it stays in effect till changed
+      results - set the default result type for this SASdata object. 'Pandas' or 'HTML' or 'TEXT'.
+      '''
+      self.results = results
+   
    def exist(self, table: str, libref: str ="") -> bool:
       '''
       table  - the name of the SAS Data Set
@@ -342,12 +350,12 @@ class SASsession:
       self._io._asubmit(code.decode(), results='text')
       os.close(fd)
 
-   def sasdata(self, table: str, libref: str ='', results: str ='HTML', dsopts: dict ={})  -> '<SASdata object>':
+   def sasdata(self, table: str, libref: str ='', results: str ='', dsopts: dict ={})  -> '<SASdata object>':
       '''
       This method creates a SASdata object for the SAS Data Set you specify
       table   - the name of the SAS Data Set
       libref  - the libref for the Data Set, defaults to WORK, or USER if assigned
-      results - format of results, HTML is default, TEXT is the alternative
+      results - format of results, SASsession.results is default, Pandas, HTML and TEXT are the valid options
       dsopts - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
                where is a sting, keep and drop are strings or list of strings. obs and first obs are numbers - either string or int
                {'where'    : 'msrp < 20000 and make = "Ford"' 
@@ -357,6 +365,8 @@ class SASsession:
                 'firstobs' : '12'
                }
       '''
+      if results == '':
+         results = self.results
       sd = SASdata(self, libref, table, results, dsopts)
       if not self.exist(sd.table, sd.libref):
          if not self.batch:
@@ -404,15 +414,22 @@ class SASsession:
          else:
             print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0]) 
 
-   def read_csv(self, file: str, table: str, libref: str ='', results: str ='HTML') -> '<SASdata object>':
+   def read_csv(self, file: str, table: str, libref: str ='', results: str ='') -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - either the OS filesystem path of the file, or HTTP://... for a url accessible file
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-      results - format of results, HTML is default, TEXT is the alternative
+      results - format of results, SASsession.results is default, HTML or TEXT are the alternatives
       '''
-      return self._io.read_csv(file, table, libref, results, self.nosub)
+      if results == '':
+         results = self.results
+      self._io.read_csv(file, table, libref, self.nosub)
+
+      if self.exist(table, libref):
+         return SASdata(self, libref, table, results)
+      else:
+         return None
    
    def write_csv(self, file: str, table: str, libref: str ='', dsopts: dict ={}) -> 'The LOG showing the results of the step':
       '''
@@ -427,29 +444,31 @@ class SASsession:
       else:
          return log   
 
-   def df2sd(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ='', results: str ='HTML') -> '<SASdata object>':
+   def df2sd(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ='', results: str ='') -> '<SASdata object>':
       '''
       This is an alias for 'dataframe2sasdata'. Why type all that?
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-      results - format of results, HTML is default, TEXT is the alternative
+      results - format of results, SASsession.results is default, HTML or TEXT are the alternatives
       '''
       return self.dataframe2sasdata(df, table, libref, results)
    
-   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ='', results: str ='HTML') -> '<SASdata object>':
+   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ='', results: str='') -> '<SASdata object>':
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-      results - format of results, HTML is default, TEXT is the alternative
+      results - format of results, SASsession.results is default, HTML or TEXT are the alternatives
       '''
+      if results == '':
+         results = self.results
       if self.nosub:
          print("too complicated to show the code, read the source :), sorry.")
          return None
       else:
-         self._io.dataframe2sasdata(df, table, libref, results)
+         self._io.dataframe2sasdata(df, table, libref)
 
       if self.exist(table, libref):
          return SASdata(self, libref, table, results)
@@ -516,9 +535,12 @@ class SASsession:
 
 class SASdata:
 
-    def __init__(self, sassession, libref, table, results="HTML", dsopts={}):
+    def __init__(self, sassession, libref, table, results='', dsopts={}):
 
         self.sas = sassession
+
+        if results == '':
+           results = sassession.results
 
         failed = 0 
         if results.upper() == "HTML":
@@ -546,18 +568,20 @@ class SASdata:
            if self.sas.sascfg.mode == 'HTTP':
               self.libref = 'WORK'
 
-        self.table  = table
-        self.dsopts = dsopts
+        self.table   = table
+        self.dsopts  = dsopts
+        self.results = results
 
     def set_results(self, results: str):
         '''
         This method set the results attribute for the SASdata object; it stays in effect till changed
-        results - set the default result type for this SASdata object. 'HTML' = HTML. Anything else = 'TEXT'.
+        results - set the default result type for this SASdata object. 'Pandas' or 'HTML' or 'TEXT'.
         '''
         if results.upper() == "HTML":
            self.HTML = 1
         else:
            self.HTML = 0
+        self.results = results
 
     def _is_valid(self):
         if self.sas.exist(self.table, self.libref):
@@ -614,9 +638,9 @@ class SASdata:
            print(code)
            return
 
-        if vars(self.sas)['returnTableType']=='pandas':
-            code  = "data _tail ; set %s.%s(obs=%s); run;" % (self.libref, self.table, obs)
-            return self._returnPD(code, '_tail')
+        if self.results.upper() == 'PANDAS':
+            code  = "data _head ; set %s.%s(obs=%s); run;" % (self.libref, self.table, obs)
+            return self._returnPD(code, '_head')
         else:
             ll = self._is_valid()
             if self.HTML:
@@ -671,7 +695,7 @@ class SASdata:
            print(code)
            return
 
-        if vars(self.sas)['returnTableType']=='pandas':
+        if self.results.upper() == 'PANDAS':
             code  = "data _tail ; set %s.%s(firstobs=%s obs=%s); run;" % (self.libref, self.table, firstobs, lastobs)
             return self._returnPD(code, '_tail')
         else:
@@ -706,7 +730,7 @@ class SASdata:
            return
 
         ll = self._is_valid()
-        if vars(self.sas)['returnTableType']=='pandas':
+        if self.results.upper() == 'PANDAS':
             code = "proc contents data=%s.%s ;" %(self.libref, self.table)
             code += "ods output Attributes=_attributes;"
             code += "ods output EngineHost=_EngineHost;"
@@ -741,7 +765,7 @@ class SASdata:
            print(code)
            return
 
-        if vars(self.sas)['returnTableType']=='pandas':
+        if self.results.upper() == 'PANDAS':
             code = "proc contents data=%s.%s ;ods output Variables=_variables ;run;" %(self.libref, self.table)
             return self._returnPD(code, '_variables')
 
@@ -788,7 +812,7 @@ class SASdata:
 
         ll = self._is_valid()
 
-        if vars(self.sas)['returnTableType']=='pandas':
+        if self.results.upper() == 'PANDAS':
             code = "proc means data=%s.%s n mean std min p25 p50 p75 max; ods output Summary=_summary; run;" %(self.libref, self.table)
             return self._returnPD(code, '_summary')
         else:
@@ -853,7 +877,6 @@ class SASdata:
             print(code)
             runcode = False
             
-       
         ll = self._is_valid()
         if ll:
             runcode = False
@@ -869,11 +892,7 @@ class SASdata:
             if not isinstance(out, str):
                 return out
             else:
-                if self.HTML:
-                    results = 'HTML'
-                else:
-                    results = 'text'
-                return self.sas.sasdata(table, libref, results)
+                return self.sas.sasdata(table, libref, self.results)
         else:
             return self
  
@@ -999,7 +1018,7 @@ class SASdata:
            return
 
         ll = self._is_valid()
-        if vars(self.sas)['returnTableType']=='pandas':
+        if self.results.upper() == 'PANDAS':
             code  = "proc freq data=%s.%s order=%s noprint;" % (self.libref, self.table, order)
             code += "\n\ttables %s / out=tmpFreqOut;" % var
             code += "\nrun;"

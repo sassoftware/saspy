@@ -714,13 +714,12 @@ class SASsessionSTDIO():
    
       return exists
    
-   def read_csv(self, file: str, table: str, libref: str ="", results: str ='HTML', nosub: bool =False) -> '<SASdata object>':
+   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False) -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-      results - format of results, HTML is default, TEXT is the alternative
       '''
       code  = "filename x "
    
@@ -737,10 +736,6 @@ class SASsessionSTDIO():
          print(code)
       else:
          ll = self.submit(code, "text")
-         if self._sb.exist(table, libref):
-            return self._sb.sasdata(table, libref, results)
-         else:
-            return None
    
    def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict ={}) -> 'The LOG showing the results of the step':
       '''
@@ -761,13 +756,12 @@ class SASsessionSTDIO():
          ll = self.submit(code, "text")
          return ll['LOG']
 
-   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="", results: str ='HTML') -> '<SASdata object>':
+   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str =""):
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-      results - format of results, HTML is default, TEXT is the alternative
       '''
       input  = ""
       card   = ""
@@ -822,7 +816,7 @@ class SASsessionSTDIO():
          #self._asubmit(card, "text")
 
       self._asubmit(";run;", "text")
-   
+
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
