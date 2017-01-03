@@ -60,9 +60,9 @@ except ImportError:
    pass
 
 class SASconfig:
-    """
-    This object is not intended to be used directly. Instantiate a SASsession object instead
-    """
+   """
+   This object is not intended to be used directly. Instantiate a SASsession object instead
+   """
    def __init__(self, **kwargs):
       configs       = []
       self._kernel  = kwargs.get('kernel', None)
@@ -138,35 +138,35 @@ class SASconfig:
              return ''
                    
 class SASsession:
-    """
-    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-    cfgname - value in SAS_config_names List of the sascfg.py file
-    kernel  - None - internal use when running the SAS_kernel notebook
+   """
+   The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
+   cfgname - value in SAS_config_names List of the sascfg.py file
+   kernel  - None - internal use when running the SAS_kernel notebook
 
-    For the STDIO IO Module
-    saspath - overrides saspath Dict entry of cfgname in sascfg.py file
-    options - overrides options Dict entry of cfgname in sascfg.py file
+   For the STDIO IO Module
+   saspath - overrides saspath Dict entry of cfgname in sascfg.py file
+   options - overrides options Dict entry of cfgname in sascfg.py file
 
-    and for running STDIO over passwordless ssh
-    ssh     - full path of the ssh command; /usr/bin/ssh for instance
-    host    - host name of the remote machine
+   and for running STDIO over passwordless ssh
+   ssh     - full path of the ssh command; /usr/bin/ssh for instance
+   host    - host name of the remote machine
 
-    and for the HTTP IO module to connect to SAS Viya
-    ip      - host address
-    port    - port; the code Defaults this to 80 (the Compute Services default port)
-    context - context name defined on the compute service
-    options - SAS options to include in the start up command line
-    user    - user name to authenticate with
-    pw      - password to authenticate with
+   and for the HTTP IO module to connect to SAS Viya
+   ip      - host address
+   port    - port; the code Defaults this to 80 (the Compute Services default port)
+   context - context name defined on the compute service
+   options - SAS options to include in the start up command line
+   user    - user name to authenticate with
+   pw      - password to authenticate with
 
-    and for the IOM IO module to connect to SAS9 via Java IOM
-    ip      - host address
-    port    - port; the code Defaults this to 80 (the Compute Services default port)
-    context - context name defined on the compute service
-    options - SAS options to include in the start up command line
-    omruser - user name to authenticate with
-    omrpw   - password to authenticate with
-    """
+   and for the IOM IO module to connect to SAS9 via Java IOM
+   ip      - host address
+   port    - port; the code Defaults this to 80 (the Compute Services default port)
+   context - context name defined on the compute service
+   options - SAS options to include in the start up command line
+   omruser - user name to authenticate with
+   omrpw   - password to authenticate with
+   """
    #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list =[]) -> '<SASsession object>':
    def __init__(self, **kwargs) -> '<SASsession object>':
       self._loaded_macros = False
@@ -615,7 +615,7 @@ class SASdata:
            return
 
         if vars(self.sas)['returnTableType']=='pandas':
-            code  = "data=_tail ; set %s.%s(obs=%s); run;" % (self.libref, self.table, obs)
+            code  = "data _tail ; set %s.%s(obs=%s); run;" % (self.libref, self.table, obs)
             return self._returnPD(code, '_tail')
         else:
             ll = self._is_valid()
@@ -672,7 +672,7 @@ class SASdata:
            return
 
         if vars(self.sas)['returnTableType']=='pandas':
-            code  = "data=_tail ; set %s.%s(firstobs=%s obs=%s); run;" % (self.libref, self.table, firstobs, lastobs)
+            code  = "data _tail ; set %s.%s(firstobs=%s obs=%s); run;" % (self.libref, self.table, firstobs, lastobs)
             return self._returnPD(code, '_tail')
         else:
             if self.HTML:
