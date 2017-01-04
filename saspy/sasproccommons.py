@@ -16,6 +16,7 @@
 import logging
 import re
 from saspy.sasresults import SASresults
+#from pdb import set_trace as bp
 
 
 class SASProcCommons:
@@ -492,8 +493,12 @@ class SASProcCommons:
         self.sas.nosub = nosub
         charlist1 = [x.casefold() for x in charlist1]
         try:
-            input_list = [x.casefold() for x in input_list]        
-            charlist2 = list(set(charlist1) & (set(input_list) | set([tgt])))
+            if isinstance(input_list, dict):
+                input_list['nominal'] = [x.casefold() for x in input_list['nominal']]
+                charlist2 = list(set(charlist1) & (set(input_list['nominal']) | set([tgt])))
+            else:
+                input_list = [x.casefold() for x in input_list]
+                charlist2 = list(set(charlist1) & (set(input_list) | set([tgt])))
         except TypeError:
             charlist2 = list(set(charlist1) & set([tgt]))
 
@@ -519,8 +524,14 @@ class SASProcCommons:
                      'interval': int_inputs}
         # no nominal list but there are char variables
         elif len(charlist2)>0:
-            nom_inputs = [val for val in input_list if val in charlist2]
-            int_inputs = [val for val in input_list if val not in charlist2]
+            if isinstance(input_list, dict):
+                # add char variables to the current nominal list
+                nom_inputs = list( set(input_list['nominal']) | set(charlist2))
+                # make sure char variables aren't in interval list
+                int_inputs = list( set(input_list['interval']) - set(charlist2))
+            else:
+                nom_inputs = [val for val in input_list if val in charlist2]
+                int_inputs = [val for val in input_list if val not in charlist2]
             inputs = {'nominal': nom_inputs,
                      'interval': int_inputs}
 
