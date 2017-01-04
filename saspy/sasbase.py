@@ -1036,6 +1036,7 @@ class SASdata:
         if len(title) > 0:
            code += '\ttitle "'+title+'";\n'
         code += 'title \"\";'
+        code += 'run;'
 
         if self.sas.nosub:
            print(code)
