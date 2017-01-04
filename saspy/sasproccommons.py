@@ -465,7 +465,6 @@ class SASProcCommons:
 
 
     def _processNominals(self, kwargs, data):
-        import pdb;pdb.set_trace()
         nom = kwargs.pop('nominals', None)
         input_list = kwargs.pop('input', None)
         tgt = kwargs.pop('target', None)
@@ -484,9 +483,13 @@ class SASProcCommons:
             keep Variable;
         run;
         """
+        # ignore teach_me_SAS mode to run contents
+        nosub = self.sas.nosub
+        self.sas.nosub = False
         self.sas.submit(char_string.format(data.libref, data.table+data._dsopts()))
         charlist1=list(self.sas.sasdata2dataframe('_charlist', libref='WORK').values.flatten())
         self.sas.submit("proc delete data=work._charlist; run;")
+        self.sas.nosub = nosub
         charlist1 = [x.casefold() for x in charlist1]
         try:
             input_list = [x.casefold() for x in input_list]        
