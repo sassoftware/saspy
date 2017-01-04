@@ -22,6 +22,7 @@ from time import sleep
 import saspy.sascfg as SAScfg
 
 try:
+   import pandas as pd
    from IPython.display import HTML
 except ImportError:
    pass
@@ -825,7 +826,7 @@ class SASsessionSTDIO():
       port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       '''
       port =  kwargs.get('port', 0)
-      import pandas as pd
+      #import pandas as pd
       import socket as socks
       datar = ""
 

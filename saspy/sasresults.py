@@ -17,9 +17,10 @@ from __future__ import print_function
 from saspy.SASLogLexer import SASLogStyle, SASLogLexer
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
-import pandas as pd
+#import pandas as pd
 
 try:
+    import pandas as pd
     from IPython import display as dis
     from IPython.core.display import HTML
 except ImportError:
