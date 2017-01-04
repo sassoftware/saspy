@@ -426,7 +426,7 @@ class SASsession:
          else:
             print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0]) 
 
-   def read_csv(self, file: str, table: str, libref: str ='_csv', results: str ='') -> '<SASdata object>':
+   def read_csv(self, file: str, table: str='_csv', libref: str ='', results: str ='') -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - either the OS filesystem path of the file, or HTTP://... for a url accessible file
@@ -1067,6 +1067,7 @@ class SASdata:
         if len(title) > 0:
            code += '\ttitle "'+title+'";\n'
         code += 'title \"\";'
+        code += 'run;'
 
         if self.sas.nosub:
            print(code)
