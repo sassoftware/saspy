@@ -18,6 +18,7 @@ from saspy.SASLogLexer import SASLogStyle, SASLogLexer
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
 import pandas as pd
+#from pdb import set_trace as bp
 
 try:
     from IPython import display as dis
@@ -99,10 +100,12 @@ class SASresults(object):
         """
         if not self.sas.batch:
            for i in self._attrs:
-               dis.display(self.__getattr__(i))
+               if i.upper()!='LOG':
+                   dis.display(self.__getattr__(i))
         else:
            ret = []
            for i in self._attrs:
-               ret.append(self.__getattr__(i))
+               if i.upper()!='LOG':
+                   ret.append(self.__getattr__(i))
            return ret
 
