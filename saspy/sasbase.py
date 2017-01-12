@@ -604,16 +604,19 @@ class SASdata:
            return ll
 
     def _returnPD(self, code, tablename, **kwargs):
+        libref='work'
+        if 'libref' in kwargs:
+          libref = kwargs['libref']
         self.sas._io.submit(code)
         if isinstance(tablename, str):
-            pd = self.sas._io.sasdata2dataframe(tablename,'work')
-            self.sas._io.submit("proc delete data=%s; run;" % tablename)
+            pd = self.sas._io.sasdata2dataframe(tablename,libref)
+            self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, tablename))
         elif isinstance(tablename, list):
             pd=dict()
             for t in tablename:
                 # strip leading '_' from names and capitalize for dictionary labels
-                pd[t.replace('_','').capitalize()] = self.sas._io.sasdata2dataframe(t,'work')
-                self.sas._io.submit("proc delete data=%s; run;" % t)
+                pd[t.replace('_','').capitalize()] = self.sas._io.sasdata2dataframe(t, libref)
+                self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, t))
         else:
             raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))
 
@@ -907,6 +910,80 @@ class SASdata:
                 return self.sas.sasdata(table, libref, self.results)
         else:
             return self
+
+      def assess_model(self, target,  proc='', nominal=True, kwargs):
+        # Need target variable, if nominal, proc name
+        target = target
+        nominals = kwargs.get('nominals', None)
+        proc = proc
+        # submit autocall macro
+        self.sas.submit("%aamodel;")
+        
+        # build parameters and 
+        score_table = str(self.libref + '.' + "SCOREDATA")
+        binstats = str(self.libref + '.' + "ASSESSMENTSTATISTICS")
+        out = str(self.libref + '.' + "ASSESSMENTBINSTATISTICS")
+        level = 'interval'
+        var = 'P_' + target
+        if nominal:
+            level = 'class'
+            sortOrder='DESC'
+            if proc in ['tree']:
+                sortOrder = 'ASC'
+            event  = "proc hpdmdb data=%s.%s classout=work._DMDBCLASSTARGET(keep=name nraw craw level frequency nmisspercent);" % (self.libref, self.table)
+            event += "\nclass %s (%s); \nrun;" % (target, sortOrder) 
+            event += "data _null_; set work._DMDBCLASSTARGET; where ^(NRAW eq . and CRAW eq '') and lowcase(name)=lowcase('%s');" % target
+            event += "if _N_=1 then call symput('_newevent', strip(LEVEL)); run;"
+            event += '\n%put "target Level = &_newevent";'
+            self.sas.submit(event)
+            if proc in ['tree', 'gradboost', 'forest']:
+                var = 'P_' + target + "&_newevent."
+ 
+        if nominal:
+            self.sas.submit("%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s,  EVENT=&_newevent);" 
+                         % (score_table, target, var , level, binstats, out))
+            self.sas.submit("%symdel _newevent")
+        else:
+            self.sas.submit("%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s);" 
+                         % (score_table, target, var, level, binstats, out))
+        rename_char = """
+        data {0};
+            set {0};
+            if level in ("INTERVAL", "INT") then do;
+                rename  _sse_ = SumSquaredError
+                        _div_ = Divsor
+                        _ASE_ = AverageSquaredError
+                        _RASE_ = RootAverageSquaredError
+                        _MEANP_ = MeanPredictionValue
+                        _STDP_ = StandardDeviationPrediction
+                        _CVP_ = CoefficientVariationPrediction;
+            end;
+            else do;
+                rename  CR = MaxClassificationRate
+                        KSCut = KSCutOff
+                        CRDEPTH =  MaxClassificationDepth
+                        MDepth = MedianClassificationDepth
+                        MCut  = MedianEventDetectionCutOff
+                        CCut = ClassificationCutOff
+                        _misc_ = MisClassificationRate;
+            end;
+        run;
+
+        """
+        self.sas.submit(rename_char.format(binstats))
+        """
+        # Debug block
+        debug={'name': name,
+               'score_table': score_table,
+               'target': target,
+               'var': var,
+               'nominals': nominals,
+               'level': level,
+               'binstats': binstats,
+               'out':out}
+        print(debug.items())
+        """
+        return self._returnPD(code, ['ASSESSMENTSTATISTICS','ASSESSMENTBINSTATISTICS'], libref=self.libref)
  
     def to_csv(self, file: str) -> 'The LOG showing the results of the step':
         '''
