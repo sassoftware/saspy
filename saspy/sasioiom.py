@@ -20,10 +20,11 @@ import subprocess
 import getpass
 from time import sleep
 import saspy.sascfg as SAScfg
-import pandas as pd
+#import pandas as pd
 import socket as socks
 
 try:
+   import pandas as pd
    from IPython.display import HTML
 except ImportError:
    pass

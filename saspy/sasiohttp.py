@@ -22,6 +22,7 @@ from time import sleep
 import saspy.sascfg as SAScfg
 
 try:
+   import pandas as pd
    from IPython.display import HTML
 except ImportError:
    pass
@@ -644,7 +645,7 @@ class SASsessionHTTP():
       libref  - the libref for the SAS Data Set.
       '''
       print("sasdata2dataframe is not currently FULLY implemented in this SAS Connection Interface; HTTP")
-      import pandas as pd
+      #import pandas as pd
 
       # GET Data Table      I don't think this is necessary at all - maybe to get the links?
       #conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
