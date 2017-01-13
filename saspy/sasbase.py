@@ -37,7 +37,7 @@
 #
 
 import os
-
+from pdb import set_trace as bp
 import saspy.sascfg as SAScfg
 
 try:
@@ -729,7 +729,105 @@ class SASdata:
                   print(ll['LST'])
                else:
                   return ll
-   
+
+    def partition(self, var='', fraction=.7, seed=9878, kfold=1, out=None):
+        """
+        Partion a sas data object using SRS sampling or if a variable is specified then stratifiying with respect to that variable
+        """
+        #bp()
+        # loop through for k folds cross-validation
+        i = 1
+        # initialize code string so that loops work
+        code = ''
+        # Make sure kfold was an integer
+        try:
+            k = int(kfold)
+        except ValueError:
+            print("Kfold must be an integer")
+        if out is None:
+            out_table = self.table
+            out_libref = self.libref
+        elif not isinstance(out, str):
+            out_table = out.table
+            out_libref = out.libref
+        else:
+            try:
+                out_table = out.split('.')[1]
+                out_libref = out.split('.')[0]
+            except IndexError:
+                out_table = out
+                out_libref = 'work'
+        while i <=k:
+            # get the list of variables
+            if k==1:
+                code += "proc hpsample data=%s.%s%s out=%s.%s%s samppct=%s seed=%s Partition;\n" % (self.libref, self.table, self._dsopts(),out_libref, out_table, self._dsopts(), fraction, seed)
+            else:
+                code += "proc hpsample data=%s.%s%s out=%s.%s%s samppct=%s seed=%s partition PARTINDNAME=_cvfold%s;\n" % (self.libref, self.table, self._dsopts(), out_libref, out_table, self._dsopts(), fraction, seed, i)
+            
+            # Get variable info for stratified sampling
+            if len(var)>0:
+                if i==1:
+                    num_string="""
+                    proc contents data={0}.{1};
+                        ods output variables=_charlist;
+                    run;
+                    data _charlist;
+                        set _charlist;
+                        where Type='Num';
+                        keep Variable;
+                    run;
+                    """
+                    # ignore teach_me_SAS mode to run contents
+                    nosub = self.sas.nosub
+                    self.sas.nosub = False
+                    self.sas.submit(num_string.format(self.libref, self.table+self._dsopts()))
+                    numlist1=list(self.sas.sasdata2dataframe('_charlist', libref='WORK').values.flatten())
+                    self.sas.submit("proc delete data=work._charlist; run;")
+                    self.sas.nosub = nosub
+
+                    # check if var is in numlist1
+                    if isinstance(var,str):
+                        tlist=var.split()
+                    elif isinstance(var,list):
+                        tlist=var
+                    else:
+                        raise SyntaxError ("var must be a string or list you submitted: %s" % str(type(var)))
+                if set(numlist1).isdisjoint(tlist):
+                    if isinstance(var,str):
+                        code += "class _character_;\ntarget %s;\nvar _numeric_;\n" % var
+                    else:
+                        code += "class _character_;\ntarget %s;\nvar _numeric_;\n" % " ".join(var)
+                else:
+                    varlist = [ x for x in numlist1 if x not in tlist]
+                    code += "class %s _character_;\ntarget %s;\nvar %s;\n" % (var, var, " ".join(varlist))
+
+            else:
+                code += "class _character_;\nvar _numeric_;\n"
+            code+="run;\n"
+            i += 1
+        runcode = True
+        if self.sas.nosub:
+            print(code)
+            runcode = False
+        ll = self._is_valid()
+        if ll:
+            runcode = False
+        if runcode:
+            ll = self.sas.submit(code, "text")
+            elog=[]
+            for line in ll['LOG'].splitlines():
+                if line.startswith('ERROR'):
+                    elog.append(line)
+            if len(elog):
+                raise RuntimeError("\n".join(elog))
+        if out:
+            if not isinstance(out, str):
+                return out
+            else:
+                return self.sas.sasdata(out_table, out_libref, self.results)
+        else:
+            return self
+
     def contents(self):
         '''
         display metadata about the table. size, number of rows, columns and their data type ...
