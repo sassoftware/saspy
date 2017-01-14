@@ -1029,15 +1029,16 @@ class SASdata:
         else:
             return self
 
-      def assess_model(self, target,  proc='', nominal=True, kwargs):
+
+def assessModel(self, target, proc='', nominal=True, kwargs):
         # Need target variable, if nominal, proc name
         target = target
         nominals = kwargs.get('nominals', None)
         proc = proc
         # submit autocall macro
         self.sas.submit("%aamodel;")
-        
-        # build parameters and 
+
+        # build parameters and
         score_table = str(self.libref + '.' + "SCOREDATA")
         binstats = str(self.libref + '.' + "ASSESSMENTSTATISTICS")
         out = str(self.libref + '.' + "ASSESSMENTBINSTATISTICS")
@@ -1049,21 +1050,22 @@ class SASdata:
             if proc in ['tree']:
                 sortOrder = 'ASC'
             event  = "proc hpdmdb data=%s.%s classout=work._DMDBCLASSTARGET(keep=name nraw craw level frequency nmisspercent);" % (self.libref, self.table)
-            event += "\nclass %s (%s); \nrun;" % (target, sortOrder) 
+            event += "\nclass %s (%s); \nrun;" % (target, sortOrder)
             event += "data _null_; set work._DMDBCLASSTARGET; where ^(NRAW eq . and CRAW eq '') and lowcase(name)=lowcase('%s');" % target
             event += "if _N_=1 then call symput('_newevent', strip(LEVEL)); run;"
             event += '\n%put "target Level = &_newevent";'
             self.sas.submit(event)
             if proc in ['tree', 'gradboost', 'forest']:
                 var = 'P_' + target + "&_newevent."
- 
+
         if nominal:
-            self.sas.submit("%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s,  EVENT=&_newevent);" 
-                         % (score_table, target, var , level, binstats, out))
+            self.sas.submit(
+                "%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s,  EVENT=&_newevent);"
+                % (score_table, target, var , level, binstats, out))
             self.sas.submit("%symdel _newevent")
         else:
-            self.sas.submit("%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s);" 
-                         % (score_table, target, var, level, binstats, out))
+            self.sas.submit("%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s);"
+                            % (score_table, target, var, level, binstats, out))
         rename_char = """
         data {0};
             set {0};
