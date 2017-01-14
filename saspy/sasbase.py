@@ -733,7 +733,7 @@ class SASdata:
                else:
                   return ll
 
-    def partition(self, var='', fraction=.7, seed=9878, kfold=1, out=None):
+    def partition(self, var='', fraction=.7, seed=9878, kfold=1, out=None, singleOut=True):
         """
         Partion a sas data object using SRS sampling or if a variable is specified then stratifiying with respect to that variable
         """
@@ -763,9 +763,10 @@ class SASdata:
         while i <=k:
             # get the list of variables
             if k==1:
-                code += "proc hpsample data=%s.%s%s out=%s.%s%s samppct=%s seed=%s Partition;\n" % (self.libref, self.table, self._dsopts(),out_libref, out_table, self._dsopts(), fraction, seed)
+                code += "proc hpsample data=%s.%s%s out=%s.%s%s samppct=%s seed=%s Partition;\n" % (self.libref, self.table, self._dsopts(),out_libref, out_table, self._dsopts(), fraction*100, seed)
             else:
-                code += "proc hpsample data=%s.%s%s out=%s.%s%s samppct=%s seed=%s partition PARTINDNAME=_cvfold%s;\n" % (self.libref, self.table, self._dsopts(), out_libref, out_table, self._dsopts(), fraction, seed, i)
+                seed += 1
+                code += "proc hpsample data=%s.%s%s out=%s.%s%s samppct=%s seed=%s partition PARTINDNAME=_cvfold%s;\n" % (self.libref, self.table, self._dsopts(), out_libref, out_table, self._dsopts(), fraction*100, seed, i)
             
             # Get variable info for stratified sampling
             if len(var)>0:
@@ -802,34 +803,53 @@ class SASdata:
                         code += "class _character_;\ntarget %s;\nvar _numeric_;\n" % " ".join(var)
                 else:
                     varlist = [ x for x in numlist1 if x not in tlist]
+                    varlist.extend(["_cvfold%s" % j for j in range(1,i) if k>1 and i>1])
                     code += "class %s _character_;\ntarget %s;\nvar %s;\n" % (var, var, " ".join(varlist))
 
             else:
                 code += "class _character_;\nvar _numeric_;\n"
             code+="run;\n"
             i += 1
+        # split_code is used if singleOut is False it generates the needed SAS code to break up the kfold parition set.
+        split_code=''
+        if not singleOut:
+            split_code +='DATA '
+            for j in range(1, k+1):
+                split_code += "\t%s.%s%s_train(drop=_Partind_ _cvfold:)\n" % (out_libref, out_table, j)
+                split_code += "\t%s.%s%s_score(drop=_Partind_ _cvfold:)\n" % (out_libref, out_table, j)
+            split_code +=';\n \tset %s.%s;\n' % (out_libref, out_table)
+            for z in range(1, k+1):
+                split_code += "\tif _cvfold%s = 1 then output %s.%s%s_train;\n" % (z, out_libref, out_table, z)
+                split_code += "\telse output %s.%s%s_score;\n" % (out_libref, out_table, z)
+            split_code +='run;' 
         runcode = True
         if self.sas.nosub:
-            print(code)
+            print(code + '\n\n' + split_code)
             runcode = False
         ll = self._is_valid()
         if ll:
             runcode = False
         if runcode:
-            ll = self.sas.submit(code, "text")
+            ll = self.sas.submit(code + split_code, "text")
             elog=[]
             for line in ll['LOG'].splitlines():
                 if line.startswith('ERROR'):
                     elog.append(line)
             if len(elog):
                 raise RuntimeError("\n".join(elog))
-        if out:
-            if not isinstance(out, str):
-                return out
+            if not singleOut:
+                outTableList = []
+                for j in range(1, k+1):
+                    outTableList.extend([self.sas.sasdata(out_table + str(z) + "_train", out_libref, dsopts=self._dsopts()),
+                                         self.sas.sasdata(out_table + str(z) + "_score", out_libref, dsopts=self._dsopts())])
+                return outTableList
+            if out:
+                if not isinstance(out, str):
+                    return out
+                else:
+                    return self.sas.sasdata(out_table, out_libref, self.results)
             else:
-                return self.sas.sasdata(out_table, out_libref, self.results)
-        else:
-            return self
+                return self
 
     def contents(self):
         '''
