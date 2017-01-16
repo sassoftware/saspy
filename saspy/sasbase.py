@@ -1030,7 +1030,7 @@ class SASdata:
             return self
 
 
-def assessModel(self, target, proc='', nominal=True, kwargs):
+    def assessModel(self, target, proc='', nominal=True, **kwargs):
         # Need target variable, if nominal, proc name
         target = target
         nominals = kwargs.get('nominals', None)
