@@ -837,8 +837,8 @@ class SASdata:
             if not singleOut:
                 outTableList = []
                 for j in range(1, k+1):
-                    outTableList.extend([self.sas.sasdata(out_table + str(z) + "_train", out_libref, dsopts=self._dsopts()),
-                                         self.sas.sasdata(out_table + str(z) + "_score", out_libref, dsopts=self._dsopts())])
+                    outTableList.append((self.sas.sasdata(out_table + str(z) + "_train", out_libref, dsopts=self._dsopts()),
+                                         self.sas.sasdata(out_table + str(z) + "_score", out_libref, dsopts=self._dsopts())))
                 return outTableList
             if out:
                 if not isinstance(out, str):
