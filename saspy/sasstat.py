@@ -167,3 +167,26 @@ class SASstat:
 
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "LOGISTIC", required_set, legal_set, **kwargs)
+
+    def tpspline(self, **kwargs: dict) -> object:
+        """
+        Python method to call the TPSPLINE procedure
+        For more information on the statements see the Documentation link.
+
+        required_set = {'model'}
+        legal_set = {'by', 'freq', 'id', 'model', 'output', 'score', 'procopts'}
+
+        cls is an alias for the class statement
+        Documentation link:
+        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_tpspline_toc.htm
+
+        The PROC TPSPLINE and MODEL statements are required.
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'model'}
+        legal_set = {'by', 'freq', 'id', 'model', 'output', 'score', 'procopts'}
+
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc(self, "TPSPLINE", required_set, legal_set, **kwargs)
