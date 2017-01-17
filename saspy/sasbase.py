@@ -1064,42 +1064,40 @@ def describe(self):
                 return ll
 
 
-def sort(self, by: str, out
+    def sort(self, by: str, out: 'str or sas data object' = '', ** kwargs) -> '<SASdata object>':
+      """
+      This method will sort the SAS Data Set
+      by  - REQUIRED variable to sort by (BY <DESCENDING> variable-1 <<DESCENDING> variable-2 ...>;)
+      out - OPTIONAL takes either a string 'libref.table' or 'table' which will go to WORK or USER if assigned or a sas data object'' will sort in place if allowed
+      returns this SASdata object if out= not specified, or a new SASdata object for out= when specified
 
-: 'str or sas data object' = '', ** kwargs) -> '<SASdata object>':
-"""
-This method will sort the SAS Data Set
-by  - REQUIRED variable to sort by (BY <DESCENDING> variable-1 <<DESCENDING> variable-2 ...>;)
-out - OPTIONAL takes either a string 'libref.table' or 'table' which will go to WORK or USER if assigned or a sas data object'' will sort in place if allowed
-returns this SASdata object if out= not specified, or a new SASdata object for out= when specified
+      Examples:
+      1. wkcars.sort('type')
+      2. wkcars2 = sas.sasdata('cars2')
+         wkcars.sort('cylinders', wkcars2)
+      3. cars2=cars.sort('DESCENDING origin', out='foobar')
+      4. cars.sort('type').head()
+      5. stat_results = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type'))
+      6. stat_results2 = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type','work.cars'))
 
-Examples:
-1. wkcars.sort('type')
-2. wkcars2 = sas.sasdata('cars2')
-   wkcars.sort('cylinders', wkcars2)
-3. cars2=cars.sort('DESCENDING origin', out='foobar')
-4. cars.sort('type').head()
-5. stat_results = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type'))
-6. stat_results2 = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type','work.cars'))
-
-"""
-outstr = ''
-options = ''
-if out:
-    if isinstance(out, str):
-        fn = out.partition('.')
-        if fn[1] == '.':
-            libref = fn[0]
-            table = fn[2]
-            outstr = "out=%s.%s" % (libref, table)
-        else:
-            libref = ''
-            table = fn[0]
-            outstr = "out=" + table
-    else:
-        libref = out.libref
-        table = out.table
-        outstr = "out=%s.%s" % (out.libref, out.table)
+      """
+      outstr = ''
+      options = ''
+      if out:
+          if isinstance(out, str):
+              fn = out.partition('.')
+              if fn[1] == '.':
+                  libref = fn[0]
+                  table = fn[2]
+                  outstr = "out=%s.%s" % (libref, table)
+              else:
+                  libref = ''
+                  table = fn[0]
+                  outstr = "out=" + table
+          else:
+              libref = out.libref
+              table = out.table
+              outstr = "out=%s.%s" % (out.libref, out.table)
 
     def assessModel(self, target: str, prediction: str, nominal: bool =True, event: str ='', **kwargs):
         """
@@ -1207,244 +1205,205 @@ if out:
         else:
            return self.sas.write_csv(file, self.table, self.libref, self.dsopts)
 
+    def to_frame(self, **kwargs) -> '<Pandas Data Frame object>':
+      '''
+      Export this SAS Data Set to a Pandas Data Frame
+      '''
+      return self.to_df(**kwargs)
 
-def to_csv(self, file: str
-
-) -> 'The LOG showing the results of the step':
-'''
-This method will export a SAS Data Set to a file in CSV format.
-file    - the OS filesystem path of the file to be created (exported from this SAS Data Set)
-'''
-ll = self._is_valid()
-if ll:
-    if not self.sas.batch:
+    def to_df(self, **kwargs) -> '<Pandas Data Frame object>':
+      '''
+      Export this SAS Data Set to a Pandas Data Frame
+      '''
+      ll = self._is_valid()
+      if ll:
         print(ll['LOG'])
-    else:
-        return ll
-else:
-    return self.sas.write_csv(file, self.table, self.libref, self.dsopts)
+        return None
+      else:
+          return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, **kwargs)
+
+    def heatmap(self, x: str, y: str, options: str = '', title: str = '', label: str = '') -> 'a heatmap plot of the (numeric) variables you chose':
+      """
+      Documentation link: http://support.sas.com/documentation/cdl/en/grstatproc/67909/HTML/default/viewer.htm#n0w12m4cn1j5c6n12ak64u1rys4w.htm
+      :param x: x variable
+      :param y: y variable
+      :param options: display options (string)
+      :param title: graph title
+      :param label:
+      :return:
+      """
+      code = "proc sgplot data=%s.%s%s;" % (self.libref, self.table, self._dsopts())
+      if len(options):
+          code += "\n\theatmap x=%s y=%s / %s;" % (x, y, options)
+      else:
+          code += "\n\theatmap x=%s y=%s;" % (x, y)
+
+      if len(label) > 0:
+          code += " LegendLABEL='" + label + "'"
+      code += ";\n"
+      if len(title) > 0:
+          code += "\ttitle '%s';\n" % title
+      code += "run;\ntitle;"
+
+      if self.sas.nosub:
+          print(code)
+          return
+
+      ll = self._is_valid()
+      if not ll:
+          html = self.HTML
+          self.HTML = 1
+          ll = self.sas._io.submit(code)
+          self.HTML = html
+      if not self.sas.batch:
+          DISPLAY(HTML(ll['LST']))
+      else:
+          return ll
+
+    def hist(self, var: str, title: str = '', label: str = '') -> 'a histogram plot of the (numeric) variable you chose':
+      '''
+      This method requires a numeric column (use the contents method to see column types) and generates a histogram.
+      var   - the NUMERIC variable (column) you want to plot
+      title - an optional Title for the chart
+      label - LegendLABEL= value for sgplot
+      '''
+      code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
+      code += ";\n\thistogram " + var + " / scale=count"
+      if len(label) > 0:
+          code += " LegendLABEL='" + label + "'"
+      code += ";\n"
+      if len(title) > 0:
+          code += '\ttitle "' + title + '";\n'
+      code += "\tdensity " + var + ';\nrun;\n' + 'title \"\";'
+
+      if self.sas.nosub:
+          print(code)
+          return
+
+      ll = self._is_valid()
+      if not ll:
+          html = self.HTML
+          self.HTML = 1
+          ll = self.sas._io.submit(code)
+          self.HTML = html
+      if not self.sas.batch:
+          DISPLAY(HTML(ll['LST']))
+      else:
+          return ll
+
+    def top(self, var: str, n: int = 10, order: str = 'freq', title: str = '') -> 'a frequency analysis of a variable':
+      """
+      This method finds the most common levels of a variable
+      var   - the CHAR variable (column) you want to count
+      n     - the top N to be displayed (defaults to 10)
+      order - default to most common use order='data' to get then in alphbetic order
+      title - an optional Title for the chart
+      label - LegendLABEL= value for sgplot
+      """
+      code = "proc freq data=%s.%s%s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
+      code += "\n\ttables %s / out=tmpFreqOut;" % var
+      code += "\nrun;"
+      if len(title) > 0:
+          code += '\ttitle "' + title + '";\n'
+      code += "proc print data=tmpFreqOut(obs=%s); \nrun;" % n
+      code += 'title \"\";'
+
+      if self.sas.nosub:
+          print(code)
+          return
+
+      ll = self._is_valid()
+      if self.results.upper() == 'PANDAS':
+          code = "proc freq data=%s.%s order=%s noprint;" % (self.libref, self.table, order)
+          code += "\n\ttables %s / out=tmpFreqOut;" % var
+          code += "\nrun;"
+          code += "\ndata tmpFreqOut; set tmpFreqOut(obs=%s); run;" % n
+          return self._returnPD(code, 'tmpFreqOut')
+      else:
+          if self.HTML:
+              if not ll:
+                  ll = self.sas._io.submit(code)
+              if not self.sas.batch:
+                  DISPLAY(HTML(ll['LST']))
+              else:
+                  return ll
+          else:
+              if not ll:
+                  ll = self.sas._io.submit(code, "text")
+              if not self.sas.batch:
+                  print(ll['LST'])
+              else:
+                  return ll
 
 
-def to_frame(self, **kwargs) ->
+    def bar(self, var: str, title: str = '', label: str = '') -> 'a barchart plot of the (numeric) variable you chose':
+      '''
+      This method requires a numeric column (use the contents method to see column types) and generates a histogram.
+      var   - the CHAR variable (column) you want to plot
+      title - an optional Title for the chart
+      label - LegendLABEL= value for sgplot
+      '''
+      code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
+      code += ";\n\tvbar " + var + " ; "
+      if len(label) > 0:
+          code += " LegendLABEL='" + label + "'"
+      code += ";\n"
+      if len(title) > 0:
+          code += '\ttitle "' + title + '";\n'
+      code += 'title \"\";'
+      code += 'run;'
 
+      if self.sas.nosub:
+          print(code)
+          return
 
-'<Pandas Data Frame object>':
-'''
-Export this SAS Data Set to a Pandas Data Frame
-'''
-return self.to_df(**kwargs)
+      ll = self._is_valid()
+      if not ll:
+          html = self.HTML
+          self.HTML = 1
+          ll = self.sas._io.submit(code)
+          self.HTML = html
+      if not self.sas.batch:
+          DISPLAY(HTML(ll['LST']))
+      else:
+          return ll
 
+    def series(self, x: str, y: list, title: str = '') -> 'a line plot of the x,y coordinates':
+      '''
+      This method plots a series of x,y coordinates. You can provide a list of y columns for multiple line plots.
+      x     - the x axis variable; generally a time or continuous variable.
+      y     - the y axis variable(s), you can specify a single column or a list of columns
+      title - an optional Title for the chart
+      '''
+      code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts() + ";\n"
+      if len(title) > 0:
+          code += '\ttitle "' + title + '";\n'
 
-def to_df(self, **kwargs) ->
+      if type(y) == list:
+          num = len(y)
+      else:
+          num = 1
+          y = [y]
 
+      for i in range(num):
+          code += "\tseries x=" + x + " y=" + y[i] + ";\n"
 
-'<Pandas Data Frame object>':
-'''
-Export this SAS Data Set to a Pandas Data Frame
-'''
-ll = self._is_valid()
-if ll:
-    print(ll['LOG'])
-    return None
-else:
-    return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, **kwargs)
+      code += 'run;\n' + 'title \"\";'
 
+      if self.sas.nosub:
+          print(code)
+          return
 
-def heatmap(self, x: str, y
-
-: str, options: str = '', title: str = '', label: str = '') -> 'a heatmap plot of the (numeric) variables you chose':
-"""
-Documentation link: http://support.sas.com/documentation/cdl/en/grstatproc/67909/HTML/default/viewer.htm#n0w12m4cn1j5c6n12ak64u1rys4w.htm
-:param x: x variable
-:param y: y variable
-:param options: display options (string)
-:param title: graph title
-:param label:
-:return:
-"""
-code = "proc sgplot data=%s.%s%s;" % (self.libref, self.table, self._dsopts())
-if len(options):
-    code += "\n\theatmap x=%s y=%s / %s;" % (x, y, options)
-else:
-    code += "\n\theatmap x=%s y=%s;" % (x, y)
-
-if len(label) > 0:
-    code += " LegendLABEL='" + label + "'"
-code += ";\n"
-if len(title) > 0:
-    code += "\ttitle '%s';\n" % title
-code += "run;\ntitle;"
-
-if self.sas.nosub:
-    print(code)
-    return
-
-ll = self._is_valid()
-if not ll:
-    html = self.HTML
-    self.HTML = 1
-    ll = self.sas._io.submit(code)
-    self.HTML = html
-if not self.sas.batch:
-    DISPLAY(HTML(ll['LST']))
-else:
-    return ll
-
-
-def hist(self, var: str, title
-
-: str = '', label: str = '') -> 'a histogram plot of the (numeric) variable you chose':
-'''
-This method requires a numeric column (use the contents method to see column types) and generates a histogram.
-var   - the NUMERIC variable (column) you want to plot
-title - an optional Title for the chart
-label - LegendLABEL= value for sgplot
-'''
-code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
-code += ";\n\thistogram " + var + " / scale=count"
-if len(label) > 0:
-    code += " LegendLABEL='" + label + "'"
-code += ";\n"
-if len(title) > 0:
-    code += '\ttitle "' + title + '";\n'
-code += "\tdensity " + var + ';\nrun;\n' + 'title \"\";'
-
-if self.sas.nosub:
-    print(code)
-    return
-
-ll = self._is_valid()
-if not ll:
-    html = self.HTML
-    self.HTML = 1
-    ll = self.sas._io.submit(code)
-    self.HTML = html
-if not self.sas.batch:
-    DISPLAY(HTML(ll['LST']))
-else:
-    return ll
-
-
-def top(self, var: str, n
-
-: int = 10, order: str = 'freq', title: str = '') -> 'a frequency analysis of a variable':
-"""
-This method finds the most common levels of a variable
-var   - the CHAR variable (column) you want to count
-n     - the top N to be displayed (defaults to 10)
-order - default to most common use order='data' to get then in alphbetic order
-title - an optional Title for the chart
-label - LegendLABEL= value for sgplot
-"""
-code = "proc freq data=%s.%s%s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
-code += "\n\ttables %s / out=tmpFreqOut;" % var
-code += "\nrun;"
-if len(title) > 0:
-    code += '\ttitle "' + title + '";\n'
-code += "proc print data=tmpFreqOut(obs=%s); \nrun;" % n
-code += 'title \"\";'
-
-if self.sas.nosub:
-    print(code)
-    return
-
-ll = self._is_valid()
-if self.results.upper() == 'PANDAS':
-    code = "proc freq data=%s.%s order=%s noprint;" % (self.libref, self.table, order)
-    code += "\n\ttables %s / out=tmpFreqOut;" % var
-    code += "\nrun;"
-    code += "\ndata tmpFreqOut; set tmpFreqOut(obs=%s); run;" % n
-    return self._returnPD(code, 'tmpFreqOut')
-else:
-    if self.HTML:
-        if not ll:
-            ll = self.sas._io.submit(code)
-        if not self.sas.batch:
-            DISPLAY(HTML(ll['LST']))
-        else:
-            return ll
-    else:
-        if not ll:
-            ll = self.sas._io.submit(code, "text")
-        if not self.sas.batch:
-            print(ll['LST'])
-        else:
-            return ll
-
-
-def bar(self, var: str, title
-
-: str = '', label: str = '') -> 'a barchart plot of the (numeric) variable you chose':
-'''
-This method requires a numeric column (use the contents method to see column types) and generates a histogram.
-var   - the CHAR variable (column) you want to plot
-title - an optional Title for the chart
-label - LegendLABEL= value for sgplot
-'''
-code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
-code += ";\n\tvbar " + var + " ; "
-if len(label) > 0:
-    code += " LegendLABEL='" + label + "'"
-code += ";\n"
-if len(title) > 0:
-    code += '\ttitle "' + title + '";\n'
-code += 'title \"\";'
-code += 'run;'
-
-if self.sas.nosub:
-    print(code)
-    return
-
-ll = self._is_valid()
-if not ll:
-    html = self.HTML
-    self.HTML = 1
-    ll = self.sas._io.submit(code)
-    self.HTML = html
-if not self.sas.batch:
-    DISPLAY(HTML(ll['LST']))
-else:
-    return ll
-
-
-def series(self, x: str, y
-
-: list, title: str = '') -> 'a line plot of the x,y coordinates':
-'''
-This method plots a series of x,y coordinates. You can provide a list of y columns for multiple line plots.
-x     - the x axis variable; generally a time or continuous variable.
-y     - the y axis variable(s), you can specify a single column or a list of columns
-title - an optional Title for the chart
-'''
-code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts() + ";\n"
-if len(title) > 0:
-    code += '\ttitle "' + title + '";\n'
-
-if type(y) == list:
-    num = len(y)
-else:
-    num = 1
-    y = [y]
-
-for i in range(num):
-    code += "\tseries x=" + x + " y=" + y[i] + ";\n"
-
-code += 'run;\n' + 'title \"\";'
-
-if self.sas.nosub:
-    print(code)
-    return
-
-ll = self._is_valid()
-if not ll:
-    html = self.HTML
-    self.HTML = 1
-    ll = self.sas._io.submit(code)
-    self.HTML = html
-if not self.sas.batch:
-    DISPLAY(HTML(ll['LST']))
-else:
-    return ll
+      ll = self._is_valid()
+      if not ll:
+          html = self.HTML
+          self.HTML = 1
+          ll = self.sas._io.submit(code)
+          self.HTML = html
+      if not self.sas.batch:
+          DISPLAY(HTML(ll['LST']))
+      else:
+          return ll
 
 if __name__ == "__main__":
     startsas()

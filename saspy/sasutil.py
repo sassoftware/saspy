@@ -50,7 +50,7 @@ class SASutil:
 
     def hpimpute(self, **kwargs: dict) -> object:
         """
-        Python method to call the HPSPLIT procedure
+        Python method to call the HPIMPUTE procedure
 
         required_set = {}
         legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
@@ -71,7 +71,7 @@ class SASutil:
 
     def hpbin(self, **kwargs: dict) -> object:
         """
-        Python method to call the HPSPLIT procedure
+        Python method to call the HPBIN procedure
 
         required_set = {}
         legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
@@ -91,7 +91,7 @@ class SASutil:
 
     def hpsample(self, **kwargs: dict) -> object:
         """
-        Python method to call the HPSPLIT procedure
+        Python method to call the HPSAMPLE procedure
 
         required_set = {}
         legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
