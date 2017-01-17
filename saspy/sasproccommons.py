@@ -16,7 +16,7 @@
 import logging
 import re
 from saspy.sasresults import SASresults
-#from pdb import set_trace as bp
+from pdb import set_trace as bp
 
 
 class SASProcCommons:
@@ -413,6 +413,9 @@ class SASProcCommons:
                d = scoreds.get('out')
                o = d.libref+'.'+d.table
                code += "score file='"+f+"' out="+o+";\n"
+            elif objtype.upper() == 'TPSPLINE':
+               
+               code += "score data=%s.%s out=%s.%s;\n" % (data.libref, data.table, scoreds.libref, scoreds.table)
             else:
                code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
         # save statemen tmust be after input and target for TREEBOOST
@@ -469,7 +472,14 @@ class SASProcCommons:
         nom = kwargs.pop('nominals', None)
         input_list = kwargs.pop('input', None)
         tgt = kwargs.pop('target', None)
+        #if tgt is None:
+        #    tgt = kwargs['model'].split('=')[0]
+        #if input_list is None:
+        #    input_list = kwargs['model'].split('=')[1].split()
+        
+
         charlist1=[]
+        #bp()
         # default target to nominal
         target = {'nominal':tgt}
 
@@ -542,7 +552,15 @@ class SASProcCommons:
             kwargs['input'] = inputs
         if any(v is not None for v in target.values()):
             kwargs['target'] = target
-       
+        
+        # if the mode key exists then thye are using the model syntax so convert target and input 
+        # and delete them. Only one syntax style is valid.
+        #bp()
+        #if 'model' in kwargs.keys():
+        #   kwargs['cls'] = ' '.join(kwargs.get(inputs['nominal'], ''))
+        #   kwargs['model'] = tgt + '=' + ' '.join(inputs['nominal']) +' '+ ' '.join(inputs['interval'])
+        #   kwargs.pop('input', None)
+        #   kwargs.pop('target', None)
         #print(kwargs.items())
 
         return kwargs
@@ -560,7 +578,8 @@ class SASProcCommons:
         :return: sas result object
         """
         data = kwargs.pop('data', None)
-        kwargs = SASProcCommons._processNominals(self, kwargs, data)
+        if 'model' not in kwargs.keys():
+            kwargs = SASProcCommons._processNominals(self, kwargs, data)
         verifiedKwargs = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
         obj1 = []
         nosub = False
