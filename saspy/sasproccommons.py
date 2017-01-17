@@ -334,15 +334,6 @@ class SASProcCommons:
         if 'strata' in args:
             self.logger.debug("strata statement,length: %s,%s", args['strata'], len(args['strata']))
             code += "strata %s;\n" % (args['strata'])
-        if 'score' in args:
-            scoreds = args['score']
-            if objtype.upper() == "HP4SCORE":
-               f = scoreds.get('file') 
-               d = scoreds.get('out')
-               o = d.libref+'.'+d.table
-               code += "score file='"+f+"' out="+o+";\n"
-            else:
-               code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
         if 'target' in args:
             self.logger.debug("target statement,length: %s,%s", args['target'], len(args['target']))
             # make sure target is a single variable extra split to account for level= option
@@ -415,6 +406,15 @@ class SASProcCommons:
         if 'xchart' in args:
             self.logger.debug("xchart statement,length: %s,%s", args['xchart'], len(args['xchart']))
             code += "xchart %s;\n" % (args['xchart'])
+        if 'score' in args:
+            scoreds = args['score']
+            if objtype.upper() == "HP4SCORE":
+               f = scoreds.get('file')
+               d = scoreds.get('out')
+               o = d.libref+'.'+d.table
+               code += "score file='"+f+"' out="+o+";\n"
+            else:
+               code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
         # save statemen tmust be after input and target for TREEBOOST
         if 'save' in args:
             #self.logger.debug("save statement,length: %s,%s", args['save'], len(args['save']))

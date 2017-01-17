@@ -120,7 +120,7 @@ class SASml:
 
     def treeboost(self, **kwargs: dict) -> object:
         """
-        Python method to call the HPNEURAL procedure
+        Python method to call the TREEBOOST procedure
 
         required_set = {'input', 'target'}
         legal_set = {'assess', 'code', 'freq', 'importance', 'input', 'performance', 'target', 'save', 'score',
