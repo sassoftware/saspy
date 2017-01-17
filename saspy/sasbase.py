@@ -39,6 +39,7 @@
 import os
 from pdb import set_trace as bp
 import saspy.sascfg as SAScfg
+import logging
 
 try:
    import saspy.sasiostdio as sasiostdio
@@ -47,11 +48,12 @@ try:
 except:
    running_on_win = True
 import saspy.sasiohttp  as sasiohttp
-from saspy.sasstat import *
-from saspy.sasets  import *
-from saspy.sasml   import *
-from saspy.sasqc   import *
-from saspy.sasutil import *
+from saspy.sasstat    import *
+from saspy.sasets     import *
+from saspy.sasml      import *
+from saspy.sasqc      import *
+from saspy.sasutil    import *
+from saspy.sasresults import *
 
 try:
    from IPython.display import HTML
@@ -550,6 +552,7 @@ class SASdata:
     def __init__(self, sassession, libref, table, results='', dsopts={}):
 
         self.sas = sassession
+        self.logger = logging.getLogger(__name__)
 
         if results == '':
            results = sassession.results
@@ -932,12 +935,20 @@ class SASdata:
         """
         return self.means()
 
+    def info(self):
+        m = self.means()
+        c = self.columnInfo()
+        p1 = m[['Variable', 'N','NMiss']]
+        p2 = c[['Variable', 'Type']]
+        info = pd.merge(p1, p2, on='Variable', how='outer')
+        return(info)
+
     def means(self):
         '''
         display descriptive statistics for the table; summary statistics. This is an alias for 'describe'
 
         '''
-        code  = "proc means data="+self.libref+'.'+self.table+self._dsopts()+" n mean std min p25 p50 p75 max;run;"
+        code  = "proc means data="+self.libref+'.'+self.table+self._dsopts()+" n nmiss median mean std min p25 p50 p75 max;run;"
         
         if self.sas.nosub:
            print(code)
@@ -946,7 +957,7 @@ class SASdata:
         ll = self._is_valid()
 
         if self.results.upper() == 'PANDAS':
-            code = "proc means data=%s.%s n mean std min p25 p50 p75 max; ods output Summary=_summary; run;" %(self.libref, self.table)
+            code = "proc means data=%s.%s stackodsoutput n nmiss median mean std min p25 p50 p75 max; ods output Summary=_summary; run;" %(self.libref, self.table)
             return self._returnPD(code, '_summary')
         else:
             if self.HTML:
@@ -1029,43 +1040,52 @@ class SASdata:
         else:
             return self
 
-
-    def assessModel(self, target, proc='', nominal=True, **kwargs):
-        # Need target variable, if nominal, proc name
-        target = target
-        nominals = kwargs.get('nominals', None)
-        proc = proc
+    def assessModel(self, target: str, prediction: str, nominal: bool =True, event: str ='', **kwargs):
+        """
+        This method will calculate assessment measures using the SAS AA_Model_Eval Macro used for SAS Enterprise Miner.
+        Not all datasets can be assessed. This is designed for scored data that includes a target and prediction columns
+        TODO: add code example of build, score, and then assess
+        :param target: string that represents the target variable in the data
+        :param prediction: string that represetnt the prediction column in the data
+        :param nominal: boolean to indicate if the Target Variable is nominal because the assessment measures are different.
+        :param sortOrder: string of either DESC or ASC which indicates which value of the target variable is the event vs non-event
+        :param kwargs:
+        :return: sas result object
+        """
         # submit autocall macro
         self.sas.submit("%aamodel;")
+        objtype = "datastep"
+        objname = '{s:{c}^{n}}'.format(s=self.table[:3], n=3, c='_') + self.sas._objcnt()  # translate to a libname so needs to be less than 8
+        code = "%macro proccall(d);\n"
 
-        # build parameters and
-        score_table = str(self.libref + '.' + "SCOREDATA")
-        binstats = str(self.libref + '.' + "ASSESSMENTSTATISTICS")
-        out = str(self.libref + '.' + "ASSESSMENTBINSTATISTICS")
+        # build parameters
+        score_table = str(self.libref + '.' + self.table)
+        binstats = str(objname + '.' + "ASSESSMENTSTATISTICS")
+        out = str(objname + '.' + "ASSESSMENTBINSTATISTICS")
         level = 'interval'
-        var = 'P_' + target
+        #var = 'P_' + target
         if nominal:
             level = 'class'
-            sortOrder='DESC'
-            if proc in ['tree']:
-                sortOrder = 'ASC'
-            event  = "proc hpdmdb data=%s.%s classout=work._DMDBCLASSTARGET(keep=name nraw craw level frequency nmisspercent);" % (self.libref, self.table)
-            event += "\nclass %s (%s); \nrun;" % (target, sortOrder)
-            event += "data _null_; set work._DMDBCLASSTARGET; where ^(NRAW eq . and CRAW eq '') and lowcase(name)=lowcase('%s');" % target
-            event += "if _N_=1 then call symput('_newevent', strip(LEVEL)); run;"
-            event += '\n%put "target Level = &_newevent";'
-            self.sas.submit(event)
-            if proc in ['tree', 'gradboost', 'forest']:
-                var = 'P_' + target + "&_newevent."
+            # the user didn't specify the event for a nominal Give them the possible choices
+            try:
+                if len(event) < 1:
+                    raise Exception(event)
+            except Exception:
+                print("No event was specified for a nominal target. Here are possible options:\n")
+                event_code  = "proc hpdmdb data=%s.%s classout=work._DMDBCLASSTARGET(keep=name nraw craw level frequency nmisspercent);" % (self.libref, self.table)
+                event_code += "\nclass %s ; \nrun;" % target
+                event_code += "data _null_; set work._DMDBCLASSTARGET; where ^(NRAW eq . and CRAW eq '') and lowcase(name)=lowcase('%s');" % target
+                ec = self.sas.submit(event_code)
+                HTML(ec['LST'])
 
         if nominal:
-            self.sas.submit(
-                "%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s,  EVENT=&_newevent);"
-                % (score_table, target, var , level, binstats, out))
-            self.sas.submit("%symdel _newevent")
+            code +="%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s,  EVENT=%s);" \
+                   % (score_table, target, prediction , level, binstats, out, event)
         else:
-            self.sas.submit("%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s);"
-                            % (score_table, target, var, level, binstats, out))
+            code +="%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s);" \
+                   % (score_table, target, prediction, level, binstats, out)
+        code += "run; quit; %mend;\n"
+        code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
         rename_char = """
         data {0};
             set {0};
@@ -1090,7 +1110,8 @@ class SASdata:
         run;
 
         """
-        self.sas.submit(rename_char.format(binstats))
+        code += rename_char.format(binstats)
+        # TODO: add graphics code here to return to the SAS results object
         """
         # Debug block
         debug={'name': name,
@@ -1103,8 +1124,14 @@ class SASdata:
                'out':out}
         print(debug.items())
         """
-        return self._returnPD(code, ['ASSESSMENTSTATISTICS','ASSESSMENTBINSTATISTICS'], libref=self.libref)
- 
+        if self.sas.nosub:
+           print(code)
+           return
+
+        ll=self.sas.submit(code, 'text')
+        obj1 = SASProcCommons._objectmethods(self, objname)
+        return SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
+
     def to_csv(self, file: str) -> 'The LOG showing the results of the step':
         '''
         This method will export a SAS Data Set to a file in CSV format.
