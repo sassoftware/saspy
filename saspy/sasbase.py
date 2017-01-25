@@ -602,6 +602,12 @@ class SASdata:
         self.dsopts = dsopts
         self.results = results
 
+    def __getitem__(self, i):
+        #bp()
+        print(i)
+        #print(kwargs.keys())
+        #print(kwargs.items())
+
     def set_results(self, results: str):
         '''
         This method set the results attribute for the SASdata object; it stays in effect till changed
