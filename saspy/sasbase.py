@@ -678,7 +678,7 @@ class SASdata:
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "data _head ; set %s.%s(obs=%s); run;" % (self.libref, self.table, obs)
+            code = "data _head ; set %s.%s %s; run;" % (self.libref, self.table, self.sas._dsopts(topts))
             return self._returnPD(code, '_head')
         else:
             ll = self._is_valid()
@@ -735,7 +735,7 @@ class SASdata:
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "data _tail ; set %s.%s(firstobs=%s obs=%s); run;" % (self.libref, self.table, firstobs, lastobs)
+            code = "data _tail ; set %s.%s %s; run;" % (self.libref, self.table, self.sas._dsopts(topts))
             return self._returnPD(code, '_tail')
         else:
             if self.HTML:
@@ -787,12 +787,12 @@ class SASdata:
         while i <= k:
             # get the list of variables
             if k == 1:
-                code += "proc hpsample data=%s.%s%s out=%s.%s%s samppct=%s seed=%s Partition;\n" % (
+                code += "proc hpsample data=%s.%s %s out=%s.%s %s samppct=%s seed=%s Partition;\n" % (
                     self.libref, self.table, self._dsopts(), out_libref, out_table, self._dsopts(), fraction * 100,
                     seed)
             else:
                 seed += 1
-                code += "proc hpsample data=%s.%s%s out=%s.%s%s samppct=%s seed=%s partition PARTINDNAME=_cvfold%s;\n" % (
+                code += "proc hpsample data=%s.%s %s out=%s.%s %s samppct=%s seed=%s partition PARTINDNAME=_cvfold%s;\n" % (
                     self.libref, self.table, self._dsopts(), out_libref, out_table, self._dsopts(), fraction * 100,
                     seed, i)
 
@@ -894,7 +894,7 @@ class SASdata:
 
         ll = self._is_valid()
         if self.results.upper() == 'PANDAS':
-            code = "proc contents data=%s.%s ;" % (self.libref, self.table)
+            code = "proc contents data=%s.%s %s ;" % (self.libref, self.table, self._dsopts())
             code += "ods output Attributes=_attributes;"
             code += "ods output EngineHost=_EngineHost;"
             code += "ods output Variables=_Variables;"
@@ -929,7 +929,7 @@ class SASdata:
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "proc contents data=%s.%s ;ods output Variables=_variables ;run;" % (self.libref, self.table)
+            code = "proc contents data=%s.%s %s ;ods output Variables=_variables ;run;" % (self.libref, self.table, self._dsopts())
             return self._returnPD(code, '_variables')
 
         else:
@@ -976,8 +976,8 @@ class SASdata:
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "proc means data=%s.%s stackodsoutput n nmiss median mean std min p25 p50 p75 max; ods output Summary=_summary; run;" % (
-                self.libref, self.table)
+            code = "proc means data=%s.%s %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; ods output Summary=_summary; run;" % (
+                self.libref, self.table, self._dsopts())
             return self._returnPD(code, '_summary')
         else:
             if not ll:
@@ -1012,7 +1012,7 @@ class SASdata:
                 if fn[1] == '.':
                     libref = fn[0]
                     table = fn[2]
-                    outstr = "out=%s.%s" % (libref, table)
+                    outstr = "out=%s.%s %s" % (libref, table, self._dsopts())
                 else:
                     libref = ''
                     table = fn[0]
@@ -1020,7 +1020,7 @@ class SASdata:
             else:
                 libref = out.libref
                 table = out.table
-                outstr = "out=%s.%s" % (out.libref, out.table)
+                outstr = "out=%s.%s %s" % (out.libref, out.table, self._dsopts())
 
     def assessModel(self, target: str, prediction: str, nominal: bool = True, event: str = '', **kwargs):
         """
@@ -1055,19 +1055,20 @@ class SASdata:
                     raise Exception(event)
             except Exception:
                 print("No event was specified for a nominal target. Here are possible options:\n")
-                event_code = "proc hpdmdb data=%s.%s classout=work._DMDBCLASSTARGET(keep=name nraw craw level frequency nmisspercent);" % (
-                    self.libref, self.table)
+                event_code = "proc hpdmdb data=%s.%s %s classout=work._DMDBCLASSTARGET(keep=name nraw craw level frequency nmisspercent);" % (
+                    self.libref, self.table, self._dsopts())
                 event_code += "\nclass %s ; \nrun;" % target
                 event_code += "data _null_; set work._DMDBCLASSTARGET; where ^(NRAW eq . and CRAW eq '') and lowcase(name)=lowcase('%s');" % target
                 ec = self.sas.submit(event_code)
                 HTML(ec['LST'])
+                # TODO: Finish output of the list of nominals variables
 
         if nominal:
-            code += "%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s,  EVENT=%s);" \
-                    % (score_table, target, prediction, level, binstats, out, event)
+            code += "%%aa_model_eval(DATA=%s%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s,  EVENT=%s);" \
+                    % (score_table, self._dsopts(), target, prediction, level, binstats, out, event)
         else:
-            code += "%%aa_model_eval(DATA=%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s);" \
-                    % (score_table, target, prediction, level, binstats, out)
+            code += "%%aa_model_eval(DATA=%s%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s);" \
+                    % (score_table, self._dsopts(), target, prediction, level, binstats, out)
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
         rename_char = """
@@ -1158,7 +1159,7 @@ class SASdata:
         :param label:
         :return:
         """
-        code = "proc sgplot data=%s.%s%s;" % (self.libref, self.table, self._dsopts())
+        code = "proc sgplot data=%s.%s %s;" % (self.libref, self.table, self._dsopts())
         if len(options):
             code += "\n\theatmap x=%s y=%s / %s;" % (x, y, options)
         else:
@@ -1227,7 +1228,7 @@ class SASdata:
         title - an optional Title for the chart
         label - LegendLABEL= value for sgplot
         """
-        code = "proc freq data=%s.%s%s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
+        code = "proc freq data=%s.%s %s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
         code += "\n\ttables %s / out=tmpFreqOut;" % var
         code += "\nrun;"
         if len(title) > 0:
@@ -1241,7 +1242,7 @@ class SASdata:
 
         ll = self._is_valid()
         if self.results.upper() == 'PANDAS':
-            code = "proc freq data=%s.%s order=%s noprint;" % (self.libref, self.table, order)
+            code = "proc freq data=%s.%s%s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
             code += "\n\ttables %s / out=tmpFreqOut;" % var
             code += "\nrun;"
             code += "\ndata tmpFreqOut; set tmpFreqOut(obs=%s); run;" % n
