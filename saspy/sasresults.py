@@ -78,7 +78,8 @@ class SASresults(object):
         return color_log
 
     def _go_run_code(self, attr) -> dict:
-        if 'PLOT' in attr:
+        graphics = ['PLOT', 'OGRAM', 'PANEL', 'BY', 'MAP']
+        if any(x in attr for x in graphics):
             code = '%%getdata(%s, %s);' % (self._name, attr)
             res = self.sas.submit(code)
             return res
