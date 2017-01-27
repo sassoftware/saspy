@@ -154,7 +154,7 @@ class SASsessionIOM():
        return '%08d' % self._log_cnt
 
    def _startsas(self):
-      import pdb;pdb.set_trace()
+      #import pdb;pdb.set_trace()
       if self.pid:
          return self.pid
 
@@ -172,10 +172,13 @@ class SASsessionIOM():
       try:
          self.sockin  = socks.socket()
          self.sockin.bind(("",port))
+         #self.sockin.bind(("",32701))
          self.sockout = socks.socket()
          self.sockout.bind(("",port))
+         #self.sockout.bind(("",32702))
          self.sockerr = socks.socket()
          self.sockerr.bind(("",port))
+         #self.sockerr.bind(("",32703))
       except OSError:
          print('Error try to open a socket in the _startsas method. Call failed.')
          return None
@@ -191,21 +194,14 @@ class SASsessionIOM():
 
       pgm    = self.sascfg.java
       parms  = [pgm]
-      parms += ["-classpath", classpath, "pyiom.test1"]
+      parms += ["-classpath", classpath, "pyiom.saspy2j"]
+      #parms += ["-classpath", classpath, "pyiom.saspy2j_sleep"]
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
       parms += ["-host", self.sascfg.host, "-port", str(self.sascfg.port)]     
       parms += ["-user", self.sascfg.omruser]     
       parms += ['']
-
-
-      #parms += ["-classpath", classpath, "-Djava.awt.headless=true", "pyiom.test1"]
-      #parms += ["-classpath", "/opt/tom/gitlab/metis/java", "pyiom.test1", "-sockport", str(self.port)]
-      #parms += ["-verbose", "-Djava.awt.headless=true"]
-      #parms += ["-classpath", classpath, "workspace.TestSimpleExecute"]
-      #parms += ["-host", self.sascfg.host, "-port", self.sascfg.port]     
-      #parms += ["-user", self.sascfg.omruser, "-pass", pw, "-source", "/opt/tom/gitlab/metis/java/test.sas"]     
 
 
       PIPE_READ  = 0
@@ -267,7 +263,6 @@ class SASsessionIOM():
          rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
          if rc != None:
             self.pid = None
-         print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")  
              
          self.stdin[0].send(pw.encode())
 
@@ -421,7 +416,7 @@ class SASsessionIOM():
       # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
       # unnecessary read in submit as this can't happen in the current code. 
-      odsopen  = b"ods listing close;ods html5 file=PRINT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen  = b"ods listing close;ods html5 file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods html5 close;ods listing;\n"
       ods      = True
       pgm      = b""
@@ -466,8 +461,8 @@ class SASsessionIOM():
             print(results['LOG'])
             HTML(results['LST']) 
       '''
-      #odsopen  = b"ods listing close;ods html5 file=PRINT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsopen  = b"ods listing close;ods html5  options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      #odsopen  = b"ods listing close;ods html5 file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen  = b"ods listing close;ods html5 file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods html5 close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
@@ -885,12 +880,9 @@ class SASsessionIOM():
       libref  - the libref for the SAS Data Set.
       port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       '''
-      port =  kwargs.get('port', 0)
-      #import pandas as pd
-      #import socket as socks
       datar = ""
 
-      code  = "data _null_; file STDERR;d = open('"+libref+"."+table+"');\n"
+      code  = "data _null_; file LOG;d = open('"+libref+"."+table+"');\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
       code += "put lr lrecl; put vn nvars; put vl;\n"
@@ -930,22 +922,7 @@ class SASsessionIOM():
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
    
-      try:
-         sock = socks.socket()
-         sock.bind(("",port))
-         port = sock.getsockname()[1]
-      except OSError:
-         print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
-         return None
-
-      if self.sascfg.ssh:
-         host = socks.gethostname()
-      else:
-         host = ''
-   
-      code  = ""
-      code += "filename sock socket '"+host+":"+str(port)+"' lrecl=32767 recfm=v termstr=LF;\n"
-      code += " data _null_; set "+libref+"."+table+";\n file sock; put "
+      code = " data _null_; set "+libref+"."+table+";\n file _tomods1; put "
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
@@ -963,23 +940,10 @@ class SASsessionIOM():
             code += "'09'x "
       code += "; run;\n"
 
-      sock.listen(0)
-      self._asubmit(code, 'text')
-      newsock = sock.accept()
-   
-      while True:
-         data = newsock[0].recv(4096)
-         if len(data):
-            datar += data.decode()
-         else:
-            break
-   
-      newsock[0].shutdown(socks.SHUT_RDWR)
-      newsock[0].close()
-      sock.close()
+      ll = self.submit(code, 'text')
    
       r = []
-      for i in datar.splitlines():
+      for i in ll['LST'].splitlines():
          r.append(tuple(i.split(sep='\t')))
 
       df = pd.DataFrame.from_records(r, columns=varlist)

@@ -485,22 +485,28 @@ class SASProcCommons:
 
         # Get list of character varaibles to add to nominal list
         char_string="""
-        proc contents data={0}.{1};
-            ods output variables=_charlist;
-        run;
-        data _charlist;
-            set _charlist;
-            where Type='Char';
-            keep Variable;
+        data _null_; file LOG;
+          d = open('{0}.{1}');
+          nvars = attrn(d, 'NVARS'); 
+          put 'VARLIST=';
+          do i = 1 to nvars; 
+             vart = vartype(d, i);
+             var  = varname(d, i);
+             if vart eq 'C' then
+                put var; end;
+          put 'VARLISTend=';
         run;
         """
+
         # ignore teach_me_SAS mode to run contents
         nosub = self.sas.nosub
         self.sas.nosub = False
-        self.sas.submit(char_string.format(data.libref, data.table+data._dsopts()))
-        charlist1=list(self.sas.sasdata2dataframe('_charlist', libref='WORK').values.flatten())
-        self.sas.submit("proc delete data=work._charlist; run;")
+        ll = self.sas.submit(char_string.format(data.libref, data.table+data._dsopts()))
         self.sas.nosub = nosub
+        l2 = ll['LOG'].partition("VARLIST=\n")            
+        l2 = l2[2].rpartition("VARLISTend=\n")                   
+        charlist1 = l2[0].split("\n")                                             
+        del charlist1[len(charlist1)-1]
         charlist1 = [x.casefold() for x in charlist1]
         try:
             if isinstance(input_list, dict):

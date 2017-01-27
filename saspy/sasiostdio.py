@@ -42,6 +42,7 @@ class SASconfigSTDIO:
       self.ssh      = cfg.get('ssh', '')
       self.host     = cfg.get('host', '')
       self.metapw   = cfg.get('metapw', '')
+      self.iomc     = cfg.get('iomc', '')
 
       # GET Config options
       try:
@@ -156,8 +157,13 @@ class SASsessionSTDIO():
          pgm    = self.sascfg.saspath
          parms  = [pgm]
 
-      # temporary hack for testing grid w/ sasgsub
-      if self.sascfg.metapw:
+      # temporary hack for testing grid w/ sasgsub and iomc ...
+      if self.sascfg.iomc:
+         pgm    = self.sascfg.iomc
+         parms  = [pgm]
+         parms += ["user", "sas", "pw", "sas"]
+         parms += ['']
+      elif self.sascfg.metapw:
          pgm    = self.sascfg.ssh
          parms  = [pgm]
          parms += ["-t", "-i", "/u/sastpw/idrsacnn", self.sascfg.host]

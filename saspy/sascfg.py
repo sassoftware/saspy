@@ -26,7 +26,7 @@
 # 
 # SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', 'httptest']
 #
-SAS_config_names = ['default', 'http', 'httptest', 'ssh', 'httpfred', 'grid', 'tdi', 'iom']
+SAS_config_names = ['default', 'http', 'httptest', 'ssh', 'httpfred', 'grid', 'tdi', 'iomj', 'iomc']
 
 # Configuration options for pysas - python Dict
 # valid key are:
@@ -69,15 +69,23 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 
 grid     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
             'ssh'     : '/usr/bin/ssh',
-            'omrpw'   : '1connect',
+            'metapw'  : '1connect',
             'host'    : 'sascnn@sgm001.unx.sas.com',
             'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridrunsaslm"]
             }
 #           'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridruncmdint"]
 #           'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridrunsaslm"]
 
-iom      = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
+iomj     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
             'java'    : '/usr/bin/java',
+            'omruser' : 'sas',
+            'omrpw'   : 'sas',
+            'host'    : 'tom64-3.na.sas.com',
+            'port'    : 8591
+            }
+
+iomc     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
+            'iomc'    : '/u/sastpw/tkpy2c/tkext/com/laxnd/tktom',
             'omruser' : 'sas',
             'omrpw'   : 'sas',
             'host'    : 'tom64-3.na.sas.com',

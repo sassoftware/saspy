@@ -975,17 +975,27 @@ class SASdata:
             print(code)
             return
 
+        ll = self._is_valid()
+
         if self.results.upper() == 'PANDAS':
             code = "proc means data=%s.%s %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; ods output Summary=_summary; run;" % (
                 self.libref, self.table, self._dsopts())
             return self._returnPD(code, '_summary')
         else:
-            if not ll:
-                ll = self.sas._io.submit(code, "text")
-            if not self.sas.batch:
-                print(ll['LST'])
+            if self.HTML:
+               if not ll:
+                  ll = self.sas._io.submit(code)
+               if not self.sas.batch:
+                  DISPLAY(HTML(ll['LST']))
+               else:
+                  return ll
             else:
-                return ll
+               if not ll:
+                  ll = self.sas._io.submit(code, "text")
+               if not self.sas.batch:
+                  print(ll['LST'])
+               else:
+                  return ll
 
     def sort(self, by: str, out: 'str or sas data object' = '', **kwargs) -> '<SASdata object>':
         """
