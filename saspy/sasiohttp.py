@@ -409,9 +409,9 @@ class SASsessionHTTP():
       return lstr
 
    def _asubmit(self, code, results="html"):
-      #odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
-      odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n")
-      odsclose = json.dumps("ods html5 close;ods listing;\n")
+      #odsopen  = json.dumps("ods listing close;ods html5 (id=saspy_internal) options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
+      odsopen  = json.dumps("ods listing close;ods html5 (id=saspy_internal) options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n")
+      odsclose = json.dumps("ods html5 (id=saspy_internal) close;ods listing;\n")
       ods      = True;
 
       if results.upper() != "HTML":
@@ -459,9 +459,9 @@ class SASsessionHTTP():
             print(results['LOG'])
             HTML(results['LST']) 
       '''
-      #odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
-      odsopen  = json.dumps("ods listing close;ods html5 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n")
-      odsclose = json.dumps("ods html5 close;ods listing;\n")
+      #odsopen  = json.dumps("ods listing close;ods html5 (id=saspy_internal) options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
+      odsopen  = json.dumps("ods listing close;ods html5 (id=saspy_internal) options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n")
+      odsclose = json.dumps("ods html5 (id=saspy_internal) close;ods listing;\n")
       ods      = True;
       pcodei   = ''
       pcodeiv  = ''

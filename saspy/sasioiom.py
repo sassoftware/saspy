@@ -416,8 +416,8 @@ class SASsessionIOM():
       # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
       # unnecessary read in submit as this can't happen in the current code. 
-      odsopen  = b"ods listing close;ods html5 file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods html5 close;ods listing;\n"
+      odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods html5 (id=saspy_internal) close;ods listing;\n"
       ods      = True
       pgm      = b""
 
@@ -461,9 +461,9 @@ class SASsessionIOM():
             print(results['LOG'])
             HTML(results['LST']) 
       '''
-      #odsopen  = b"ods listing close;ods html5 file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsopen  = b"ods listing close;ods html5 file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods html5 close;ods listing;\n"
+      #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods html5 (id=saspy_internal) close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
       lstf     = ''
@@ -735,7 +735,7 @@ class SASsessionIOM():
                found = True
 
             if found:
-               ll = self.submit('ods html5 close;ods listing close;ods listing;libname work list;\n','text')
+               ll = self.submit('ods html5 (id=saspy_internal) close;ods listing close;ods listing;libname work list;\n','text')
                break
 
             sleep(.25)
@@ -922,7 +922,7 @@ class SASsessionIOM():
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
    
-      code = " data _null_; set "+libref+"."+table+";\n file _tomods1; put "
+      code = "data _null_; set "+libref+"."+table+";\n file _tomods1; put "
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
