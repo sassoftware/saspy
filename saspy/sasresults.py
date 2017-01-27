@@ -92,7 +92,9 @@ class SASresults(object):
             if self.sas.results.upper() == 'PANDAS':
                df = self.sas.sasdata2dataframe(attr, libref=lref)
             else:
-               df = self.sas.submit("proc print data="+lref+"."+attr+";run;")
+               code = '%%getdata(%s, %s);' % (self._name, attr)
+               df   = self.sas.submit(code)
+               #df = self.sas.submit("proc print data="+lref+"."+attr+";run;")
             return df
 
 
