@@ -36,15 +36,16 @@ class SASconfigIOM:
    def __init__(self, **kwargs):
       self._kernel  = kwargs.get('kernel', None)
 
-      self.name     = kwargs.get('sascfgname', '')
-      cfg           = getattr(SAScfg, self.name) 
+      self.name      = kwargs.get('sascfgname', '')
+      cfg            = getattr(SAScfg, self.name) 
 
-      self.java     = cfg.get('java', '')
-      self.iomhost  = cfg.get('iomhost', '')
-      self.iomport  = cfg.get('iomport', '')
-      self.omruser  = cfg.get('omruser', '')
-      self.omrpw    = cfg.get('omrpw', '')
-      self.encoding = cfg.get('encoding', '')
+      self.java      = cfg.get('java', '')
+      self.iomhost   = cfg.get('iomhost', '')
+      self.iomport   = cfg.get('iomport', '')
+      self.omruser   = cfg.get('omruser', '')
+      self.omrpw     = cfg.get('omrpw', '')
+      self.encoding  = cfg.get('encoding', '')
+      self.classpath = cfg.get('classpath', '')
 
 
       # GET Config options
@@ -97,6 +98,13 @@ class SASconfigIOM:
             print("Parameter 'omrpw' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.omrpw = inomrpw   
+
+      incp = kwargs.get('classpath', '')
+      if len(incp) > 0:
+         if lock and len(self.classpath):
+            print("Parameter 'classpath' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.classpath = incp   
 
       inencoding = kwargs.get('encoding', '')
       if len(inencoding) > 0:
@@ -169,29 +177,19 @@ class SASsessionIOM():
       if self.pid:
          return self.pid
 
-      classpath  =  "/opt/tom/gitlab/metis/java/lib/sas.svc.connection.jar"
-      classpath += ":/opt/tom/gitlab/metis/java/lib/sas.codepolicy.jar"
-      classpath += ":/opt/tom/gitlab/metis/java/lib/log4j.jar"
-      classpath += ":/opt/tom/gitlab/metis/java/lib/sas.security.sspi.jar"
-      classpath += ":/opt/tom/gitlab/metis/java/lib/sas.core.jar"
-      classpath += ":/opt/tom/gitlab/metis/java/tools/ConnectionHelper.java"
-      classpath += ":/opt/tom/gitlab/metis/java/pyiom"
-      classpath += ":/opt/tom/gitlab/metis/java/tools"
-      classpath += ":/opt/tom/gitlab/metis/java"
-
       port = 0
       try:
          self.sockin  = socks.socket()
-         #self.sockin.bind(("",port))
-         self.sockin.bind(("",32701))
+         self.sockin.bind(("",port))
+         #self.sockin.bind(("",32701))
 
          self.sockout = socks.socket()
-         #self.sockout.bind(("",port))
-         self.sockout.bind(("",32702))
+         self.sockout.bind(("",port))
+         #self.sockout.bind(("",32702))
 
          self.sockerr = socks.socket()
-         #self.sockerr.bind(("",port))
-         self.sockerr.bind(("",32703))
+         self.sockerr.bind(("",port))
+         #self.sockerr.bind(("",32703))
       except OSError:
          print('Error try to open a socket in the _startsas method. Call failed.')
          return None
@@ -207,9 +205,9 @@ class SASsessionIOM():
 
       pgm    = self.sascfg.java
       parms  = [pgm]
-      #parms += ["-classpath", classpath, "pyiom.saspy2j"]
-      parms += ["-classpath", classpath, "pyiom.saspy2j_sleep"]
-      parms += ["-host", "tom64-3.na.sas.com"] #socks.gethostname()]
+      parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
+      #parms += ["-classpath", self.sascfg.classpath, "pyiom.saspy2j_sleep"]
+      parms += ["-host", "localhost"] #socks.gethostname()]
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
