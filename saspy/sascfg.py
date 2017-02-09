@@ -113,7 +113,6 @@ gridiom  = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.
             'omrpw'     : '1connect',
             'iomhost'   : 'bb04cnt10.unx.sas.com',
             'iomport'   : 8594,
-            'encoding'  : 'cp1252',
             'classpath' : cp
             }
 
