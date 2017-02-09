@@ -26,7 +26,7 @@
 # 
 # SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', 'httptest']
 #
-SAS_config_names = ['default', 'http', 'httptest', 'ssh', 'httpfred', 'grid', 'tdi', 'iomj', 'iomc']
+SAS_config_names = ['default', 'http', 'httptest', 'ssh', 'httpfred', 'grid', 'tdi', 'iomj', 'iomc', 'iomjwin']
 
 # Configuration options for pysas - python Dict
 # valid key are:
@@ -80,8 +80,17 @@ iomj     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/
             'java'    : '/usr/bin/java',
             'omruser' : 'sas',
             'omrpw'   : 'sas',
-            'host'    : 'tom64-3.na.sas.com',
-            'port'    : 8591
+            'iomhost' : 'tom64-3.na.sas.com',
+            'iomport' : 8591
+            }
+
+iomjwin  = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
+            'java'    : '/usr/bin/java',
+            'omruser' : 'sasiom1@carynt',
+            'omrpw'   : '1bridge',
+            'iomhost' : 'd77422.na.sas.com',
+            'iomport' : 18591,
+            'encoding': 'cp1252'
             }
 
 iomc     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
