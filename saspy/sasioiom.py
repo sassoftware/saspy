@@ -13,14 +13,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-import fcntl
-import os
-import signal
+
+#import fcntl
+#import os
+#import signal
 import subprocess
 import getpass
 from time import sleep
 import saspy.sascfg as SAScfg
-#import pandas as pd
 import socket as socks
 
 try:
@@ -36,14 +36,17 @@ class SASconfigIOM:
    def __init__(self, **kwargs):
       self._kernel  = kwargs.get('kernel', None)
 
-      self.name     = kwargs.get('sascfgname', '')
-      cfg           = getattr(SAScfg, self.name) 
+      self.name      = kwargs.get('sascfgname', '')
+      cfg            = getattr(SAScfg, self.name) 
 
-      self.java     = cfg.get('java', '')
-      self.host     = cfg.get('host', '')
-      self.port     = cfg.get('port', '')
-      self.omruser  = cfg.get('omruser', '')
-      self.omrpw    = cfg.get('omrpw', '')
+      self.java      = cfg.get('java', '')
+      self.iomhost   = cfg.get('iomhost', '')
+      self.iomport   = cfg.get('iomport', '')
+      self.omruser   = cfg.get('omruser', '')
+      self.omrpw     = cfg.get('omrpw', '')
+      self.encoding  = cfg.get('encoding', '')
+      self.classpath = cfg.get('classpath', '')
+
 
       # GET Config options
       try:
@@ -68,19 +71,19 @@ class SASconfigIOM:
          else:
             self.java = injava   
 
-      inhost = kwargs.get('host', '')
+      inhost = kwargs.get('iomhost', '')
       if len(inhost) > 0:
-         if lock and len(self.host):
+         if lock and len(self.iomhost):
             print("Parameter 'host' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.host = inhost   
+            self.iomhost = inhost   
 
-      inport = kwargs.get('port', '')
+      inport = kwargs.get('iomport', '')
       if len(inport) > 0:
-         if lock and len(self.port):
+         if lock and len(self.iomport):
             print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.port = inport   
+            self.iomport = inport   
 
       inomruser = kwargs.get('omruser', '')
       if len(inomruser) > 0:
@@ -95,6 +98,22 @@ class SASconfigIOM:
             print("Parameter 'omrpw' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.omrpw = inomrpw   
+
+      incp = kwargs.get('classpath', '')
+      if len(incp) > 0:
+         if lock and len(self.classpath):
+            print("Parameter 'classpath' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.classpath = incp   
+
+      inencoding = kwargs.get('encoding', '')
+      if len(inencoding) > 0:
+         if lock and len(self.encoding):
+            print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.encoding = inencoding   
+      if not self.encoding:
+         self.encoding = 'utf-8'  
 
       return
 
@@ -158,24 +177,16 @@ class SASsessionIOM():
       if self.pid:
          return self.pid
 
-      classpath  =  "/opt/tom/gitlab/metis/java/lib/sas.svc.connection.jar"
-      classpath += ":/opt/tom/gitlab/metis/java/lib/sas.codepolicy.jar"
-      classpath += ":/opt/tom/gitlab/metis/java/lib/log4j.jar"
-      classpath += ":/opt/tom/gitlab/metis/java/lib/sas.security.sspi.jar"
-      classpath += ":/opt/tom/gitlab/metis/java/lib/sas.core.jar"
-      classpath += ":/opt/tom/gitlab/metis/java/tools/ConnectionHelper.java"
-      classpath += ":/opt/tom/gitlab/metis/java/pyiom"
-      classpath += ":/opt/tom/gitlab/metis/java/tools"
-      classpath += ":/opt/tom/gitlab/metis/java"
-
       port = 0
       try:
          self.sockin  = socks.socket()
          self.sockin.bind(("",port))
          #self.sockin.bind(("",32701))
+
          self.sockout = socks.socket()
          self.sockout.bind(("",port))
          #self.sockout.bind(("",32702))
+
          self.sockerr = socks.socket()
          self.sockerr.bind(("",port))
          #self.sockerr.bind(("",32703))
@@ -194,50 +205,60 @@ class SASsessionIOM():
 
       pgm    = self.sascfg.java
       parms  = [pgm]
-      parms += ["-classpath", classpath, "pyiom.saspy2j"]
-      #parms += ["-classpath", classpath, "pyiom.saspy2j_sleep"]
+      parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
+      #parms += ["-classpath", self.sascfg.classpath, "pyiom.saspy2j_sleep"]
+      parms += ["-host", "localhost"] #socks.gethostname()]
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
-      parms += ["-host", self.sascfg.host, "-port", str(self.sascfg.port)]     
+      parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
       parms += ["-user", self.sascfg.omruser]     
       parms += ['']
 
 
-      PIPE_READ  = 0
-      PIPE_WRITE = 1
+      try:
+         self.pid = subprocess.Popen(parms)
+      except:
+         print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
+         print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
+         return NULL
+         
+
+      '''
+      #PIPE_READ  = 0
+      #PIPE_WRITE = 1
       
-      pin  = os.pipe() 
-      pout = os.pipe()
-      perr = os.pipe() 
+      #pin  = os.pipe() 
+      #pout = os.pipe()
+      #perr = os.pipe() 
 
       pidpty = os.forkpty()
       if pidpty[0]:
          # we are the parent
 
          pid = pidpty[0]
-         os.close(pin[PIPE_READ])
-         os.close(pout[PIPE_WRITE]) 
-         os.close(perr[PIPE_WRITE]) 
+         #os.close(pin[PIPE_READ])
+         #os.close(pout[PIPE_WRITE]) 
+         #os.close(perr[PIPE_WRITE]) 
 
       else:
          # we are the child
          #signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-         os.close(0)
-         os.close(1)
-         os.close(2)
+         #os.close(0)
+         #os.close(1)
+         #os.close(2)
 
-         os.dup2(pin[PIPE_READ],   0)
-         os.dup2(pout[PIPE_WRITE], 1)
-         os.dup2(perr[PIPE_WRITE], 2)
+         #os.dup2(pin[PIPE_READ],   0)
+         #os.dup2(pout[PIPE_WRITE], 1)
+         #os.dup2(perr[PIPE_WRITE], 2)
 
-         os.close(pin[PIPE_READ])
-         os.close(pin[PIPE_WRITE])
-         os.close(pout[PIPE_READ])
-         os.close(pout[PIPE_WRITE]) 
-         os.close(perr[PIPE_READ])
-         os.close(perr[PIPE_WRITE]) 
+         #os.close(pin[PIPE_READ])
+         #os.close(pin[PIPE_WRITE])
+         #os.close(pout[PIPE_READ])
+         #os.close(pout[PIPE_WRITE]) 
+         #os.close(perr[PIPE_READ])
+         #os.close(perr[PIPE_WRITE]) 
 
          try:
             #sleep(15)
@@ -248,36 +269,41 @@ class SASsessionIOM():
             os._exit(-6)
 
       self.pid    = pidpty[0]
+      '''
 
-      if self.pid is None:
+      self.stdin  = self.sockin.accept()
+      self.stdout = self.sockout.accept()
+      self.stderr = self.sockerr.accept()
+      self.stdout[0].setblocking(False)
+      self.stderr[0].setblocking(False)
+
+      try:
+         self.pid.wait(0)
+         print("Subprocess failed to start. Double check you settings in sascfg.py file.\n") 
+         self.pid = None
+      except:
+         pass
+
+      self.stdin[0].send(pw.encode(self.sascfg.encoding))
+
+      self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max linesize=max nosyntaxcheck; ods graphics on;", "text")
+
+      try:
+         sp.wait(0)
          print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-         return NULL
-      else:
-         self.stdin  = self.sockin.accept()
-         self.stdout = self.sockout.accept()
-         self.stderr = self.sockerr.accept()
-         self.stdout[0].setblocking(False)
-         self.stderr[0].setblocking(False)
+         return None
+      except:
+         pass
 
-         rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-         if rc != None:
-            self.pid = None
-             
-         self.stdin[0].send(pw.encode())
-
-         self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
-         if self.pid is None:
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
-            print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            return None
-         print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")  
-         return self.pid
+      print("SAS Connection established. Subprocess id is "+str(self.pid.pid)+"\n")  
+      return self.pid
    
     
    def _endsas(self):
       rc = 0
       if self.pid:
+         pid = self.pid.pid
          try:
 
             self.stdin[0].shutdown(socks.SHUT_RDWR)
@@ -292,12 +318,14 @@ class SASsessionIOM():
             self.stderr[0].close()
             self.sockerr.close()
    
-   
-            rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+            rc = self.pid.wait(5)
+            #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
          except (subprocess.TimeoutExpired):
             print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
-            os.kill(self.pid, signal.SIGKILL)
-         print("SAS Connection terminated. Subprocess id was "+str(self.pid))
+            #os.kill(self.pid, signal.SIGKILL)
+            self.pid.kill()
+
+         print("SAS Connection terminated. Subprocess id was "+str(pid))
          self.pid = None
       return rc
 
@@ -321,16 +349,20 @@ class SASsessionIOM():
                break
             sleep(0.5)
    
-      x = logf.decode().replace(code1, " ")
+      x = logf.decode(self.sascfg.encoding, errors='replace').replace(code1, " ")
       self._log += x
 
       if self.pid == None:
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+      #if rc != None:
+      try:
+         rc = self.pid.wait(0)
          self.pid = None
-         return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
-
+         return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+      except:
+         pass
+ 
       return x
 
    def _getlst(self, wait=5, jobid=None):
@@ -368,12 +400,16 @@ class SASsessionIOM():
 
       if self.pid == None:
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+      #if rc != None:
+      try:
+         rc = self.pid.wait(0)
          self.pid = None
-         return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
-
-      return lstf.decode()
+         return 'SAS process has terminated unexpectedly.  RC from wait was: '+str(rc)
+      except:
+         pass
+ 
+      return lstf.decode(self.sascfg.encoding, errors='replace')
    
    def _getlsttxt(self, wait=5, jobid=None):
       f2 = [None]
@@ -396,18 +432,22 @@ class SASsessionIOM():
       
             if (eof != -1):
                final = lstf.partition(b"Tom was here")
-               f2 = final[0].decode().rpartition(chr(12))
+               f2 = final[0].decode(self.sascfg.encoding, errors='replace').rpartition(chr(12))
                break
 
       lst = f2[0]
 
       if self.pid == None:
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+      #if rc != None:
+      try:
+         rc = self.pid.wait(0)
          self.pid = None
-         return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
-
+         return 'SAS process has terminated unexpectedly.  RC from wait was: '+str(rc)
+      except:
+         pass
+ 
       return lst.replace(chr(12), '\n')
 
    def _asubmit(self, code, results="html"):
@@ -427,7 +467,7 @@ class SASsessionIOM():
       if (ods):
          pgm += odsopen
    
-      pgm += code.encode()+b'\n'
+      pgm += code.encode(self.sascfg.encoding)+b'\n'
    
       if (ods):
          pgm += odsclose
@@ -484,11 +524,15 @@ class SASsessionIOM():
          print("No SAS process attached. SAS process has terminated unexpectedly.")
          return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
 
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+      #if rc != None:
+      try:
+         rc = self.pid.wait(0)
          self.pid = None
-         return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
-
+         return dict(LOG='SAS process has terminated unexpectedly. RC from wait was: '+str(rc), LST='')
+      except:
+         pass
+ 
       # to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
       # removing this and adding comment in _asubmit to use _getlst[txt] so this will never be necessary; delete later
       #while(len(self.stdout.read1(4096)) > 0):
@@ -519,46 +563,53 @@ class SASsessionIOM():
       if ods:
          pgm += odsopen
    
-      pgm += mj+b'\n'+pcodei.encode()+pcodeiv.encode()+code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj
+      pgm += mj+b'\n'+pcodei.encode(self.sascfg.encoding)+pcodeiv.encode(self.sascfg.encoding)
+      pgm += code.encode(self.sascfg.encoding)+b'\n'+pcodeo.encode(self.sascfg.encoding)+b'\n'+mj
    
       if ods:
          pgm += odsclose
 
-      pgm += b'\n'+logcodei.encode()+b'\n'
+      pgm += b'\n'+logcodei.encode(self.sascfg.encoding)+b'\n'
       self.stdin[0].send(pgm)
-
+      #print(pgm.decode()+'\n')
       while not done:
          try:
              while True:
-                 rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-                 if rc is not None:
-                     self.pid = None
-                     return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
-                                 str(rc), LST='')
+                 #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+                 #if rc is not None:
+                 try:
+                    rc = self.pid.wait(0)
+                    self.pid = None
+                    return dict(LOG='SAS process has terminated unexpectedly. RC from wait was: '+str(rc), LST='')
+                 except:
+                    pass
+
                  if bail:
                     eof -= 1
                  if eof < 0:
                     break
                  try:
-                    lst = self.stdout[0].recv(4096).decode()
+                    lst = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
                  except (BlockingIOError):
                     lst = b''
 
                  if len(lst) > 0:
+                    #print(lst)
                     lstf += lst
                  else:
                     try:
-                       log = self.stderr[0].recv(4096).decode() 
+                       log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace') 
                     except (BlockingIOError):
                        log = b''
 
                     if len(log) > 0:
-                        logf += log
-                        if logf.count(logcodeo) >= 1:
-                            bail = True
-                        if not bail and bc:
-                            self.stdin[0].send(odsclose+logcodei.encode() + b'\n')
-                            bc = False
+                       #print(log)
+                       logf += log
+                       if logf.count(logcodeo) >= 1:
+                          bail = True
+                       if not bail and bc:
+                          self.stdin[0].send(odsclose+logcodei.encode(self.sascfg.encoding) + b'\n')
+                          bc = False
              done = True
 
          except (KeyboardInterrupt, SystemExit):
@@ -577,7 +628,7 @@ class SASsessionIOM():
              else:
                 print('Exception ignored, continuing to process...\n')
 
-             self.stdin[0].send(odsclose+logcodei.encode()+b'\n')
+             self.stdin[0].send(odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
 
       trip = lstf.rpartition("/*]]>*/")      
       if len(trip[1]) > 0 and len(trip[2]) < 100:
@@ -604,7 +655,8 @@ class SASsessionIOM():
         if self.pid is None:
             return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='', ABORT=True)
 
-        if self.sascfg.ssh:
+        #if self.sascfg.ssh:
+        if True:
            response = self.sascfg._prompt(
                      "SAS attention handling not supported over ssh. Please enter (T) to terminate SAS or (C) to continue.")
            while True:
@@ -614,19 +666,23 @@ class SASsessionIOM():
                  break
               response = self.sascfg._prompt("Please enter (T) to terminate SAS or (C) to continue.")
               
-        interrupt = signal.SIGINT
-        os.kill(self.pid, interrupt)
-        sleep(.25)
+        #interrupt = signal.SIGINT
+        #os.kill(self.pid, interrupt)
+        #sleep(.25)
 
+        self.pid.kill()
+        self.pid = None
+        return dict(LOG="SAS process terminated", LST='', ABORT=True)
+
+        '''
         while True:
             rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
             if rc is not None:
                 self.pid = None
                 outrc = str(rc)
-                return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
-                            outrc, LST='',ABORT=True)
+                return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+outrc, LST='', ABORT=True)
 
-            lst = self.stdout.read1(4096).decode()
+            lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
             lstf += lst
             if len(lst) > 0:
                 lsts = lst.rpartition('Select:')
@@ -635,7 +691,7 @@ class SASsessionIOM():
                     query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                     print('Processing interrupt\nAttn handler Query is\n\n' + query)
                     response = self.sascfg._prompt("Please enter your Response: ")
-                    self.stdin[0].send(response.encode() + b'\n')
+                    self.stdin[0].send(response.encode(self.sascfg.encoding) + b'\n')
                     if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
                        bc = True
                        break
@@ -653,7 +709,7 @@ class SASsessionIOM():
                         #print("******************No 'Select' or 'Press' found in lst=")
                         pass
             else:
-                log = self.stderr[0].recv(4096).decode()
+                log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
                 logf += log
                 self._log += log
 
@@ -668,80 +724,8 @@ class SASsessionIOM():
 
         lstr = lstf
         logr = logf
-
         return dict(LOG=logr, LST=lstr, BC=bc)
-
-   def _break(self, inlst=''):
-      found = False
-      lst = inlst
-
-      interupt = signal.SIGINT
-      os.kill(self.pid, interupt)
-      sleep(.25)
-      self._asubmit('','text')
-
-      while True:
-         if len(lst) >  0:
-            lsts = lst.rpartition('Select:')
-            if lsts[0] != '' and lsts[1] != '':
-               found = True
-               print('Processing interupt\nAttn handler Query is\n\n'+lsts[1]+lsts[2].rsplit('\n?')[0]+'\n')
-               opt = lsts[2].partition('Cancel Submitted Statements')
-               if opt[0] != '' and opt[1] != '':
-                  response = opt[0].rpartition('.')[0].rpartition(' ')[2]
-               else:
-                  opt = lsts[2].partition('Halt DATA')
-                  if opt[0] != '' and opt[1] != '':
-                     response = opt[0].rpartition('.')[0].rpartition(' ')[2]
-                  else:
-                     opt = lsts[2].partition('Cancel the dialog')
-                     if opt[0] != '' and opt[1] != '':
-                        response = opt[0].rpartition('.')[0].rpartition(' ')[2]
-                     else:
-                        print("Unknown 'Select' choices found: ")
-                        response = ''
-   
-               print("'Select' Response="+response+'\n')
-               self._asubmit(response+'\n','text')
-            else:
-               lsts = lst.rpartition('Press')
-               if lsts[0] != '' and lsts[1] != '':
-                  print('Seconday Query is:\n\n'+lsts[1]+lsts[2].rsplit('\n?')[0]+'\n')
-                  opt = lsts[2].partition(' to exit ')
-                  if opt[0] != '' and opt[1] != '':
-                     response = opt[0].rpartition(' ')[2]
-                  else:
-                     opt = lsts[2].partition('N to continue')
-                     if opt[0] != '' and opt[1] != '':
-                        response = 'Y'
-                     else:
-                        response = 'X'
-
-                  print("'Press' Response="+response+'\n')
-                  self._asubmit(response+'\n','text')
-               else:
-                  #print("******************No 'Select' or 'Press' found in lst=")
-                  pass
-
-            sleep(.25)
-            lst = self.stdout[0].recv(4096).decode()
-         else:
-            log = self.stderr[0].recv(4096).decode()
-            self._log += log
-            logn = self._logcnt(False)
-
-            if log.count("\nE3969440A681A24088859985"+logn) >= 1:
-               print("******************Found end of step. No interupt processed")
-               found = True
-
-            if found:
-               ll = self.submit('ods html5 (id=saspy_internal) close;ods listing close;ods listing;libname work list;\n','text')
-               break
-
-            sleep(.25)
-            lst = self.stdout[0].recv(4096).decode()
-
-      return log
+        '''
 
    def saslog(self):
       '''
@@ -760,7 +744,7 @@ class SASsessionIOM():
       if len(libref):
          code += libref+"."
       code += table+"');\n" 
-      code += "te='TABLE_EXISTS='; put te e;run;"
+      code += "te='TABLE_EXISTS='; put te e;run;\n"
    
       ll = self.submit(code, "text")
 
@@ -802,8 +786,7 @@ class SASsessionIOM():
       '''
       code  = "options nosource;\n"
       code += "filename x \""+file+"\";\n"
-      code += "proc export data="+libref+"."+table+" outfile=x"
-      code += " dbms=csv replace; run;"
+      code += "proc export data="+libref+"."+table+" outfile=x dbms=csv replace; run\n;"
       code += "options source;\n"
 
       if nosub:
@@ -846,19 +829,17 @@ class SASsessionIOM():
       if len(libref):
          code += libref+"."
       code += table+";\n"
-      if len(length):
-         code += "length"+length+";\n"
+      if len(length):                                                         
+         code += "length "+length+";\n"
       if len(format):
          code += "format "+format+";\n"
-      code += "infile datalines delimiter='09'x;\n input "+input+";\n datalines;"
+      code += "infile datalines delimiter='03'x;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\ndatalines;"
       self._asubmit(code, "text")
 
       for row in df.itertuples(index=False):
-      #for row in df.iterrows():
          card  = ""
          for col in range(ncols):
             var = str(row[col])
-            #var = str(row[1][col])
             if dts[col] == 'N' and var == 'nan':
                var = '.'
             if dts[col] == 'D': 
@@ -866,12 +847,16 @@ class SASsessionIOM():
                   var = '.'
                else:
                   var = str(row[col].to_datetime64())[:26]
-                  #var = str(row[1][col].to_datetime64())
-            card += var+chr(9)
-         self.stdin[0].send(card.encode()+b'\n')
-         #self._asubmit(card, "text")
-
-      self._asubmit(";run;", "text")
+            card += var
+            if col < (ncols-1):
+               card += chr(3)
+         #code += card+"\n"
+         self._asubmit(card, "text")
+         #sleep(.25)
+      self._asubmit(";\nrun;", "text")
+      ll = self.submit("", "text")
+      #ll = self.submit(code+";\nrun;", "text")
+      return
    
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
       '''
@@ -881,12 +866,17 @@ class SASsessionIOM():
       port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       '''
       datar = ""
+      if libref:
+         tabname = libref+"."+table
+      else:
+         tabname = table
 
-      code  = "data _null_; file LOG;d = open('"+libref+"."+table+"');\n"
+      code  = "data _null_; file LOG; d = open('"+tabname+"');\n"
+      code += "length var $256;\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
       code += "put lr lrecl; put vn nvars; put vl;\n"
-      code += "do i = 1 to nvars; var = varname(d, i); put var; end;\n"
+      code += "do i = 1 to nvars; var = compress(varname(d, i), '00'x); put var; end;\n"
       code += "put vt;\n"
       code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
       code += "run;"
@@ -910,10 +900,10 @@ class SASsessionIOM():
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
    
-      code  = "data _null_; set "+libref+"."+table+"(obs=1);put 'FMT_CATS=';\n"
+      code  = "data _null_; set "+tabname+"(obs=1); put 'FMT_CATS=';\n"
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "run;\n"
+      code += "run;"
    
       ll = self.submit(code, "text")
 
@@ -922,7 +912,7 @@ class SASsessionIOM():
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
    
-      code = "data _null_; set "+libref+"."+table+";\n file _tomods1; put "
+      code = "data _null_; set "+tabname+";\n file _tomods1; put "
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
@@ -938,7 +928,7 @@ class SASsessionIOM():
                      code += 'best32. '
          if i < (len(varlist)-1):
             code += "'09'x "
-      code += "; run;\n"
+      code += ";\n run;"
 
       ll = self.submit(code, 'text')
    
