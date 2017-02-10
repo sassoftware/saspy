@@ -88,8 +88,7 @@ cp += ":/opt/tom/gitlab/metis/java/pyiom"
 cp += ":/opt/tom/gitlab/metis/java/tools"
 cp += ":/opt/tom/gitlab/metis/java"
 
-iomj     = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'java'      : '/usr/bin/java',
+iomj     = {'java'      : '/usr/bin/java',
             'omruser'   : 'sas',
             'omrpw'     : 'sas',
             'iomhost'   : 'tom64-3.na.sas.com',
@@ -97,8 +96,7 @@ iomj     = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.
             'classpath' : cp
             }           
 
-iomjwin  = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'java'      : '/usr/bin/java',
+iomjwin  = {'java'      : '/usr/bin/java',
             'omruser'   : 'sasiom1@carynt',
             'omrpw'     : '1bridge',
             'iomhost'   : 'd77422.na.sas.com',
@@ -107,16 +105,31 @@ iomjwin  = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.
             'classpath' : cp
             }
 
-gridiom  = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'java'      : '/usr/bin/java',
+gridiom  = {'java'      : '/usr/bin/java',
             'omruser'   : 'sascnn1',
             'omrpw'     : '1connect',
             'iomhost'   : 'bb04cnt10.unx.sas.com',
             'iomport'   : 8594,
+            'encoding'  : 'iso-8859-1',
             'classpath' : cp
             }
+         
+# build out a local classpath variable to use below
+cpl  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.svc.connection.jar"
+cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.codepolicy.jar"
+cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\log4j.jar"
+cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.security.sspi.jar"
+cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.core.jar"
+cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\\java\ConnectionHelper.java"
+cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\pyiom"
+cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\tools"
+cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java"
 
-winlocal = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
+winlocal = {'saspath'   : 'C:\Program Files\SASHome\SASFoundation\9.4\sas.exe',
+            'java'      : 'java',
+            'omruser'   : 'sastpw',
+            'encoding'  : 'cp1252',
+            'classpath' : cpl
             }
 
 # build out a local classpath variable to use below
@@ -130,8 +143,14 @@ cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\pyiom"
 cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\tools"
 cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java"
 
-winiomj  = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
+winlocal = {'saspath'   : 'C:\Program Files\SASHome\SASFoundation\9.4\sas.exe',
             'java'      : 'java',
+            'omruser'   : 'sastpw',
+            'encoding'  : 'cp1252',
+            'classpath' : cpw
+            }
+
+winiomj  = {'java'      : 'java',
             'omruser'   : 'sas',
             'omrpw'     : 'sas',
             'iomhost'   : 'tom64-3.na.sas.com',
@@ -139,8 +158,7 @@ winiomj  = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.
             'classpath' : cpw
             }
 
-winiomjwin = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'java'      : 'java',
+winiomjwin = {'java'    : 'java',
             'omruser'   : 'sasiom1@carynt',
             'omrpw'     : '1bridge',
             'iomhost'   : 'd77422.na.sas.com',
@@ -149,8 +167,7 @@ winiomjwin = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.
             'classpath' : cpw
             }
 
-gridiomw = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'java'      : 'java',
+gridiomw = {'java'      : 'java',
             'omruser'   : 'sascnn1',
             'omrpw'     : '1connect',
             'iomhost'   : 'bb04cnt10.unx.sas.com',
@@ -159,8 +176,7 @@ gridiomw = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.
             'classpath' : cpw
             }
 
-iomc     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'iomc'    : '/u/sastpw/tkpy2c/tkext/com/laxnd/tktom',
+iomc     = {'iomc'    : '/u/sastpw/tkpy2c/tkext/com/laxnd/tktom',
             'omruser' : 'sas',
             'omrpw'   : 'sas',
             'host'    : 'tom64-3.na.sas.com',

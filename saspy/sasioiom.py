@@ -39,6 +39,7 @@ class SASconfigIOM:
       self.name      = kwargs.get('sascfgname', '')
       cfg            = getattr(SAScfg, self.name) 
 
+      self.saspath   = cfg.get('saspath', '')
       self.java      = cfg.get('java', '')
       self.iomhost   = cfg.get('iomhost', '')
       self.iomport   = cfg.get('iomport', '')
@@ -56,6 +57,13 @@ class SASconfigIOM:
 
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
+
+      insaspath = kwargs.get('saspath', '')   
+      if len(insaspath) > 0:
+         if lock and len(self.saspath):
+            print("Parameter 'saspath' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.saspath = insaspath   
 
       inoptions = kwargs.get('options', '')
       if len(inoptions) > 0:
@@ -177,6 +185,22 @@ class SASsessionIOM():
       if self.pid:
          return self.pid
 
+      # check for local iom server
+      if self.sascfg.saspath:
+         self.sascfg.iomhost = "localhost"
+         if not self.sascfg.iomport:
+            self.sascfg.iomport = 8591
+         pgm    = self.sascfg.saspath
+         parms  = [pgm]
+         parms += ["-objectserver", "-objectserverparms", "'protocol=bridge", "port="+str(self.sascfg.iomport), "lockserver'"]
+         
+         try:
+            self.saspid = subprocess.Popen(parms)
+         except:
+            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
+            print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
+            return NULL
+
       port = 0
       try:
          self.sockin  = socks.socket()
@@ -197,11 +221,8 @@ class SASsessionIOM():
       self.sockout.listen(0)
       self.sockerr.listen(0)
 
-
-      pw = self.sascfg.omrpw
-      while len(pw) == 0:
-         pw = self.sascfg._prompt("Please enter the OMR password for OMR user "+self.sascfg.omruser+": ", pw=True)
-      pw += '\n'
+      while len(self.sascfg.omruser) == 0:
+         self.sascfg.omruser = self._prompt("Please enter the IOM user id: ")
 
       pgm    = self.sascfg.java
       parms  = [pgm]
@@ -224,53 +245,6 @@ class SASsessionIOM():
          return NULL
          
 
-      '''
-      #PIPE_READ  = 0
-      #PIPE_WRITE = 1
-      
-      #pin  = os.pipe() 
-      #pout = os.pipe()
-      #perr = os.pipe() 
-
-      pidpty = os.forkpty()
-      if pidpty[0]:
-         # we are the parent
-
-         pid = pidpty[0]
-         #os.close(pin[PIPE_READ])
-         #os.close(pout[PIPE_WRITE]) 
-         #os.close(perr[PIPE_WRITE]) 
-
-      else:
-         # we are the child
-         #signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-         #os.close(0)
-         #os.close(1)
-         #os.close(2)
-
-         #os.dup2(pin[PIPE_READ],   0)
-         #os.dup2(pout[PIPE_WRITE], 1)
-         #os.dup2(perr[PIPE_WRITE], 2)
-
-         #os.close(pin[PIPE_READ])
-         #os.close(pin[PIPE_WRITE])
-         #os.close(pout[PIPE_READ])
-         #os.close(pout[PIPE_WRITE]) 
-         #os.close(perr[PIPE_READ])
-         #os.close(perr[PIPE_WRITE]) 
-
-         try:
-            #sleep(15)
-            os.execv(pgm, parms)
-         except:
-            print("Subprocess failed to start. Double check you settings in sascfg.py file.\n") 
-            sleep(60)
-            os._exit(-6)
-
-      self.pid    = pidpty[0]
-      '''
-
       self.stdin  = self.sockin.accept()
       self.stdout = self.sockout.accept()
       self.stderr = self.sockerr.accept()
@@ -283,6 +257,11 @@ class SASsessionIOM():
          self.pid = None
       except:
          pass
+
+      pw = self.sascfg.omrpw
+      while len(pw) == 0:
+         pw = self.sascfg._prompt("Please enter the OMR password for OMR user "+self.sascfg.omruser+": ", pw=True)
+      pw += '\n'
 
       self.stdin[0].send(pw.encode(self.sascfg.encoding))
 
@@ -299,7 +278,6 @@ class SASsessionIOM():
       print("SAS Connection established. Subprocess id is "+str(self.pid.pid)+"\n")  
       return self.pid
    
-    
    def _endsas(self):
       rc = 0
       if self.pid:
@@ -324,6 +302,9 @@ class SASsessionIOM():
             print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
             #os.kill(self.pid, signal.SIGKILL)
             self.pid.kill()
+
+         if self.saspid:
+            self.saspid.kill()
 
          print("SAS Connection terminated. Subprocess id was "+str(pid))
          self.pid = None
