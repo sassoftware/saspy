@@ -120,7 +120,7 @@ cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__9
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\log4j.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.security.sspi.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.core.jar"
-cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\\java\ConnectionHelper.java"
+cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\ConnectionHelper.java"
 cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\pyiom"
 cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\tools"
 cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java"
@@ -132,30 +132,12 @@ winlocal = {'saspath'   : 'C:\Program Files\SASHome\SASFoundation\9.4\sas.exe',
             'classpath' : cpl
             }
 
-# build out a local classpath variable to use below
-cpw  =  "E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\lib\sas.svc.connection.jar"
-cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\lib\sas.codepolicy.jar"
-cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\lib\log4j.jar"
-cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\lib\sas.security.sspi.jar"
-cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\lib\sas.core.jar"
-cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\ConnectionHelper.java"
-cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\pyiom"
-cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\tools"
-cpw += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java"
-
-winlocal = {'saspath'   : 'C:\Program Files\SASHome\SASFoundation\9.4\sas.exe',
-            'java'      : 'java',
-            'omruser'   : 'sastpw',
-            'encoding'  : 'cp1252',
-            'classpath' : cpw
-            }
-
 winiomj  = {'java'      : 'java',
             'omruser'   : 'sas',
             'omrpw'     : 'sas',
             'iomhost'   : 'tom64-3.na.sas.com',
             'iomport'   : 8591,
-            'classpath' : cpw
+            'classpath' : cpl
             }
 
 winiomjwin = {'java'    : 'java',
@@ -164,7 +146,7 @@ winiomjwin = {'java'    : 'java',
             'iomhost'   : 'd77422.na.sas.com',
             'iomport'   : 18591,
             'encoding'  : 'cp1252',
-            'classpath' : cpw
+            'classpath' : cpl
             }
 
 gridiomw = {'java'      : 'java',
@@ -173,7 +155,7 @@ gridiomw = {'java'      : 'java',
             'iomhost'   : 'bb04cnt10.unx.sas.com',
             'iomport'   : 8594,
             'encoding'  : 'cp1252',
-            'classpath' : cpw
+            'classpath' : cpl
             }
 
 iomc     = {'iomc'    : '/u/sastpw/tkpy2c/tkext/com/laxnd/tktom',

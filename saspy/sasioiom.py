@@ -159,6 +159,7 @@ class SASsessionIOM():
       self.stdin  = None
       self.stderr = None
       self.stdout = None
+      self.saspid = None
 
       self.sascfg   = SASconfigIOM(**kwargs)
       self._log_cnt = 0
@@ -201,16 +202,16 @@ class SASsessionIOM():
       port = 0
       try:
          self.sockin  = socks.socket()
-         self.sockin.bind(("",port))
-         #self.sockin.bind(("",32701))
+         #self.sockin.bind(("",port))
+         self.sockin.bind(("",32701))
 
          self.sockout = socks.socket()
-         self.sockout.bind(("",port))
-         #self.sockout.bind(("",32702))
+         #self.sockout.bind(("",port))
+         self.sockout.bind(("",32702))
 
          self.sockerr = socks.socket()
-         self.sockerr.bind(("",port))
-         #self.sockerr.bind(("",32703))
+         #self.sockerr.bind(("",port))
+         self.sockerr.bind(("",32703))
       except OSError:
          print('Error try to open a socket in the _startsas method. Call failed.')
          return None
@@ -548,9 +549,8 @@ class SASsessionIOM():
          pgm += odsclose
 
       pgm += b'\n'+logcodei.encode(self.sascfg.encoding)+b'\n'
-      self.stdin[0].send(pgm)
+      self.stdin[0].send(pgm+b'tom says EOL='+logcodeo.encode())
 
-      self.stdin[0].send(b'tom says EOL='+logcodeo.encode())
       while not done:
          try:
              while True:

@@ -705,7 +705,7 @@ class SASdata:
 
         '''
         # code = "%put lastobs=%sysfunc(attrn(%sysfunc(open("+self.libref+'.'+self.table+")),NOBS)) tom;"
-        code = "proc sql;select count(*) into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;"
+        code = "proc sql;select count(*) into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;quit;"
 
         nosub = self.sas.nosub
         self.sas.nosub = False
