@@ -120,7 +120,6 @@ cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__9
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\log4j.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.security.sspi.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.core.jar"
-cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\ConnectionHelper.java"
 cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\pyiom"
 cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\tools"
 cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java"
@@ -149,12 +148,12 @@ winiomjwin = {'java'    : 'java',
             'classpath' : cpl
             }
 
-gridiomw = {'java'      : 'java',
+wingridiom = {'java'      : 'java',
             'omruser'   : 'sascnn1',
             'omrpw'     : '1connect',
             'iomhost'   : 'bb04cnt10.unx.sas.com',
             'iomport'   : 8594,
-            'encoding'  : 'cp1252',
+            'encoding'  : 'iso-8859-1',
             'classpath' : cpl
             }
 
