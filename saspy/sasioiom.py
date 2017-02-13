@@ -14,9 +14,6 @@
 #  limitations under the License.
 #
 
-#import fcntl
-#import os
-#import signal
 import subprocess
 import getpass
 from time import sleep
@@ -227,8 +224,8 @@ class SASsessionIOM():
       pgm    = self.sascfg.java
       parms  = [pgm]
       parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
-      #parms += ["-classpath", self.sascfg.classpath, "pyiom.saspy2j_sleep"]
-      parms += ["-host", "localhost"] #socks.gethostname()]
+      #parms += ["-classpath", self.sascfg.classpath, "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
+      parms += ["-host", "localhost"] 
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
@@ -260,7 +257,7 @@ class SASsessionIOM():
 
       pw = self.sascfg.omrpw
       while len(pw) == 0:
-         pw = self.sascfg._prompt("Please enter the OMR password for OMR user "+self.sascfg.omruser+": ", pw=True)
+         pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
       pw += '\n'
 
       self.stdin[0].send(pw.encode(self.sascfg.encoding))
@@ -552,7 +549,8 @@ class SASsessionIOM():
 
       pgm += b'\n'+logcodei.encode(self.sascfg.encoding)+b'\n'
       self.stdin[0].send(pgm)
-      #print(pgm.decode()+'\n')
+
+      self.stdin[0].send(b'tom says EOL='+logcodeo.encode())
       while not done:
          try:
              while True:
