@@ -281,8 +281,7 @@ class SASsessionIOM():
       if self.pid:
          pid = self.pid.pid
 
-         self.submit("", "text")
-         self.submit("endsas;", "text")
+         #self.submit("endsas;", "text")
 
          try:
 
@@ -571,7 +570,6 @@ class SASsessionIOM():
                  if bail:
                     if lstf.count(logcodeo) >= 1:
                        lstf = lstf.rsplit(logcodeo)[0]
-                       bail = True
                        break
                  try:
                     lst = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
