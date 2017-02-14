@@ -26,7 +26,7 @@
 # 
 # SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', 'httptest']
 #
-SAS_config_names = ['default', 'http', 'httptest', 'ssh', 'httpfred', 'grid', 'tdi', 'iomj', 'iomc', 'iomjwin', 'winiomj', 'winiomjwin', 'winlocal', 'gridiom', 'gridiomw']
+SAS_config_names = ['default', 'http', 'httptest', 'ssh', 'httpfred', 'grid', 'tdi', 'iomj', 'iomc', 'iomjwin', 'winiomj', 'winiomjwin', 'winlocal', 'gridiom', 'wingridiom']
 
 # Configuration options for pysas - python Dict
 # valid key are:
@@ -79,14 +79,23 @@ grid     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/
 
 # build out a local classpath variable to use below
 cp  =  "/opt/tom/gitlab/metis/java/lib/sas.svc.connection.jar"
-cp += ":/opt/tom/gitlab/metis/java/lib/sas.codepolicy.jar"
+#cp += ":/opt/tom/gitlab/metis/java/lib/sas.codepolicy.jar"
 cp += ":/opt/tom/gitlab/metis/java/lib/log4j.jar"
 cp += ":/opt/tom/gitlab/metis/java/lib/sas.security.sspi.jar"
 cp += ":/opt/tom/gitlab/metis/java/lib/sas.core.jar"
-cp += ":/opt/tom/gitlab/metis/java/tools/ConnectionHelper.java"
 cp += ":/opt/tom/gitlab/metis/java/pyiom"
 cp += ":/opt/tom/gitlab/metis/java/tools"
 cp += ":/opt/tom/gitlab/metis/java"
+
+# build out a local classpath variable to use below
+cp2  =  "/u/sastpw/tkpy2j/lib2/sas.svc.connection.jar"
+#cp2 += ":/u/sastpw/tkpy2j/lib2/sas.codepolicy.jar"
+cp2 += ":/u/sastpw/tkpy2j/lib2/log4j.jar"
+cp2 += ":/u/sastpw/tkpy2j/lib2/sas.security.sspi.jar"
+cp2 += ":/u/sastpw/tkpy2j/lib2/sas.core.jar"
+cp2 += ":/opt/tom/gitlab/metis/java/pyiom"
+cp2 += ":/opt/tom/gitlab/metis/java/tools"
+cp2 += ":/opt/tom/gitlab/metis/java"
 
 iomj     = {'java'      : '/usr/bin/java',
             'omruser'   : 'sas',
@@ -111,15 +120,15 @@ gridiom  = {'java'      : '/usr/bin/java',
             'iomhost'   : 'bb04cnt10.unx.sas.com',
             'iomport'   : 8594,
             'encoding'  : 'iso-8859-1',
-            'classpath' : cp
+            'classpath' : cp2
             }
          
 # build out a local classpath variable to use below
-cpl  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.svc.connection.jar"
-cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.codepolicy.jar"
-cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\log4j.jar"
-cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.security.sspi.jar"
-cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\java\lib\sas.core.jar"
+cpl  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar"
+#cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.codepolicy.jar"
+cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
+cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
+cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
 cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\pyiom"
 cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java\tools"
 cpl += ";E:\metis-master-85c5ead4636c675fabfbae571e7d1958d10fc31d\java"

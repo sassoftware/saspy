@@ -280,6 +280,10 @@ class SASsessionIOM():
       rc = 0
       if self.pid:
          pid = self.pid.pid
+
+         self.submit("", "text")
+         self.submit("endsas;", "text")
+
          try:
 
             self.stdin[0].shutdown(socks.SHUT_RDWR)
@@ -294,7 +298,8 @@ class SASsessionIOM():
             self.stderr[0].close()
             self.sockerr.close()
    
-            rc = self.pid.wait(5)
+            if self.pid:
+               rc = self.pid.wait(5)
             #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
          except (subprocess.TimeoutExpired):
             print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
@@ -308,6 +313,7 @@ class SASsessionIOM():
          self.pid = None
       return rc
 
+   '''
    def _getlog(self, wait=5, jobid=None):
       logf   = b''
       quit   = wait * 2
@@ -454,6 +460,8 @@ class SASsessionIOM():
       self.stdin[0].send(pgm)
 
       return 
+   '''
+
 
    def submit(self, code: str, results: str ="html", prompt: dict ={}) -> dict:
       '''
@@ -564,16 +572,17 @@ class SASsessionIOM():
                     pass
 
                  if bail:
-                    eof -= 1
-                 if eof < 0:
-                    break
+                    if lstf.count(logcodeo) >= 1:
+                       lstf = lstf.rsplit(logcodeo)[0]
+                       bail = True
+                       break
                  try:
                     lst = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
                  except (BlockingIOError):
                     lst = b''
 
                  if len(lst) > 0:
-                    #print(lst)
+                    #print("LIST = \n"+lst)
                     lstf += lst
                  else:
                     try:
@@ -582,7 +591,7 @@ class SASsessionIOM():
                        log = b''
 
                     if len(log) > 0:
-                       #print(log)
+                       #print("LOG = \n"+log)
                        logf += log
                        if logf.count(logcodeo) >= 1:
                           bail = True
@@ -813,8 +822,10 @@ class SASsessionIOM():
       if len(format):
          code += "format "+format+";\n"
       code += "infile datalines delimiter='03'x;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\ndatalines;"
-      self._asubmit(code, "text")
+      #self._asubmit(code, "text")
+      self.stdin[0].send(code.encode(self.sascfg.encoding)+b'\n')
 
+      i = 0
       for row in df.itertuples(index=False):
          card  = ""
          for col in range(ncols):
@@ -830,11 +841,16 @@ class SASsessionIOM():
             if col < (ncols-1):
                card += chr(3)
          #code += card+"\n"
-         self._asubmit(card, "text")
-         #sleep(.25)
-      self._asubmit(";\nrun;", "text")
+         #self._asubmit(card, "text")
+         self.stdin[0].send(card.encode(self.sascfg.encoding)+b'\n')
+         if i > 50:
+            self.stdin[0].send(b'tom says EOL= ASYNCH                          \n')
+            i = 0
+         i = i + 1
+      #self._asubmit(";\nrun;", "text")
+      self.stdin[0].send(b';\nrun;\n')
+
       ll = self.submit("", "text")
-      #ll = self.submit(code+";\nrun;", "text")
       return
    
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
