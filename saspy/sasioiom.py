@@ -313,7 +313,6 @@ class SASsessionIOM():
          self.pid = None
       return rc
 
-   '''
    def _getlog(self, wait=5, jobid=None):
       logf   = b''
       quit   = wait * 2
@@ -460,8 +459,6 @@ class SASsessionIOM():
       self.stdin[0].send(pgm)
 
       return 
-   '''
-
 
    def submit(self, code: str, results: str ="html", prompt: dict ={}) -> dict:
       '''
@@ -557,7 +554,7 @@ class SASsessionIOM():
          pgm += odsclose
 
       pgm += b'\n'+logcodei.encode(self.sascfg.encoding)+b'\n'
-      self.stdin[0].send(pgm+b'tom says EOL='+logcodeo.encode())
+      self.stdin[0].send(pgm+b'tom says EOL='+logcodeo.encode()+b'\n')
 
       while not done:
          try:
@@ -827,6 +824,7 @@ class SASsessionIOM():
 
       i = 0
       for row in df.itertuples(index=False):
+         i = i + 1
          card  = ""
          for col in range(ncols):
             var = str(row[col])
@@ -844,9 +842,9 @@ class SASsessionIOM():
          #self._asubmit(card, "text")
          self.stdin[0].send(card.encode(self.sascfg.encoding)+b'\n')
          if i > 50:
-            self.stdin[0].send(b'tom says EOL= ASYNCH                          \n')
+            self.stdin[0].send(b'tom says EOL=ASYNCH                          \n')
             i = 0
-         i = i + 1
+
       #self._asubmit(";\nrun;", "text")
       self.stdin[0].send(b';\nrun;\n')
 
