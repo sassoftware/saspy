@@ -313,21 +313,8 @@ class SASsessionIOM():
       if self.pid:
          if os.name == 'nt': 
             pid = self.pid.pid
-            #self.submit("endsas;", "text")
+            self._asubmit(";*\';*\";*/;\n;quit;endsas;\n", "text")
             try:
-      
-               self.stdin[0].shutdown(socks.SHUT_RDWR)
-               self.stdin[0].close()
-               self.sockin.close()
-      
-               self.stdout[0].shutdown(socks.SHUT_RDWR)
-               self.stdout[0].close()
-               self.sockout.close()
-      
-               self.stderr[0].shutdown(socks.SHUT_RDWR)
-               self.stderr[0].close()
-               self.sockerr.close()
-      
                if self.pid:
                   rc = self.pid.wait(5)
             except (subprocess.TimeoutExpired):
@@ -340,7 +327,7 @@ class SASsessionIOM():
             if self.pid:      
                pid = self.pid
                code = ";*\';*\";*/;\n;quit;endsas;\n"
-               self._getlog(wait=1)
+               #self._getlog(wait=1)
                self._asubmit(code,'text')
                sleep(1)
                try:
@@ -349,10 +336,27 @@ class SASsessionIOM():
                   print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                   os.kill(self.pid, signal.SIGKILL)
 
+
+         self.stdin[0].shutdown(socks.SHUT_RDWR)
+         self.stdin[0].close()
+         self.sockin.close()
+
+         self.stdout[0].shutdown(socks.SHUT_RDWR)
+         self.stdout[0].close()
+         self.sockout.close()
+
+         self.stderr[0].shutdown(socks.SHUT_RDWR)
+         self.stderr[0].close()
+         self.sockerr.close()
+      
          print("SAS Connection terminated. Subprocess id was "+str(pid))
          self.pid = None
+
       return rc
 
+
+
+   '''
    def _getlog(self, wait=5, jobid=None):
       logf   = b''
       quit   = wait * 2
@@ -485,6 +489,9 @@ class SASsessionIOM():
             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
  
       return lst.replace(chr(12), '\n')
+   '''
+
+
 
    def _asubmit(self, code, results="html"):
       # as this is an _ method, it's not really to be used. Of note is that if this is used and if what it submitted generates
@@ -654,7 +661,6 @@ class SASsessionIOM():
                        if logf.count(logcodeo) >= 1:
                           bail = True
                        if not bail and bc:
-                          print("FOUND MYSELF IN BC!!!!!!!!!!!!!"+log)
                           self.stdin[0].send(odsclose+logcodei.encode(self.sascfg.encoding)+b'tom says EOL='+logcodeo.encode()+b'\n')
                           bc = False
              done = True
@@ -908,7 +914,7 @@ class SASsessionIOM():
             code = ""
 
       self._asubmit(code+";\nrun;", "text")
-      ll = self.submit("", "text")
+      ll = self.submit("", 'text')
       return
    
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
