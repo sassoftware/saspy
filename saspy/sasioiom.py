@@ -194,6 +194,7 @@ class SASsessionIOM():
             lsoc.bind(("", 0))
             self.sascfg.iomport = lsoc.getsockname()[1]
             lsoc.close()
+            #print(str(self.sascfg.iomport))
          pgm    = self.sascfg.saspath
          parms  = [pgm]
          parms += ["-objectserver", "-objectserverparms", "'protocol=bridge", "port="+str(self.sascfg.iomport), "lockserver'"]
@@ -314,29 +315,29 @@ class SASsessionIOM():
    def _endsas(self):
       rc = 0
       if self.pid:
+         self.stdin[0].send(b'\ntom says EOL=ENDSAS                          \n')
+
          if os.name == 'nt': 
             pid = self.pid.pid
-            self._asubmit(";*\';*\";*/;\n;quit;endsas;\n", "text")
             try:
-               if self.pid:
-                  rc = self.pid.wait(5)
+               if self.saspid:
+                  self.saspid.wait(5)
+                  self.saspid = None
+               rc = self.pid.wait(5)
+               self.pid = None
             except (subprocess.TimeoutExpired):
                print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
-               self.pid.kill()
-      
-            if self.saspid:
-               self.saspid.kill()
+               if self.saspid:
+                  self.saspid.kill()
+               if self.pid:
+                  self.pid.kill()
          else:
             if self.pid:      
                pid = self.pid
-               code = ";*\';*\";*/;\n;quit;endsas;\n"
-               #self._getlog(wait=1)
-               self._asubmit(code,'text')
-               sleep(1)
                try:
                   rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
                except (subprocess.TimeoutExpired):
-                  print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+                  print("SAS didn't shutdown w/in a second; killing it to be sure")
                   os.kill(self.pid, signal.SIGKILL)
 
 
