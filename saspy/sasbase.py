@@ -43,13 +43,14 @@ import logging
 
 try:
     import saspy.sasiostdio as sasiostdio
-    import saspy.sasioiom   as sasioiom
+    #import saspy.sasioiom   as sasioiom
 
     running_on_win = False
 
 except:
     running_on_win = True
 
+import saspy.sasioiom   as sasioiom
 import saspy.sasiohttp  as sasiohttp
 from saspy.sasstat import *
 from saspy.sasets import *
@@ -706,7 +707,7 @@ class SASdata:
 
         '''
         # code = "%put lastobs=%sysfunc(attrn(%sysfunc(open("+self.libref+'.'+self.table+")),NOBS)) tom;"
-        code = "proc sql;select count(*) into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;"
+        code = "proc sql;select count(*) into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;quit;"
 
         nosub = self.sas.nosub
         self.sas.nosub = False
@@ -802,22 +803,27 @@ class SASdata:
             if len(var) > 0:
                 if i == 1:
                     num_string = """
-                        proc contents data={0}.{1};
-                            ods output variables=_charlist;
-                        run;
-                        data _charlist;
-                            set _charlist;
-                            where Type='Num';
-                            keep Variable;
+                        data _null_; file LOG;
+                          d = open('{0}.{1}');
+                          nvars = attrn(d, 'NVARS'); 
+                          put 'VARLIST=';
+                          do i = 1 to nvars; 
+                             vart = vartype(d, i);
+                             var  = varname(d, i);
+                             if vart eq 'N' then
+                                put var; end;
+                             put 'VARLISTend=';
                         run;
                         """
                     # ignore teach_me_SAS mode to run contents
                     nosub = self.sas.nosub
                     self.sas.nosub = False
-                    self.sas.submit(num_string.format(self.libref, self.table + self._dsopts()))
-                    numlist1 = list(self.sas.sasdata2dataframe('_charlist', libref='WORK').values.flatten())
-                    self.sas.submit("proc delete data=work._charlist; run;")
+                    ll = self.sas.submit(num_string.format(self.libref, self.table + self._dsopts()))
                     self.sas.nosub = nosub
+                    l2 = ll['LOG'].partition("VARLIST=\n")            
+                    l2 = l2[2].rpartition("VARLISTend=\n")                   
+                    numlist1 = l2[0].split("\n")                                             
+                    del numlist1[len(charlist1)-1]
 
                     # check if var is in numlist1
                     if isinstance(var, str):
@@ -897,10 +903,10 @@ class SASdata:
         ll = self._is_valid()
         if self.results.upper() == 'PANDAS':
             code = "proc contents data=%s.%s %s ;" % (self.libref, self.table, self._dsopts())
-            code += "ods output Attributes=_attributes;"
-            code += "ods output EngineHost=_EngineHost;"
-            code += "ods output Variables=_Variables;"
-            code += "ods output Sortedby=_Sortedby;"
+            code += "ods output Attributes=work._attributes;"
+            code += "ods output EngineHost=work._EngineHost;"
+            code += "ods output Variables=work._Variables;"
+            code += "ods output Sortedby=work._Sortedby;"
             code += "run;"
             return self._returnPD(code, ['_attributes', '_EngineHost', '_Variables', '_Sortedby'])
 
@@ -931,7 +937,7 @@ class SASdata:
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "proc contents data=%s.%s %s ;ods output Variables=_variables ;run;" % (self.libref, self.table, self._dsopts())
+            code = "proc contents data=%s.%s %s ;ods output Variables=work._variables ;run;" % (self.libref, self.table, self._dsopts())
             return self._returnPD(code, '_variables')
 
         else:
@@ -971,7 +977,7 @@ class SASdata:
         display descriptive statistics for the table; summary statistics. This is an alias for 'describe'
 
         '''
-        code = "proc means data=" + self.libref + '.' + self.table + self._dsopts() + " n nmiss median mean std min p25 p50 p75 max;run;"
+        code = "proc means data=" + self.libref + '.' + self.table + self._dsopts() + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;run;"
 
         if self.sas.nosub:
             print(code)
@@ -980,7 +986,7 @@ class SASdata:
         ll = self._is_valid()
 
         if self.results.upper() == 'PANDAS':
-            code = "proc means data=%s.%s %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; ods output Summary=_summary; run;" % (
+            code = "proc means data=%s.%s %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; ods output Summary=work._summary; run;" % (
                 self.libref, self.table, self._dsopts())
             return self._returnPD(code, '_summary')
         else:
