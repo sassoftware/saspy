@@ -190,3 +190,56 @@ class SASstat:
 
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TPSPLINE", required_set, legal_set, **kwargs)
+
+    def hplogistic(self, **kwargs: dict) -> object:
+        """
+        Python method to call the HPLOGISTIC procedure
+        For more information on the statements see the Documentation link.
+
+        required_set={'model'}
+        legal_set= {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
+                    'partition', 'score', 'selection', 'weight'}
+
+        cls is an alias for the class statement
+        Documentation link:
+        https://support.sas.com/documentation/onlinedoc/stat/141/hplogistic.pdf
+
+        The PROC HPLOGISTIC and MODEL statements are required.
+        The CLASS statement (if specified) must
+        precede the MODEL statement
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'model'}
+        legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
+                     'partition', 'score', 'selection', 'weight'}
+
+        logger.debug("kwargs type: " + str(type(kwargs)))
+        return self._run_proc("HPLOGISTIC", required_set, legal_set, **kwargs)
+
+
+    def hpreg(self, **kwargs: dict) -> object:
+        """
+        Python method to call the HPREG procedure
+        For more information on the statements see the Documentation link.
+
+        required_set={'model'}
+        legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
+                     'partition', 'performance', 'score', 'selection', 'weight'}
+
+        cls is an alias for the class statement
+        Documentation link:
+        https://support.sas.com/documentation/onlinedoc/stat/141/hpreg.pdf
+
+        The PROC HPREG and MODEL statements are required.
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'model'}
+        legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
+                     'partition', 'performance', 'score', 'selection', 'weight'}
+
+        logger.debug("kwargs type: " + str(type(kwargs)))
+        return self._run_proc("HPREG", required_set, legal_set, **kwargs)
