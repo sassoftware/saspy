@@ -190,7 +190,10 @@ class SASsessionIOM():
       if self.sascfg.saspath:
          self.sascfg.iomhost = "localhost"
          if not self.sascfg.iomport:
-            self.sascfg.iomport = 8591
+            lsoc = socks.socket()
+            lsoc.bind(("", 0))
+            self.sascfg.iomport = lsoc.getsockname()[1]
+            lsoc.close()
          pgm    = self.sascfg.saspath
          parms  = [pgm]
          parms += ["-objectserver", "-objectserverparms", "'protocol=bridge", "port="+str(self.sascfg.iomport), "lockserver'"]
