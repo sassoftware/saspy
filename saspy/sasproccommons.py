@@ -313,6 +313,11 @@ class SASProcCommons:
         if 'season' in args:
             self.logger.debug("season statement,length: %s,%s", args['season'], len(args['season']))
             code += "season %s;\n" % (args['season'])
+        if 'selection' in args:
+            if args['selection'].lower().strip() in ['none', 'forward', 'backward', 'stepwise', 'forwardswap',
+                                                     'lar', 'lasso']:
+                self.logger.debug("selection statement,length: %s,%s", args['selection'], len(args['selection']))
+                code += "selection method=%s;\n" % (args['selection'])
         if 'slope' in args:
             self.logger.debug("slope statement,length: %s,%s", args['slope'], len(args['slope']))
             code += "slope %s;\n" % (args['slope'])
