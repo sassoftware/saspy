@@ -603,9 +603,11 @@ class SASdata:
         self.dsopts = dsopts
         self.results = results
 
-    def __getitem__(self, i):
+    def __getitem__(self, key):
+
         #bp()
-        print(i)
+        print(key)
+        print(type(key))
         #print(kwargs.keys())
         #print(kwargs.items())
 
