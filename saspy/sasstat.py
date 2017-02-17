@@ -15,6 +15,7 @@
 #
 import logging
 from saspy.sasproccommons import SASProcCommons
+#from pdb import set_trace as bp
 
 
 class SASstat:
@@ -215,8 +216,11 @@ class SASstat:
         legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
                      'partition', 'score', 'selection', 'weight'}
 
-        logger.debug("kwargs type: " + str(type(kwargs)))
-        return self._run_proc("HPLOGISTIC", required_set, legal_set, **kwargs)
+        logging.debug("kwargs type: " + str(type(kwargs)))
+
+        # ODS graphics are created by default for STAT this stops them form generation
+        kwargs['ODSGraphics']=False
+        return SASProcCommons._run_proc(self, "HPLOGISTIC", required_set, legal_set, **kwargs)
 
 
     def hpreg(self, **kwargs: dict) -> object:
@@ -241,5 +245,6 @@ class SASstat:
         legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
                      'partition', 'performance', 'score', 'selection', 'weight'}
 
-        logger.debug("kwargs type: " + str(type(kwargs)))
-        return self._run_proc("HPREG", required_set, legal_set, **kwargs)
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        kwargs['ODSGraphics']=False
+        return SASProcCommons._run_proc(self, "HPREG", required_set, legal_set, **kwargs)
