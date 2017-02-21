@@ -97,7 +97,7 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 #                                                                                                         
 # Since this IOM access method used the Java IOM client, a classpath is required for the java process to find the necessary jars. Use the template below
 # to build out a classpath variable and assign that to the 'classpath' option in the configuration definition. The IOM client jars are delivered as part
-# of a Base SAS install, so should be available in any SAS install. The saspy jar is available in the saspy repo/install. 
+# of a Base SAS install, so should be available in any SAS install. The saspyiom.jar is available in the saspy repo/install. 
 #
 # valid keys are:
 # 'saspath'   - [REQUIRED for local Windows connection only] path to SAS executable (sas.exe) i.e.: C:\Program Files\SASHome\SASFoundation\9.4\sas.exe
