@@ -114,18 +114,14 @@ cp  =  "/opt/tom/gitlab/metis/java/lib/sas.svc.connection.jar"
 cp += ":/opt/tom/gitlab/metis/java/lib/log4j.jar"
 cp += ":/opt/tom/gitlab/metis/java/lib/sas.security.sspi.jar"
 cp += ":/opt/tom/gitlab/metis/java/lib/sas.core.jar"
-cp += ":/opt/tom/gitlab/metis/java/pyiom"
-cp += ":/opt/tom/gitlab/metis/java/tools"
-cp += ":/opt/tom/gitlab/metis/java"
+cp += ":/opt/tom/gitlab/metis/java/saspyiom.jar"
 
 # build out a local classpath variable to use below
 cp2  =  "/u/sastpw/tkpy2j/lib2/sas.svc.connection.jar"
 cp2 += ":/u/sastpw/tkpy2j/lib2/log4j.jar"
 cp2 += ":/u/sastpw/tkpy2j/lib2/sas.security.sspi.jar"
 cp2 += ":/u/sastpw/tkpy2j/lib2/sas.core.jar"
-cp2 += ":/opt/tom/gitlab/metis/java/pyiom"
-cp2 += ":/opt/tom/gitlab/metis/java/tools"
-cp2 += ":/opt/tom/gitlab/metis/java"
+cp2 += ":/opt/tom/gitlab/metis/java/saspyiom.jar"
 
 iomj     = {'java'      : '/usr/bin/java',
             'omruser'   : 'sas',
@@ -158,9 +154,7 @@ cpl  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__9
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
-cpl += ";E:\metis-master\java\pyiom"
-cpl += ";E:\metis-master\java\tools"
-cpl += ";E:\metis-master\java"
+cpl += ";E:\metis-master\java\saspyiom.jar"
 
 winlocal = {'saspath'   : 'C:\Program Files\SASHome\SASFoundation\9.4\sas.exe',
             'java'      : 'java',
