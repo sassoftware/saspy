@@ -76,10 +76,16 @@ cp += ":path/to/saspy/java/pyiom"
 cp += ":path/to/saspy/java/tools"
 cp += ":path/to/saspy/java"
 
+# java      - the path to your java executable. If java is in your path only 'java' is needed
+# omruser   - username to authenticate with SAS
+# omrpw     - password to authenticate with SAS
+#             if the username  and password are empty '' then you will be prompted for them
+# iomhost   - the DNS name (or IP address) for your object spawner
+# iomport   - the port of the object spawner listener. All connections go throught this port and then are redirected
 grid = {'java'     : '/usr/bin/java',
         'omruser'  : '',
         'omrpw'    : '',
-        'iomhost'  : 'tom64-3.na.sas.com',
+        'iomhost'  : 'foobar.sas.com',
         'iomport'  : 8591,
         'classpath': cp
         }
@@ -90,16 +96,17 @@ cpl = "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__944
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
+
 # these jars are from the saspy pip package below is the default location for anaconda
 cpl += ";C:\Users\jadean\AppData\Local\Continuum\Anaconda3\Lib\site-packages\saspy\java\pyiom"
 cpl += ";C:\Users\jadean\AppData\Local\Continuum\Anaconda3\Lib\site-packages\saspy\tools"
 cpl += ";C:\Users\jadean\AppData\Local\Continuum\Anaconda3\Lib\site-packages\saspy\java"
 
-# saspath is the path to your sas.exe file. The default path is shown below
-# java is the path to your java executable. If java is in your path only 'java' is needed
-# omruser is your user id for the PC no domain is required
-# encoding info https://en.wikipedia.org/wiki/Windows-1252
-# classpath is the collection of jars from directly above
+# saspath   - the path to your sas.exe file. The default path is shown below
+# java      - the path to your java executable. If java is in your path only 'java' is needed
+# omruser   - your user id for the PC no domain is required
+# encoding  - since python is all utf-8 transcode could be needed info about cp1252 https://en.wikipedia.org/wiki/Windows-1252
+# classpath - the collection of jars from directly above
 winlocal = {'saspath'  : 'C:\Program Files\SASHome\SASFoundation\9.4\sas.exe',
             'java'     : 'java',
             'omruser'  : 'jadean',
