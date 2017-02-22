@@ -1162,7 +1162,7 @@ class SASdata:
         :param kwargs:
         :return: SASdata object if out= not specified, or a new SASdata object for out= when specified
 
-        Examples:
+        :Example:
 
         #. wkcars.sort('type')
         #. wkcars2 = sas.sasdata('cars2')
@@ -1171,7 +1171,6 @@ class SASdata:
         #. cars.sort('type').head()
         #. stat_results = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type'))
         #. stat_results2 = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type','work.cars'))
-
         """
         outstr = ''
         options = ''

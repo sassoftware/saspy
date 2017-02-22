@@ -1,35 +1,75 @@
 
 .. Copyright SAS Institute
 
+.. currentmodule:: saspy
+
+.. _api:
+
 *************
 API Reference
 *************
 
 .. automodule:: saspy
-
-.. autoclass:: SASProcCommons
     :members:
+    :undoc-members:
+    :inherited-members:
+    :show-inheritance:
 
-.. autoclass:: SASresults
-    :members:
-
-.. autoclass:: SASutil
-    :members:
-
-.. autoclass:: SASml
-    :members:
-
-.. autoclass:: SASstat
-    :members:
-
-.. autoclass:: SASets
-    :members:
-
-.. autoclass:: SASqc
-    :members:
+SAS Data Object
+---------------
 
 .. autoclass:: SASdata
     :members:
 
+SAS Session Object
+------------------
 .. autoclass:: SASsession
     :members:
+
+
+Procedure Syntax Statements
+---------------------------
+
+.. autoclass:: SASProcCommons
+    :members:
+
+
+SAS Results
+-----------
+.. autoclass:: SASresults
+    :members:
+
+SAS Procedures
+--------------
+
+Utility
+~~~~~~~
+
+.. autoclass:: SASutil
+    :members:
+
+
+Machine Learning (SAS Enterprise Miner)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: SASml
+    :members:
+
+Statistics
+~~~~~~~~~~
+
+.. autoclass:: SASstat
+    :members:
+
+Econometic and Time Series
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: SASets
+    :members:
+
+Quality Control
+~~~~~~~~~~~~~~~
+
+.. autoclass:: SASqc
+    :members:
+
