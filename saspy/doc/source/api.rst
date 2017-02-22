@@ -1,9 +1,17 @@
 
 .. Copyright SAS Institute
 
-.. currentmodule:: saspy
-.. _api:
-
 *************
 API Reference
 *************
+
+.. automodule:: saspy
+
+.. autoclass:: SASProcCommons
+    :members:
+
+.. autoclass:: SASresults
+    :members:
+
+.. autoclass:: SASutil
+    :members:
