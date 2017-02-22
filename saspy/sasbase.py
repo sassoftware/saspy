@@ -962,21 +962,23 @@ class SASdata:
         display descriptive statistics for the table; summary statistics.
 
         '''
-        return self.means()
+        return self.means
 
     def info(self):
-        m = self.means()
+        m = self.means
         c = self.columnInfo()
         p1 = m[['Variable', 'N', 'NMiss']]
         p2 = c[['Variable', 'Type']]
         info = pd.merge(p1, p2, on='Variable', how='outer')
         return info
 
+    @property
     def means(self):
-        '''
+        """
         display descriptive statistics for the table; summary statistics. This is an alias for 'describe'
+        :return:
+        """
 
-        '''
         code = "proc means data=" + self.libref + '.' + self.table + self._dsopts() + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;run;"
 
         if self.sas.nosub:

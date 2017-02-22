@@ -135,25 +135,3 @@ class SASml:
                      'subseries', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TREEBOOST", required_set, legal_set, **kwargs)
-
-    def svm(self, **kwargs: dict) -> object:
-        """
-        Python method to call the HPSVM procedure
-
-        Documentation link:
-        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
-        :param kwargs: dict
-        :return: SAS result object
-        """
-        pass
-
-    def bnet(self, **kwargs: dict) -> object:
-        """
-        Python method to call the HPBNET procedure
-
-        Documentation link:
-        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
-        :param kwargs: dict
-        :return: SAS result object
-        """
-        pass
