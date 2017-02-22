@@ -20,22 +20,25 @@ from saspy.sasproccommons import SASProcCommons
 
 class SASets:
     """
-    This class is for SAS/STAT procedures to be called as python3 objects and use SAS as the computational engine
+    This class is for SAS/ETS procedures to be called as python3 objects and use SAS as the computational engine
+
     This class and all the useful work in this package require a licensed version of SAS.
+
     To add a new procedure do the following:
-    1. Create a new method for the procedure
-    2. Create the set of required statements. If there are no required statements then create an empty set {}
-    3. Create the legal set of statements. This can often be obtained from the documentation of the procedure.
-        'procopts' should always be included in the legal set to allow flexibility in calling the procedure.
-    4. Create the doc string with the following parts at a minimum:
-        A. Procedure Name
-        B. Required set
-        C. Legal set
-        D. Link to the procedure documentation
-    5. Add the return call for the method using an existing procedure as an example
-    6. Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method
-        of sasproccommons.py
-    7. Write at least one test to exercise the procedures and include it in the appropriate testing file
+
+    #.  Create a new method for the procedure
+    #.  Create the set of required statements. If there are no required statements then create an empty set {}
+    #. Create the legal set of statements. This can often be obtained from the documentation of the procedure. 'procopts' should always be included in the legal set to allow flexibility in calling the procedure.
+    #. Create the doc string with the following parts at a minimum:
+
+        - Procedure Name
+        - Required set
+        - Legal set
+        - Link to the procedure documentation
+
+    #. Add the return call for the method using an existing procedure as an example
+    #. Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py
+    #. Write at least one test to exercise the procedures and include it in the appropriate testing file
     """
     def __init__(self, session, *args, **kwargs):
         """Submit an initial set of macros to prepare the SAS system"""
@@ -50,10 +53,13 @@ class SASets:
     def timeseries(self, **kwargs):
         """
         Python method to call the TIMESERIES procedure
+
         required_set={'id'}
+
         legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out'}
 
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm
+        Documentation link:
+        http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm
         """
         required_set = {'id'}
         legal_set = {'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out', 'procopts'}
@@ -63,10 +69,13 @@ class SASets:
     def arima(self, **kwargs):
         """
         Python method to call the ARIMA procedure
+
         required_set={'identify'}
+
         legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
 
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
+        Documentation link:
+        http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
         """
         required_set = {'identify'}
         legal_set = {'by', 'identify', 'estimate', 'outlier', 'forecast', 'out', 'procopts'}
@@ -75,12 +84,15 @@ class SASets:
     def ucm(self, **kwargs):
         """
         Python method to call the UCM procedure
-        required_set={'model'}
-        legal_set= {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular'
-                    'level', 'model', 'nloptions', 'performance', 'out', 'outlier', 'randomreg', 'season', 'slope'
-                    'splinereg', 'splineseason'}
 
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm
+        required_set={'model'}
+
+        legal_set= {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular',
+        'level', 'model', 'nloptions', 'performance', 'out', 'outlier', 'randomreg', 'season', 'slope',
+        'splinereg', 'splineseason'}
+
+        Documentation link:
+        http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm
         """
         required_set = {'model'}
         legal_set = {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular'
@@ -93,7 +105,9 @@ class SASets:
     def esm(self, **kwargs):
         """
         Python method to call the ESM procedure
+
         required_set = {}
+
         legal_set = { 'by', 'id', 'forecast', 'out'}
 
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm
@@ -105,7 +119,9 @@ class SASets:
     def timeid(self, **kwargs):
         """
         Python method to call the TIMEID procedure
+
         required_set = {}
+
         legal_set = { 'by', 'id', 'out'}
 
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm
@@ -117,10 +133,13 @@ class SASets:
     def timedata(self, **kwargs):
         """
         Python method to call the TIMEDATA procedure
+
         required_set = {}
+
         legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts'}
 
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm
+        Documentation link:
+        http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm
         """
         required_set = {}
         legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts', 'procopts'}
