@@ -60,6 +60,7 @@ class SASml:
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+
         :param kwargs: dict
         :return: SAS result object
         """
@@ -78,6 +79,7 @@ class SASml:
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+
         :param kwargs: dict
         :return: SAS result object
         """
@@ -96,6 +98,7 @@ class SASml:
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+
         :param kwargs: dict
         :return: SAS result object
         """
@@ -115,6 +118,7 @@ class SASml:
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+
         :param kwargs: dict
         :return: SAS result object
         """
@@ -136,6 +140,7 @@ class SASml:
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+
         :param kwargs: dict
         :return: SAS result object
         """
