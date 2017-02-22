@@ -15,3 +15,21 @@ API Reference
 
 .. autoclass:: SASutil
     :members:
+
+.. autoclass:: SASml
+    :members:
+
+.. autoclass:: SASstat
+    :members:
+
+.. autoclass:: SASets
+    :members:
+
+.. autoclass:: SASqc
+    :members:
+
+.. autoclass:: SASdata
+    :members:
+
+.. autoclass:: SASsession
+    :members:
