@@ -55,6 +55,8 @@ Machine Learning (SAS Enterprise Miner)
 .. autoclass:: SASml
     :members:
 
+.. autosummary:: SASml
+
 Statistics
 ~~~~~~~~~~
 

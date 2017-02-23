@@ -340,6 +340,7 @@ class SASsession():
     def sasml(self) -> '<SASml object>':
         """
         This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.
+
         :return: sasml object
         """
         if not self._loaded_macros:
@@ -351,6 +352,7 @@ class SASsession():
     def sasqc(self) -> '<SASqc object>':
         """
         This methods creates a SASqc object which you can use to run various analytics. See the sasqc.py module.
+
         :return: sasqc object
         """
 
@@ -595,6 +597,7 @@ class SASsession():
                               'obs'      :  10
                               'firstobs' : '12'
                              }
+
         :param kwargs: dictionary
         :return: Pandas data frame
         """
