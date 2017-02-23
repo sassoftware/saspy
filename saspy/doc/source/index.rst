@@ -26,6 +26,7 @@ with a SAS 9.4 installation.
    install
    getting-started
    api
+   adding-procedures
    license
 
 
