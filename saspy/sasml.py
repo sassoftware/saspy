@@ -76,7 +76,7 @@ class SASml:
 
         ``required_set = {}``
 
-        legal_set = {'id', 'importance', 'performance', 'score', 'procopts'}
+        ``legal_set = {'id', 'importance', 'performance', 'score', 'procopts'}``
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
@@ -95,7 +95,7 @@ class SASml:
 
         ``required_set = {'input'}``
 
-        legal_set= {'freq', 'input', 'id', 'score'}
+        ``legal_set= {'freq', 'input', 'id', 'score'}``
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
@@ -114,8 +114,8 @@ class SASml:
 
         ``required_set = {'input', 'target', 'train'}``
 
-        legal_set = {'architecture', 'code', 'hidden', 'id', 'input',
-        'partition', 'score', 'target', 'train', 'procopts'}
+        ``legal_set = {'architecture', 'code', 'hidden', 'id', 'input',
+        'partition', 'score', 'target', 'train', 'procopts'}``
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
@@ -136,8 +136,8 @@ class SASml:
 
         ``required_set = {'input', 'target'}``
 
-        legal_set = {'assess', 'code', 'freq', 'importance', 'input', 'performance',
-        'target', 'save', 'score', 'subseries', 'procopts'}
+        ``legal_set = {'assess', 'code', 'freq', 'importance', 'input', 'performance',
+        'target', 'save', 'score', 'subseries', 'procopts'}``
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf

@@ -56,7 +56,7 @@ class SASets:
 
         ``required_set={'id'}``
 
-        legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out'}
+        ``legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out'}``
 
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm
@@ -72,7 +72,7 @@ class SASets:
 
         ``required_set={'identify'}``
 
-        legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
+        ``legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}``
 
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
@@ -87,9 +87,9 @@ class SASets:
 
         ``required_set={'model'}``
 
-        legal_set= {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular',
+        ``legal_set= {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular',
         'level', 'model', 'nloptions', 'performance', 'out', 'outlier', 'randomreg', 'season', 'slope',
-        'splinereg', 'splineseason'}
+        'splinereg', 'splineseason'}``
 
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm
@@ -108,7 +108,7 @@ class SASets:
 
         ``required_set = {}``
 
-        legal_set = { 'by', 'id', 'forecast', 'out'}
+        ``legal_set = { 'by', 'id', 'forecast', 'out'}``
 
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm
         """
@@ -122,7 +122,7 @@ class SASets:
 
         ``required_set = {}``
 
-        legal_set = { 'by', 'id', 'out'}
+        ``legal_set = { 'by', 'id', 'out'}``
 
         Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm
         """
@@ -136,7 +136,7 @@ class SASets:
 
         ``required_set = {}``
 
-        legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts'}
+        ``legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts'}``
 
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm

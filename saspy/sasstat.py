@@ -58,7 +58,7 @@ class SASstat:
 
         ``required_set = {}``
 
-        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}
+        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}``
 
         cls is an alias for the class statement
 
@@ -82,7 +82,8 @@ class SASstat:
 
         ``required_set={'model'}``
 
-        legal_set= {'add', 'by', 'code', 'id', 'var', 'lsmeans', 'model', 'random', 'repeated', 'slice', 'test', 'weight', 'out'}
+        ``legal_set= {'add', 'by', 'code', 'id', 'var', 'lsmeans', 'model',
+        'random', 'repeated', 'slice', 'test', 'weight', 'out'}``
 
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm
@@ -104,8 +105,8 @@ class SASstat:
 
         ``required_set={'model'}``
 
-        legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id', 'lsmeans', 'model',
-        'out', 'random', 'repeated','slice', 'weight'}
+        `legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id', 'lsmeans', 'model',
+        'out', 'random', 'repeated','slice', 'weight'}``
 
         cls is an alias for the class statement
         For more information on the statements see the Documentation link.
@@ -132,8 +133,8 @@ class SASstat:
 
         ``required_set={'model'}``
 
-        legal_set= {'absorb', 'by', 'cls', 'contrast', 'estimate', 'freq', 'id', 'lsmeans', 'manova',
-        'means', 'model', 'out', 'random', 'repeated', 'test', 'weight'}
+        ``legal_set= {'absorb', 'by', 'cls', 'contrast', 'estimate', 'freq', 'id', 'lsmeans', 'manova',
+        'means', 'model', 'out', 'random', 'repeated', 'test', 'weight'}``
 
         cls is an alias for the class statement
 
@@ -158,8 +159,9 @@ class SASstat:
         For more information on the statements see the Documentation link.
 
         ``required_set={'model'}``
-        legal_set= {'by', 'cls', 'contrast', 'effect', 'effectplot', 'estimate', 'exact', 'freq',
-        'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice', 'store', 'strata', 'units', 'weight'}
+
+        ``legal_set= {'by', 'cls', 'contrast', 'effect', 'effectplot', 'estimate', 'exact', 'freq',
+        'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice', 'store', 'strata', 'units', 'weight'}``
 
         cls is an alias for the class statement
 
@@ -190,7 +192,8 @@ class SASstat:
         For more information on the statements see the Documentation link.
 
         ``required_set = {'model'}``
-        legal_set = {'by', 'freq', 'id', 'model', 'output', 'score', 'procopts'}
+
+        ``legal_set = {'by', 'freq', 'id', 'model', 'output', 'score', 'procopts'}``
 
         cls is an alias for the class statement
 
@@ -213,7 +216,9 @@ class SASstat:
         For more information on the statements see the Documentation link.
 
         ``required_set={'model'}``
-        legal_set= {'by', 'cls', 'code', 'freq', 'id', 'model', 'out', 'partition', 'score', 'selection', 'weight'}
+
+        ``legal_set= {'by', 'cls', 'code', 'freq', 'id', 'model',
+        'out', 'partition', 'score', 'selection', 'weight'}``
 
         cls is an alias for the class statement
         Documentation link:
@@ -240,8 +245,8 @@ class SASstat:
 
         ``required_set={'model'}``
 
-        legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
-        'partition', 'performance', 'score', 'selection', 'weight'}
+        ``legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
+        'partition', 'performance', 'score', 'selection', 'weight'}``
 
         cls is an alias for the class statement
 
