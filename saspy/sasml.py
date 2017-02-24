@@ -19,7 +19,7 @@ from saspy.sasproccommons import SASProcCommons
 
 class SASml:
     """
-    This class is for SAS/STAT procedures to be called as python3 objects and use SAS as the computational engine
+    This class is for SAS Enterprise Miner procedures to be called as python3 objects and use SAS as the computational engine
 
     This class and all the useful work in this package require a licensed version of SAS.
 
@@ -54,9 +54,10 @@ class SASml:
         """
         Python method to call the HPFOREST procedure
 
-        required_set = {'input', 'target'}
+        ``required_set = {'input', 'target'}``
 
-        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score'}
+        ``legal_set = {'freq', 'input', 'id',
+        'target', 'save', 'score'}``
 
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
@@ -73,7 +74,7 @@ class SASml:
         """
         Python method to call the HP4SCORE procedure
 
-        required_set = {}
+        ``required_set = {}``
 
         legal_set = {'id', 'importance', 'performance', 'score', 'procopts'}
 
@@ -92,7 +93,7 @@ class SASml:
         """
         Python method to call the HPCLUS procedure
 
-        required_set = {'input'}
+        ``required_set = {'input'}``
 
         legal_set= {'freq', 'input', 'id', 'score'}
 
@@ -111,7 +112,7 @@ class SASml:
         """
         Python method to call the HPNEURAL procedure
 
-        required_set = {'input', 'target', 'train'}
+        ``required_set = {'input', 'target', 'train'}``
 
         legal_set = {'architecture', 'code', 'hidden', 'id', 'input',
         'partition', 'score', 'target', 'train', 'procopts'}
@@ -133,7 +134,7 @@ class SASml:
         """
         Python method to call the TREEBOOST procedure
 
-        required_set = {'input', 'target'}
+        ``required_set = {'input', 'target'}``
 
         legal_set = {'assess', 'code', 'freq', 'importance', 'input', 'performance',
         'target', 'save', 'score', 'subseries', 'procopts'}

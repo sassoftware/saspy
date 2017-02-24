@@ -3,10 +3,14 @@
 
 .. _license:
 
-:tocdepth: 2
+:tocdepth: 4
+
+************************
+Contributing New Methods
+************************
 
 Overview
-========
+--------
 SASPy is broken into product areas that largely follow the SAS product areas.
 There are many many procedures, which translate to object methods, that are not currently included in the package.
 The aim of this document is to outline the needed steps to add additional methods (procedures) to SASPy.
