@@ -24,7 +24,8 @@ from pygments import highlight
 
 @ipym.magics_class
 class SASMagic(ipym.Magics):
-    """A set of magics useful for interactive work with SAS via saspy
+    """
+    A set of magics useful for interactive work with SAS via saspy
     All the SAS magic cells in a single notebook share a SAS session
     """
 

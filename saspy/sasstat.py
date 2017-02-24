@@ -15,26 +15,30 @@
 #
 import logging
 from saspy.sasproccommons import SASProcCommons
+#from pdb import set_trace as bp
 
 
 class SASstat:
     """
     This class is for SAS/STAT procedures to be called as python3 objects and use SAS as the computational engine
+
     This class and all the useful work in this package require a licensed version of SAS.
+
     To add a new procedure do the following:
-    1. Create a new method for the procedure
-    2. Create the set of required statements. If there are no required statements then create an empty set {}
-    3. Create the legal set of statements. This can often be obtained from the documentation of the procedure.
-        'procopts' should always be included in the legal set to allow flexibility in calling the procedure.
-    4. Create the doc string with the following parts at a minimum:
-        A. Procedure Name
-        B. Required set
-        C. Legal set
-        D. Link to the procedure documentation
-    5. Add the return call for the method using an existing procedure as an example
-    6. Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method
-        of sasproccommons.py
-    7. Write at least one test to exercise the procedures and include it in the appropriate testing file
+
+    #.  Create a new method for the procedure
+    #.  Create the set of required statements. If there are no required statements then create an empty set {}
+    #. Create the legal set of statements. This can often be obtained from the documentation of the procedure. 'procopts' should always be included in the legal set to allow flexibility in calling the procedure.
+    #. Create the doc string with the following parts at a minimum:
+
+        - Procedure Name
+        - Required set
+        - Legal set
+        - Link to the procedure documentation
+
+    #. Add the return call for the method using an existing procedure as an example
+    #. Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py
+    #. Write at least one test to exercise the procedures and include it in the appropriate testing file
     """
     def __init__(self, session, *args, **kwargs):
         """
@@ -52,11 +56,13 @@ class SASstat:
         """
         Python method to call the HPSPLIT procedure
 
-        required_set = {}
-        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-                    'partition', 'performance', 'prune', 'rules'}
-        For more information on the statements see the Documentation link.
+        ``required_set = {}``
+
+        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}``
+
         cls is an alias for the class statement
+
+        For more information on the statements see the Documentation link.
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
         :param kwargs: dict
@@ -71,11 +77,14 @@ class SASstat:
     def reg(self, **kwargs: dict) -> object:
         """
         Python method to call the REG procedure
+
         For more information on the statements see the Documentation link.
-        required_set={'model'}
-        legal_set= {'add', 'by', 'code', 'id', 'var',
-                    'lsmeans', 'model', 'random', 'repeated',
-                    'slice', 'test', 'weight', 'out'}
+
+        ``required_set={'model'}``
+
+        ``legal_set= {'add', 'by', 'code', 'id', 'var', 'lsmeans', 'model',
+        'random', 'repeated', 'slice', 'test', 'weight', 'out'}``
+
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm
 
@@ -93,12 +102,15 @@ class SASstat:
     def mixed(self, **kwargs: dict) -> object:
         """
         Python method to call the MIXED procedure
-        For more information on the statements see the Documentation link.
-        required_set={'model'}
-        legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id',
-                    'lsmeans', 'model', 'out', 'random', 'repeated',
-                    'slice', 'weight'}
+
+        ``required_set={'model'}``
+
+        `legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id', 'lsmeans', 'model',
+        'out', 'random', 'repeated','slice', 'weight'}``
+
         cls is an alias for the class statement
+        For more information on the statements see the Documentation link.
+
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm
 
@@ -116,13 +128,16 @@ class SASstat:
     def glm(self, **kwargs: dict) -> object:
         """
         Python method to call the GLM procedure
+
         For more information on the statements see the Documentation link.
-        required_set={'model'}
-        legal_set= {'absorb', 'by', 'cls', 'contrast', 'estimate', 'freq', 'id',
-                    'lsmeans', 'manova', 'means', 'model', 'out', 'random', 'repeated',
-                    'test', 'weight'}
+
+        ``required_set={'model'}``
+
+        ``legal_set= {'absorb', 'by', 'cls', 'contrast', 'estimate', 'freq', 'id', 'lsmeans', 'manova',
+        'means', 'model', 'out', 'random', 'repeated', 'test', 'weight'}``
 
         cls is an alias for the class statement
+
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_toc.htm
 
@@ -140,14 +155,16 @@ class SASstat:
     def logistic(self, **kwargs: dict) -> object:
         """
         Python method to call the LOGISTIC procedure
+
         For more information on the statements see the Documentation link.
 
-        required_set={'model'}
-        legal_set= {'by', 'cls', 'contrast', 'effect', 'effectplot', 'estimate',
-                    'exact', 'freq', 'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice',
-                    'store', 'strata', 'units', 'weight'}
+        ``required_set={'model'}``
+
+        ``legal_set= {'by', 'cls', 'contrast', 'effect', 'effectplot', 'estimate', 'exact', 'freq',
+        'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice', 'store', 'strata', 'units', 'weight'}``
 
         cls is an alias for the class statement
+
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_logistic_toc.htm
 
@@ -171,16 +188,17 @@ class SASstat:
     def tpspline(self, **kwargs: dict) -> object:
         """
         Python method to call the TPSPLINE procedure
+
         For more information on the statements see the Documentation link.
 
-        required_set = {'model'}
-        legal_set = {'by', 'freq', 'id', 'model', 'output', 'score', 'procopts'}
+        ``required_set = {'model'}``
+
+        ``legal_set = {'by', 'freq', 'id', 'model', 'output', 'score', 'procopts'}``
 
         cls is an alias for the class statement
+
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_tpspline_toc.htm
-
-        The PROC TPSPLINE and MODEL statements are required.
 
         :param kwargs: dict
         :return: SAS result object
@@ -190,3 +208,58 @@ class SASstat:
 
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TPSPLINE", required_set, legal_set, **kwargs)
+
+    def hplogistic(self, **kwargs: dict) -> object:
+        """
+        Python method to call the HPLOGISTIC procedure
+
+        For more information on the statements see the Documentation link.
+
+        ``required_set={'model'}``
+
+        ``legal_set= {'by', 'cls', 'code', 'freq', 'id', 'model',
+        'out', 'partition', 'score', 'selection', 'weight'}``
+
+        cls is an alias for the class statement
+        Documentation link:
+        https://support.sas.com/documentation/onlinedoc/stat/141/hplogistic.pdf
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'model'}
+        legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
+                     'partition', 'score', 'selection', 'weight'}
+
+        logging.debug("kwargs type: " + str(type(kwargs)))
+
+        # ODS graphics are created by default for STAT this stops them form generation
+        kwargs['ODSGraphics']=False
+        return SASProcCommons._run_proc(self, "HPLOGISTIC", required_set, legal_set, **kwargs)
+
+
+    def hpreg(self, **kwargs: dict) -> object:
+        """
+        Python method to call the HPREG procedure
+        For more information on the statements see the Documentation link.
+
+        ``required_set={'model'}``
+
+        ``legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
+        'partition', 'performance', 'score', 'selection', 'weight'}``
+
+        cls is an alias for the class statement
+
+        Documentation link:
+        https://support.sas.com/documentation/onlinedoc/stat/141/hpreg.pdf
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'model'}
+        legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
+                     'partition', 'performance', 'score', 'selection', 'weight'}
+
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        kwargs['ODSGraphics']=False
+        return SASProcCommons._run_proc(self, "HPREG", required_set, legal_set, **kwargs)
