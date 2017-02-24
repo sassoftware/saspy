@@ -154,9 +154,7 @@ cpl  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__9
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
-cpl += ";C:\Public\gitlab\metis\java\pyiom"
-cpl += ";C:\Public\gitlab\metis\java\tools"
-cpl += ";C:\Public\gitlab\metis\java"
+cpl += ";E:\metis-master\java\saspyiom.jar"
 
 cpl2  =  "C:\Public\gitlab\metis\java\lib\sas.svc.connection.jar"
 cpl2 += ";C:\Public\gitlab\metis\java\lib\log4j.jar"
