@@ -26,7 +26,7 @@
 # 
 # SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', 'httptest']
 #
-SAS_config_names = ['default', 'http', 'httptest', 'ssh', 'httpfred', 'grid', 'tdi', 'iomj', 'iomc', 'iomjwin', 'winiomj', 'winiomjwin', 'winlocal', 'gridiom', 'wingridiom']
+SAS_config_names = ['default', 'SASgrid',  'http', 'httptest', 'ssh', 'httpfred', 'grid', 'tdi', 'iomj', 'iomc', 'iomjwin', 'winiomj', 'winiomjwin', 'winlocal', 'gridiom', 'wingridiom']
 
 
 # Configuration options for pysas - python Dict
@@ -141,10 +141,19 @@ iomjwin  = {'java'      : '/usr/bin/java',
             }
 
 gridiom  = {'java'      : '/usr/bin/java',
-            'omruser'   : 'sascnn1',
-            'omrpw'     : '1connect',
+           #'omruser'   : 'sascnn1',
+           #'omrpw'     : '1connect',
             'iomhost'   : 'bb04cnt10.unx.sas.com',
             'iomport'   : 8594,
+            'encoding'  : 'iso-8859-1',
+            'classpath' : cp2
+            }
+         
+SASgrid   = {'java'     : '/usr/bin/java',
+           #'omruser'   : 'sascnn1',
+           #'omrpw'     : '1connect',
+            'iomhost'   : 'sgm001.unx.sas.com',
+            'iomport'   : 8591,
             'encoding'  : 'iso-8859-1',
             'classpath' : cp2
             }

@@ -227,7 +227,7 @@ class SASsessionIOM():
       self.sockerr.listen(0)
 
       while len(self.sascfg.omruser) == 0:
-         self.sascfg.omruser = self._prompt("Please enter the IOM user id: ")
+         self.sascfg.omruser = self.sascfg._prompt("Please enter the IOM user id: ")
 
       pgm    = self.sascfg.java
       parms  = [pgm]
