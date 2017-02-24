@@ -20,25 +20,33 @@ from saspy.sasproccommons import SASProcCommons
 class SASutil:
     """
     This class is for SAS BASE procedures to be called as python3 objects and use SAS as the computational engine
+
     This class and all the useful work in this package require a licensed version of SAS.
+
     To add a new procedure do the following:
-    1. Create a new method for the procedure
-    2. Create the set of required statements. If there are no required statements then create an empty set {}
-    3. Create the legal set of statements. This can often be obtained from the documentation of the procedure.
-        'procopts' should always be included in the legal set to allow flexibility in calling the procedure.
-    4. Create the doc string with the following parts at a minimum:
-        A. Procedure Name
-        B. Required set
-        C. Legal set
-        D. Link to the procedure documentation
-    5. Add the return call for the method using an existing procedure as an example
-    6. Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method
-        of sasproccommons.py
-    7. Write at least one test to exercise the procedures and include it in the appropriate testing file
+
+    #.  Create a new method for the procedure
+    #.  Create the set of required statements. If there are no required statements then create an empty set {}
+    #. Create the legal set of statements. This can often be obtained from the documentation of the procedure. 'procopts' should always be included in the legal set to allow flexibility in calling the procedure.
+    #. Create the doc string with the following parts at a minimum:
+
+        - Procedure Name
+        - Required set
+        - Legal set
+        - Link to the procedure documentation
+
+    #. Add the return call for the method using an existing procedure as an example
+    #. Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py
+    #. Write at least one test to exercise the procedures and include it in the appropriate testing file
     """
+
     def __init__(self, session, *args, **kwargs):
         """
         Submit an initial set of macros to prepare the SAS system
+
+        :param session:
+        :param args:
+        :param kwargs:
         """
         self.sasproduct = "util"
         # create logging
@@ -48,17 +56,20 @@ class SASutil:
         self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def hpimpute(self, **kwargs: dict) -> object:
+    def hpimpute(self, **kwargs: dict) -> '<SAS result object>':
         """
         Python method to call the HPIMPUTE procedure
 
-        required_set = {}
-        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-                    'partition', 'performance', 'prune', 'rules'}
-        For more information on the statements see the Documentation link.
+        ``required_set = {}``
+
+        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
+        'partition', 'performance', 'prune', 'rules'}``
+
         cls is an alias for the class statement
+        For more information on the statements see the Documentation link.
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+
         :param kwargs: dict
         :return: SAS result object
         """
@@ -73,13 +84,15 @@ class SASutil:
         """
         Python method to call the HPBIN procedure
 
-        required_set = {}
-        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-                    'partition', 'performance', 'prune', 'rules'}
-        For more information on the statements see the Documentation link.
+        ``required_set = {}``
+
+        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}``
+
         cls is an alias for the class statement
+        For more information on the statements see the Documentation link.
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+
         :param kwargs: dict
         :return: SAS result object
         """
@@ -93,13 +106,16 @@ class SASutil:
         """
         Python method to call the HPSAMPLE procedure
 
-        required_set = {}
-        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-                    'partition', 'performance', 'prune', 'rules'}
-        For more information on the statements see the Documentation link.
+        ``required_set = {}``
+
+        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
+        'partition', 'performance', 'prune', 'rules'}``
+
         cls is an alias for the class statement
+        For more information on the statements see the Documentation link.
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+
         :param kwargs: dict
         :return: SAS result object
         """
@@ -107,24 +123,3 @@ class SASutil:
         legal_set = { 'class', 'performance', 'target', 'var', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPSAMPLE", required_set, legal_set, **kwargs)
-
-
-        # def hpaccess(self, **kwargs: dict) -> object:
-        # """
-        # Python method to call the HPSPLIT procedure
-        #
-        # required_set = {}
-        # legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-        #             'partition', 'performance', 'prune', 'rules'}
-        # For more information on the statements see the Documentation link.
-        # cls is an alias for the class statement
-        # Documentation link:
-        # http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
-        # :param kwargs: dict
-        # :return: SAS result object
-        # """
-        # required_set = {}
-        # legal_set = {'cls', 'code', 'grow', 'id', 'model', 'out',
-        #              'partition', 'performance', 'prune', 'rules', 'target', 'input', 'procopts'}
-        # logging.debug("kwargs type: " + str(type(kwargs)))
-        # return SASProcCommons._run_proc(self, "HPACCESS", required_set, legal_set, **kwargs)

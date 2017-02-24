@@ -16,7 +16,7 @@
 import logging
 import re
 from saspy.sasresults import SASresults
-from pdb import set_trace as bp
+#from pdb import set_trace as bp
 
 
 class SASProcCommons:
@@ -60,15 +60,18 @@ class SASProcCommons:
         plot = ''
         outmeth = ''
         procopts = ''
+        # Set ODS graphic generation to True by default
+        ODSGraphics = args.get('ODSGraphics', True)
+
         # The different SAS products vary slightly in plotting and out methods.
         # this block sets the options correctly for plotting and output statements
-        if self.sasproduct.lower() == 'stat':
+        if self.sasproduct.lower() == 'stat' and not ('ODSGraphics' in args.keys() or ODSGraphics == False) :
             outmeth = ''
             plot = 'plot=all'
         if self.sasproduct.lower() == 'qc':
             outmeth = ''
             plot = ''
-        if self.sasproduct.lower() == 'ets':
+        if self.sasproduct.lower() == 'ets' and not ('ODSGraphics' in args.keys() or ODSGraphics == False) :
             outmeth = 'out'
             plot = 'plots=all'
         if self.sasproduct.lower() == 'em':
@@ -128,8 +131,11 @@ class SASProcCommons:
             self.logger.debug("cdfplot statement,length: %s,%s", args['cdfplot'], len(args['cdfplot']))
             code += "cdfplot %s;\n" % (args['cdfplot'])
         if 'cls' in args:
-            self.logger.debug("class statement,length: %s,%s", args['cls'], len(args['cls']))
-            code += "class %s;\n" % (args['cls'])
+            if isinstance(args['cls'], str):
+                self.logger.debug("class statement,length: %s,%s", args['cls'], len(args['cls']))
+                code += "class %s;\n" % (args['cls'])
+            elif isinstance(args['cls'], list):
+                code += "class %s;\n" % (' '.join(args['cls']))
             #   if 'class' in args:
             #       self.logger.debug("class statement,length: %s,%s", args['class'], len(args['class']))
             #       code += "class %s;\n" % (args['class'])
@@ -313,6 +319,11 @@ class SASProcCommons:
         if 'season' in args:
             self.logger.debug("season statement,length: %s,%s", args['season'], len(args['season']))
             code += "season %s;\n" % (args['season'])
+        if 'selection' in args:
+            if args['selection'].lower().strip() in ['none', 'forward', 'backward', 'stepwise', 'forwardswap',
+                                                     'lar', 'lasso']:
+                self.logger.debug("selection statement,length: %s,%s", args['selection'], len(args['selection']))
+                code += "selection method=%s;\n" % (args['selection'])
         if 'slope' in args:
             self.logger.debug("slope statement,length: %s,%s", args['slope'], len(args['slope']))
             code += "slope %s;\n" % (args['slope'])
@@ -650,7 +661,8 @@ class SASProcCommons:
                 totSet = legalSet | reqSet
             else:
                 totSet = legalSet
-            extraSet = set(stmt.keys()).difference(totSet)  # find keys not in legal or required sets
+            generalSet = set(['ODSGraphics'])
+            extraSet = set(stmt.keys() - generalSet).difference(totSet)  # find keys not in legal or required sets
             if extraSet:
                 for item in extraSet:
                     stmt.pop(item, None)
