@@ -50,11 +50,11 @@ class SASets:
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def timeseries(self, **kwargs):
+    def timeseries(self, **kwargs: dict):
         """
         Python method to call the TIMESERIES procedure
 
-        required_set={'id'}
+        ``required_set={'id'}``
 
         legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out'}
 
@@ -66,11 +66,11 @@ class SASets:
         self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TIMESERIES", required_set, legal_set, **kwargs)
 
-    def arima(self, **kwargs):
+    def arima(self, **kwargs: dict):
         """
         Python method to call the ARIMA procedure
 
-        required_set={'identify'}
+        ``required_set={'identify'}``
 
         legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}
 
@@ -81,11 +81,11 @@ class SASets:
         legal_set = {'by', 'identify', 'estimate', 'outlier', 'forecast', 'out', 'procopts'}
         return SASProcCommons._run_proc(self, "ARIMA", required_set, legal_set, **kwargs)
 
-    def ucm(self, **kwargs):
+    def ucm(self, **kwargs: dict):
         """
         Python method to call the UCM procedure
 
-        required_set={'model'}
+        ``required_set={'model'}``
 
         legal_set= {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular',
         'level', 'model', 'nloptions', 'performance', 'out', 'outlier', 'randomreg', 'season', 'slope',
@@ -102,11 +102,11 @@ class SASets:
                      'procopts'}
         return SASProcCommons._run_proc(self, "UCM", required_set, legal_set, **kwargs)
 
-    def esm(self, **kwargs):
+    def esm(self, **kwargs: dict):
         """
         Python method to call the ESM procedure
 
-        required_set = {}
+        ``required_set = {}``
 
         legal_set = { 'by', 'id', 'forecast', 'out'}
 
@@ -116,11 +116,11 @@ class SASets:
         legal_set = {'by', 'id', 'forecast', 'out', 'procopts'}
         return SASProcCommons._run_proc(self, "ESM", required_set, legal_set, **kwargs)
 
-    def timeid(self, **kwargs):
+    def timeid(self, **kwargs: dict):
         """
         Python method to call the TIMEID procedure
 
-        required_set = {}
+        ``required_set = {}``
 
         legal_set = { 'by', 'id', 'out'}
 
@@ -130,11 +130,11 @@ class SASets:
         legal_set = {'by', 'id', 'out', 'procopts'}
         return SASProcCommons._run_proc(self, "TIMEID", required_set, legal_set, **kwargs)
 
-    def timedata(self, **kwargs):
+    def timedata(self, **kwargs: dict):
         """
         Python method to call the TIMEDATA procedure
 
-        required_set = {}
+        ``required_set = {}``
 
         legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts'}
 

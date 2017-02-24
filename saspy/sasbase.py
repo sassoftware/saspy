@@ -149,18 +149,25 @@ class SASconfig:
 
 class SASsession():
     """
+    **Overview**
+
     The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
     cfgname - value in SAS_config_names List of the sascfg.py file
     kernel  - None - internal use when running the SAS_kernel notebook
     results - Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
 
-    For the STDIO IO Module
+    **STDIO IO**
+
     saspath - overrides saspath Dict entry of cfgname in sascfg.py file
     options - overrides options Dict entry of cfgname in sascfg.py file
+
+    **SSH**
 
     and for running STDIO over passwordless ssh
     ssh     - full path of the ssh command; /usr/bin/ssh for instance
     host    - host name of the remote machine
+
+    **Compute Service**
 
     and for the HTTP IO module to connect to SAS Viya
     ip      - host address
@@ -169,6 +176,8 @@ class SASsession():
     options - SAS options to include in the start up command line
     user    - user name to authenticate with
     pw      - password to authenticate with
+
+    **IOM**
 
     and for the IOM IO module to connect to SAS9 via Java IOM
     ip      - host address
@@ -275,30 +284,38 @@ class SASsession():
         return self._io.submit(code, results, prompt)
 
     def saslog(self) -> 'The SAS Log for the session':
-        '''
+        """
         this method is used to get the current, full contents of the SASLOG
-        '''
+        :return: SAS log
+        :rtype: str
+        """
         return self._io.saslog()
 
     def teach_me_SAS(self, nosub: bool):
         '''
         nosub - bool. True means don't submit the code, print it out so I can see what the SAS code would be.
-                      False means run normally - submit the code.
+            False means run normally - submit the code.
         '''
         self.nosub = nosub
 
-    def set_batch(self, batch: bool):
-        '''
-        This method sets the batch attribute for the SASsession object; it stays in effect untill changed. For methods that just
-        display results like SASdata object methods (head, tail, hist, series) and SASresult object results, you can set 'batch'
-        to true to get the results back directly so you can write them to files or whatever you want to do with them. This is intended
-        for use in python batch scripts so you can still get ODS XML5 results and save them to files, which you couldn't otherwise do for
-        these methods. When running interactivly, the expectation is that you want to have the results directly rendered, but you can
-        run this way too; get the objects display them yourself and/or write them to somewhere. When true, you get the same dictionary
-        returned as from the SASsession.submit() method.
+    def set_batch(self, batch: bool) -> bool:
+        """
+        This method sets the batch attribute for the SASsession object; it stays in effect until changed.
+        For methods that just display results like SASdata object methods (head, tail, hist, series, etc.)
+        and SASresult object results, you can set 'batch' to true to get the results back directly so you
+        can write them to files or whatever you want to do with them.
 
-        batch - set the default result type for this SASsession. True = return dict([LOG, LST]. False = display LST to screen.
-        '''
+        This is intended for use in python batch scripts so you can still get ODS XML5 results
+        and save them to files, which you couldn't otherwise do for these methods.
+        When running interactively, the expectation is that you want to have the results directly rendered,
+        but you can run this way too; get the objects display them yourself and/or write them to somewhere.
+
+        When `set_batch ==True`, you get the same dictionary returned as from the `SASsession.submit()` method.
+
+        :param batch: bool
+        :rtype: bool
+        :return: True = return dict([LOG, LST]. False = display LST to screen.
+        """
         self.batch = batch
 
     def set_results(self, results: str):
@@ -310,6 +327,7 @@ class SASsession():
 
     def exist(self, table: str, libref: str = "") -> bool:
         """
+        Does the SAS data set currently exist
         :param table: the name of the SAS Data Set
         :param libref: the libref for the Data Set, defaults to WORK, or USER if assigned
         :return: Boolean True it the Data Set exists and False if it does not
@@ -338,32 +356,32 @@ class SASsession():
         return SASets(self)
 
     def sasml(self) -> '<SASml object>':
-        """
-        This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.
-
-        :return: sasml object
-        """
         if not self._loaded_macros:
             self._loadmacros()
             self._loaded_macros = True
+            """
+            This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.
+            :return: sasml object
+            """
 
         return SASml(self)
 
     def sasqc(self) -> '<SASqc object>':
-        """
-        This methods creates a SASqc object which you can use to run various analytics. See the sasqc.py module.
-
-        :return: sasqc object
-        """
-
         if not self._loaded_macros:
             self._loadmacros()
             self._loaded_macros = True
+        """
+            This methods creates a SASqc object which you can use to run various analytics. See the sasqc.py module.
+
+            :return: sasqc object
+        """
         return SASqc(self)
 
     def sasutil(self) -> '<SASutil object>':
         '''
         This methods creates a SASutil object which you can use to run various analytics. See the sasutil.py module.
+
+        :return: sasutil object
         '''
         if not self._loaded_macros:
             self._loadmacros()

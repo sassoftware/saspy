@@ -60,7 +60,7 @@ class SASutil:
         """
         Python method to call the HPIMPUTE procedure
 
-        required_set = {}
+        ``required_set = {}``
 
         legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
                     'partition', 'performance', 'prune', 'rules'}
@@ -84,7 +84,7 @@ class SASutil:
         """
         Python method to call the HPBIN procedure
 
-        required_set = {}
+        ``required_set = {}``
 
         legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}
 
@@ -106,7 +106,7 @@ class SASutil:
         """
         Python method to call the HPSAMPLE procedure
 
-        required_set = {}
+        ``required_set = {}``
 
         legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
                     'partition', 'performance', 'prune', 'rules'}

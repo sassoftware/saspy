@@ -56,7 +56,7 @@ class SASstat:
         """
         Python method to call the HPSPLIT procedure
 
-        required_set = {}
+        ``required_set = {}``
 
         legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}
 
@@ -80,7 +80,7 @@ class SASstat:
 
         For more information on the statements see the Documentation link.
 
-        required_set={'model'}
+        ``required_set={'model'}``
 
         legal_set= {'add', 'by', 'code', 'id', 'var', 'lsmeans', 'model', 'random', 'repeated', 'slice', 'test', 'weight', 'out'}
 
@@ -102,7 +102,7 @@ class SASstat:
         """
         Python method to call the MIXED procedure
 
-        required_set={'model'}
+        ``required_set={'model'}``
 
         legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id', 'lsmeans', 'model',
         'out', 'random', 'repeated','slice', 'weight'}
@@ -130,7 +130,7 @@ class SASstat:
 
         For more information on the statements see the Documentation link.
 
-        required_set={'model'}
+        ``required_set={'model'}``
 
         legal_set= {'absorb', 'by', 'cls', 'contrast', 'estimate', 'freq', 'id', 'lsmeans', 'manova',
         'means', 'model', 'out', 'random', 'repeated', 'test', 'weight'}
@@ -157,7 +157,7 @@ class SASstat:
 
         For more information on the statements see the Documentation link.
 
-        required_set={'model'}
+        ``required_set={'model'}``
         legal_set= {'by', 'cls', 'contrast', 'effect', 'effectplot', 'estimate', 'exact', 'freq',
         'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice', 'store', 'strata', 'units', 'weight'}
 
@@ -189,7 +189,7 @@ class SASstat:
 
         For more information on the statements see the Documentation link.
 
-        required_set = {'model'}
+        ``required_set = {'model'}``
         legal_set = {'by', 'freq', 'id', 'model', 'output', 'score', 'procopts'}
 
         cls is an alias for the class statement
@@ -212,7 +212,7 @@ class SASstat:
 
         For more information on the statements see the Documentation link.
 
-        required_set={'model'}
+        ``required_set={'model'}``
         legal_set= {'by', 'cls', 'code', 'freq', 'id', 'model', 'out', 'partition', 'score', 'selection', 'weight'}
 
         cls is an alias for the class statement
@@ -238,7 +238,7 @@ class SASstat:
         Python method to call the HPREG procedure
         For more information on the statements see the Documentation link.
 
-        required_set={'model'}
+        ``required_set={'model'}``
 
         legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
         'partition', 'performance', 'score', 'selection', 'weight'}

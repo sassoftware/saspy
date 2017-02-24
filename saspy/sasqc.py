@@ -50,11 +50,11 @@ class SASqc:
         self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
     
-    def cusum(self, **kwargs):
+    def cusum(self, **kwargs: dict):
         """
         Python method to call the CUSUM procedure
 
-        required_set = {}
+        ``required_set = {}``
 
         legal_set = {'by','xchart'}
 
@@ -66,11 +66,11 @@ class SASqc:
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "CUSUM", required_set, legal_set, **kwargs)
 
-    def macontrol(self, **kwargs):
+    def macontrol(self, **kwargs: dict):
         """
         Python method to call the MACONTROL procedure
 
-        required_set = {}
+        ``required_set = {}``
 
         Documentation link:
         http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_macontrol_toc.htm
@@ -80,10 +80,10 @@ class SASqc:
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "MACONTROL", required_set, legal_set, **kwargs)
 
-    def capability(self, **kwargs):
+    def capability(self, **kwargs: dict):
         """
         Python method to call the CUSUM procedure
-        required_set = {}
+        ``required_set = {}``
 
         legal_set = {'cdfplot', 'comphist', 'histogram', 'inset', 'intervals', 'output', 'ppplot', 'probplot',
         'qqplot', 'freq', 'weight', 'id', 'by', 'spec'}
@@ -97,7 +97,7 @@ class SASqc:
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "CAPABILITY", required_set, legal_set, **kwargs)
 
-    def shewhart(self, **kwargs):
+    def shewhart(self, **kwargs: dict):
         """
         Python method to call the SHEWHART procedure
 

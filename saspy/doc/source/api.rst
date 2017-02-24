@@ -15,17 +15,16 @@ API Reference
     :inherited-members:
     :show-inheritance:
 
-SAS Data Object
----------------
-
-.. autoclass:: SASdata
-    :members:
-
 SAS Session Object
 ------------------
 .. autoclass:: SASsession
     :members:
 
+SAS Data Object
+---------------
+
+.. autoclass:: SASdata
+    :members:
 
 Procedure Syntax Statements
 ---------------------------
