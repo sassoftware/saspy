@@ -62,8 +62,8 @@ class SASutil:
 
         ``required_set = {}``
 
-        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-                    'partition', 'performance', 'prune', 'rules'}
+        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
+        'partition', 'performance', 'prune', 'rules'}``
 
         cls is an alias for the class statement
         For more information on the statements see the Documentation link.
@@ -86,7 +86,7 @@ class SASutil:
 
         ``required_set = {}``
 
-        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}
+        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}``
 
         cls is an alias for the class statement
         For more information on the statements see the Documentation link.
@@ -108,8 +108,8 @@ class SASutil:
 
         ``required_set = {}``
 
-        legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-                    'partition', 'performance', 'prune', 'rules'}
+        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
+        'partition', 'performance', 'prune', 'rules'}``
 
         cls is an alias for the class statement
         For more information on the statements see the Documentation link.

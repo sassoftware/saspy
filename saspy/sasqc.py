@@ -56,7 +56,7 @@ class SASqc:
 
         ``required_set = {}``
 
-        legal_set = {'by','xchart'}
+        ``legal_set = {'by','xchart'}``
 
         Documentation link:
         http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_cusum_sect001.htm
@@ -85,8 +85,8 @@ class SASqc:
         Python method to call the CUSUM procedure
         ``required_set = {}``
 
-        legal_set = {'cdfplot', 'comphist', 'histogram', 'inset', 'intervals', 'output', 'ppplot', 'probplot',
-        'qqplot', 'freq', 'weight', 'id', 'by', 'spec'}
+        ``legal_set = {'cdfplot', 'comphist', 'histogram', 'inset', 'intervals', 'output', 'ppplot', 'probplot',
+        'qqplot', 'freq', 'weight', 'id', 'by', 'spec'}``
 
         Documentation link:
         http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_capability_sect001.htm

@@ -285,7 +285,8 @@ class SASsession():
 
     def saslog(self) -> 'The SAS Log for the session':
         """
-        this method is used to get the current, full contents of the SASLOG
+        This method is used to get the current, full contents of the SASLOG
+
         :return: SAS log
         :rtype: str
         """
@@ -318,25 +319,43 @@ class SASsession():
         """
         self.batch = batch
 
-    def set_results(self, results: str):
-        '''
+    def set_results(self, results: str) -> str:
+        """
         This method set the results attribute for the SASsession object; it stays in effect till changed
-        results - set the default result type for this SASdata object. 'Pandas' or 'HTML' or 'TEXT'.
-        '''
+
+        :param results: set the default result type for this SASdata object. ``'Pandas' or 'HTML' or 'TEXT'``.
+        :return: string of the return type
+        :rtype: str
+        """
         self.results = results
 
     def exist(self, table: str, libref: str = "") -> bool:
         """
         Does the SAS data set currently exist
+
         :param table: the name of the SAS Data Set
         :param libref: the libref for the Data Set, defaults to WORK, or USER if assigned
         :return: Boolean True it the Data Set exists and False if it does not
+        :rtype: bool
         """
         return self._io.exist(table, libref)
 
+    def sasets(self) -> '<SASets object>':
+        """
+        This methods creates a SASets object which you can use to run various analytics.
+        See the sasets.py module.
+        :return: sasets object
+        """
+        if not self._loaded_macros:
+            self._loadmacros()
+            self._loaded_macros = True
+        return SASets(self)
+
     def sasstat(self) -> '<SASstat object>':
         """
-        This methods creates a SASstat object which you can use to run various analytics. See the sasstat.py module.
+        This methods creates a SASstat object which you can use to run various analytics.
+        See the sasstat.py module.
+
         :return: sasstat object
         """
         if not self._loaded_macros:
@@ -345,41 +364,35 @@ class SASsession():
 
         return SASstat(self)
 
-    def sasets(self) -> '<SASets object>':
-        """
-        This methods creates a SASets object which you can use to run various analytics. See the sasets.py module.
-        :return: sasets object
-        """
-        if not self._loaded_macros:
-            self._loadmacros()
-            self._loaded_macros = True
-        return SASets(self)
-
     def sasml(self) -> '<SASml object>':
+        """
+        This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.
+
+        :return: sasml object
+        """
         if not self._loaded_macros:
             self._loadmacros()
             self._loaded_macros = True
-            """
-            This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.
-            :return: sasml object
-            """
+
 
         return SASml(self)
 
     def sasqc(self) -> '<SASqc object>':
+        """
+        This methods creates a SASqc object which you can use to run various analytics. See the sasqc.py module.
+
+        :return: sasqc object
+        """
         if not self._loaded_macros:
             self._loadmacros()
             self._loaded_macros = True
-        """
-            This methods creates a SASqc object which you can use to run various analytics. See the sasqc.py module.
 
-            :return: sasqc object
-        """
         return SASqc(self)
 
     def sasutil(self) -> '<SASutil object>':
         '''
-        This methods creates a SASutil object which you can use to run various analytics. See the sasutil.py module.
+        This methods creates a SASutil object which you can use to run various analytics.
+        See the sasutil.py module.
 
         :return: sasutil object
         '''
@@ -392,6 +405,7 @@ class SASsession():
     def _loadmacros(self):
         """
         Load the SAS macros at the start of the session
+
         :return:
         """
         macro_path = os.path.dirname(os.path.realpath(__file__))
@@ -405,6 +419,7 @@ class SASsession():
 
     def sasdata(self, table: str, libref: str = '', results: str = '', dsopts: dict = {}) -> '<SASdata object>':
         """
+        Method to define an existing SAS dataset so that it can be accessed via SASPy
 
         :param table:   the name of the SAS Data Set
         :param libref:  the libref for the Data Set, defaults to WORK, or USER if assigned
@@ -426,7 +441,7 @@ class SASsession():
                               'firstobs' : '12'
                              }
 
-        :return:
+        :return: SASdata object
         """
         if results == '':
             results = self.results
@@ -534,6 +549,7 @@ class SASsession():
               results: str = '') -> '<SASdata object>':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
+
         :param df: Pandas Data Frame to import to a SAS Data Set
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
@@ -546,6 +562,7 @@ class SASsession():
                           results: str = '') -> '<SASdata object>':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
+
         :param df: Pandas Data Frame to import to a SAS Data Set
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
@@ -569,6 +586,7 @@ class SASsession():
         """
         This is an alias for 'sasdata2dataframe'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+
         :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
         :param libref: the libref for the SAS Data Set.
         :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
@@ -597,6 +615,7 @@ class SASsession():
         """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+
         :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
         :param libref: the libref for the SAS Data Set.
         :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
@@ -704,6 +723,7 @@ class SASdata:
                               'obs'      :  10
                               'firstobs' : '12'
                              }
+        end comment
         """
         self.sas = sassession
         self.logger = logging.getLogger(__name__)
@@ -800,7 +820,7 @@ class SASdata:
 
     def _dsopts(self):
         '''
-        This method builds out data set optiond clause for this SASdata object: '(where= , keeep=, obs=, ...)'
+        This method builds out data set options clause for this SASdata object: '(where= , keeep=, obs=, ...)'
         '''
         return self.sas._dsopts(self.dsopts)
 
@@ -855,6 +875,7 @@ class SASdata:
     def tail(self, obs=5):
         """
         display the last n rows of a table
+
         :param obs: the number of rows of the table that you want to display. The default is 5
         :return:
         """
@@ -1129,6 +1150,7 @@ class SASdata:
     def info(self):
         """
         Display the column info on a SAS data object
+
         :return: Pandas data frame
         """
         m = self.means
@@ -1142,9 +1164,9 @@ class SASdata:
     def means(self):
         """
         display descriptive statistics for the table; summary statistics. This is an alias for 'describe'
+
         :return:
         """
-
         code = "proc means data=" + self.libref + '.' + self.table + self._dsopts() + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;run;"
 
         if self.sas.nosub:
@@ -1216,6 +1238,7 @@ class SASdata:
         This method will calculate assessment measures using the SAS AA_Model_Eval Macro used for SAS Enterprise Miner.
         Not all datasets can be assessed. This is designed for scored data that includes a target and prediction columns
         TODO: add code example of build, score, and then assess
+
         :param target: string that represents the target variable in the data
         :param prediction: string that represetnt the prediction column in the data
         :param nominal: boolean to indicate if the Target Variable is nominal because the assessment measures are different.
@@ -1282,22 +1305,24 @@ class SASdata:
                         _misc_ = MisClassificationRate;
             end;
         run;
-
         """
+
+
         code += rename_char.format(binstats)
         # TODO: add graphics code here to return to the SAS results object
-        """
+
         # Debug block
-        debug={'name': name,
-               'score_table': score_table,
-               'target': target,
-               'var': var,
-               'nominals': nominals,
-               'level': level,
-               'binstats': binstats,
-               'out':out}
-        print(debug.items())
-        """
+
+        #debug={'name': name,
+        #       'score_table': score_table,
+        #       'target': target,
+        #       'var': var,
+        #       'nominals': nominals,
+        #       'level': level,
+        #       'binstats': binstats,
+        #       'out':out}
+        #print(debug.items())
+
         if self.sas.nosub:
             print(code)
             return
@@ -1349,6 +1374,7 @@ class SASdata:
                 label: str = '') -> 'a heatmap plot of the (numeric) variables you chose':
         """
         Documentation link: http://support.sas.com/documentation/cdl/en/grstatproc/67909/HTML/default/viewer.htm#n0w12m4cn1j5c6n12ak64u1rys4w.htm
+
         :param x: x variable
         :param y: y variable
         :param options: display options (string)
@@ -1420,6 +1446,7 @@ class SASdata:
 
     def top(self, var: str, n: int = 10, order: str = 'freq', title: str = '') -> 'a frequency analysis of a variable':
         """
+        Return the most commonly occuring items (levels)
 
         :param var: the CHAR variable (column) you want to count
         :param n: the top N to be displayed (defaults to 10)
@@ -1464,7 +1491,9 @@ class SASdata:
 
     def bar(self, var: str, title: str = '', label: str = '') -> 'a barchart plot of the (numeric) variable you chose':
         """
-        This method requires a character column (use the contents method to see column types) and generates a bar chart.
+        This method requires a character column (use the contents method to see column types)
+        and generates a bar chart.
+
         :param var: the CHAR variable (column) you want to plot
         :param title: an optional title for the chart
         :param label: LegendLABEL= value for sgplot
