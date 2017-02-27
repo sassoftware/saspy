@@ -15,29 +15,34 @@
 #  limitations under the License.
 #
 
+
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
-import sys
+
+from saspy import __version__
 
 with open('README.rst') as f:
     readme = f.read()
 
+
 setup(name='saspy',
-      #version=__version__,
-      version = '2.1.0'
-      description='A Python interface to SAS',
-      long_description=readme,
-      author='Tom Weber',
-      author_email='Tom.Weber@sas.com',
-      url='https://github.com/sassoftware/saspy',
-      packages=['saspy'],
-      cmdclass={},
-      package_data={'saspy': ['*.sas']},
-      install_requires=['pygments', 'IPython', 'pre-commit'],
-      classifiers=[
+      version = __version__,
+      description = 'A Python interface to SAS',
+      long_description = readme,
+      author = 'Tom Weber',
+      author_email = 'Tom.Weber@sas.com',
+      url = 'https://github.com/sassoftware/saspy',
+      packages = ['saspy'],
+      cmdclass = {},
+      package_data = {'': ['*.js', '*.md', '*.yaml', '*.css', '*.rst'], 'saspy': ['*.sas', 'java/*.*']},
+      install_requires = ['pygments', 'ipython>=4.0.0', 'pre-commit'],
+      classifiers = [
         'Programming Language :: Python :: 3',
-        'License :: OSI Approved :: Apache Software License',
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Topic :: System :: Shells",
+        'License :: OSI Approved :: Apache Software License'
       ]
       )
