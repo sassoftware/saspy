@@ -19,7 +19,11 @@ import signal
 import subprocess
 import getpass
 from time import sleep
-import saspy.sascfg as SAScfg
+
+try:
+   import saspy.sascfg_tom as SAScfg
+except ImportError:
+   import saspy.sascfg as SAScfg
 
 try:
    import pandas as pd

@@ -24,9 +24,10 @@
 # specify options=''. This way it's specified so it can't be overridden, even though you don't have any
 # extra options you want applied.
 # 
-#SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http']
+# SAS_config_names=['default', 'sasother', 'sas_en', 'sas_utf8', 'http', 'ssh', 'httptest']
+#
+SAS_config_names = ['default', 'SASgrid',  'http', 'httptest', 'ssh', 'httpfred', 'grid', 'tdi', 'iomj', 'iomc', 'iomjwin', 'winiomj', 'winiomjwin', 'winlocal', 'gridiom', 'wingridiom']
 
-SAS_config_names=['default']
 
 # Configuration options for pysas - python Dict
 # valid key are:
@@ -59,13 +60,22 @@ SAS_config_options = {'lock_down': True}
 default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
             }
 
+tdi      = {'saspath' : '/tdi/mva-v940m4/usrlibsas/laxno/SASFoundation/9.4/bin/sas_u8'
+            }
+
 ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
             'ssh'     : '/usr/bin/ssh',
-            'host'    : 'remote.linux.host', 
+            'host'    : 'tom64-2', 
             'options' : ["-fullstimer"]
             }
 
-# sasother = {'saspath' : '/some/other/directory/SASHome/SASFoundation/9.4/bin_sas_u8',
+# sas_en   = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sas'
+#             }
+#
+# sas_utf8 = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/sasutf8'
+#             }
+#
+# sasother = {'saspath' : '/some/other/directory/SASHome/SASFoundation/9.4/sas',
 #             'options' : ["-autoexec", "/my/home_dir/my_autoexec.sas", "-set",
 #                          "Env_var", "Value", "-fullstimer"]
 #             }
@@ -100,56 +110,109 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 # 'classpath' - classpath to IOM client jars and saspy client jar.
 #
 
-# build out a local classpath variable to use below for Linux clients
-cpL  =  "/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar"
-cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/log4j.jar"
-cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.security.sspi.jar"
-cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.core.jar"
-cpL += ":/opt/github/saspy/java/saspyiom.jar"
+# build out a local classpath variable to use below
+cp  =  "/u/sastpw/tkpy2j/lib2/sas.svc.connection.jar"
+cp += ":/u/sastpw/tkpy2j/lib2/log4j.jar"
+cp += ":/u/sastpw/tkpy2j/lib2/sas.security.sspi.jar"
+cp += ":/u/sastpw/tkpy2j/lib2/sas.core.jar"
+cp += ":/opt/tom/gitlab/metis/java/saspyiom.jar"
 
-iomlinux = {'java'      : '/usr/bin/java',
-            'iomhost'   : 'linux.iom.host',
+iomj     = {'java'      : '/usr/bin/java',
+            'omruser'   : 'sas',
+            'omrpw'     : 'sas',
+            'iomhost'   : 'tom64-3.na.sas.com',
             'iomport'   : 8591,
-            'encoding'  : 'iso-8859-1',
-            'classpath' : cpL
+            'classpath' : cp
             }           
 
-iomwin   = {'java'      : '/usr/bin/java',
-            'iomhost'   : 'windows.iom.host',
-            'iomport'   : 8591,
+iomjwin  = {'java'      : '/usr/bin/java',
+            'omruser'   : 'sasiom1@carynt',
+            'omrpw'     : '1bridge',
+            'iomhost'   : 'd77422.na.sas.com',
+            'iomport'   : 18591,
             'encoding'  : 'cp1252',
-            'classpath' : cp:
+            'classpath' : cp
             }
 
+gridiom  = {'java'      : '/usr/bin/java',
+           #'omruser'   : 'sascnn1',
+           #'omrpw'     : '1connect',
+            'iomhost'   : 'bb04cnt10.unx.sas.com',
+            'iomport'   : 8594,
+            'encoding'  : 'iso-8859-1',
+            'classpath' : cp
+            }
          
-# build out a local classpath variable to use below for Windows clients
-cpW  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar"
-cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
-cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
-cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
-cpW += ";C:\github\saspy\java\saspyiom.jar"
+SASgrid   = {'java'     : '/usr/bin/java',
+           #'omruser'   : 'sascnn1',
+           #'omrpw'     : '1connect',
+            'iomhost'   : 'sgm001.unx.sas.com',
+            'iomport'   : 8591,
+            'encoding'  : 'iso-8859-1',
+            'classpath' : cp
+            }
+         
+# build out a local classpath variable to use below
+cpl  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar"
+cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
+cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
+cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
+cpl += ";E:\metis-master\java\saspyiom.jar"
 
 winlocal = {'saspath'   : 'C:\Program Files\SASHome\SASFoundation\9.4\sas.exe',
             'java'      : 'java',
             'omruser'   : 'sastpw',
-            #'omrpw'    : 'no_way_man',
             'encoding'  : 'cp1252',
-            'classpath' : cpW
+            'classpath' : cpl
             }
 
-winiomlinux = {'java'   : 'java',
-            'iomhost'   : 'linux.iom.host',
+winiomj  = {'java'      : 'java',
+            'omruser'   : 'sas',
+            'omrpw'     : 'sas',
+            'iomhost'   : 'tom64-3.na.sas.com',
             'iomport'   : 8591,
+            'classpath' : cpl
+            }
+
+winiomjwin = {'java'    : 'java',
+            'omruser'   : 'sasiom1@carynt',
+            'omrpw'     : '1bridge',
+            'iomhost'   : 'd77422.na.sas.com',
+            'iomport'   : 18591,
+            'encoding'  : 'cp1252',
+            'classpath' : cpl
+            }
+
+wingridiom = {'java'      : 'java',
+            'omruser'   : 'sascnn1',
+            'omrpw'     : '1connect',
+            'iomhost'   : 'bb04cnt10.unx.sas.com',
+            'iomport'   : 8594,
             'encoding'  : 'iso-8859-1',
-            'classpath' : cpW
+            'classpath' : cpl
             }
 
-winiomwin  = {'java'    : 'java',
-            'iomhost'   : 'windows.iom.host',
-            'iomport'   : 8591,
-            'encoding'  : 'cp1252',
-            'classpath' : cpW
+iomc     = {'iomc'    : '/u/sastpw/tkpy2c/tkext/com/laxnd/tktom',
+            'omruser' : 'sas',
+            'omrpw'   : 'sas',
+            'host'    : 'tom64-3.na.sas.com',
+            'port'    : 8591
             }
+
+
+
+
+
+# test case for sasgsub grid testing
+grid     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
+            'ssh'     : '/usr/bin/ssh',
+            'metapw'  : '1connect',
+            'host'    : 'sascnn@sgm001.unx.sas.com',
+            'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridrunsaslm"]
+            }
+#           'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridruncmdint"]
+#           'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridrunsaslm"]
+
 
 
 # Future - for the HTTP access method to connect to the Compute Service
@@ -164,9 +227,19 @@ winiomwin  = {'java'    : 'java',
 # 
 #
              
-http     = {'ip'      : 'host.running.compute.service',
+http     = {'ip'      : 'tomspc',
             'port'    :  80,
-            'context' : 'OMRcontext1'
+            'context' : 'Tom2'
+            }
+
+httpfred = {'ip'      : '10.63.24.180',
+            'port'    :  7980,
+            'context' : 'Tom2'
+            }
+
+httptest = {'ip'      : 'tomspc',
+            'port'    :  80, 
+            'options' : ["fullstimer", "memsize=1G"]
             }
 
 

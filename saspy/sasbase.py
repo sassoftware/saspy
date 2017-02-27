@@ -38,8 +38,12 @@
 
 import os
 from pdb import set_trace as bp
-import saspy.sascfg as SAScfg
 import logging
+
+try:
+   import saspy.sascfg_tom as SAScfg
+except ImportError:
+   import saspy.sascfg as SAScfg
 
 try:
     import saspy.sasiostdio as sasiostdio
@@ -250,7 +254,9 @@ class SASsession():
 
         - code    - the SAS statements you want to execute
         - results - format of results, HTLML and TEXT is the alternative
-        - prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete the keys are the names of the macro variables and the boolean flag is to either hide what you type and delete the macros, or show what you type and keep the macros (they will still be available later).
+        - prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete the keys are the names of the macro variables and the boolean flag is to either hide what you type and delete the macros, or show w
+
+hat you type and keep the macros (they will still be available later).
 
             for example (what you type for pw will not be displayed, user and dsname will):
 
