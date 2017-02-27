@@ -654,6 +654,7 @@ class SASsessionIOM():
                     #print("LIST = \n"+lst)
                     lstf += lst
                  else:
+                    sleep(0.1)
                     try:
                        log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace') 
                     except (BlockingIOError):
