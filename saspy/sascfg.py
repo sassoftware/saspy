@@ -163,13 +163,21 @@ cpl  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__9
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
 cpl += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
-cpl += ";E:\metis-master\java\saspyiom.jar"
+cpl += ";C:\programData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
+
+cpl2  =  "C:\Public\gitlab\metis\java\lib\sas.svc.connection.jar"
+cpl2 += ";C:\Public\gitlab\metis\java\lib\log4j.jar"
+cpl2 += ";C:\Public\gitlab\metis\java\lib\sas.security.sspi.jar"
+cpl2 += ";C:\Public\gitlab\metis\java\lib\sas.core.jar"
+cpl2 += ";C:\Public\gitlab\metis\java\pyiom"
+cpl2 += ";C:\Public\gitlab\metis\java\tools"
+cpl2 += ";C:\Public\gitlab\metis\java"
 
 winlocal = {'saspath'   : 'C:\Program Files\SASHome\SASFoundation\9.4\sas.exe',
             'java'      : 'java',
-            'omruser'   : 'sastpw',
+            'omruser'   : '',
             'encoding'  : 'cp1252',
-            'classpath' : cpl
+            'classpath' : cpl2
             }
 
 winiomj  = {'java'      : 'java',
