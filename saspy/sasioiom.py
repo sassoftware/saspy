@@ -147,16 +147,18 @@ class SASconfigIOM:
 class SASsessionIOM():
    '''
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-   cfgname - value in SAS_config_names List of the sascfg.py file
-   kernel  - None - internal use when running the SAS_kernel notebook
-   saspath - overrides saspath Dict entry of cfgname in sascfg.py file
-   options - overrides options Dict entry of cfgname in sascfg.py file
 
-   and for running STDIO over passwordless ssh
-   ssh     - full path of the ssh command; /usr/bin/ssh for instance
-   host    - host name of the remote machine
+   cfgname   - value in SAS_config_names List of the sascfg.py file
+   kernel    - None - internal use when running the SAS_kernel notebook
+   saspath   - for local Windows connection only] path to SAS executable (sas.exe) i.e.: C:\Program Files\SASHome\SASFoundation\9.4\sas.exe
+   java      - the path to the java executable to use
+   iomhost   - for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to
+   iomport   - for remote IOM case, not local Windows] the port IOM is listening on
+   omruser   - user id for IOM access
+   omrpw     - pw for user for IOM access
+   encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
+   classpath - classpath to IOM client jars and saspyiom client jar.
    '''
-   #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list =[]) -> '<SASsession object>':
    def __init__(self, **kwargs):
       self.pid    = None
       self.stdin  = None
@@ -182,7 +184,6 @@ class SASsessionIOM():
        return '%08d' % self._log_cnt
 
    def _startsas(self):
-      #import pdb;pdb.set_trace()
       if self.pid:
          return self.pid
 
@@ -194,7 +195,6 @@ class SASsessionIOM():
             lsoc.bind(("", 0))
             self.sascfg.iomport = lsoc.getsockname()[1]
             lsoc.close()
-            #print(str(self.sascfg.iomport))
          pgm    = self.sascfg.saspath
          parms  = [pgm]
          parms += ["-objectserver", "-objectserverparms", "'protocol=bridge", "port="+str(self.sascfg.iomport), "lockserver'"]
@@ -335,7 +335,7 @@ class SASsessionIOM():
             if self.pid:      
                pid = self.pid
                try:
-                  rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+                  rc = os.waitpid(self.pid, os.WEXITED | os.WNOHANG)
                except (subprocess.TimeoutExpired):
                   print("SAS didn't shutdown w/in a second; killing it to be sure")
                   os.kill(self.pid, signal.SIGKILL)
@@ -581,7 +581,7 @@ class SASsessionIOM():
       else:
          if self.pid == None:
             return "No SAS process attached. SAS process has terminated unexpectedly."
-         rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+         rc = os.waitpid(self.pid, os.WEXITED | os.WNOHANG)
          if rc != None:
             self.pid = None
             return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
@@ -636,7 +636,7 @@ class SASsessionIOM():
                     except:
                        pass
                  else:
-                    rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+                    rc = os.waitpid(self.pid, os.WEXITED | os.WNOHANG)
                     if rc is not None:
                         self.pid = None
                         return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
