@@ -13,18 +13,24 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+
+
 # Configuration Names for SAS - python List
 # This is the list of allowed configuration definitions that can be used. The definition are defined below.
+# if there is nore than one name in the list, and cfgname= is not specified in SASsession(), then the user
+# will be prompted to choose which configuration to use.
+#
 # The various options for the different access methods can be specified on the SASsession() i.e.:
 # sas = SASsession(cfgname='default', options='-fullstimer', user='me')
 #
-# based upon the lock_down configuration option below, you may or may not be able to override option
+# Based upon the lock_down configuration option below, you may or may not be able to override option
 # that are defined already. Any necessary option (like user, pw for IOM or HTTP) that are not defined will be 
-# prompted for at run time. To dissallow overrides of OPTION, when you don't have any specified, simply
+# prompted for at run time. To dissallow overrides of as OPTION, when you don't have a value, simply
 # specify options=''. This way it's specified so it can't be overridden, even though you don't have any
-# extra options you want applied.
+# specifi value you want applied.
 # 
 #SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http']
+#
 
 SAS_config_names=['default']
 
@@ -33,6 +39,7 @@ SAS_config_names=['default']
 # 
 # 'lock_down' - True | False. True = Prevent runtime overrides of SAS_Config values below
 #
+
 SAS_config_options = {'lock_down': True}
 
 
@@ -56,6 +63,7 @@ SAS_config_options = {'lock_down': True}
 # 'ssh'     - [REQUIRED] the ssh command to run
 # 'host'    - [REQUIRED] the host to connect to
 #
+
 default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
             }
 
@@ -77,8 +85,8 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 # and also to connect to a local Windows SAS session. The client side (python and java) for this access method can be either Linux or Windows.
 # The STDIO access method above is only for Linux. PC SAS requires this IOM interface. 
 #
-# The 'saspath' option triggers local Windows SAS mode. In this case neither 'iomhost' nor 'iomport' are needed. localhost is used and an available port
-# is used for the connection. In this way, you can run multiple python sessions to seperate Windows SAS instances (i.e.: different notbooks in Jupyter).
+# The absence of the iomhost option triggers local Windows SAS mode. In this case none of 'iomhost', 'iomport', 'omruser', 'omrpw' are needed.
+# a local SAS session is started up and connected to.
 #
 # Since python uses utf-8, running SAS with encoding=utf-8 is the expected use case. By default Windows SAS runs in WindowsLatin1 (cp1252),
 # which does not work well as utf-8. So, transcoding has been implemented in the python layer. The 'encoding' option can be specified to match
@@ -90,12 +98,11 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 # of a Base SAS install, so should be available in any SAS install. The saspyiom.jar is available in the saspy repo/install. 
 #
 # valid keys are:
-# 'saspath'   - [REQUIRED for local Windows connection only] path to SAS executable (sas.exe) i.e.: C:\Program Files\SASHome\SASFoundation\9.4\sas.exe
 # 'java'      - [REQUIRED] the path to the java executable to use
-# 'iomhost'   - [REQUIRED for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to
-# 'iomport'   - [REQUIRED for remote IOM case, Don't specify for local Windows] the port IOM is listening on
-# 'omruser'   - not suggested [REQUIRED but PROMTED for at runtime] For local Windows SAS, this is a local user account/pw
-# 'omrpw'     - really not suggested [REQUIRED but PROMTED for at runtime]
+# 'iomhost'   - [REQUIRED for remote IOM case, Don't specify to use a local Windows Session] the resolvable host name, or ip to the IOM server to connect to
+# 'iomport'   - [REQUIRED for remote IOM case, Don't specify to use a local Windows Session] the port IOM is listening on
+# 'omruser'   - not suggested        [REQUIRED for remote IOM case but PROMTED for at runtime] Don't specify to use a local Windows Session
+# 'omrpw'     - really not suggested [REQUIRED for remote IOM case but PROMTED for at runtime] Don't specify to use a local Windows Session
 # 'encoding'  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
 # 'classpath' - classpath to IOM client jars and saspy client jar.
 #
@@ -129,10 +136,7 @@ cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__9
 cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
 cpW += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
 
-winlocal = {'saspath'   : 'C:\Program Files\SASHome\SASFoundation\9.4\sas.exe',
-            'java'      : 'java',
-            'omruser'   : '<userid>',
-            #'omrpw'    : 'no_way_man',
+winlocal = {'java'      : 'java',
             'encoding'  : 'cp1252',
             'classpath' : cpW
             }
@@ -153,6 +157,9 @@ winiomwin  = {'java'    : 'java',
 
 
 # Future - for the HTTP access method to connect to the Compute Service
+#          This access method is not available yet.
+#
+#
 # These need ip addr and port, other values will be prompted for - python Dict
 # valid keys are:
 # 'ip'      - [REQUIRED] host address 

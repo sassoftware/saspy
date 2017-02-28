@@ -43,7 +43,6 @@ class SASconfigIOM:
       self.name      = kwargs.get('sascfgname', '')
       cfg            = getattr(SAScfg, self.name) 
 
-      self.saspath   = cfg.get('saspath', '')
       self.java      = cfg.get('java', '')
       self.iomhost   = cfg.get('iomhost', '')
       self.iomport   = cfg.get('iomport', '')
@@ -61,20 +60,6 @@ class SASconfigIOM:
 
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
-
-      insaspath = kwargs.get('saspath', '')   
-      if len(insaspath) > 0:
-         if lock and len(self.saspath):
-            print("Parameter 'saspath' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.saspath = insaspath   
-
-      inoptions = kwargs.get('options', '')
-      if len(inoptions) > 0:
-         if lock and len(self.options):
-            print("Parameter 'options' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.options = inoptions   
 
       injava = kwargs.get('java', '')
       if len(injava) > 0:
@@ -154,7 +139,6 @@ class SASsessionIOM():
 
    cfgname   - value in SAS_config_names List of the sascfg.py file
    kernel    - None - internal use when running the SAS_kernel notebook
-   saspath   - for local Windows connection only] path to SAS executable (sas.exe) i.e.: C:\Program Files\SASHome\SASFoundation\9.4\sas.exe
    java      - the path to the java executable to use
    iomhost   - for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to
    iomport   - for remote IOM case, not local Windows] the port IOM is listening on
@@ -168,7 +152,6 @@ class SASsessionIOM():
       self.stdin  = None
       self.stderr = None
       self.stdout = None
-      self.saspid = None
 
       self.sascfg   = SASconfigIOM(**kwargs)
       self._log_cnt = 0
@@ -192,37 +175,24 @@ class SASsessionIOM():
          return self.pid
 
       # check for local iom server
-      if self.sascfg.saspath:
-         self.sascfg.iomhost = "localhost"
-         if not self.sascfg.iomport:
-            lsoc = socks.socket()
-            lsoc.bind(("", 0))
-            self.sascfg.iomport = lsoc.getsockname()[1]
-            lsoc.close()
-         pgm    = self.sascfg.saspath
-         parms  = [pgm]
-         parms += ["-objectserver", "-objectserverparms", "'protocol=bridge", "port="+str(self.sascfg.iomport), "lockserver'"]
-         
-         try:
-            self.saspid = subprocess.Popen(parms)
-         except:
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
-            print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            return NULL
+      if self.sascfg.iomhost:
+         zero = True
+      else:
+         zero = False
 
       port = 0
       try:
          self.sockin  = socks.socket()
-         self.sockin.bind(("",port))
-         #self.sockin.bind(("",32701))
+         #self.sockin.bind(("",port))
+         self.sockin.bind(("",32701))
 
          self.sockout = socks.socket()
-         self.sockout.bind(("",port))
-         #self.sockout.bind(("",32702))
+         #self.sockout.bind(("",port))
+         self.sockout.bind(("",32702))
 
          self.sockerr = socks.socket()
-         self.sockerr.bind(("",port))
-         #self.sockerr.bind(("",32703))
+         #self.sockerr.bind(("",port))
+         self.sockerr.bind(("",32703))
       except OSError:
          print('Error try to open a socket in the _startsas method. Call failed.')
          return None
@@ -230,21 +200,24 @@ class SASsessionIOM():
       self.sockout.listen(0)
       self.sockerr.listen(0)
 
-      while len(self.sascfg.omruser) == 0:
-         self.sascfg.omruser = self.sascfg._prompt("Please enter the IOM user id: ")
+      if not zero:
+         while len(self.sascfg.omruser) == 0:
+            self.sascfg.omruser = self.sascfg._prompt("Please enter the IOM user id: ")
 
       pgm    = self.sascfg.java
       parms  = [pgm]
-      parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
-      #parms += ["-classpath", self.sascfg.classpath, "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
+      #parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
+      parms += ["-classpath", self.sascfg.classpath, "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
       parms += ["-host", "localhost"] 
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
-      parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
-      parms += ["-user", self.sascfg.omruser]     
+      if not zero:
+         parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
+         parms += ["-user", self.sascfg.omruser]     
+      else:
+         parms += ["-zero"]     
       parms += ['']
-
 
       if os.name == 'nt': 
          try:
@@ -289,12 +262,12 @@ class SASsessionIOM():
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             return NULL
 
-      pw = self.sascfg.omrpw
-      while len(pw) == 0:
-         pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
-      pw += '\n'
-
-      self.stdin[0].send(pw.encode(self.sascfg.encoding))
+      if not zero:
+         pw = self.sascfg.omrpw
+         while len(pw) == 0:
+            pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
+         pw += '\n'
+         self.stdin[0].send(pw.encode(self.sascfg.encoding))
 
       self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max linesize=max nosyntaxcheck; ods graphics on;", "text")
 
@@ -324,31 +297,19 @@ class SASsessionIOM():
          if os.name == 'nt': 
             pid = self.pid.pid
             try:
-               if self.saspid:
-                  self.saspid.wait(5)
-                  self.saspid = None
                rc = self.pid.wait(5)
                self.pid = None
             except (subprocess.TimeoutExpired):
                print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
-               if self.saspid:
-                  self.saspid.kill()
-               if self.pid:
-                  self.pid.kill()
+               self.pid.kill()
          else:
-            if self.pid:      
-               pid = self.pid
-               try:
-                  #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-                  rc = os.waitpid(self.pid, os.WNOHANG)
-                  if rc[1]:
-                     pass
-                  else:
-                     print("SAS didn't shutdown w/in a second; killing it to be sure")
-                     os.kill(self.pid, signal.SIGKILL)
-               except (subprocess.TimeoutExpired):
-                  print("SAS didn't shutdown w/in a second; killing it to be sure")
-                  os.kill(self.pid, signal.SIGKILL)
+            pid = self.pid
+            rc = os.waitpid(self.pid, os.WNOHANG)
+            if rc[1]:
+               pass
+            else:
+               print("SAS didn't shutdown w/in a second; killing it to be sure")
+               os.kill(self.pid, signal.SIGKILL)
 
 
          self.stdin[0].shutdown(socks.SHUT_RDWR)
