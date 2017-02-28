@@ -175,10 +175,10 @@ class SASsessionIOM():
          return self.pid
 
       # check for local iom server
-      if self.sascfg.iomhost:
-         zero = True
-      else:
+      if len(self.sascfg.iomhost) > 0:
          zero = False
+      else:
+         zero = True
 
       port = 0
       try:
