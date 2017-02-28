@@ -809,16 +809,16 @@ class SASdata:
         libref = 'work'
         if 'libref' in kwargs:
             libref = kwargs['libref']
-        self.sas.submit(code)
+        self.sas._io.submit(code)
         if isinstance(tablename, str):
             pd = self.sas.sasdata2dataframe(tablename, libref)
-            self.sas.submit("proc delete data=%s.%s; run;" % (libref, tablename))
+            self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, tablename))
         elif isinstance(tablename, list):
             pd = dict()
             for t in tablename:
                 # strip leading '_' from names and capitalize for dictionary labels
-                pd[t.replace('_', '').capitalize()] = self.sas.sasdata2dataframe(t, libref)
-                self.sas.submit("proc delete data=%s.%s; run;" % (libref, t))
+                pd[t.replace('_', '').capitalize()] = self.sas._io.sasdata2dataframe(t, libref)
+                self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, t))
         else:
             raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))
 
@@ -865,14 +865,14 @@ class SASdata:
             ll = self._is_valid()
             if self.HTML:
                 if not ll:
-                    ll = self.sas.submit(code)
+                    ll = self.sas._io.submit(code)
                 if not self.sas.batch:
                     DISPLAY(HTML(ll['LST']))
                 else:
                     return ll
             else:
                 if not ll:
-                    ll = self.sas.submit(code, "text")
+                    ll = self.sas._io.submit(code, "text")
                 if not self.sas.batch:
                     print(ll['LST'])
                 else:
@@ -921,7 +921,7 @@ class SASdata:
         else:
             if self.HTML:
                 if not le:
-                    ll = self.sas.submit(code)
+                    ll = self.sas._io.submit(code)
                 else:
                     ll = le
                 if not self.sas.batch:
@@ -930,7 +930,7 @@ class SASdata:
                     return ll
             else:
                 if not le:
-                    ll = self.sas.submit(code, "text")
+                    ll = self.sas._io.submit(code, "text")
                 else:
                     ll = le
                 if not self.sas.batch:
@@ -1101,14 +1101,14 @@ class SASdata:
         else:
             if self.HTML:
                 if not ll:
-                    ll = self.sas.submit(code)
+                    ll = self.sas._io.submit(code)
                 if not self.sas.batch:
                     DISPLAY(HTML(ll['LST']))
                 else:
                     return ll
             else:
                 if not ll:
-                    ll = self.sas.submit(code, "text")
+                    ll = self.sas._io.submit(code, "text")
                 if not self.sas.batch:
                     print(ll['LST'])
                 else:
@@ -1132,14 +1132,14 @@ class SASdata:
             ll = self._is_valid()
             if self.HTML:
                 if not ll:
-                    ll = self.sas.submit(code)
+                    ll = self.sas._io.submit(code)
                 if not self.sas.batch:
                     DISPLAY(HTML(ll['LST']))
                 else:
                     return ll
             else:
                 if not ll:
-                    ll = self.sas.submit(code, "text")
+                    ll = self.sas._io.submit(code, "text")
                 if not self.sas.batch:
                     print(ll['LST'])
                 else:
@@ -1187,14 +1187,14 @@ class SASdata:
         else:
             if self.HTML:
                if not ll:
-                  ll = self.sas.submit(code)
+                  ll = self.sas._io.submit(code)
                if not self.sas.batch:
                   DISPLAY(HTML(ll['LST']))
                else:
                   return ll
             else:
                if not ll:
-                  ll = self.sas.submit(code, "text")
+                  ll = self.sas._io.submit(code, "text")
                if not self.sas.batch:
                   print(ll['LST'])
                else:
@@ -1408,7 +1408,7 @@ class SASdata:
         if not ll:
             html = self.HTML
             self.HTML = 1
-            ll = self.sas.submit(code)
+            ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
             DISPLAY(HTML(ll['LST']))
@@ -1442,7 +1442,7 @@ class SASdata:
         if not ll:
             html = self.HTML
             self.HTML = 1
-            ll = self.sas.submit(code)
+            ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
             DISPLAY(HTML(ll['LST']))
@@ -1481,7 +1481,7 @@ class SASdata:
         else:
             if self.HTML:
                 if not ll:
-                    ll = self.sas.submit(code)
+                    ll = self.sas._io.submit(code)
                 if not self.sas.batch:
                     DISPLAY(HTML(ll['LST']))
                 else:
@@ -1522,7 +1522,7 @@ class SASdata:
         if not ll:
             html = self.HTML
             self.HTML = 1
-            ll = self.sas.submit(code)
+            ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
             DISPLAY(HTML(ll['LST']))
@@ -1562,7 +1562,7 @@ class SASdata:
         if not ll:
             html = self.HTML
             self.HTML = 1
-            ll = self.sas.submit(code)
+            ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
             DISPLAY(HTML(ll['LST']))
