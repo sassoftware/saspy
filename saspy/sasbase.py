@@ -160,12 +160,12 @@ class SASsession():
     kernel  - None - internal use when running the SAS_kernel notebook
     results - Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
 
-    **STDIO IO**
+    **STDIO**
 
     saspath - overrides saspath Dict entry of cfgname in sascfg.py file
     options - overrides options Dict entry of cfgname in sascfg.py file
 
-    **SSH**
+    **STDIO over SSH**
 
     and for running STDIO over passwordless ssh
     ssh     - full path of the ssh command; /usr/bin/ssh for instance
@@ -184,12 +184,14 @@ class SASsession():
     **IOM**
 
     and for the IOM IO module to connect to SAS9 via Java IOM
-    ip      - host address
-    port    - port; the code Defaults this to 80 (the Compute Services default port)
-    context - context name defined on the compute service
-    options - SAS options to include in the start up command line
-    omruser - user name to authenticate with
-    omrpw   - password to authenticate with
+    saspath   - for local Windows connection only] path to SAS executable (sas.exe) i.e.: C:\Program Files\SASHome\SASFoundation\9.4\sas.exe
+    java      - the path to the java executable to use
+    iomhost   - for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to
+    iomport   - for remote IOM case, not local Windows] the port IOM is listening on
+    omruser   - user id for IOM access
+    omrpw     - pw for user for IOM access
+    encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
+    classpath - classpath to IOM client jars and saspyiom client jar.
     """
 
     # def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list =[]) -> '<SASsession object>':
@@ -255,6 +257,7 @@ class SASsession():
         - code    - the SAS statements you want to execute
         - results - format of results, HTLML and TEXT is the alternative
         - prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete the keys are the names of the macro variables and the boolean flag is to either hide what you type and delete the macros, or show w
+
 
 hat you type and keep the macros (they will still be available later).
 

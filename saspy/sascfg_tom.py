@@ -34,7 +34,7 @@ SAS_config_names = ['default', 'SASgrid',  'http', 'httptest', 'ssh', 'httpfred'
 # 
 # 'lock_down' - True | False. True = Prevent runtime overrides of SAS_Config values below
 #
-SAS_config_options = {'lock_down': True}
+SAS_config_options = {'lock_down': False}
 
 
 # Configuration Definitions

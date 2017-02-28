@@ -339,7 +339,13 @@ class SASsessionIOM():
             if self.pid:      
                pid = self.pid
                try:
-                  rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+                  #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+                  rc = os.waitpid(self.pid, os.WNOHANG)
+                  if rc[1]:
+                     pass
+                  else:
+                     print("SAS didn't shutdown w/in a second; killing it to be sure")
+                     os.kill(self.pid, signal.SIGKILL)
                except (subprocess.TimeoutExpired):
                   print("SAS didn't shutdown w/in a second; killing it to be sure")
                   os.kill(self.pid, signal.SIGKILL)
@@ -585,8 +591,10 @@ class SASsessionIOM():
       else:
          if self.pid == None:
             return "No SAS process attached. SAS process has terminated unexpectedly."
-         rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-         if rc != None:
+         #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+         rc = os.waitpid(self.pid, os.WNOHANG)
+         #if rc != None:
+         if rc[1]:
             self.pid = None
             return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
  
@@ -640,8 +648,10 @@ class SASsessionIOM():
                     except:
                        pass
                  else:
-                    rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-                    if rc is not None:
+                    #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+                    rc = os.waitpid(self.pid, os.WNOHANG)
+                    #if rc is not None:
+                    if rc[1]:
                         self.pid = None
                         return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
 
