@@ -127,11 +127,11 @@ cpW  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__9
 cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
 cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
 cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
-cpW += ";C:\github\saspy\java\saspyiom.jar"
+cpW += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
 
 winlocal = {'saspath'   : 'C:\Program Files\SASHome\SASFoundation\9.4\sas.exe',
             'java'      : 'java',
-            'omruser'   : 'sastpw',
+            'omruser'   : '<userid>',
             #'omrpw'    : 'no_way_man',
             'encoding'  : 'cp1252',
             'classpath' : cpW
