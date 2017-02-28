@@ -118,7 +118,7 @@ iomwin   = {'java'      : '/usr/bin/java',
             'iomhost'   : 'windows.iom.host',
             'iomport'   : 8591,
             'encoding'  : 'cp1252',
-            'classpath' : cp:
+            'classpath' : cpL
             }
 
          

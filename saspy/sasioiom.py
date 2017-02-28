@@ -21,7 +21,7 @@ from time import sleep
 import socket as socks
 
 try:
-   import saspy.sascfg_tom as SAScfg
+   import saspy.sascfg_personal as SAScfg
 except ImportError:
    import saspy.sascfg as SAScfg
 

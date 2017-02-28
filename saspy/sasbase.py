@@ -41,7 +41,7 @@ from pdb import set_trace as bp
 import logging
 
 try:
-   import saspy.sascfg_tom as SAScfg
+   import saspy.sascfg_personal as SAScfg
 except ImportError:
    import saspy.sascfg as SAScfg
 
@@ -257,6 +257,8 @@ class SASsession():
         - code    - the SAS statements you want to execute
         - results - format of results, HTLML and TEXT is the alternative
         - prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete the keys are the names of the macro variables and the boolean flag is to either hide what you type and delete the macros, or show w
+
+
 
 
 hat you type and keep the macros (they will still be available later).
