@@ -183,16 +183,16 @@ class SASsessionIOM():
       port = 0
       try:
          self.sockin  = socks.socket()
-         #self.sockin.bind(("",port))
-         self.sockin.bind(("",32701))
+         self.sockin.bind(("",port))
+         #self.sockin.bind(("",32701))
 
          self.sockout = socks.socket()
-         #self.sockout.bind(("",port))
-         self.sockout.bind(("",32702))
+         self.sockout.bind(("",port))
+         #self.sockout.bind(("",32702))
 
          self.sockerr = socks.socket()
-         #self.sockerr.bind(("",port))
-         self.sockerr.bind(("",32703))
+         self.sockerr.bind(("",port))
+         #self.sockerr.bind(("",32703))
       except OSError:
          print('Error try to open a socket in the _startsas method. Call failed.')
          return None
@@ -206,8 +206,8 @@ class SASsessionIOM():
 
       pgm    = self.sascfg.java
       parms  = [pgm]
-      #parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
-      parms += ["-classpath", self.sascfg.classpath, "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
+      parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
+      #parms += ["-classpath", self.sascfg.classpath, "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
       parms += ["-host", "localhost"] 
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
