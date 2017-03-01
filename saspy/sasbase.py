@@ -197,11 +197,13 @@ class SASsession():
     # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
     def __init__(self, **kwargs) -> 'SASsession':
         self._loaded_macros = False
-        self._obj_cnt = 0
-        self.nosub = False
-        self.sascfg = SASconfig(**kwargs)
-        self.batch = False
-        self.results = kwargs.get('results', 'Pandas')
+        self._obj_cnt       = 0
+        self.nosub          = False
+        self.sascfg         = SASconfig(**kwargs)
+        self.batch          = False
+        self.results        = kwargs.get('results', 'Pandas')
+        self.workpath       = ''
+        self.sasver         = ''
 
         if not self.sascfg.valid:
             return
@@ -220,9 +222,32 @@ class SASsession():
 
         try:
            if self._io:
-              pass
+             ll = self.submit('libname work list;')
+             self.workpath = ll['LOG'].partition('Physical Name=')[2].partition('\n')[0].strip()
+             if running_on_win:
+                self.workpath += '\\'
+             else:
+                self.workpath += '/'
+             ll = self.submit('"%put SYSV=&sysvlong;";')
+             self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
+
         except (AttributeError):
            self._io = None
+
+    def __repr__(self):
+        """
+        display info about this object ...
+
+        :return: output
+        """
+        print("Access Method   = "+self.sascfg.mode)
+        print("SAS Config name = "+self.sascfg.name)
+        print("WORK Path       = "+self.workpath)
+        print("SAS Version     = "+self.sasver)
+        print("Teach me SAS    = "+str(self.nosub))
+        print("Batch           = "+str(self.batch))
+        print("Results         = "+self.results)
+        return ''
 
     def __del__(self):
         if self._io:
@@ -782,6 +807,19 @@ class SASdata:
         print(type(key))
         #print(kwargs.keys())
         #print(kwargs.items())
+
+    def __repr__(self):
+        """
+        display info about this object ...
+
+        :return: output
+        """
+
+        print("Libref  = "+self.libref)
+        print("Table   = "+self.table)
+        print("Dsopts  = "+str(self.dsopts))
+        print("Results = "+self.results)
+        return ''
 
     def set_results(self, results: str):
         """
