@@ -589,7 +589,7 @@ class SASsession():
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
-        :param df: Pandas Data Frame to import to a SAS Data Set
+        :param df: :class:`pandas.DataFrame` Pandas Data Frame to import to a SAS Data Set
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
