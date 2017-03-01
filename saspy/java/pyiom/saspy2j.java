@@ -35,6 +35,10 @@ import com.sas.services.connection.ConnectionInterface;
 import com.sas.services.connection.ManualConnectionFactoryConfiguration;
 import com.sas.services.connection.Server;
 
+import com.sas.services.connection.SecurityPackageCredential;
+import com.sas.services.connection.ZeroConfigWorkspaceServer;
+
+
 import com.sas.iom.SAS.StreamOpenMode;
 
 public class saspy2j {
@@ -65,6 +69,7 @@ public class saspy2j {
         String      eol      = "";
         int         idx      =  0;
         boolean     fndeol       ;
+        boolean     zero     = false;
 
         BufferedReader inp;
         BufferedWriter outp;
@@ -106,6 +111,9 @@ public class saspy2j {
                                 else
                                     if (args[x].equalsIgnoreCase("-user") )
                                         omruser = args[x+1];
+                                    else
+                                        if (args[x].equalsIgnoreCase("-zero") )
+                                            zero = true;
         }
 
         try
@@ -126,22 +134,35 @@ public class saspy2j {
         outp = new BufferedWriter( new OutputStreamWriter(sout.getOutputStream()) );
         errp = new BufferedWriter( new OutputStreamWriter(serr.getOutputStream()) );
 
-        omrpw = inp.readLine();
-        try
+        if (zero)
         {
-            server = new BridgeServer(Server.CLSID_SAS, iomhost, iomport);
-            ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
-            ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
-            ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
-            //ConnectionFactoryAdminInterface admin = cxf.getAdminInterface();
-            cx = cxf.getConnection(omruser, omrpw, 10000);
+        	ZeroConfigWorkspaceServer zserver = new ZeroConfigWorkspaceServer();
+        	ManualConnectionFactoryConfiguration config = new ManualConnectionFactoryConfiguration(zserver);
+        	ConnectionFactoryManager manager = new ConnectionFactoryManager();
+        	ConnectionFactoryInterface factory = manager.getFactory(config);
+        	SecurityPackageCredential cred = new SecurityPackageCredential();
+        	cx = factory.getConnection(cred);
+
         }
-        catch (ConnectionFactoryException e)
+        else
         {
-        	String msg = e.getMessage();
-        	System.out.print(msg);
-        	if (msg.contains("or the password is incorrect"))
-        		throw(e);
+	        omrpw = inp.readLine();
+	        try
+	        {
+	            server = new BridgeServer(Server.CLSID_SAS, iomhost, iomport);
+	            ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
+	            ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
+	            ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
+	            //ConnectionFactoryAdminInterface admin = cxf.getAdminInterface();
+	            cx = cxf.getConnection(omruser, omrpw, 10000);
+	        }
+	        catch (ConnectionFactoryException e)
+	        {
+	        	String msg = e.getMessage();
+	        	System.out.print(msg);
+	        	if (msg.contains("or the password is incorrect"))
+	        		throw(e);
+	        }
         }
 
         wksp = IWorkspaceHelper.narrow(cx.getObject());
