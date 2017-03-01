@@ -24,6 +24,7 @@ with a SAS 9.4 installation.
 .. toctree::
 
    install
+   configuration
    getting-started
    api
    adding-procedures
