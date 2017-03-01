@@ -37,7 +37,7 @@
 #
 
 import os
-from pdb import set_trace as bp
+# from pdb import set_trace as bp
 import logging
 
 try:
@@ -47,7 +47,7 @@ except ImportError:
 
 try:
     import saspy.sasiostdio as sasiostdio
-    #import saspy.sasioiom   as sasioiom
+    # import saspy.sasioiom   as sasioiom
 
     running_on_win = False
 
@@ -194,8 +194,8 @@ class SASsession():
     classpath - classpath to IOM client jars and saspyiom client jar.
     """
 
-    # def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list =[]) -> '<SASsession object>':
-    def __init__(self, **kwargs) -> '<SASsession object>':
+    # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
+    def __init__(self, **kwargs) -> 'SASsession':
         self._loaded_macros = False
         self._obj_cnt = 0
         self.nosub = False
@@ -297,7 +297,7 @@ class SASsession():
 
         return self._io.submit(code, results, prompt)
 
-    def saslog(self) -> 'The SAS Log for the session':
+    def saslog(self) -> str:
         """
         This method is used to get the current, full contents of the SASLOG
 
@@ -354,7 +354,7 @@ class SASsession():
         """
         return self._io.exist(table, libref)
 
-    def sasets(self) -> '<SASets object>':
+    def sasets(self) -> 'SASets':
         """
         This methods creates a SASets object which you can use to run various analytics.
         See the sasets.py module.
@@ -365,7 +365,7 @@ class SASsession():
             self._loaded_macros = True
         return SASets(self)
 
-    def sasstat(self) -> '<SASstat object>':
+    def sasstat(self) -> 'SASstat':
         """
         This methods creates a SASstat object which you can use to run various analytics.
         See the sasstat.py module.
@@ -378,7 +378,7 @@ class SASsession():
 
         return SASstat(self)
 
-    def sasml(self) -> '<SASml object>':
+    def sasml(self) -> 'SASml':
         """
         This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.
 
@@ -391,7 +391,7 @@ class SASsession():
 
         return SASml(self)
 
-    def sasqc(self) -> '<SASqc object>':
+    def sasqc(self) -> 'SASqc':
         """
         This methods creates a SASqc object which you can use to run various analytics. See the sasqc.py module.
 
@@ -403,7 +403,7 @@ class SASsession():
 
         return SASqc(self)
 
-    def sasutil(self) -> '<SASutil object>':
+    def sasutil(self) -> 'SASutil':
         '''
         This methods creates a SASutil object which you can use to run various analytics.
         See the sasutil.py module.
@@ -431,7 +431,7 @@ class SASsession():
         self._io._asubmit(code.decode(), results='text')
         os.close(fd)
 
-    def sasdata(self, table: str, libref: str = '', results: str = '', dsopts: dict = {}) -> '<SASdata object>':
+    def sasdata(self, table: str, libref: str = '', results: str = '', dsopts: dict = {}) -> 'SASdata':
         """
         Method to define an existing SAS dataset so that it can be accessed via SASPy
 
@@ -467,7 +467,7 @@ class SASsession():
         return sd
 
     def saslib(self, libref: str, engine: str = ' ', path: str = '',
-               options: str = ' ') -> 'The LOG showing the assignment of the libref':
+               options: str = ' ') -> str:
         """
 
         :param libref:  the libref for be assigned
@@ -490,7 +490,7 @@ class SASsession():
             else:
                 print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0])
 
-    def datasets(self, libref: str = '') -> 'The LOG showing the output':
+    def datasets(self, libref: str = '') -> str:
         """
         This method is used to query a libref. The results show information about the libref including members.
 
@@ -511,7 +511,7 @@ class SASsession():
             else:
                 print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0])
 
-    def read_csv(self, file: str, table: str = '_csv', libref: str = '', results: str = '') -> '<SASdata object>':
+    def read_csv(self, file: str, table: str = '_csv', libref: str = '', results: str = '') -> 'SASdata':
         """
         :param file: either the OS filesystem path of the file, or HTTP://... for a url accessible file
         :param table: the name of the SAS Data Set to create
@@ -529,7 +529,7 @@ class SASsession():
             return None
 
     def write_csv(self, file: str, table: str, libref: str = '',
-                  dsopts: dict = {}) -> 'The LOG showing the results of the step':
+                  dsopts: dict = {}) -> str:
         """
 
         :param file: the OS filesystem path of the file to be created (exported from the SAS Data Set)
@@ -559,8 +559,8 @@ class SASsession():
         else:
             return log
 
-    def df2sd(self, df: '<Pandas Data Frame object>', table: str = '_df', libref: str = '',
-              results: str = '') -> '<SASdata object>':
+    def df2sd(self, df: 'DataFrame', table: str = '_df', libref: str = '',
+              results: str = '') -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
@@ -572,8 +572,8 @@ class SASsession():
         """
         return self.dataframe2sasdata(df, table, libref, results)
 
-    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str = '_df', libref: str = '',
-                          results: str = '') -> '<SASdata object>':
+    def dataframe2sasdata(self, df: 'DataFrame', table: str = '_df', libref: str = '',
+                          results: str = '') -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
@@ -596,7 +596,7 @@ class SASsession():
         else:
             return None
 
-    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> '<Pandas Data Frame object>':
+    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'DataFrame':
         """
         This is an alias for 'sasdata2dataframe'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -625,7 +625,7 @@ class SASsession():
         return self.sasdata2dataframe(table, libref, dsopts, **kwargs)
 
     def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {},
-                          **kwargs) -> '<Pandas Data Frame object>':
+                          **kwargs) -> 'DataFrame':
         """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -819,7 +819,7 @@ class SASdata:
             libref = kwargs['libref']
         self.sas._io.submit(code)
         if isinstance(tablename, str):
-            pd = self.sas.sasdata2dataframe(tablename, libref)
+            pd = self.sas._io.sasdata2dataframe(tablename, libref)
             self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, tablename))
         elif isinstance(tablename, list):
             pd = dict()
@@ -838,7 +838,7 @@ class SASdata:
         '''
         return self.sas._dsopts(self.dsopts)
 
-    def where(self, where: str) -> '<SASdata object>':
+    def where(self, where: str) -> 'SASdata':
         """
         This method returns a clone of the SASdata object, with the where attribute set. The original SASdata object is not affected.
 
@@ -947,7 +947,7 @@ class SASdata:
                     return ll
 
     def partition(self, var: str = '', fraction: float = .7, seed: int = 9878, kfold: int = 1,
-                  out: '<SASdata object>' = None, singleOut: bool = True) -> 'Tuple or SASdata object':
+                  out: 'SASdata' = None, singleOut: bool = True) -> object:
         """
         Partition a sas data object using SRS sampling or if a variable is specified then
         stratifying with respect to that variable
@@ -1082,7 +1082,6 @@ class SASdata:
                     return self.sas.sasdata(out_table, out_libref, self.results)
             else:
                 return self
-                #return SASdata(self.sas, self.libref, self.table, dsopts=dict(self.dsopts)) 
 
     def contents(self):
         """
@@ -1208,7 +1207,7 @@ class SASdata:
                else:
                   return ll
 
-    def sort(self, by: str, out: 'str or sas data object' = '', **kwargs) -> '<SASdata object>':
+    def sort(self, by: str, out: object = '', **kwargs) -> 'SASdata':
         """
         Sort the SAS Data Set
 
@@ -1344,7 +1343,7 @@ class SASdata:
         obj1 = SASProcCommons._objectmethods(self, objname)
         return SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
 
-    def to_csv(self, file: str) -> 'The LOG showing the results of the step':
+    def to_csv(self, file: str) -> str:
         """
         This method will export a SAS Data Set to a file in CSV format.
 
@@ -1360,7 +1359,7 @@ class SASdata:
         else:
             return self.sas.write_csv(file, self.table, self.libref, self.dsopts)
 
-    def to_frame(self, **kwargs) -> '<Pandas Data Frame object>':
+    def to_frame(self, **kwargs) -> 'DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame
 
@@ -1369,7 +1368,7 @@ class SASdata:
         """
         return self.to_df(**kwargs)
 
-    def to_df(self, **kwargs) -> '<Pandas Data Frame object>':
+    def to_df(self, **kwargs) -> 'DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame
 
@@ -1384,7 +1383,7 @@ class SASdata:
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, **kwargs)
 
     def heatmap(self, x: str, y: str, options: str = '', title: str = '',
-                label: str = '') -> 'a heatmap plot of the (numeric) variables you chose':
+                label: str = '') -> object:
         """
         Documentation link: http://support.sas.com/documentation/cdl/en/grstatproc/67909/HTML/default/viewer.htm#n0w12m4cn1j5c6n12ak64u1rys4w.htm
 
@@ -1424,7 +1423,7 @@ class SASdata:
             return ll
 
     def hist(self, var: str, title: str = '',
-             label: str = '') -> 'a histogram plot of the (numeric) variable you chose':
+             label: str = '') -> object:
         """
         This method requires a numeric column (use the contents method to see column types) and generates a histogram.
 
@@ -1457,7 +1456,7 @@ class SASdata:
         else:
             return ll
 
-    def top(self, var: str, n: int = 10, order: str = 'freq', title: str = '') -> 'a frequency analysis of a variable':
+    def top(self, var: str, n: int = 10, order: str = 'freq', title: str = '') -> object:
         """
         Return the most commonly occuring items (levels)
 
@@ -1496,13 +1495,13 @@ class SASdata:
                     return ll
             else:
                 if not ll:
-                    ll = self.sas.submit(code, "text")
+                    ll = self.sas._io.submit(code, "text")
                 if not self.sas.batch:
                     print(ll['LST'])
                 else:
                     return ll
 
-    def bar(self, var: str, title: str = '', label: str = '') -> 'a barchart plot of the (numeric) variable you chose':
+    def bar(self, var: str, title: str = '', label: str = '') -> object:
         """
         This method requires a character column (use the contents method to see column types)
         and generates a bar chart.
@@ -1537,7 +1536,7 @@ class SASdata:
         else:
             return ll
 
-    def series(self, x: str, y: list, title: str = '') -> 'a line plot of the x,y coordinates':
+    def series(self, x: str, y: list, title: str = '') -> object:
         """
         This method plots a series of x,y coordinates. You can provide a list of y columns for multiple line plots.
 
