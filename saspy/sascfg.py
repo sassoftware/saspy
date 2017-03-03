@@ -88,9 +88,9 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
 # The absence of the iomhost option triggers local Windows SAS mode. In this case none of 'iomhost', 'iomport', 'omruser', 'omrpw' are needed.
 # a local SAS session is started up and connected to.
 #
-# Since python uses utf-8, running SAS with encoding=utf-8 is the expected use case. By default Windows SAS runs in WindowsLatin1 (cp1252),
+# Since python uses utf-8, running SAS with encoding=utf-8 is the expected use case. By default Windows SAS runs in WLatin1 (windows-1252),
 # which does not work well as utf-8. So, transcoding has been implemented in the python layer. The 'encoding' option can be specified to match
-# the SAS session encoding (see https://docs.python.org/3.5/library/codecs.html#standard-encodings for python encoding values). cp1252 is appropriate
+# the SAS session encoding (see https://docs.python.org/3.5/library/codecs.html#standard-encodings for python encoding values). windows-1252 is appropriate
 # for the default Windows SAS session encoding
 #                                                                                                         
 # Since this IOM access method used the Java IOM client, a classpath is required for the java process to find the necessary jars. Use the template below
@@ -117,14 +117,14 @@ cpL += ":/opt/github/saspy/java/saspyiom.jar"
 iomlinux = {'java'      : '/usr/bin/java',
             'iomhost'   : 'linux.iom.host',
             'iomport'   : 8591,
-            'encoding'  : 'iso-8859-1',
+            'encoding'  : 'latin1',
             'classpath' : cpL
             }           
 
 iomwin   = {'java'      : '/usr/bin/java',
             'iomhost'   : 'windows.iom.host',
             'iomport'   : 8591,
-            'encoding'  : 'cp1252',
+            'encoding'  : 'windows-1252',
             'classpath' : cpL
             }
 
@@ -137,21 +137,21 @@ cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__9
 cpW += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
 
 winlocal = {'java'      : 'java',
-            'encoding'  : 'cp1252',
+            'encoding'  : 'windows-1252',
             'classpath' : cpW
             }
 
 winiomlinux = {'java'   : 'java',
             'iomhost'   : 'linux.iom.host',
             'iomport'   : 8591,
-            'encoding'  : 'iso-8859-1',
+            'encoding'  : 'latin1',
             'classpath' : cpW
             }
 
 winiomwin  = {'java'    : 'java',
             'iomhost'   : 'windows.iom.host',
             'iomport'   : 8591,
-            'encoding'  : 'cp1252',
+            'encoding'  : 'windows-1252',
             'classpath' : cpW
             }
 

@@ -86,97 +86,10 @@ to connect to a SAS grid. Using this method, instead of STDIO over SSH,
 lets the distribution of connections to the various grid nodes be controlled by SAS Grid Manager,
 as well as integrating with all of the monitoring and administration SAS Grid Manager provides.
 
-The IOM access method supports two forms: `Local`_ and `Remote`_
-
-Remote
-~~~~~~
-For Remote access (any workspace server on any SAS platform), the following keys are available for the
-Configuration Definition Dictionary:
-
-java    - Required
-    The path to the java executable to use (On Linux, fully qualifed path. On Windows, you may get away with simply ``java``, else put the FQP)
-iomhost - Required
-    For remote IOM case, Don't specify to use a local Windows Session] the resolvable host name, or ip to the IOM server to connect to
-iomport - Required
-    For remote IOM case, Don't specify to use a local Windows Session] the port IOM is listening on
-classpath - Required
-    Classpath to IOM client jars and saspy client jar.
-omruser - *not suggested*
-    If blank the user will be prompted for at runtime
-    Don't specify to use a local Windows Session
-omrpw    - **really not suggested** [Required for remote IOM case but PROMTED for at runtime]
-    Don't specify to use a local Windows Session
-encoding  -
-    This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
-    **What is the default? How would they figure out what their SAS server is running in?**
-
-
-.. code:: ipython3
-
-    cpL  =  "/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar"
-    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/log4j.jar"
-    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.security.sspi.jar"
-    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.core.jar"
-    cpL += ":/opt/github/saspy/java/saspyiom.jar"
-
-    iomlinux = {'java'      : '/usr/bin/java',
-                'iomhost'   : 'linux.iom.host',
-                'iomport'   : 8591,
-                'encoding'  : 'iso-8859-1',
-                'classpath' : cpL
-                }
-
-    winiomlinux = {'java'      : 'java',
-                   'iomhost'   : 'linux.iom.host',
-                   'iomport'   : 8591,
-                   'encoding'  : 'iso-8859-1',
-                   'classpath' : cpW
-                  }
-
-
-Local
-~~~~~
-For Local SAS running on the same Windows machine, you only need the following (Don't specify any of the others). The absence of ``iomhost`` triggers Local Windows mode.
-
-java      - Required
-    the path to the java executable to use (On Unix, fully qualified path. On Windows, you may get away with simply ``java``, else put the FQP)
-encoding  -
-    This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
-classpath - Required
-    Classpath to IOM client jars and saspy client jar.
-
-.. code:: ipython3
-
-
-    winlocal = {'java'      : 'java',
-                'encoding'  : 'cp1252',
-                'classpath' : cpW
-                }
-
-
-**Note:** having the ``'java'`` key is the triger to use the IOM access method.
-**Note:** When using the IOM access method (``'java'`` key specified), the absence of the ``'iomhost'`` key is the trigger to use a
-Local Windows Session instead of remote IOM.
-
-.. code:: ipython3
-
-    cpW  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar"
-    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
-    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
-    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
-    cpW += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
-
-    winiomlinux = {'java'      : 'java',
-                   'iomhost'   : 'linux.iom.host',
-                   'iomport'   : 8591,
-                   'encoding'  : 'iso-8859-1',
-                   'classpath' : cpW
-                  }
-
-
-The ``'classpath'`` key requires a little extra explanation. There are four (4) jars that are required for the Java IOM Client.
+The IOM access method requires the use of the SAS Java IOM Client, and a classpath to access the SAS Java IOM Client jars and the saspy jar.
+The ``'classpath'`` key requires a little extra explanation befor we get to the Configuration Definition. There are four (4) jars that are required for the Java IOM Client.
 These are provided in your existing SAS Install.
-There is one jar provided in this repo: saspyiom.jar. These five jurs must be provided (fully qualified paths) in a classpath variable. 
+There is one jar provided in this repo: saspyiom.jar. These five jars must be provided (fully qualified paths) in a classpath variable. 
 This is done in a very simple way in the sascfg.py file, like so.
 
 ::
@@ -194,6 +107,137 @@ And then simply use:
     'classpath' : cp,
 
 in the Configuration Definition. Easy :)
+
+
+The IOM access method supports two forms: `Local`_ and `Remote`_
+
+Remote
+~~~~~~
+For Remote access (any workspace server on any SAS platform) from either a Unix or Windows client, the following keys are available for the
+Configuration Definition Dictionary:
+
+java    - Required
+    The path to the java executable to use (On Linux, fully qualifed path. On Windows, you may get away with simply ``java``, else put the FQP)
+iomhost - Required
+    the resolvable host name, or ip to the IOM server to connect to
+iomport - Required
+    the port that IOM is listening on for workspace connections
+classpath - Required
+    Classpath to IOM client jars and saspy client jar.
+omruser - *not suggested*  [Required but PROMTED for at runtime]
+    If blank the user will be prompted for at runtime
+omrpw    - **really not suggested** [Required but PROMTED for at runtime]
+    If blank (which itought to be) the password will be prompted for at runtime
+encoding  -
+    This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
+    The python encoding values can be found here: `encodings-and-unicode <https://docs.python.org/3.5/library/codecs.html#encodings-and-unicode>`_
+    The three most common SAS encoings, UTF8, LATIN1 and WLATIN1 which are the defaults for running SAS in Unicode, on Unix, and on Windows, respectivly,
+    map to these python encoding values: utf8, latin1 and windows-1252, respectivly. 
+
+.. code:: ipython3
+
+    # Unix client class path
+    cpL  =  "/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar"
+    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/log4j.jar"
+    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.security.sspi.jar"
+    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.core.jar"
+    cpL += ":/usr/lib/python3.5/site-packages/saspy/java/saspyiom.jar"
+
+    # Windows client class path
+    cpW  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
+    cpW += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
+
+    # Unix client and Unix IOM server
+    iomlinux = {'java'      : '/usr/bin/java',
+                'iomhost'   : 'linux.iom.host',
+                'iomport'   : 8591,
+                'encoding'  : 'latin1',
+                'classpath' : cpL
+               }
+
+    # Unix client and Windows IOM server
+    iomwin   = {'java'      : '/usr/bin/java',
+                'iomhost'   : 'windows.iom.host',
+                'iomport'   : 8591,
+                'encoding'  : 'windows-1252',
+                'classpath' : cpL
+               }
+
+    # Windows client and Unix IOM server
+    winiomwin   = {'java'      : 'java',
+                   'iomhost'   : 'linux.iom.host',
+                   'iomport'   : 8591,
+                   'encoding'  : 'latin1',
+                   'classpath' : cpW
+                  }
+
+    # Windows client and Windows IOM server
+    winiomwin   = {'java'      : 'java',
+                   'iomhost'   : 'windows.iom.host',
+                   'iomport'   : 8591,
+                   'encoding'  : 'windows-1252',
+                   'classpath' : cpW
+                  }
+
+
+Local
+~~~~~
+For Local SAS running on the same Windows machine, you only need the following Configuration Definition keys (Don't specify any of the others).
+There is also one other requirement.
+The sspiauth.dll file (also included in your SAS installation) must be in either your system PATH, your java.library.path, or in the home directory of your Java client.
+You can search for this file in your SAS deployment, though it is likely in your SASHome\SASFoundation\9.4\core\sasext\. If adding this to your system PATH environment
+variable, only list the path to the directory, don't incluse the file itself i.e.: C:\Program Files\SASHome\SASFoundation\9.4\core\sasext\ 
+
+java      - Required
+    the path to the java executable to use (On Unix, fully qualified path. On Windows, you may get away with simply ``java``, else put the FQP)
+classpath - Required
+    Classpath to IOM client jars and saspyiom.jar.
+encoding  -
+    This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
+    The python encoding values can be found here: `encodings-and-unicode <https://docs.python.org/3.5/library/codecs.html#encodings-and-unicode>`_
+    The three most common SAS encoings, UTF8, LATIN1 and WLATIN1 which are the defaults for running SAS in Unicode, on Unix, and on Windows, respectivly,
+    map to these python encoding values: utf8, latin1 and windows-1252, respectivly. 
+
+.. code:: ipython3
+
+    # Windows client class path
+    cpW  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
+    cpW += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
+
+
+    # Windows client and Local Windows IOM server
+    winlocal    = {'java'      : 'java',
+                   'encoding'  : 'windows-1252',
+                   'classpath' : cpW
+                  }
+
+    # Windows client and Unix IOM server
+    winiomlinux = {'java'      : 'java',
+                   'iomhost'   : 'linux.iom.host',
+                   'iomport'   : 8591,
+                   'encoding'  : 'latin1',
+                   'classpath' : cpW
+                  }
+
+    # Windows client and Windows IOM server
+    winiomwin   = {'java'      : 'java',
+                   'iomhost'   : 'windows.iom.host',
+                   'iomport'   : 8591,
+                   'encoding'  : 'windows-1252',
+                   'classpath' : cpW
+                  }
+
+
+
+**Note:** having the ``'java'`` key is the triger to use the IOM access method.
+**Note:** When using the IOM access method (``'java'`` key specified), the absence of the ``'iomhost'`` key is the trigger to use a
+Local Windows Session instead of remote IOM.
 
 
 HTTP
