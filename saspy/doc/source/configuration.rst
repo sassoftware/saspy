@@ -27,16 +27,17 @@ There are three main parts to this configuration file.
         2) SAS_config_options
         3) Configuration Definitions
 
-In reverse order, the Configuration Definitions Python Dictionaries are where you configure each connection to a type of SAS session.
+In reverse order, the Configuration Definitions are Python Dictionaries are you configure each connection to a type of SAS session.
 SAS_config_options only has one option so far, which restricts (or allows) the end users ability to override settings in the Configuration Definitions using SASsession().
 SAS_config_names is the list of Configuration Definition names, which are available to be used; chosen by an end user at connection time.
-Configuration Definitions not listed in SAS_config_names are simply inaccessible. You can define all kinds of connections in the file, but not have them availabe by not havging their names in the list.
+Configuration Definitions not listed in SAS_config_names are simply inaccessible. You can define all kinds of Configuration Definitions in the file,
+but not have them availabe by simply not havging their names in the list.
 
 
 STDIO
 =====
 The original access method for SASPy is STDIO. This works with Unix only,
-because PC SAS does not support line mode connections.
+because PC SAS does not support line mode style connections (via stdin, stdout, stderr).
 This is for a local connection to SAS which is installed on the same Unix server.
 There are only two keys for this Configuration Definition Dictionary:
 
@@ -52,12 +53,12 @@ options -
                 }
 
 Note: the trigger to use the STDIO is the absense of any trigger for the other access methods: not having ``'ssh'``
-or ``'java'`` keys.
+or ``'java'`` keys in the Configuration Definition.
 
 
 STDIO over SSH
 ==============
-The remote version of the original access method for SASPy. This also works with Linux only, and it support passwordless SSH to the Linux machine where SAS is installed.
+The remote version of the original access method for SASPy. This also works with Unix only, and it supports passwordless SSH to the Unix machine where SAS is installed.
 It is up to you to make sure user accounts have passwordless SSH configured between the two system. Google it, it's not that hard.
 As well as the two keys for STDIO, there are two more more required keys to configure:
 
@@ -65,7 +66,7 @@ ssh - Required
     The ssh command to run (Linux execv required a fully qualified path, even it it could be found in the path variable - it won't. Use fully qualified path here)
 
 host - Required
-    The host to connect to. recolvable host name or ip address.
+    The host to connect to. resolvable host name or ip address.
 
 Note: having the ``'ssh'`` key is the triger to use the STDIO over SSH access method.
 
@@ -84,12 +85,15 @@ The is the newest access method which opens up many connectivity options. This i
 `SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__
 to connect to a SAS grid. Using this method, instead of STDIO over SSH,
 lets the distribution of connections to the various grid nodes be controlled by SAS Grid Manager,
-as well as integrating with all of the monitoring and administration SAS Grid Manager provides.
+as well as providing integration with all of the monitoring and administration SAS Grid Manager provides.
+
+The IOM access method also allows saspy to connect to Windows SAS. This can be either a local Windows SAS installation or a remote IOM server running on Windows.
 
 The IOM access method requires the use of the SAS Java IOM Client, and a classpath to access the SAS Java IOM Client jars and the saspy jar.
-The ``'classpath'`` key requires a little extra explanation befor we get to the Configuration Definition. There are four (4) jars that are required for the Java IOM Client.
+The ``'classpath'`` key requires a little extra explanation before we get to the Configuration Definition. There are four (4) jars that are required for the Java IOM Client.
 These are provided in your existing SAS Install.
-There is one jar provided in this repo: saspyiom.jar. These five jars must be provided (fully qualified paths) in a classpath variable. 
+There is one jar provided in this repo: saspyiom.jar. These five jars must be provided (fully qualified paths) in a classpath variable.
+Also, these five jars are compatible/interchangable with both Windows and Unix client systems.  
 This is done in a very simple way in the sascfg.py file, like so.
 
 ::
@@ -127,11 +131,11 @@ classpath - Required
 omruser - *not suggested*  [Required but PROMTED for at runtime]
     If blank the user will be prompted for at runtime
 omrpw    - **really not suggested** [Required but PROMTED for at runtime]
-    If blank (which itought to be) the password will be prompted for at runtime
+    If blank (which it ought to be) the password will be prompted for at runtime
 encoding  -
     This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
     The python encoding values can be found here: `encodings-and-unicode <https://docs.python.org/3.5/library/codecs.html#encodings-and-unicode>`_
-    The three most common SAS encoings, UTF8, LATIN1 and WLATIN1 which are the defaults for running SAS in Unicode, on Unix, and on Windows, respectivly,
+    The three most common SAS encodings, UTF8, LATIN1 and WLATIN1 which are the defaults for running SAS in Unicode, on Unix, and on Windows, respectivly,
     map to these python encoding values: utf8, latin1 and windows-1252, respectivly. 
 
 .. code:: ipython3
@@ -188,8 +192,8 @@ Local
 For Local SAS running on the same Windows machine, you only need the following Configuration Definition keys (Don't specify any of the others).
 There is also one other requirement.
 The sspiauth.dll file (also included in your SAS installation) must be in either your system PATH, your java.library.path, or in the home directory of your Java client.
-You can search for this file in your SAS deployment, though it is likely in your SASHome\SASFoundation\9.4\core\sasext\. If adding this to your system PATH environment
-variable, only list the path to the directory, don't incluse the file itself i.e.: C:\Program Files\SASHome\SASFoundation\9.4\core\sasext\ 
+You can search for this file in your SAS deployment, though it is likely in your SASHome\\SASFoundation\\9.4\\core\\sasext. If adding this to your system PATH environment
+variable, only list the path to the directory, don't incluse the file itself i.e.: C:\\Program Files\\SASHome\\SASFoundation\\9.4\\core\\sasext. 
 
 java      - Required
     the path to the java executable to use (On Unix, fully qualified path. On Windows, you may get away with simply ``java``, else put the FQP)
@@ -198,7 +202,7 @@ classpath - Required
 encoding  -
     This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
     The python encoding values can be found here: `encodings-and-unicode <https://docs.python.org/3.5/library/codecs.html#encodings-and-unicode>`_
-    The three most common SAS encoings, UTF8, LATIN1 and WLATIN1 which are the defaults for running SAS in Unicode, on Unix, and on Windows, respectivly,
+    The three most common SAS encodings, UTF8, LATIN1 and WLATIN1 which are the defaults for running SAS in Unicode, on Unix, and on Windows, respectivly,
     map to these python encoding values: utf8, latin1 and windows-1252, respectivly. 
 
 .. code:: ipython3
@@ -242,7 +246,7 @@ Local Windows Session instead of remote IOM.
 
 HTTP
 ====
-The access method is for the next generation of remote connectivity in SAS(R) Viya. The Compute Service, which is what this connects to is not out yet.
+This access method is for the next generation of remote connectivity in SAS(R) Viya. The Compute Service, which is what this connects to is not out yet.
 But when it ships, this access method will be used to connect to it. 
 It will work from either Unix or Windows, client side, and will connect to any SAS platform supported by the Compute Service.
 
