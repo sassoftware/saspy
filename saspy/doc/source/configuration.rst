@@ -45,6 +45,12 @@ saspath - Required
     Path to SAS startup script
 options -
     SAS options to include in the start up command line - *must* be a Python List
+encoding  -
+    This is the python encoding value that matches the SAS session encoding of the SAS Session you are connecting to
+    The python encoding values can be found here: `encodings-and-unicode <https://docs.python.org/3.5/library/codecs.html#encodings-and-unicode>`_
+    The three most common SAS encodings, UTF8, LATIN1 and WLATIN1 which are the defaults for running SAS in Unicode, on Unix, and on Windows, respectivly,
+    map to these python encoding values: utf8, latin1 and windows-1252, respectivly. 
+
 
 .. code:: ipython3
 

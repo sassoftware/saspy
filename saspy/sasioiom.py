@@ -269,7 +269,7 @@ class SASsessionIOM():
          pw += '\n'
          self.stdin[0].send(pw.encode(self.sascfg.encoding))
 
-      self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max linesize=max nosyntaxcheck; ods graphics on;", "text")
+      self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
 
       if os.name == 'nt': 
          try:
