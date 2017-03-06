@@ -5,7 +5,7 @@ import saspy
 class TestSASdataObject(unittest.TestCase):
     @classmethod    
     def setUpClass(cls):
-        cls.sas = saspy.SASsession() #cfgname='default')
+        cls.sas = saspy.SASsession(results='HTML') #cfgname='default')
         #cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
 
     @classmethod
@@ -68,12 +68,12 @@ class TestSASdataObject(unittest.TestCase):
         cars = self.sas.sasdata('cars', libref='sashelp', results='text')
         self.sas.set_batch(True)
         ll = cars.describe()
-        expected = ['MSRP', '428', '32774.86', '19431.72', '10280.00', '20329.50', '27635.00', '39215.00', '192465.00']
+        expected = ['MSRP', '428', '0', '27635', '32775', '19432', '10280', '20330', '27635']
         rows = ll['LST'].splitlines()
         retrieved = []
         for i in range(len(rows)):
            retrieved.append(rows[i].split())
-        self.assertIn(expected, retrieved, msg="cars.contents() result didn't contain expected result")
+        self.assertIn(expected, retrieved, msg="cars.describe() result didn't contain expected result")
         
     def test_SASdata_results(self):
         #test set_results()

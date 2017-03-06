@@ -1199,14 +1199,6 @@ class SASdata:
                 else:
                     return ll
 
-    def describe(self):
-        """
-        display descriptive statistics for the table; summary statistics.
-
-        :return:
-        """
-        return self.means()
-
     def info(self):
         """
         Display the column info on a SAS data object
@@ -1219,6 +1211,14 @@ class SASdata:
         p2 = c[['Variable', 'Type']]
         info = pd.merge(p1, p2, on='Variable', how='outer')
         return info
+
+    def describe(self):
+        """
+        display descriptive statistics for the table; summary statistics.
+
+        :return:
+        """
+        return self.means()
 
     def means(self):
         """
@@ -1281,15 +1281,15 @@ class SASdata:
                 fn = out.partition('.')
                 if fn[1] == '.':
                     libref = fn[0]
-                    table = fn[2]
+                    table  = fn[2]
                     outstr = "out=%s.%s %s" % (libref, table, self._dsopts())
                 else:
                     libref = ''
-                    table = fn[0]
+                    table  = fn[0]
                     outstr = "out=" + table
             else:
                 libref = out.libref
-                table = out.table
+                table  = out.table
                 outstr = "out=%s.%s %s" % (out.libref, out.table, self._dsopts())
 
     def assessModel(self, target: str, prediction: str, nominal: bool = True, event: str = '', **kwargs):
