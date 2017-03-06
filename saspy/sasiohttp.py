@@ -19,7 +19,11 @@ import json
 import getpass
 
 from time import sleep
-import saspy.sascfg as SAScfg
+
+try:
+   import saspy.sascfg_personal as SAScfg
+except ImportError:
+   import saspy.sascfg as SAScfg
 
 try:
    import pandas as pd

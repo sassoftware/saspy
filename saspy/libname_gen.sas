@@ -76,7 +76,7 @@ options pagesize=max;
         if length(method)>1 then output;
     run;
     ods listing;
-%mend;
+%mend mangobj;
 *%mangobj(cars,reg,sashelp.cars);
 /*
 %let d=sashelp.cars;
@@ -93,7 +93,7 @@ options pagesize=max;
         replay \ (where=(lower(_name_)=lower("&method.")));;
     run;
     quit;
-%mend;
+%mend getdata;
 /*
 %getdata(cars,nobs);
 %getdata(cars,qqplot);
@@ -106,7 +106,7 @@ options pagesize=max;
         put method;
         if  last then put "endparse9878";
     run;
-%mend;
+%mend listdata;
 /*
 %listdata(cars);
 %listdata(lm);

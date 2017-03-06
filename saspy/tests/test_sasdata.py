@@ -178,6 +178,8 @@ class TestSASdataObject(unittest.TestCase):
         wkcars = self.sas.sasdata('cars')
         # sort by missing variable
         self.assertRaises(RuntimeError, lambda: wkcars.sort('foobar'))
+
+
         
         
         

@@ -37,13 +37,17 @@
 #
 
 import os
-from pdb import set_trace as bp
-import saspy.sascfg as SAScfg
+# from pdb import set_trace as bp
 import logging
 
 try:
+   import saspy.sascfg_personal as SAScfg
+except ImportError:
+   import saspy.sascfg as SAScfg
+
+try:
     import saspy.sasiostdio as sasiostdio
-    #import saspy.sasioiom   as sasioiom
+    # import saspy.sasioiom   as sasioiom
 
     running_on_win = False
 
@@ -147,20 +151,27 @@ class SASconfig:
                 return ''
 
 
-class SASsession:
+class SASsession():
     """
+    **Overview**
+
     The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
     cfgname - value in SAS_config_names List of the sascfg.py file
     kernel  - None - internal use when running the SAS_kernel notebook
     results - Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
 
-    For the STDIO IO Module
+    **STDIO**
+
     saspath - overrides saspath Dict entry of cfgname in sascfg.py file
     options - overrides options Dict entry of cfgname in sascfg.py file
+
+    **STDIO over SSH**
 
     and for running STDIO over passwordless ssh
     ssh     - full path of the ssh command; /usr/bin/ssh for instance
     host    - host name of the remote machine
+
+    **Compute Service**
 
     and for the HTTP IO module to connect to SAS Viya
     ip      - host address
@@ -170,23 +181,29 @@ class SASsession:
     user    - user name to authenticate with
     pw      - password to authenticate with
 
+    **IOM**
+
     and for the IOM IO module to connect to SAS9 via Java IOM
-    ip      - host address
-    port    - port; the code Defaults this to 80 (the Compute Services default port)
-    context - context name defined on the compute service
-    options - SAS options to include in the start up command line
-    omruser - user name to authenticate with
-    omrpw   - password to authenticate with
+    saspath   - for local Windows connection only] path to SAS executable (sas.exe) i.e.: C:\Program Files\SASHome\SASFoundation\9.4\sas.exe
+    java      - the path to the java executable to use
+    iomhost   - for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to
+    iomport   - for remote IOM case, not local Windows] the port IOM is listening on
+    omruser   - user id for IOM access
+    omrpw     - pw for user for IOM access
+    encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
+    classpath - classpath to IOM client jars and saspyiom client jar.
     """
 
-    # def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list =[]) -> '<SASsession object>':
-    def __init__(self, **kwargs) -> '<SASsession object>':
+    # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
+    def __init__(self, **kwargs) -> 'SASsession':
         self._loaded_macros = False
-        self._obj_cnt = 0
-        self.nosub = False
-        self.sascfg = SASconfig(**kwargs)
-        self.batch = False
-        self.results = kwargs.get('results', 'Pandas')
+        self._obj_cnt       = 0
+        self.nosub          = False
+        self.sascfg         = SASconfig(**kwargs)
+        self.batch          = False
+        self.results        = kwargs.get('results', 'Pandas')
+        self.workpath       = ''
+        self.sasver         = ''
 
         if not self.sascfg.valid:
             return
@@ -196,16 +213,45 @@ class SASsession:
                 self._io = sasiostdio.SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
             else:
                 print(
-                    "Cannot use STDIO I/O module on Windows. No SASsession established. Choose an HTTP SASconfig definition")
-                return
+                    "Cannot use STDIO I/O module on Windows. No SASsession established. Choose an IOM SASconfig definition")
         elif self.sascfg.mode == 'HTTP':
             self._io = sasiohttp.SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
         elif self.sascfg.mode == 'IOM':
             self._io = sasioiom.SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
+        try:
+           if self._io:
+             ll = self.submit('libname work list;')
+             self.workpath = ll['LOG'].partition('Physical Name=')[2].partition('\n')[0].strip()
+             if running_on_win:
+                self.workpath += '\\'
+             else:
+                self.workpath += '/'
+             ll = self.submit('"%put SYSV=&sysvlong;";')
+             self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
+
+        except (AttributeError):
+           self._io = None
+
+    def __repr__(self):
+        """
+        display info about this object ...
+
+        :return: output
+        """
+        print("Access Method   = "+self.sascfg.mode)
+        print("SAS Config name = "+self.sascfg.name)
+        print("WORK Path       = "+self.workpath)
+        print("SAS Version     = "+self.sasver)
+        print("Teach me SAS    = "+str(self.nosub))
+        print("Batch           = "+str(self.batch))
+        print("Results         = "+self.results)
+        return ''
+
     def __del__(self):
-        return self._io.__del__()
+        if self._io:
+           return self._io.__del__()
 
     def _objcnt(self):
         self._obj_cnt += 1
@@ -238,27 +284,32 @@ class SASsession:
     def submit(self, code: str, results: str = '', prompt: dict = []) -> dict:
         '''
         This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
-        code    - the SAS statements you want to execute
-        results - format of results, HTLML and TEXT is the alternative
-        prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete
-                  The keys are the names of the macro variables and the boolean flag is to either hide what you type and delete
-                  the macros, or show what you type and keep the macros (they will still be available later)
-                  for example (what you type for pw will not be displayed, user and dsname will):
 
-                  results_dict = sas.submit(
-                     """
-                     libname tera teradata server=teracop1 user=&user pw=&pw;
-                     proc print data=tera.&dsname (obs=10); run;
-                     """ ,
-                     prompt = {'user': False, 'pw': True, 'dsname': False}
-                     )
+        - code    - the SAS statements you want to execute
+        - results - format of results, HTLML and TEXT is the alternative
+        - prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete 
+                    the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
+                    or show what you type and keep the macros (they will still be available later).
 
-        Returns - a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is 'results' (HTML or TEXT)
+            for example (what you type for pw will not be displayed, user and dsname will):
+
+            .. code-block:: python
+
+                results_dict = sas.submit(
+                             """
+                             libname tera teradata server=teracop1 user=&user pw=&pw;
+                             proc print data=tera.&dsname (obs=10); run;
+                             """ ,
+                             prompt = {'user': False, 'pw': True, 'dsname': False}
+                             )
+
+            Returns - a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is 'results' (HTML or TEXT)
 
         NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()
+
         i.e,: results = sas.submit("data a; x=1; run; proc print;run')
-              print(results['LOG'])
-              HTML(results['LST'])
+                      print(results['LOG'])
+                      HTML(results['LST'])
         '''
         if self.nosub:
             return dict(LOG=code, LST='')
@@ -271,92 +322,118 @@ class SASsession:
 
         return self._io.submit(code, results, prompt)
 
-    def saslog(self) -> 'The SAS Log for the session':
-        '''
-        this method is used to get the current, full contents of the SASLOG
-        '''
+    def saslog(self) -> str:
+        """
+        This method is used to get the current, full contents of the SASLOG
+
+        :return: SAS log
+        :rtype: str
+        """
         return self._io.saslog()
 
     def teach_me_SAS(self, nosub: bool):
         '''
         nosub - bool. True means don't submit the code, print it out so I can see what the SAS code would be.
-                      False means run normally - submit the code.
+            False means run normally - submit the code.
         '''
         self.nosub = nosub
 
-    def set_batch(self, batch: bool):
-        '''
-        This method sets the batch attribute for the SASsession object; it stays in effect untill changed. For methods that just
-        display results like SASdata object methods (head, tail, hist, series) and SASresult object results, you can set 'batch'
-        to true to get the results back directly so you can write them to files or whatever you want to do with them. This is intended
-        for use in python batch scripts so you can still get ODS XML5 results and save them to files, which you couldn't otherwise do for
-        these methods. When running interactivly, the expectation is that you want to have the results directly rendered, but you can
-        run this way too; get the objects display them yourself and/or write them to somewhere. When true, you get the same dictionary
-        returned as from the SASsession.submit() method.
+    def set_batch(self, batch: bool) -> bool:
+        """
+        This method sets the batch attribute for the SASsession object; it stays in effect until changed.
+        For methods that just display results like SASdata object methods (head, tail, hist, series, etc.)
+        and SASresult object results, you can set 'batch' to true to get the results back directly so you
+        can write them to files or whatever you want to do with them.
 
-        batch - set the default result type for this SASsession. True = return dict([LOG, LST]. False = display LST to screen.
-        '''
+        This is intended for use in python batch scripts so you can still get ODS XML5 results
+        and save them to files, which you couldn't otherwise do for these methods.
+        When running interactively, the expectation is that you want to have the results directly rendered,
+        but you can run this way too; get the objects display them yourself and/or write them to somewhere.
+
+        When `set_batch ==True`, you get the same dictionary returned as from the `SASsession.submit()` method.
+
+        :param batch: bool
+        :rtype: bool
+        :return: True = return dict([LOG, LST]. False = display LST to screen.
+        """
         self.batch = batch
 
-    def set_results(self, results: str):
-        '''
+    def set_results(self, results: str) -> str:
+        """
         This method set the results attribute for the SASsession object; it stays in effect till changed
-        results - set the default result type for this SASdata object. 'Pandas' or 'HTML' or 'TEXT'.
-        '''
+
+        :param results: set the default result type for this SASdata object. ``'Pandas' or 'HTML' or 'TEXT'``.
+        :return: string of the return type
+        :rtype: str
+        """
         self.results = results
 
     def exist(self, table: str, libref: str = "") -> bool:
-        '''
-        table  - the name of the SAS Data Set
-        libref - the libref for the Data Set, defaults to WORK, or USER if assigned
+        """
+        Does the SAS data set currently exist
 
-        Returns True it the Data Set exists and False if it does not
-        '''
+        :param table: the name of the SAS Data Set
+        :param libref: the libref for the Data Set, defaults to WORK, or USER if assigned
+        :return: Boolean True it the Data Set exists and False if it does not
+        :rtype: bool
+        """
         return self._io.exist(table, libref)
 
-    def sasstat(self) -> '<SASstat object>':
-        '''
-        This methods creates a SASstat object which you can use to run various analytics. See the sasstat.py module.
-        '''
+    def sasets(self) -> 'SASets':
+        """
+        This methods creates a SASets object which you can use to run various analytics.
+        See the sasets.py module.
+        :return: sasets object
+        """
+        if not self._loaded_macros:
+            self._loadmacros()
+            self._loaded_macros = True
+        return SASets(self)
+
+    def sasstat(self) -> 'SASstat':
+        """
+        This methods creates a SASstat object which you can use to run various analytics.
+        See the sasstat.py module.
+
+        :return: sasstat object
+        """
         if not self._loaded_macros:
             self._loadmacros()
             self._loaded_macros = True
 
         return SASstat(self)
 
-    def sasets(self) -> '<SASets object>':
-        '''
-        This methods creates a SASets object which you can use to run various analytics. See the sasets.py module.
-        '''
-        if not self._loaded_macros:
-            self._loadmacros()
-            self._loaded_macros = True
-
-        return SASets(self)
-
-    def sasml(self) -> '<SASml object>':
-        '''
+    def sasml(self) -> 'SASml':
+        """
         This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.
-        '''
+
+        :return: sasml object
+        """
         if not self._loaded_macros:
             self._loadmacros()
             self._loaded_macros = True
+
 
         return SASml(self)
 
-    def sasqc(self) -> '<SASqc object>':
-        '''
+    def sasqc(self) -> 'SASqc':
+        """
         This methods creates a SASqc object which you can use to run various analytics. See the sasqc.py module.
-        '''
+
+        :return: sasqc object
+        """
         if not self._loaded_macros:
             self._loadmacros()
             self._loaded_macros = True
 
         return SASqc(self)
 
-    def sasutil(self) -> '<SASutil object>':
+    def sasutil(self) -> 'SASutil':
         '''
-        This methods creates a SASutil object which you can use to run various analytics. See the sasutil.py module.
+        This methods creates a SASutil object which you can use to run various analytics.
+        See the sasutil.py module.
+
+        :return: sasutil object
         '''
         if not self._loaded_macros:
             self._loadmacros()
@@ -365,6 +442,11 @@ class SASsession:
         return SASutil(self)
 
     def _loadmacros(self):
+        """
+        Load the SAS macros at the start of the session
+
+        :return:
+        """
         macro_path = os.path.dirname(os.path.realpath(__file__))
         fd = os.open(macro_path + '/' + 'libname_gen.sas', os.O_RDONLY)
         code = b'options nosource;\n'
@@ -374,21 +456,32 @@ class SASsession:
         self._io._asubmit(code.decode(), results='text')
         os.close(fd)
 
-    def sasdata(self, table: str, libref: str = '', results: str = '', dsopts: dict = {}) -> '<SASdata object>':
-        '''
-        This method creates a SASdata object for the SAS Data Set you specify
-        table   - the name of the SAS Data Set
-        libref  - the libref for the Data Set, defaults to WORK, or USER if assigned
-        results - format of results, SASsession.results is default, Pandas, HTML and TEXT are the valid options
-        dsopts - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
-                 where is a sting, keep and drop are strings or list of strings. obs and first obs are numbers - either string or int
-                 {'where'    : 'msrp < 20000 and make = "Ford"'
-                  'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
-                  'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
-                  'obs'      :  10
-                  'firstobs' : '12'
-                 }
-        '''
+    def sasdata(self, table: str, libref: str = '', results: str = '', dsopts: dict = {}) -> 'SASdata':
+        """
+        Method to define an existing SAS dataset so that it can be accessed via SASPy
+
+        :param table:   the name of the SAS Data Set
+        :param libref:  the libref for the Data Set, defaults to WORK, or USER if assigned
+        :param results: format of results, SASsession.results is default, Pandas, HTML and TEXT are the valid options
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+
+            - where is a string
+            - keep are strings or list of strings.
+            - drop are strings or list of strings.
+            - obs is a numbers - either string or int
+            - first obs is a numbers - either string or int
+
+            .. code-block:: python
+
+                             {'where'    : 'msrp < 20000 and make = "Ford"'
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
+                              'obs'      :  10
+                              'firstobs' : '12'
+                             }
+
+        :return: SASdata object
+        """
         if results == '':
             results = self.results
         sd = SASdata(self, libref, table, results, dsopts)
@@ -399,14 +492,15 @@ class SASsession:
         return sd
 
     def saslib(self, libref: str, engine: str = ' ', path: str = '',
-               options: str = ' ') -> 'The LOG showing the assignment of the libref':
-        '''
-        This method is used to assign a libref. The libref is then available to be used in the SAS session.
-        libref  - the libref for be assigned
-        engine  - the engine name used to access the SAS Library (engine defaults to BASE, per SAS)
-        path    - path to the library (for engines that take a path parameter)
-        options - other engine or engine supervisor options
-        '''
+               options: str = ' ') -> str:
+        """
+
+        :param libref:  the libref for be assigned
+        :param engine:  the engine name used to access the SAS Library (engine defaults to BASE, per SAS)
+        :param path:    path to the library (for engines that take a path parameter)
+        :param options: other engine or engine supervisor options
+        :return: SAS log
+        """
         code = "libname " + libref + " " + engine + " "
         if len(path) > 0:
             code += " '" + path + "' "
@@ -421,11 +515,13 @@ class SASsession:
             else:
                 print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0])
 
-    def datasets(self, libref: str = '') -> 'The LOG showing the output':
-        '''
+    def datasets(self, libref: str = '') -> str:
+        """
         This method is used to query a libref. The results show information about the libref including members.
-        libref  - the libref to query
-        '''
+
+        :param libref: the libref to query
+        :return:
+        """
         code = "proc datasets"
         if libref:
             code += " dd=" + libref
@@ -440,14 +536,14 @@ class SASsession:
             else:
                 print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0])
 
-    def read_csv(self, file: str, table: str = '_csv', libref: str = '', results: str = '') -> '<SASdata object>':
-        '''
-        This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
-        file    - either the OS filesystem path of the file, or HTTP://... for a url accessible file
-        table   - the name of the SAS Data Set to create
-        libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-        results - format of results, SASsession.results is default, HTML or TEXT are the alternatives
-        '''
+    def read_csv(self, file: str, table: str = '_csv', libref: str = '', results: str = '') -> 'SASdata':
+        """
+        :param file: either the OS filesystem path of the file, or HTTP://... for a url accessible file
+        :param table: the name of the SAS Data Set to create
+        :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :return: SASdata object
+        """
         if results == '':
             results = self.results
         self._io.read_csv(file, table, libref, self.nosub)
@@ -458,39 +554,60 @@ class SASsession:
             return None
 
     def write_csv(self, file: str, table: str, libref: str = '',
-                  dsopts: dict = {}) -> 'The LOG showing the results of the step':
-        '''
-        This method will export a SAS Data Set to a file in CSV format.
-        file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
-        table   - the name of the SAS Data Set you want to export to a CSV file
-        libref  - the libref for the SAS Data Set.
-        '''
+                  dsopts: dict = {}) -> str:
+        """
+
+        :param file: the OS filesystem path of the file to be created (exported from the SAS Data Set)
+        :param table: the name of the SAS Data Set you want to export to a CSV file
+        :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+
+            - where is a string
+            - keep are strings or list of strings.
+            - drop are strings or list of strings.
+            - obs is a numbers - either string or int
+            - first obs is a numbers - either string or int
+
+            .. code-block:: python
+
+                             {'where'    : 'msrp < 20000 and make = "Ford"'
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
+                              'obs'      :  10
+                              'firstobs' : '12'
+                             }
+        :return: SAS log
+        """
         log = self._io.write_csv(file, table, libref, self.nosub, dsopts)
         if not self.batch:
             print(log)
         else:
             return log
 
-    def df2sd(self, df: '<Pandas Data Frame object>', table: str = '_df', libref: str = '',
-              results: str = '') -> '<SASdata object>':
-        '''
+    def df2sd(self, df: 'DataFrame', table: str = '_df', libref: str = '',
+              results: str = '') -> 'SASdata':
+        """
         This is an alias for 'dataframe2sasdata'. Why type all that?
-        df      - Pandas Data Frame to import to a SAS Data Set
-        table   - the name of the SAS Data Set to create
-        libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-        results - format of results, SASsession.results is default, HTML or TEXT are the alternatives
-        '''
+
+        :param df: :class:`pandas.DataFrame` Pandas Data Frame to import to a SAS Data Set
+        :param table: the name of the SAS Data Set to create
+        :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :return: SASdata object
+        """
         return self.dataframe2sasdata(df, table, libref, results)
 
-    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str = '_df', libref: str = '',
-                          results: str = '') -> '<SASdata object>':
-        '''
+    def dataframe2sasdata(self, df: 'DataFrame', table: str = '_df', libref: str = '',
+                          results: str = '') -> 'SASdata':
+        """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
-        df      - Pandas Data Frame to import to a SAS Data Set
-        table   - the name of the SAS Data Set to create
-        libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-        results - format of results, SASsession.results is default, HTML or TEXT are the alternatives
-        '''
+
+        :param df: Pandas Data Frame to import to a SAS Data Set
+        :param table: the name of the SAS Data Set to create
+        :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :return: SASdata object
+        """
         if results == '':
             results = self.results
         if self.nosub:
@@ -504,22 +621,63 @@ class SASsession:
         else:
             return None
 
-    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> '<Pandas Data Frame object>':
-        '''
+    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'DataFrame':
+        """
         This is an alias for 'sasdata2dataframe'. Why type all that?
-        sd      - SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
-        table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
-        libref  - the libref for the SAS Data Set.
-        '''
+        SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+
+        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
+        :param libref: the libref for the SAS Data Set.
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+
+            - where is a string
+            - keep are strings or list of strings.
+            - drop are strings or list of strings.
+            - obs is a numbers - either string or int
+            - first obs is a numbers - either string or int
+
+            .. code-block:: python
+
+                             {'where'    : 'msrp < 20000 and make = "Ford"'
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
+                              'obs'      :  10
+                              'firstobs' : '12'
+                             }
+        :param kwargs: dictionary
+        :return: Pandas data frame
+        """
         return self.sasdata2dataframe(table, libref, dsopts, **kwargs)
 
     def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {},
-                          **kwargs) -> '<Pandas Data Frame object>':
-        '''
+                          **kwargs) -> 'DataFrame':
+        """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-        table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
-        libref  - the libref for the SAS Data Set.
-        '''
+        SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+
+        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
+        :param libref: the libref for the SAS Data Set.
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+
+            - where is a string
+            - keep are strings or list of strings.
+            - drop are strings or list of strings.
+            - obs is a numbers - either string or int
+            - first obs is a numbers - either string or int
+
+            .. code-block:: python
+
+                             {'where'    : 'msrp < 20000 and make = "Ford"'
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
+                              'obs'      :  10
+                              'firstobs' : '12'
+                             }
+
+        :param kwargs: dictionary
+        :return: Pandas data frame
+        """
+
         if self.exist(table, libref) == 0:
             print('The SAS Data Set ' + libref + '.' + table + ' does not exist')
             return None
@@ -531,9 +689,25 @@ class SASsession:
             return self._io.sasdata2dataframe(table, libref, dsopts, **kwargs)
 
     def _dsopts(self, dsopts):
-        '''
-        This method builds out data set optiond clause for this SASdata object: '(where= , keeep=, obs=, ...)'
-        '''
+        """
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+
+            - where is a string
+            - keep are strings or list of strings.
+            - drop are strings or list of strings.
+            - obs is a numbers - either string or int
+            - first obs is a numbers - either string or int
+
+            .. code-block:: python
+
+                             {'where'    : 'msrp < 20000 and make = "Ford"'
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
+                              'obs'      :  10
+                              'firstobs' : '12'
+                             }
+        :return: dictionary
+        """
         opts = ''
 
         if len(dsopts):
@@ -566,7 +740,30 @@ class SASsession:
 
 class SASdata:
     def __init__(self, sassession, libref, table, results='', dsopts={}):
+        """
 
+        :param sassession:
+        :param table: the name of the SAS Data Set
+        :param libref: the libref for the SAS Data Set.
+        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+
+            - where is a string
+            - keep are strings or list of strings.
+            - drop are strings or list of strings.
+            - obs is a numbers - either string or int
+            - first obs is a numbers - either string or int
+
+            .. code-block:: python
+
+                             {'where'    : 'msrp < 20000 and make = "Ford"'
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
+                              'obs'      :  10
+                              'firstobs' : '12'
+                             }
+        end comment
+        """
         self.sas = sassession
         self.logger = logging.getLogger(__name__)
 
@@ -603,17 +800,35 @@ class SASdata:
         self.dsopts = dsopts
         self.results = results
 
-    def __getitem__(self, i):
+    def __getitem__(self, key):
+
         #bp()
-        print(i)
+        print(key)
+        print(type(key))
         #print(kwargs.keys())
         #print(kwargs.items())
 
+    def __repr__(self):
+        """
+        display info about this object ...
+
+        :return: output
+        """
+
+        print("Libref  = "+self.libref)
+        print("Table   = "+self.table)
+        print("Dsopts  = "+str(self.dsopts))
+        print("Results = "+self.results)
+        return ''
+
     def set_results(self, results: str):
-        '''
+        """
         This method set the results attribute for the SASdata object; it stays in effect till changed
         results - set the default result type for this SASdata object. 'Pandas' or 'HTML' or 'TEXT'.
-        '''
+
+        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :return: None
+        """
         if results.upper() == "HTML":
             self.HTML = 1
         else:
@@ -629,6 +844,14 @@ class SASdata:
             return ll
 
     def _returnPD(self, code, tablename, **kwargs):
+        """
+        private function to take a sas code normally to create a table, generate pandas data frame and cleanup.
+
+        :param code: string of SAS code
+        :param tablename: the name of the SAS Data Set
+        :param kwargs:
+        :return: Pandas Data Frame
+        """
         libref = 'work'
         if 'libref' in kwargs:
             libref = kwargs['libref']
@@ -649,27 +872,30 @@ class SASdata:
 
     def _dsopts(self):
         '''
-        This method builds out data set optiond clause for this SASdata object: '(where= , keeep=, obs=, ...)'
+        This method builds out data set options clause for this SASdata object: '(where= , keeep=, obs=, ...)'
         '''
         return self.sas._dsopts(self.dsopts)
 
-    def where(self, where: str) -> '<SASdata object>':
-        '''
+    def where(self, where: str) -> 'SASdata':
+        """
         This method returns a clone of the SASdata object, with the where attribute set. The original SASdata object is not affected.
-        where - the where clause to apply
 
-        '''
+        :param where: the where clause to apply
+        :return: SAS data object
+        """
         sd = SASdata(self.sas, self.libref, self.table, dsopts=dict(self.dsopts))
         sd.HTML = self.HTML
         sd.dsopts['where'] = where
         return sd
 
     def head(self, obs=5):
-        '''
+        """
         display the first n rows of a table
-        obs - the number of rows of the table that you want to display. The default is 5
 
-        '''
+        :param obs: the number of rows of the table that you want to display. The default is 5
+        :return:
+        """
+
         topts = dict(self.dsopts)
         topts['obs'] = obs
         code = "proc print data=" + self.libref + '.' + self.table + self.sas._dsopts(topts) + ";run;"
@@ -699,13 +925,13 @@ class SASdata:
                     return ll
 
     def tail(self, obs=5):
-        '''
+        """
         display the last n rows of a table
-        obs - the number of rows of the table that you want to display. The default is 5
 
-        '''
-        # code = "%put lastobs=%sysfunc(attrn(%sysfunc(open("+self.libref+'.'+self.table+")),NOBS)) tom;"
-        code = "proc sql;select count(*) into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;"
+        :param obs: the number of rows of the table that you want to display. The default is 5
+        :return:
+        """
+        code = "proc sql;select count(*) into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;quit;"
 
         nosub = self.sas.nosub
         self.sas.nosub = False
@@ -758,11 +984,20 @@ class SASdata:
                 else:
                     return ll
 
-    def partition(self, var='', fraction=.7, seed=9878, kfold=1, out=None, singleOut=True):
+    def partition(self, var: str = '', fraction: float = .7, seed: int = 9878, kfold: int = 1,
+                  out: 'SASdata' = None, singleOut: bool = True) -> object:
         """
-        Partion a sas data object using SRS sampling or if a variable is specified then stratifiying with respect to that variable
+        Partition a sas data object using SRS sampling or if a variable is specified then
+        stratifying with respect to that variable
+
+        :param var: variable(s) for stratification. If multiple then space delimited list
+        :param fraction: fraction to split
+        :param seed: random seed
+        :param kfold: number of k folds
+        :param out: the SAS data object
+        :param singleOut: boolean to return single table or seperate tables
+        :return: Tuples or SAS data object
         """
-        # bp()
         # loop through for k folds cross-validation
         i = 1
         # initialize code string so that loops work
@@ -821,7 +1056,6 @@ class SASdata:
                     l2 = ll['LOG'].partition("VARLIST=\n")            
                     l2 = l2[2].rpartition("VARLISTend=\n")                   
                     numlist1 = l2[0].split("\n")                                             
-                    del numlist1[len(charlist1)-1]
 
                     # check if var is in numlist1
                     if isinstance(var, str):
@@ -888,10 +1122,11 @@ class SASdata:
                 return self
 
     def contents(self):
-        '''
+        """
         display metadata about the table. size, number of rows, columns and their data type ...
 
-        '''
+        :return: output
+        """
         code = "proc contents data=" + self.libref + '.' + self.table + self._dsopts() + ";run;"
 
         if self.sas.nosub:
@@ -956,13 +1191,19 @@ class SASdata:
                     return ll
 
     def describe(self):
-        '''
+        """
         display descriptive statistics for the table; summary statistics.
 
-        '''
-        return self.means()
+        :return:
+        """
+        return self.means
 
     def info(self):
+        """
+        Display the column info on a SAS data object
+
+        :return: Pandas data frame
+        """
         m = self.means()
         c = self.columnInfo()
         p1 = m[['Variable', 'N', 'NMiss']]
@@ -971,10 +1212,11 @@ class SASdata:
         return info
 
     def means(self):
-        '''
+        """
         display descriptive statistics for the table; summary statistics. This is an alias for 'describe'
 
-        '''
+        :return:
+        """
         code = "proc means data=" + self.libref + '.' + self.table + self._dsopts() + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;run;"
 
         if self.sas.nosub:
@@ -1003,22 +1245,25 @@ class SASdata:
                else:
                   return ll
 
-    def sort(self, by: str, out: 'str or sas data object' = '', **kwargs) -> '<SASdata object>':
+    def sort(self, by: str, out: object = '', **kwargs) -> 'SASdata':
         """
-        This method will sort the SAS Data Set
-        by  - REQUIRED variable to sort by (BY <DESCENDING> variable-1 <<DESCENDING> variable-2 ...>;)
-        out - OPTIONAL takes either a string 'libref.table' or 'table' which will go to WORK or USER if assigned or a sas data object'' will sort in place if allowed
-        returns this SASdata object if out= not specified, or a new SASdata object for out= when specified
+        Sort the SAS Data Set
 
-        Examples:
-        1. wkcars.sort('type')
-        2. wkcars2 = sas.sasdata('cars2')
-           wkcars.sort('cylinders', wkcars2)
-        3. cars2=cars.sort('DESCENDING origin', out='foobar')
-        4. cars.sort('type').head()
-        5. stat_results = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type'))
-        6. stat_results2 = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type','work.cars'))
+        :param by: REQUIRED variable to sort by (BY <DESCENDING> variable-1 <<DESCENDING> variable-2 ...>;)
+        :param out: OPTIONAL takes either a string 'libref.table' or 'table' which will go to WORK or USER
+            if assigned or a sas data object'' will sort in place if allowed
+        :param kwargs:
+        :return: SASdata object if out= not specified, or a new SASdata object for out= when specified
 
+        :Example:
+
+        #. wkcars.sort('type')
+        #. wkcars2 = sas.sasdata('cars2')
+        #. wkcars.sort('cylinders', wkcars2)
+        #. cars2=cars.sort('DESCENDING origin', out='foobar')
+        #. cars.sort('type').head()
+        #. stat_results = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type'))
+        #. stat_results2 = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type','work.cars'))
         """
         outstr = ''
         options = ''
@@ -1043,12 +1288,14 @@ class SASdata:
         This method will calculate assessment measures using the SAS AA_Model_Eval Macro used for SAS Enterprise Miner.
         Not all datasets can be assessed. This is designed for scored data that includes a target and prediction columns
         TODO: add code example of build, score, and then assess
+
         :param target: string that represents the target variable in the data
-        :param prediction: string that represetnt the prediction column in the data
+        :param prediction: string that represents the numeric prediction column in the data. For nominal targets this should
+        a probability between (0,1).
         :param nominal: boolean to indicate if the Target Variable is nominal because the assessment measures are different.
         :param event: string of either DESC or ASC which indicates which value of the target variable is the event vs non-event
         :param kwargs:
-        :return: sas result object
+        :return: SAS result object
         """
         # submit autocall macro
         self.sas.submit("%aamodel;")
@@ -1085,8 +1332,6 @@ class SASdata:
         else:
             code += "%%aa_model_eval(DATA=%s%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s);" \
                     % (score_table, self._dsopts(), target, prediction, level, binstats, out)
-        code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
         rename_char = """
         data {0};
             set {0};
@@ -1109,22 +1354,53 @@ class SASdata:
                         _misc_ = MisClassificationRate;
             end;
         run;
-
         """
         code += rename_char.format(binstats)
         # TODO: add graphics code here to return to the SAS results object
+        graphics ="""
+        ODS PROCLABEL='ERRORPLOT' ;
+        proc sgplot data={0};
+            title "Error and Correct rate by Depth";
+            series x=depth y=correct_rate;
+            series x=depth y=error_rate;
+            yaxis label="Percentage" grid;
+        run;
+        /* roc chart */
+        ODS PROCLABEL='ROCPLOT' ;
+
+        proc sgplot data={0};
+            title "ROC Curve";
+            series x=one_minus_specificity y=sensitivity;
+            yaxis grid;
+        run;
+        /* Lift and Cumulative Lift */
+        ODS PROCLABEL='LIFTPLOT' ;
+        proc sgplot data={0};
+            Title "Lift and Cumulative Lift";
+            series x=depth y=c_lift;
+            series x=depth y=lift;
+            yaxis grid;
+        run;
         """
+        code += graphics.format(out)
+        code += "run; quit; %mend;\n"
+        code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
+
+        #code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
+        #code += "run; quit; %mend;\n"
+
         # Debug block
-        debug={'name': name,
-               'score_table': score_table,
-               'target': target,
-               'var': var,
-               'nominals': nominals,
-               'level': level,
-               'binstats': binstats,
-               'out':out}
-        print(debug.items())
-        """
+
+        #debug={'name': name,
+        #       'score_table': score_table,
+        #       'target': target,
+        #       'var': var,
+        #       'nominals': nominals,
+        #       'level': level,
+        #       'binstats': binstats,
+        #       'out':out}
+        #print(debug.items())
+
         if self.sas.nosub:
             print(code)
             return
@@ -1133,11 +1409,13 @@ class SASdata:
         obj1 = SASProcCommons._objectmethods(self, objname)
         return SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
 
-    def to_csv(self, file: str) -> 'The LOG showing the results of the step':
-        '''
+    def to_csv(self, file: str) -> str:
+        """
         This method will export a SAS Data Set to a file in CSV format.
-        file    - the OS filesystem path of the file to be created (exported from this SAS Data Set)
-        '''
+
+        :param file: the OS filesystem path of the file to be created (exported from this SAS Data Set)
+        :return:
+        """
         ll = self._is_valid()
         if ll:
             if not self.sas.batch:
@@ -1147,16 +1425,60 @@ class SASdata:
         else:
             return self.sas.write_csv(file, self.table, self.libref, self.dsopts)
 
-    def to_frame(self, **kwargs) -> '<Pandas Data Frame object>':
-        '''
+    def score(self, file: str = '', code: str = '', out: 'SASData' = None) -> 'SASData':
+        """
+        This method is meant to update a SAS Data object with a model score file.
+
+        :param file: a file reference to the SAS score code
+        :param code: a string of the valid SAS score code
+        :param out: Where to the write the file. Defaults to update in place
+        :return: The Scored SAS Data object.
+        """
+        if out is not None:
+            outTable = out.table
+            outLibref = out.libref
+        else:
+            outTable = self.table
+            outLibref = self.libref
+        code = "data %s.%s%s;" % (outLibref, outTable, self._dsopts())
+        code += "set %s.%s%s;" % (self.libref, self.table, self._dsopts())
+        if len(file)>0:
+            code += "%%include %s;" % file
+        else:
+            code += "%%include %s;" %code
+        code += "run;"
+
+        if self.sas.nosub:
+            print(code)
+            return
+
+        ll = self._is_valid()
+        if not ll:
+            html = self.HTML
+            self.HTML = 1
+            ll = self.sas._io.submit(code)
+            self.HTML = html
+        if not self.sas.batch:
+            DISPLAY(HTML(ll['LST']))
+        else:
+            return ll
+
+    def to_frame(self, **kwargs) -> 'DataFrame':
+        """
         Export this SAS Data Set to a Pandas Data Frame
-        '''
+
+        :param kwargs:
+        :return: Pandas data frame
+        """
         return self.to_df(**kwargs)
 
-    def to_df(self, **kwargs) -> '<Pandas Data Frame object>':
-        '''
+    def to_df(self, **kwargs) -> 'DataFrame':
+        """
         Export this SAS Data Set to a Pandas Data Frame
-        '''
+
+        :param kwargs:
+        :return: Pandas data frame
+        """
         ll = self._is_valid()
         if ll:
             print(ll['LOG'])
@@ -1165,9 +1487,10 @@ class SASdata:
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, **kwargs)
 
     def heatmap(self, x: str, y: str, options: str = '', title: str = '',
-                label: str = '') -> 'a heatmap plot of the (numeric) variables you chose':
+                label: str = '') -> object:
         """
         Documentation link: http://support.sas.com/documentation/cdl/en/grstatproc/67909/HTML/default/viewer.htm#n0w12m4cn1j5c6n12ak64u1rys4w.htm
+
         :param x: x variable
         :param y: y variable
         :param options: display options (string)
@@ -1204,13 +1527,15 @@ class SASdata:
             return ll
 
     def hist(self, var: str, title: str = '',
-             label: str = '') -> 'a histogram plot of the (numeric) variable you chose':
-        '''
+             label: str = '') -> object:
+        """
         This method requires a numeric column (use the contents method to see column types) and generates a histogram.
-        var   - the NUMERIC variable (column) you want to plot
-        title - an optional Title for the chart
-        label - LegendLABEL= value for sgplot
-        '''
+
+        :param var: the NUMERIC variable (column) you want to plot
+        :param title: an optional Title for the chart
+        :param label: LegendLABEL= value for sgplot
+        :return:
+        """
         code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
         code += ";\n\thistogram " + var + " / scale=count"
         if len(label) > 0:
@@ -1235,14 +1560,15 @@ class SASdata:
         else:
             return ll
 
-    def top(self, var: str, n: int = 10, order: str = 'freq', title: str = '') -> 'a frequency analysis of a variable':
+    def top(self, var: str, n: int = 10, order: str = 'freq', title: str = '') -> object:
         """
-        This method finds the most common levels of a variable
-        var   - the CHAR variable (column) you want to count
-        n     - the top N to be displayed (defaults to 10)
-        order - default to most common use order='data' to get then in alphbetic order
-        title - an optional Title for the chart
-        label - LegendLABEL= value for sgplot
+        Return the most commonly occuring items (levels)
+
+        :param var: the CHAR variable (column) you want to count
+        :param n: the top N to be displayed (defaults to 10)
+        :param order: default to most common use order='data' to get then in alphbetic order
+        :param title: an optional Title for the chart
+        :return: Data Table
         """
         code = "proc freq data=%s.%s %s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
         code += "\n\ttables %s / out=tmpFreqOut;" % var
@@ -1279,13 +1605,16 @@ class SASdata:
                 else:
                     return ll
 
-    def bar(self, var: str, title: str = '', label: str = '') -> 'a barchart plot of the (numeric) variable you chose':
-        '''
-        This method requires a numeric column (use the contents method to see column types) and generates a histogram.
-        var   - the CHAR variable (column) you want to plot
-        title - an optional Title for the chart
-        label - LegendLABEL= value for sgplot
-        '''
+    def bar(self, var: str, title: str = '', label: str = '') -> object:
+        """
+        This method requires a character column (use the contents method to see column types)
+        and generates a bar chart.
+
+        :param var: the CHAR variable (column) you want to plot
+        :param title: an optional title for the chart
+        :param label: LegendLABEL= value for sgplot
+        :return: graphic plot
+        """
         code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
         code += ";\n\tvbar " + var + " ; "
         if len(label) > 0:
@@ -1311,13 +1640,16 @@ class SASdata:
         else:
             return ll
 
-    def series(self, x: str, y: list, title: str = '') -> 'a line plot of the x,y coordinates':
-        '''
+    def series(self, x: str, y: list, title: str = '') -> object:
+        """
         This method plots a series of x,y coordinates. You can provide a list of y columns for multiple line plots.
-        x     - the x axis variable; generally a time or continuous variable.
-        y     - the y axis variable(s), you can specify a single column or a list of columns
-        title - an optional Title for the chart
-        '''
+
+        :param x: the x axis variable; generally a time or continuous variable.
+        :param y: the y axis variable(s), you can specify a single column or a list of columns
+        :param title: an optional Title for the chart
+        :return: graph object
+        """
+
         code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts() + ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
