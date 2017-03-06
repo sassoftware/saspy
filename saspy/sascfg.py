@@ -63,20 +63,42 @@ SAS_config_options = {'lock_down': True}
 # 'ssh'     - [REQUIRED] the ssh command to run
 # 'host'    - [REQUIRED] the host to connect to
 #
-
-default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
+default  = {'saspath': '/install/SASServer/SASHome/SASFoundation/9.4/bin/sas_u8'
             }
 
-ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'ssh'     : '/usr/bin/ssh',
-            'host'    : 'remote.linux.host', 
+ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+            'ssh'    : '/usr/bin/ssh',
+            'host'   : 'tom64-2', 
             'options' : ["-fullstimer"]
             }
 
-# sasother = {'saspath' : '/some/other/directory/SASHome/SASFoundation/9.4/bin_sas_u8',
-#             'options' : ["-autoexec", "/my/home_dir/my_autoexec.sas", "-set",
-#                          "Env_var", "Value", "-fullstimer"]
-#             }
+grid     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
+            'ssh'     : '/usr/bin/ssh',
+            'metapw'  : '1connect',
+            'host'    : 'sascnn@sgm001.unx.sas.com',
+            'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridrunsaslm"]
+            }
+
+
+# build out a local classpath variable to use below
+cp  =  "/opt/tom/gitlab/metis/java/lib/sas.svc.connection.jar"
+cp += ":/opt/tom/gitlab/metis/java/lib/sas.codepolicy.jar"
+cp += ":/opt/tom/gitlab/metis/java/lib/log4j.jar"
+cp += ":/opt/tom/gitlab/metis/java/lib/sas.security.sspi.jar"
+cp += ":/opt/tom/gitlab/metis/java/lib/sas.core.jar"
+cp += ":/opt/tom/gitlab/metis/java/tools/ConnectionHelper.java"
+cp += ":/opt/tom/gitlab/metis/java/pyiom"
+cp += ":/opt/tom/gitlab/metis/java/tools"
+cp += ":/opt/tom/gitlab/metis/java"
+
+iomj     = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
+            'java'      : '/usr/bin/java',
+            'omruser'   : 'sas',
+            'omrpw'     : 'sas',
+            'iomhost'   : 'tom64-3.na.sas.com',
+            'iomport'   : 8591,
+            'classpath' : cp
+            }           
 
 
 
@@ -173,6 +195,12 @@ winiomwin  = {'java'    : 'java',
              
 http     = {'ip'      : 'host.running.compute.service',
             'port'    :  80,
+            'context' : 'Tom2'
+            }
+
+httptest = {'ip'      : 'tomspc',
+            'port'    :  80, 
+            'options' : ["fullstimer", "memsize=1G"]
             'context' : 'OMRcontext1'
             }
 

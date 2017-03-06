@@ -429,7 +429,7 @@ class SASProcCommons:
                code += "score data=%s.%s out=%s.%s;\n" % (data.libref, data.table, scoreds.libref, scoreds.table)
             else:
                code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
-        # save statemen tmust be after input and target for TREEBOOST
+        # save statement must be after input and target for TREEBOOST
         if 'save' in args:
             #self.logger.debug("save statement,length: %s,%s", args['save'], len(args['save']))
             if objtype=="hpforest":
@@ -483,15 +483,8 @@ class SASProcCommons:
         nom = kwargs.pop('nominals', None)
         input_list = kwargs.pop('input', None)
         tgt = kwargs.pop('target', None)
-        #if tgt is None:
-        #    tgt = kwargs['model'].split('=')[0]
-        #if input_list is None:
-        #    input_list = kwargs['model'].split('=')[1].split()
-        
 
         charlist1=[]
-        #bp()
-        # default target to nominal
         target = {'nominal':tgt}
 
         # Get list of character varaibles to add to nominal list
