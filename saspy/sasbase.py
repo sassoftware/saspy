@@ -1281,16 +1281,46 @@ class SASdata:
                 fn = out.partition('.')
                 if fn[1] == '.':
                     libref = fn[0]
-                    table  = fn[2]
-                    outstr = "out=%s.%s %s" % (libref, table, self._dsopts())
+                    table = fn[2]
+                    outstr = "out=%s.%s" % (libref, table)
                 else:
                     libref = ''
-                    table  = fn[0]
+                    table = fn[0]
                     outstr = "out=" + table
             else:
                 libref = out.libref
-                table  = out.table
-                outstr = "out=%s.%s %s" % (out.libref, out.table, self._dsopts())
+                table = out.table
+                outstr = "out=%s.%s" % (out.libref, out.table)
+
+        if 'options' in kwargs:
+            options = kwargs['options']
+
+        code = "proc sort data=%s.%s%s %s %s ;\n" % (self.libref, self.table, self._dsopts(), outstr, options)
+        code += "by %s;" % by
+        code += "run\n;"
+        runcode = True
+        if self.sas.nosub:
+            print(code)
+            runcode = False
+
+        ll = self._is_valid()
+        if ll:
+            runcode = False
+        if runcode:
+            ll = self.sas.submit(code, "text")
+            elog = []
+            for line in ll['LOG'].splitlines():
+                if line.startswith('ERROR'):
+                    elog.append(line)
+            if len(elog):
+                raise RuntimeError("\n".join(elog))
+        if out:
+            if not isinstance(out, str):
+                return out
+            else:
+                return self.sas.sasdata(table, libref, self.results)
+        else:
+            return self
 
     def assessModel(self, target: str, prediction: str, nominal: bool = True, event: str = '', **kwargs):
         """
