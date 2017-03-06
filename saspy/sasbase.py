@@ -1205,7 +1205,7 @@ class SASdata:
 
         :return:
         """
-        return self.means
+        return self.means()
 
     def info(self):
         """
