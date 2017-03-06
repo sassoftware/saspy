@@ -1290,7 +1290,8 @@ class SASdata:
         TODO: add code example of build, score, and then assess
 
         :param target: string that represents the target variable in the data
-        :param prediction: string that represetnt the prediction column in the data
+        :param prediction: string that represents the numeric prediction column in the data. For nominal targets this should
+        a probability between (0,1).
         :param nominal: boolean to indicate if the Target Variable is nominal because the assessment measures are different.
         :param event: string of either DESC or ASC which indicates which value of the target variable is the event vs non-event
         :param kwargs:
@@ -1331,8 +1332,6 @@ class SASdata:
         else:
             code += "%%aa_model_eval(DATA=%s%s, TARGET=%s, VAR=%s, level=%s, BINSTATS=%s, bins=100, out=%s);" \
                     % (score_table, self._dsopts(), target, prediction, level, binstats, out)
-        code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
         rename_char = """
         data {0};
             set {0};
@@ -1356,10 +1355,39 @@ class SASdata:
             end;
         run;
         """
-
-
         code += rename_char.format(binstats)
         # TODO: add graphics code here to return to the SAS results object
+        graphics ="""
+        ODS PROCLABEL='ERRORPLOT' ;
+        proc sgplot data={0};
+            title "Error and Correct rate by Depth";
+            series x=depth y=correct_rate;
+            series x=depth y=error_rate;
+            yaxis label="Percentage" grid;
+        run;
+        /* roc chart */
+        ODS PROCLABEL='ROCPLOT' ;
+
+        proc sgplot data={0};
+            title "ROC Curve";
+            series x=one_minus_specificity y=sensitivity;
+            yaxis grid;
+        run;
+        /* Lift and Cumulative Lift */
+        ODS PROCLABEL='LIFTPLOT' ;
+        proc sgplot data={0};
+            Title "Lift and Cumulative Lift";
+            series x=depth y=c_lift;
+            series x=depth y=lift;
+            yaxis grid;
+        run;
+        """
+        code += graphics.format(out)
+        code += "run; quit; %mend;\n"
+        code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
+
+        #code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
+        #code += "run; quit; %mend;\n"
 
         # Debug block
 
@@ -1396,6 +1424,44 @@ class SASdata:
                 return ll
         else:
             return self.sas.write_csv(file, self.table, self.libref, self.dsopts)
+
+    def score(self, file: str = '', code: str = '', out: 'SASData' = None) -> 'SASData':
+        """
+        This method is meant to update a SAS Data object with a model score file.
+
+        :param file: a file reference to the SAS score code
+        :param code: a string of the valid SAS score code
+        :param out: Where to the write the file. Defaults to update in place
+        :return: The Scored SAS Data object.
+        """
+        if out is not None:
+            outTable = out.table
+            outLibref = out.libref
+        else:
+            outTable = self.table
+            outLibref = self.libref
+        code = "data %s.%s%s;" % (outLibref, outTable, self._dsopts())
+        code += "set %s.%s%s;" % (self.libref, self.table, self._dsopts())
+        if len(file)>0:
+            code += "%%include %s;" % file
+        else:
+            code += "%%include %s;" %code
+        code += "run;"
+
+        if self.sas.nosub:
+            print(code)
+            return
+
+        ll = self._is_valid()
+        if not ll:
+            html = self.HTML
+            self.HTML = 1
+            ll = self.sas._io.submit(code)
+            self.HTML = html
+        if not self.sas.batch:
+            DISPLAY(HTML(ll['LST']))
+        else:
+            return ll
 
     def to_frame(self, **kwargs) -> 'DataFrame':
         """

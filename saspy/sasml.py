@@ -150,3 +150,22 @@ class SASml:
                      'subseries', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TREEBOOST", required_set, legal_set, **kwargs)
+
+    def hpbnet(self, **kwargs: dict) -> object:
+        """
+        Python method to call the HPBNET procedure
+
+        ``required_set = {'input', 'target'}``
+
+        ``legal_set = {'id', 'code', 'freq', 'partition', 'input', 'performance', 'target', 'output', 'procopts'}``
+
+        Documentation link:
+        http://go.documentation.sas.com/?docsetId=emhpprcref&docsetVersion=14.2&docsetTarget=emhpprcref_hpbnet_toc.htm&locale=en
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'input', 'target'}
+        legal_set = {'id', 'code', 'freq', 'partition', 'input', 'performance', 'target', 'output', 'procopts'}
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc(self, "HPBNET", required_set, legal_set, **kwargs)
