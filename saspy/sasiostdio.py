@@ -45,6 +45,7 @@ class SASconfigSTDIO:
       self.options  = cfg.get('options', [])
       self.ssh      = cfg.get('ssh', '')
       self.host     = cfg.get('host', '')
+      self.encoding = cfg.get('encoding', '')
       self.metapw   = cfg.get('metapw', '')
       self.iomc     = cfg.get('iomc', '')
 
@@ -86,6 +87,15 @@ class SASconfigSTDIO:
          else:
             self.host = inhost   
 
+      inencoding = kwargs.get('encoding', '')
+      if len(inencoding) > 0:
+         if lock and len(self.encoding):
+            print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.encoding = inencoding   
+      if not self.encoding:
+         self.encoding = 'utf-8'  
+
       while len(self.saspath) == 0:
          if not lock:
             self.saspath = self._prompt("Please enter the path to the SAS start up script: ")
@@ -119,6 +129,7 @@ class SASsessionSTDIO():
    kernel  - None - internal use when running the SAS_kernel notebook
    saspath - overrides saspath Dict entry of cfgname in sascfg.py file
    options - overrides options Dict entry of cfgname in sascfg.py file
+   encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
 
    and for running STDIO over passwordless ssh
    ssh     - full path of the ssh command; /usr/bin/ssh for instance
@@ -247,7 +258,7 @@ class SASsessionSTDIO():
                   gotit = True
                else:
                   print("Sorry, didn't get a value, please enter the metadata password.")
-            self.stdin.write(pw.encode()+b'\n')
+            self.stdin.write(pw.encode(self.sascfg.encoding)+b'\n')
             self.stdin.flush()
 
          self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
@@ -291,7 +302,7 @@ class SASsessionSTDIO():
                break
             sleep(0.5)
    
-      x = logf.decode().replace(code1, " ")
+      x = logf.decode(self.sascfg.encoding).replace(code1, " ")
       self._log += x
 
       if self.pid == None:
@@ -339,7 +350,7 @@ class SASsessionSTDIO():
          self.pid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
-      return lstf.decode()
+      return lstf.decode(self.sascfg.encoding)
    
    def _getlsttxt(self, wait=5, jobid=None):
       f2 = [None]
@@ -358,7 +369,7 @@ class SASsessionSTDIO():
       
             if (eof != -1):
                final = lstf.partition(b"Tom was here")
-               f2 = final[0].decode().rpartition(chr(12))
+               f2 = final[0].decode(self.sascfg.encoding).rpartition(chr(12))
                break
 
       lst = f2[0]
@@ -388,7 +399,7 @@ class SASsessionSTDIO():
       if (ods):
          self.stdin.write(odsopen)
    
-      out = self.stdin.write(code.encode()+b'\n')
+      out = self.stdin.write(code.encode(self.sascfg.encoding)+b'\n')
    
       if (ods):
          self.stdin.write(odsclose)
@@ -478,12 +489,14 @@ class SASsessionSTDIO():
       if ods:
          self.stdin.write(odsopen)
    
-      out = self.stdin.write(mj+b'\n'+pcodei.encode()+pcodeiv.encode()+code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj)
+      pgm  = mj+b'\n'+pcodei.encode(self.sascfg.encoding)+pcodeiv.encode(self.sascfg.encoding)
+      pgm += code.encode(self.sascfg.encoding)+b'\n'+pcodeo.encode(self.sascfg.encoding)+b'\n'+mj
+      out  = self.stdin.write(pgm)
    
       if ods:
          self.stdin.write(odsclose)
 
-      out = self.stdin.write(b'\n'+logcodei.encode()+b'\n')
+      out = self.stdin.write(b'\n'+logcodei.encode(self.sascfg.encoding)+b'\n')
       self.stdin.flush()
 
       while not done:
@@ -498,17 +511,17 @@ class SASsessionSTDIO():
                      eof -= 1
                  if eof < 0:
                      break
-                 lst = self.stdout.read1(4096).decode()
+                 lst = self.stdout.read1(4096).decode(self.sascfg.encoding)
                  if len(lst) > 0:
                      lstf += lst
                  else:
-                     log = self.stderr.read1(4096).decode() 
+                     log = self.stderr.read1(4096).decode(self.sascfg.encoding) 
                      if len(log) > 0:
                          logf += log
                          if logf.count(logcodeo) >= 1:
                              bail = True
                          if not bail and bc:
-                             self.stdin.write(odsclose+logcodei.encode() + b'\n')
+                             self.stdin.write(odsclose+logcodei.encode(self.sascfg.encoding) + b'\n')
                              self.stdin.flush()
                              bc = False
              done = True
@@ -529,7 +542,7 @@ class SASsessionSTDIO():
              else:
                 print('Exception ignored, continuing to process...\n')
 
-             self.stdin.write(odsclose+logcodei.encode()+b'\n')
+             self.stdin.write(odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
              self.stdin.flush()
 
       trip = lstf.rpartition("/*]]>*/")      
@@ -541,7 +554,7 @@ class SASsessionSTDIO():
       z = final[0].rpartition(chr(10))
       prev = '%08d' %  (self._log_cnt - 1)
       zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
-      logd = zz[2].replace(mj.decode(), '')
+      logd = zz[2].replace(mj.decode(self.sascfg.encoding), '')
 
       lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                     '<body class="l body">').replace("font-size: x-small;",
@@ -579,7 +592,7 @@ class SASsessionSTDIO():
                 return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
                             outrc, LST='',ABORT=True)
 
-            lst = self.stdout.read1(4096).decode()
+            lst = self.stdout.read1(4096).decode(self.sascfg.encoding)
             lstf += lst
             if len(lst) > 0:
                 lsts = lst.rpartition('Select:')
@@ -588,7 +601,7 @@ class SASsessionSTDIO():
                     query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                     print('Processing interrupt\nAttn handler Query is\n\n' + query)
                     response = self.sascfg._prompt("Please enter your Response: ")
-                    self.stdin.write(response.encode() + b'\n')
+                    self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
                     self.stdin.flush()
                     if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
                        bc = True
@@ -599,7 +612,7 @@ class SASsessionSTDIO():
                         query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                         print('Secondary Query is:\n\n' + query)
                         response = self.sascfg._prompt("Please enter your Response: ")
-                        self.stdin.write(response.encode() + b'\n')
+                        self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
                         self.stdin.flush()
                         if (response == 'N' or response == 'n') and query.count("N to continue") >= 1:
                            bc = True
@@ -608,7 +621,7 @@ class SASsessionSTDIO():
                         #print("******************No 'Select' or 'Press' found in lst=")
                         pass
             else:
-                log = self.stderr.read1(4096).decode()
+                log = self.stderr.read1(4096).decode(self.sascfg.encoding)
                 logf += log
                 self._log += log
 
@@ -679,9 +692,9 @@ class SASsessionSTDIO():
                   pass
 
             sleep(.25)
-            lst = self.stdout.read1(4096).decode()
+            lst = self.stdout.read1(4096).decode(self.sascfg.encoding)
          else:
-            log = self.stderr.read1(4096).decode()
+            log = self.stderr.read1(4096).decode(self.sascfg.encoding)
             self._log += log
             logn = self._logcnt(False)
 
@@ -694,7 +707,7 @@ class SASsessionSTDIO():
                break
 
             sleep(.25)
-            lst = self.stdout.read1(4096).decode()
+            lst = self.stdout.read1(4096).decode(self.sascfg.encoding)
 
       return log
 
@@ -823,7 +836,7 @@ class SASsessionSTDIO():
                   var = str(row[col].to_datetime64())[:26]
                   #var = str(row[1][col].to_datetime64())
             card += var+chr(9)
-         self.stdin.write(card.encode()+b'\n')
+         self.stdin.write(card.encode(self.sascfg.encoding)+b'\n')
          #self._asubmit(card, "text")
 
       self._asubmit(";run;", "text")
@@ -925,7 +938,7 @@ class SASsessionSTDIO():
       while True:
          data = newsock[0].recv(4096)
          if len(data):
-            datar += data.decode()
+            datar += data.decode(self.sascfg.encoding)
          else:
             break
    
