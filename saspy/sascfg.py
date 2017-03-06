@@ -50,56 +50,29 @@ SAS_config_options = {'lock_down': True}
 # The default path to the sas start up script is: /opt/sasinside/SASHome/SASFoundation/9.4/sas
 # A usual install path is: /opt/sasinside/SASHome
 #
-# Since python uses utf-8, running SAS with encoding=utf-8 is the expected use case. By default
-# linux SAS runs in Latin1, which works fine as long as you stick with the lower half of the code page.
-# SAS is installed with a link ('sas') to the bin/sas_en startup script, and the link can be swapped
-# to point to the utf8 start up script (bin/sas_u8), or another link made (sasutf8) to point to that.  
-#
+# Since python uses utf-8, running SAS with encoding=utf-8 is the expected use case. By default Unix SAS runs in Latin1 (iso-8859-1),
+# which does not work well as utf-8. So, transcoding has been implemented in the python layer. The 'encoding' option can be specified to match
+# the SAS session encoding (see https://docs.python.org/3.5/library/codecs.html#standard-encodings for python encoding values). latin1 is appropriate
+# for the default Unix SAS session encoding
+#                                                                                                         
 # valid keys are:
-# 'saspath' - [REQUIRED] path to SAS startup script i.e.: /opt/sasinside/SASHome/SASFoundation/9.4/sas
-# 'options' - SAS options to include in the start up command line - Python List
+# 'saspath'  - [REQUIRED] path to SAS startup script i.e.: /opt/sasinside/SASHome/SASFoundation/9.4/sas
+# 'options'  - SAS options to include in the start up command line - Python List
+# 'encoding' - This is the python encoding value that matches the SAS session encoding youe SAS session is using 
 #
 # For passwordless ssh connection, the following are also reuqired:
 # 'ssh'     - [REQUIRED] the ssh command to run
 # 'host'    - [REQUIRED] the host to connect to
 #
-default  = {'saspath': '/install/SASServer/SASHome/SASFoundation/9.4/bin/sas_u8'
+default  = {'saspath'  : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
             }
 
-ssh      = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'ssh'    : '/usr/bin/ssh',
-            'host'   : 'tom64-2', 
+ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
+            'ssh'     : '/usr/bin/ssh',
+            'host'    : 'remote.linux.host', 
+            'encoding': 'latin1',
             'options' : ["-fullstimer"]
             }
-
-grid     = {'saspath' : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'ssh'     : '/usr/bin/ssh',
-            'metapw'  : '1connect',
-            'host'    : 'sascnn@sgm001.unx.sas.com',
-            'options' : ["/sas3rd/wky/mva-v940/lax_sgm/SASAppServerConfig/Lev1/Applications/SASGridManagerClientUtility/9.4/sasgsub", "-gridrunsaslm"]
-            }
-
-
-# build out a local classpath variable to use below
-cp  =  "/opt/tom/gitlab/metis/java/lib/sas.svc.connection.jar"
-cp += ":/opt/tom/gitlab/metis/java/lib/sas.codepolicy.jar"
-cp += ":/opt/tom/gitlab/metis/java/lib/log4j.jar"
-cp += ":/opt/tom/gitlab/metis/java/lib/sas.security.sspi.jar"
-cp += ":/opt/tom/gitlab/metis/java/lib/sas.core.jar"
-cp += ":/opt/tom/gitlab/metis/java/tools/ConnectionHelper.java"
-cp += ":/opt/tom/gitlab/metis/java/pyiom"
-cp += ":/opt/tom/gitlab/metis/java/tools"
-cp += ":/opt/tom/gitlab/metis/java"
-
-iomj     = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.4/bin/sas_u8',
-            'java'      : '/usr/bin/java',
-            'omruser'   : 'sas',
-            'omrpw'     : 'sas',
-            'iomhost'   : 'tom64-3.na.sas.com',
-            'iomport'   : 8591,
-            'classpath' : cp
-            }           
-
 
 
 # For IOM (Grid Manager or any IOM) and Local Windows via IOM access method
@@ -115,7 +88,7 @@ iomj     = {'saspath'   : '/sas3rd/wky/mva-v940/lax_sgm/SASHome/SASFoundation/9.
 # the SAS session encoding (see https://docs.python.org/3.5/library/codecs.html#standard-encodings for python encoding values). windows-1252 is appropriate
 # for the default Windows SAS session encoding
 #                                                                                                         
-# Since this IOM access method used the Java IOM client, a classpath is required for the java process to find the necessary jars. Use the template below
+# Since this IOM access method uses the Java IOM client, a classpath is required for the java process to find the necessary jars. Use the template below
 # to build out a classpath variable and assign that to the 'classpath' option in the configuration definition. The IOM client jars are delivered as part
 # of a Base SAS install, so should be available in any SAS install. The saspyiom.jar is available in the saspy repo/install. 
 #
@@ -197,11 +170,4 @@ http     = {'ip'      : 'host.running.compute.service',
             'port'    :  80,
             'context' : 'Tom2'
             }
-
-httptest = {'ip'      : 'tomspc',
-            'port'    :  80, 
-            'options' : ["fullstimer", "memsize=1G"]
-            'context' : 'OMRcontext1'
-            }
-
 
