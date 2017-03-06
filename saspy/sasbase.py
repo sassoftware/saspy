@@ -240,14 +240,14 @@ class SASsession():
 
         :return: output
         """
-        print("Access Method   = "+self.sascfg.mode)
-        print("SAS Config name = "+self.sascfg.name)
-        print("WORK Path       = "+self.workpath)
-        print("SAS Version     = "+self.sasver)
-        print("Teach me SAS    = "+str(self.nosub))
-        print("Batch           = "+str(self.batch))
-        print("Results         = "+self.results)
-        return ''
+        x  = "Access Method   = %s\n" % self.sascfg.mode
+        x += "SAS Config name = %s\n" % self.sascfg.name
+        x += "WORK Path       = %s\n" % self.workpath    
+        x += "SAS Version     = %s\n" % self.sasver        
+        x += "Teach me SAS    = %s\n" % str(self.nosub)  
+        x += "Batch           = %s\n" % str(self.batch)    
+        x += "Results         = %s\n" % self.results     
+        return(x)                 
 
     def __del__(self):
         if self._io:
@@ -814,12 +814,11 @@ class SASdata:
 
         :return: output
         """
-
-        print("Libref  = "+self.libref)
-        print("Table   = "+self.table)
-        print("Dsopts  = "+str(self.dsopts))
-        print("Results = "+self.results)
-        return ''
+        x  = "Libref  = %s\n" % self.libref
+        x += "Table   = %s\n" % self.table
+        x += "Dsopts  = %s\n" % str(self.dsopts)
+        x += "Results = %s\n" % self.results
+        return(x)                 
 
     def set_results(self, results: str):
         """
