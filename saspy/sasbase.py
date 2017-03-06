@@ -162,24 +162,15 @@ class SASsession():
 
     **STDIO**
 
-    saspath - overrides saspath Dict entry of cfgname in sascfg.py file
-    options - overrides options Dict entry of cfgname in sascfg.py file
+    saspath  - overrides saspath Dict entry of cfgname in sascfg.py file
+    options  - overrides options Dict entry of cfgname in sascfg.py file
+    encoding  - This is the python encoding value that matches the SAS session encoding
 
     **STDIO over SSH**
 
     and for running STDIO over passwordless ssh
     ssh     - full path of the ssh command; /usr/bin/ssh for instance
     host    - host name of the remote machine
-
-    **Compute Service**
-
-    and for the HTTP IO module to connect to SAS Viya
-    ip      - host address
-    port    - port; the code Defaults this to 80 (the Compute Services default port)
-    context - context name defined on the compute service
-    options - SAS options to include in the start up command line
-    user    - user name to authenticate with
-    pw      - password to authenticate with
 
     **IOM**
 
@@ -192,6 +183,18 @@ class SASsession():
     omrpw     - pw for user for IOM access
     encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
     classpath - classpath to IOM client jars and saspyiom client jar.
+
+    **Compute Service**
+
+    and for the HTTP IO module to connect to SAS Viya
+    ip        - host address
+    port      - port; the code Defaults this to 80 (the Compute Services default port)
+    context   - context name defined on the compute service
+    options   - SAS options to include in the start up command line
+    user      - user name to authenticate with
+    pw        - password to authenticate with
+    encoding  - This is the python encoding value that matches the SAS session encoding
+
     """
 
     # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
@@ -204,6 +207,7 @@ class SASsession():
         self.results        = kwargs.get('results', 'Pandas')
         self.workpath       = ''
         self.sasver         = ''
+        self.sascei         = ''
 
         if not self.sascfg.valid:
             return
@@ -224,12 +228,16 @@ class SASsession():
            if self._io:
              ll = self.submit('libname work list;')
              self.workpath = ll['LOG'].partition('Physical Name=')[2].partition('\n')[0].strip()
-             if running_on_win:
+             win = self.workpath.count('\\')
+             lnx = self.workpath.count('/')
+             if (win > lnx):
                 self.workpath += '\\'
              else:
                 self.workpath += '/'
-             ll = self.submit('"%put SYSV=&sysvlong;";')
+             ll = self.submit('"%put SYSV=&sysvlong4;";')
              self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
+             ll = self.submit('proc options option=encoding;run;')
+             self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
 
         except (AttributeError):
            self._io = None
@@ -240,13 +248,15 @@ class SASsession():
 
         :return: output
         """
-        x  = "Access Method   = %s\n" % self.sascfg.mode
-        x += "SAS Config name = %s\n" % self.sascfg.name
-        x += "WORK Path       = %s\n" % self.workpath    
-        x += "SAS Version     = %s\n" % self.sasver        
-        x += "Teach me SAS    = %s\n" % str(self.nosub)  
-        x += "Batch           = %s\n" % str(self.batch)    
-        x += "Results         = %s\n" % self.results     
+        x  = "Access Method         = %s\n" % self.sascfg.mode
+        x += "SAS Config name       = %s\n" % self.sascfg.name
+        x += "WORK Path             = %s\n" % self.workpath    
+        x += "SAS Version           = %s\n" % self.sasver        
+        x += "Teach me SAS          = %s\n" % str(self.nosub)  
+        x += "Batch                 = %s\n" % str(self.batch)    
+        x += "Results               = %s\n" % self.results     
+        x += "SAS Session Encoding  = %s\n" % self.sascei     
+        x += "Python Encoding value = %s\n" % self._io.sascfg.encoding     
         return(x)                 
 
     def __del__(self):
