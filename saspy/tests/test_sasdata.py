@@ -1,5 +1,7 @@
 import unittest
 import saspy
+import os
+from IPython.utils.tempdir import TemporaryDirectory
 
 
 class TestSASdataObject(unittest.TestCase):
@@ -179,6 +181,53 @@ class TestSASdataObject(unittest.TestCase):
         # sort by missing variable
         self.assertRaises(RuntimeError, lambda: wkcars.sort('foobar'))
 
+    def test_SASdata_score1(self):
+        # Create dataset in WORK
+        self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
+        wkcars = self.sas.sasdata('cars')
+        a = wkcars.columnInfo()
+        wkcars.score(code='P_originUSA = origin;')
+        b = wkcars.columnInfo()
+        self.assertNotEqual(a, b, msg="B should have an extra column P_originUSA")
+
+    def test_SASdata_score2(self):
+        # Create dataset in WORK
+        self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
+        wkcars = self.sas.sasdata('cars')
+        wkcars2 = self.sas.sasdata('cars2', 'work')
+        a = wkcars.columnInfo()
+        wkcars.score(code='P_originUSA = origin;', out=wkcars2)
+        b = wkcars.columnInfo()
+        self.assertEqual(a, b, msg="B should be identical to a")
+        self.assertIsInstance(wkcars2, 'SASData', "Does out dataset exist")
+
+    def test_SASdata_score3(self):
+        with TemporaryDirectory() as temppath:
+            with open(os.path.join(temppath, 'score.sas'), 'w') as f:
+                f.write('P_originUSA = origin;')
+
+        # Create dataset in WORK
+        self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
+        wkcars = self.sas.sasdata('cars')
+        wkcars2 = self.sas.sasdata('cars2', 'work')
+        a = wkcars.columnInfo()
+        wkcars.score(file=f.name, out=wkcars2)
+        b = wkcars.columnInfo()
+        self.assertEqual(a, b, msg="B should be identical to a")
+        self.assertIsInstance(wkcars2, 'SASData', "Does out dataset exist")
+
+    def test_SASdata_score4(self):
+        with TemporaryDirectory() as temppath:
+            with open(os.path.join(temppath, 'score.sas'), 'w') as f:
+                f.write('P_originUSA = origin;')
+
+        # Create dataset in WORK
+        self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
+        wkcars = self.sas.sasdata('cars')
+        a = wkcars.columnInfo()
+        wkcars.score(file=f.name)
+        b = wkcars.columnInfo()
+        self.assertNotEqual(a, b, msg="B should have an extra column P_originUSA")
 
         
         
