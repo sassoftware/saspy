@@ -5,7 +5,7 @@ import saspy
 class TestSASstat(unittest.TestCase):
     def setUp(self):
         # Use the first entry in the configuration list
-        self.sas = saspy.SASsession(cfgname=saspy.SAScfg.SAS_config_names[0])
+        self.sas = saspy.SASsession() #cfgname=saspy.SAScfg.SAS_config_names[0])
         self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
         procNeeded=['reg', 'mixed', 'hpsplit']
         if not self.procFound(procNeeded):
@@ -59,8 +59,11 @@ class TestSASstat(unittest.TestCase):
         # multiple target variables
         stat = self.sas.sasstat()
         nnin = self.sas.sasdata('cars', 'sashelp')
-        self.assertRaises(SyntaxError, lambda: stat.hpsplit(data=nnin, target='MSRP origin', input='enginesize--length'))
-
+        # Need to change this assert; the exception isn't raised - I think the code changed
+        x =  stat.hpsplit(data=nnin, target='MSRP origin', input='enginesize--length')
+        a = ['ERROR_LOG']
+        self.assertEqual(a, x.__dir__(), msg=u"Multiple target variables didn't fail in stat.hpsplit")
+  
     def test_outputDset(self):
         stat = self.sas.sasstat()
         tsave = self.sas.sasdata('tsave')

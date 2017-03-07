@@ -6,7 +6,7 @@ import saspy
 class TestSASets(unittest.TestCase):
     def setUp(self):
         # Use the first entry in the configuration list
-        self.sas = saspy.SASsession(cfgname=saspy.SAScfg.SAS_config_names[0])
+        self.sas = saspy.SASsession() #cfgname=saspy.SAScfg.SAS_config_names[0])
         self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
         procNeeded=['arima']
         if not self.procFound(procNeeded):
