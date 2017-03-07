@@ -49,6 +49,7 @@ class SASconfigHTTP:
       self.options  = cfg.get('options', [])
       user          = cfg.get('user', '')
       pw            = cfg.get('pw', '')
+      self.encoding = cfg.get('encoding', '')
 
       # GET Config options
       try:
@@ -100,6 +101,15 @@ class SASconfigHTTP:
             print("Parameter 'pw' passed to SAS_session was ignored due to configuration restriction.")
          else:
             pw = inpw
+
+      inencoding = kwargs.get('encoding', '')
+      if len(inencoding) > 0:
+         if lock and len(self.encoding):
+            print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.encoding = inencoding   
+      if not self.encoding:
+         self.encoding = 'utf-8'  
 
       while len(self.ip) == 0:
          if not lock:
@@ -179,9 +189,9 @@ class SASconfigHTTP:
 
       # POST AuthToken
       conn = hc.HTTPConnection(self.ip, self.port);conn.connect()
-      d1 = ("grant_type=password&username="+user+"&password="+pw).encode()
-      basic = base64.encodestring("sas.tkmtrb:".encode())
-      authheader = '%s' % basic.splitlines()[0].decode()
+      d1 = ("grant_type=password&username="+user+"&password="+pw).encode(self.sascfg.encoding)
+      basic = base64.encodestring("sas.tkmtrb:".encode(self.sascfg.encoding))
+      authheader = '%s' % basic.splitlines()[0].decode(self.sascfg.encoding)
       headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
                "Authorization":"Basic "+authheader}
       try:
@@ -192,15 +202,15 @@ class SASconfigHTTP:
          print("Failure in GET AuthToken. Could not connect to the logon service. Exception info:\n"+str(sys.exc_info()))
          return None
 
-      status = req.getcode()
+      status = req.getcode(self.sascfg.encoding)
       resp = req.read()
       conn.close()
 
       if status > 299:
-         print("Failure in GET AuthToken. Status="+str(status)+"\nResponse="+resp.decode())
+         print("Failure in GET AuthToken. Status="+str(status)+"\nResponse="+resp.decode(self.sascfg.encoding))
          return None
 
-      js = json.loads(resp.decode())
+      js = json.loads(resp.decode(self.sascfg.encoding))
       token = js.get('access_token')
       return token
 
@@ -213,15 +223,15 @@ class SASconfigHTTP:
       headers={"Accept":"application/vnd.sas.collection+json","Authorization":"Bearer "+self._token}
       conn.request('GET', "/compute/contexts", headers=headers)
       req = conn.getresponse()
-      status = req.getcode()
+      status = req.getcode(self.sascfg.encoding)
       resp = req.read()
       conn.close()
 
       if status > 299:
-         print("Failure in GET Contexts. Status="+str(status)+"\nResponse="+resp.decode())
+         print("Failure in GET Contexts. Status="+str(status)+"\nResponse="+resp.decode(self.sascfg.encoding))
          return None
 
-      js = json.loads(resp.decode())
+      js = json.loads(resp.decode(self.sascfg.encoding))
       items = js.get('items')
 
       for i in range(len(items)):
@@ -233,14 +243,15 @@ class SASconfigHTTP:
 class SASsessionHTTP():
    '''
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-   cfgname - value in SAS_config_names List of the sascfg.py file
-   kernel  - None - internal use when running the SAS_kernel notebook
-   user    - userid to use to connect to Compute Service
-   pw      - pw for the userid being used to connect to Compute Service
-   ip      - overrides IP      Dict entry of cfgname in sascfg.py file
-   port    - overrides Port    Dict entry of cfgname in sascfg.py file
-   context - overrides Context Dict entry of cfgname in sascfg.py file 
-   options - overrides Options Dict entry of cfgname in sascfg.py file
+   cfgname   - value in SAS_config_names List of the sascfg.py file
+   kernel    - None - internal use when running the SAS_kernel notebook
+   user      - userid to use to connect to Compute Service
+   pw        - pw for the userid being used to connect to Compute Service
+   ip        - overrides IP      Dict entry of cfgname in sascfg.py file
+   port      - overrides Port    Dict entry of cfgname in sascfg.py file
+   context   - overrides Context Dict entry of cfgname in sascfg.py file 
+   options   - overrides Options Dict entry of cfgname in sascfg.py file
+   encoding  - This is the python encoding value that matches the SAS session encoding of the Compute Server you are connecting to
    '''
    #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, user: str ='', pw: str ='', 
    #                   ip: str ='', port: int ='', context: str ='', options: list =[]) -> '<SASsession object>':
@@ -272,16 +283,16 @@ class SASsessionHTTP():
       headers={"Accept":"*/*","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', "/compute/sessions?contextName="+self.sascfg.ctxname, body=d1, headers=headers)
       req = conn.getresponse()
-      status = req.getcode()
+      status = req.getcode(self.sascfg.encoding)
       resp = req.read()
       conn.close()
 
       if status > 299:
-         print("Failure in POST Session \n"+resp.decode())
+         print("Failure in POST Session \n"+resp.decode(self.sascfg.encoding))
          print("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
          return None
 
-      js = json.loads(resp.decode())
+      js = json.loads(resp.decode(self.sascfg.encoding))
       self._sessionid = js.get('id')
 
       if self._sessionid == None:
@@ -322,11 +333,11 @@ class SASsessionHTTP():
          else:
             conn.request('GET', "/compute/sessions/"+self._sessionid+"/log?start="+str(start)+"&limit=999999", headers=headers)
          req = conn.getresponse()
-         status = req.getcode()
+         status = req.getcode(self.sascfg.encoding)
          resp = req.read()
          conn.close()
 
-         js  = json.loads(resp.decode())
+         js  = json.loads(resp.decode(self.sascfg.encoding))
          log = js.get('items')
 
          lines = len(log)
@@ -355,11 +366,11 @@ class SASsessionHTTP():
       else:
          conn.request('GET', "/compute/sessions/"+self._sessionid+"/results", headers=headers)
       req = conn.getresponse()
-      status = req.getcode()
+      status = req.getcode(self.sascfg.encoding)
       resp = req.read()
       conn.close()
 
-      js = json.loads(resp.decode())
+      js = json.loads(resp.decode(self.sascfg.encoding))
       results = js.get('items')
 
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
@@ -369,9 +380,9 @@ class SASsessionHTTP():
          if results[i].get('type') == 'ODS':
             conn.request('GET', results[i].get('links')[0].get('href'), headers=headers)
             req = conn.getresponse()
-            status = req.getcode()
+            status = req.getcode(self.sascfg.encoding)
             resp = req.read()
-            htm += resp.decode()
+            htm += resp.decode(self.sascfg.encoding)
          i += 1
       conn.close()
 
@@ -393,11 +404,11 @@ class SASsessionHTTP():
          else:
             conn.request('GET', "/compute/sessions/"+self._sessionid+"/listing?start="+str(start)+"limit=999999", headers=headers)
          req = conn.getresponse()
-         status = req.getcode()
+         status = req.getcode(self.sascfg.encoding)
          resp = req.read()
          conn.close()
 
-         js  = json.loads(resp.decode())
+         js  = json.loads(resp.decode(self.sascfg.encoding))
          lst = js.get('items')
 
          lines = len(lst)
@@ -434,7 +445,7 @@ class SASsessionHTTP():
       resp = req.read()
       conn.close()
 
-      js = json.loads(resp.decode())
+      js = json.loads(resp.decode(self.sascfg.encoding))
       jobid = js.get('id')
 
       return jobid
@@ -507,7 +518,7 @@ class SASsessionHTTP():
       resp = req.read()
       conn.close()
 
-      js = json.loads(resp.decode())
+      js = json.loads(resp.decode(self.sascfg.encoding))
       jobid = js.get('id')
       if not jobid:
          print("Problem submitting job to Compute Service.\n   Status code="+str(js.get('httpStatusCode'))+"\n   Message="+js.get('message'))
@@ -573,7 +584,7 @@ class SASsessionHTTP():
 
          conn.request('HEAD', "/compute/sessions/"+self._sessionid+"/data/WORK", headers=headers)
          req = conn.getresponse()
-         status = req.getcode()
+         status = req.getcode(self.sascfg.encoding)
          conn.close()
     
          if status == 200:
@@ -586,7 +597,7 @@ class SASsessionHTTP():
       headers={"Accept":"*/*", "Authorization":"Bearer "+self.sascfg._token}
       conn.request('HEAD', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table, headers=headers)
       req = conn.getresponse()
-      status = req.getcode()
+      status = req.getcode(self.sascfg.encoding)
       conn.close()
 
       if status == 200:
@@ -656,21 +667,21 @@ class SASsessionHTTP():
       #headers={"Accept":"application/vnd.sas.compute.data.table+json", "Authorization":"Bearer "+self.sascfg._token}
       #conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table, headers=headers)
       #req = conn.getresponse()
-      #status = req.getcode()
+      #status = req.getcode(self.sascfg.encoding)
       #conn.close()
 
       #resp = req.read()
-      #js = json.loads(resp.decode())
+      #js = json.loads(resp.decode(self.sascfg.encoding))
 
       conn = hc.HTTPConnection(self.sascfg.ip, self.sascfg.port);conn.connect()
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
       conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table+"/columns", headers=headers)
       req = conn.getresponse()
-      status = req.getcode()
+      status = req.getcode(self.sascfg.encoding)
       resp = req.read()
       conn.close()
 
-      js = json.loads(resp.decode())
+      js = json.loads(resp.decode(self.sascfg.encoding))
 
       varlist = []
       vartype = []
@@ -740,11 +751,11 @@ class SASsessionHTTP():
 
       #conn.request('GET', "/compute/sessions/"+self._sessionid+"/data/"+libref+"/"+table+"/rows", headers=headers)
       req = conn.getresponse()
-      status = req.getcode()
+      status = req.getcode(self.sascfg.encoding)
       resp = req.read()
       conn.close()
 
-      js = json.loads(resp.decode())
+      js = json.loads(resp.decode(self.sascfg.encoding))
 
       r = []
       lst = js.get('items')
