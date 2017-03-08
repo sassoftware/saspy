@@ -27,7 +27,7 @@ There are three main parts to this configuration file.
         2) SAS_config_options
         3) Configuration Definitions
 
-In reverse order, the Configuration Definitions are Python Dictionaries are you configure each connection to a type of SAS session.
+In reverse order, the Configuration Definitions are Python Dictionaries where you configure each connection to a type of SAS session.
 SAS_config_options only has one option so far, which restricts (or allows) the end users ability to override settings in the Configuration Definitions using SASsession().
 SAS_config_names is the list of Configuration Definition names, which are available to be used; chosen by an end user at connection time.
 Configuration Definitions not listed in SAS_config_names are simply inaccessible. You can define all kinds of Configuration Definitions in the file,
@@ -39,7 +39,7 @@ STDIO
 The original access method for SASPy is STDIO. This works with Unix only,
 because PC SAS does not support line mode style connections (via stdin, stdout, stderr).
 This is for a local connection to SAS which is installed on the same Unix server.
-There are only two keys for this Configuration Definition Dictionary:
+There are only three keys for this Configuration Definition Dictionary:
 
 saspath - Required
     Path to SAS startup script
@@ -66,7 +66,7 @@ STDIO over SSH
 ==============
 The remote version of the original access method for SASPy. This also works with Unix only, and it supports passwordless SSH to the Unix machine where SAS is installed.
 It is up to you to make sure user accounts have passwordless SSH configured between the two system. Google it, it's not that hard.
-As well as the two keys for STDIO, there are two more more required keys to configure:
+As well as the three keys for STDIO, there are two more more required keys to configure:
 
 ssh - Required
     The ssh command to run (Linux execv required a fully qualified path, even it it could be found in the path variable - it won't. Use fully qualified path here)
@@ -99,7 +99,6 @@ The IOM access method requires the use of the SAS Java IOM Client, and a classpa
 The ``'classpath'`` key requires a little extra explanation before we get to the Configuration Definition. There are four (4) jars that are required for the Java IOM Client.
 These are provided in your existing SAS Install.
 There is one jar provided in this repo: saspyiom.jar. These five jars must be provided (fully qualified paths) in a classpath variable.
-Also, these five jars are compatible/interchangable with both Windows and Unix client systems.  
 This is done in a very simple way in the sascfg.py file, like so.
 
 ::
@@ -117,6 +116,8 @@ And then simply use:
     'classpath' : cp,
 
 in the Configuration Definition. Easy :)
+Also worth noting: these five jars are compatible/interchangable with both Windows and Unix client systems.  
+
 
 
 The IOM access method supports two forms: `Local`_ and `Remote`_
