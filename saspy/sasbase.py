@@ -156,44 +156,54 @@ class SASsession():
     **Overview**
 
     The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-    cfgname - value in SAS_config_names List of the sascfg.py file
-    kernel  - None - internal use when running the SAS_kernel notebook
-    results - Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
+    Most of these parameters will be configured in the sascfg.py configuration file. 
+
+    Common parms for all access methods are:
+
+    :param cfgname: value in SAS_config_names List of the sascfg.py file
+    :param kernel: None - internal use when running the SAS_kernel notebook
+    :param results: Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
+    :return: 'SASsession'
+    :rtype: 'SASsession'
+
+    And each access method has its own set of parameters.
 
     **STDIO**
 
-    saspath  - overrides saspath Dict entry of cfgname in sascfg.py file
-    options  - overrides options Dict entry of cfgname in sascfg.py file
-    encoding  - This is the python encoding value that matches the SAS session encoding
+    :param saspath: overrides saspath Dict entry of cfgname in sascfg.py file
+    :param options: overrides options Dict entry of cfgname in sascfg.py file
+    :param encoding: This is the python encoding value that matches the SAS session encoding
 
     **STDIO over SSH**
 
-    and for running STDIO over passwordless ssh
-    ssh     - full path of the ssh command; /usr/bin/ssh for instance
-    host    - host name of the remote machine
+    and for running STDIO over passwordless ssh, add these required parameters
+
+    :param ssh: full path of the ssh command; /usr/bin/ssh for instance
+    :param host: host name of the remote machine
 
     **IOM**
 
     and for the IOM IO module to connect to SAS9 via Java IOM
-    saspath   - for local Windows connection only] path to SAS executable (sas.exe) i.e.: C:\Program Files\SASHome\SASFoundation\9.4\sas.exe
-    java      - the path to the java executable to use
-    iomhost   - for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to
-    iomport   - for remote IOM case, not local Windows] the port IOM is listening on
-    omruser   - user id for IOM access
-    omrpw     - pw for user for IOM access
-    encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
-    classpath - classpath to IOM client jars and saspyiom client jar.
+
+    :param java: the path to the java executable to use
+    :param iomhost: for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to
+    :param iomport: for remote IOM case, not local Windows] the port IOM is listening on
+    :param omruser: user id for remote IOM access
+    :param omrpw: pw for user for remote IOM access
+    :param encoding: This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
+    :param classpath: classpath to IOM client jars and saspyiom client jar.
 
     **Compute Service**
 
     and for the HTTP IO module to connect to SAS Viya
-    ip        - host address
-    port      - port; the code Defaults this to 80 (the Compute Services default port)
-    context   - context name defined on the compute service
-    options   - SAS options to include in the start up command line
-    user      - user name to authenticate with
-    pw        - password to authenticate with
-    encoding  - This is the python encoding value that matches the SAS session encoding
+
+    :param ip: host address
+    :param port: port; the code Defaults this to 80 (the Compute Services default port)
+    :param context: context name defined on the compute service
+    :param options: SAS options to include in the start up command line
+    :param user: user name to authenticate with
+    :param pw: password to authenticate with
+    :param encoding: This is the python encoding value that matches the SAS session encoding
 
     """
 
