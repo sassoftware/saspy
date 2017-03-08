@@ -24,3 +24,15 @@ class TestSASml(unittest.TestCase):
                 if line == 'ERROR: Procedure %s not found.' % proc.upper():
                     return False
         return True
+
+    def testForestSmoke1(self):
+        ml = self.sas.sasml()
+        dt = self.sas.sasdata("class", "sashelp")
+        out1 = ml.forest(data=dt, target='height',
+                         input={'interval':'weight', "nominal":'sex'}
+                         )
+        a = ['BASELINE', 'DATAACCESSINFO', 'FITSTATISTICS', 'LOG',
+             'MODELINFO', 'NOBS', 'PERFORMANCEINFO', 'VARIABLEIMPORTANCE']
+        self.assertEqual(sorted(a), sorted(out1.__dir__()),
+                         msg=u"Simple Forest  model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))

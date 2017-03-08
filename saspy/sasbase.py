@@ -1330,7 +1330,7 @@ class SASdata:
 
         :param target: string that represents the target variable in the data
         :param prediction: string that represents the numeric prediction column in the data. For nominal targets this should
-        a probability between (0,1).
+            a probability between (0,1).
         :param nominal: boolean to indicate if the Target Variable is nominal because the assessment measures are different.
         :param event: string of either DESC or ASC which indicates which value of the target variable is the event vs non-event
         :param kwargs:
@@ -1479,12 +1479,13 @@ class SASdata:
         else:
             outTable = self.table
             outLibref = self.libref
+        codestr = code
         code = "data %s.%s%s;" % (outLibref, outTable, self._dsopts())
         code += "set %s.%s%s;" % (self.libref, self.table, self._dsopts())
         if len(file)>0:
             code += "%%include %s;" % file
         else:
-            code += "%%include %s;" %code
+            code += "%s;" %codestr
         code += "run;"
 
         if self.sas.nosub:
