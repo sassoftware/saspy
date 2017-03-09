@@ -479,21 +479,21 @@ class SASProcCommons:
         return objlist
 
 
-    def _processNominals(self, kwargs, data):
-        nom = kwargs.pop('nominals', None)
-        input_list = kwargs.pop('input', None)
-        tgt = kwargs.pop('target', None)
+    def _charlist(self, data) -> list:
+        """
+        Private method to return the variables in a SAS Data set that are of type char
 
-        charlist1=[]
-        target = {'nominal':tgt}
-
-        # Get list of character varaibles to add to nominal list
-        char_string="""
+        :param data: SAS Data object to process
+        :return: list of character variables
+        :rtype: list
+        """
+        # Get list of character variables to add to nominal list
+        char_string = """
         data _null_; file LOG;
           d = open('{0}.{1}');
-          nvars = attrn(d, 'NVARS'); 
+          nvars = attrn(d, 'NVARS');
           put 'VARLIST=';
-          do i = 1 to nvars; 
+          do i = 1 to nvars;
              vart = vartype(d, i);
              var  = varname(d, i);
              if vart eq 'C' then
@@ -501,78 +501,110 @@ class SASProcCommons:
           put 'VARLISTend=';
         run;
         """
-
         # ignore teach_me_SAS mode to run contents
         nosub = self.sas.nosub
         self.sas.nosub = False
-        ll = self.sas.submit(char_string.format(data.libref, data.table+data._dsopts()))
+        ll = self.sas.submit(char_string.format(data.libref, data.table + data._dsopts()))
         self.sas.nosub = nosub
-        l2 = ll['LOG'].partition("VARLIST=\n")            
-        l2 = l2[2].rpartition("VARLISTend=\n")                   
-        charlist1 = l2[0].split("\n")                                             
-        del charlist1[len(charlist1)-1]
+        l2 = ll['LOG'].partition("VARLIST=\n")
+        l2 = l2[2].rpartition("VARLISTend=\n")
+        charlist1 = l2[0].split("\n")
+        del charlist1[len(charlist1) - 1]
         charlist1 = [x.casefold() for x in charlist1]
-        try:
-            if isinstance(input_list, dict):
-                input_list['nominal'] = [x.casefold() for x in input_list['nominal']]
-                charlist2 = list(set(charlist1) & (set(input_list['nominal']) | set([tgt])))
-            else:
-                input_list = [x.casefold() for x in input_list]
-                charlist2 = list(set(charlist1) & (set(input_list) | set([tgt])))
-        except TypeError:
-            charlist2 = list(set(charlist1) & set([tgt]))
+        return charlist1
 
-        # if there is no nominals in the list or it it only the target variable
-        if nom is not None and not (len(nom)==1 and tgt.casefold() == nom[0].casefold()):
-            # add char variables in the input list to nom
-            if isinstance(nom, str):
-                nom=nom.split(' ')
-            nom.extend(charlist2)
-            # make lists case insensitive
+    def _processNominals(self, kwargs, data):
+        nom = kwargs.pop('nominals', None)
+        inputs = kwargs.pop('input', None)
+        tgt = kwargs.pop('target', None)
+
+        # get char variables and nominals list if it exists
+        if nom is None:
+            dsnom = SASProcCommons._charlist(self, data)
+        elif isinstance(nom, list):
             nom = [x.casefold() for x in nom]
-            nom_inputs = [x.casefold() for x in nom]
-
-            # if there are is a list of nominals make two lists based on inputs and nominals
-            if len(nom_inputs)>1:
-                nom_inputs = [val for val in input_list if val in nom]
-                int_inputs = [val for val in input_list if val not in nom]
-            if tgt.casefold() not in nom:
-                target = {'interval': tgt}
-            # Add char variables to nom_inputs
-            #nom_inputs.extend(charlist)
-            inputs = {'nominal': nom_inputs,
-                     'interval': int_inputs}
-        # no nominal list but there are char variables
-        elif len(charlist2)>0:
-            if isinstance(input_list, dict):
-                # add char variables to the current nominal list
-                nom_inputs = list( set(input_list['nominal']) | set(charlist2))
-                # make sure char variables aren't in interval list
-                int_inputs = list( set(input_list['interval']) - set(charlist2))
-            else:
-                nom_inputs = [val for val in input_list if val in charlist2]
-                int_inputs = [val for val in input_list if val not in charlist2]
-            inputs = {'nominal': nom_inputs,
-                     'interval': int_inputs}
-
+            dsnom = list(set(SASProcCommons._charlist(self, data)) | set(nom))
         else:
-            inputs = {'interval': input_list}
-
-        if any(v is not None for v in inputs.values()):
-            kwargs['input'] = inputs
-        if any(v is not None for v in target.values()):
-            kwargs['target'] = target
-        
-        # if the mode key exists then thye are using the model syntax so convert target and input 
-        # and delete them. Only one syntax style is valid.
-        #bp()
-        #if 'model' in kwargs.keys():
-        #   kwargs['cls'] = ' '.join(kwargs.get(inputs['nominal'], ''))
-        #   kwargs['model'] = tgt + '=' + ' '.join(inputs['nominal']) +' '+ ' '.join(inputs['interval'])
-        #   kwargs.pop('input', None)
-        #   kwargs.pop('target', None)
-        #print(kwargs.items())
-
+            raise SyntaxWarning('nominals must be list type. You gave %s.' % str(type(nom)))
+        if tgt is not None:
+            # what object type is target
+            if isinstance(tgt, str):
+                # if there is only one word or special character do nothing
+                if len(tgt.split()) == 1 or len(
+                        [word for word in tgt if any(letter in word for letter in '/\:;.%')]) != 0:
+                    kwargs['target'] = tgt
+                else:
+                    # turn str into list and search for nominals
+                    tgt_list = tgt.casefold().split()
+                    nom_target = list(set(tgt_list).intersection(dsnom))
+                    int_target = list(set(tgt_list).difference(dsnom))
+                    if (nom_target is not None and len(nom_target) > 0) and (
+                            int_target is not None and len(int_target) > 0):
+                        kwargs['target'] = {'nominal' : nom_target,
+                                            'interval': int_target}
+                    elif nom_target is not None and len(nom_target) > 0:
+                        kwargs['target'] = {'nominal': nom_target}
+                    elif int_target is not None and len(int_target) > 0:
+                        kwargs['target'] = {'interval': int_target}
+            elif isinstance(tgt, list):
+                tgt_list = tgt
+                tgt_list = [x.casefold() for x in tgt_list]
+                nom_target = list(set(tgt_list).intersection(dsnom))
+                int_target = list(set(tgt_list).difference(dsnom))
+                if (nom_target is not None and len(nom_target) > 0) and (
+                        int_target is not None and len(int_target) > 0):
+                    kwargs['target'] = {'nominal' : nom_target,
+                                        'interval': int_target}
+                elif nom_target is not None and len(nom_target) > 0:
+                    kwargs['target'] = {'nominal': nom_target}
+                elif int_target is not None and len(int_target) > 0:
+                    kwargs['target'] = {'interval': int_target}
+            elif isinstance(tgt, dict):
+                # are the keys valid
+                # TODO: make comparison case insensitive casefold()
+                if any(key in tgt.keys() for key in ['nominal', 'interval']):
+                    kwargs['target'] = tgt
+            else:
+                raise SyntaxError("Target must be a string, list, or dictionary you provided: %s" % str(type(tgt)))
+        if inputs is not None:
+            # what object type is input
+            if isinstance(inputs, str):
+                # if there is only one word or special character do nothing
+                if len(inputs.split()) == 1 or len(
+                        [word for word in inputs if any(letter in word for letter in '/\:;.%')]) != 0:
+                    kwargs['input'] = inputs
+                else:
+                    # turn str into list and search for nominals
+                    inputs_list = inputs.casefold().split()
+                    nom_input = list(set(inputs_list).intersection(dsnom))
+                    int_input = list(set(inputs_list).difference(dsnom))
+                    if (nom_input is not None and len(nom_input) > 0) and (
+                            int_input is not None and len(int_input) > 0):
+                        kwargs['input'] = {'nominal' : nom_input,
+                                           'interval': int_input}
+                    elif nom_input is not None and len(nom_input) > 0:
+                        kwargs['input'] = {'nominal': nom_input}
+                    elif int_input is not None and len(int_input) > 0:
+                        kwargs['input'] = {'interval': int_input}
+            elif isinstance(inputs, list):
+                inputs_list = inputs
+                inputs_list = [x.casefold() for x in inputs_list]
+                nom_input = list(set(inputs_list).intersection(dsnom))
+                int_input = list(set(inputs_list).difference(dsnom))
+                if (nom_input is not None and len(nom_input) > 0) and (int_input is not None and len(int_input) > 0):
+                    kwargs['input'] = {'nominal' : nom_input,
+                                       'interval': int_input}
+                elif nom_input is not None and len(nom_input) > 0:
+                    kwargs['input'] = {'nominal': nom_input}
+                elif int_input is not None and len(int_input) > 0:
+                    kwargs['input'] = {'interval': int_input}
+            elif isinstance(inputs, dict):
+                # are the keys valid
+                # TODO: make comparison case insensitive casefold()
+                if any(key in inputs.keys() for key in ['nominal', 'interval']):
+                    kwargs['input'] = inputs
+            else:
+                raise SyntaxError("input must be a string, list, or dictionary you provided: %s" % str(type(inputs)))
         return kwargs
 
 
