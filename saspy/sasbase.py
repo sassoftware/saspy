@@ -512,7 +512,7 @@ class SASsession():
         return sd
 
     def saslib(self, libref: str, engine: str = ' ', path: str = '',
-               options: str = ' ') -> str:
+               options: str = ' ', prompt: dict = []) -> str:
         """
 
         :param libref:  the libref for be assigned
@@ -529,7 +529,7 @@ class SASsession():
         if self.nosub:
             print(code)
         else:
-            ll = self._io.submit(code, "text")
+            ll = self._io.submit(code, "text", prompt)
             if self.batch:
                 return ll['LOG'].rsplit(";*\';*\";*/;\n")[0]
             else:
