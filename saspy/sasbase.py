@@ -1339,8 +1339,7 @@ class SASdata:
         TODO: add code example of build, score, and then assess
 
         :param target: string that represents the target variable in the data
-        :param prediction: string that represents the numeric prediction column in the data. For nominal targets this should
-        a probability between (0,1).
+        :param prediction: string that represents the numeric prediction column in the data. For nominal targets this should a probability between (0,1).
         :param nominal: boolean to indicate if the Target Variable is nominal because the assessment measures are different.
         :param event: string of either DESC or ASC which indicates which value of the target variable is the event vs non-event
         :param kwargs:
