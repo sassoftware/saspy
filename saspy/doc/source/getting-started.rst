@@ -183,6 +183,32 @@ The API doc has a complete list of methods for each object.
 To see a list of the available methods you can `dir()` function for example `dir(stat)` will give you a list of the
 methods available. *Not* all of the methods are procedures but the vast majority are.
 
+.. code:: python
+
+    dir(stat)
+
+
+
+
+.. parsed-literal::
+
+    ['__class__', '__delattr__',  '__dict__',  '__dir__',  '__doc__',  '__eq__',  '__format__', '__ge__',
+    '__getattribute__', '__gt__', '__hash__',  '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__',
+    '__new__', '__reduce__', '__reduce_ex__',  '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__',
+     'glm',
+     'hplogistic',
+     'hpreg',
+     'hpsplit',
+     'logger',
+     'logistic',
+     'mixed',
+     'reg',
+     'sas',
+     'sasproduct',
+     'tpspline']
+
+
+
 To build a model you will need to supply the required parameters to the modeling method. I'll start with an example
 then explain the syntax. We'll continue using the HR data from above.
 
@@ -199,15 +225,28 @@ The code above creates two variables
 -  `inputs` which is a dictionary that represents the model inputs with two keys `interval` and `nominal` which
 represent the interval and nominal variables respectively to consider for modeling
 
-Here are ways to specify the same as above
+Here are ways to specify the same as above using the nominal parameter and a list of inputs.
+The target variable is now a dictionary
 
 .. code:: ipython3
 
-    t1='left'
-    nom = ['work_accident','promotion_last_5years','sales','salary']
-    inputs =['work_accident','promotion_last_5years','sales','salary', 'satisfaction_level',
-             'last_evaluation','number_project','average_montly_hours','time_spend_company']
+    t1={'nominal':'left'}
+    nom = ['work_accident', 'promotion_last_5years', 'sales', 'salary']
+    inputs =['work_accident', 'promotion_last_5years', 'sales', 'salary', 'satisfaction_level',
+             'last_evaluation', 'number_project', 'average_montly_hours', 'time_spend_company']
     rf_model = ml.forest(data=hr, target=t1, input=inputs, nominals = nom)
+
+
+Here using the nominal parameter and a string of inputs and the target is a list (`nominals` must be a list)
+
+.. code:: ipython3
+
+    t1=['left']
+    nom = ['work_accident', 'promotion_last_5years', 'sales', 'salary', 'left']
+    inputs ='work_accident promotion_last_5years sales salary satisfaction_level last_evaluation number_project
+            average_montly_hours time_spend_company'
+    rf_model = ml.forest(data=hr, target=t1, input=inputs, nominals = nom)
+
 
 More about the target and input parameters
 ------------------------------------------
@@ -224,6 +263,75 @@ These rules apply to both the `target` and `input`
 
 **Note:** If a variable is a SAS Character type then it does not need to be specified on the `nominals` parameter but
 does need to be assigned to the ``'nominal'`` dictionary key if you use the dictionary object type
+
+
+Evaluating Model Diagnostics
+============================
+Perhaps the most important part of modeling is evaluating the quality of the model. SASPy makes this very easy by
+leverging the rich graphical and tabular output of `SAS ODS <http://support.sas.com/rnd/base/ods/>`_
+
+The output of a model in SASPy is a `SASresults`_ <add link> Object. It contains all the ODS tables and graphics that
+were produced by the SAS procedure. You can see all the available objects by using `dir()` or tab-complete on the object.
+
+.. code:: python
+
+    dir(rf_model)
+
+The returned list shows the available diagnoist output for this model. The output lists will vary slightly depending on
+the modeling algorthm, the settings, and the target type (nominal vs interval)
+
+.. parsed-literal::
+
+    ['BASELINE',
+     'DATAACCESSINFO',
+     'FITSTATISTICS',
+     'LOG',
+     'MODELINFO',
+     'NOBS',
+     'PERFORMANCEINFO',
+     'VARIABLEIMPORTANCE']
+
+To view a particular diagnostic submit as shown below. The default objects for tables are Pandas DataFrames and for plots
+are HTML graphics
+
+.. code:: python
+
+    rf_model.FITSTATISTICS
+
+
+**Note:** If an error occured during processing, the only artifact will be `ERROR_LOG` which contains the SAS log to aid
+you in resolving your error.
+
+Below is an example were a the variable `left` has been typed incorrectly as `lefty`
+
+
+.. code:: ipython3
+
+    rf_model = ml.forest(data=hr, target='lefty', input=inputs, nominals = nom)
+
+.. parsed-literal::
+
+    SubmissionError: ERRORS found in SAS log:
+    ERROR: Variable LEFTY not found.
+
+We can see a brief detailing of the error but if more context is needed you can see the entire log for the model
+submission
+
+.. code:: ipython3
+
+    rf_model.ERROR_LOG
+
+
+
+
+Assessing Model Quality
+=======================
+
+
+
+
+Scoring New Data
+================
 
 
 
