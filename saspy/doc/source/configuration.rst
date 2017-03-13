@@ -197,10 +197,13 @@ encoding  -
 Local
 ~~~~~
 For Local SAS running on the same Windows machine, you only need the following Configuration Definition keys (Don't specify any of the others).
-There is also one other requirement.
-The sspiauth.dll file (also included in your SAS installation) must be in either your system PATH, your java.library.path, or in the home directory of your Java client.
-You can search for this file in your SAS deployment, though it is likely in your SASHome\\SASFoundation\\9.4\\core\\sasext. If adding this to your system PATH environment
-variable, only list the path to the directory, don't incluse the file itself i.e.: C:\\Program Files\\SASHome\\SASFoundation\\9.4\\core\\sasext. 
+
+*There is also one other requirement.*
+
+The **sspiauth.dll** file (also included in your SAS installation) must be in either your system PATH, your java.library.path, or in the home directory of your Java client.
+You can search for this file in your SAS deployment, though it is likely in your SASHome\\SASFoundation\\9.4\\core\\sasext.
+
+If adding this to your system PATH environment variable, only list the path to the directory, don't incluse the file itself i.e.: C:\\Program Files\\SASHome\\SASFoundation\\9.4\\core\\sasext. 
 
 java      - Required
     the path to the java executable to use (On Unix, fully qualified path. On Windows, you may get away with simply ``java``, else put the FQP)
