@@ -3,7 +3,7 @@
 :tocdepth: 4
 
 *****
-SASPY
+SASpy
 *****
 
 .. module:: saspy
@@ -14,11 +14,12 @@ SASPY
 
 **Source Repository:** `<http://github.com/sassoftware/saspy>`_
 
-**Issues & Ideas:** `<https://github.com/sassoftware/saspy/issues>`_
+**Issues and Ideas:** `<https://github.com/sassoftware/saspy/issues>`_
 
 
-The SASPY project defines Python APIs that can work both
-with a SAS 9.4 installation.
+The SASPy project provides Python APIs to the SAS system. You can start a 
+SAS session and run analytics from Python through a combination of 
+object-oriented methods and Python magics. 
 
 
 .. toctree::

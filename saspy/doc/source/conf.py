@@ -260,8 +260,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'saspy.tex', 'SASpy Documentation',
-     'SAS', 'manual'),
+    (master_doc, 'saspy.tex', 'SASPy',
+     'SAS Institute Inc.', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -290,7 +290,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'saspy', 'SASpy Documentation',
+    (master_doc, 'saspy', 'SASPy',
      [author], 1)
 ]
 
@@ -304,8 +304,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'saspy', 'SASpy Documentation',
-     author, 'SASpy', 'One line description of project.',
+    (master_doc, 'saspy', 'SASPy',
+     author, 'SASPy', 'SASPy is a Python module that provides an interface to the SAS system.',
      'Miscellaneous'),
 ]
 
