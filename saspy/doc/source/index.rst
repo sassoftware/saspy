@@ -3,7 +3,7 @@
 :tocdepth: 4
 
 *****
-SASpy
+SASPy
 *****
 
 .. module:: saspy
@@ -24,6 +24,7 @@ object-oriented methods and Python magics.
 
 .. toctree::
 
+   overview
    install
    configuration
    getting-started
