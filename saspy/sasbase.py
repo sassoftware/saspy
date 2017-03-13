@@ -42,6 +42,7 @@ import logging
 
 try:
    import saspy.sascfg_personal as SAScfg
+   import pandas as pd
 except ImportError:
    import saspy.sascfg as SAScfg
 
@@ -604,7 +605,7 @@ class SASsession():
         else:
             return log
 
-    def df2sd(self, df: 'DataFrame', table: str = '_df', libref: str = '',
+    def df2sd(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
               results: str = '') -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
@@ -617,7 +618,7 @@ class SASsession():
         """
         return self.dataframe2sasdata(df, table, libref, results)
 
-    def dataframe2sasdata(self, df: 'DataFrame', table: str = '_df', libref: str = '',
+    def dataframe2sasdata(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
                           results: str = '') -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
@@ -641,7 +642,7 @@ class SASsession():
         else:
             return None
 
-    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'DataFrame':
+    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'pd.DataFrame':
         """
         This is an alias for 'sasdata2dataframe'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -670,7 +671,7 @@ class SASsession():
         return self.sasdata2dataframe(table, libref, dsopts, **kwargs)
 
     def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {},
-                          **kwargs) -> 'DataFrame':
+                          **kwargs) -> 'pd.DataFrame':
         """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -1473,7 +1474,7 @@ class SASdata:
         else:
             return self.sas.write_csv(file, self.table, self.libref, self.dsopts)
 
-    def score(self, file: str = '', code: str = '', out: 'SASData' = None) -> 'SASData':
+    def score(self, file: str = '', code: str = '', out: 'SASdata' = None) -> 'SASdata':
         """
         This method is meant to update a SAS Data object with a model score file.
 
@@ -1511,16 +1512,17 @@ class SASdata:
         else:
             return ll
 
-    def to_frame(self, **kwargs) -> 'DataFrame':
+    def to_frame(self, **kwargs) -> 'pd.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame
 
         :param kwargs:
         :return: Pandas data frame
+        :rtype: 'pd.DataFrame'
         """
         return self.to_df(**kwargs)
 
-    def to_df(self, **kwargs) -> 'DataFrame':
+    def to_df(self, **kwargs) -> 'pd.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame
 

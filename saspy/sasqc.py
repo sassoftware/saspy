@@ -16,6 +16,7 @@
 
 import logging
 from saspy.sasproccommons import SASProcCommons
+from saspy.sasresults import SASresults
 
 
 class SASqc:
@@ -50,7 +51,7 @@ class SASqc:
         self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
     
-    def cusum(self, **kwargs: dict):
+    def cusum(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the CUSUM procedure
 
@@ -66,7 +67,7 @@ class SASqc:
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "CUSUM", required_set, legal_set, **kwargs)
 
-    def macontrol(self, **kwargs: dict):
+    def macontrol(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the MACONTROL procedure
 
@@ -80,7 +81,7 @@ class SASqc:
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "MACONTROL", required_set, legal_set, **kwargs)
 
-    def capability(self, **kwargs: dict):
+    def capability(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the CUSUM procedure
         ``required_set = {}``
@@ -97,7 +98,7 @@ class SASqc:
         logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "CAPABILITY", required_set, legal_set, **kwargs)
 
-    def shewhart(self, **kwargs: dict):
+    def shewhart(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the SHEWHART procedure
 

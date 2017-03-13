@@ -28,6 +28,7 @@ object-oriented methods and Python magics.
    install
    configuration
    getting-started
+   advanced-topics
    api
    adding-procedures
    license

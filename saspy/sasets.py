@@ -14,8 +14,8 @@
 #  limitations under the License.
 #
 import logging
-
 from saspy.sasproccommons import SASProcCommons
+from saspy.sasresults import SASresults
 
 
 class SASets:
@@ -50,7 +50,7 @@ class SASets:
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def timeseries(self, **kwargs: dict):
+    def timeseries(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMESERIES procedure
 
@@ -66,7 +66,7 @@ class SASets:
         self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TIMESERIES", required_set, legal_set, **kwargs)
 
-    def arima(self, **kwargs: dict):
+    def arima(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the ARIMA procedure
 
@@ -81,7 +81,7 @@ class SASets:
         legal_set = {'by', 'identify', 'estimate', 'outlier', 'forecast', 'out', 'procopts'}
         return SASProcCommons._run_proc(self, "ARIMA", required_set, legal_set, **kwargs)
 
-    def ucm(self, **kwargs: dict):
+    def ucm(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the UCM procedure
 
@@ -102,7 +102,7 @@ class SASets:
                      'procopts'}
         return SASProcCommons._run_proc(self, "UCM", required_set, legal_set, **kwargs)
 
-    def esm(self, **kwargs: dict):
+    def esm(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the ESM procedure
 
@@ -116,7 +116,7 @@ class SASets:
         legal_set = {'by', 'id', 'forecast', 'out', 'procopts'}
         return SASProcCommons._run_proc(self, "ESM", required_set, legal_set, **kwargs)
 
-    def timeid(self, **kwargs: dict):
+    def timeid(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMEID procedure
 
@@ -130,7 +130,7 @@ class SASets:
         legal_set = {'by', 'id', 'out', 'procopts'}
         return SASProcCommons._run_proc(self, "TIMEID", required_set, legal_set, **kwargs)
 
-    def timedata(self, **kwargs: dict):
+    def timedata(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMEDATA procedure
 
