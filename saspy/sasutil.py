@@ -15,6 +15,7 @@
 #
 import logging
 from saspy.sasproccommons import SASProcCommons
+from saspy.sasresults import SASresults
 
 
 class SASutil:
@@ -56,7 +57,7 @@ class SASutil:
         self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def hpimpute(self, **kwargs: dict) -> '<SAS result object>':
+    def hpimpute(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPIMPUTE procedure
 
@@ -79,8 +80,7 @@ class SASutil:
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPIMPUTE", required_set, legal_set, **kwargs)
 
-
-    def hpbin(self, **kwargs: dict) -> object:
+    def hpbin(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPBIN procedure
 
@@ -102,7 +102,7 @@ class SASutil:
         return SASProcCommons._run_proc(self, "HPBIN", required_set, legal_set, **kwargs)
 
 
-    def hpsample(self, **kwargs: dict) -> object:
+    def hpsample(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPSAMPLE procedure
 

@@ -15,6 +15,7 @@
 #
 import logging
 from saspy.sasproccommons import SASProcCommons
+from saspy.sasresults import SASresults
 
 
 class SASml:
@@ -50,7 +51,7 @@ class SASml:
         self.sas = session
         logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def forest(self, **kwargs: dict) -> object:
+    def forest(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPFOREST procedure
 
@@ -70,7 +71,7 @@ class SASml:
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPFOREST", required_set, legal_set, **kwargs)
 
-    def hp4score(self, **kwargs: dict) -> object:
+    def hp4score(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HP4SCORE procedure
 
@@ -89,7 +90,7 @@ class SASml:
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HP4SCORE", required_set, legal_set, **kwargs)
 
-    def cluster(self, **kwargs: dict) -> object:
+    def cluster(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPCLUS procedure
 
@@ -108,7 +109,7 @@ class SASml:
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPCLUS", required_set, legal_set, **kwargs)
 
-    def neural(self, **kwargs: dict) -> object:
+    def neural(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPNEURAL procedure
 
@@ -130,7 +131,7 @@ class SASml:
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPNEURAL", required_set, legal_set, **kwargs)
 
-    def treeboost(self, **kwargs: dict) -> object:
+    def treeboost(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TREEBOOST procedure
 
@@ -151,7 +152,7 @@ class SASml:
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TREEBOOST", required_set, legal_set, **kwargs)
 
-    def hpbnet(self, **kwargs: dict) -> object:
+    def hpbnet(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPBNET procedure
 
