@@ -243,6 +243,7 @@ class SASsessionIOM():
                print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
                os._exit(-6)
 
+      '''
       if os.name == 'nt': 
          try:
             self.pid.wait(0)
@@ -252,12 +253,14 @@ class SASsessionIOM():
             pass
       else:
          rc = os.waitpid(self.pid, os.WNOHANG)
-         if rc[1]:
+         print(rc)
+         if rc[1] != 0:
             pass
          else:
             print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            return NULL
+            #return NULL
+      '''
 
       self.stdin  = self.sockin.accept()
       self.stdout = self.sockout.accept()
