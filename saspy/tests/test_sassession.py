@@ -1,16 +1,21 @@
+import shutil
+import tempfile
 import unittest
 import saspy
+import os
 
 
 class TestSASsessionObject(unittest.TestCase):
-    @classmethod    
-    def setUpClass(cls):
-        cls.sas = saspy.SASsession() #cfgname='default')
 
-    @classmethod
-    def tearDownClass(cls):
+    def setUpClass(self, cls):
+        cls.sas = saspy.SASsession() #cfgname='default')
+        self.test_dir = tempfile.mkdtemp()
+
+    def tearDownClass(self, cls):
+        shutil.rmtree(self.test_dir)
         if cls.sas:
            cls.sas._endsas()
+
 
     def test_SASsession(self):
         self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
@@ -41,7 +46,8 @@ class TestSASsessionObject(unittest.TestCase):
     def test_SASsession_csv(self):
         #test write and read csv
         self.sas.set_batch(True)
-        log = self.sas.write_csv('/tmp/sas_csv_test.csv', 'cars', libref='sashelp')
+        fname  = os.path.join(self.test_dir, 'sas_csv_test.csv'), 'w'
+        log = self.sas.write_csv(fname, 'cars', libref='sashelp')
         self.assertNotIn("ERROR", log, msg="sas.write_csv() failed")
         csvdata = self.sas.read_csv('/tmp/sas_csv_test.csv', 'csvcars', results='text')
         ll = csvdata.head()
@@ -74,19 +80,23 @@ class TestSASsessionObject(unittest.TestCase):
         self.assertIn(expected, retrieved, msg="cars.datasets(...) result didn't contain expected result")
         
     def test_SASsession_procobjs(self):
-        #test stat
+        # test stat
         stat = self.sas.sasstat()
         self.assertIsInstance(stat, saspy.SASstat, msg="stat = self.sas.sasstat() failed")
 
-        #test ets
+        # test ets
         ets = self.sas.sasets()
         self.assertIsInstance(ets, saspy.SASets, msg="ets = self.sas.sasets() failed")
 
-        #test stat
+        # test qc
         qc = self.sas.sasqc()
         self.assertIsInstance(qc, saspy.SASqc, msg="qc = self.sas.sasqc() failed")
 
-        #test stat
+        # test ml
         ml = self.sas.sasml()
         self.assertIsInstance(ml, saspy.SASml, msg="ml = self.sas.sasml() failed")
+
+        # test util
+        util = self.sas.sasutil()
+        self.assertIsInstance(util, saspy.SASutil, msg="util = self.sas.sasutil() failed")
 

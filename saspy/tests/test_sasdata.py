@@ -2,6 +2,7 @@ import unittest
 import saspy
 import os
 from IPython.utils.tempdir import TemporaryDirectory
+from pandas.util.testing import assert_frame_equal
 
 
 class TestSASdataObject(unittest.TestCase):
@@ -194,18 +195,19 @@ class TestSASdataObject(unittest.TestCase):
         # Create dataset in WORK
         self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
         wkcars = self.sas.sasdata('cars')
+        wkcars.set_results('PANDAS')
         wkcars2 = self.sas.sasdata('cars2', 'work')
+        wkcars2.set_results('PANDAS')
         a = wkcars.columnInfo()
         wkcars.score(code='P_originUSA = origin;', out=wkcars2)
         b = wkcars.columnInfo()
-        self.assertEqual(a, b, msg="B should be identical to a")
-        self.assertIsInstance(wkcars2, 'SASData', "Does out dataset exist")
+        self.assertFalse(assert_frame_equal(a, b), msg="B should be identical to a")
+        self.assertIsInstance(wkcars2, saspy.sasbase.SASdata, "Does out dataset exist")
 
     def test_SASdata_score3(self):
         with TemporaryDirectory() as temppath:
             with open(os.path.join(temppath, 'score.sas'), 'w') as f:
                 f.write('P_originUSA = origin;')
-
         # Create dataset in WORK
         self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
         wkcars = self.sas.sasdata('cars')
@@ -213,14 +215,13 @@ class TestSASdataObject(unittest.TestCase):
         a = wkcars.columnInfo()
         wkcars.score(file=f.name, out=wkcars2)
         b = wkcars.columnInfo()
-        self.assertEqual(a, b, msg="B should be identical to a")
-        self.assertIsInstance(wkcars2, 'SASData', "Does out dataset exist")
+        self.assertFalse(assert_frame_equal(a, b), msg="B should be identical to a")
+        self.assertIsInstance(wkcars2, saspy.sasbase.SASdata, "Does out dataset exist")
 
     def test_SASdata_score4(self):
         with TemporaryDirectory() as temppath:
             with open(os.path.join(temppath, 'score.sas'), 'w') as f:
                 f.write('P_originUSA = origin;')
-
         # Create dataset in WORK
         self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
         wkcars = self.sas.sasdata('cars')

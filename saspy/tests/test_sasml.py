@@ -35,4 +35,4 @@ class TestSASml(unittest.TestCase):
              'MODELINFO', 'NOBS', 'PERFORMANCEINFO', 'VARIABLEIMPORTANCE']
         self.assertEqual(sorted(a), sorted(out1.__dir__()),
                          msg=u"Simple Forest  model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
-                             str(a), str(b)))
+                             str(a), str(out1)))
