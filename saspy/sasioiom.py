@@ -220,8 +220,11 @@ class SASsessionIOM():
       parms += ['']
 
       s = ''
-      for i in parms:
-         s += i+' '
+      for i in range(len(parms)):
+         if i == 2 and os.name == 'nt':
+            s += '"'+parms[i]+'"'+' '
+         else:
+            s += parms[i]+' '
 
       if os.name == 'nt': 
          try:
@@ -230,7 +233,7 @@ class SASsessionIOM():
          except:
             print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("Try running the following manually to see what the error is:\n"+s+"\n")
+            print("Try running the following manually to see if it's a problem starting Java:\n"+s+"\n")
             return None
       else:
          #signal.signal(signal.SIGCHLD, signal.SIG_IGN)
@@ -248,7 +251,7 @@ class SASsessionIOM():
             except:
                print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
                print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-               print("Try running the following manually to see what the error is:\n"+s+"\n")
+               print("Try running the following manually to see if it's a problem starting Java:\n"+s+"\n")
                os._exit(-6)
 
       if os.name == 'nt': 
@@ -256,7 +259,7 @@ class SASsessionIOM():
             self.pid.wait(1)
             print("Subprocess failed to start. Double check you settings in sascfg.py file.\n") 
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("Try running the following manually to see what the error is:\n"+s+"\n")
+            print("Try running the following manually to see if it's a problem starting Java:\n"+s+"\n")
             self.pid = None
             return None
          except:
@@ -269,7 +272,7 @@ class SASsessionIOM():
          else:
             print("SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check you settings in sascfg.py file.\n")  
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("Try running the following manually to see what the error is:\n"+s+"\n")
+            print("Try running the following manually to see if it's a problem starting Java:\n"+s+"\n")
             self.pid = None
             return None
 
@@ -286,22 +289,15 @@ class SASsessionIOM():
          pw += '\n'
          self.stdin[0].send(pw.encode(self.sascfg.encoding))
 
-      self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
+      ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
 
-      if os.name == 'nt': 
-         try:
-            sp.wait(0)
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
-            print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            self.pid = None
-            return None
-         except:
-            pass
-      else:
-         if self.pid is None:
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
-            print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            return None
+      if self.pid is None:
+         print(ll['LOG'])
+         print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
+         print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
+         if zero:
+            print("Be sure the path to sspiauth.dll is in your System PATH"+"\n")
+         return None
 
       print("SAS Connection established. Subprocess id is "+str(pid)+"\n")  
       return self.pid
@@ -670,6 +666,19 @@ class SASsessionIOM():
                           bc = False
              done = True
 
+         except (ConnectionResetError):
+             rc = 0
+             if os.name == 'nt': 
+                try:
+                   rc = self.pid.wait()
+                except:
+                   pass
+             else:
+                rc = os.waitpid(self.pid, 0)
+
+             self.pid = None
+             return dict(LOG='Connection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+             
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
              ll = self._breakprompt(logcodeo)
@@ -1074,5 +1083,7 @@ sas_datetime_fmts = (
 'NLDATMYW','NLDATMZ','NLDDFDT','NLDDFDT','NORDFDT','NORDFDT','POLDFDT','POLDFDT','PTGDFDT','PTGDFDT','RUSDFDT','RUSDFDT',
 'SLODFDT','SLODFDT','SVEDFDT','SVEDFDT','TWMDY','YMDDTTM',
 )
+
+
 
 
