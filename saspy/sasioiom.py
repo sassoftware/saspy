@@ -219,6 +219,10 @@ class SASsessionIOM():
          parms += ["-zero"]     
       parms += ['']
 
+      s = ''
+      for i in parms:
+         s += i+' '
+
       if os.name == 'nt': 
          try:
             self.pid = subprocess.Popen(parms)
@@ -226,8 +230,10 @@ class SASsessionIOM():
          except:
             print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            return NULL
+            print("Try running the following manually to see what the error is:\n"+s+"\n")
+            return None
       else:
+         #signal.signal(signal.SIGCHLD, signal.SIG_IGN)
          pidpty = os.forkpty()
          if pidpty[0]:
             # we are the parent
@@ -241,26 +247,31 @@ class SASsessionIOM():
                os.execv(pgm, parms)
             except:
                print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
+               print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
+               print("Try running the following manually to see what the error is:\n"+s+"\n")
                os._exit(-6)
 
-      '''
       if os.name == 'nt': 
          try:
-            self.pid.wait(0)
+            self.pid.wait(1)
             print("Subprocess failed to start. Double check you settings in sascfg.py file.\n") 
+            print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
+            print("Try running the following manually to see what the error is:\n"+s+"\n")
             self.pid = None
+            return None
          except:
             pass
       else:
+         sleep(1)
          rc = os.waitpid(self.pid, os.WNOHANG)
-         print(rc)
-         if rc[1] != 0:
+         if rc[0] == 0:
             pass
          else:
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
+            print("SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check you settings in sascfg.py file.\n")  
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            #return NULL
-      '''
+            print("Try running the following manually to see what the error is:\n"+s+"\n")
+            self.pid = None
+            return None
 
       self.stdin  = self.sockin.accept()
       self.stdout = self.sockout.accept()
@@ -299,7 +310,6 @@ class SASsessionIOM():
       rc = 0
       if self.pid:
          self.stdin[0].send(b'\ntom says EOL=ENDSAS                          \n')
-
          if os.name == 'nt': 
             pid = self.pid.pid
             try:
@@ -310,11 +320,20 @@ class SASsessionIOM():
                self.pid.kill()
          else:
             pid = self.pid
-            rc = os.waitpid(self.pid, os.WNOHANG)
-            if rc[1]:
+            x = 5
+            while True:
+               rc = os.waitpid(self.pid, os.WNOHANG)
+               if rc[0] != 0:
+                  break
+               x = x - 1
+               if x < 1:
+                  break
+               sleep(1)
+
+            if rc[0] != 0:
                pass
             else:
-               print("SAS didn't shutdown w/in a second; killing it to be sure")
+               print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                os.kill(self.pid, signal.SIGKILL)
 
 
@@ -333,7 +352,7 @@ class SASsessionIOM():
          print("SAS Connection terminated. Subprocess id was "+str(pid))
          self.pid = None
 
-      return rc
+      return 
 
 
 
