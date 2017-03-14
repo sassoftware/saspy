@@ -16,7 +16,7 @@
 import logging
 import re
 from saspy.sasresults import SASresults
-#from pdb import set_trace as bp
+# from pdb import set_trace as bp
 
 
 class SASProcCommons:
@@ -362,18 +362,25 @@ class SASProcCommons:
                     raise SyntaxError("The target list must have exactly one member")
             elif isinstance(args['target'], dict):
                 try:
-                    if 'interval' in args['target'].keys():
-                        if isinstance(args['target']['interval'], str):
-                            code += "target %s /level=interval;\n" % args['target']['interval']
-                        if isinstance(args['target']['interval'], list):
-                            code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
-                    if 'nominal' in args['target'].keys():
-                        if isinstance(args['target']['nominal'], str):
-                            code += "target %s /level=nominal;\n" % args['target']['nominal']
-                        if isinstance(args['target']['nominal'], list):
-                            code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
-                except:
-                    raise SyntaxError("Proper Keys not found for TARGET dictionary: %s" % args['target'].keys())
+                    # check there there is only one target:
+                    value_length = [len(v) for v in args['target'].values()]
+                    if sum(value_length) == 1:
+                        if 'interval' in args['target'].keys():
+                            if isinstance(args['target']['interval'], str):
+                                code += "target %s /level=interval;\n" % args['target']['interval']
+                            if isinstance(args['target']['interval'], list):
+                                code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
+                        if 'nominal' in args['target'].keys():
+                            if isinstance(args['target']['nominal'], str):
+                                code += "target %s /level=nominal;\n" % args['target']['nominal']
+                            if isinstance(args['target']['nominal'], list):
+                                code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
+                    else:
+                        raise SyntaxError
+                except SyntaxError:
+                    print("SyntaxError: TARGET can only have one variable")
+                except KeyError:
+                    print("KeyError: Proper keys not found for TARGET dictionary: %s" % args['target'].keys())
             else:
                 raise SyntaxError("TARGET is in an unknown format: %s" % str(args['target']))
         if 'train' in args:
@@ -571,7 +578,7 @@ class SASProcCommons:
             if isinstance(inputs, str):
                 # if there is only one word or special character do nothing
                 if len(inputs.split()) == 1 or len(
-                        [word for word in inputs if any(letter in word for letter in '/\:;.%')]) != 0:
+                        [word for word in inputs if any(letter in word for letter in '-/\\:;.%')]) != 0:
                     kwargs['input'] = inputs
                 else:
                     # turn str into list and search for nominals
@@ -638,7 +645,7 @@ class SASProcCommons:
                 error = SASProcCommons._errorLog(log)
                 isinstance(error, str)
                 if len(error) > 1:
-                    print("SubmissionError: ERRORS found in SAS log: \n%s" % error)
+                    RuntimeWarning("ERRORS found in SAS log: \n%s" % error)
                     return SASresults(obj1, self.sas, objname, nosub, log)
                 try:
                     obj1 = SASProcCommons._objectmethods(self, objname)
@@ -649,8 +656,7 @@ class SASProcCommons:
                 print(code)
                 nosub = True
         else:
-            print("Error in code submission")
-
+            RuntimeWarning("Error in code submission")
         return SASresults(obj1, self.sas, objname, nosub, log)
 
     @staticmethod
@@ -691,6 +697,5 @@ class SASProcCommons:
             if extraSet:
                 for item in extraSet:
                     stmt.pop(item, None)
-                print("The following %d statements are invalid and will be ignored: " % len(extraSet))
-                print(extraSet)
+                SyntaxWarning("The following %d statements are invalid and will be ignored:\nextraSet " % len(extraSet))
         return stmt
