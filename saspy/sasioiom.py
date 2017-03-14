@@ -207,7 +207,7 @@ class SASsessionIOM():
       pgm    = self.sascfg.java
       parms  = [pgm]
       parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
-      #parms += ["-classpath", self.sascfg.classpath, "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
+      #parms += ["-classpath", self.sascfg.classpath+":/u/sastpw/tkpy2j", "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
       parms += ["-host", "localhost"] 
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
@@ -626,7 +626,7 @@ class SASsessionIOM():
                     try:
                        rc = self.pid.wait(0)
                        self.pid = None
-                       return dict(LOG='SAS process has terminated unexpectedly. RC from wait was: '+str(rc), LST='')
+                       return dict(LOG=logf.partition(logcodeo)[0]+'\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc), LST='')
                     except:
                        pass
                  else:
@@ -635,7 +635,7 @@ class SASsessionIOM():
                     #if rc is not None:
                     if rc[1]:
                         self.pid = None
-                        return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+                        return dict(LOG=logf.partition(logcodeo)[0]+'\nSAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
 
                  if bail:
                     if lstf.count(logcodeo) >= 1:
@@ -677,7 +677,7 @@ class SASsessionIOM():
                 rc = os.waitpid(self.pid, 0)
 
              self.pid = None
-             return dict(LOG='Connection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+             return dict(LOG=logf.partition(logcodeo)[0]+'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
              
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
