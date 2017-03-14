@@ -1,5 +1,6 @@
 import unittest
 import saspy
+import pandas as pd
 
 
 class TestSASstat(unittest.TestCase):
@@ -38,6 +39,34 @@ class TestSASstat(unittest.TestCase):
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (reg) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), str(b)))
+
+    def regResult1(self):
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        b = stat.reg(data=tr, model='weight=height')
+        self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
+
+    def regResult2(self):
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        tr.set_results('PANDAS')
+        b = stat.reg(data=tr, model='weight=height')
+        self.assertIsInstance(b.ANOVA, pandas.core.frame.DataFrame, msg="correct return type")
+
+    def regResult3(self):
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        tr.set_results('PANDAS')
+        b = stat.reg(data=tr, model='weight=height')
+        self.assertIsInstance(b.LOG, IPython.core.display.HTML, msg="correct return type")
+
+    def regResult4(self):
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        tr.set_results('PANDAS')
+        b = stat.reg(data=tr, model='weight=height')
+        self.assertIsInstance(b.RESIDUALHISTOGRAM, IPython.core.display.HTML, msg="correct return type")
+
 
     def test_smokeMixed(self):
         # Basic model returns objects
