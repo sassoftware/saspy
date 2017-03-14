@@ -205,7 +205,6 @@ public class saspy2j {
 							sin.close();
 							sout.close();
 							serr.close();
-							Thread.sleep(3);
 							System.exit(-6);
 						}
 

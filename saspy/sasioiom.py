@@ -45,7 +45,7 @@ class SASconfigIOM:
 
       self.java      = cfg.get('java', '')
       self.iomhost   = cfg.get('iomhost', '')
-      self.iomport   = cfg.get('iomport', '')
+      self.iomport   = cfg.get('iomport', None)
       self.omruser   = cfg.get('omruser', '')
       self.omrpw     = cfg.get('omrpw', '')
       self.encoding  = cfg.get('encoding', '')
@@ -75,9 +75,9 @@ class SASconfigIOM:
          else:
             self.iomhost = inhost   
 
-      inport = kwargs.get('iomport', '')
-      if len(inport) > 0:
-         if lock and len(self.iomport):
+      inport = kwargs.get('iomport', None)
+      if inport:
+         if lock and self.iomport:
             print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.iomport = inport   
