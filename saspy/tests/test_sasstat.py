@@ -25,15 +25,133 @@ class TestSASstat(unittest.TestCase):
                     return False
         return True
 
-    def test_smoke(self):
+    def test_smokeReg(self):
         # Basic model returns objects
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
+        # REG
         b = stat.reg(data=tr, model='weight=height')
         a = ['ANOVA', 'COOKSDPLOT', 'DFBETASPANEL', 'DFFITSPLOT', 'DIAGNOSTICSPANEL', 'FITPLOT', 'FITSTATISTICS',
              'LOG', 'NOBS', 'OBSERVEDBYPREDICTED', 'PARAMETERESTIMATES', 'QQPLOT', 'RESIDUALBOXPLOT',
              'RESIDUALBYPREDICTED',
              'RESIDUALHISTOGRAM', 'RESIDUALPLOT', 'RFPLOT', 'RSTUDENTBYLEVERAGE', 'RSTUDENTBYPREDICTED']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u"Simple Regession (reg) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeMixed(self):
+        # Basic model returns objects
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        b = stat.mixed(data=tr, model='weight=height')
+        a = ['COVPARMS', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS', 'PEARSONPANEL',
+             'RESIDUALPANEL', 'STUDENTPANEL', 'TESTS3']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeGLM(self):
+        # Basic model returns objects
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        b = stat.glm(data=tr, model='weight=height')
+        a = ['DIAGNOSTICSPANEL', 'FITPLOT', 'FITSTATISTICS', 'LOG', 'MODELANOVA', 'NOBS', 'OVERALLANOVA',
+             'PARAMETERESTIMATES', 'RESIDUALPLOTS']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeLogistic(self):
+        # Basic model returns objects
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        b = stat.logistic(data=tr, model='sex=height weight')
+        a = ['ASSOCIATION', 'CONVERGENCESTATUS', 'DFBETASPLOT', 'DPCPLOT', 'EFFECTPLOT', 'FITSTATISTICS',
+             'GLOBALTESTS', 'INFLUENCEPLOTS', 'LEVERAGEPLOTS', 'LOG', 'MODELINFO', 'NOBS', 'ODDSRATIOS',
+             'ORPLOT', 'PARAMETERESTIMATES', 'PHATPLOTS', 'RESPONSEPROFILE', 'ROCCURVE']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeTpspline(self):
+        # Basic model returns objects
+        stat = self.sas.sasstat()
+        self.sas.submit("""
+                data work.melanoma;
+                   input  year incidences @@;
+                   datalines;
+                1936    0.9   1937   0.8  1938   0.8  1939   1.3
+                1940    1.4   1941   1.2  1942   1.7  1943   1.8
+                1944    1.6   1945   1.5  1946   1.5  1947   2.0
+                1948    2.5   1949   2.7  1950   2.9  1951   2.5
+                1952    3.1   1953   2.4  1954   2.2  1955   2.9
+                1956    2.5   1957   2.6  1958   3.2  1959   3.8
+                1960    4.2   1961   3.9  1962   3.7  1963   3.3
+                1964    3.7   1965   3.9  1966   4.1  1967   3.8
+                1968    4.7   1969   4.4  1970   4.8  1971   4.8
+                1972    4.8
+                ;;
+                run;
+                """)
+
+        tr = self.sas.sasdata("melanoma", "work")
+        b = stat.tpspline(data=tr, model='incidences = (year) /alpha = 0.1', output='out = result pred uclm lclm')
+        a = ['CRITERIONPLOT', 'DATASUMMARY', 'DIAGNOSTICSPANEL', 'FITPLOT', 'FITSTATISTICS', 'FITSUMMARY', 'LOG',
+             'OBSERVEDBYPREDICTED', 'QQPLOT', 'RESIDPANEL', 'RESIDUALBYPREDICTED', 'RESIDUALHISTOGRAM', 'RFPLOT']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_tpspline2(self):
+        # Basic model returns objects
+        stat = self.sas.sasstat()
+        self.sas.submit("""
+        data work.melanoma;
+           input  year incidences @@;
+           datalines;
+        1936    0.9   1937   0.8  1938   0.8  1939   1.3
+        1940    1.4   1941   1.2  1942   1.7  1943   1.8
+        1944    1.6   1945   1.5  1946   1.5  1947   2.0
+        1948    2.5   1949   2.7  1950   2.9  1951   2.5
+        1952    3.1   1953   2.4  1954   2.2  1955   2.9
+        1956    2.5   1957   2.6  1958   3.2  1959   3.8
+        1960    4.2   1961   3.9  1962   3.7  1963   3.3
+        1964    3.7   1965   3.9  1966   4.1  1967   3.8
+        1968    4.7   1969   4.4  1970   4.8  1971   4.8
+        1972    4.8
+        ;;
+        run;
+        """)
+
+        tr = self.sas.sasdata("melanoma", "work")
+        ds = self.sas.sasdata("result", "work")
+        b = stat.tpspline(data=tr, model='incidences = (year) /alpha = 0.1', score=ds)
+        a = ['CRITERIONPLOT', 'DATASUMMARY', 'DIAGNOSTICSPANEL', 'FITPLOT', 'FITSTATISTICS', 'FITSUMMARY', 'LOG',
+             'OBSERVEDBYPREDICTED', 'QQPLOT', 'RESIDPANEL', 'RESIDUALBYPREDICTED', 'RESIDUALHISTOGRAM', 'RFPLOT',
+             'SCOREPLOT']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeHPLogistic(self):
+        # Basic model returns objects
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        b = stat.hplogistic(data=tr, model='sex=height weight')
+        a = ['CONVERGENCESTATUS', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'GLOBALTESTS', 'ITERHISTORY',
+             'LOG', 'MODELINFO', 'NOBS', 'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'RESPONSEPROFILE']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeHPReg(self):
+        # Basic model returns objects
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        # REG
+        b = stat.hpreg(data=tr, model='weight=height')
+        a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS',
+             'PARAMETERESTIMATES', 'PERFORMANCEINFO']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (reg) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), str(b)))
