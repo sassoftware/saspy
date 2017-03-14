@@ -211,7 +211,9 @@ class TestSASdataObject(unittest.TestCase):
         # Create dataset in WORK
         self.sas.submit("data cars; set sashelp.cars; id=_n_;run;")
         wkcars = self.sas.sasdata('cars')
+        wkcars.set_results('PANDAS')
         wkcars2 = self.sas.sasdata('cars2', 'work')
+        wkcars2.set_results('PANDAS')
         a = wkcars.columnInfo()
         wkcars.score(file=f.name, out=wkcars2)
         b = wkcars.columnInfo()

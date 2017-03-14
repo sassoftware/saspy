@@ -7,7 +7,6 @@ class TestSASsessionObject(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.sas = saspy.SASsession() #cfgname='default')
-        test_dir = tempfile.mkdtemp()
 
     @classmethod
     def tearDownClass(cls):
