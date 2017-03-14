@@ -16,7 +16,7 @@
 import logging
 import re
 from saspy.sasresults import SASresults
-#from pdb import set_trace as bp
+# from pdb import set_trace as bp
 
 
 class SASProcCommons:
@@ -362,18 +362,25 @@ class SASProcCommons:
                     raise SyntaxError("The target list must have exactly one member")
             elif isinstance(args['target'], dict):
                 try:
-                    if 'interval' in args['target'].keys():
-                        if isinstance(args['target']['interval'], str):
-                            code += "target %s /level=interval;\n" % args['target']['interval']
-                        if isinstance(args['target']['interval'], list):
-                            code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
-                    if 'nominal' in args['target'].keys():
-                        if isinstance(args['target']['nominal'], str):
-                            code += "target %s /level=nominal;\n" % args['target']['nominal']
-                        if isinstance(args['target']['nominal'], list):
-                            code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
-                except:
-                    raise SyntaxError("Proper Keys not found for TARGET dictionary: %s" % args['target'].keys())
+                    # check there there is only one target:
+                    value_length = [len(v) for v in args['target'].values()]
+                    if sum(value_length) == 1:
+                        if 'interval' in args['target'].keys():
+                            if isinstance(args['target']['interval'], str):
+                                code += "target %s /level=interval;\n" % args['target']['interval']
+                            if isinstance(args['target']['interval'], list):
+                                code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
+                        if 'nominal' in args['target'].keys():
+                            if isinstance(args['target']['nominal'], str):
+                                code += "target %s /level=nominal;\n" % args['target']['nominal']
+                            if isinstance(args['target']['nominal'], list):
+                                code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
+                    else:
+                        raise SyntaxError
+                except SyntaxError:
+                    print("SyntaxError: TARGET can only have one variable")
+                except KeyError:
+                    print("KeyError: Proper keys not found for TARGET dictionary: %s" % args['target'].keys())
             else:
                 raise SyntaxError("TARGET is in an unknown format: %s" % str(args['target']))
         if 'train' in args:

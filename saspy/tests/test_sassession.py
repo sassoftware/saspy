@@ -1,18 +1,16 @@
-import shutil
-import tempfile
 import unittest
 import saspy
 import os
-
+from IPython.utils.tempdir import TemporaryDirectory
 
 class TestSASsessionObject(unittest.TestCase):
-
-    def setUpClass(self, cls):
+    @classmethod
+    def setUpClass(cls):
         cls.sas = saspy.SASsession() #cfgname='default')
-        self.test_dir = tempfile.mkdtemp()
+        test_dir = tempfile.mkdtemp()
 
-    def tearDownClass(self, cls):
-        shutil.rmtree(self.test_dir)
+    @classmethod
+    def tearDownClass(cls):
         if cls.sas:
            cls.sas._endsas()
 
@@ -44,13 +42,15 @@ class TestSASsessionObject(unittest.TestCase):
         self.assertTrue(exists, msg="exists = self.sas.exist(...) failed")
 
     def test_SASsession_csv(self):
-        #test write and read csv
+        # test write and read csv
+
         self.sas.set_batch(True)
-        fname  = os.path.join(self.test_dir, 'sas_csv_test.csv'), 'w'
-        log = self.sas.write_csv(fname, 'cars', libref='sashelp')
-        self.assertNotIn("ERROR", log, msg="sas.write_csv() failed")
-        csvdata = self.sas.read_csv('/tmp/sas_csv_test.csv', 'csvcars', results='text')
-        ll = csvdata.head()
+        with TemporaryDirectory() as temppath:
+            fname = os.path.join(temppath, 'sas_csv_test.csv')
+            log = self.sas.write_csv(fname, 'cars', libref='sashelp')
+            self.assertNotIn("ERROR", log, msg="sas.write_csv() failed")
+            csvdata = self.sas.read_csv(fname, 'csvcars', results='text')
+            ll = csvdata.head()
         expected = ['1', 'Acura', 'MDX', 'SUV', 'Asia', 'All', '$36,945', '$33,337', '3.5']
         rows = ll['LST'].splitlines()
         retrieved = []
@@ -59,7 +59,7 @@ class TestSASsessionObject(unittest.TestCase):
         self.assertIn(expected, retrieved, msg="csvcars.head() result didn't contain row 1")
         
     def test_SASsession_datasets(self):
-        #test datasets()
+        # test datasets()
         self.sas.set_batch(True)
         log = self.sas.datasets()
         expected = ['Libref', 'WORK']
@@ -76,7 +76,7 @@ class TestSASsessionObject(unittest.TestCase):
         for i in range(len(rows)):
            retrieved.append(rows[i].split())
            if i > 20:
-              break  #it'll be in the first 20 rows for sure. don't need all of it
+              break  # it'll be in the first 20 rows for sure. don't need all of it
         self.assertIn(expected, retrieved, msg="cars.datasets(...) result didn't contain expected result")
         
     def test_SASsession_procobjs(self):

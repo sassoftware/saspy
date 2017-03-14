@@ -7,7 +7,7 @@ class TestSASstat(unittest.TestCase):
         # Use the first entry in the configuration list
         self.sas = saspy.SASsession() #cfgname=saspy.SAScfg.SAS_config_names[0])
         self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
-        procNeeded=['reg', 'mixed', 'hpsplit','hplogistic', 'hpreg']
+        procNeeded=['reg', 'mixed', 'hpsplit', 'hplogistic', 'hpreg', 'glm', 'logistic', 'tpspline']
         if not self.procFound(procNeeded):
             self.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
