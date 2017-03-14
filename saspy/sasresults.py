@@ -33,11 +33,11 @@ class SASresults(object):
     def __init__(self, attrs, session, objname, nosub=False, log=''):
 
         if len(attrs) > 0:
-           self._attrs = attrs
+           self._names = attrs
            if len(log)>0:
-               self._attrs.append("LOG")
+               self._names.append("LOG")
         else:
-           self._attrs = ['ERROR_LOG']
+           self._names = ['ERROR_LOG']
         self._name = objname
         self.sas = session
         self.nosub = nosub
@@ -45,7 +45,7 @@ class SASresults(object):
 
     def __dir__(self) -> list:
         """Overload dir method to return the attributes"""
-        return self._attrs
+        return self._names
 
     def __getattr__(self, attr):
         if attr.startswith('_'):
@@ -55,14 +55,14 @@ class SASresults(object):
                 return HTML(self._colorLog(self._log))
             else:
                 return self._log
-        if attr.upper() in self._attrs:
+        if attr.upper() in self._names:
             data = self._go_run_code(attr)
         else:
             if self.nosub:
                 print('This SAS Result object was created in teach_me_SAS mode, so it has no results')
                 return
             else:
-                print("Result named "+attr+" not found. Valid results are:"+str(self._attrs))
+                print("Result named "+attr+" not found. Valid results are:"+str(self._names))
                 return
 
         if not self.sas.batch:
@@ -107,12 +107,12 @@ class SASresults(object):
         This method shows all the results attributes for a given object
         """
         if not self.sas.batch:
-           for i in self._attrs:
+           for i in self._names:
                if i.upper()!='LOG':
                    dis.display(self.__getattr__(i))
         else:
            ret = []
-           for i in self._attrs:
+           for i in self._names:
                if i.upper()!='LOG':
                    ret.append(self.__getattr__(i))
            return ret
