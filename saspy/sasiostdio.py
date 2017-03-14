@@ -194,6 +194,10 @@ class SASsessionSTDIO():
          parms += ["-pagesize", "MAX"]
          parms += ['']
 
+      s = ''
+      for i in range(len(parms)):
+            s += parms[i]+' '
+
       PIPE_READ  = 0
       PIPE_WRITE = 1
       
@@ -247,28 +251,18 @@ class SASsessionSTDIO():
       if self.pid is None:
          print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
+         print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
          return NULL
       else:
-         # temporary hack for testing grid w/ sasgsub
-         if self.sascfg.metapw:
-            gotit = False
-            while not gotit:
-               pw = self.sascfg._prompt('Please enter metadata password: ', pw=True)
-               if len(pw) > 0:
-                  gotit = True
-               else:
-                  print("Sorry, didn't get a value, please enter the metadata password.")
-            self.stdin.write(pw.encode(self.sascfg.encoding)+b'\n')
-            self.stdin.flush()
-
          self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
          if self.pid is None:
             print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
+            print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
             return None
-         print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")  
-         return self.pid
-   
+
+      print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")  
+      return self.pid
     
    def _endsas(self):
       rc = 0
@@ -526,6 +520,12 @@ class SASsessionSTDIO():
                              bc = False
              done = True
 
+         except (ConnectionResetError):
+             rc = 0
+             rc = os.waitpid(self.pid, 0)
+             self.pid = None
+             return dict(LOG=logf.partition(logcodeo)[0]+'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+             
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
              ll = self._breakprompt(logcodeo)

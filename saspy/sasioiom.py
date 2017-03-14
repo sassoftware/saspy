@@ -233,7 +233,7 @@ class SASsessionIOM():
          except:
             print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("Try running the following manually to see if it's a problem starting Java:\n"+s+"\n")
+            print("Try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
             return None
       else:
          #signal.signal(signal.SIGCHLD, signal.SIG_IGN)
@@ -251,7 +251,7 @@ class SASsessionIOM():
             except:
                print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
                print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-               print("Try running the following manually to see if it's a problem starting Java:\n"+s+"\n")
+               print("Try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
                os._exit(-6)
 
       if os.name == 'nt': 
@@ -259,7 +259,7 @@ class SASsessionIOM():
             self.pid.wait(1)
             print("Subprocess failed to start. Double check you settings in sascfg.py file.\n") 
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("Try running the following manually to see if it's a problem starting Java:\n"+s+"\n")
+            print("Try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
             self.pid = None
             return None
          except:
@@ -272,7 +272,7 @@ class SASsessionIOM():
          else:
             print("SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check you settings in sascfg.py file.\n")  
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("Try running the following manually to see if it's a problem starting Java:\n"+s+"\n")
+            print("Try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
             self.pid = None
             return None
 
