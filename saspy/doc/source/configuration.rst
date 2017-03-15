@@ -12,9 +12,12 @@ It can connect to a local SAS session or remote session.
 Because of the wide range of connection types, there are a number of different access methods
 that are part of SASPy each of which are used to connect to different kinds of SAS sessions.
 
-The current set of access methods include `STDIO`_, and `STDIO over SSH`_, `IOM`_, and `HTTP`_. The HTTP access method isn't available yet, since it is for an interface which hasn't shipped yet.
-The STDIO access method is only available for Linux SAS; local or remote via passwordless SSH. The IOM access method supports SAS on any platform.
-It allows for using a local Windows connection and is also the way to connect to SAS Grid via SAS Grid Manager. I can connect to any SAS Workspace Server.
+The current set of access methods include `STDIO`_, and `STDIO over SSH`_, `IOM`_, and `HTTP`_. 
+The HTTP access method isn't available yet, since it is for an interface which hasn't shipped yet.
+The STDIO access method is only available for Linux SAS; local or remote via passwordless SSH. 
+The IOM access method supports SAS on any platform.
+It allows for using a local Windows connection and is also the way to connect to SAS Grid via SAS Grid Manager.
+It can connect to any SAS Workspace Server.
 
 Configuring all of these various types of connections is actually quite easy. There is a single confiuration file in the saspy directory of the repo: sascfg.py.
 This file contains instructions and examples, but this document will go into more details explaining how to configure each type of connection.
@@ -29,7 +32,7 @@ There are three main parts to this configuration file.
 
 In reverse order, the Configuration Definitions are Python Dictionaries where you configure each connection to a type of SAS session.
 SAS_config_options only has one option so far, which restricts (or allows) the end users ability to override settings in the Configuration Definitions using SASsession().
-SAS_config_names is the list of Configuration Definition names, which are available to be used; chosen by an end user at connection time.
+SAS_config_names is the list of Configuration Definition names which are available to be used; chosen by an end user at connection time.
 Configuration Definitions not listed in SAS_config_names are simply inaccessible. You can define all kinds of Configuration Definitions in the file,
 but not have them availabe by simply not havging their names in the list.
 
@@ -206,7 +209,7 @@ You can search for this file in your SAS deployment, though it is likely in your
 If adding this to your system PATH environment variable, only list the path to the directory, don't incluse the file itself i.e.: C:\\Program Files\\SASHome\\SASFoundation\\9.4\\core\\sasext. 
 
 java      - Required
-    the path to the java executable to use (On Unix, fully qualified path. On Windows, you may get away with simply ``java``, else put the FQP)
+    the path to the java executable to use 
 classpath - Required
     Classpath to IOM client jars and saspyiom.jar.
 encoding  -
@@ -231,27 +234,12 @@ encoding  -
                    'classpath' : cpW
                   }
 
-    # Windows client and Unix IOM server
-    winiomlinux = {'java'      : 'java',
-                   'iomhost'   : 'linux.iom.host',
-                   'iomport'   : 8591,
-                   'encoding'  : 'latin1',
-                   'classpath' : cpW
-                  }
-
-    # Windows client and Windows IOM server
-    winiomwin   = {'java'      : 'java',
-                   'iomhost'   : 'windows.iom.host',
-                   'iomport'   : 8591,
-                   'encoding'  : 'windows-1252',
-                   'classpath' : cpW
-                  }
 
 
 
 **Note:** having the ``'java'`` key is the triger to use the IOM access method.
 **Note:** When using the IOM access method (``'java'`` key specified), the absence of the ``'iomhost'`` key is the trigger to use a
-Local Windows Session instead of remote IOM.
+Local Windows Session instead of remote IOM (it is a different connection type).
 
 
 HTTP

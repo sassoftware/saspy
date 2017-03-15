@@ -8,8 +8,10 @@
 Troubleshooting
 ===============
 
-This chapter covers more detailed explanations of functionality in SASPy and advice
-for troubleshooting.
+This chapter covers covers troubleshooting procedures with saspy. While we don't expect you to have trouble,
+there are some cases where you might not have everything working right. We've tried to provide an easy reference
+for diagnosing and fixing those issues here.
+ 
 
 ***********************************
 Connection and Configuration issues
@@ -37,10 +39,10 @@ you will get and can use to track down the issue.
 The first is that if the SASsession() method fails, it will return any erros it can, as well as the 
 actual command it was trying to run to connect to SAS. That will vary with access method, but in each
 case, you can cut-n-paste that command into a shell on the machine where saspy (python) is running
-and that may very well provide more diagnostics and error messages that saspy could get.
+and that may very well provide more diagnostics and error messages that saspy may have displayed.
 
 For instance, here's a very simple case using the STDIO access method on a local linux machine. The 
-configuration method is nothing but a valid path that should work.
+Configuration Definition is nothing but a valid path that should work.
 
 .. code:: ipython3
 
@@ -136,12 +138,12 @@ So, running that command can tell me what the problem is.
 .. code:: ipython3
 
     Linux-1> /usr/bin/ssh -t Linux-2 /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en -fullstimer -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX
-    ssh: Could not resolve hostname tom64-2: Name or service not known
+    ssh: Could not resolve hostname Linux-2: Name or service not known
 
     or maybe another problem:
 
     Linux-1> /usr/bin/ssh -t Linux-2 /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en -fullstimer -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX
-    ssh: connect to host tomspc port 22: Connection refused
+    ssh: connect to host Linux-2 port 22: Connection refused
 
     or if it is that you do not have passwordless ssh set up, even though you can connect to that machine, you might see this (prompting you for pw)
 
@@ -160,11 +162,11 @@ IOM
 
 This access method has the most possibilities of having something misconfigured, because it has more 
 components that all have to connect together. But, it also has the most diagnostics to help you out.
-
 There are basically two possibilities where something can go wrong; Java or IOM. Lets look at Java first.
+
 There are two things that are likely to be the problem.
 
-   1) Java isn't installed or configured right, or you don't have the right java command  for 'java' in your configuration definition
+   1) Java isn't installed or configured right, or you don't have the right java command  for 'java' in your Configuration Definition
    2) You don't have your classpath right, or don't have the right jars.
 
 Neither of these problems will result in a good message from saspy telling you what the problem is. But, like in the cases above,
@@ -188,6 +190,28 @@ and error messages.
     Linux-1> /usr/bin/java -classpath wronpath pyiom.saspy2j -host localhost -stdinport 38228 -stdoutport 47074 -stderrport 60464 -iomhost Linux-1 -iomport 8591 -user user
     Error: Could not find or load main class pyiom.saspy2j
 
+That error shows that there is an issue with the classpath, as Java could not find the saspyiom.jar. You might also see a Java traceback for cases where you have some of the jars
+in the path but are missing others.
+
+If you run the Java command and you see an error similar to the following, about a socket connection failure, that suggests that your classpath is correct
+and that the problem might be connecting to the IOM server. That error shows that java came up and is running code from saspyiom.jar. It is trying to connect
+back to the saspy python process, which isn't running, thus the connection error. But it means, at least, saspyiom.jar was found.
+
+.. code:: ipython3
+
+    java.net.ConnectException: Connection refused
+            at java.net.PlainSocketImpl.socketConnect(Native Method)
+            at java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:350)
+            at java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:206)
+            at java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:188)
+            at java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
+            at java.net.Socket.connect(Socket.java:589)
+            at java.net.Socket.connect(Socket.java:538)
+            at java.net.Socket.<init>(Socket.java:434)
+            at java.net.Socket.<init>(Socket.java:211)
+            at pyiom.saspy2j.main(saspy2j.java:109)
+    Exception in thread "main" java.lang.NullPointerException
+            at pyiom.saspy2j.main(saspy2j.java:116)
 
 Now, if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM. There are a few obvious misconfigurations
 that can happen here. 
