@@ -22,6 +22,51 @@ It can connect to any SAS Workspace Server.
 Configuring all of these various types of connections is actually quite easy. There is a single confiuration file in the saspy directory of the repo: sascfg.py.
 This file contains instructions and examples, but this document will go into more details explaining how to configure each type of connection.
 
+Depending upon how you installed saspy, the sascfg.py file may be in different locations on the file system. In a regular pip install,
+it will show up under the site-packages directory in the python install. If you cloned the repo, or downloaded and extraced the repo,
+and installed from that, it may use the code from that location and not copy it to site-packages.
+ 
+Making sure you update the one python is using is the first thing to be sure of. If you're familiar with pip and Git, 
+then you probably know where to look, but if not, there's a very simple way to tell where python is getting the saspy modules.
+
+After installing saspy, however you install it, bring up python and import saspy, then simply submit saspy.SAScfg and python
+will show you where it found the module. Edit that one :).
+
+.. code:: ipython3
+
+    # this is a case where it's in stalled from a repo on Windows:
+
+    C:\>python
+    Python 3.6.0 |Anaconda custom (64-bit)| (default, Dec 23 2016, 11:57:41) [MSC v.1900 64 bit (AMD64)] on win32
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import saspy
+    >>> saspy.SAScfg
+    <module 'saspy.sascfg' from 'E:\\metis-master\\saspy_pip\\saspy\\sascfg.py'>
+    >>>
+
+    # this is a case where it's in stalled from a repo on Linux:
+
+    Linux-1> python3.5
+    Python 3.5.1 (default, Jan 19 2016, 21:32:20)
+    [GCC 4.4.7 20120313 (Red Hat 4.4.7-16)] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import saspy
+    >>> saspy.SAScfg
+    <module 'saspy.sascfg' from '/opt/tom/gitlab/metis/saspy_pip/saspy/sascfg.py'>
+    >>>
+    
+    # this is a case where it's in stalled from PyPi into site-apckages in the python instal location:
+
+    Linux-1> python3.5
+    Python 3.5.1 (default, Jan 19 2016, 21:32:20)
+    [GCC 4.4.7 20120313 (Red Hat 4.4.7-16)] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import saspy
+    >>> saspy.SAScfg
+    <module 'saspy.sascfg' from '/usr/lib/python3.5/site-packages/saspy/sascfg.py'>
+    >>>
+    
+        
 sascfg.py
 =========
 There are three main parts to this configuration file.
