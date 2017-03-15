@@ -97,7 +97,7 @@ At runtime, the user would be prompted for user and password and they would see 
 
     sas.saslib('Tera', engine='Teradata', options='user=&user pw=&mypw server=teracop1', prompt={'user': False, 'mypw': True})
     Please enter value for macro variable user sastpw
-    Please enter value for macro variable mypw ········
+    Please enter value for macro variable mypw ........
  
 Here's another example where you want to create a table, but you will let the user choose the table name as well as the name
 of the column and a hidden value to assign to it. You can see what the user is prompted for and enters, and then you can see
@@ -114,7 +114,7 @@ variables which are still available.
     run;
     ''', prompt={'var1': False, 'pw': True, 'dsname': False})
     Please enter value for macro variable var1 MyColumnName
-    Please enter value for macro variable hidden ········
+    Please enter value for macro variable hidden ........
     Please enter value for macro variable dsname TestTable1    
     
     
