@@ -232,7 +232,116 @@ class TestSASdataObject(unittest.TestCase):
         b = wkcars.columnInfo()
         self.assertNotEqual(a, b, msg="B should have an extra column P_originUSA")
 
-        
-        
+    def test_regScoreAssess(self):
+        stat = self.sas.sasstat()
+        self.sas.submit("""
+        data work.class;
+            set sashelp.class;
+        run;
+        """)
+        tr = self.sas.sasdata("class", "work")
+        tr.set_results('PANDAS')
+        with TemporaryDirectory() as temppath:
+            fname = os.path.join(temppath, 'hpreg_code.sas')
+            b = stat.hpreg(data=tr, model='weight=height', code=fname)
+            tr.score(file=os.path.join(temppath, 'hpreg_code.sas'))
+            # check that p_weight is in columnInfo
+            self.assertTrue('P_Weight ' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
+
+        res1 = tr.assessModel(target = 'weight', prediction='P_weight', nominal=False)
+        a = ['ASSESSMENTBINSTATISTICS', 'ASSESSMENTSTATISTICS', 'LOG']
+        self.assertEqual(sorted(a), sorted(res1.__dir__()),
+                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+        self.assertIsInstance(res1, saspy.SASresults, "Is return type correct")
+
+    def test_regScoreAssess2(self):
+        stat = self.sas.sasstat()
+        self.sas.submit("""
+        data work.class;
+            set sashelp.class;
+        run;
+        """)
+        tr = self.sas.sasdata("class", "work")
+        tr.set_results('PANDAS')
+        with TemporaryDirectory() as temppath:
+            fname = os.path.join(temppath, 'hplogistic_code.sas')
+            b = stat.hplogistic(data=tr, model='sex = weight height', code=fname)
+            tr.score(file=fname)
+            # check that p_weight is in columnInfo
+            self.assertTrue('P_SexF ' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
+
+        res1 = tr.assessModel(target = 'sex', prediction='P_SexF', nominal=True, event='F')
+        a = ['ASSESSMENTBINSTATISTICS', 'ASSESSMENTSTATISTICS', 'LOG', 'SGPLOT']
+        self.assertEqual(sorted(a), sorted(res1.__dir__()),
+                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+        self.assertIsInstance(res1, saspy.SASresults, "Is return type correct")
+
+    def test_partition1(self):
+        self.sas.submit("""
+                data work.class;
+                    set sashelp.class;
+                run;
+                """)
+        tr = self.sas.sasdata("class", "work")
+        tr.set_results('PANDAS')
+        tr.partition(var='sex', fraction = .5, kfold=1, out=None, singleOut=True)
+        self.assertTrue('_PartInd_ ' in tr.columnInfo()['Variable'].values, msg="Partition Column not found")
+
+    def test_partition2(self):
+        self.sas.submit("""
+                data work.class;
+                    set sashelp.class;
+                run;
+                """)
+        tr = self.sas.sasdata("class", "work")
+        tr.set_results('PANDAS')
+        tr.partition(var='sex', fraction = .5, kfold=2, out=None, singleOut=True)
+        self.assertTrue('_cvfold2 ' in tr.columnInfo()['Variable'].values, msg="Partition Column not found")
+
+    def test_partition3(self):
+        self.sas.submit("""
+                data work.class;
+                    set sashelp.class;
+                run;
+                """)
+        tr = self.sas.sasdata("class", "work")
+        out = self.sas.sasdata("class2", "work")
+        tr.set_results('PANDAS')
+        out.set_results('PANDAS')
+        tr.partition(var='sex', fraction = .5, kfold=2, out=out, singleOut=True)
+        self.assertFalse('_cvfold1 ' in tr.columnInfo()['Variable'].values, msg="Writing to wrong table")
+        self.assertFalse('_PartInd_ ' in tr.columnInfo()['Variable'].values, msg="Writing to wrong table")
+        self.assertTrue('_cvfold2 ' in out.columnInfo()['Variable'].values, msg="Partition Column not found")
+
+    def test_partition4(self):
+        self.sas.submit("""
+                data work.class;
+                    set sashelp.class;
+                run;
+                """)
+        tr = self.sas.sasdata("class", "work")
+        out = self.sas.sasdata("class2", "work")
+        tr.set_results('PANDAS')
+        out.set_results('PANDAS')
+        res1 = tr.partition(var='sex', fraction = .5, kfold=2, out=out, singleOut=False)
+        self.assertFalse('_cvfold1 ' in tr.columnInfo()['Variable'].values, msg="Writing to wrong table")
+        self.assertFalse('_PartInd_ ' in tr.columnInfo()['Variable'].values, msg="Writing to wrong table")
+        self.assertTrue('_cvfold2 ' in out.columnInfo()['Variable'].values, msg="Partition Column not found")
+        self.assertIsInstance(res1, list, "Is return type correct")
+        self.assertIsInstance(res1[0], tuple, "Is return type correct")
+        self.assertIsInstance(res1[0][1], saspy.SASdata, "Is return type correct")
+
+    def test_partition5(self):
+        self.sas.submit("""
+                data work.class;
+                    set sashelp.class;
+                run;
+                """)
+        tr = self.sas.sasdata("class", "work")
+        tr.set_results('PANDAS')
+        tr.partition(fraction = .5, kfold=1, out=None, singleOut=True)
+        self.assertTrue('_PartInd_ ' in tr.columnInfo()['Variable'].values, msg="Partition Column not found")
         
         

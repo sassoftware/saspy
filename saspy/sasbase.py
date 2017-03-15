@@ -1128,10 +1128,8 @@ class SASdata:
             if not singleOut:
                 outTableList = []
                 for j in range(1, k + 1):
-                    outTableList.append(
-                        (self.sas.sasdata(out_table + str(z) + "_train", out_libref, dsopts=self._dsopts()),
-                         self.sas.sasdata(out_table + str(z) + "_score", out_libref,
-                                          dsopts=self._dsopts())))
+                    outTableList.append((self.sas.sasdata(out_table + str(j) + "_train", out_libref, dsopts=self._dsopts()),
+                                               self.sas.sasdata(out_table + str(j) + "_score", out_libref, dsopts=self._dsopts())))
                 return outTableList
             if out:
                 if not isinstance(out, str):
@@ -1493,7 +1491,7 @@ class SASdata:
         code = "data %s.%s%s;" % (outLibref, outTable, self._dsopts())
         code += "set %s.%s%s;" % (self.libref, self.table, self._dsopts())
         if len(file)>0:
-            code += "%%include %s;" % file
+            code += '%%include "%s";' % file
         else:
             code += "%s;" %codestr
         code += "run;"
