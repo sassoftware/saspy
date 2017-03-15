@@ -12,13 +12,61 @@ It can connect to a local SAS session or remote session.
 Because of the wide range of connection types, there are a number of different access methods
 that are part of SASPy each of which are used to connect to different kinds of SAS sessions.
 
-The current set of access methods include `STDIO`_, and `STDIO over SSH`_, `IOM`_, and `HTTP`_. The HTTP access method isn't available yet, since it is for an interface which hasn't shipped yet.
-The STDIO access method is only available for Linux SAS; local or remote via passwordless SSH. The IOM access method supports SAS on any platform.
-It allows for using a local Windows connection and is also the way to connect to SAS Grid via SAS Grid Manager. I can connect to any SAS Workspace Server.
+The current set of access methods include `STDIO`_, and `STDIO over SSH`_, `IOM`_, and `HTTP`_. 
+The HTTP access method isn't available yet, since it is for an interface which hasn't shipped yet.
+The STDIO access method is only available for Linux SAS; local or remote via passwordless SSH. 
+The IOM access method supports SAS on any platform.
+It allows for using a local Windows connection and is also the way to connect to SAS Grid via SAS Grid Manager.
+It can connect to any SAS Workspace Server.
 
 Configuring all of these various types of connections is actually quite easy. There is a single confiuration file in the saspy directory of the repo: sascfg.py.
 This file contains instructions and examples, but this document will go into more details explaining how to configure each type of connection.
 
+Depending upon how you installed saspy, the sascfg.py file may be in different locations on the file system. In a regular pip install,
+it will show up under the site-packages directory in the python install. If you cloned the repo, or downloaded and extraced the repo,
+and installed from that, it may use the code from that location and not copy it to site-packages.
+ 
+Making sure you update the one python is using is the first thing to be sure of. If you're familiar with pip and Git, 
+then you probably know where to look, but if not, there's a very simple way to tell where python is getting the saspy modules.
+
+After installing saspy, however you install it, bring up python and import saspy, then simply submit saspy.SAScfg and python
+will show you where it found the module. Edit that one :).
+
+.. code:: ipython3
+
+    # this is a case where it's installed from a repo on Windows:
+
+    C:\>python
+    Python 3.6.0 |Anaconda custom (64-bit)| (default, Dec 23 2016, 11:57:41) [MSC v.1900 64 bit (AMD64)] on win32
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import saspy
+    >>> saspy.SAScfg
+    <module 'saspy.sascfg' from 'E:\\metis-master\\saspy_pip\\saspy\\sascfg.py'>
+    >>>
+
+    # this is a case where it's installed from a repo on Linux:
+
+    Linux-1> python3.5
+    Python 3.5.1 (default, Jan 19 2016, 21:32:20)
+    [GCC 4.4.7 20120313 (Red Hat 4.4.7-16)] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import saspy
+    >>> saspy.SAScfg
+    <module 'saspy.sascfg' from '/opt/tom/gitlab/metis/saspy_pip/saspy/sascfg.py'>
+    >>>
+    
+    # this is a case where it's installed from PyPI into site-apckages in the python instal location:
+
+    Linux-1> python3.5
+    Python 3.5.1 (default, Jan 19 2016, 21:32:20)
+    [GCC 4.4.7 20120313 (Red Hat 4.4.7-16)] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import saspy
+    >>> saspy.SAScfg
+    <module 'saspy.sascfg' from '/usr/lib/python3.5/site-packages/saspy/sascfg.py'>
+    >>>
+    
+        
 sascfg.py
 =========
 There are three main parts to this configuration file.
@@ -29,7 +77,7 @@ There are three main parts to this configuration file.
 
 In reverse order, the Configuration Definitions are Python Dictionaries where you configure each connection to a type of SAS session.
 SAS_config_options only has one option so far, which restricts (or allows) the end users ability to override settings in the Configuration Definitions using SASsession().
-SAS_config_names is the list of Configuration Definition names, which are available to be used; chosen by an end user at connection time.
+SAS_config_names is the list of Configuration Definition names which are available to be used; chosen by an end user at connection time.
 Configuration Definitions not listed in SAS_config_names are simply inaccessible. You can define all kinds of Configuration Definitions in the file,
 but not have them availabe by simply not havging their names in the list.
 
@@ -197,13 +245,16 @@ encoding  -
 Local
 ~~~~~
 For Local SAS running on the same Windows machine, you only need the following Configuration Definition keys (Don't specify any of the others).
-There is also one other requirement.
-The sspiauth.dll file (also included in your SAS installation) must be in either your system PATH, your java.library.path, or in the home directory of your Java client.
-You can search for this file in your SAS deployment, though it is likely in your SASHome\\SASFoundation\\9.4\\core\\sasext. If adding this to your system PATH environment
-variable, only list the path to the directory, don't incluse the file itself i.e.: C:\\Program Files\\SASHome\\SASFoundation\\9.4\\core\\sasext. 
+
+*There is also one other requirement.*
+
+The **sspiauth.dll** file (also included in your SAS installation) must be in either your system PATH, your java.library.path, or in the home directory of your Java client.
+You can search for this file in your SAS deployment, though it is likely in your SASHome\\SASFoundation\\9.4\\core\\sasext.
+
+If adding this to your system PATH environment variable, only list the path to the directory, don't incluse the file itself i.e.: C:\\Program Files\\SASHome\\SASFoundation\\9.4\\core\\sasext. 
 
 java      - Required
-    the path to the java executable to use (On Unix, fully qualified path. On Windows, you may get away with simply ``java``, else put the FQP)
+    the path to the java executable to use 
 classpath - Required
     Classpath to IOM client jars and saspyiom.jar.
 encoding  -
@@ -228,27 +279,12 @@ encoding  -
                    'classpath' : cpW
                   }
 
-    # Windows client and Unix IOM server
-    winiomlinux = {'java'      : 'java',
-                   'iomhost'   : 'linux.iom.host',
-                   'iomport'   : 8591,
-                   'encoding'  : 'latin1',
-                   'classpath' : cpW
-                  }
-
-    # Windows client and Windows IOM server
-    winiomwin   = {'java'      : 'java',
-                   'iomhost'   : 'windows.iom.host',
-                   'iomport'   : 8591,
-                   'encoding'  : 'windows-1252',
-                   'classpath' : cpW
-                  }
 
 
 
 **Note:** having the ``'java'`` key is the triger to use the IOM access method.
 **Note:** When using the IOM access method (``'java'`` key specified), the absence of the ``'iomhost'`` key is the trigger to use a
-Local Windows Session instead of remote IOM.
+Local Windows Session instead of remote IOM (it is a different connection type).
 
 
 HTTP

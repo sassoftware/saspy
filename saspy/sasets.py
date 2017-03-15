@@ -143,4 +143,4 @@ class SASets:
         """
         required_set = {}
         legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts', 'procopts'}
-        return SASProcCommons._run_proc(self, "TIMEIDATA", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc(self, "TIMEDATA", required_set, legal_set, **kwargs)

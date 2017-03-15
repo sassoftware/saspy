@@ -157,7 +157,7 @@ class SASsession():
     **Overview**
 
     The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-    Most of these parameters will be configured in the sascfg.py configuration file. 
+    Most of these parameters will be configured in the sascfg.py configuration file.
 
     Common parms for all access methods are:
 
@@ -1489,12 +1489,13 @@ class SASdata:
         else:
             outTable = self.table
             outLibref = self.libref
+        codestr = code
         code = "data %s.%s%s;" % (outLibref, outTable, self._dsopts())
         code += "set %s.%s%s;" % (self.libref, self.table, self._dsopts())
         if len(file)>0:
             code += "%%include %s;" % file
         else:
-            code += "%%include %s;" %code
+            code += "%s;" %codestr
         code += "run;"
 
         if self.sas.nosub:

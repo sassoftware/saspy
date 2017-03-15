@@ -26,14 +26,175 @@ class TestSASets(unittest.TestCase):
                     return False
         return True
 
-    def test_smoke(self):
+    def test_smokeTimeseries(self):
+        # Basic model returns objects
+        ets = self.sas.sasets()
+        self.sas.submit("""
+        data work.seriesG;
+            set sashelp.air;
+            logair = log( air );
+        run;
+        """)
+        air = self.sas.sasdata('seriesG', 'work')
+        b = ets.timeseries(data=air, id='date interval=month', var='logair')
+        a = ['ACFNORMPLOT', 'ACFPLOT', 'CYCLECOMPONENTPLOT', 'CYCLEPLOT', 'DATASET', 'IACFNORMPLOT', 'IACFPLOT',
+             'IRREGULARCOMPONENTPLOT', 'LOG', 'PACFNORMPLOT', 'PACFPLOT', 'PERCENTCHANGEADJUSTEDPLOT', 'PERIODOGRAM',
+             'SEASONALCOMPONENTPLOT', 'SEASONALIRREGULARCOMPONENTPLOT', 'SEASONALLYADJUSTEDPLOT', 'SERIESHISTOGRAM',
+             'SERIESPLOT', 'SPECTRALDENSITYPLOT', 'SSARESULTSPLOT', 'SSARESULTSVECTORPLOT', 'SSASINGULARVALUESPLOT',
+             'TRENDCOMPONENTPLOT', 'TRENDCYCLECOMPONENTPLOT', 'TRENDCYCLESEASONALPLOT', 'VARIABLE',
+             'WHITENOISELOGPROBABILITYPLOT', 'WHITENOISEPROBABILITYPLOT']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u"model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeArima(self):
         # Basic model returns objects
         ets = self.sas.sasets()
         air = self.sas.sasdata('air', 'sashelp')
         b = ets.arima(data=air, identify='var=air(1,12)')
         a = ['CHISQAUTO', 'DESCSTATS', 'LOG', 'SERIESCORRPANEL']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u"Simple Regession (reg) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u"model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeUCM(self):
+        # Basic model returns objects
+        ets = self.sas.sasets()
+        self.sas.submit("""
+                data work.seriesG;
+                    set sashelp.air;
+                    logair = log( air );
+                run;
+                """)
+        air = self.sas.sasdata('seriesG', 'work')
+        b = ets.ucm(data=air, id = 'date interval=month', model='logair',
+                    irregular='',
+                    level='',
+                    slope='',
+                    season='length=12 type=trig print=smooth',
+                    estimate='',
+                    forecast='lead=24 print=decomp')
+        a = ['ANNUALSEASONPLOT', 'COMPONENTSIGNIFICANCE', 'CONVERGENCESTATUS', 'CUSUMPLOT', 'CUSUMSQPLOT',
+             'DATASET', 'ERRORPLOT', 'ERRORWHITENOISELOGPROBPLOT', 'ESTIMATIONSPAN',
+             'FILTEREDALLEXCEPTIRREGPLOT', 'FILTEREDALLEXCEPTIRREGVARPLOT', 'FILTEREDSEASONPLOT', 'FITSTATISTICS',
+             'FITSUMMARY', 'FORECASTS', 'FORECASTSONLYPLOT', 'FORECASTSPAN', 'FORECASTSPLOT', 'INITIALPARAMETERS',
+             'LOG', 'MODELPLOT', 'OUTLIERSUMMARY', 'PANELRESIDUALPLOT', 'PARAMETERESTIMATES', 'RESIDUALLOESSPLOT',
+             'SEASONDESCRIPTION', 'SMOOTHEDALLEXCEPTIRREG', 'SMOOTHEDALLEXCEPTIRREGPLOT', 'SMOOTHEDALLEXCEPTIRREGVARPLOT',
+             'SMOOTHEDSEASON', 'SMOOTHEDSEASONPLOT']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_UCM2(self):
+        # Basic model returns objects
+        ets = self.sas.sasets()
+        self.sas.submit("""
+                data work.seriesG;
+                    set sashelp.air;
+                    logair = log( air );
+                run;
+                """)
+        air = self.sas.sasdata('seriesG', 'work')
+        b = ets.ucm(data=air, id = 'date interval=month', model='logair',
+                    irregular=True,
+                    level=True,
+                    slope=True,
+                    season='length=12 type=trig print=smooth',
+                    estimate=True,
+                    forecast='lead=24 print=decomp')
+        a = ['ANNUALSEASONPLOT', 'COMPONENTSIGNIFICANCE', 'CONVERGENCESTATUS', 'CUSUMPLOT', 'CUSUMSQPLOT',
+             'DATASET', 'ERRORPLOT', 'ERRORWHITENOISELOGPROBPLOT', 'ESTIMATIONSPAN',
+             'FILTEREDALLEXCEPTIRREGPLOT', 'FILTEREDALLEXCEPTIRREGVARPLOT', 'FILTEREDSEASONPLOT', 'FITSTATISTICS',
+             'FITSUMMARY', 'FORECASTS', 'FORECASTSONLYPLOT', 'FORECASTSPAN', 'FORECASTSPLOT', 'INITIALPARAMETERS',
+             'LOG', 'MODELPLOT', 'OUTLIERSUMMARY', 'PANELRESIDUALPLOT', 'PARAMETERESTIMATES', 'RESIDUALLOESSPLOT',
+             'SEASONDESCRIPTION', 'SMOOTHEDALLEXCEPTIRREG', 'SMOOTHEDALLEXCEPTIRREGPLOT', 'SMOOTHEDALLEXCEPTIRREGVARPLOT',
+             'SMOOTHEDSEASON', 'SMOOTHEDSEASONPLOT']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u"model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeESM(self):
+        # Basic model returns objects
+        ets = self.sas.sasets()
+        self.sas.submit("""
+                data work.seriesG;
+                    set sashelp.air;
+                    logair = log( air );
+                run;
+                """)
+        air = self.sas.sasdata('seriesG', 'work')
+        b = ets.esm(data=air, id='date interval=daily', forecast='_numeric_')
+        a = ['DATASET', 'ERRORACFNORMPLOT', 'ERRORACFPLOT', 'ERRORHISTOGRAM', 'ERRORIACFNORMPLOT', 'ERRORIACFPLOT',
+             'ERRORPACFNORMPLOT', 'ERRORPACFPLOT', 'ERRORPERIODOGRAM', 'ERRORPLOT', 'ERRORSPECTRALDENSITYPLOT',
+             'ERRORWHITENOISELOGPROBPLOT', 'ERRORWHITENOISEPROBPLOT', 'FORECASTSONLYPLOT', 'FORECASTSPLOT', 'LEVELSTATEPLOT',
+             'LOG', 'MODELFORECASTSPLOT', 'MODELPLOT', 'VARIABLE']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u"model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeTimeID(self):
+        # Basic model returns objects
+        ets = self.sas.sasets()
+        self.sas.submit("""
+                data work.workdays;
+                   format day weekdate.;
+                   input day : date. @@;
+                   datalines;
+                01AUG09 06AUG09 11AUG09 14AUG09 19AUG09 22AUG09
+                27AUG09 01SEP09 04SEP09 09SEP09 12SEP09 17SEP09
+                ;
+                run;
+                """)
+        air = self.sas.sasdata('workdays', 'work')
+        b = ets.timeid(data=air, id='day')
+        a = ['DECOMPOSITIONPLOT', 'INTERVALCOUNTSCOMPONENTPLOT', 'LOG', 'OFFSETCOMPONENTPLOT',
+             'SPANCOMPONENTPLOT', 'VALUESPLOT']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u"model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
+    def test_smokeTimedata(self):
+        # Basic model returns objects
+        ets = self.sas.sasets()
+        self.sas.submit("""
+                proc fcmp outlib=work.timefnc.funcs;
+                   subroutine mylog(actual[*], transform[*]);
+                   outargs transform;
+                   actlen  = DIM(actual);
+                   do t = 1 to actlen;
+                      transform[t] = log(actual[t]);
+                   end;
+                   endsub;
+
+                   function mymean(actual[*]);
+                   actlen  = DIM(actual);
+                   sum = 0;
+                   do t = 1 to actlen;
+                      sum = sum + actual[t];
+                   end;
+                   return( sum / actlen );
+                   endsub;
+                run;
+                quit;
+                options cmplib = work.timefnc;
+                """)
+        air = self.sas.sasdata('air', 'sashelp')
+        b = ets.timedata(data=air,
+                         procopts='out=work.air print=(scalars arrays)',
+                         id='date interval=qtr acc=t format=yymmdd.',
+                         var='air',
+                         outarrays=' logair myair',
+                         outscalars='mystats',
+                         prog_stmts="""
+                                   call mylog(air,logair);
+                                   do t = 1 to dim(air);
+                                   myair[t] = air[t] - logair[t];
+                                   end;
+                                   mystats= mymean(air);
+                                 """)
+        a = ['ARRAYPLOT', 'ARRAYS', 'LOG', 'SCALARS']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u"model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), str(b)))
 
     def test_missingVar(self):

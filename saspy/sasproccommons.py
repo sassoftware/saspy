@@ -16,7 +16,7 @@
 import logging
 import re
 from saspy.sasresults import SASresults
-#from pdb import set_trace as bp
+# from pdb import set_trace as bp
 
 
 class SASProcCommons:
@@ -73,7 +73,7 @@ class SASProcCommons:
             plot = ''
         if self.sasproduct.lower() == 'ets' and not ('ODSGraphics' in args.keys() or ODSGraphics == False) :
             outmeth = 'out'
-            plot = 'plots=all'
+            plot = 'plot=all'
         if self.sasproduct.lower() == 'em':
             outmeth = ''
             plot = ''
@@ -238,11 +238,21 @@ class SASProcCommons:
             self.logger.debug("intervals statement,length: %s,%s", args['intervals'], len(args['intervals']))
             code += "intervals %s;\n" % (args['intervals'])
         if 'irregular' in args:
-            self.logger.debug("irregular statement,length: %s,%s", args['irregular'], len(args['irregular']))
-            code += "irregular %s;\n" % (args['irregular'])
+            if isinstance(args['irregular'], str):
+                self.logger.debug("irregular statement,length: %s,%s", args['irregular'], len(args['irregular']))
+                code += "irregular %s;\n" % (args['irregular'])
+            elif isinstance(args['irregular'], bool) and args['irregular']:
+                code += "irregular;\n"
+            else:
+                raise SyntaxError("irregular is in an unknown format: %s" % str(args['irregular']))
         if 'level' in args:
-            self.logger.debug("level statement,length: %s,%s", args['level'], len(args['level']))
-            code += "level %s;\n" % (args['level'])
+            if isinstance(args['level'], str):
+                self.logger.debug("level statement,length: %s,%s", args['level'], len(args['level']))
+                code += "level %s;\n" % (args['level'])
+            elif isinstance(args['level'], bool) and args['level']:
+                code += "level;\n"
+            else:
+                raise SyntaxError("level is in an unknown format: %s" % str(args['level']))
         # lsmeans moved
         # manova moved
         # means moved
@@ -253,8 +263,13 @@ class SASProcCommons:
             self.logger.debug("contrast statement,length: %s,%s", args['contrast'], len(args['contrast']))
             code += "contrast %s;\n" % (args['contrast'])
         if 'estimate' in args:
-            self.logger.debug("estimate statement,length: %s,%s", args['estimate'], len(args['estimate']))
-            code += "estimate %s;\n" % (args['estimate'])
+            if isinstance(args['estimate'], str):
+                self.logger.debug("estimate statement,length: %s,%s", args['estimate'], len(args['estimate']))
+                code += "estimate %s;\n" % (args['estimate'])
+            elif isinstance(args['estimate'], bool) and args['estimate']:
+                code += "estimate;\n"
+            else:
+                raise SyntaxError("estimate is in an unknown format: %s" % str(args['estimate']))
         if 'lsmeans' in args:
             self.logger.debug("lsmeans statement,length: %s,%s", args['lsmeans'], len(args['lsmeans']))
             code += "lsmeans %s;\n" % (args['lsmeans'])
@@ -325,8 +340,13 @@ class SASProcCommons:
                 self.logger.debug("selection statement,length: %s,%s", args['selection'], len(args['selection']))
                 code += "selection method=%s;\n" % (args['selection'])
         if 'slope' in args:
-            self.logger.debug("slope statement,length: %s,%s", args['slope'], len(args['slope']))
-            code += "slope %s;\n" % (args['slope'])
+            if isinstance(args['slope'], str):
+                self.logger.debug("slope statement,length: %s,%s", args['slope'], len(args['slope']))
+                code += "slope %s;\n" % (args['slope'])
+            elif isinstance(args['slope'], bool) and args['slope']:
+                code += "slope;\n"
+            else:
+                raise SyntaxError("slope is in an unknown format: %s" % str(args['slope']))
         if 'splinereg' in args:
             self.logger.debug("splinereg statement,length: %s,%s", args['splinereg'], len(args['splinereg']))
             code += "splinereg %s;\n" % (args['splinereg'])
@@ -362,18 +382,25 @@ class SASProcCommons:
                     raise SyntaxError("The target list must have exactly one member")
             elif isinstance(args['target'], dict):
                 try:
-                    if 'interval' in args['target'].keys():
-                        if isinstance(args['target']['interval'], str):
-                            code += "target %s /level=interval;\n" % args['target']['interval']
-                        if isinstance(args['target']['interval'], list):
-                            code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
-                    if 'nominal' in args['target'].keys():
-                        if isinstance(args['target']['nominal'], str):
-                            code += "target %s /level=nominal;\n" % args['target']['nominal']
-                        if isinstance(args['target']['nominal'], list):
-                            code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
-                except:
-                    raise SyntaxError("Proper Keys not found for TARGET dictionary: %s" % args['target'].keys())
+                    # check there there is only one target:
+                    value_length = [len(v) for v in args['target'].values()]
+                    if sum(value_length) == 1:
+                        if 'interval' in args['target'].keys():
+                            if isinstance(args['target']['interval'], str):
+                                code += "target %s /level=interval;\n" % args['target']['interval']
+                            if isinstance(args['target']['interval'], list):
+                                code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
+                        if 'nominal' in args['target'].keys():
+                            if isinstance(args['target']['nominal'], str):
+                                code += "target %s /level=nominal;\n" % args['target']['nominal']
+                            if isinstance(args['target']['nominal'], list):
+                                code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
+                    else:
+                        raise SyntaxError
+                except SyntaxError:
+                    print("SyntaxError: TARGET can only have one variable")
+                except KeyError:
+                    print("KeyError: Proper keys not found for TARGET dictionary: %s" % args['target'].keys())
             else:
                 raise SyntaxError("TARGET is in an unknown format: %s" % str(args['target']))
         if 'train' in args:
@@ -418,17 +445,19 @@ class SASProcCommons:
             self.logger.debug("xchart statement,length: %s,%s", args['xchart'], len(args['xchart']))
             code += "xchart %s;\n" % (args['xchart'])
         if 'score' in args:
-            scoreds = args['score']
-            if objtype.upper() == "HP4SCORE":
-               f = scoreds.get('file')
-               d = scoreds.get('out')
-               o = d.libref+'.'+d.table
-               code += "score file='"+f+"' out="+o+";\n"
-            elif objtype.upper() == 'TPSPLINE':
-               
-               code += "score data=%s.%s out=%s.%s;\n" % (data.libref, data.table, scoreds.libref, scoreds.table)
+            if isinstance(args['score'], str):
+                code += "score %s;\n" % args['score']
             else:
-               code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
+                scoreds = args['score']
+                if objtype.upper() == "HP4SCORE":
+                   f = scoreds.get('file')
+                   d = scoreds.get('out')
+                   o = d.libref+'.'+d.table
+                   code += "score file='"+f+"' out="+o+";\n"
+                elif objtype.upper() == 'TPSPLINE':
+                   code += "score data=%s.%s out=%s.%s;\n" % (data.libref, data.table, scoreds.libref, scoreds.table)
+                else:
+                   code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
         # save statement must be after input and target for TREEBOOST
         if 'save' in args:
             #self.logger.debug("save statement,length: %s,%s", args['save'], len(args['save']))
@@ -571,7 +600,7 @@ class SASProcCommons:
             if isinstance(inputs, str):
                 # if there is only one word or special character do nothing
                 if len(inputs.split()) == 1 or len(
-                        [word for word in inputs if any(letter in word for letter in '/\:;.%')]) != 0:
+                        [word for word in inputs if any(letter in word for letter in '-/\\:;.%')]) != 0:
                     kwargs['input'] = inputs
                 else:
                     # turn str into list and search for nominals
@@ -638,7 +667,7 @@ class SASProcCommons:
                 error = SASProcCommons._errorLog(log)
                 isinstance(error, str)
                 if len(error) > 1:
-                    print("SubmissionError: ERRORS found in SAS log: \n%s" % error)
+                    RuntimeWarning("ERRORS found in SAS log: \n%s" % error)
                     return SASresults(obj1, self.sas, objname, nosub, log)
                 try:
                     obj1 = SASProcCommons._objectmethods(self, objname)
@@ -649,8 +678,7 @@ class SASProcCommons:
                 print(code)
                 nosub = True
         else:
-            print("Error in code submission")
-
+            RuntimeWarning("Error in code submission")
         return SASresults(obj1, self.sas, objname, nosub, log)
 
     @staticmethod
@@ -686,11 +714,10 @@ class SASProcCommons:
                 totSet = legalSet | reqSet
             else:
                 totSet = legalSet
-            generalSet = set(['ODSGraphics'])
+            generalSet = set(['ODSGraphics', 'stmtpassthrough'])
             extraSet = set(stmt.keys() - generalSet).difference(totSet)  # find keys not in legal or required sets
             if extraSet:
                 for item in extraSet:
                     stmt.pop(item, None)
-                print("The following %d statements are invalid and will be ignored: " % len(extraSet))
-                print(extraSet)
+                SyntaxWarning("The following %d statements are invalid and will be ignored:\nextraSet " % len(extraSet))
         return stmt
