@@ -34,7 +34,7 @@ will show you where it found the module. Edit that one :).
 
 .. code:: ipython3
 
-    # this is a case where it's in stalled from a repo on Windows:
+    # this is a case where it's installed from a repo on Windows:
 
     C:\>python
     Python 3.6.0 |Anaconda custom (64-bit)| (default, Dec 23 2016, 11:57:41) [MSC v.1900 64 bit (AMD64)] on win32
@@ -44,7 +44,7 @@ will show you where it found the module. Edit that one :).
     <module 'saspy.sascfg' from 'E:\\metis-master\\saspy_pip\\saspy\\sascfg.py'>
     >>>
 
-    # this is a case where it's in stalled from a repo on Linux:
+    # this is a case where it's installed from a repo on Linux:
 
     Linux-1> python3.5
     Python 3.5.1 (default, Jan 19 2016, 21:32:20)
@@ -55,7 +55,7 @@ will show you where it found the module. Edit that one :).
     <module 'saspy.sascfg' from '/opt/tom/gitlab/metis/saspy_pip/saspy/sascfg.py'>
     >>>
     
-    # this is a case where it's in stalled from PyPi into site-apckages in the python instal location:
+    # this is a case where it's installed from PyPI into site-apckages in the python instal location:
 
     Linux-1> python3.5
     Python 3.5.1 (default, Jan 19 2016, 21:32:20)
