@@ -8,7 +8,7 @@ Getting started
 ***************
 
 SASPy is an interface module to the SAS System. It connects to SAS 9.4 (released July 2013) or newer and allows users
-to take advantage of their licenced SAS infrastructure through Python 3.3+
+to take advantage of their licenced SAS infrastructure through Python 3.x
 It is the communication layer for the `sas_kernel <https://github.com/sassoftware/sas_kernel>`_
 SASPy is an open source project and your contributions are appreciated and encouraged.
 
@@ -16,8 +16,7 @@ The SASPy interface is designed to allow users to use Python syntax and
 constructs to interact with MVA SAS (SAS 9.4). It makes SAS the
 analytical engine or "calculator" for data analysis. In its most simple
 form, SASPy is a code translator taking python commands and converting
-them into SAS procedure and data step calls and then displaying the
-results.
+them into SAS language statements and then displaying the results.
 
 Please open issues for things you see!
 
@@ -25,7 +24,8 @@ We will start with a basic example using `Kaggle Resources Analytics <https://ww
 
 Initial import
 ==============
-It is assumed you have already `:any:Installation` installed and `configured` SASPy but if not please see the respective links to get started
+It is assumed you have already :doc:`installed <installation>` and :doc:`configured <configuration>` SASPy but if not please
+ see the respective links to get started
 
 .. code:: ipython3
 
@@ -33,11 +33,15 @@ It is assumed you have already `:any:Installation` installed and `configured` SA
     import pandas as pd
     from IPython.display import HTML
 
-Create SAS instance
-===================
-In this code we have created an instance named `sas` using the default configuration. Each SAS instance is linked to a
-distinct SAS session. If no cfgname is provided the user will be prompted from the set defined in the sascfg.py file.
+Create SAS session
+==================
+In this code we have created a SASsession named `sas` using the default configuration. Each SASsession is a connection to a
+seperated SAS instance. The cfgname= paramter specifies which Configuration Definition you want to connect to (in sascfg.py).
+If there is only one defined, you don't need to specify cfgname=. If there are more then one, and you don't specify one,
+you will be prompted for which one to use. 
+
 Once a connection is ready a note similar to the the one below will be displayed.
+
 .. code:: ipython3
 
     sas = saspy.SASsession(cfgname='default')
@@ -65,18 +69,18 @@ Pandas DataFrame
 .. code:: ipython3
 
     hr_pd = pd.read_csv("./HR_comma_sep.csv")
-    hr = sas.df2sd(hr_pd)
+    hr = sas.df2sd(hr_pd)  # the short for of: hr = sas.dataframe2sasdata(hr_pd) 
 
 
 Existing SAS data set
 ---------------------
 .. code:: ipython3
 
-    hr = sas.sasdata('hr', 'mylib')
+    hr = sas.sasdata('hr', 'mylibref')  # or simpley hr = sas.sasdata('hr') if hr is in your 'work' or 'user' library
 
 Explore the data
 ================
-There are a number of tabular and graphical methods to view your data here are a few see the API reference for a
+There are a number of tabular and graphical methods to view your data here are a few. Please see the :doc:`api` for a
 complete list.
 
 List the variables
@@ -122,7 +126,8 @@ Submit SAS code directly from Python session
 If you encounter a situation where you need to submit code directly to the SAS system, there is a submit method to
 accomplish that. Here we are creating a side by side panel plot to compare employees who have left vs those still
 working at the company based on their business unit and median performance rating and satisifaction level.
-The submit method returns a dictionary with two keys: LOG and LST
+The submit method returns a dictionary with two keys: LOG and LST. The LST has the results to display and the LOG has the
+portion of the SAS log for that code submittal. 
 
 .. code:: ipython3
 
@@ -141,7 +146,7 @@ Split the data into training and test
 Partitioning data is essential to avoid overfitting during model development. this can be achived using the partition
 method. In this example we are going to partion inplace stratifying based on the variable left. If no variable is
 provided or the variable is interval then simple random sampling (SRS) is done.
-We can then create two
+We can then create two partitions; test and training.
 .. code:: ipython3
 
     hr.partition('left')
@@ -172,12 +177,12 @@ Here is a code example to create objects for each product:
     qc   = sas.sasqc()
     util = sas.sasutil()
 
-From each of these objects is a set of methods that can perform analytical functions namely modeling.
+Each of these objects contain a set of methods that can perform analytical functions, namely modeling.
 These methods closely follow the SAS procedures for naming and organization.
-**NOTE:** The list of methods is does not begin to be exhaustive and I hope you'll consider contributing
+**NOTE:** The existing list of methods is not an exhaustive list of the SAS Procedures that are available and I hope you'll consider contributing
 the methods you've written to do your work. Here is documentation on how to add a method (SAS Procedure).
 
-The API doc has a complete list of methods for each object.
+The :doc:`api' has a complete list of methods for each object.
 
 
 To see a list of the available methods you can `dir()` function for example `dir(stat)` will give you a list of the
@@ -291,8 +296,8 @@ the modeling algorthm, the settings, and the target type (nominal vs interval)
      'PERFORMANCEINFO',
      'VARIABLEIMPORTANCE']
 
-To view a particular diagnostic submit as shown below. The default objects for tables are Pandas DataFrames and for plots
-are HTML graphics
+To view a particular diagnostic, submit it as shown below. The default objects for tables are Pandas DataFrames and for plots
+are HTML graphics. You can use use the `results=` option to choose HTML for tables too, if you choose.
 
 .. code:: python
 
