@@ -8,16 +8,16 @@
 Troubleshooting
 ===============
 
-This chapter covers covers troubleshooting procedures with saspy. While we don't expect you to have trouble,
+This chapter covers covers troubleshooting procedures with SASPy. While we don't expect you to have trouble,
 there are some cases where you might not have everything working right. We've tried to provide an easy reference
 for diagnosing and fixing those issues here.
  
 
 ***********************************
-Connection and Configuration issues
+Connection and configuration issues
 ***********************************
 
-Although setting up and configuring saspy is pretty simple, if you do have something not quite right, it
+Although setting up and configuring SASPy is pretty simple, if you do have something not quite right, it
 may be hard to figure out what's wrong. That's when you come to this chapter. 
 
 We've added quite a bit of self diagnostics and error messages for many of the likely issues that can
@@ -25,12 +25,12 @@ happen trying to start up a connection to SAS. Each access method has its own se
 little help and explaination here, you can probably diagnose and correct any issue you might have.
 
 Problems in this category will be when using the saspy.SASsession() method to connect to a SAS session.
-The very first thing to look at is your sascfg.py file (in the saspy instalation). This is where the
+The very first thing to look at is your sascfg.py file (in the SASPy instalation). This is where the
 configurations definition are. The file itself had documentation about how to configure, and so does
 the <Configuring SASPy> chapter of this document.
 
 
-Common Diagnostics
+Common diagnostics
 ------------------
 
 Although each access method has its own ways something can go wrong, there are some common diagnostics
@@ -38,8 +38,8 @@ you will get and can use to track down the issue.
 
 The first is that if the SASsession() method fails, it will return any erros it can, as well as the 
 actual command it was trying to run to connect to SAS. That will vary with access method, but in each
-case, you can cut-n-paste that command into a shell on the machine where saspy (python) is running
-and that may very well provide more diagnostics and error messages that saspy may have displayed.
+case, you can cut-n-paste that command into a shell on the machine where SASPy (python) is running
+and that may very well provide more diagnostics and error messages that SASPy may have displayed.
 
 For instance, here's a very simple case using the STDIO access method on a local linux machine. The 
 Configuration Definition is nothing but a valid path that should work.
@@ -61,7 +61,7 @@ When I try to run I get the following:
     Attempted to run program /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8 with the following parameters:
     ['/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8', '-nodms', '-stdio', '-terminal', '-nosyntaxcheck', '-pagesize', 'MAX', '']
     
-    Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:
+    Try running the following command (where SASPy is running) manually to see if you can get more information on what went wrong:
     /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8 -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX
     
     No SAS process attached. SAS process has terminated unexpectedly.
@@ -92,7 +92,7 @@ Well go figure. My SAS has expired.
 
 The same process can be used with other access methods. IOM uses Java, so you could have a classpath issue
 which you won't see unless you run the command yourself from a shell and then you can get a traceback or
-other errors from java that didn't make it back to saspy to display.
+other errors from java that didn't make it back to SASPy to display.
 
 
 STDIO
@@ -113,8 +113,8 @@ it has to be right on the Remote Unix machine that you are ssh'ing to. That migh
 as on your local Unix SAS deployment. 
 
 Secondly, this requires that you have passwordless ssh configured and working for each user that will
-be connecting between the local and remote machines. That can be diagnosed independant of saspy or python.
-If the connection cannot be made, you should see that error message with the command that saspy was
+be connecting between the local and remote machines. That can be diagnosed independant of SASPy or python.
+If the connection cannot be made, you should see that error message with the command that SASPy was
 trying to execute, and you can run it to get better diagnostic error messages that can tell you if its
 a problem with your ssh credentials, the machine you're trying to reach isn't listening, or any other
 problem there might be.
@@ -169,7 +169,7 @@ There are two things that are likely to be the problem.
    1) Java isn't installed or configured right, or you don't have the right java command  for 'java' in your Configuration Definition
    2) You don't have your classpath right, or don't have the right jars.
 
-Neither of these problems will result in a good message from saspy telling you what the problem is. But, like in the cases above,
+Neither of these problems will result in a good message from SASPy telling you what the problem is. But, like in the cases above,
 if the problem is that Java won't start up, you will get the exact command trying to be run, so you can run it and see more diagnostics
 and error messages.
 
@@ -271,7 +271,7 @@ that can happen here.
     
     
 
-So, hopefully this has shown you how to diagnose connection and configuration problems with saspy. When you have things set up right, you shouldn't
+So, hopefully this has shown you how to diagnose connection and configuration problems with SASPy. When you have things set up right, you shouldn't
 have any problems, it should just work! 
 
 

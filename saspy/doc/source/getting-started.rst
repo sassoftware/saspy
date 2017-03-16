@@ -4,18 +4,18 @@
 .. currentmodule:: saspy
 
 ***************
-Getting Started
+Getting started
 ***************
 
 SASPy is an interface module to the SAS System. It connects to SAS 9.4 (released July 2013) or newer and allows users
 to take advantage of their licenced SAS infrastructure through Python 3.3+
 It is the communication layer for the `sas_kernel <https://github.com/sassoftware/sas_kernel>`_
-SASPY is an open source project and your contributions are appreciated and encouraged.
+SASPy is an open source project and your contributions are appreciated and encouraged.
 
-The SASPY interface is designed to allow users to use Python syntax and
+The SASPy interface is designed to allow users to use Python syntax and
 constructs to interact with MVA SAS (SAS 9.4). It makes SAS the
 analytical engine or "calculator" for data analysis. In its most simple
-form, SASPY is a code translator taking python commands and converting
+form, SASPy is a code translator taking python commands and converting
 them into SAS procedure and data step calls and then displaying the
 results.
 
@@ -25,7 +25,7 @@ We will start with a basic example using `Kaggle Resources Analytics <https://ww
 
 Initial import
 ==============
-It is assumed you have already `:any:Installation` installed and `configured` saspy but if not please see the respective links to get started
+It is assumed you have already `:any:Installation` installed and `configured` SASPy but if not please see the respective links to get started
 
 .. code:: ipython3
 
@@ -33,7 +33,7 @@ It is assumed you have already `:any:Installation` installed and `configured` sa
     import pandas as pd
     from IPython.display import HTML
 
-Create SAS Instance
+Create SAS instance
 ===================
 In this code we have created an instance named `sas` using the default configuration. Each SAS instance is linked to a
 distinct SAS session. If no cfgname is provided the user will be prompted from the set defined in the sascfg.py file.
@@ -48,7 +48,7 @@ Once a connection is ready a note similar to the the one below will be displayed
     SAS Connection established. Subprocess id is 28207
 
 
-Load Data Into SAS
+Load sata into SAS
 ==================
 Data can be loaded easily from many sources. Below are examples of the most common sources. In each case `hr` is a
 SASdata object.
@@ -117,7 +117,7 @@ Basic heatmap
     hr.heatmap('last_evaluation', 'satisfaction_level')
 
 
-Submit SAS Code directly from Python session
+Submit SAS code directly from Python session
 ============================================
 If you encounter a situation where you need to submit code directly to the SAS system, there is a submit method to
 accomplish that. Here we are creating a side by side panel plot to compare employees who have left vs those still
@@ -265,7 +265,7 @@ These rules apply to both the `target` and `input`
 does need to be assigned to the ``'nominal'`` dictionary key if you use the dictionary object type
 
 
-Evaluating Model Diagnostics
+Evaluating model diagnostics
 ============================
 Perhaps the most important part of modeling is evaluating the quality of the model. SASPy makes this very easy by
 leverging the rich graphical and tabular output of `SAS ODS <http://support.sas.com/rnd/base/ods/>`_
@@ -324,13 +324,13 @@ submission
 
 
 
-Assessing Model Quality
+Assessing model quality
 =======================
 
 
 
 
-Scoring New Data
+Scoring new data
 ================
 
 

@@ -19,17 +19,17 @@ The IOM access method supports SAS on any platform.
 It allows for using a local Windows connection and is also the way to connect to SAS Grid via SAS Grid Manager.
 It can connect to any SAS Workspace Server.
 
-Configuring all of these various types of connections is actually quite easy. There is a single confiuration file in the saspy directory of the repo: sascfg.py.
+Configuring all of these various types of connections is actually quite easy. There is a single confiuration file in the SASPy directory of the repo: sascfg.py.
 This file contains instructions and examples, but this document will go into more details explaining how to configure each type of connection.
 
-Depending upon how you installed saspy, the sascfg.py file may be in different locations on the file system. In a regular pip install,
+Depending upon how you installed SASPy, the sascfg.py file may be in different locations on the file system. In a regular pip install,
 it will show up under the site-packages directory in the python install. If you cloned the repo, or downloaded and extraced the repo,
 and installed from that, it may use the code from that location and not copy it to site-packages.
  
 Making sure you update the one python is using is the first thing to be sure of. If you're familiar with pip and Git, 
-then you probably know where to look, but if not, there's a very simple way to tell where python is getting the saspy modules.
+then you probably know where to look, but if not, there's a very simple way to tell where python is getting the SASPy modules.
 
-After installing saspy, however you install it, bring up python and import saspy, then simply submit saspy.SAScfg and python
+After installing SASPy, however you install it, bring up python and import saspy, then simply submit saspy.SAScfg and python
 will show you where it found the module. Edit that one :).
 
 .. code:: ipython3
@@ -141,9 +141,9 @@ to connect to a SAS grid. Using this method, instead of STDIO over SSH,
 lets the distribution of connections to the various grid nodes be controlled by SAS Grid Manager,
 as well as providing integration with all of the monitoring and administration SAS Grid Manager provides.
 
-The IOM access method also allows saspy to connect to Windows SAS. This can be either a local Windows SAS installation or a remote IOM server running on Windows.
+The IOM access method also allows SASPy to connect to Windows SAS. This can be either a local Windows SAS installation or a remote IOM server running on Windows.
 
-The IOM access method requires the use of the SAS Java IOM Client, and a classpath to access the SAS Java IOM Client jars and the saspy jar.
+The IOM access method requires the use of the SAS Java IOM Client, and a classpath to access the SAS Java IOM Client jars and the SASPy jar.
 The ``'classpath'`` key requires a little extra explanation before we get to the Configuration Definition. There are four (4) jars that are required for the Java IOM Client.
 These are provided in your existing SAS Install.
 There is one jar provided in this repo: saspyiom.jar. These five jars must be provided (fully qualified paths) in a classpath variable.
@@ -182,7 +182,7 @@ iomhost - Required
 iomport - Required
     the port that IOM is listening on for workspace connections
 classpath - Required
-    Classpath to IOM client jars and saspy client jar.
+    Classpath to IOM client jars and SASPy client jar.
 omruser - *not suggested*  [Required but PROMTED for at runtime]
     If blank the user will be prompted for at runtime
 omrpw    - **really not suggested** [Required but PROMTED for at runtime]
