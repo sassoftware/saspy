@@ -10,7 +10,7 @@ installations.  To install the latest version using `pip`, you execute the follo
 
     pip install saspy
 
-or, for a specific release:
+or, for a specific release::
 
     pip install http://github.com/sassoftware/saspy/releases/saspy-X.X.X.tar.gz
 
