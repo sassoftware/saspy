@@ -25,7 +25,7 @@ We will start with a basic example using `Kaggle Resources Analytics <https://ww
 Initial import
 ==============
 It is assumed you have already :doc:`installed <install>` and :doc:`configured <configuration>` SASPy but if not please
- see the respective links to get started
+see the respective links to get started
 
 .. code:: ipython3
 
