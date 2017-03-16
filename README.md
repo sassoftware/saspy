@@ -23,6 +23,8 @@ All of the doc, including install and configuration information can be found at
 
 saspy can be installed via pip. This will pull down the latest PyPI package and install it.
 
+    pip install saspy
+
 However, if that's too easy, you can also download a specific release from
 [saspy project releases page](https://github.com/sassoftware/saspy/releases), or just clone
 the repo and and instll from that. To install a given release, use the following, 
