@@ -14,7 +14,6 @@ or, for a specific release:
 
     pip install http://github.com/sassoftware/saspy/releases/saspy-X.X.X.tar.gz
 
-
 Dependencies
 ------------
 
