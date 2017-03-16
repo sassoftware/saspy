@@ -300,7 +300,7 @@ and how to check the various stages
        ?ml.forest()
        ?stat.hplogistic()
 
-   The next best option is to use the API_ reference for the given method
+   The next best option is to use the :doc:`api` for the given method
    Both ways will show you the set of required parameters and then the list of optional parameters. The requred set
    and optional make up the complete set of parameters the method will take.
 
