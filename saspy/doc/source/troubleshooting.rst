@@ -26,8 +26,7 @@ little help and explaination here, you can probably diagnose and correct any iss
 
 Problems in this category will be when using the saspy.SASsession() method to connect to a SAS session.
 The very first thing to look at is your sascfg.py file (in the saspy instalation). This is where the
-configurations definition are. The file itself had documentation about how to configure, and so does
-the <Configuring SASPy> chapter of this document.
+configurations definition are. The file itself has documentation and so does :doc:`configuration`.
 
 
 Common Diagnostics
