@@ -182,7 +182,7 @@ These methods closely follow the SAS procedures for naming and organization.
 **NOTE:** The existing list of methods is not an exhaustive list of the SAS Procedures that are available and I hope you'll consider contributing
 the methods you've written to do your work. Here is documentation on how to add a method (SAS Procedure).
 
-The :doc:`api' has a complete list of methods for each object.
+The :doc:`api` has a complete list of methods for each object.
 
 
 To see a list of the available methods you can `dir()` function for example `dir(stat)` will give you a list of the
