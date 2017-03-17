@@ -228,7 +228,7 @@ class SASsessionIOM():
 
       if os.name == 'nt': 
          try:
-            self.pid = subprocess.Popen(parms)
+            self.pid = subprocess.Popen(parms, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             pid = self.pid.pid
          except:
             print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
@@ -237,14 +237,43 @@ class SASsessionIOM():
             return None
       else:
          #signal.signal(signal.SIGCHLD, signal.SIG_IGN)
+
+         PIPE_READ  = 0
+         PIPE_WRITE = 1
+         
+         pin  = os.pipe() 
+         pout = os.pipe()
+         perr = os.pipe() 
+      
          pidpty = os.forkpty()
          if pidpty[0]:
             # we are the parent
             self.pid = pidpty[0]
             pid = self.pid
+
+            os.close(pin[PIPE_READ])
+            os.close(pout[PIPE_WRITE]) 
+            os.close(perr[PIPE_WRITE]) 
+
          else:
             # we are the child
             signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+            os.close(0)
+            os.close(1)
+            os.close(2)
+          
+            os.dup2(pin[PIPE_READ],   0)
+            os.dup2(pout[PIPE_WRITE], 1)
+            os.dup2(perr[PIPE_WRITE], 2)
+          
+            os.close(pin[PIPE_READ])
+            os.close(pin[PIPE_WRITE])
+            os.close(pout[PIPE_READ])
+            os.close(pout[PIPE_WRITE]) 
+            os.close(perr[PIPE_READ])
+            os.close(perr[PIPE_WRITE]) 
+          
             try:
                #sleep(5)
                os.execv(pgm, parms)
@@ -257,22 +286,39 @@ class SASsessionIOM():
       if os.name == 'nt': 
          try:
             self.pid.wait(1)
+
+            error  = self.pid.stderr.read(4096).decode()+'\n' 
+            error += self.pid.stdout.read(4096).decode() 
+            print("Java Error:\n"+error)
+
             print("Subprocess failed to start. Double check you settings in sascfg.py file.\n") 
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("Try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
+            print("If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
             self.pid = None
             return None
          except:
             pass
       else:
+
+         self.pid    = pidpty[0]
+         self.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
+         self.stderr = os.fdopen(perr[PIPE_READ], mode='rb')
+         self.stdout = os.fdopen(pout[PIPE_READ], mode='rb')
+   
+         fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
+         fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
+
          sleep(1)
          rc = os.waitpid(self.pid, os.WNOHANG)
          if rc[0] == 0:
             pass
          else:
+            error  = self.stderr.read1(4096).decode()+'\n' 
+            error += self.stdout.read1(4096).decode() 
+            print("Java Error:\n"+error)
             print("SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check you settings in sascfg.py file.\n")  
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("Try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
+            print("If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
             self.pid = None
             return None
 
