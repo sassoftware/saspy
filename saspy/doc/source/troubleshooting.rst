@@ -41,7 +41,7 @@ case, you can cut-n-paste that command into a shell on the machine where SASPy (
 and that may very well provide more diagnostics and error messages that SASPy may have displayed.
 
 For instance, here's a very simple case using the STDIO access method on a local linux machine. The 
-Configuration Definition is nothing but a valid path that should work.
+Configuration Definition is nothing but a valid path which should work.
 
 .. code:: ipython3
 
@@ -168,29 +168,162 @@ There are two things that are likely to be the problem.
    1) Java isn't installed or configured right, or you don't have the right java command  for 'java' in your Configuration Definition
    2) You don't have your classpath right, or don't have the right jars.
 
-Neither of these problems will result in a good message from SASPy telling you what the problem is. But, like in the cases above,
-if the problem is that Java won't start up, you will get the exact command trying to be run, so you can run it and see more diagnostics
+SASPy will catch Java startup problems and return the system error(s) that it got. And, like in the cases above,
+you will still get the exact command trying to be run, so you can always run it too and see if there are any more diagnostics
 and error messages.
+
+Here an example of the first case, a bad path to the java command. This example is from Jupyter on Windows.
 
 .. code:: ipython3
 
-    >>> sas = saspy.SASsession(classpath='wronpath')
-    SAS Connection failed. No connection established. Staus=(11358, 256)  Double check you settings in sascfg.py file.
+    sas = saspy.SASsession(cfgname='winlocal', results='HTML', java='c:\java') 
+
+.. code:: ipython3
+
+    The OS Error was:
+    The system cannot find the file specified
     
-    Attempted to run program /usr/bin/java with the following parameters:['/usr/bin/java', '-classpath', 'wronpath', 'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '38228', '-stdoutport', '47074',
-                                                                          '-stderrport', '60464', '-iomhost', 'Linux-1'  '-iomport', '8591', '-user', 'user', '']
+    SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
     
-    Try running the following command (where saspy is running) manually to see if it's a problem starting Java:
-    /usr/bin/java -classpath wronpath pyiom.saspy2j -host localhost -stdinport 38228 -stdoutport 47074 -stderrport 60464 -iomhost Linux-1 -iomport 8591 -user user
+    Attempted to run program c:\java with the following parameters:['c:\\java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
+                                                                  'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
+
+    If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:
+    java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.ja;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59007 -stdoutport 59008 -stderrport 59009 -zero  
+
+
+    
+    If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:
+    c:\java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.ja;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59107 -stdoutport 59108 -stderrport 59109 -zero  
     
     No SAS process attached. SAS process has terminated unexpectedly.
-    >>>
 
-    Linux-1> /usr/bin/java -classpath wronpath pyiom.saspy2j -host localhost -stdinport 38228 -stdoutport 47074 -stderrport 60464 -iomhost Linux-1 -iomport 8591 -user user
+And if we submit that command, we get a slightly different error message than SASPy got, but it shows the same problem: there is no c:\java command to execute.     
+    
+.. code:: ipython3
+
+    C:> c:\java -classpath "C:\jars\sas.svc.connection.jar;C:\jars\log4j.jar;C:\jars\sas.security.sspi.jar;C:\jar\sas.core.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 52061 -stdoutport 52062 -stderrport 52063 -zero
+    'c:\java' is not recognized as an internal or external command, operable program or batch file.
+
+
+So what about classpath problems? Here are two cases. The first is just the wrong path altogether, so Java won't be able to find the main class to run.
+The second case has a valid classpath, but is missing one of the IOM jars.
+    
+.. code:: ipython3
+
+    sas = saspy.SASsession(cfgname='winlocal', results='HTML', classpath='.') 
+
+.. code:: ipython3
+
+    Java Error:
     Error: Could not find or load main class pyiom.saspy2j
 
-That error shows that there is an issue with the classpath, as Java could not find the saspyiom.jar. You might also see a Java traceback for cases where you have some of the jars
-in the path but are missing others.
+    
+    Subprocess failed to start. Double check you settings in sascfg.py file.
+    
+    Attempted to run program java with the following parameters:['java', '-classpath', '.', 'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59102', '-stdoutport', '59103', '-stderrport', '59104', '-zero', '']
+    
+    If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:
+    java -classpath "." pyiom.saspy2j -host localhost -stdinport 59102 -stdoutport 59103 -stderrport 59104 -zero  
+    
+    No SAS process attached. SAS process has terminated unexpectedly.
+    
+
+And if we submit that command, we see the same error as SASPy reported.     
+    
+.. code:: ipython3
+
+    C:\>java -classpath "." pyiom.saspy2j -host localhost -stdinport 59102 -stdoutport 59103 -stderrport 59104 -zero
+    Error: Could not find or load main class pyiom.saspy2j
+
+
+Now for one missing jar; let's comment out one of the IOM jars:
+
+.. code:: ipython3
+
+    cp  =  "C:\jars\sas.svc.connection.jar"
+    cp += ";C:\jars\log4j.jar"
+    cp += ";C:\jars\sas.security.sspi.jar"
+    #cp += ";C:\jars\sas.core.jar"
+    cp += ";C:\jars\saspyiom.jar"
+    
+    sas = saspy.SASsession(cfgname='winlocal', classpath=cp)
+
+    Java Error:
+    java.lang.NoClassDefFoundError: com/sas/util/ChainedExceptionInterface
+            at java.lang.ClassLoader.defineClass1(Native Method)
+            at java.lang.ClassLoader.defineClass(Unknown Source)
+            at java.security.SecureClassLoader.defineClass(Unknown Source)
+            at java.net.URLClassLoader.defineClass(Unknown Source)
+            at java.net.URLClassLoader.access$100(Unknown Source)
+            at java.net.URLClassLoader$1.run(Unknown Source)
+            at java.net.URLClassLoader$1.run(Unknown Source)
+            at java.security.AccessController.doPrivileged(Native Method)
+            at java.net.URLClassLoader.findClass(Unknown Source)
+            at java.lang.ClassLoader.loadClass(Unknown Source)
+            at sun.misc.Launcher$AppClassLoader.loadClass(Unknown Source)
+            at java.lang.ClassLoader.loadClass(Unknown Source)
+            at java.lang.Class.getDeclaredMethods0(Native Method)
+            at java.lang.Class.privateGetDeclaredMethods(Unknown Source)
+            at java.lang.Class.privateGetMethodRecursive(Unknown Source)
+            at java.lang.Class.getMethod0(Unknown Source)
+            at java.lang.Class.getMethod(Unknown Source)
+            at sun.launcher.LauncherHelper.validateMainClass(Unknown Source)
+            at sun.launcher.LauncherHelper.checkAndLoadMain(Unknown Source)
+    Caused by: java.lang.ClassNotFoundException: com.sas.util.ChainedExceptionInterface
+            at java.net.URLClassLoader.findClass(Unknown Source)
+            at java.lang.ClassLoader.loadClass(Unknown Source)
+            at sun.misc.Launcher$AppClassLoader.loadClass(Unknown Source)
+            at java.lang.ClassLoader.loadClass(Unknown Source)
+            ... 19 more
+    Error: A JNI error has occurred, please check your installation and try again
+    Exception in thread "main" 
+    
+    Subprocess failed to start. Double check you settings in sascfg.py file.
+    
+    Attempted to run program java with the following parameters:['java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
+    'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
+    
+    If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:
+    java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.jar;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59110 -stdoutport 59111 -stderrport 59112 -zero  
+    
+    No SAS process attached. SAS process has terminated unexpectedly.
+    
+And if we run that command ourselves... Same error as SASPy reported.
+
+.. code:: ipython3
+
+    C:\> java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.jar;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59110 -stdoutport 59111 -stderrport 59112 -zero  
+    
+    Error: A JNI error has occurred, please check your installation and try again
+    Exception in thread "main" java.lang.NoClassDefFoundError: com/sas/util/ChainedExceptionInterface
+            at java.lang.ClassLoader.defineClass1(Native Method)
+            at java.lang.ClassLoader.defineClass(Unknown Source)
+            at java.security.SecureClassLoader.defineClass(Unknown Source)
+            at java.net.URLClassLoader.defineClass(Unknown Source)
+            at java.net.URLClassLoader.access$100(Unknown Source)
+            at java.net.URLClassLoader$1.run(Unknown Source)
+            at java.net.URLClassLoader$1.run(Unknown Source)
+            at java.security.AccessController.doPrivileged(Native Method)
+            at java.net.URLClassLoader.findClass(Unknown Source)
+            at java.lang.ClassLoader.loadClass(Unknown Source)
+            at sun.misc.Launcher$AppClassLoader.loadClass(Unknown Source)
+            at java.lang.ClassLoader.loadClass(Unknown Source)
+            at java.lang.Class.getDeclaredMethods0(Native Method)
+            at java.lang.Class.privateGetDeclaredMethods(Unknown Source)
+            at java.lang.Class.privateGetMethodRecursive(Unknown Source)
+            at java.lang.Class.getMethod0(Unknown Source)
+            at java.lang.Class.getMethod(Unknown Source)
+            at sun.launcher.LauncherHelper.validateMainClass(Unknown Source)
+            at sun.launcher.LauncherHelper.checkAndLoadMain(Unknown Source)
+    Caused by: java.lang.ClassNotFoundException: com.sas.util.ChainedExceptionInterface
+            at java.net.URLClassLoader.findClass(Unknown Source)
+            at java.lang.ClassLoader.loadClass(Unknown Source)
+            at sun.misc.Launcher$AppClassLoader.loadClass(Unknown Source)
+            at java.lang.ClassLoader.loadClass(Unknown Source)
+            ... 19 more
+        
+    
 
 If you run the Java command and you see an error similar to the following, about a socket connection failure, that suggests that your classpath is correct
 and that the problem might be connecting to the IOM server. That error shows that java came up and is running code from saspyiom.jar. It is trying to connect
@@ -212,8 +345,8 @@ back to the saspy python process, which isn't running, thus the connection error
     Exception in thread "main" java.lang.NullPointerException
             at pyiom.saspy2j.main(saspy2j.java:116)
 
-Now, if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM. There are a few obvious misconfigurations
-that can happen here. 
+So if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM. There are a few obvious misconfigurations
+that can happen here. These also produce the IOM Error message followed by the command that was trying to to run.
 
    1) The 'iomhost' or 'iomport' you've specified aren't right, or the server isn't up and available to be connected to.
    2) Your credentials were specifed wrong, or you don't have permission to connect.
@@ -222,7 +355,8 @@ that can happen here.
 
 .. code:: ipython3
 
-    >>> sas = saspy.SASsession(iomport=333)
+    >>> sas = saspy.SASsession(iomport=333) # clearly the wrong port
+
     The application could not log on to the server "Linux-1:333". No server is available at that port on that machine.
     SAS process has terminated unexpectedly. Pid State= (11195, 64000)
     SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
@@ -237,6 +371,7 @@ that can happen here.
 
 
     >>> sas = saspy.SASsession(omruser='wrong_user')
+
     The application could not log on to the server "Linux-1:8591". The user ID "wrong_user" or the password is incorrect.
     SAS process has terminated unexpectedly. Pid State= (11449, 64000)
     SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
@@ -245,7 +380,6 @@ that can happen here.
     /jars/saspyiom.jar', 'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '49660', '-stdoutport', '46794', '-stderrport', '51907', '-iomhost', 'Linux-1', '-iomport', '8591', '-user', 'wrong_user', '']
     
     No SAS process attached. SAS process has terminated unexpectedly.
-
 
 
 .. code:: ipython3
@@ -258,11 +392,8 @@ that can happen here.
     SAS process has terminated unexpectedly. RC from wait was: 4294967290
     SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
     
-    Attempted to run program java with the following parameters:['java', '-classpath', 'C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0_
-    _1\\deploywiz\\sas.svc.connection.jar;C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar;C:\\Program Files\\SA
-    SHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar;C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\dep
-    loywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar;E:\\metis-master\\saspy_pip\\saspy\\java\\saspyiom.jar', 'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '55330', '-std
-    outport', '55331', '-stderrport', '55332', '-zero', '']
+    Attempted to run program java with the following parameters:['java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
+    'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
     
     Be sure the path to sspiauth.dll is in your System PATH
     
