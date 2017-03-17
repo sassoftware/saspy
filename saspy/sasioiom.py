@@ -230,10 +230,11 @@ class SASsessionIOM():
          try:
             self.pid = subprocess.Popen(parms, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             pid = self.pid.pid
-         except:
+         except OSError as e:
+            print("The OS Error was:\n"+e.strerror+'\n')
             print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("Try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
+            print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
             return None
       else:
          #signal.signal(signal.SIGCHLD, signal.SIG_IGN)
@@ -277,10 +278,11 @@ class SASsessionIOM():
             try:
                #sleep(5)
                os.execv(pgm, parms)
-            except:
-               print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
+            except OSError as e:
+               print("The OS Error was:\n"+e.strerror+'\n')
+               print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
                print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-               print("Try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
+               print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
                os._exit(-6)
 
       if os.name == 'nt': 
