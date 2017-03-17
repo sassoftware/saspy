@@ -6,7 +6,7 @@
 :tocdepth: 4
 
 ************************
-Contributing New Methods
+Contributing new methods
 ************************
 
 Overview

@@ -5,14 +5,14 @@
 
 
 ===============
-Advanced Topics
+Advanced topics
 ===============
 
 In this chapter we will explore more detailed explanations of specific functionality in SASPy.
 
 
 ****************
-Using Batch_mode
+Using Batch mode
 ****************
 
 Batch mode is meant to be used when you want to automate your code as python scripts.
@@ -62,21 +62,21 @@ results updated and refreshed by just re-running the script.
 Prompting
 *********
 
-There are two types of prompting that saspy will do. Meaning prompting the user for input while running.
+There are two types of prompting that SASPy will do. Meaning prompting the user for input while running.
 
-The first is prompting saspy does on its own. When running the SASsession() method, any required parameters for the
+The first is prompting SASPy does on its own. When running the SASsession() method, any required parameters for the
 chosen access method that were not specified in the Configuration Definition will be prompted for. Also, when there is
 more than one Configuration Definition Name in SAS_config_names, and cfgname= is not specified on the SASsession() method 
-(or an invalid name is specified), saspy will prompt for which Configuration Definition to use.
+(or an invalid name is specified), SASPy will prompt for which Configuration Definition to use.
 
 The other kind of prompting is prompting you control. The submit() method, and the saslib() methods both take an
-optional 'prompt=' parameter. This parameter is how you can request that saspy prompt the user for input at run time.
+optional 'prompt=' parameter. This parameter is how you can request that SASPy prompt the user for input at run time.
 This option is used in conjunction with SAS Macro variables that you code in the sas code or options for the method.
 The prompt= parameter taked a python Dictionay where the keys are the names of your macro variable and the value is
-True or False. The boolean value tells saspy whether it is to hide what the user types in or not. It also controls
+True or False. The boolean value tells SASPy whether it is to hide what the user types in or not. It also controls
 whether the macro variables stay available to the SAS session or if they are deleted after running that code. 
 
-What happens is that saspy will prompt for the values of your keys, and will then assign those values to SAS Macro variables
+What happens is that SASPy will prompt for the values of your keys, and will then assign those values to SAS Macro variables
 for you in SAS so that when your code runs the macro variables will be resolved. If you specified 'True', then the value
 the user types will not be displayed, nor will the macro variable in SAS be displayed in the log, and the Marco Variable
 will be deleted from SAS so as to not be accessible after that code submission. For 'False, you can see what the user types,
