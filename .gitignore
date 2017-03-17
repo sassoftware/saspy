@@ -1,0 +1,9 @@
+*.bak
+*.sas7bcat
+.ipynb_checkpoints/
+*.sas7bitm
+*.pyc
+SAS_kernel.egg-info/
+saspy.egg-info/
+*.rej
+sascfg_personal.py
