@@ -23,7 +23,7 @@ except ImportError:
 
 from saspy import __version__
 
-with open('README.rst') as f:
+with open('README.md') as f:
     readme = f.read()
 
 
