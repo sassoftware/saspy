@@ -52,7 +52,7 @@ Once a connection is ready a note similar to the the one below will be displayed
     SAS Connection established. Subprocess id is 28207
 
 
-Load sata into SAS
+Load data into SAS
 ==================
 Data can be loaded easily from many sources. Below are examples of the most common sources. In each case `hr` is a
 SASdata object.
@@ -69,7 +69,7 @@ Pandas DataFrame
 .. code:: ipython3
 
     hr_pd = pd.read_csv("./HR_comma_sep.csv")
-    hr = sas.df2sd(hr_pd)  # the short for of: hr = sas.dataframe2sasdata(hr_pd) 
+    hr = sas.df2sd(hr_pd)  # the short form of: hr = sas.dataframe2sasdata(hr_pd) 
 
 
 Existing SAS data set
