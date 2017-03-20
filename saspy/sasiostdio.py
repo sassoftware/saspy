@@ -27,6 +27,9 @@ except ImportError:
 
 try:
    import pandas as pd
+except ImportError:
+   pass
+try:
    from IPython.display import HTML
 except ImportError:
    pass
