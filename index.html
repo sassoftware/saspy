@@ -1,0 +1,349 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SASPy &mdash; saspy 2.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="saspy 2.1.0 documentation" href="#"/>
+        <link rel="next" title="Installation" href="install.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> saspy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring SASPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">saspy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>SASPy</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-saspy">
+<span id="saspy"></span><h1>SASPy<a class="headerlink" href="#module-saspy" title="Permalink to this headline">¶</a></h1>
+<p><strong>Date</strong>: Mar 20, 2017 <strong>Version</strong>: 2.1.0</p>
+<p><strong>Binary Installers:</strong> <a class="reference external" href="http://github.com/sassoftware/saspy/releases">http://github.com/sassoftware/saspy/releases</a></p>
+<p><strong>Source Repository:</strong> <a class="reference external" href="http://github.com/sassoftware/saspy">http://github.com/sassoftware/saspy</a></p>
+<p><strong>Issues and Ideas:</strong> <a class="reference external" href="https://github.com/sassoftware/saspy/issues">https://github.com/sassoftware/saspy/issues</a></p>
+<p>The SASPy project provides Python APIs to the SAS system. You can start a
+SAS session and run analytics from Python through a combination of
+object-oriented methods and Python magics.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring SASPy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#sascfg-py">sascfg.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#stdio">STDIO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#stdio-over-ssh">STDIO over SSH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#iom">IOM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#remote">Remote</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#local">Local</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#initial-import">Initial import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#create-sas-session">Create SAS session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#load-sata-into-sas">Load sata into SAS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#csv">CSV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#pandas-dataframe">Pandas DataFrame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#existing-sas-data-set">Existing SAS data set</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#explore-the-data">Explore the data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#list-the-variables">List the variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#see-the-first-observations">See the first observations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#summary-of-numeric-columns">Summary of numeric columns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#basic-bar-chart">Basic bar chart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#basic-histogram">Basic histogram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#basic-heatmap">Basic heatmap</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#submit-sas-code-directly-from-python-session">Submit SAS code directly from Python session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#split-the-data-into-training-and-test">Split the data into training and test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#building-an-analytical-model">Building an analytical model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#more-about-the-target-and-input-parameters">More about the target and input parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#evaluating-model-diagnostics">Evaluating model diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#assessing-model-quality">Assessing model quality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#scoring-new-data">Scoring new data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#sas-session-object">SAS Session Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#sas-data-object">SAS Data Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#procedure-syntax-statements">Procedure Syntax Statements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#sas-results">SAS Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#sas-procedures">SAS Procedures</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#utility">Utility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#machine-learning-sas-enterprise-miner">Machine Learning (SAS Enterprise Miner)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#statistics">Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#econometic-and-time-series">Econometic and Time Series</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#quality-control">Quality Control</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#using-batch-mode">Using Batch mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#prompting">Prompting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="adding-procedures.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adding-procedures.html#process">Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="adding-procedures.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="adding-procedures.html#faq">FAQ</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#connection-and-configuration-issues">Connection and configuration issues</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#common-diagnostics">Common diagnostics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#stdio">STDIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#stdio-over-ssh">STDIO over SSH</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#iom">IOM</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#problems-running-code">Problems running code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#my-model-didn-t-run">My model didn&#8217;t run</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="license.html#apache-2-0">Apache 2.0</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="index">
+<h2>Index<a class="headerlink" href="#index" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

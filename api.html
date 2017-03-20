@@ -1,0 +1,1911 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API Reference &mdash; saspy 2.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="saspy 2.1.0 documentation" href="index.html"/>
+        <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
+        <link rel="prev" title="Getting started" href="getting-started.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> saspy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring SASPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sas-session-object">SAS Session Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sas-data-object">SAS Data Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#procedure-syntax-statements">Procedure Syntax Statements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sas-results">SAS Results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sas-procedures">SAS Procedures</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#utility">Utility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#machine-learning-sas-enterprise-miner">Machine Learning (SAS Enterprise Miner)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#statistics">Statistics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#econometic-and-time-series">Econometic and Time Series</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#quality-control">Quality Control</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">saspy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>API Reference</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-saspy">
+<span id="api-reference"></span><span id="api"></span><h1>API Reference<a class="headerlink" href="#module-saspy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="sas-session-object">
+<h2>SAS Session Object<a class="headerlink" href="#sas-session-object" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="saspy.SASsession">
+<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASsession</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASsession<a class="headerlink" href="#saspy.SASsession" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p><strong>Overview</strong></p>
+<p>The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
+Most of these parameters will be configured in the sascfg.py configuration file.</p>
+<p>Common parms for all access methods are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cfgname</strong> &#8211; value in SAS_config_names List of the sascfg.py file</li>
+<li><strong>kernel</strong> &#8211; None - internal use when running the SAS_kernel notebook</li>
+<li><strong>results</strong> &#8211; Type of tabular results to return. default is &#8216;Pandas&#8217;, other options are &#8216;HTML or &#8216;TEXT&#8217;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">&#8216;SASsession&#8217;</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">&#8216;SASsession&#8217;</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>And each access method has its own set of parameters.</p>
+<p><strong>STDIO</strong></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>saspath</strong> &#8211; overrides saspath Dict entry of cfgname in sascfg.py file</li>
+<li><strong>options</strong> &#8211; overrides options Dict entry of cfgname in sascfg.py file</li>
+<li><strong>encoding</strong> &#8211; This is the python encoding value that matches the SAS session encoding</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>STDIO over SSH</strong></p>
+<p>and for running STDIO over passwordless ssh, add these required parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ssh</strong> &#8211; full path of the ssh command; /usr/bin/ssh for instance</li>
+<li><strong>host</strong> &#8211; host name of the remote machine</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>IOM</strong></p>
+<p>and for the IOM IO module to connect to SAS9 via Java IOM</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>java</strong> &#8211; the path to the java executable to use</li>
+<li><strong>iomhost</strong> &#8211; for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to</li>
+<li><strong>iomport</strong> &#8211; for remote IOM case, not local Windows] the port IOM is listening on</li>
+<li><strong>omruser</strong> &#8211; user id for remote IOM access</li>
+<li><strong>omrpw</strong> &#8211; pw for user for remote IOM access</li>
+<li><strong>encoding</strong> &#8211; This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to</li>
+<li><strong>classpath</strong> &#8211; classpath to IOM client jars and saspyiom client jar.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Compute Service</strong></p>
+<p>and for the HTTP IO module to connect to SAS Viya</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ip</strong> &#8211; host address</li>
+<li><strong>port</strong> &#8211; port; the code Defaults this to 80 (the Compute Services default port)</li>
+<li><strong>context</strong> &#8211; context name defined on the compute service</li>
+<li><strong>options</strong> &#8211; SAS options to include in the start up command line</li>
+<li><strong>user</strong> &#8211; user name to authenticate with</li>
+<li><strong>pw</strong> &#8211; password to authenticate with</li>
+<li><strong>encoding</strong> &#8211; This is the python encoding value that matches the SAS session encoding</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="saspy.SASsession.dataframe2sasdata">
+<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; Pandas Data Frame to import to a SAS Data Set</li>
+<li><strong>table</strong> &#8211; the name of the SAS Data Set to create</li>
+<li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
+<li><strong>results</strong> &#8211; format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SASdata object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.datasets">
+<code class="descname">datasets</code><span class="sig-paren">(</span><em>libref: str = ''</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASsession.datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to query a libref. The results show information about the libref including members.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>libref</strong> &#8211; the libref to query</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.df2sd">
+<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an alias for &#8216;dataframe2sasdata&#8217;. Why type all that?</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; <code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code> Pandas Data Frame to import to a SAS Data Set</li>
+<li><strong>table</strong> &#8211; the name of the SAS Data Set to create</li>
+<li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
+<li><strong>results</strong> &#8211; format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SASdata object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.exist">
+<code class="descname">exist</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em><span class="sig-paren">)</span> &rarr; bool<a class="headerlink" href="#saspy.SASsession.exist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does the SAS data set currently exist</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table</strong> &#8211; the name of the SAS Data Set</li>
+<li><strong>libref</strong> &#8211; the libref for the Data Set, defaults to WORK, or USER if assigned</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Boolean True it the Data Set exists and False if it does not</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.read_csv">
+<code class="descname">read_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str = '_csv'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.read_csv" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file</strong> &#8211; either the OS filesystem path of the file, or <a class="reference external" href="HTTP://">HTTP://</a>... for a url accessible file</li>
+<li><strong>table</strong> &#8211; the name of the SAS Data Set to create</li>
+<li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
+<li><strong>results</strong> &#8211; format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SASdata object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.sasdata">
+<code class="descname">sasdata</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>dsopts: dict = {}</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.sasdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to define an existing SAS dataset so that it can be accessed via SASPy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table</strong> &#8211; the name of the SAS Data Set</li>
+<li><strong>libref</strong> &#8211; the libref for the Data Set, defaults to WORK, or USER if assigned</li>
+<li><strong>results</strong> &#8211; format of results, SASsession.results is default, Pandas, HTML and TEXT are the valid options</li>
+<li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
+<ul>
+<li>where is a string</li>
+<li>keep are strings or list of strings.</li>
+<li>drop are strings or list of strings.</li>
+<li>obs is a numbers - either string or int</li>
+<li>first obs is a numbers - either string or int</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SASdata object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.sasdata2dataframe">
+<code class="descname">sasdata2dataframe</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sasdata2dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
+SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table</strong> &#8211; the name of the SAS Data Set you want to export to a Pandas Data Frame</li>
+<li><strong>libref</strong> &#8211; the libref for the SAS Data Set.</li>
+<li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
+<ul>
+<li>where is a string</li>
+<li>keep are strings or list of strings.</li>
+<li>drop are strings or list of strings.</li>
+<li>obs is a numbers - either string or int</li>
+<li>first obs is a numbers - either string or int</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><strong>kwargs</strong> &#8211; dictionary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Pandas data frame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.sasets">
+<code class="descname">sasets</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; saspy.sasets.SASets<a class="headerlink" href="#saspy.SASsession.sasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods creates a SASets object which you can use to run various analytics.
+See the sasets.py module.
+:return: sasets object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.saslib">
+<code class="descname">saslib</code><span class="sig-paren">(</span><em>libref: str</em>, <em>engine: str = ' '</em>, <em>path: str = ''</em>, <em>options: str = ' '</em>, <em>prompt: dict = []</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASsession.saslib" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>libref</strong> &#8211; the libref for be assigned</li>
+<li><strong>engine</strong> &#8211; the engine name used to access the SAS Library (engine defaults to BASE, per SAS)</li>
+<li><strong>path</strong> &#8211; path to the library (for engines that take a path parameter)</li>
+<li><strong>options</strong> &#8211; other engine or engine supervisor options</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SAS log</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.saslog">
+<code class="descname">saslog</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASsession.saslog" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to get the current, full contents of the SASLOG</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">SAS log</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.sasml">
+<code class="descname">sasml</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; saspy.sasml.SASml<a class="headerlink" href="#saspy.SASsession.sasml" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">sasml object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.sasqc">
+<code class="descname">sasqc</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; saspy.sasqc.SASqc<a class="headerlink" href="#saspy.SASsession.sasqc" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods creates a SASqc object which you can use to run various analytics. See the sasqc.py module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">sasqc object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.sasstat">
+<code class="descname">sasstat</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; saspy.sasstat.SASstat<a class="headerlink" href="#saspy.SASsession.sasstat" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods creates a SASstat object which you can use to run various analytics.
+See the sasstat.py module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">sasstat object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.sasutil">
+<code class="descname">sasutil</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; saspy.sasutil.SASutil<a class="headerlink" href="#saspy.SASsession.sasutil" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods creates a SASutil object which you can use to run various analytics.
+See the sasutil.py module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">sasutil object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.sd2df">
+<code class="descname">sd2df</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an alias for &#8216;sasdata2dataframe&#8217;. Why type all that?
+SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table</strong> &#8211; the name of the SAS Data Set you want to export to a Pandas Data Frame</li>
+<li><strong>libref</strong> &#8211; the libref for the SAS Data Set.</li>
+<li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
+<ul>
+<li>where is a string</li>
+<li>keep are strings or list of strings.</li>
+<li>drop are strings or list of strings.</li>
+<li>obs is a numbers - either string or int</li>
+<li>first obs is a numbers - either string or int</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><strong>kwargs</strong> &#8211; dictionary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Pandas data frame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.set_batch">
+<code class="descname">set_batch</code><span class="sig-paren">(</span><em>batch: bool</em><span class="sig-paren">)</span> &rarr; bool<a class="headerlink" href="#saspy.SASsession.set_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method sets the batch attribute for the SASsession object; it stays in effect until changed.
+For methods that just display results like SASdata object methods (head, tail, hist, series, etc.)
+and SASresult object results, you can set &#8216;batch&#8217; to true to get the results back directly so you
+can write them to files or whatever you want to do with them.</p>
+<p>This is intended for use in python batch scripts so you can still get ODS XML5 results
+and save them to files, which you couldn&#8217;t otherwise do for these methods.
+When running interactively, the expectation is that you want to have the results directly rendered,
+but you can run this way too; get the objects display them yourself and/or write them to somewhere.</p>
+<p>When <cite>set_batch ==True</cite>, you get the same dictionary returned as from the <cite>SASsession.submit()</cite> method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>batch</strong> &#8211; bool</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True = return dict([LOG, LST]. False = display LST to screen.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.set_results">
+<code class="descname">set_results</code><span class="sig-paren">(</span><em>results: str</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASsession.set_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method set the results attribute for the SASsession object; it stays in effect till changed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>results</strong> &#8211; set the default result type for this SASdata object. <code class="docutils literal"><span class="pre">'Pandas'</span> <span class="pre">or</span> <span class="pre">'HTML'</span> <span class="pre">or</span> <span class="pre">'TEXT'</span></code>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string of the return type</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.submit">
+<code class="descname">submit</code><span class="sig-paren">(</span><em>code: str</em>, <em>results: str = ''</em>, <em>prompt: dict = []</em><span class="sig-paren">)</span> &rarr; dict<a class="headerlink" href="#saspy.SASsession.submit" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.</p>
+<ul>
+<li><p class="first">code    - the SAS statements you want to execute</p>
+</li>
+<li><p class="first">results - format of results, HTLML and TEXT is the alternative</p>
+</li>
+<li><dl class="first docutils">
+<dt>prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete </dt>
+<dd><blockquote class="first">
+<div><p>the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
+or show what you type and keep the macros (they will still be available later).</p>
+</div></blockquote>
+<p>for example (what you type for pw will not be displayed, user and dsname will):</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">results_dict</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+             <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">             libname tera teradata server=teracop1 user=&amp;user pw=&amp;pw;</span>
+<span class="sd">             proc print data=tera.&amp;dsname (obs=10); run;</span>
+<span class="sd">             &quot;&quot;&quot;</span> <span class="p">,</span>
+             <span class="n">prompt</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;pw&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;dsname&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">}</span>
+             <span class="p">)</span>
+</pre></div>
+</div>
+<p class="last">Returns - a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is &#8216;results&#8217; (HTML or TEXT)</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()</p>
+<dl class="docutils">
+<dt>i.e,: results = sas.submit(&#8220;data a; x=1; run; proc print;run&#8217;)</dt>
+<dd>print(results[&#8216;LOG&#8217;])
+HTML(results[&#8216;LST&#8217;])</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.teach_me_SAS">
+<code class="descname">teach_me_SAS</code><span class="sig-paren">(</span><em>nosub: bool</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.teach_me_SAS" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>nosub - bool. True means don&#8217;t submit the code, print it out so I can see what the SAS code would be.</dt>
+<dd>False means run normally - submit the code.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.write_csv">
+<code class="descname">write_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASsession.write_csv" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file</strong> &#8211; the OS filesystem path of the file to be created (exported from the SAS Data Set)</li>
+<li><strong>table</strong> &#8211; the name of the SAS Data Set you want to export to a CSV file</li>
+<li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
+<li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
+<ul>
+<li>where is a string</li>
+<li>keep are strings or list of strings.</li>
+<li>drop are strings or list of strings.</li>
+<li>obs is a numbers - either string or int</li>
+<li>first obs is a numbers - either string or int</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SAS log</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="sas-data-object">
+<h2>SAS Data Object<a class="headerlink" href="#sas-data-object" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="saspy.SASdata">
+<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASdata</code><span class="sig-paren">(</span><em>sassession</em>, <em>libref</em>, <em>table</em>, <em>results=''</em>, <em>dsopts={}</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="saspy.SASdata.assessModel">
+<code class="descname">assessModel</code><span class="sig-paren">(</span><em>target: str</em>, <em>prediction: str</em>, <em>nominal: bool = True</em>, <em>event: str = ''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.assessModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method will calculate assessment measures using the SAS AA_Model_Eval Macro used for SAS Enterprise Miner.
+Not all datasets can be assessed. This is designed for scored data that includes a target and prediction columns
+TODO: add code example of build, score, and then assess</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>target</strong> &#8211; string that represents the target variable in the data</li>
+<li><strong>prediction</strong> &#8211; string that represents the numeric prediction column in the data. For nominal targets this should a probability between (0,1).</li>
+<li><strong>nominal</strong> &#8211; boolean to indicate if the Target Variable is nominal because the assessment measures are different.</li>
+<li><strong>event</strong> &#8211; string of either DESC or ASC which indicates which value of the target variable is the event vs non-event</li>
+<li><strong>kwargs</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SAS result object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.bar">
+<code class="descname">bar</code><span class="sig-paren">(</span><em>var: str</em>, <em>title: str = ''</em>, <em>label: str = ''</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method requires a character column (use the contents method to see column types)
+and generates a bar chart.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> &#8211; the CHAR variable (column) you want to plot</li>
+<li><strong>title</strong> &#8211; an optional title for the chart</li>
+<li><strong>label</strong> &#8211; LegendLABEL= value for sgplot</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">graphic plot</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.columnInfo">
+<code class="descname">columnInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.columnInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>display metadata about the table, size, number of rows, columns and their data type</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.contents">
+<code class="descname">contents</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.contents" title="Permalink to this definition">¶</a></dt>
+<dd><p>display metadata about the table. size, number of rows, columns and their data type ...</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">output</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.describe">
+<code class="descname">describe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.describe" title="Permalink to this definition">¶</a></dt>
+<dd><p>display descriptive statistics for the table; summary statistics.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.head">
+<code class="descname">head</code><span class="sig-paren">(</span><em>obs=5</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.head" title="Permalink to this definition">¶</a></dt>
+<dd><p>display the first n rows of a table</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>obs</strong> &#8211; the number of rows of the table that you want to display. The default is 5</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.heatmap">
+<code class="descname">heatmap</code><span class="sig-paren">(</span><em>x: str</em>, <em>y: str</em>, <em>options: str = ''</em>, <em>title: str = ''</em>, <em>label: str = ''</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.heatmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Documentation link: <a class="reference external" href="http://support.sas.com/documentation/cdl/en/grstatproc/67909/HTML/default/viewer.htm#n0w12m4cn1j5c6n12ak64u1rys4w.htm">http://support.sas.com/documentation/cdl/en/grstatproc/67909/HTML/default/viewer.htm#n0w12m4cn1j5c6n12ak64u1rys4w.htm</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; x variable</li>
+<li><strong>y</strong> &#8211; y variable</li>
+<li><strong>options</strong> &#8211; display options (string)</li>
+<li><strong>title</strong> &#8211; graph title</li>
+<li><strong>label</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.hist">
+<code class="descname">hist</code><span class="sig-paren">(</span><em>var: str</em>, <em>title: str = ''</em>, <em>label: str = ''</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method requires a numeric column (use the contents method to see column types) and generates a histogram.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> &#8211; the NUMERIC variable (column) you want to plot</li>
+<li><strong>title</strong> &#8211; an optional Title for the chart</li>
+<li><strong>label</strong> &#8211; LegendLABEL= value for sgplot</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.info">
+<code class="descname">info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.info" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display the column info on a SAS data object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Pandas data frame</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.means">
+<code class="descname">means</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.means" title="Permalink to this definition">¶</a></dt>
+<dd><p>display descriptive statistics for the table; summary statistics. This is an alias for &#8216;describe&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.partition">
+<code class="descname">partition</code><span class="sig-paren">(</span><em>var: str = ''</em>, <em>fraction: float = 0.7</em>, <em>seed: int = 9878</em>, <em>kfold: int = 1</em>, <em>out: typing.Union[saspy.sasbase.SASdata</em>, <em>NoneType] = None</em>, <em>singleOut: bool = True</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.partition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Partition a sas data object using SRS sampling or if a variable is specified then
+stratifying with respect to that variable</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> &#8211; variable(s) for stratification. If multiple then space delimited list</li>
+<li><strong>fraction</strong> &#8211; fraction to split</li>
+<li><strong>seed</strong> &#8211; random seed</li>
+<li><strong>kfold</strong> &#8211; number of k folds</li>
+<li><strong>out</strong> &#8211; the SAS data object</li>
+<li><strong>singleOut</strong> &#8211; boolean to return single table or seperate tables</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Tuples or SAS data object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.score">
+<code class="descname">score</code><span class="sig-paren">(</span><em>file: str = ''</em>, <em>code: str = ''</em>, <em>out: typing.Union[saspy.sasbase.SASdata</em>, <em>NoneType] = None</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASdata.score" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is meant to update a SAS Data object with a model score file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file</strong> &#8211; a file reference to the SAS score code</li>
+<li><strong>code</strong> &#8211; a string of the valid SAS score code</li>
+<li><strong>out</strong> &#8211; Where to the write the file. Defaults to update in place</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The Scored SAS Data object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.series">
+<code class="descname">series</code><span class="sig-paren">(</span><em>x: str</em>, <em>y: list</em>, <em>title: str = ''</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.series" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method plots a series of x,y coordinates. You can provide a list of y columns for multiple line plots.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; the x axis variable; generally a time or continuous variable.</li>
+<li><strong>y</strong> &#8211; the y axis variable(s), you can specify a single column or a list of columns</li>
+<li><strong>title</strong> &#8211; an optional Title for the chart</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">graph object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.set_results">
+<code class="descname">set_results</code><span class="sig-paren">(</span><em>results: str</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.set_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method set the results attribute for the SASdata object; it stays in effect till changed
+results - set the default result type for this SASdata object. &#8216;Pandas&#8217; or &#8216;HTML&#8217; or &#8216;TEXT&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>results</strong> &#8211; format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.sort">
+<code class="descname">sort</code><span class="sig-paren">(</span><em>by: str</em>, <em>out: object = ''</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASdata.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort the SAS Data Set</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>by</strong> &#8211; REQUIRED variable to sort by (BY &lt;DESCENDING&gt; variable-1 &lt;&lt;DESCENDING&gt; variable-2 ...&gt;;)</li>
+<li><strong>out</strong> &#8211; OPTIONAL takes either a string &#8216;libref.table&#8217; or &#8216;table&#8217; which will go to WORK or USER
+if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li>
+<li><strong>kwargs</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">SASdata object if out= not specified, or a new SASdata object for out= when specified</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<ol class="arabic simple">
+<li>wkcars.sort(&#8216;type&#8217;)</li>
+<li>wkcars2 = sas.sasdata(&#8216;cars2&#8217;)</li>
+<li>wkcars.sort(&#8216;cylinders&#8217;, wkcars2)</li>
+<li>cars2=cars.sort(&#8216;DESCENDING origin&#8217;, out=&#8217;foobar&#8217;)</li>
+<li>cars.sort(&#8216;type&#8217;).head()</li>
+<li>stat_results = stat.reg(model=&#8217;horsepower = Cylinders EngineSize&#8217;, by=&#8217;type&#8217;, data=wkcars.sort(&#8216;type&#8217;))</li>
+<li>stat_results2 = stat.reg(model=&#8217;horsepower = Cylinders EngineSize&#8217;, by=&#8217;type&#8217;, data=wkcars.sort(&#8216;type&#8217;,&#8217;work.cars&#8217;))</li>
+</ol>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.tail">
+<code class="descname">tail</code><span class="sig-paren">(</span><em>obs=5</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.tail" title="Permalink to this definition">¶</a></dt>
+<dd><p>display the last n rows of a table</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>obs</strong> &#8211; the number of rows of the table that you want to display. The default is 5</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.to_csv">
+<code class="descname">to_csv</code><span class="sig-paren">(</span><em>file: str</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASdata.to_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method will export a SAS Data Set to a file in CSV format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> &#8211; the OS filesystem path of the file to be created (exported from this SAS Data Set)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.to_df">
+<code class="descname">to_df</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASdata.to_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export this SAS Data Set to a Pandas Data Frame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Pandas data frame</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.to_frame">
+<code class="descname">to_frame</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASdata.to_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export this SAS Data Set to a Pandas Data Frame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Pandas data frame</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">&#8216;pd.DataFrame&#8217;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.top">
+<code class="descname">top</code><span class="sig-paren">(</span><em>var: str</em>, <em>n: int = 10</em>, <em>order: str = 'freq'</em>, <em>title: str = ''</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.top" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the most commonly occuring items (levels)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>var</strong> &#8211; the CHAR variable (column) you want to count</li>
+<li><strong>n</strong> &#8211; the top N to be displayed (defaults to 10)</li>
+<li><strong>order</strong> &#8211; default to most common use order=&#8217;data&#8217; to get then in alphbetic order</li>
+<li><strong>title</strong> &#8211; an optional Title for the chart</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Data Table</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.where">
+<code class="descname">where</code><span class="sig-paren">(</span><em>where: str</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASdata.where" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns a clone of the SASdata object, with the where attribute set. The original SASdata object is not affected.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>where</strong> &#8211; the where clause to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS data object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="procedure-syntax-statements">
+<h2>Procedure Syntax Statements<a class="headerlink" href="#procedure-syntax-statements" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="saspy.SASProcCommons">
+<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASProcCommons</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASProcCommons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="sas-results">
+<h2>SAS Results<a class="headerlink" href="#sas-results" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="saspy.SASresults">
+<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASresults</code><span class="sig-paren">(</span><em>attrs</em>, <em>session</em>, <em>objname</em>, <em>nosub=False</em>, <em>log=''</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASresults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Return results from a SAS Model object</p>
+<dl class="method">
+<dt id="saspy.SASresults.ALL">
+<code class="descname">ALL</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASresults.ALL" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method shows all the results attributes for a given object</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="sas-procedures">
+<h2>SAS Procedures<a class="headerlink" href="#sas-procedures" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="utility">
+<h3>Utility<a class="headerlink" href="#utility" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="saspy.SASutil">
+<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASutil</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASutil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This class is for SAS BASE procedures to be called as python3 objects and use SAS as the computational engine</p>
+<p>This class and all the useful work in this package require a licensed version of SAS.</p>
+<p>To add a new procedure do the following:</p>
+<ol class="arabic">
+<li><p class="first">Create a new method for the procedure</p>
+</li>
+<li><p class="first">Create the set of required statements. If there are no required statements then create an empty set {}</p>
+</li>
+<li><p class="first">Create the legal set of statements. This can often be obtained from the documentation of the procedure. &#8216;procopts&#8217; should always be included in the legal set to allow flexibility in calling the procedure.</p>
+</li>
+<li><p class="first">Create the doc string with the following parts at a minimum:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Procedure Name</li>
+<li>Required set</li>
+<li>Legal set</li>
+<li>Link to the procedure documentation</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Add the return call for the method using an existing procedure as an example</p>
+</li>
+<li><p class="first">Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py</p>
+</li>
+<li><p class="first">Write at least one test to exercise the procedures and include it in the appropriate testing file</p>
+</li>
+</ol>
+<dl class="method">
+<dt id="saspy.SASutil.hpbin">
+<code class="descname">hpbin</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASutil.hpbin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HPBIN procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'cls',</span> <span class="pre">'code',</span> <span class="pre">'grow',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'out',</span> <span class="pre">'partition',</span> <span class="pre">'performance',</span> <span class="pre">'prune',</span> <span class="pre">'rules'}</span></code></p>
+<p>cls is an alias for the class statement
+For more information on the statements see the Documentation link.
+Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm">http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASutil.hpimpute">
+<code class="descname">hpimpute</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASutil.hpimpute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HPIMPUTE procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'cls',</span> <span class="pre">'code',</span> <span class="pre">'grow',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'out'</span>
+<span class="pre">'partition',</span> <span class="pre">'performance',</span> <span class="pre">'prune',</span> <span class="pre">'rules'}</span></code></p>
+<p>cls is an alias for the class statement
+For more information on the statements see the Documentation link.
+Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm">http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASutil.hpsample">
+<code class="descname">hpsample</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASutil.hpsample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HPSAMPLE procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'cls',</span> <span class="pre">'code',</span> <span class="pre">'grow',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'out'</span>
+<span class="pre">'partition',</span> <span class="pre">'performance',</span> <span class="pre">'prune',</span> <span class="pre">'rules'}</span></code></p>
+<p>cls is an alias for the class statement
+For more information on the statements see the Documentation link.
+Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm">http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="machine-learning-sas-enterprise-miner">
+<h3>Machine Learning (SAS Enterprise Miner)<a class="headerlink" href="#machine-learning-sas-enterprise-miner" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="saspy.SASml">
+<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASml</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASml" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This class is for SAS Enterprise Miner procedures to be called as python3 objects and use SAS as the computational engine</p>
+<p>This class and all the useful work in this package require a licensed version of SAS.</p>
+<p>To add a new procedure do the following:</p>
+<ol class="arabic">
+<li><p class="first">Create a new method for the procedure</p>
+</li>
+<li><p class="first">Create the set of required statements. If there are no required statements then create an empty set {}</p>
+</li>
+<li><p class="first">Create the legal set of statements. This can often be obtained from the documentation of the procedure. &#8216;procopts&#8217; should always be included in the legal set to allow flexibility in calling the procedure.</p>
+</li>
+<li><p class="first">Create the doc string with the following parts at a minimum:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Procedure Name</li>
+<li>Required set</li>
+<li>Legal set</li>
+<li>Link to the procedure documentation</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Add the return call for the method using an existing procedure as an example</p>
+</li>
+<li><p class="first">Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py</p>
+</li>
+<li><p class="first">Write at least one test to exercise the procedures and include it in the appropriate testing file</p>
+</li>
+</ol>
+<dl class="method">
+<dt id="saspy.SASml.cluster">
+<code class="descname">cluster</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HPCLUS procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'input'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'freq',</span> <span class="pre">'input',</span> <span class="pre">'id',</span> <span class="pre">'score'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf">https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASml.forest">
+<code class="descname">forest</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.forest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HPFOREST procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'input',</span> <span class="pre">'target'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'freq',</span> <span class="pre">'input',</span> <span class="pre">'id',</span>
+<span class="pre">'target',</span> <span class="pre">'save',</span> <span class="pre">'score'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf">https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASml.hp4score">
+<code class="descname">hp4score</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.hp4score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HP4SCORE procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'id',</span> <span class="pre">'importance',</span> <span class="pre">'performance',</span> <span class="pre">'score',</span> <span class="pre">'procopts'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf">https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASml.hpbnet">
+<code class="descname">hpbnet</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.hpbnet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HPBNET procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'input',</span> <span class="pre">'target'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'id',</span> <span class="pre">'code',</span> <span class="pre">'freq',</span> <span class="pre">'partition',</span> <span class="pre">'input',</span> <span class="pre">'performance',</span> <span class="pre">'target',</span> <span class="pre">'output',</span> <span class="pre">'procopts'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="http://go.documentation.sas.com/?docsetId=emhpprcref&amp;docsetVersion=14.2&amp;docsetTarget=emhpprcref_hpbnet_toc.htm&amp;locale=en">http://go.documentation.sas.com/?docsetId=emhpprcref&amp;docsetVersion=14.2&amp;docsetTarget=emhpprcref_hpbnet_toc.htm&amp;locale=en</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASml.neural">
+<code class="descname">neural</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.neural" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HPNEURAL procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'input',</span> <span class="pre">'target',</span> <span class="pre">'train'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'architecture',</span> <span class="pre">'code',</span> <span class="pre">'hidden',</span> <span class="pre">'id',</span> <span class="pre">'input',</span>
+<span class="pre">'partition',</span> <span class="pre">'score',</span> <span class="pre">'target',</span> <span class="pre">'train',</span> <span class="pre">'procopts'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf">https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASml.treeboost">
+<code class="descname">treeboost</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.treeboost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the TREEBOOST procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'input',</span> <span class="pre">'target'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'assess',</span> <span class="pre">'code',</span> <span class="pre">'freq',</span> <span class="pre">'importance',</span> <span class="pre">'input',</span> <span class="pre">'performance',</span>
+<span class="pre">'target',</span> <span class="pre">'save',</span> <span class="pre">'score',</span> <span class="pre">'subseries',</span> <span class="pre">'procopts'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf">https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#saspy.SASml" title="saspy.SASml"><code class="xref py py-obj docutils literal"><span class="pre">SASml</span></code></a>(session,&nbsp;\*args,&nbsp;\*\*kwargs)</td>
+<td>This class is for SAS Enterprise Miner procedures to be called as python3 objects and use SAS as the computational engine</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="statistics">
+<h3>Statistics<a class="headerlink" href="#statistics" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="saspy.SASstat">
+<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASstat</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASstat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This class is for SAS/STAT procedures to be called as python3 objects and use SAS as the computational engine</p>
+<p>This class and all the useful work in this package require a licensed version of SAS.</p>
+<p>To add a new procedure do the following:</p>
+<ol class="arabic">
+<li><p class="first">Create a new method for the procedure</p>
+</li>
+<li><p class="first">Create the set of required statements. If there are no required statements then create an empty set {}</p>
+</li>
+<li><p class="first">Create the legal set of statements. This can often be obtained from the documentation of the procedure. &#8216;procopts&#8217; should always be included in the legal set to allow flexibility in calling the procedure.</p>
+</li>
+<li><p class="first">Create the doc string with the following parts at a minimum:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Procedure Name</li>
+<li>Required set</li>
+<li>Legal set</li>
+<li>Link to the procedure documentation</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Add the return call for the method using an existing procedure as an example</p>
+</li>
+<li><p class="first">Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py</p>
+</li>
+<li><p class="first">Write at least one test to exercise the procedures and include it in the appropriate testing file</p>
+</li>
+</ol>
+<dl class="method">
+<dt id="saspy.SASstat.glm">
+<code class="descname">glm</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.glm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the GLM procedure</p>
+<p>For more information on the statements see the Documentation link.</p>
+<p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'absorb',</span> <span class="pre">'by',</span> <span class="pre">'cls',</span> <span class="pre">'contrast',</span> <span class="pre">'estimate',</span> <span class="pre">'freq',</span> <span class="pre">'id',</span> <span class="pre">'lsmeans',</span> <span class="pre">'manova',</span>
+<span class="pre">'means',</span> <span class="pre">'model',</span> <span class="pre">'out',</span> <span class="pre">'random',</span> <span class="pre">'repeated',</span> <span class="pre">'test',</span> <span class="pre">'weight'}</span></code></p>
+<p>cls is an alias for the class statement</p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_toc.htm">http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_toc.htm</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASstat.hplogistic">
+<code class="descname">hplogistic</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.hplogistic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HPLOGISTIC procedure</p>
+<p>For more information on the statements see the Documentation link.</p>
+<p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'by',</span> <span class="pre">'cls',</span> <span class="pre">'code',</span> <span class="pre">'freq',</span> <span class="pre">'id',</span> <span class="pre">'model',</span>
+<span class="pre">'out',</span> <span class="pre">'partition',</span> <span class="pre">'score',</span> <span class="pre">'selection',</span> <span class="pre">'weight'}</span></code></p>
+<p>cls is an alias for the class statement
+Documentation link:
+<a class="reference external" href="https://support.sas.com/documentation/onlinedoc/stat/141/hplogistic.pdf">https://support.sas.com/documentation/onlinedoc/stat/141/hplogistic.pdf</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASstat.hpreg">
+<code class="descname">hpreg</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.hpreg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HPREG procedure
+For more information on the statements see the Documentation link.</p>
+<p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'by',</span> <span class="pre">'cls',</span> <span class="pre">'code',</span> <span class="pre">'freq',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'out',</span>
+<span class="pre">'partition',</span> <span class="pre">'performance',</span> <span class="pre">'score',</span> <span class="pre">'selection',</span> <span class="pre">'weight'}</span></code></p>
+<p>cls is an alias for the class statement</p>
+<p>Documentation link:
+<a class="reference external" href="https://support.sas.com/documentation/onlinedoc/stat/141/hpreg.pdf">https://support.sas.com/documentation/onlinedoc/stat/141/hpreg.pdf</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASstat.hpsplit">
+<code class="descname">hpsplit</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.hpsplit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the HPSPLIT procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'cls',</span> <span class="pre">'code',</span> <span class="pre">'grow',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'out',</span> <span class="pre">'partition',</span> <span class="pre">'performance',</span> <span class="pre">'prune',</span> <span class="pre">'rules'}</span></code></p>
+<p>cls is an alias for the class statement</p>
+<p>For more information on the statements see the Documentation link.
+Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm">http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm</a>
+:param kwargs: dict
+:return: SAS result object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASstat.logistic">
+<code class="descname">logistic</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.logistic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the LOGISTIC procedure</p>
+<p>For more information on the statements see the Documentation link.</p>
+<p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'by',</span> <span class="pre">'cls',</span> <span class="pre">'contrast',</span> <span class="pre">'effect',</span> <span class="pre">'effectplot',</span> <span class="pre">'estimate',</span> <span class="pre">'exact',</span> <span class="pre">'freq',</span>
+<span class="pre">'lsmeans',</span> <span class="pre">'oddsratio',</span> <span class="pre">'out',</span> <span class="pre">'roc',</span> <span class="pre">'score',</span> <span class="pre">'slice',</span> <span class="pre">'store',</span> <span class="pre">'strata',</span> <span class="pre">'units',</span> <span class="pre">'weight'}</span></code></p>
+<p>cls is an alias for the class statement</p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_logistic_toc.htm">http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_logistic_toc.htm</a></p>
+<p>The PROC LOGISTIC and MODEL statements are required.
+The CLASS and EFFECT statements (if specified) must
+precede the MODEL statement, and the CONTRAST, EXACT,
+and ROC statements (if specified) must follow the MODEL
+statement.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASstat.mixed">
+<code class="descname">mixed</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.mixed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the MIXED procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
+<p><cite>legal_set= {&#8216;by&#8217;, &#8216;cls&#8217;, &#8216;code&#8217;, &#8216;contrast&#8217;, &#8216;estimate&#8217;, &#8216;id&#8217;, &#8216;lsmeans&#8217;, &#8216;model&#8217;,
+&#8216;out&#8217;, &#8216;random&#8217;, &#8216;repeated&#8217;,&#8217;slice&#8217;, &#8216;weight&#8217;}`</cite></p>
+<p>cls is an alias for the class statement
+For more information on the statements see the Documentation link.</p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm">http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASstat.reg">
+<code class="descname">reg</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.reg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the REG procedure</p>
+<p>For more information on the statements see the Documentation link.</p>
+<p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'add',</span> <span class="pre">'by',</span> <span class="pre">'code',</span> <span class="pre">'id',</span> <span class="pre">'var',</span> <span class="pre">'lsmeans',</span> <span class="pre">'model',</span>
+<span class="pre">'random',</span> <span class="pre">'repeated',</span> <span class="pre">'slice',</span> <span class="pre">'test',</span> <span class="pre">'weight',</span> <span class="pre">'out'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm">http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASstat.tpspline">
+<code class="descname">tpspline</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.tpspline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the TPSPLINE procedure</p>
+<p>For more information on the statements see the Documentation link.</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'model'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'by',</span> <span class="pre">'freq',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'output',</span> <span class="pre">'score',</span> <span class="pre">'procopts'}</span></code></p>
+<p>cls is an alias for the class statement</p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_tpspline_toc.htm">http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_tpspline_toc.htm</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="econometic-and-time-series">
+<h3>Econometic and Time Series<a class="headerlink" href="#econometic-and-time-series" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="saspy.SASets">
+<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASets</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This class is for SAS/ETS procedures to be called as python3 objects and use SAS as the computational engine</p>
+<p>This class and all the useful work in this package require a licensed version of SAS.</p>
+<p>To add a new procedure do the following:</p>
+<ol class="arabic">
+<li><p class="first">Create a new method for the procedure</p>
+</li>
+<li><p class="first">Create the set of required statements. If there are no required statements then create an empty set {}</p>
+</li>
+<li><p class="first">Create the legal set of statements. This can often be obtained from the documentation of the procedure. &#8216;procopts&#8217; should always be included in the legal set to allow flexibility in calling the procedure.</p>
+</li>
+<li><p class="first">Create the doc string with the following parts at a minimum:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Procedure Name</li>
+<li>Required set</li>
+<li>Legal set</li>
+<li>Link to the procedure documentation</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Add the return call for the method using an existing procedure as an example</p>
+</li>
+<li><p class="first">Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py</p>
+</li>
+<li><p class="first">Write at least one test to exercise the procedures and include it in the appropriate testing file</p>
+</li>
+</ol>
+<dl class="method">
+<dt id="saspy.SASets.arima">
+<code class="descname">arima</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.arima" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the ARIMA procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set={'identify'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set={</span> <span class="pre">'by',</span> <span class="pre">'identify',</span> <span class="pre">'estimate',</span> <span class="pre">'outlier',</span> <span class="pre">'forecast',</span> <span class="pre">'out'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm">http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASets.esm">
+<code class="descname">esm</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.esm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the ESM procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">'by',</span> <span class="pre">'id',</span> <span class="pre">'forecast',</span> <span class="pre">'out'}</span></code></p>
+<p>Documentation link: <a class="reference external" href="http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm">http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASets.timedata">
+<code class="descname">timedata</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.timedata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the TIMEDATA procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'by',</span> <span class="pre">'id',</span> <span class="pre">'fcmport',</span> <span class="pre">'out',</span> <span class="pre">'outarrays',</span> <span class="pre">'outscalars',</span> <span class="pre">'var',</span> <span class="pre">'prog_stmts'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm">http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASets.timeid">
+<code class="descname">timeid</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.timeid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the TIMEID procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">'by',</span> <span class="pre">'id',</span> <span class="pre">'out'}</span></code></p>
+<p>Documentation link: <a class="reference external" href="http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm">http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASets.timeseries">
+<code class="descname">timeseries</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.timeseries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the TIMESERIES procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set={'id'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set={</span> <span class="pre">'by',</span> <span class="pre">'corr',</span> <span class="pre">'crosscorr',</span> <span class="pre">'decomp',</span> <span class="pre">'id',</span> <span class="pre">'season',</span> <span class="pre">'trend',</span> <span class="pre">'var',</span> <span class="pre">'crossvar',</span> <span class="pre">'out'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm">http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASets.ucm">
+<code class="descname">ucm</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.ucm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the UCM procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'autoreg',</span> <span class="pre">'blockseason',</span> <span class="pre">'by',</span> <span class="pre">'cycle',</span> <span class="pre">'deplag',</span> <span class="pre">'estimate',</span> <span class="pre">'forecast',</span> <span class="pre">'id',</span> <span class="pre">'irregular',</span>
+<span class="pre">'level',</span> <span class="pre">'model',</span> <span class="pre">'nloptions',</span> <span class="pre">'performance',</span> <span class="pre">'out',</span> <span class="pre">'outlier',</span> <span class="pre">'randomreg',</span> <span class="pre">'season',</span> <span class="pre">'slope',</span>
+<span class="pre">'splinereg',</span> <span class="pre">'splineseason'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm">http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm</a></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="quality-control">
+<h3>Quality Control<a class="headerlink" href="#quality-control" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="saspy.SASqc">
+<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASqc</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASqc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>This class is for SAS/QC procedures to be called as python3 objects and use SAS as the computational engine
+This class and all the useful work in this package require a licensed version of SAS.</p>
+<p>To add a new procedure do the following:</p>
+<ol class="arabic">
+<li><p class="first">Create a new method for the procedure</p>
+</li>
+<li><p class="first">Create the set of required statements. If there are no required statements then create an empty set {}</p>
+</li>
+<li><p class="first">Create the legal set of statements. This can often be obtained from the documentation of the procedure. &#8216;procopts&#8217; should always be included in the legal set to allow flexibility in calling the procedure.</p>
+</li>
+<li><p class="first">Create the doc string with the following parts at a minimum:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Procedure Name</li>
+<li>Required set</li>
+<li>Legal set</li>
+<li>Link to the procedure documentation</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Add the return call for the method using an existing procedure as an example</p>
+</li>
+<li><p class="first">Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py</p>
+</li>
+<li><p class="first">Write at least one test to exercise the procedures and include it in the appropriate testing file</p>
+</li>
+</ol>
+<dl class="method">
+<dt id="saspy.SASqc.capability">
+<code class="descname">capability</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASqc.capability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the CUSUM procedure
+<code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'cdfplot',</span> <span class="pre">'comphist',</span> <span class="pre">'histogram',</span> <span class="pre">'inset',</span> <span class="pre">'intervals',</span> <span class="pre">'output',</span> <span class="pre">'ppplot',</span> <span class="pre">'probplot',</span>
+<span class="pre">'qqplot',</span> <span class="pre">'freq',</span> <span class="pre">'weight',</span> <span class="pre">'id',</span> <span class="pre">'by',</span> <span class="pre">'spec'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_capability_sect001.htm">http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_capability_sect001.htm</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASqc.cusum">
+<code class="descname">cusum</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASqc.cusum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the CUSUM procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'by','xchart'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_cusum_sect001.htm">http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_cusum_sect001.htm</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASqc.macontrol">
+<code class="descname">macontrol</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASqc.macontrol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the MACONTROL procedure</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_macontrol_toc.htm">http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_macontrol_toc.htm</a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASqc.shewhart">
+<code class="descname">shewhart</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASqc.shewhart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the SHEWHART procedure</p>
+<p>Documentation link:
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_shewhart_toc.htm">http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_shewhart_toc.htm</a></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="advanced-topics.html" class="btn btn-neutral float-right" title="Advanced topics" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="getting-started.html" class="btn btn-neutral" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

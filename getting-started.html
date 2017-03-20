@@ -1,0 +1,552 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Getting started &mdash; saspy 2.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="saspy 2.1.0 documentation" href="index.html"/>
+        <link rel="next" title="API Reference" href="api.html"/>
+        <link rel="prev" title="Configuring SASPy" href="configuration.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> saspy
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring SASPy</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#initial-import">Initial import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-sas-session">Create SAS session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#load-sata-into-sas">Load sata into SAS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#csv">CSV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pandas-dataframe">Pandas DataFrame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#existing-sas-data-set">Existing SAS data set</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#explore-the-data">Explore the data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#list-the-variables">List the variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#see-the-first-observations">See the first observations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#summary-of-numeric-columns">Summary of numeric columns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#basic-bar-chart">Basic bar chart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#basic-histogram">Basic histogram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#basic-heatmap">Basic heatmap</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submit-sas-code-directly-from-python-session">Submit SAS code directly from Python session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#split-the-data-into-training-and-test">Split the data into training and test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-an-analytical-model">Building an analytical model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#more-about-the-target-and-input-parameters">More about the target and input parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#evaluating-model-diagnostics">Evaluating model diagnostics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#assessing-model-quality">Assessing model quality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scoring-new-data">Scoring new data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">saspy</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Getting started</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/getting-started.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p>SASPy is an interface module to the SAS System. It connects to SAS 9.4 (released July 2013) or newer and allows users
+to take advantage of their licenced SAS infrastructure through Python 3.x
+It is the communication layer for the <a class="reference external" href="https://github.com/sassoftware/sas_kernel">sas_kernel</a>
+SASPy is an open source project and your contributions are appreciated and encouraged.</p>
+<p>The SASPy interface is designed to allow users to use Python syntax and
+constructs to interact with MVA SAS (SAS 9.4). It makes SAS the
+analytical engine or &#8220;calculator&#8221; for data analysis. In its most simple
+form, SASPy is a code translator taking python commands and converting
+them into SAS language statements and then displaying the results.</p>
+<p>Please open issues for things you see!</p>
+<p>We will start with a basic example using <a class="reference external" href="https://www.kaggle.com/ludobenistant/hr-analytics">Kaggle Resources Analytics</a> data</p>
+<div class="section" id="initial-import">
+<h2>Initial import<a class="headerlink" href="#initial-import" title="Permalink to this headline">¶</a></h2>
+<p>It is assumed you have already <a class="reference internal" href="install.html"><span class="doc">installed</span></a> and <a class="reference internal" href="configuration.html"><span class="doc">configured</span></a> SASPy but if not please
+see the respective links to get started</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">saspy</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="k">import</span> <span class="n">HTML</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="create-sas-session">
+<h2>Create SAS session<a class="headerlink" href="#create-sas-session" title="Permalink to this headline">¶</a></h2>
+<p>In this code we have created a SASsession named <cite>sas</cite> using the default configuration. Each SASsession is a connection to a
+seperated SAS instance. The cfgname= paramter specifies which Configuration Definition you want to connect to (in sascfg.py).
+If there is only one defined, you don&#8217;t need to specify cfgname=. If there are more then one, and you don&#8217;t specify one,
+you will be prompted for which one to use.</p>
+<p>Once a connection is ready a note similar to the the one below will be displayed.</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">SAS</span> <span class="n">Connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="ow">is</span> <span class="mi">28207</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="load-sata-into-sas">
+<h2>Load sata into SAS<a class="headerlink" href="#load-sata-into-sas" title="Permalink to this headline">¶</a></h2>
+<p>Data can be loaded easily from many sources. Below are examples of the most common sources. In each case <cite>hr</cite> is a
+SASdata object.</p>
+<div class="section" id="csv">
+<h3>CSV<a class="headerlink" href="#csv" title="Permalink to this headline">¶</a></h3>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">hr</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;./HR_comma_sep.csv&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pandas-dataframe">
+<h3>Pandas DataFrame<a class="headerlink" href="#pandas-dataframe" title="Permalink to this headline">¶</a></h3>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">hr_pd</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;./HR_comma_sep.csv&quot;</span><span class="p">)</span>
+<span class="n">hr</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">hr_pd</span><span class="p">)</span>  <span class="c1"># the short for of: hr = sas.dataframe2sasdata(hr_pd)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="existing-sas-data-set">
+<h3>Existing SAS data set<a class="headerlink" href="#existing-sas-data-set" title="Permalink to this headline">¶</a></h3>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">hr</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasdata</span><span class="p">(</span><span class="s1">&#39;hr&#39;</span><span class="p">,</span> <span class="s1">&#39;mylibref&#39;</span><span class="p">)</span>  <span class="c1"># or simpley hr = sas.sasdata(&#39;hr&#39;) if hr is in your &#39;work&#39; or &#39;user&#39; library</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="explore-the-data">
+<h2>Explore the data<a class="headerlink" href="#explore-the-data" title="Permalink to this headline">¶</a></h2>
+<p>There are a number of tabular and graphical methods to view your data here are a few. Please see the <a class="reference internal" href="api.html"><span class="doc">API Reference</span></a> for a
+complete list.</p>
+<div class="section" id="list-the-variables">
+<h3>List the variables<a class="headerlink" href="#list-the-variables" title="Permalink to this headline">¶</a></h3>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">columnInfo</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="see-the-first-observations">
+<h3>See the first observations<a class="headerlink" href="#see-the-first-observations" title="Permalink to this headline">¶</a></h3>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="summary-of-numeric-columns">
+<h3>Summary of numeric columns<a class="headerlink" href="#summary-of-numeric-columns" title="Permalink to this headline">¶</a></h3>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">means</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="basic-bar-chart">
+<h3>Basic bar chart<a class="headerlink" href="#basic-bar-chart" title="Permalink to this headline">¶</a></h3>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="s1">&#39;salary&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="basic-histogram">
+<h3>Basic histogram<a class="headerlink" href="#basic-histogram" title="Permalink to this headline">¶</a></h3>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="s1">&#39;last_evaluation&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="basic-heatmap">
+<h3>Basic heatmap<a class="headerlink" href="#basic-heatmap" title="Permalink to this headline">¶</a></h3>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="s1">&#39;last_evaluation&#39;</span><span class="p">,</span> <span class="s1">&#39;satisfaction_level&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="submit-sas-code-directly-from-python-session">
+<h2>Submit SAS code directly from Python session<a class="headerlink" href="#submit-sas-code-directly-from-python-session" title="Permalink to this headline">¶</a></h2>
+<p>If you encounter a situation where you need to submit code directly to the SAS system, there is a submit method to
+accomplish that. Here we are creating a side by side panel plot to compare employees who have left vs those still
+working at the company based on their business unit and median performance rating and satisifaction level.
+The submit method returns a dictionary with two keys: LOG and LST. The LST has the results to display and the LOG has the
+portion of the SAS log for that code submittal.</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">proc sgpanel data=work._csv;</span>
+<span class="s2">    PANELBY left;</span>
+<span class="s2">    hbar sales / response=last_evaluation stat=median;</span>
+<span class="s2">    hbar sales / response=satisfaction_level stat=median ;</span>
+<span class="s2">run;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">HTML</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;LST&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="split-the-data-into-training-and-test">
+<h2>Split the data into training and test<a class="headerlink" href="#split-the-data-into-training-and-test" title="Permalink to this headline">¶</a></h2>
+<p>Partitioning data is essential to avoid overfitting during model development. this can be achived using the partition
+method. In this example we are going to partion inplace stratifying based on the variable left. If no variable is
+provided or the variable is interval then simple random sampling (SRS) is done.
+We can then create two partitions; test and training.
+.. code:: ipython3</p>
+<blockquote>
+<div><p>hr.partition(&#8216;left&#8217;)</p>
+<p>hr_train = hr.where(&#8216;_PartInd_=1&#8217;)
+hr_test = hr.where(&#8216;_PartInd_=0&#8217;)</p>
+</div></blockquote>
+</div>
+<div class="section" id="building-an-analytical-model">
+<h2>Building an analytical model<a class="headerlink" href="#building-an-analytical-model" title="Permalink to this headline">¶</a></h2>
+<p>One of the key activities for SASPy is analtycal modeling. This is
+The SAS System is capable of modeling in a number of distinct areas
+(statisics, machine learning, econometric time series, and so on). The capabilities of SASPy are similarly divided
+to make it easier for users and not clutter tab-complete lists with methods you might not actually have.
+Under the session object there are methods to create an instance for each supported product.
+Here is a code example to create objects for each product:
+-  STAT (SAS/STAT)
+-  ETS (SAS/ETS)
+-  Machine learning (SAS Enterprise Miner)
+-  QC (SAS/QC)
+-  UTIL (SAS Base procedures)</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">stat</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasstat</span><span class="p">()</span>
+<span class="n">ml</span>   <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasml</span><span class="p">()</span>
+<span class="n">ets</span>  <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasets</span><span class="p">()</span>
+<span class="n">qc</span>   <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasqc</span><span class="p">()</span>
+<span class="n">util</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasutil</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Each of these objects contain a set of methods that can perform analytical functions, namely modeling.
+These methods closely follow the SAS procedures for naming and organization.
+<strong>NOTE:</strong> The existing list of methods is not an exhaustive list of the SAS Procedures that are available and I hope you&#8217;ll consider contributing
+the methods you&#8217;ve written to do your work. Here is documentation on how to add a method (SAS Procedure).</p>
+<p>The <a class="reference internal" href="api.html"><span class="doc">API Reference</span></a> has a complete list of methods for each object.</p>
+<p>To see a list of the available methods you can <cite>dir()</cite> function for example <cite>dir(stat)</cite> will give you a list of the
+methods available. <em>Not</em> all of the methods are procedures but the vast majority are.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="nb">dir</span><span class="p">(</span><span class="n">stat</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;__class__&#39;</span><span class="p">,</span> <span class="s1">&#39;__delattr__&#39;</span><span class="p">,</span>  <span class="s1">&#39;__dict__&#39;</span><span class="p">,</span>  <span class="s1">&#39;__dir__&#39;</span><span class="p">,</span>  <span class="s1">&#39;__doc__&#39;</span><span class="p">,</span>  <span class="s1">&#39;__eq__&#39;</span><span class="p">,</span>  <span class="s1">&#39;__format__&#39;</span><span class="p">,</span> <span class="s1">&#39;__ge__&#39;</span><span class="p">,</span>
+<span class="s1">&#39;__getattribute__&#39;</span><span class="p">,</span> <span class="s1">&#39;__gt__&#39;</span><span class="p">,</span> <span class="s1">&#39;__hash__&#39;</span><span class="p">,</span>  <span class="s1">&#39;__init__&#39;</span><span class="p">,</span> <span class="s1">&#39;__init_subclass__&#39;</span><span class="p">,</span> <span class="s1">&#39;__le__&#39;</span><span class="p">,</span> <span class="s1">&#39;__lt__&#39;</span><span class="p">,</span> <span class="s1">&#39;__module__&#39;</span><span class="p">,</span> <span class="s1">&#39;__ne__&#39;</span><span class="p">,</span>
+<span class="s1">&#39;__new__&#39;</span><span class="p">,</span> <span class="s1">&#39;__reduce__&#39;</span><span class="p">,</span> <span class="s1">&#39;__reduce_ex__&#39;</span><span class="p">,</span>  <span class="s1">&#39;__repr__&#39;</span><span class="p">,</span> <span class="s1">&#39;__setattr__&#39;</span><span class="p">,</span> <span class="s1">&#39;__sizeof__&#39;</span><span class="p">,</span> <span class="s1">&#39;__str__&#39;</span><span class="p">,</span> <span class="s1">&#39;__subclasshook__&#39;</span><span class="p">,</span> <span class="s1">&#39;__weakref__&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;glm&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;hplogistic&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;hpreg&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;hpsplit&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;logger&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;logistic&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;mixed&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;reg&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;sas&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;sasproduct&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;tpspline&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To build a model you will need to supply the required parameters to the modeling method. I&#8217;ll start with an example
+then explain the syntax. We&#8217;ll continue using the HR data from above.</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">t1</span><span class="o">=</span><span class="s1">&#39;left&#39;</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nominal&#39;</span><span class="p">:[</span><span class="s1">&#39;work_accident&#39;</span><span class="p">,</span><span class="s1">&#39;promotion_last_5years&#39;</span><span class="p">,</span><span class="s1">&#39;sales&#39;</span><span class="p">,</span><span class="s1">&#39;salary&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;interval&#39;</span><span class="p">:[</span><span class="s1">&#39;satisfaction_level&#39;</span><span class="p">,</span><span class="s1">&#39;last_evaluation&#39;</span><span class="p">,</span><span class="s1">&#39;number_project&#39;</span><span class="p">,</span><span class="s1">&#39;average_montly_hours&#39;</span><span class="p">,</span><span class="s1">&#39;time_spend_company&#39;</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="n">rf_model</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">forest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">hr</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="n">inputs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The code above creates two variables
+-  <cite>t1</cite> which is a string that represents the target variable
+-  <cite>inputs</cite> which is a dictionary that represents the model inputs with two keys <cite>interval</cite> and <cite>nominal</cite> which
+represent the interval and nominal variables respectively to consider for modeling</p>
+<p>Here are ways to specify the same as above using the nominal parameter and a list of inputs.
+The target variable is now a dictionary</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">t1</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;nominal&#39;</span><span class="p">:</span><span class="s1">&#39;left&#39;</span><span class="p">}</span>
+<span class="n">nom</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;work_accident&#39;</span><span class="p">,</span> <span class="s1">&#39;promotion_last_5years&#39;</span><span class="p">,</span> <span class="s1">&#39;sales&#39;</span><span class="p">,</span> <span class="s1">&#39;salary&#39;</span><span class="p">]</span>
+<span class="n">inputs</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;work_accident&#39;</span><span class="p">,</span> <span class="s1">&#39;promotion_last_5years&#39;</span><span class="p">,</span> <span class="s1">&#39;sales&#39;</span><span class="p">,</span> <span class="s1">&#39;salary&#39;</span><span class="p">,</span> <span class="s1">&#39;satisfaction_level&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;last_evaluation&#39;</span><span class="p">,</span> <span class="s1">&#39;number_project&#39;</span><span class="p">,</span> <span class="s1">&#39;average_montly_hours&#39;</span><span class="p">,</span> <span class="s1">&#39;time_spend_company&#39;</span><span class="p">]</span>
+<span class="n">rf_model</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">forest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">hr</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">nominals</span> <span class="o">=</span> <span class="n">nom</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here using the nominal parameter and a string of inputs and the target is a list (<cite>nominals</cite> must be a list)</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">t1</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span>
+<span class="n">nom</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;work_accident&#39;</span><span class="p">,</span> <span class="s1">&#39;promotion_last_5years&#39;</span><span class="p">,</span> <span class="s1">&#39;sales&#39;</span><span class="p">,</span> <span class="s1">&#39;salary&#39;</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">]</span>
+<span class="n">inputs</span> <span class="o">=</span><span class="s1">&#39;work_accident promotion_last_5years sales salary satisfaction_level last_evaluation number_project</span>
+        <span class="n">average_montly_hours</span> <span class="n">time_spend_company</span><span class="s1">&#39;</span>
+<span class="n">rf_model</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">forest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">hr</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">t1</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">nominals</span> <span class="o">=</span> <span class="n">nom</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="more-about-the-target-and-input-parameters">
+<h3>More about the target and input parameters<a class="headerlink" href="#more-about-the-target-and-input-parameters" title="Permalink to this headline">¶</a></h3>
+<p>These rules apply to both the <cite>target</cite> and <cite>input</cite></p>
+<ul class="simple">
+<li>The parameters accept strings (str), lists (list), or dictionaries (dict) types</li>
+<li><dl class="first docutils">
+<dt>The <cite>target</cite> and <cite>input</cite> parameters are modified by a <cite>nominals</cite> parameter to identify the proper variables treatment.</dt>
+<dd>The <cite>nominals</cite> parameter must be a list type or you will recieve a Syntax warning</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Variables will be treated as nominals if any of the following are met:</dt>
+<dd><ul class="first last">
+<li>The variable is a character type in SAS</li>
+<li>The variable is specificed in the nominals list</li>
+<li>The variable is paired with dictionary key <code class="docutils literal"><span class="pre">'nominal'</span></code></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Note:</strong> If a variable is a SAS Character type then it does not need to be specified on the <cite>nominals</cite> parameter but
+does need to be assigned to the <code class="docutils literal"><span class="pre">'nominal'</span></code> dictionary key if you use the dictionary object type</p>
+</div>
+</div>
+<div class="section" id="evaluating-model-diagnostics">
+<h2>Evaluating model diagnostics<a class="headerlink" href="#evaluating-model-diagnostics" title="Permalink to this headline">¶</a></h2>
+<p>Perhaps the most important part of modeling is evaluating the quality of the model. SASPy makes this very easy by
+leverging the rich graphical and tabular output of <a class="reference external" href="http://support.sas.com/rnd/base/ods/">SAS ODS</a></p>
+<p>The output of a model in SASPy is a <a href="#id1"><span class="problematic" id="id2">`SASresults`_</span></a> &lt;add link&gt; Object. It contains all the ODS tables and graphics that
+were produced by the SAS procedure. You can see all the available objects by using <cite>dir()</cite> or tab-complete on the object.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="nb">dir</span><span class="p">(</span><span class="n">rf_model</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The returned list shows the available diagnoist output for this model. The output lists will vary slightly depending on
+the modeling algorthm, the settings, and the target type (nominal vs interval)</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;BASELINE&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;DATAACCESSINFO&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;FITSTATISTICS&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;LOG&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;MODELINFO&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;NOBS&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;PERFORMANCEINFO&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;VARIABLEIMPORTANCE&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To view a particular diagnostic, submit it as shown below. The default objects for tables are Pandas DataFrames and for plots
+are HTML graphics. You can use use the <cite>results=</cite> option to choose HTML for tables too, if you choose.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">rf_model</span><span class="o">.</span><span class="n">FITSTATISTICS</span>
+</pre></div>
+</div>
+<p><strong>Note:</strong> If an error occured during processing, the only artifact will be <cite>ERROR_LOG</cite> which contains the SAS log to aid
+you in resolving your error.</p>
+<p>Below is an example were a the variable <cite>left</cite> has been typed incorrectly as <cite>lefty</cite></p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">rf_model</span> <span class="o">=</span> <span class="n">ml</span><span class="o">.</span><span class="n">forest</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">hr</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s1">&#39;lefty&#39;</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">nominals</span> <span class="o">=</span> <span class="n">nom</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">SubmissionError</span><span class="p">:</span> <span class="n">ERRORS</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">SAS</span> <span class="n">log</span><span class="p">:</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">Variable</span> <span class="n">LEFTY</span> <span class="ow">not</span> <span class="n">found</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>We can see a brief detailing of the error but if more context is needed you can see the entire log for the model
+submission</p>
+<div class="code ipython3 highlight-default"><div class="highlight"><pre><span></span><span class="n">rf_model</span><span class="o">.</span><span class="n">ERROR_LOG</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="assessing-model-quality">
+<h2>Assessing model quality<a class="headerlink" href="#assessing-model-quality" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="scoring-new-data">
+<h2>Scoring new data<a class="headerlink" href="#scoring-new-data" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="configuration.html" class="btn btn-neutral" title="Configuring SASPy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017 SAS Institute Inc. All Rights Reserved..
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
