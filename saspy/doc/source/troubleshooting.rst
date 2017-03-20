@@ -8,7 +8,7 @@
 Troubleshooting
 ===============
 
-This chapter covers covers troubleshooting procedures with SASPy. While we don't expect you to have trouble,
+This chapter covers troubleshooting procedures with SASPy. While we don't expect you to have trouble,
 there are some cases where you might not have everything working right. We've tried to provide an easy reference
 for diagnosing and fixing those issues here.
  
@@ -38,7 +38,7 @@ you will get and can use to track down the issue.
 The first is that if the SASsession() method fails, it will return any erros it can, as well as the 
 actual command it was trying to run to connect to SAS. That will vary with access method, but in each
 case, you can cut-n-paste that command into a shell on the machine where SASPy (python) is running
-and that may very well provide more diagnostics and error messages that SASPy may have displayed.
+and that may provide more diagnostics and error messages that SASPy may have displayed.
 
 For instance, here's a very simple case using the STDIO access method on a local linux machine. The 
 Configuration Definition is nothing but a valid path which should work.
@@ -87,11 +87,10 @@ it did say I should try running that command to see if I could get better diagno
     ERROR: (SASXKINI): PHASE 3 KERNEL INITIALIZATION FAILED.
     ERROR: Unable to initialize the SAS kernel.
 
-Well go figure. My SAS has expired.  
+Well go figure. My SAS has expired. 
 
-The same process can be used with other access methods. IOM uses Java, so you could have a classpath issue
-which you won't see unless you run the command yourself from a shell and then you can get a traceback or
-other errors from java that didn't make it back to SASPy to display.
+The same process can be used with other access methods. Now we'll look at what can be misconfiogured for the
+various acces methods, and see what the erros look like and how you can tell what the problem is.
 
 
 STDIO
@@ -165,7 +164,7 @@ There are basically two possibilities where something can go wrong; Java or IOM.
 
 There are two things that are likely to be the problem.
 
-   1) Java isn't installed or configured right, or you don't have the right java command  for 'java' in your Configuration Definition
+   1) Java isn't installed or configured right, or you don't have the right java command for 'java' in your Configuration Definition
    2) You don't have your classpath right, or don't have the right jars.
 
 SASPy will catch Java startup problems and return the system error(s) that it got. And, like in the cases above,
@@ -188,17 +187,13 @@ Here an example of the first case, a bad path to the java command. This example 
     Attempted to run program c:\java with the following parameters:['c:\\java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
                                                                   'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
 
-    If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:
-    java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.ja;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59007 -stdoutport 59008 -stderrport 59009 -zero  
-
-
-    
     If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:
     c:\java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.ja;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59107 -stdoutport 59108 -stderrport 59109 -zero  
     
     No SAS process attached. SAS process has terminated unexpectedly.
 
-And if we submit that command, we get a slightly different error message than SASPy got, but it shows the same problem: there is no c:\java command to execute.     
+And if we submit that command, we get a slightly different error message than SASPy got, but it shows the same problem:
+there is no c:\\java command to execute.     
     
 .. code:: ipython3
 
@@ -345,8 +340,9 @@ back to the saspy python process, which isn't running, thus the connection error
     Exception in thread "main" java.lang.NullPointerException
             at pyiom.saspy2j.main(saspy2j.java:116)
 
-So if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM. There are a few obvious misconfigurations
-that can happen here. These also produce the IOM Error message followed by the command that was trying to to run.
+So if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM. 
+SASPy will report the IOM Error message followed by the command that was trying to to run.
+There are a few obvious misconfigurations that can happen here.
 
    1) The 'iomhost' or 'iomport' you've specified aren't right, or the server isn't up and available to be connected to.
    2) Your credentials were specifed wrong, or you don't have permission to connect.
