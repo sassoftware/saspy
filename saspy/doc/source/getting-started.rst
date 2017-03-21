@@ -7,42 +7,53 @@
 Getting started
 ***************
 
-SASPy is an interface module to the SAS System. It connects to SAS 9.4 (released July 2013) or newer and allows users
-to take advantage of their licenced SAS infrastructure through Python 3.x
-It is the communication layer for the `sas_kernel <https://github.com/sassoftware/sas_kernel>`_
-SASPy is an open source project and your contributions are appreciated and encouraged.
+SASPy is an interface module to the SAS System. It connects to SAS 9.4 
+(released July 2013) or newer and enables Python programmers to take 
+advantage of their licenced SAS infrastructure through Python 3.x.
 
-The SASPy interface is designed to allow users to use Python syntax and
-constructs to interact with MVA SAS (SAS 9.4). It makes SAS the
-analytical engine or "calculator" for data analysis. In its most simple
-form, SASPy is a code translator taking python commands and converting
-them into SAS language statements and then displaying the results.
+The SASPy interface is designed to enable programmers to use Python 
+syntax and constructs to interact with SAS. The interface makes SAS the
+analytical engine--or "calculator" for data analysis. In its most simple
+form, SASPy is a code translator that accepts Python commands and 
+converts them into SAS language statements. The statements are run,
+and then SASPy displays the results in Python.
 
-Please open issues for things you see!
+SASPy is an open source project. Your contributions are appreciated 
+and encouraged. Please open issues in gitlab for problems that you see!
 
-We will start with a basic example using `Kaggle Resources Analytics <https://www.kaggle.com/ludobenistant/hr-analytics>`_ data
+The rest of this section demonstrates how to use SASPy with a simple example.
+The example uses `Kaggle Resources Analytics 
+<https://www.kaggle.com/ludobenistant/hr-analytics>`_ data.
 
+ 
 Initial import
 ==============
-It is assumed you have already :doc:`installed <install>` and :doc:`configured <configuration>` SASPy but if not please
-see the respective links to get started
+It is assumed you have already :doc:`installed and configured <install>` SASPy.
+If you have not, refer to that section for more information.
 
-.. code:: ipython3
+.. code-block:: ipython3
 
     import saspy
     import pandas as pd
     from IPython.display import HTML
 
-Create SAS session
-==================
-In this code we have created a SASsession named `sas` using the default configuration. Each SASsession is a connection to a
-seperated SAS instance. The cfgname= paramter specifies which Configuration Definition you want to connect to (in sascfg.py).
-If there is only one defined, you don't need to specify cfgname=. If there are more then one, and you don't specify one,
-you will be prompted for which one to use. 
 
-Once a connection is ready a note similar to the the one below will be displayed.
+Start a SAS session
+===================
+In the following code we start a SAS session named ``sas`` using the default 
+configuration. Each SAS session is a connection to a separate SAS instance.
+The cfgname parameter specifies the configuration definition (in sascfg.py) 
+to use for the connection to SAS.
 
-.. code:: ipython3
+If sascfg.py has only one connection definition, then you do not need to 
+specify the cfgname parameter. If the file has more than one connection
+definition and you do not specify the one to use with cfgname, you are 
+prompted for the connection to use. 
+
+After a connection is made and a SAS session is started, a note that is 
+similar to the the one below is displayed.
+
+.. code-block:: ipython3
 
     sas = saspy.SASsession(cfgname='default')
 
@@ -54,19 +65,29 @@ Once a connection is ready a note similar to the the one below will be displayed
 
 Load data into SAS
 ==================
-Data can be loaded easily from many sources. Below are examples of the most common sources. In each case `hr` is a
-SASdata object.
+Data can be loaded easily from many sources. The following examples show 
+the most common methods. In each case, ``hr`` is a SASdata object that
+represents a SAS data set.
+
 
 CSV
 ---
-.. code:: ipython3
+In the following example, the CSV file is accessible to Python. The 
+``sas`` object reads the CSV file and creates a SAS data set in the
+SAS session.
+
+.. code-block:: ipython3
 
     hr = sas.read_csv("./HR_comma_sep.csv")
 
 
 Pandas DataFrame
 ----------------
-.. code:: ipython3
+In the following example, the CSV file is accessible to Python. First,
+the CSV file is read into a data frame. Then the ``sas`` object
+reads the data frame and creates a SAS data set in the SAS session.
+
+.. code-block:: ipython3
 
     hr_pd = pd.read_csv("./HR_comma_sep.csv")
     hr = sas.df2sd(hr_pd)  # the short form of: hr = sas.dataframe2sasdata(hr_pd) 
@@ -74,68 +95,84 @@ Pandas DataFrame
 
 Existing SAS data set
 ---------------------
-.. code:: ipython3
+In the following example, no data file is accessible to Python. An existing
+SAS data set that is accessible to the SAS session is associated with the
+``hr`` object.
 
-    hr = sas.sasdata('hr', 'mylibref')  # or simpley hr = sas.sasdata('hr') if hr is in your 'work' or 'user' library
+.. code-block:: ipython3
+
+    hr = sas.sasdata('hr', 'mylibref')  
+
+    # or simply: hr = sas.sasdata('hr') 
+    # ...if hr.sas7bdat is in your 'work' or 'user' library
 
 Explore the data
 ================
-There are a number of tabular and graphical methods to view your data here are a few. Please see the :doc:`api` for a
+There are a number of tabular and graphical methods to view your data.
+The following examples show common methods. See the :doc:`api` for a
 complete list.
 
 List the variables
 ------------------
-.. code:: ipython3
+.. code-block:: ipython3
 
     hr.columnInfo()
 
 See the first observations
 --------------------------
-.. code:: ipython3
+.. code-block:: ipython3
 
     hr.head()
 
 Summary of numeric columns
 --------------------------
-.. code:: ipython3
+.. code-block:: ipython3
 
     hr.means()
 
 Basic bar chart
 ---------------
-.. code:: ipython3
+.. code-block:: ipython3
 
     hr.bar('salary')
 
 Basic histogram
 ---------------
-.. code:: ipython3
+.. code-block:: ipython3
 
     hr.hist('last_evaluation')
 
 
 Basic heatmap
 -------------
-.. code:: ipython3
+.. code-block:: ipython3
 
     hr.heatmap('last_evaluation', 'satisfaction_level')
 
 
 Submit SAS code directly from Python session
 ============================================
-If you encounter a situation where you need to submit code directly to the SAS system, there is a submit method to
-accomplish that. Here we are creating a side by side panel plot to compare employees who have left vs those still
-working at the company based on their business unit and median performance rating and satisifaction level.
-The submit method returns a dictionary with two keys: LOG and LST. The LST has the results to display and the LOG has the
-portion of the SAS log for that code submittal. 
+The preceeding examples demonstrate commonly used Python
+methods that are available with the SASPy module.
 
-.. code:: ipython3
+If you encounter a situation where you need to submit SAS
+statements directly to the SAS system, the submit method can
+accomplish that. The following example creates a side-by-side
+panel plot to compare employees who have left versus employees
+still working at the company, based on their business unit,
+median performance rating, and satisifaction level.
+
+The submit method returns a dictionary with two keys: LOG and LST.
+The LST has the results to display and the LOG has the portion 
+of the SAS log for the code submission.
+
+.. code-block:: ipython3
 
     c = sas.submit("""
     proc sgpanel data=work._csv;
         PANELBY left;
-        hbar sales / response=last_evaluation stat=median;
-        hbar sales / response=satisfaction_level stat=median ;
+        hbar sales / response=last_evaluation    stat=median;
+        hbar sales / response=satisfaction_level stat=median;
     run;
     """)
     HTML(c['LST'])
@@ -143,11 +180,16 @@ portion of the SAS log for that code submittal.
 
 Split the data into training and test
 =====================================
-Partitioning data is essential to avoid overfitting during model development. this can be achived using the partition
-method. In this example we are going to partion inplace stratifying based on the variable left. If no variable is
-provided or the variable is interval then simple random sampling (SRS) is done.
-We can then create two partitions; test and training.
-.. code:: ipython3
+Partitioning data is essential to avoid overfitting during
+model development. This can be achived using the partition
+method. In this example, the data is partitioned in-place
+and performs stratified sampling, based on the variable 
+'left.' If you do not specify a variable or the variable
+is an interval, then simple random sampling (SRS) is done.
+
+We create two partitions: test and training.
+
+.. code-block:: ipython3
 
     hr.partition('left')
 
@@ -155,21 +197,28 @@ We can then create two partitions; test and training.
     hr_test = hr.where('_PartInd_=0')
 
 
-Building an analytical model
-============================
-One of the key activities for SASPy is analtycal modeling. This is
-The SAS System is capable of modeling in a number of distinct areas
-(statisics, machine learning, econometric time series, and so on). The capabilities of SASPy are similarly divided
-to make it easier for users and not clutter tab-complete lists with methods you might not actually have.
-Under the session object there are methods to create an instance for each supported product.
-Here is a code example to create objects for each product:
--  STAT (SAS/STAT)
--  ETS (SAS/ETS)
--  Machine learning (SAS Enterprise Miner)
--  QC (SAS/QC)
--  UTIL (SAS Base procedures)
+Build an analytical model
+=========================
+One of the key activities for SASPy is analtycal modeling. The SAS
+system is capable of modeling in a number of distinct areas
+(statisics, machine learning, econometric time series, and so on). 
 
-.. code:: ipython3
+The capabilities of SASPy are organized similarly to make it easier 
+for users. Grouping functionality also avoids cluttered tab-complete 
+lists with methods that you might not have licensed.
+
+The session object has methods to create an instance for each supported 
+product. 
+
+* STAT (SAS/STAT)
+* ETS (SAS/ETS)
+* Machine learning (SAS Enterprise Miner)
+* QC (SAS/QC)
+* UTIL (SAS Base procedures)
+
+Here is a code example to create an object for each product:
+
+.. code-block:: ipython3
 
     stat = sas.sasstat()
     ml   = sas.sasml()
@@ -177,22 +226,24 @@ Here is a code example to create objects for each product:
     qc   = sas.sasqc()
     util = sas.sasutil()
 
-Each of these objects contain a set of methods that can perform analytical functions, namely modeling.
-These methods closely follow the SAS procedures for naming and organization.
-**NOTE:** The existing list of methods is not an exhaustive list of the SAS Procedures that are available and I hope you'll consider contributing
-the methods you've written to do your work. Here is documentation on how to add a method (SAS Procedure).
+Each of these objects contains a set of methods that perform analytical 
+functions, namely modeling. These methods closely follow the SAS procedures 
+for naming and organization.  
 
-The :doc:`api` has a complete list of methods for each object.
+.. note:: The existing list of methods is not an exhaustive list of the 
+          SAS procedures that are available with each product. Please
+          consider contributing the methods you've written to do your work. 
 
+The :doc:`api` documentation shows how to add a method that corresponds to
+a SAS procedure. The API has a complete list of methods for each object.
 
-To see a list of the available methods you can `dir()` function for example `dir(stat)` will give you a list of the
-methods available. *Not* all of the methods are procedures but the vast majority are.
+You can use the ``dir()`` function to see a list of the available methods. 
+For example, ``dir(stat)`` provides a list of the methods that are available. 
+**Not** all of the methods corresponds to a procedure but the vast majority do.
 
-.. code:: python
+.. code-block:: python
 
     dir(stat)
-
-
 
 
 .. parsed-literal::
@@ -214,76 +265,99 @@ methods available. *Not* all of the methods are procedures but the vast majority
 
 
 
-To build a model you will need to supply the required parameters to the modeling method. I'll start with an example
-then explain the syntax. We'll continue using the HR data from above.
+To build a model, you need to supply the required parameters to the modeling 
+method. I'll start with an example then explain the syntax. We'll continue 
+using the HR data from above.
 
-.. code:: ipython3
+.. code-block:: ipython3
 
     t1='left'
-    inputs = {'nominal':['work_accident','promotion_last_5years','sales','salary'],
-        'interval':['satisfaction_level','last_evaluation','number_project','average_montly_hours','time_spend_company']
-        }
+
+    inputs = {
+       'nominal':['work_accident','promotion_last_5years','sales','salary'],
+       'interval':['satisfaction_level','last_evaluation','number_project','average_montly_hours','time_spend_company']
+    }
+
     rf_model = ml.forest(data=hr, target=t1, input=inputs)
 
-The code above creates two variables
--  `t1` which is a string that represents the target variable
--  `inputs` which is a dictionary that represents the model inputs with two keys `interval` and `nominal` which
-represent the interval and nominal variables respectively to consider for modeling
+The preceding code creates two variables:
 
-Here are ways to specify the same as above using the nominal parameter and a list of inputs.
-The target variable is now a dictionary
+t1
+  A string that represents the target variable.
 
-.. code:: ipython3
+inputs
+  A dictionary that represents the model inputs with two keys--interval and 
+  nominal--which represent the interval and nominal variables respectively
+  to consider for modeling.
+
+Here is another way to specify the same as above--using the nominal parameter 
+and a list of inputs. The target variable is now a dictionary.
+
+.. code-block:: ipython3
 
     t1={'nominal':'left'}
+
     nom = ['work_accident', 'promotion_last_5years', 'sales', 'salary']
+
     inputs =['work_accident', 'promotion_last_5years', 'sales', 'salary', 'satisfaction_level',
              'last_evaluation', 'number_project', 'average_montly_hours', 'time_spend_company']
+
     rf_model = ml.forest(data=hr, target=t1, input=inputs, nominals = nom)
 
 
-Here using the nominal parameter and a string of inputs and the target is a list (`nominals` must be a list)
+Here is another way--using the nominal parameter and a string of inputs. The 
+target is a list (nominals must be a list).
 
-.. code:: ipython3
+.. code-block:: ipython3
 
     t1=['left']
+
     nom = ['work_accident', 'promotion_last_5years', 'sales', 'salary', 'left']
+
     inputs ='work_accident promotion_last_5years sales salary satisfaction_level last_evaluation number_project
             average_montly_hours time_spend_company'
+
     rf_model = ml.forest(data=hr, target=t1, input=inputs, nominals = nom)
 
 
 More about the target and input parameters
 ------------------------------------------
 
-These rules apply to both the `target` and `input`
+These rules apply to both target and input:
 
--  The parameters accept strings (str), lists (list), or dictionaries (dict) types
--  The `target` and `input` parameters are modified by a `nominals` parameter to identify the proper variables treatment.
-    The `nominals` parameter must be a list type or you will recieve a Syntax warning
--  Variables will be treated as nominals if any of the following are met:
-    -  The variable is a character type in SAS
-    -  The variable is specificed in the nominals list
-    -  The variable is paired with dictionary key ``'nominal'``
+* The parameters accept strings (str), lists (list), or dictionaries (dict) types.
+* The target and input parameters are modified by a nominals parameter to 
+  identify the proper variables treatment.
+* The nominals parameter must be a list type or you recieve a syntax warning.
+* Variables are treated as nominals if any of the following are met:
 
-**Note:** If a variable is a SAS Character type then it does not need to be specified on the `nominals` parameter but
-does need to be assigned to the ``'nominal'`` dictionary key if you use the dictionary object type
+  * The variable is a character type in SAS.
+  * The variable is specificed in the nominals list.
+  * The variable is paired with dictionary key ``'nominal'``.
+
+.. note:: If a variable is a SAS character type then it does not need to be 
+          specified in the nominals parameter but does need to be assigned 
+          to the ``'nominal'`` dictionary key if you use the dictionary 
+          object type.
 
 
 Evaluating model diagnostics
 ============================
-Perhaps the most important part of modeling is evaluating the quality of the model. SASPy makes this very easy by
-leverging the rich graphical and tabular output of `SAS ODS <http://support.sas.com/rnd/base/ods/>`_
+Perhaps the most important part of modeling is evaluating the quality of the 
+model. SASPy makes this very easy by leverging the rich graphical and tabular 
+output of `SAS ODS <http://support.sas.com/rnd/base/ods/>`_.
 
-The output of a model in SASPy is a `SASresults`_ <add link> Object. It contains all the ODS tables and graphics that
-were produced by the SAS procedure. You can see all the available objects by using `dir()` or tab-complete on the object.
+The output of a model in SASPy is a :any:`SASresults` object. It contains all 
+the ODS tables and graphics that were produced by the SAS procedure. You can 
+see all the available objects by using ``dir()`` or tab-complete on the object.
 
-.. code:: python
+.. code-block:: python
 
     dir(rf_model)
 
-The returned list shows the available diagnoist output for this model. The output lists will vary slightly depending on
-the modeling algorthm, the settings, and the target type (nominal vs interval)
+The returned list shows the available diagnostic output for this model. The 
+output lists vary slightly, depending on the modeling algorthm, the settings, 
+and the target type (nominal or interval).
 
 .. parsed-literal::
 
@@ -296,21 +370,22 @@ the modeling algorthm, the settings, and the target type (nominal vs interval)
      'PERFORMANCEINFO',
      'VARIABLEIMPORTANCE']
 
-To view a particular diagnostic, submit it as shown below. The default objects for tables are Pandas DataFrames and for plots
-are HTML graphics. You can use use the `results=` option to choose HTML for tables too, if you choose.
+To view a particular diagnostic, submit it as shown below. The default objects 
+for tables are Pandas DataFrames and for plots are HTML graphics. You can use 
+use the ``results`` option to choose HTML for tables too, if you choose.
 
-.. code:: python
+.. code-block:: python
 
     rf_model.FITSTATISTICS
 
 
-**Note:** If an error occured during processing, the only artifact will be `ERROR_LOG` which contains the SAS log to aid
-you in resolving your error.
+.. note:: If an error occured during processing, the only artifact is ERROR_LOG.
+          This object contains the SAS log to aid you in resolving your error.
 
-Below is an example were a the variable `left` has been typed incorrectly as `lefty`
+Below is an example where the variable name left is typed incorrectly as lefty.
 
 
-.. code:: ipython3
+.. code-block:: ipython3
 
     rf_model = ml.forest(data=hr, target='lefty', input=inputs, nominals = nom)
 
@@ -319,25 +394,10 @@ Below is an example were a the variable `left` has been typed incorrectly as `le
     SubmissionError: ERRORS found in SAS log:
     ERROR: Variable LEFTY not found.
 
-We can see a brief detailing of the error but if more context is needed you can see the entire log for the model
-submission
+We can see a brief detail of the error but if more context is needed, you can 
+see the entire log for the model submission with code like the following:
 
-.. code:: ipython3
+.. code-block:: ipython3
 
     rf_model.ERROR_LOG
-
-
-
-
-Assessing model quality
-=======================
-
-
-
-
-Scoring new data
-================
-
-
-
 

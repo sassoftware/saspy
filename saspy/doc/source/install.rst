@@ -1,8 +1,13 @@
 
 .. Copyright SAS Institute
 
-Installation
-============
+******************************
+Installation and configuration
+******************************
+
+=============
+Install SASPy
+=============
 
 The SASPy package installs just like any other Python package.
 It is a pure Python package and works with Python 3.x
@@ -14,10 +19,359 @@ or, for a specific release::
 
     pip install http://github.com/sassoftware/saspy/releases/saspy-X.X.X.tar.gz
 
-Dependencies
-------------
 
-SASPy has dependencies on a SAS 9.4 as well as Python 3.x. Also, in order to use SASPy after installation, you
-will need to edit the sascfg.py file to configure it to be able to connect to your SAS System. Plese see the
-:doc:`configuration` chapter to see how to do this. If you run into any problems, please see the :doc:`troubleshooting` 
-chapter for help. If you have any questions, just open an Issue at https://github.com/sassoftware/saspy/issues.
+To use SASPy after installation, you need to edit the sascfg.py file to 
+configure it to be able to connect and start a SAS session. Follow the 
+instructions in the next section.
+
+* If you run into any problems, see :doc:`troubleshooting`.
+* If you have questions, open an issue at https://github.com/sassoftware/saspy/issues.
+
+
+
+===============
+Configure SASPy
+===============
+
+SASPy can connect and start different kinds of SAS sessions. It can connect to SAS 
+on Unix, Mainframe, and Windows. It can connect to a local SAS session or remote session.
+Because of the wide range of connection types, there are a number of different access methods
+that are part of SASPy each of which are used to connect to different kinds of SAS sessions.
+
+The current set of connection methods are as follows:
+
+`STDIO`_
+  This connection method is available on the Linux platform only. This 
+  method enables you to connect to SAS on the same host as SASPy and Python.
+
+`STDIO over SSH`_
+  This connection method is also avaialble on the Linux platform only. This 
+  method can connect to SAS on the same host (local) or to SAS
+  that is installed on a remote host, if you have passwordless SSH configured
+  for your Linux user account.
+
+
+`IOM`_
+  The integrated object method (IOM) connection method supports SAS on any platform.
+  This method can make a local Windows connection and it is also the way to connect 
+  to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
+  Server on any supported SAS platform.
+
+Though there are several connection methods available, a single configuration file
+is used to enable all the connection methods. The file contains instructions and
+examples, but this section goes into more detail to explain how to configure each
+type of connection.
+
+Depending upon how you installed SASPy, the sascfg.py file may be in different 
+locations on the file system:
+
+* In a regular pip install, it is under the site-packages directory in the Python 
+  installation. 
+* If you cloned the repo or downloaded and extraced the repo and then installed, 
+  it may use the sascfg.py file from that location and not copy it to site-packages.
+ 
+First, make sure that you update the sascfg.py file that Python uses. If you are 
+familiar with pip and Git, then you probably know where to look. If you are not
+familiar with those tools, then there is a very simple way to determine the location
+that Python is using to get the SASPy modules.
+
+After installing SASPy, start Python and ``import saspy``. Then, simply submit 
+``saspy.SAScfg``. Python will show you where it found the module. Edit that one.
+
+.. code-block:: ipython3
+
+    # this is an example of a repo install on Windows:
+
+    C:\>python
+    Python 3.6.0 |Anaconda custom (64-bit)| (default, Dec 23 2016, 11:57:41) [MSC v.1900 64 bit (AMD64)] on win32
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import saspy
+    >>> saspy.SAScfg
+    <module 'saspy.sascfg' from 'E:\\metis-master\\saspy_pip\\saspy\\sascfg.py'>
+    >>>
+
+    # this is an example of a repo install on Linux:
+
+    Linux-1> python3.5
+    Python 3.5.1 (default, Jan 19 2016, 21:32:20)
+    [GCC 4.4.7 20120313 (Red Hat 4.4.7-16)] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import saspy
+    >>> saspy.SAScfg
+    <module 'saspy.sascfg' from '/opt/tom/gitlab/metis/saspy_pip/saspy/sascfg.py'>
+    >>>
+    
+    # this is an example of a PyPi install on Linux into site-packages:
+
+    Linux-1> python3.5
+    Python 3.5.1 (default, Jan 19 2016, 21:32:20)
+    [GCC 4.4.7 20120313 (Red Hat 4.4.7-16)] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import saspy
+    >>> saspy.SAScfg
+    <module 'saspy.sascfg' from '/usr/lib/python3.5/site-packages/saspy/sascfg.py'>
+    >>>
+    
+        
+sascfg.py details
+=================
+There are three main parts to this configuration file.
+
+        1) SAS_config_names
+        2) SAS_config_options
+        3) Configuration definitions
+
+In reverse order, the configuration definitions are Python dictionaries. Each dictionary 
+has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
+
+SAS_config_options has one option. The option restricts (or allows) an end users' ability 
+to override settings in the configuration definitions using ``SASsession()``.
+
+SAS_config_names is the list of configuration definition names to make available to an
+end user at connection time. Any configuration definitions that are not listed in 
+SAS_config_names are simply inaccessible by an end user. You can add several configuration
+definitions in the file but not make them available by simply excluding the names from 
+the list.
+
+
+STDIO
+=====
+This is the original connection method for SASPy. This works with Unix only,
+because SAS on Windows platforms does not support line-mode style connections
+(through stdin, stdout, stderr). This connection method is for a local 
+connection to SAS that is installed on the same host as Python and SASPy.
+
+There are only three keys for this configuration definition dictionary:
+
+saspath - 
+    (Required) Path to SAS startup script
+options -
+    SAS options to include in the start up command line. These **must** be a
+    Python list.
+encoding -
+    This is the Python encoding value that matches the SAS session encoding
+    of the SAS session to which you are connecting. The Python encoding 
+    values can be found at `encodings-and-unicode <https://docs.python.org/
+    3.5/library/codecs.html#encodings-and-unicode>`_.
+    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the 
+    default encodings for running SAS in Unicode, on Unix, and on Windows,
+    respectively. Those map to Python encoding values: utf8, latin1, and
+    windows-1252, respectively. 
+
+
+.. code-block:: ipython3
+
+    default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
+                'options' : ["-fullstimer"]
+                }
+
+.. note:: The trigger to use the STDIO connection method is the absence of any
+          trigger for the other access methods: not having ``'ssh'`` or ``'java'``
+          keys in the configuration definition.
+
+
+STDIO over SSH
+==============
+This is the remote version of the original connection method. This also works 
+with Unix only, and it supports passwordless SSH to the Unix machine where SAS
+is installed. It is up to you to make sure that user accounts have passwordless
+SSH configured between the two system. Google it, it's not that difficult.
+
+In addition to the three keys for STDIO, there are two more keys to configure:
+
+ssh - 
+    (Required) The ssh command to run (Linux execv requires a fully qualified
+    path. Even if the command is found in the PATH variable, it won't be used.
+    Enter the fully qualified path.)
+
+host - 
+    (Required) The host to connect to. Enter a resolvable host name or IP address.
+
+.. code-block:: ipython3
+
+    ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+                'ssh'     : '/usr/bin/ssh',
+                'host'    : 'remote.linux.host',
+                'options' : ["-fullstimer"]
+               }
+
+.. note:: The ``'ssh'`` key is the triger to use the STDIO over SSH connection
+          method.
+
+
+
+IOM
+===
+The connection method opens many connectivity options. This method enables you to use
+`SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__
+to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
+Manager to control the distribution of connections to the various grid nodes
+and integrates all the monitoring and administration that SAS Grid Manager provides.
+
+The IOM connection method also enables SASPy to connect to SAS on Windows platforms.
+The connection can be to a local SAS installation or a remote IOM server running on 
+Windows.
+
+The IOM connection method requires the following:
+
+* The SAS Java IOM Client
+* Setting the CLASSPATH to access the SAS Java IOM Client JAR files.
+* Setting the CLASSPATH to include the the SASPy JAR file.
+
+The ``'classpath'`` key for the configuration definition requires a little additional
+explanation before we get to further details. There are four (4) JAR files that are 
+required for the Java IOM Client. The JAR files are available from your existing SAS
+installation.  There is one JAR file that is provided with the SASPy package: 
+saspyiom.jar. These five JAR files must be provided (fully qualified paths) in a 
+CLASSPATH environment variable. This is done in a very simple way in the sascfg.py 
+file, like so:
+
+::
+
+    cp  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar"
+    cp += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
+    cp += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
+    cp += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
+    cp += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
+ 
+And then simply refer to the ``cp`` variable in the configuration definition:
+
+::
+
+    'classpath' : cp,
+
+Also worth noting: these five JAR files are compatible with both Windows and Unix client systems.  
+
+
+Remote
+~~~~~~
+A remote connection is defined as a connection to any workspace server on any SAS platform 
+from either a Unix or Windows client. 
+
+The following keys are available for the configuration definition dictionary:
+
+java    - 
+    (Required) The path to the Java executable to use. For Linux, use a fully qualifed
+    path. On Windows, you might be able to simply enter ``java``. If that is not successful,
+    enter the fully qualified path.
+iomhost - 
+    (Required) The resolvable host name, or IP address to the IOM server.
+iomport - 
+    (Required) The port that IOM server is listening on for workspace connections.
+classpath - 
+    (Required) The CLASSPATH to the IOM client JAR files and SASPy client jar.
+omruser - 
+    (**Discouraged**)  The user ID is required but if this field is left blank,
+    the user is **prompted** for a user ID at runtime.
+omrpw  - 
+    (**Strongly discouraged**) A password is required but if this field is left
+    blank, the user is **prompted** for a password at runtime.
+encoding  -
+    This is the Python encoding value that matches the SAS session encoding of 
+    the IOM server to which you are connecting. The Python encoding values can be 
+    found at `encodings-and-unicode <https://docs.python.org/3.5/
+    library/codecs.html#encodings-and-unicode>`_.
+    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the 
+    default encodings for running SAS in Unicode, on Unix, and on Windows,
+    respectively. Those map to Python encoding values: utf8, latin1, and 
+    windows-1252, respectively. 
+
+.. code-block:: ipython3
+
+    # Unix client class path
+    cpL  =  "/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar"
+    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/log4j.jar"
+    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.security.sspi.jar"
+    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.core.jar"
+    cpL += ":/usr/lib/python3.5/site-packages/saspy/java/saspyiom.jar"
+
+    # Windows client class path
+    cpW  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
+    cpW += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
+
+    # Unix client and Unix IOM server
+    iomlinux = {'java'      : '/usr/bin/java',
+                'iomhost'   : 'linux.iom.host',
+                'iomport'   : 8591,
+                'encoding'  : 'latin1',
+                'classpath' : cpL
+               }
+
+    # Unix client and Windows IOM server
+    iomwin   = {'java'      : '/usr/bin/java',
+                'iomhost'   : 'windows.iom.host',
+                'iomport'   : 8591,
+                'encoding'  : 'windows-1252',
+                'classpath' : cpL
+               }
+
+    # Windows client and Unix IOM server
+    winiomwin   = {'java'      : 'java',
+                   'iomhost'   : 'linux.iom.host',
+                   'iomport'   : 8591,
+                   'encoding'  : 'latin1',
+                   'classpath' : cpW
+                  }
+
+    # Windows client and Windows IOM server
+    winiomwin   = {'java'      : 'java',
+                   'iomhost'   : 'windows.iom.host',
+                   'iomport'   : 8591,
+                   'encoding'  : 'windows-1252',
+                   'classpath' : cpW
+                  }
+
+
+Local
+~~~~~
+A local connection is defined as a connection to SAS that is running on the same
+Windows machine. You only need the following configuration definition keys. (Do not
+specify any of the others).
+
+**There is one additional requirement.** The sspiauth.dll file--also included in 
+your SAS installation--must be in your system PATH environment variable, your 
+java.library.path, or in the home directory of your Java client. You can search 
+for this file in your SAS deployment, though it is likely
+in SASHome\\SASFoundation\\9.4\\core\\sasext.
+
+If you add the file to the system PATH environment variable, only list the path to 
+the directory--do not include the file itself. For example, C:\\Program Files
+\\SASHome\\SASFoundation\\9.4\\core\\sasext. 
+
+java      - 
+    (Required) The path to the Java executable to use. 
+classpath - 
+    (Required) The CLASSPATH to the IOM client JAR files and SASPy client jar.
+encoding  -
+    This is the Python encoding value that matches the SAS session encoding of 
+    the IOM server to which you are connecting. The Python encoding values can be 
+    found at `encodings-and-unicode <https://docs.python.org/3.5/
+    library/codecs.html#encodings-and-unicode>`_.
+    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the 
+    default encodings for running SAS in Unicode, on Unix, and on Windows,
+    respectively. Those map to Python encoding values: utf8, latin1, and 
+    windows-1252, respectively. 
+
+.. code-block:: ipython3
+
+    # Windows client class path
+    cpW  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
+    cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
+    cpW += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
+
+
+    # Windows client and Local Windows IOM server
+    winlocal    = {'java'      : 'java',
+                   'encoding'  : 'windows-1252',
+                   'classpath' : cpW
+                  }
+
+.. note:: Having the ``'java'`` key is the triger to use the IOM access method.
+.. note:: When using the IOM access method (``'java'`` key specified), the 
+         absence of the ``'iomhost'`` key is the trigger to use a local Windows
+         session instead of remote IOM (it is a different connection type).
