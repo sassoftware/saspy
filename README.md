@@ -6,9 +6,8 @@ results as text, HTML5 documents (via SAS ODS), or as Pandas Data Frames. It sup
 analytics and returning the resulting graphics and result data. It can convert between SAS Data
 Sets and Pandas Data Frames. It has multiple access methods which allow it to connect to
 local or remote Linux SAS, IOM SAS on Windows or Linux (Including Grid Manager),
-local PC SAS, and, in the future, the Compute Service (SAS Viya micro service replacing IOM).
-It can run w/in Jupyter Notebooks, in line mode python or in python batch scripts. It is
-expected that the user community can and will contribute enhancements. 
+and local PC SAS. It can run w/in Jupyter Notebooks, in line mode python or in python batch
+scripts. It is expected that the user community can and will contribute enhancements. 
 
 ## Requirements
 
