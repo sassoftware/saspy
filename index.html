@@ -38,7 +38,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="saspy 2.1.0 documentation" href="#"/>
-        <link rel="next" title="Installation" href="install.html"/> 
+        <link rel="next" title="Overview of SASPy" href="overview.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -92,8 +92,8 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring SASPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview of SASPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a></li>
@@ -165,7 +165,7 @@
             
   <div class="section" id="module-saspy">
 <span id="saspy"></span><h1>SASPy<a class="headerlink" href="#module-saspy" title="Permalink to this headline">¶</a></h1>
-<p><strong>Date</strong>: Mar 20, 2017 <strong>Version</strong>: 2.1.0</p>
+<p><strong>Date</strong>: Mar 21, 2017 <strong>Version</strong>: 2.1.0</p>
 <p><strong>Binary Installers:</strong> <a class="reference external" href="http://github.com/sassoftware/saspy/releases">http://github.com/sassoftware/saspy/releases</a></p>
 <p><strong>Source Repository:</strong> <a class="reference external" href="http://github.com/sassoftware/saspy">http://github.com/sassoftware/saspy</a></p>
 <p><strong>Issues and Ideas:</strong> <a class="reference external" href="https://github.com/sassoftware/saspy/issues">https://github.com/sassoftware/saspy/issues</a></p>
@@ -174,25 +174,31 @@ SAS session and run analytics from Python through a combination of
 object-oriented methods and Python magics.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="install.html#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview of SASPy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#what-is-this">What is this?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#jupyter-magics">Jupyter magics</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring SASPy</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#sascfg-py">sascfg.py</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#stdio">STDIO</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#stdio-over-ssh">STDIO over SSH</a></li>
-<li class="toctree-l2"><a class="reference internal" href="configuration.html#iom">IOM</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="configuration.html#remote">Remote</a></li>
-<li class="toctree-l3"><a class="reference internal" href="configuration.html#local">Local</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation and configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#install-saspy">Install SASPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#configure-saspy">Configure SASPy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="install.html#sascfg-py-details">sascfg.py details</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#stdio">STDIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#stdio-over-ssh">STDIO over SSH</a></li>
+<li class="toctree-l3"><a class="reference internal" href="install.html#iom">IOM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="install.html#remote">Remote</a></li>
+<li class="toctree-l4"><a class="reference internal" href="install.html#local">Local</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="getting-started.html#initial-import">Initial import</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting-started.html#create-sas-session">Create SAS session</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting-started.html#load-sata-into-sas">Load sata into SAS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#start-a-sas-session">Start a SAS session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#load-data-into-sas">Load data into SAS</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="getting-started.html#csv">CSV</a></li>
 <li class="toctree-l3"><a class="reference internal" href="getting-started.html#pandas-dataframe">Pandas DataFrame</a></li>
 <li class="toctree-l3"><a class="reference internal" href="getting-started.html#existing-sas-data-set">Existing SAS data set</a></li>
@@ -209,13 +215,11 @@ object-oriented methods and Python magics.</p>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="getting-started.html#submit-sas-code-directly-from-python-session">Submit SAS code directly from Python session</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting-started.html#split-the-data-into-training-and-test">Split the data into training and test</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting-started.html#building-an-analytical-model">Building an analytical model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#build-an-analytical-model">Build an analytical model</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="getting-started.html#more-about-the-target-and-input-parameters">More about the target and input parameters</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="getting-started.html#evaluating-model-diagnostics">Evaluating model diagnostics</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting-started.html#assessing-model-quality">Assessing model quality</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting-started.html#scoring-new-data">Scoring new data</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
@@ -285,7 +289,7 @@ object-oriented methods and Python magics.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="overview.html" class="btn btn-neutral float-right" title="Overview of SASPy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

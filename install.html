@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; saspy 2.1.0 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.1.0 documentation</title>
   
 
   
@@ -38,8 +38,8 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="saspy 2.1.0 documentation" href="index.html"/>
-        <link rel="next" title="Configuring SASPy" href="configuration.html"/>
-        <link rel="prev" title="SASPy" href="index.html"/> 
+        <link rel="next" title="Getting started" href="getting-started.html"/>
+        <link rel="prev" title="Overview of SASPy" href="overview.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -93,11 +93,22 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview of SASPy</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-saspy">Install SASPy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configure-saspy">Configure SASPy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sascfg-py-details">sascfg.py details</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stdio">STDIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#iom">IOM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#remote">Remote</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#local">Local</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring SASPy</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a></li>
@@ -148,7 +159,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Installation</li>
+      <li>Installation and configuration</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -167,8 +178,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="installation-and-configuration">
+<h1>Installation and configuration<a class="headerlink" href="#installation-and-configuration" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="install-saspy">
+<h2>Install SASPy<a class="headerlink" href="#install-saspy" title="Permalink to this headline">¶</a></h2>
 <p>The SASPy package installs just like any other Python package.
 It is a pure Python package and works with Python 3.x
 installations.  To install the latest version using <cite>pip</cite>, you execute the following:</p>
@@ -179,12 +192,337 @@ installations.  To install the latest version using <cite>pip</cite>, you execut
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sassoftware</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">saspy</span><span class="o">-</span><span class="n">X</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
 </pre></div>
 </div>
-<div class="section" id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
-<p>SASPy has dependencies on a SAS 9.4 as well as Python 3.x. Also, in order to use SASPy after installation, you
-will need to edit the sascfg.py file to configure it to be able to connect to your SAS System. Plese see the
-<a class="reference internal" href="configuration.html"><span class="doc">Configuring SASPy</span></a> chapter to see how to do this. If you run into any problems, please see the <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting</span></a>
-chapter for help. If you have any questions, just open an Issue at <a class="reference external" href="https://github.com/sassoftware/saspy/issues">https://github.com/sassoftware/saspy/issues</a>.</p>
+<p>To use SASPy after installation, you need to edit the sascfg.py file to
+configure it to be able to connect and start a SAS session. Follow the
+instructions in the next section.</p>
+<ul class="simple">
+<li>If you run into any problems, see <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting</span></a>.</li>
+<li>If you have questions, open an issue at <a class="reference external" href="https://github.com/sassoftware/saspy/issues">https://github.com/sassoftware/saspy/issues</a>.</li>
+</ul>
+</div>
+<div class="section" id="configure-saspy">
+<h2>Configure SASPy<a class="headerlink" href="#configure-saspy" title="Permalink to this headline">¶</a></h2>
+<p>SASPy can connect and start different kinds of SAS sessions. It can connect to SAS
+on Unix, Mainframe, and Windows. It can connect to a local SAS session or remote session.
+Because of the wide range of connection types, there are a number of different access methods
+that are part of SASPy each of which are used to connect to different kinds of SAS sessions.</p>
+<p>The current set of connection methods are as follows:</p>
+<dl class="docutils">
+<dt><a class="reference internal" href="#stdio">STDIO</a></dt>
+<dd>This connection method is available on the Linux platform only. This
+method enables you to connect to SAS on the same host as SASPy and Python.</dd>
+<dt><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></dt>
+<dd>This connection method is also avaialble on the Linux platform only. This
+method can connect to SAS on the same host (local) or to SAS
+that is installed on a remote host, if you have passwordless SSH configured
+for your Linux user account.</dd>
+<dt><a class="reference internal" href="#iom">IOM</a></dt>
+<dd>The integrated object method (IOM) connection method supports SAS on any platform.
+This method can make a local Windows connection and it is also the way to connect
+to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
+Server on any supported SAS platform.</dd>
+</dl>
+<p>Though there are several connection methods available, a single configuration file
+is used to enable all the connection methods. The file contains instructions and
+examples, but this section goes into more detail to explain how to configure each
+type of connection.</p>
+<p>Depending upon how you installed SASPy, the sascfg.py file may be in different
+locations on the file system:</p>
+<ul class="simple">
+<li>In a regular pip install, it is under the site-packages directory in the Python
+installation.</li>
+<li>If you cloned the repo or downloaded and extraced the repo and then installed,
+it may use the sascfg.py file from that location and not copy it to site-packages.</li>
+</ul>
+<p>First, make sure that you update the sascfg.py file that Python uses. If you are
+familiar with pip and Git, then you probably know where to look. If you are not
+familiar with those tools, then there is a very simple way to determine the location
+that Python is using to get the SASPy modules.</p>
+<p>After installing SASPy, start Python and <code class="docutils literal"><span class="pre">import</span> <span class="pre">saspy</span></code>. Then, simply submit
+<code class="docutils literal"><span class="pre">saspy.SAScfg</span></code>. Python will show you where it found the module. Edit that one.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># this is an example of a repo install on Windows:</span>
+
+<span class="n">C</span><span class="p">:</span>\<span class="o">&gt;</span><span class="n">python</span>
+<span class="n">Python</span> <span class="mf">3.6</span><span class="o">.</span><span class="mi">0</span> <span class="o">|</span><span class="n">Anaconda</span> <span class="n">custom</span> <span class="p">(</span><span class="mi">64</span><span class="o">-</span><span class="n">bit</span><span class="p">)</span><span class="o">|</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Dec</span> <span class="mi">23</span> <span class="mi">2016</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span><span class="mi">57</span><span class="p">:</span><span class="mi">41</span><span class="p">)</span> <span class="p">[</span><span class="n">MSC</span> <span class="n">v</span><span class="o">.</span><span class="mi">1900</span> <span class="mi">64</span> <span class="n">bit</span> <span class="p">(</span><span class="n">AMD64</span><span class="p">)]</span> <span class="n">on</span> <span class="n">win32</span>
+<span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SAScfg</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy.sascfg&#39;</span> <span class="kn">from</span> <span class="s1">&#39;E:</span><span class="se">\\</span><span class="s1">metis-master</span><span class="se">\\</span><span class="s1">saspy_pip</span><span class="se">\\</span><span class="s1">saspy</span><span class="se">\\</span><span class="s1">sascfg.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+
+<span class="c1"># this is an example of a repo install on Linux:</span>
+
+<span class="n">Linux</span><span class="o">-</span><span class="mi">1</span><span class="o">&gt;</span> <span class="n">python3</span><span class="o">.</span><span class="mi">5</span>
+<span class="n">Python</span> <span class="mf">3.5</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Jan</span> <span class="mi">19</span> <span class="mi">2016</span><span class="p">,</span> <span class="mi">21</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">20</span><span class="p">)</span>
+<span class="p">[</span><span class="n">GCC</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span> <span class="mi">20120313</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span><span class="o">-</span><span class="mi">16</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
+<span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SAScfg</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy.sascfg&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/opt/tom/gitlab/metis/saspy_pip/saspy/sascfg.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+
+<span class="c1"># this is an example of a PyPi install on Linux into site-packages:</span>
+
+<span class="n">Linux</span><span class="o">-</span><span class="mi">1</span><span class="o">&gt;</span> <span class="n">python3</span><span class="o">.</span><span class="mi">5</span>
+<span class="n">Python</span> <span class="mf">3.5</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Jan</span> <span class="mi">19</span> <span class="mi">2016</span><span class="p">,</span> <span class="mi">21</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">20</span><span class="p">)</span>
+<span class="p">[</span><span class="n">GCC</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span> <span class="mi">20120313</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span><span class="o">-</span><span class="mi">16</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
+<span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SAScfg</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy.sascfg&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/usr/lib/python3.5/site-packages/saspy/sascfg.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<div class="section" id="sascfg-py-details">
+<h3>sascfg.py details<a class="headerlink" href="#sascfg-py-details" title="Permalink to this headline">¶</a></h3>
+<p>There are three main parts to this configuration file.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>SAS_config_names</li>
+<li>SAS_config_options</li>
+<li>Configuration definitions</li>
+</ol>
+</div></blockquote>
+<p>In reverse order, the configuration definitions are Python dictionaries. Each dictionary
+has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.</p>
+<p>SAS_config_options has one option. The option restricts (or allows) an end users&#8217; ability
+to override settings in the configuration definitions using <code class="docutils literal"><span class="pre">SASsession()</span></code>.</p>
+<p>SAS_config_names is the list of configuration definition names to make available to an
+end user at connection time. Any configuration definitions that are not listed in
+SAS_config_names are simply inaccessible by an end user. You can add several configuration
+definitions in the file but not make them available by simply excluding the names from
+the list.</p>
+</div>
+<div class="section" id="stdio">
+<h3>STDIO<a class="headerlink" href="#stdio" title="Permalink to this headline">¶</a></h3>
+<p>This is the original connection method for SASPy. This works with Unix only,
+because SAS on Windows platforms does not support line-mode style connections
+(through stdin, stdout, stderr). This connection method is for a local
+connection to SAS that is installed on the same host as Python and SASPy.</p>
+<p>There are only three keys for this configuration definition dictionary:</p>
+<dl class="docutils">
+<dt>saspath -</dt>
+<dd>(Required) Path to SAS startup script</dd>
+<dt>options -</dt>
+<dd>SAS options to include in the start up command line. These <strong>must</strong> be a
+Python list.</dd>
+<dt>encoding -</dt>
+<dd>This is the Python encoding value that matches the SAS session encoding
+of the SAS session to which you are connecting. The Python encoding
+values can be found at <a class="reference external" href="https://docs.python.org/3.5/library/codecs.html#encodings-and-unicode">encodings-and-unicode</a>.
+The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
+default encodings for running SAS in Unicode, on Unix, and on Windows,
+respectively. Those map to Python encoding values: utf8, latin1, and
+windows-1252, respectively.</dd>
+</dl>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span>
+            <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The trigger to use the STDIO connection method is the absence of any
+trigger for the other access methods: not having <code class="docutils literal"><span class="pre">'ssh'</span></code> or <code class="docutils literal"><span class="pre">'java'</span></code>
+keys in the configuration definition.</p>
+</div>
+</div>
+<div class="section" id="stdio-over-ssh">
+<h3>STDIO over SSH<a class="headerlink" href="#stdio-over-ssh" title="Permalink to this headline">¶</a></h3>
+<p>This is the remote version of the original connection method. This also works
+with Unix only, and it supports passwordless SSH to the Unix machine where SAS
+is installed. It is up to you to make sure that user accounts have passwordless
+SSH configured between the two system. Google it, it&#8217;s not that difficult.</p>
+<p>In addition to the three keys for STDIO, there are two more keys to configure:</p>
+<dl class="docutils">
+<dt>ssh -</dt>
+<dd>(Required) The ssh command to run (Linux execv requires a fully qualified
+path. Even if the command is found in the PATH variable, it won&#8217;t be used.
+Enter the fully qualified path.)</dd>
+<dt>host -</dt>
+<dd>(Required) The host to connect to. Enter a resolvable host name or IP address.</dd>
+</dl>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">ssh</span>      <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span> <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ssh&#39;</span>     <span class="p">:</span> <span class="s1">&#39;/usr/bin/ssh&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;host&#39;</span>    <span class="p">:</span> <span class="s1">&#39;remote.linux.host&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">]</span>
+           <span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <code class="docutils literal"><span class="pre">'ssh'</span></code> key is the triger to use the STDIO over SSH connection
+method.</p>
+</div>
+</div>
+<div class="section" id="iom">
+<h3>IOM<a class="headerlink" href="#iom" title="Permalink to this headline">¶</a></h3>
+<p>The connection method opens many connectivity options. This method enables you to use
+<a class="reference external" href="https://www.sas.com/en_us/software/foundation/grid-manager.html">SAS Grid Manager</a>
+to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
+Manager to control the distribution of connections to the various grid nodes
+and integrates all the monitoring and administration that SAS Grid Manager provides.</p>
+<p>The IOM connection method also enables SASPy to connect to SAS on Windows platforms.
+The connection can be to a local SAS installation or a remote IOM server running on
+Windows.</p>
+<p>The IOM connection method requires the following:</p>
+<ul class="simple">
+<li>The SAS Java IOM Client</li>
+<li>Setting the CLASSPATH to access the SAS Java IOM Client JAR files.</li>
+<li>Setting the CLASSPATH to include the the SASPy JAR file.</li>
+</ul>
+<p>The <code class="docutils literal"><span class="pre">'classpath'</span></code> key for the configuration definition requires a little additional
+explanation before we get to further details. There are four (4) JAR files that are
+required for the Java IOM Client. The JAR files are available from your existing SAS
+installation.  There is one JAR file that is provided with the SASPy package:
+saspyiom.jar. These five JAR files must be provided (fully qualified paths) in a
+CLASSPATH environment variable. This is done in a very simple way in the sascfg.py
+file, like so:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cp</span>  <span class="o">=</span>  <span class="s2">&quot;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar&quot;</span>
+<span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar&quot;</span>
+<span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar&quot;</span>
+<span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar&quot;</span>
+<span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar&quot;</span>
+</pre></div>
+</div>
+<p>And then simply refer to the <code class="docutils literal"><span class="pre">cp</span></code> variable in the configuration definition:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cp</span><span class="p">,</span>
+</pre></div>
+</div>
+<p>Also worth noting: these five JAR files are compatible with both Windows and Unix client systems.</p>
+<div class="section" id="remote">
+<h4>Remote<a class="headerlink" href="#remote" title="Permalink to this headline">¶</a></h4>
+<p>A remote connection is defined as a connection to any workspace server on any SAS platform
+from either a Unix or Windows client.</p>
+<p>The following keys are available for the configuration definition dictionary:</p>
+<dl class="docutils">
+<dt>java    -</dt>
+<dd>(Required) The path to the Java executable to use. For Linux, use a fully qualifed
+path. On Windows, you might be able to simply enter <code class="docutils literal"><span class="pre">java</span></code>. If that is not successful,
+enter the fully qualified path.</dd>
+<dt>iomhost -</dt>
+<dd>(Required) The resolvable host name, or IP address to the IOM server.</dd>
+<dt>iomport -</dt>
+<dd>(Required) The port that IOM server is listening on for workspace connections.</dd>
+<dt>classpath -</dt>
+<dd>(Required) The CLASSPATH to the IOM client JAR files and SASPy client jar.</dd>
+<dt>omruser -</dt>
+<dd>(<strong>Discouraged</strong>)  The user ID is required but if this field is left blank,
+the user is <strong>prompted</strong> for a user ID at runtime.</dd>
+<dt>omrpw  -</dt>
+<dd>(<strong>Strongly discouraged</strong>) A password is required but if this field is left
+blank, the user is <strong>prompted</strong> for a password at runtime.</dd>
+<dt>encoding  -</dt>
+<dd>This is the Python encoding value that matches the SAS session encoding of
+the IOM server to which you are connecting. The Python encoding values can be
+found at <a class="reference external" href="https://docs.python.org/3.5/library/codecs.html#encodings-and-unicode">encodings-and-unicode</a>.
+The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
+default encodings for running SAS in Unicode, on Unix, and on Windows,
+respectively. Those map to Python encoding values: utf8, latin1, and
+windows-1252, respectively.</dd>
+</dl>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Unix client class path</span>
+<span class="n">cpL</span>  <span class="o">=</span>  <span class="s2">&quot;/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar&quot;</span>
+<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/log4j.jar&quot;</span>
+<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.security.sspi.jar&quot;</span>
+<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.core.jar&quot;</span>
+<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/usr/lib/python3.5/site-packages/saspy/java/saspyiom.jar&quot;</span>
+
+<span class="c1"># Windows client class path</span>
+<span class="n">cpW</span>  <span class="o">=</span>  <span class="s2">&quot;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar&quot;</span>
+
+<span class="c1"># Unix client and Unix IOM server</span>
+<span class="n">iomlinux</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;/usr/bin/java&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;iomhost&#39;</span>   <span class="p">:</span> <span class="s1">&#39;linux.iom.host&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;iomport&#39;</span>   <span class="p">:</span> <span class="mi">8591</span><span class="p">,</span>
+            <span class="s1">&#39;encoding&#39;</span>  <span class="p">:</span> <span class="s1">&#39;latin1&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cpL</span>
+           <span class="p">}</span>
+
+<span class="c1"># Unix client and Windows IOM server</span>
+<span class="n">iomwin</span>   <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;/usr/bin/java&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;iomhost&#39;</span>   <span class="p">:</span> <span class="s1">&#39;windows.iom.host&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;iomport&#39;</span>   <span class="p">:</span> <span class="mi">8591</span><span class="p">,</span>
+            <span class="s1">&#39;encoding&#39;</span>  <span class="p">:</span> <span class="s1">&#39;windows-1252&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cpL</span>
+           <span class="p">}</span>
+
+<span class="c1"># Windows client and Unix IOM server</span>
+<span class="n">winiomwin</span>   <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;java&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;iomhost&#39;</span>   <span class="p">:</span> <span class="s1">&#39;linux.iom.host&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;iomport&#39;</span>   <span class="p">:</span> <span class="mi">8591</span><span class="p">,</span>
+               <span class="s1">&#39;encoding&#39;</span>  <span class="p">:</span> <span class="s1">&#39;latin1&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cpW</span>
+              <span class="p">}</span>
+
+<span class="c1"># Windows client and Windows IOM server</span>
+<span class="n">winiomwin</span>   <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;java&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;iomhost&#39;</span>   <span class="p">:</span> <span class="s1">&#39;windows.iom.host&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;iomport&#39;</span>   <span class="p">:</span> <span class="mi">8591</span><span class="p">,</span>
+               <span class="s1">&#39;encoding&#39;</span>  <span class="p">:</span> <span class="s1">&#39;windows-1252&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cpW</span>
+              <span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="local">
+<h4>Local<a class="headerlink" href="#local" title="Permalink to this headline">¶</a></h4>
+<p>A local connection is defined as a connection to SAS that is running on the same
+Windows machine. You only need the following configuration definition keys. (Do not
+specify any of the others).</p>
+<p><strong>There is one additional requirement.</strong> The sspiauth.dll file&#8211;also included in
+your SAS installation&#8211;must be in your system PATH environment variable, your
+java.library.path, or in the home directory of your Java client. You can search
+for this file in your SAS deployment, though it is likely
+in SASHome\SASFoundation\9.4\core\sasext.</p>
+<p>If you add the file to the system PATH environment variable, only list the path to
+the directory&#8211;do not include the file itself. For example, C:\Program Files
+\SASHome\SASFoundation\9.4\core\sasext.</p>
+<dl class="docutils">
+<dt>java      -</dt>
+<dd>(Required) The path to the Java executable to use.</dd>
+<dt>classpath -</dt>
+<dd>(Required) The CLASSPATH to the IOM client JAR files and SASPy client jar.</dd>
+<dt>encoding  -</dt>
+<dd>This is the Python encoding value that matches the SAS session encoding of
+the IOM server to which you are connecting. The Python encoding values can be
+found at <a class="reference external" href="https://docs.python.org/3.5/library/codecs.html#encodings-and-unicode">encodings-and-unicode</a>.
+The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
+default encodings for running SAS in Unicode, on Unix, and on Windows,
+respectively. Those map to Python encoding values: utf8, latin1, and
+windows-1252, respectively.</dd>
+</dl>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Windows client class path</span>
+<span class="n">cpW</span>  <span class="o">=</span>  <span class="s2">&quot;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar&quot;</span>
+
+
+<span class="c1"># Windows client and Local Windows IOM server</span>
+<span class="n">winlocal</span>    <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;java&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;encoding&#39;</span>  <span class="p">:</span> <span class="s1">&#39;windows-1252&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cpW</span>
+              <span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Having the <code class="docutils literal"><span class="pre">'java'</span></code> key is the triger to use the IOM access method.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When using the IOM access method (<code class="docutils literal"><span class="pre">'java'</span></code> key specified), the
+absence of the <code class="docutils literal"><span class="pre">'iomhost'</span></code> key is the trigger to use a local Windows
+session instead of remote IOM (it is a different connection type).</p>
+</div>
+</div>
+</div>
 </div>
 </div>
 
@@ -198,10 +536,10 @@ chapter for help. If you have any questions, just open an Issue at <a class="ref
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="configuration.html" class="btn btn-neutral float-right" title="Configuring SASPy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="SASPy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="overview.html" class="btn btn-neutral" title="Overview of SASPy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
