@@ -56,7 +56,7 @@ except:
     running_on_win = True
 
 import saspy.sasioiom   as sasioiom
-import saspy.sasiohttp  as sasiohttp
+#import saspy.sasiohttp  as sasiohttp
 from saspy.sasstat import *
 from saspy.sasets import *
 from saspy.sasml import *
@@ -116,10 +116,11 @@ class SASconfig:
         self.name = cfgname
         cfg = getattr(SAScfg, cfgname)
 
-        ip = cfg.get('ip', '')
-        ssh = cfg.get('ssh', '')
-        path = cfg.get('saspath', '')
-        java = cfg.get('java', '')
+        ip           = cfg.get('ip', '')
+        ssh          = cfg.get('ssh', '')
+        path         = cfg.get('saspath', '')
+        java         = cfg.get('java', '')
+        self.results = cfg.get('results', None)
 
         if len(java) > 0:
             self.mode = 'IOM'
@@ -215,7 +216,9 @@ class SASsession():
         self.nosub          = False
         self.sascfg         = SASconfig(**kwargs)
         self.batch          = False
-        self.results        = kwargs.get('results', 'Pandas')
+        self.results        = kwargs.get('results', self.sascfg.results)
+        if not self.results:
+           self.results     = 'Pandas'
         self.workpath       = ''
         self.sasver         = ''
         self.sascei         = ''
@@ -229,11 +232,12 @@ class SASsession():
             else:
                 print(
                     "Cannot use STDIO I/O module on Windows. No SASsession established. Choose an IOM SASconfig definition")
-        elif self.sascfg.mode == 'HTTP':
-            self._io = sasiohttp.SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
-
         elif self.sascfg.mode == 'IOM':
             self._io = sasioiom.SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
+        '''
+        elif self.sascfg.mode == 'HTTP':
+            self._io = sasiohttp.SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
+        '''
 
         try:
            if self._io:
