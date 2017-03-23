@@ -249,7 +249,7 @@ class SASsession():
                 self.workpath += '\\'
              else:
                 self.workpath += '/'
-             ll = self.submit('"%put SYSV=&sysvlong4;";')
+             ll = self.submit('%put SYSV=&sysvlong4;')
              self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
              ll = self.submit('proc options option=encoding;run;')
              self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
