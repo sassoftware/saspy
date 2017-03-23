@@ -26,7 +26,6 @@ object-oriented methods and Python magics.
 
    overview
    install
-   configuration
    getting-started
    api
    advanced-topics
