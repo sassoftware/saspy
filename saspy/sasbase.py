@@ -249,7 +249,7 @@ class SASsession():
                 self.workpath += '\\'
              else:
                 self.workpath += '/'
-             ll = self.submit('"%put SYSV=&sysvlong4;";')
+             ll = self.submit('%put SYSV=&sysvlong4;')
              self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
              ll = self.submit('proc options option=encoding;run;')
              self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
@@ -1218,8 +1218,11 @@ class SASdata:
 
         :return: Pandas data frame
         """
+        res = self.results
+        self.results = 'Pandas'
         m = self.means()
         c = self.columnInfo()
+        self.results = res
         p1 = m[['Variable', 'N', 'NMiss']]
         p2 = c[['Variable', 'Type']]
         info = pd.merge(p1, p2, on='Variable', how='outer')
