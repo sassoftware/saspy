@@ -1218,8 +1218,11 @@ class SASdata:
 
         :return: Pandas data frame
         """
+        res = self.results
+        self.results = 'Pandas'
         m = self.means()
         c = self.columnInfo()
+        self.results = res
         p1 = m[['Variable', 'N', 'NMiss']]
         p2 = c[['Variable', 'Type']]
         info = pd.merge(p1, p2, on='Variable', how='outer')
