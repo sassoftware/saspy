@@ -1344,7 +1344,7 @@ class SASdata:
         :param target: string that represents the target variable in the data
         :param prediction: string that represents the numeric prediction column in the data. For nominal targets this should a probability between (0,1).
         :param nominal: boolean to indicate if the Target Variable is nominal because the assessment measures are different.
-        :param event: string of either DESC or ASC which indicates which value of the target variable is the event vs non-event
+        :param event: string which indicates which value of the nominal target variable is the event vs non-event
         :param kwargs:
         :return: SAS result object
         """
@@ -1407,33 +1407,34 @@ class SASdata:
         run;
         """
         code += rename_char.format(binstats)
-        # TODO: add graphics code here to return to the SAS results object
-        graphics ="""
-        ODS PROCLABEL='ERRORPLOT' ;
-        proc sgplot data={0};
-            title "Error and Correct rate by Depth";
-            series x=depth y=correct_rate;
-            series x=depth y=error_rate;
-            yaxis label="Percentage" grid;
-        run;
-        /* roc chart */
-        ODS PROCLABEL='ROCPLOT' ;
+        if nominal:
+            # TODO: add graphics code here to return to the SAS results object
+            graphics ="""
+            ODS PROCLABEL='ERRORPLOT' ;
+            proc sgplot data={0};
+                title "Error and Correct rate by Depth";
+                series x=depth y=correct_rate;
+                series x=depth y=error_rate;
+                yaxis label="Percentage" grid;
+            run;
+            /* roc chart */
+            ODS PROCLABEL='ROCPLOT' ;
 
-        proc sgplot data={0};
-            title "ROC Curve";
-            series x=one_minus_specificity y=sensitivity;
-            yaxis grid;
-        run;
-        /* Lift and Cumulative Lift */
-        ODS PROCLABEL='LIFTPLOT' ;
-        proc sgplot data={0};
-            Title "Lift and Cumulative Lift";
-            series x=depth y=c_lift;
-            series x=depth y=lift;
-            yaxis grid;
-        run;
-        """
-        code += graphics.format(out)
+            proc sgplot data={0};
+                title "ROC Curve";
+                series x=one_minus_specificity y=sensitivity;
+                yaxis grid;
+            run;
+            /* Lift and Cumulative Lift */
+            ODS PROCLABEL='LIFTPLOT' ;
+            proc sgplot data={0};
+                Title "Lift and Cumulative Lift";
+                series x=depth y=c_lift;
+                series x=depth y=lift;
+                yaxis grid;
+            run;
+            """
+            code += graphics.format(out)
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
 

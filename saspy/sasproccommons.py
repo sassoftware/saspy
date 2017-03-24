@@ -558,9 +558,8 @@ class SASProcCommons:
         if tgt is not None:
             # what object type is target
             if isinstance(tgt, str):
-                # if there is only one word or special character do nothing
-                if len(tgt.split()) == 1 or len(
-                        [word for word in tgt if any(letter in word for letter in '/\:;.%')]) != 0:
+                # if there is special character do nothing
+                if len([word for word in tgt if any(letter in word for letter in '/\:;.%')]) != 0:
                     kwargs['target'] = tgt
                 else:
                     # turn str into list and search for nominals
