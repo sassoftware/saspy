@@ -335,10 +335,15 @@ class SASProcCommons:
             self.logger.debug("season statement,length: %s,%s", args['season'], len(args['season']))
             code += "season %s;\n" % (args['season'])
         if 'selection' in args:
-            if args['selection'].lower().strip() in ['none', 'forward', 'backward', 'stepwise', 'forwardswap',
+            if isinstance(args['selection'], str):
+                if args['selection'].lower().strip() in ['none', 'forward', 'backward', 'stepwise', 'forwardswap',
                                                      'lar', 'lasso']:
-                self.logger.debug("selection statement,length: %s,%s", args['selection'], len(args['selection']))
-                code += "selection method=%s;\n" % (args['selection'])
+                    self.logger.debug("selection statement,length: %s,%s", args['selection'], len(args['selection']))
+                    code += "selection method=%s;\n" % (args['selection'])
+            if isinstance(args['selection'], dict):
+                if bool(args['selection']): # is the dictionary empty
+                    m = args['selection'].pop('method', '')
+                    code += "selection method=%s (%s) ;"  % (m, ' '.join('{}={}'.format(key, val) for key, val in args['selection'].items()))
         if 'slope' in args:
             if isinstance(args['slope'], str):
                 self.logger.debug("slope statement,length: %s,%s", args['slope'], len(args['slope']))
