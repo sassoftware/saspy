@@ -344,7 +344,7 @@ class SASProcCommons:
                 if bool(args['selection']): # is the dictionary empty
                     m = args['selection'].pop('method', '')
                     d = args['selection'].pop('details', '')
-                    code += "selection method=%s (%s)  %d;"  % (m, ' '.join('{}={}'.format(key, val) for key, val in args['selection'].items()), d)
+                    code += "selection method=%s (%s)  %s;"  % (m, ' '.join('{}={}'.format(key, val) for key, val in args['selection'].items()), d)
         if 'slope' in args:
             if isinstance(args['slope'], str):
                 self.logger.debug("slope statement,length: %s,%s", args['slope'], len(args['slope']))
