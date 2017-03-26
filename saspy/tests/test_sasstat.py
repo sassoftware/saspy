@@ -185,6 +185,18 @@ class TestSASstat(unittest.TestCase):
                          msg=u"Simple Regession (reg) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), str(b)))
 
+    def test_selectionDict(self):
+        # Basic model returns objects
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        selDict = {'method':'stepwise', 'sl': '0.05'}
+        b = stat.hpreg(data=tr, model='weight=height', selection= selDict)
+        a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS',
+             'PARAMETERESTIMATES', 'PERFORMANCEINFO']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u"Simple Regession (HPREG) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
     def test_missingVar(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
