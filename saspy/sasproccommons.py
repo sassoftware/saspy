@@ -343,8 +343,15 @@ class SASProcCommons:
             if isinstance(args['selection'], dict):
                 if bool(args['selection']): # is the dictionary empty
                     m = args['selection'].pop('method', '')
+                    me = args['selection'].pop('maxeffects', None)
+                    if me is not None:
+                        if int(me) > 0 and m != 'backward':
+                            args['selection']['maxeffects'] = me
                     d = args['selection'].pop('details', '')
-                    code += "selection method=%s (%s)  %s;"  % (m, ' '.join('{}={}'.format(key, val) for key, val in args['selection'].items()), d)
+                    dstr = ''
+                    if len(d) > 0:
+                        dstr = 'details = %s' % d  
+                    code += "selection method=%s (%s)  %s;"  % (m, ' '.join('{}={}'.format(key, val) for key, val in args['selection'].items()), dstr)
         if 'slope' in args:
             if isinstance(args['slope'], str):
                 self.logger.debug("slope statement,length: %s,%s", args['slope'], len(args['slope']))

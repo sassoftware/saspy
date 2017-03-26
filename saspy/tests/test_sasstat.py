@@ -189,10 +189,11 @@ class TestSASstat(unittest.TestCase):
         # Basic model returns objects
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
-        selDict = {'method':'stepwise', 'sl': '0.05'}
+        selDict = {'method':'stepwise'}
         b = stat.hpreg(data=tr, model='weight=height', selection= selDict)
         a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS',
-             'PARAMETERESTIMATES', 'PERFORMANCEINFO']
+             'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON', 
+             'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), str(b)))
@@ -202,10 +203,11 @@ class TestSASstat(unittest.TestCase):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         # DETAILS=NONE | SUMMARY | ALL
-        selDict = {'method':'stepwise', 'sl': '0.05', 'details':'ALL', 'maxeffects':'0'}
+        selDict = {'method':'forward', 'details':'ALL', 'maxeffects':'0'}
         b = stat.hpreg(data=tr, model='weight=height', selection= selDict)
-        a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS',
-             'PARAMETERESTIMATES', 'PERFORMANCEINFO']
+        a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'ENTRYCANDIDATES', 'FITSTATISTICS', 'LOG', 
+             'MODELINFO', 'NOBS', 'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 
+             'SELECTIONINFO', 'SELECTIONREASON', 'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), str(b)))
@@ -217,8 +219,9 @@ class TestSASstat(unittest.TestCase):
         # DETAILS=NONE | SUMMARY | ALL
         selDict = {'stop': 'aic', 'method': 'backward', 'select': 'aic', 'choose': 'aic', 'maxeffects':'3'}
         b = stat.hpreg(data=tr, model='weight=height', selection= selDict)
-        a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS', 'PARAMETERESTIMATES',
-             'PERFORMANCEINFO', 'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON', 'SELECTIONSUMMARY', 'STOPREASON']
+        a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS',
+             'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON',
+             'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), str(b)))
