@@ -41,19 +41,19 @@ import os
 import logging
 
 try:
-   import saspy.sascfg_personal as SAScfg
    import pandas as pd
+except ImportError:
+   pass
+
+try:
+   import saspy.sascfg_personal as SAScfg
 except ImportError:
    import saspy.sascfg as SAScfg
 
 try:
     import saspy.sasiostdio as sasiostdio
-    # import saspy.sasioiom   as sasioiom
-
-    running_on_win = False
-
 except:
-    running_on_win = True
+    pass
 
 import saspy.sasioiom   as sasioiom
 #import saspy.sasiohttp  as sasiohttp
@@ -227,7 +227,7 @@ class SASsession():
             return
 
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
-            if not running_on_win:
+            if os.name != 'nt':
                 self._io = sasiostdio.SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
             else:
                 print(
