@@ -199,7 +199,6 @@ host -
           method.
 
 
-
 IOM
 ===
 The connection method opens many connectivity options. This method enables you to use

@@ -23,7 +23,7 @@
 # connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interrupt
 # handling, as the local STDIO method can. An interrupt on this method can only terminate the SAS process;
 # you'll be prompted to terminate or wait for completion. The third method is HTTP, which can connect
-# to SAS Viya via the Compute Servie, a restful micro service in the Viya system.
+# to SAS Viya via the Compute Service, a restful micro service in the Viya system.
 #
 # Each of these connection methods (access methods) are handled by their own IO module. This main
 # module determines which IO module to use based upon the configuration chosen at runtime. More
@@ -1112,7 +1112,7 @@ class SASdata:
                 code += "class _character_;\nvar _numeric_;\n"
             code += "run;\n"
             i += 1
-        # split_code is used if singleOut is False it generates the needed SAS code to break up the kfold parition set.
+        # split_code is used if singleOut is False it generates the needed SAS code to break up the kfold partition set.
         split_code = ''
         if not singleOut:
             split_code += 'DATA '
