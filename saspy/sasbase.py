@@ -887,7 +887,8 @@ class SASdata:
             pd = dict()
             for t in tablename:
                 # strip leading '_' from names and capitalize for dictionary labels
-                pd[t.replace('_', '').capitalize()] = self.sas._io.sasdata2dataframe(t, libref)
+                if self.sas.exist(t, libref):
+                   pd[t.replace('_', '').capitalize()] = self.sas._io.sasdata2dataframe(t, libref)
                 self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, t))
         else:
             raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))
