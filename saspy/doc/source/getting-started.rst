@@ -152,7 +152,7 @@ Basic heatmap
 
 Submit SAS code directly from Python session
 ============================================
-The preceeding examples demonstrate commonly used Python
+The proceeding examples demonstrate commonly used Python
 methods that are available with the SASPy module.
 
 If you encounter a situation where you need to submit SAS
@@ -160,7 +160,7 @@ statements directly to the SAS system, the submit method can
 accomplish that. The following example creates a side-by-side
 panel plot to compare employees who have left versus employees
 still working at the company, based on their business unit,
-median performance rating, and satisifaction level.
+median performance rating, and satisfaction level.
 
 The submit method returns a dictionary with two keys: LOG and LST.
 The LST has the results to display and the LOG has the portion 
@@ -181,7 +181,7 @@ of the SAS log for the code submission.
 Split the data into training and test
 =====================================
 Partitioning data is essential to avoid overfitting during
-model development. This can be achived using the partition
+model development. This can be achieved using the partition
 method. In this example, the data is partitioned in-place
 and performs stratified sampling, based on the variable 
 'left.' If you do not specify a variable or the variable
@@ -199,9 +199,9 @@ We create two partitions: test and training.
 
 Build an analytical model
 =========================
-One of the key activities for SASPy is analtycal modeling. The SAS
+One of the key activities for SASPy is analytical modeling. The SAS
 system is capable of modeling in a number of distinct areas
-(statisics, machine learning, econometric time series, and so on). 
+(statistics, machine learning, econometric time series, and so on).
 
 The capabilities of SASPy are organized similarly to make it easier 
 for users. Grouping functionality also avoids cluttered tab-complete 
@@ -328,7 +328,7 @@ These rules apply to both target and input:
 * The parameters accept strings (str), lists (list), or dictionaries (dict) types.
 * The target and input parameters are modified by a nominals parameter to 
   identify the proper variables treatment.
-* The nominals parameter must be a list type or you recieve a syntax warning.
+* The nominals parameter must be a list type or you receive a syntax warning.
 * Variables are treated as nominals if any of the following are met:
 
   * The variable is a character type in SAS.
@@ -344,7 +344,7 @@ These rules apply to both target and input:
 Evaluating model diagnostics
 ============================
 Perhaps the most important part of modeling is evaluating the quality of the 
-model. SASPy makes this very easy by leverging the rich graphical and tabular 
+model. SASPy makes this very easy by leveraging the rich graphical and tabular
 output of `SAS ODS <http://support.sas.com/rnd/base/ods/>`_.
 
 The output of a model in SASPy is a :any:`SASresults` object. It contains all 
@@ -356,7 +356,7 @@ see all the available objects by using ``dir()`` or tab-complete on the object.
     dir(rf_model)
 
 The returned list shows the available diagnostic output for this model. The 
-output lists vary slightly, depending on the modeling algorthm, the settings, 
+output lists vary slightly, depending on the modeling algorithm, the settings,
 and the target type (nominal or interval).
 
 .. parsed-literal::
@@ -379,7 +379,7 @@ use the ``results`` option to choose HTML for tables too, if you choose.
     rf_model.FITSTATISTICS
 
 
-.. note:: If an error occured during processing, the only artifact is ERROR_LOG.
+.. note:: If an error occurred during processing, the only artifact is ERROR_LOG.
           This object contains the SAS log to aid you in resolving your error.
 
 Below is an example where the variable name left is typed incorrectly as lefty.

@@ -209,16 +209,22 @@ class SASProcCommons:
                 code += "input %s;\n" % (args['input'])
             elif isinstance(args['input'], dict):
                 try:
+                    # fix var type names for HPNEURAL
+                    nomstr = 'nominal'
+                    intstr = 'interval'
+                    if objtype.casefold() =='hpneural':
+                        nomstr = 'nom'
+                        intstr = 'int'
                     if 'interval' in args['input'].keys():
                         if isinstance(args['input']['interval'], str):
-                            code += "input %s /level=interval;\n" % args['input']['interval']
+                            code += "input %s /level=%s;\n" % (args['input']['interval'], intstr)
                         if isinstance(args['input']['interval'], list):
-                            code += "input %s /level=interval;\n" % " ".join(args['input']['interval'])
+                            code += "input %s /level=%s;\n" % (" ".join(args['input']['interval']), intstr )
                     if 'nominal' in args['input'].keys():
                         if isinstance(args['input']['nominal'], str):
-                            code += "input %s /level=nominal;\n" % args['input']['nominal']
+                            code += "input %s /level=%s;\n" % (args['input']['nominal'], nomstr)
                         if isinstance(args['input']['nominal'], list):
-                            code += "input %s /level=nominal;\n" % " ".join(args['input']['nominal'])
+                            code += "input %s /level=%s;\n" % (" ".join(args['input']['nominal']), nomstr)
                 except:
                     raise SyntaxError("Proper Keys not found for INPUT dictionary: %s" % args['input'].keys())
             elif isinstance(args['input'], list):
@@ -396,18 +402,39 @@ class SASProcCommons:
             elif isinstance(args['target'], dict):
                 try:
                     # check there there is only one target:
-                    value_length = [len(v) for v in args['target'].values()]
-                    if sum(value_length) == 1:
+                    length=0
+                    try:
+                        length += len([args['target']['nominal'], args['target']['interval'] ])
+                    except KeyError:
+                        try:
+                            length += len([args['target']['nominal']])
+                        except KeyError:
+                            try:
+                                length += len([args['target']['interval']])
+                            except KeyError:
+                                raise
+                    if length  == 1:
+                        # fix var type names for HPNEURAL
+                        nomstr = 'nominal'
+                        intstr = 'interval'
+                        targOpts = ''
+                        try:
+                            targOpts = ' '.join('{}={}'.format(key, val) for key, val in args['target']['targOpts'].items())
+                        except:
+                            pass
+                        if objtype.casefold() == 'hpneural':
+                            nomstr = 'nom'
+                            intstr = 'int'
                         if 'interval' in args['target'].keys():
                             if isinstance(args['target']['interval'], str):
-                                code += "target %s /level=interval;\n" % args['target']['interval']
+                                code += "target %s /level=%s %s;\n" % (args['target']['interval'], intstr, targOpts)
                             if isinstance(args['target']['interval'], list):
-                                code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
+                                code += "target %s /level=%s %s;\n" % (" ".join(args['target']['interval']), intstr, targOpts)
                         if 'nominal' in args['target'].keys():
                             if isinstance(args['target']['nominal'], str):
-                                code += "target %s /level=nominal;\n" % args['target']['nominal']
+                                code += "target %s /level=%s;\n" % (args['target']['nominal'], nomstr)
                             if isinstance(args['target']['nominal'], list):
-                                code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
+                                code += "target %s /level=%s;\n" % (" ".join(args['target']['nominal']), nomstr)
                     else:
                         raise SyntaxError
                 except SyntaxError:
@@ -559,6 +586,7 @@ class SASProcCommons:
         nom = kwargs.pop('nominals', None)
         inputs = kwargs.pop('input', None)
         tgt = kwargs.pop('target', None)
+        targOpts = kwargs.pop('targOpts', None)
 
         # get char variables and nominals list if it exists
         if nom is None:
@@ -607,6 +635,8 @@ class SASProcCommons:
                     kwargs['target'] = tgt
             else:
                 raise SyntaxError("Target must be a string, list, or dictionary you provided: %s" % str(type(tgt)))
+        if targOpts is not None:
+            kwargs['target']['targOpts'] = targOpts
         if inputs is not None:
             # what object type is input
             if isinstance(inputs, str):
@@ -726,7 +756,7 @@ class SASProcCommons:
                 totSet = legalSet | reqSet
             else:
                 totSet = legalSet
-            generalSet = set(['ODSGraphics', 'stmtpassthrough'])
+            generalSet = set(['ODSGraphics', 'stmtpassthrough', 'targOpts'])
             extraSet = set(stmt.keys() - generalSet).difference(totSet)  # find keys not in legal or required sets
             if extraSet:
                 for item in extraSet:

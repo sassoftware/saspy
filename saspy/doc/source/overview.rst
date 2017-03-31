@@ -1,6 +1,6 @@
-######################
+#################
 Overview of SASPy
-######################
+#################
 .. I used http://documentation-style-guide-sphinx.readthedocs.io/en/latest/style-guide.html
 
 
@@ -43,7 +43,7 @@ Jupyter magics
 Typically, programming with SASPy is performed with the Python functions
 that are provided by the package.  For example, to view the first few rows
 of a data set, you can use the ``head()`` method. However, if you are an
-experienced SAS programmer, there might be occassions in which you prefer
+experienced SAS programmer, there might be occasions in which you prefer
 to run SAS statements--such as running PROC PRINT to view the first few rows
 of a data set. 
 

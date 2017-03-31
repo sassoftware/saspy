@@ -23,7 +23,7 @@
 # connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interrupt
 # handling, as the local STDIO method can. An interrupt on this method can only terminate the SAS process;
 # you'll be prompted to terminate or wait for completion. The third method is HTTP, which can connect
-# to SAS Viya via the Compute Servie, a restful micro service in the Viya system.
+# to SAS Viya via the Compute Service, a restful micro service in the Viya system.
 #
 # Each of these connection methods (access methods) are handled by their own IO module. This main
 # module determines which IO module to use based upon the configuration chosen at runtime. More
@@ -37,7 +37,8 @@
 #
 
 import os
-# from pdb import set_trace as bp
+import re
+#from pdb import set_trace as bp
 import logging
 
 try:
@@ -827,7 +828,6 @@ class SASdata:
 
     def __getitem__(self, key):
 
-        #bp()
         print(key)
         print(type(key))
         #print(kwargs.keys())
@@ -867,6 +867,13 @@ class SASdata:
             ll = {'LOG': msg, 'LST': msg}
             return ll
 
+    def _checkLogForError(self, log):
+        lines = re.split(r'[\n]\s*', log)
+        for line in lines:
+            if line.startswith('ERROR'):
+                return (False, line)
+        return (True, '')
+
     def _returnPD(self, code, tablename, **kwargs):
         """
         private function to take a sas code normally to create a table, generate pandas data frame and cleanup.
@@ -879,7 +886,10 @@ class SASdata:
         libref = 'work'
         if 'libref' in kwargs:
             libref = kwargs['libref']
-        self.sas._io.submit(code)
+        ll = self.sas._io.submit(code)
+        check, errorMsg = self._checkLogForError(ll['LOG'])
+        if not check:
+            raise ValueError("Internal code execution failed: " + errorMsg)
         if isinstance(tablename, str):
             pd = self.sas._io.sasdata2dataframe(tablename, libref)
             self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, tablename))
@@ -1103,7 +1113,7 @@ class SASdata:
                 code += "class _character_;\nvar _numeric_;\n"
             code += "run;\n"
             i += 1
-        # split_code is used if singleOut is False it generates the needed SAS code to break up the kfold parition set.
+        # split_code is used if singleOut is False it generates the needed SAS code to break up the kfold partition set.
         split_code = ''
         if not singleOut:
             split_code += 'DATA '
@@ -1219,15 +1229,51 @@ class SASdata:
 
         :return: Pandas data frame
         """
-        res = self.results
-        self.results = 'Pandas'
-        m = self.means()
-        c = self.columnInfo()
-        self.results = res
-        p1 = m[['Variable', 'N', 'NMiss']]
-        p2 = c[['Variable', 'Type']]
-        info = pd.merge(p1, p2, on='Variable', how='outer')
-        return info
+        if self.results != 'Pandas':
+            print("The info method only works with Pandas results")
+            return None
+        info_code = """
+        data work._statsInfo ;
+            do rows=0 by 1 while( not last ) ;
+                set {0}.{1}{2} end=last;
+                array chrs _character_ ;
+                array nums _numeric_ ;
+                array ccounts(999) _temporary_ ;
+                array ncounts(999) _temporary_ ;
+                do over chrs;
+                    ccounts(_i_) + missing(chrs) ;
+                end;
+                do over nums;
+                    ncounts(_i_) + missing(nums);
+                end;   
+            end ;
+            length Variable $32 type $8. ;
+            Do over chrs;
+                Type = 'char';
+                Variable = vname(chrs) ;
+                N = rows;
+                Nmiss = ccounts(_i_) ;
+                Output ;
+            end ;
+            Do over nums;
+                Type = 'numeric';
+                Variable = vname(nums) ;
+                N = rows;
+                Nmiss = ncounts(_i_) ;
+                if variable ^= 'rows' then output;
+            end ;
+            stop;
+            keep Variable N NMISS Type ;
+        run;
+        """
+        if self.sas.nosub:
+            print(info_code.format(self.libref, self.table, self._dsopts()))
+            return None
+        info_pd = self._returnPD(info_code.format(self.libref, self.table, self._dsopts()), '_statsInfo')
+        info_pd = info_pd.iloc[:, :]
+        info_pd.index.name = None
+        info_pd.name = None
+        return info_pd
 
     def describe(self):
         """
@@ -1748,3 +1794,4 @@ if __name__ == "__main__":
     print(_getlsttxt())
 
     endsas()
+
