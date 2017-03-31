@@ -209,16 +209,22 @@ class SASProcCommons:
                 code += "input %s;\n" % (args['input'])
             elif isinstance(args['input'], dict):
                 try:
+                    # fix var type names for HPNEURAL
+                    nomstr = 'nominal'
+                    intstr = 'interval'
+                    if objtype.casefold() =='hpneural':
+                        nomstr = 'nom'
+                        intstr = 'int'
                     if 'interval' in args['input'].keys():
                         if isinstance(args['input']['interval'], str):
-                            code += "input %s /level=interval;\n" % args['input']['interval']
+                            code += "input %s /level=%s;\n" % (args['input']['interval'], intstr)
                         if isinstance(args['input']['interval'], list):
-                            code += "input %s /level=interval;\n" % " ".join(args['input']['interval'])
+                            code += "input %s /level=%s;\n" % (" ".join(args['input']['interval']), intstr )
                     if 'nominal' in args['input'].keys():
                         if isinstance(args['input']['nominal'], str):
-                            code += "input %s /level=nominal;\n" % args['input']['nominal']
+                            code += "input %s /level=%s;\n" % (args['input']['nominal'], nomstr)
                         if isinstance(args['input']['nominal'], list):
-                            code += "input %s /level=nominal;\n" % " ".join(args['input']['nominal'])
+                            code += "input %s /level=%s;\n" % (" ".join(args['input']['nominal']), nomstr)
                 except:
                     raise SyntaxError("Proper Keys not found for INPUT dictionary: %s" % args['input'].keys())
             elif isinstance(args['input'], list):
@@ -398,16 +404,22 @@ class SASProcCommons:
                     # check there there is only one target:
                     value_length = [len(v) for v in args['target'].values()]
                     if sum(value_length) == 1:
+                        # fix var type names for HPNEURAL
+                        nomstr = 'nominal'
+                        intstr = 'interval'
+                        if objtype.casefold() == 'hpneural':
+                            nomstr = 'nom'
+                            intstr = 'int'
                         if 'interval' in args['target'].keys():
                             if isinstance(args['target']['interval'], str):
-                                code += "target %s /level=interval;\n" % args['target']['interval']
+                                code += "target %s /level=%s;\n" % (args['target']['interval'], intstr)
                             if isinstance(args['target']['interval'], list):
-                                code += "target %s /level=interval;\n" % " ".join(args['target']['interval'])
+                                code += "target %s /level=%s;\n" % (" ".join(args['target']['interval']), intstr)
                         if 'nominal' in args['target'].keys():
                             if isinstance(args['target']['nominal'], str):
-                                code += "target %s /level=nominal;\n" % args['target']['nominal']
+                                code += "target %s /level=%s;\n" % (args['target']['nominal'], nomstr)
                             if isinstance(args['target']['nominal'], list):
-                                code += "target %s /level=nominal;\n" % " ".join(args['target']['nominal'])
+                                code += "target %s /level=%s;\n" % (" ".join(args['target']['nominal']), nomstr)
                     else:
                         raise SyntaxError
                 except SyntaxError:
