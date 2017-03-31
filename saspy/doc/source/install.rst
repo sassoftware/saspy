@@ -199,6 +199,7 @@ host -
           method.
 
 
+
 IOM
 ===
 The connection method opens many connectivity options. This method enables you to use
@@ -242,6 +243,30 @@ And then simply refer to the ``cp`` variable in the configuration definition:
 Also worth noting: these five JAR files are compatible with both Windows and Unix client systems.  
 
 
+The IOM access method now had support for getting the required user/password from an authinfo file in the users home directory
+instead of prompting for it. On linux, the file is named .authinfo and on windows, it's _authinfo. The format of the line in the authinfo file is
+as follows. The first value is the authkey value you specify for `authkey`. Next is the 'user' key followed by the value (the user id)
+and then 'password' key followed by its value (the users password). Note that there are permission rules for this file. On linux the file must
+have permissions of 600, only the user can read or write the file. On Windows, the file should be equally locked down to where only the owner
+can read and write it.  
+
+::
+
+    authkey user omr_user_id password omr_user_password
+
+So, for a Configuration Definition that specifies the following authkey:
+
+::
+
+    'authkey' : 'IOM_Prod_Grid1',
+
+The authinfo file in the home directory for user Bob, with a password of BobsPW1 would have a line in it as follows:
+ 
+::
+
+    IOM_Prod_Grid1 user Bob password BobsPW1
+
+
 Remote
 ~~~~~~
 A remote connection is defined as a connection to any workspace server on any SAS platform 
@@ -259,12 +284,14 @@ iomport -
     (Required) The port that IOM server is listening on for workspace connections.
 classpath - 
     (Required) The CLASSPATH to the IOM client JAR files and SASPy client jar.
+authkey -
+    The keyword that starts a line in the authinfo file contining user and or password for this connection.
 omruser - 
     (**Discouraged**)  The user ID is required but if this field is left blank,
-    the user is **prompted** for a user ID at runtime.
+    the user is **prompted** for a user ID at runtime, unless it's found in the authinfo file.
 omrpw  - 
     (**Strongly discouraged**) A password is required but if this field is left
-    blank, the user is **prompted** for a password at runtime.
+    blank, the user is **prompted** for a password at runtime, unless it's found in the authinfo file.
 encoding  -
     This is the Python encoding value that matches the SAS session encoding of 
     the IOM server to which you are connecting. The Python encoding values can be 
