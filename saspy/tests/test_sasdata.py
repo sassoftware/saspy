@@ -61,10 +61,8 @@ class TestSASdataObject(unittest.TestCase):
         cars = self.sas.sasdata('cars', libref='sashelp', results='pandas')
         self.sas.set_batch(True)
         ll = cars.tail()
-        self.assertTrue(ll.shape, (5,15), msg="wrong shape returned")
+        self.assertEqual(ll.shape, (5,15), msg="wrong shape returned")
         self.assertIsInstance(ll, pd.DataFrame, "Is return type correct")
-
-        self.assertIn(expected, retrieved, msg="cars.tail() result didn't contain row 1")
 
     def test_SASdata_contents(self):
         #test contents()
@@ -361,7 +359,7 @@ class TestSASdataObject(unittest.TestCase):
         tr.set_results('Pandas')
         res = tr.info()
         self.assertIsInstance(res, pd.DataFrame, msg= 'Data frame not returned')
-        self.assertTrue(res.shape, (5, 4), msg="wrong shape returned")
+        self.assertEqual(res.shape, (5, 4), msg="wrong shape returned")
 
     def test_info2(self):
         tr = self.sas.sasdata("class", "sashelp")
