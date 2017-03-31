@@ -42,19 +42,19 @@ import re
 import logging
 
 try:
-   import saspy.sascfg_personal as SAScfg
    import pandas as pd
+except ImportError:
+   pass
+
+try:
+   import saspy.sascfg_personal as SAScfg
 except ImportError:
    import saspy.sascfg as SAScfg
 
 try:
     import saspy.sasiostdio as sasiostdio
-    # import saspy.sasioiom   as sasioiom
-
-    running_on_win = False
-
 except:
-    running_on_win = True
+    pass
 
 import saspy.sasioiom   as sasioiom
 #import saspy.sasiohttp  as sasiohttp
@@ -228,7 +228,7 @@ class SASsession():
             return
 
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
-            if not running_on_win:
+            if os.name != 'nt':
                 self._io = sasiostdio.SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
             else:
                 print(
@@ -897,7 +897,8 @@ class SASdata:
             pd = dict()
             for t in tablename:
                 # strip leading '_' from names and capitalize for dictionary labels
-                pd[t.replace('_', '').capitalize()] = self.sas._io.sasdata2dataframe(t, libref)
+                if self.sas.exist(t, libref):
+                   pd[t.replace('_', '').capitalize()] = self.sas._io.sasdata2dataframe(t, libref)
                 self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, t))
         else:
             raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))
