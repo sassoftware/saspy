@@ -404,9 +404,15 @@ class SASProcCommons:
                     # check there there is only one target:
                     length=0
                     try:
-                        length += len([args['target']['nominal']])
+                        length += len([args['target']['nominal'], args['target']['interval'] ])
                     except KeyError:
-                        length += len([args['target']['interval']])
+                        try:
+                            length += len([args['target']['nominal']])
+                        except KeyError:
+                            try:
+                                length += len([args['target']['interval']])
+                            except KeyError:
+                                raise
                     if length  == 1:
                         # fix var type names for HPNEURAL
                         nomstr = 'nominal'
