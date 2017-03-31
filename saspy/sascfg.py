@@ -32,7 +32,7 @@
 #SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http']
 #
 
-SAS_config_names=['winlocal']
+SAS_config_names=['default']
 
 # Configuration options for pysas - python Dict
 # valid key are:
@@ -129,7 +129,7 @@ cpW  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__9
 cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
 cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
 cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
-cpW += ";C:\\Public\\github\\fork\\saspy\\saspy\\java\\saspyiom.jar"
+cpW += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
 
 winlocal = {'java'      : 'java',
             'encoding'  : 'windows-1252',
