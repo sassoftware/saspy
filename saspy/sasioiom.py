@@ -56,6 +56,7 @@ class SASconfigIOM:
       self.omrpw     = cfg.get('omrpw', '')
       self.encoding  = cfg.get('encoding', '')
       self.classpath = cfg.get('classpath', '')
+      self.authkey   = cfg.get('authkey', '')
 
 
       # GET Config options
@@ -108,6 +109,13 @@ class SASconfigIOM:
             print("Parameter 'classpath' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.classpath = incp   
+
+      inak = kwargs.get('authkey', '')
+      if len(inak) > 0:
+         if lock and len(self.authkey):
+            print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.authkey = inak   
 
       inencoding = kwargs.get('encoding', '')
       if len(inencoding) > 0:
@@ -207,8 +215,31 @@ class SASsessionIOM():
       self.sockerr.listen(0)
 
       if not zero:
-         while len(self.sascfg.omruser) == 0:
-            self.sascfg.omruser = self.sascfg._prompt("Please enter the IOM user id: ")
+         user  = self.sascfg.omruser
+         pw    = self.sascfg.omrpw
+         found = False
+         if self.sascfg.authkey:
+            if os.name == 'nt': 
+               pwf = os.path.expanduser('~')+os.sep+'_authinfo'
+            else:
+               pwf = os.path.expanduser('~')+os.sep+'.authinfo'
+            try:
+               fid = open(pwf, mode='r')
+               for line in fid:
+                  if line.startswith(self.sascfg.authkey): 
+                     user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                     pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                     found = True
+               fid.close()
+            except OSError as e:
+               print('Error trying to read authinfo file:'+pwf+'\n'+e)
+               pass
+
+            if not found:
+               print('Did not find key '+self.sascfg.authkey+' in authinfo file:'+pwf+'\n')
+
+         while len(user) == 0:
+            user = self.sascfg._prompt("Please enter the IOM user id: ")
 
       pgm    = self.sascfg.java
       parms  = [pgm]
@@ -220,7 +251,7 @@ class SASsessionIOM():
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
       if not zero:
          parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
-         parms += ["-user", self.sascfg.omruser]     
+         parms += ["-user", user]     
       else:
          parms += ["-zero"]     
       parms += ['']
@@ -337,7 +368,6 @@ class SASsessionIOM():
       self.stderr[0].setblocking(False)
 
       if not zero:
-         pw = self.sascfg.omrpw
          while len(pw) == 0:
             pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
          pw += '\n'
@@ -1137,7 +1167,4 @@ sas_datetime_fmts = (
 'NLDATMYW','NLDATMZ','NLDDFDT','NLDDFDT','NORDFDT','NORDFDT','POLDFDT','POLDFDT','PTGDFDT','PTGDFDT','RUSDFDT','RUSDFDT',
 'SLODFDT','SLODFDT','SVEDFDT','SVEDFDT','TWMDY','YMDDTTM',
 )
-
-
-
 
