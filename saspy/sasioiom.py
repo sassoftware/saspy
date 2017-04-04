@@ -232,7 +232,9 @@ class SASsessionIOM():
                      found = True
                fid.close()
             except OSError as e:
-               print('Error trying to read authinfo file:'+pwf+'\n'+e)
+               print('Error trying to read authinfo file:'+pwf+'\n'+str(e))
+               pass
+            except:
                pass
 
             if not found:
