@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Contributing new methods &mdash; saspy 2.1.0 documentation</title>
+  <title>Contributing new methods &mdash; saspy 2.1.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.2 documentation" href="index.html"/>
         <link rel="next" title="Troubleshooting" href="troubleshooting.html"/>
         <link rel="prev" title="Advanced topics" href="advanced-topics.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.0
+                2.1.2
               </div>
             
           
@@ -169,46 +169,46 @@
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <p>SASPy is broken into product areas that largely follow the SAS product areas.
-There are many many procedures, which translate to object methods, that are not currently included in the package.
-The aim of this document is to outline the needed steps to add additional methods (procedures) to SASPy.</p>
-<p>A copy of the process is included inline of each product file (sasstat.py, sasets.py, sasqc.py and so on)
-My hope is that a new contribution should be under 30 minutes the first time and under 15 minutes for subsuquent methods</p>
+There are many many procedures, which translate to object methods, that are not
+currently included in the package. The aim of this document is to outline the
+steps you can take to add additional methods (procedures) to SASPy.</p>
+<p>A copy of the process is included inline of each product file (sasstat.py,
+sasets.py, sasqc.py, and so on). The project maintainers expect that a new
+contribution should take less than 30 minutes the first time and less than 15
+minutes for subsequent methods.</p>
 <p>Your contribution and feedback is greatly appreciated!</p>
 <div class="section" id="process">
 <h3>Process<a class="headerlink" href="#process" title="Permalink to this headline">¶</a></h3>
-<p>To add a new procedure do the following:</p>
+<p>To add a new procedure follow these steps:</p>
 <ol class="arabic">
-<li><p class="first">Create a new method for the procedure</p>
+<li><p class="first">Create a new method for the procedure.</p>
 </li>
-<li><p class="first">Create the set of required statements. If there are no required statements then create an empty set {}</p>
+<li><p class="first">Create the set of required statements. If there are no required statements
+then create an empty set {}.</p>
 </li>
-<li><p class="first">Create the legal set of statements. This can often be obtained from the documentation of the procedure. &#8216;procopts&#8217; should always be included in the legal set to allow flexibility in calling the procedure.</p>
+<li><p class="first">Create the legal set of statements. This can often be obtained from the
+documentation for the procedure. procopts should always be included in the
+legal set to permit flexibility in calling the procedure.</p>
 </li>
 <li><p class="first">Create the doc string with the following parts at a minimum:</p>
 <blockquote>
 <div><ul class="simple">
-<li>Procedure Name</li>
+<li>Procedure name</li>
 <li>Required set</li>
 <li>Legal set</li>
 <li>Link to the procedure documentation</li>
 </ul>
 </div></blockquote>
 </li>
-<li><p class="first">Add the return call for the method using an existing procedure as an example</p>
+<li><p class="first">Add the return call for the method using an existing procedure as an example.</p>
 </li>
-<li><p class="first">Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py</p>
+<li><p class="first">Verify that all the statements in the required and legal sets are listed in
+_makeProcCallMacro method of sasproccommons.py.</p>
 </li>
-<li><p class="first">Write at least one test to exercise the procedures and include it in the appropriate testing file</p>
+<li><p class="first">Write at least one test to exercise the procedures and include it in the
+appropriate testing file.</p>
 </li>
 </ol>
-</div>
-<div class="section" id="example">
-<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
-<p>Following the procedure above I will add the adaptivereg procedure.
-I assume you have forked the SASPy repository and it is in your home directory</p>
-</div>
-<div class="section" id="faq">
-<h3>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h3>
 </div>
 </div>
 </div>
@@ -257,7 +257,7 @@ I assume you have forked the SASPy repository and it is in your home directory</
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.0',
+            VERSION:'2.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -267,7 +267,7 @@ I assume you have forked the SASPy repository and it is in your home directory</
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

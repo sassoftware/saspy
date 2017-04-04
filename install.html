@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 2.1.0 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.1.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.2 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview of SASPy" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.0
+                2.1.2
               </div>
             
           
@@ -179,9 +179,9 @@
            <div itemprop="articleBody">
             
   <div class="section" id="installation-and-configuration">
-<h1>Installation and configuration<a class="headerlink" href="#installation-and-configuration" title="Permalink to this headline">Â¶</a></h1>
+<h1>Installation and configuration<a class="headerlink" href="#installation-and-configuration" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="install-saspy">
-<h2>Install SASPy<a class="headerlink" href="#install-saspy" title="Permalink to this headline">Â¶</a></h2>
+<h2>Install SASPy<a class="headerlink" href="#install-saspy" title="Permalink to this headline">¶</a></h2>
 <p>The SASPy package installs just like any other Python package.
 It is a pure Python package and works with Python 3.x
 installations.  To install the latest version using <cite>pip</cite>, you execute the following:</p>
@@ -201,7 +201,7 @@ instructions in the next section.</p>
 </ul>
 </div>
 <div class="section" id="configure-saspy">
-<h2>Configure SASPy<a class="headerlink" href="#configure-saspy" title="Permalink to this headline">Â¶</a></h2>
+<h2>Configure SASPy<a class="headerlink" href="#configure-saspy" title="Permalink to this headline">¶</a></h2>
 <p>SASPy can connect and start different kinds of SAS sessions. It can connect to SAS
 on Unix, Mainframe, and Windows. It can connect to a local SAS session or remote session.
 Because of the wide range of connection types, there are a number of different access methods
@@ -274,7 +274,7 @@ that Python is using to get the SASPy modules.</p>
 </pre></div>
 </div>
 <div class="section" id="sascfg-py-details">
-<h3>sascfg.py details<a class="headerlink" href="#sascfg-py-details" title="Permalink to this headline">Â¶</a></h3>
+<h3>sascfg.py details<a class="headerlink" href="#sascfg-py-details" title="Permalink to this headline">¶</a></h3>
 <p>There are three main parts to this configuration file.</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -294,7 +294,7 @@ definitions in the file but not make them available by simply excluding the name
 the list.</p>
 </div>
 <div class="section" id="stdio">
-<h3>STDIO<a class="headerlink" href="#stdio" title="Permalink to this headline">Â¶</a></h3>
+<h3>STDIO<a class="headerlink" href="#stdio" title="Permalink to this headline">¶</a></h3>
 <p>This is the original connection method for SASPy. This works with Unix only,
 because SAS on Windows platforms does not support line-mode style connections
 (through stdin, stdout, stderr). This connection method is for a local
@@ -328,7 +328,7 @@ keys in the configuration definition.</p>
 </div>
 </div>
 <div class="section" id="stdio-over-ssh">
-<h3>STDIO over SSH<a class="headerlink" href="#stdio-over-ssh" title="Permalink to this headline">Â¶</a></h3>
+<h3>STDIO over SSH<a class="headerlink" href="#stdio-over-ssh" title="Permalink to this headline">¶</a></h3>
 <p>This is the remote version of the original connection method. This also works
 with Unix only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
@@ -356,7 +356,7 @@ method.</p>
 </div>
 </div>
 <div class="section" id="iom">
-<h3>IOM<a class="headerlink" href="#iom" title="Permalink to this headline">Â¶</a></h3>
+<h3>IOM<a class="headerlink" href="#iom" title="Permalink to this headline">¶</a></h3>
 <p>The connection method opens many connectivity options. This method enables you to use
 <a class="reference external" href="https://www.sas.com/en_us/software/foundation/grid-manager.html">SAS Grid Manager</a>
 to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
@@ -408,7 +408,7 @@ can read and write it.</p>
 </pre></div>
 </div>
 <div class="section" id="remote">
-<h4>Remote<a class="headerlink" href="#remote" title="Permalink to this headline">Â¶</a></h4>
+<h4>Remote<a class="headerlink" href="#remote" title="Permalink to this headline">¶</a></h4>
 <p>A remote connection is defined as a connection to any workspace server on any SAS platform
 from either a Unix or Windows client.</p>
 <p>The following keys are available for the configuration definition dictionary:</p>
@@ -489,7 +489,7 @@ windows-1252, respectively.</dd>
 </div>
 </div>
 <div class="section" id="local">
-<h4>Local<a class="headerlink" href="#local" title="Permalink to this headline">Â¶</a></h4>
+<h4>Local<a class="headerlink" href="#local" title="Permalink to this headline">¶</a></h4>
 <p>A local connection is defined as a connection to SAS that is running on the same
 Windows machine. You only need the following configuration definition keys. (Do not
 specify any of the others).</p>
@@ -589,7 +589,7 @@ session instead of remote IOM (it is a different connection type).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.0',
+            VERSION:'2.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -599,7 +599,7 @@ session instead of remote IOM (it is a different connection type).</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

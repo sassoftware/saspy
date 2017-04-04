@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 2.1.0 documentation</title>
+  <title>API Reference &mdash; saspy 2.1.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.2 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.0
+                2.1.2
               </div>
             
           
@@ -184,43 +184,101 @@
 <h2>SAS Session Object<a class="headerlink" href="#sas-session-object" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="saspy.SASsession">
-<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASsession</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASsession<a class="headerlink" href="#saspy.SASsession" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASsession</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASsession<a class="headerlink" href="#saspy.SASsession" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p><strong>Overview</strong></p>
 <p>The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-cfgname - value in SAS_config_names List of the sascfg.py file
-kernel  - None - internal use when running the SAS_kernel notebook
-results - Type of tabular results to return. default is &#8216;Pandas&#8217;, other options are &#8216;HTML or &#8216;TEXT&#8217;</p>
+Most of these parameters will be configured in the sascfg.py configuration file.</p>
+<p>Common parms for all access methods are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cfgname</strong> &#8211; value in SAS_config_names List of the sascfg.py file</li>
+<li><strong>kernel</strong> &#8211; None - internal use when running the SAS_kernel notebook</li>
+<li><strong>results</strong> &#8211; Type of tabular results to return. default is &#8216;Pandas&#8217;, other options are &#8216;HTML or &#8216;TEXT&#8217;</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">&#8216;SASsession&#8217;</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">&#8216;SASsession&#8217;</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>And each access method has its own set of parameters.</p>
 <p><strong>STDIO</strong></p>
-<p>saspath  - overrides saspath Dict entry of cfgname in sascfg.py file
-options  - overrides options Dict entry of cfgname in sascfg.py file
-encoding  - This is the python encoding value that matches the SAS session encoding</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>saspath</strong> &#8211; overrides saspath Dict entry of cfgname in sascfg.py file</li>
+<li><strong>options</strong> &#8211; overrides options Dict entry of cfgname in sascfg.py file</li>
+<li><strong>encoding</strong> &#8211; This is the python encoding value that matches the SAS session encoding</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <p><strong>STDIO over SSH</strong></p>
-<p>and for running STDIO over passwordless ssh
-ssh     - full path of the ssh command; /usr/bin/ssh for instance
-host    - host name of the remote machine</p>
+<p>and for running STDIO over passwordless ssh, add these required parameters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ssh</strong> &#8211; full path of the ssh command; /usr/bin/ssh for instance</li>
+<li><strong>host</strong> &#8211; host name of the remote machine</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <p><strong>IOM</strong></p>
-<p>and for the IOM IO module to connect to SAS9 via Java IOM
-saspath   - for local Windows connection only] path to SAS executable (sas.exe) i.e.: C:Program FilesSASHomeSASFoundation9.4sas.exe
-java      - the path to the java executable to use
-iomhost   - for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to
-iomport   - for remote IOM case, not local Windows] the port IOM is listening on
-omruser   - user id for IOM access
-omrpw     - pw for user for IOM access
-encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
-classpath - classpath to IOM client jars and saspyiom client jar.</p>
+<p>and for the IOM IO module to connect to SAS9 via Java IOM</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>java</strong> &#8211; the path to the java executable to use</li>
+<li><strong>iomhost</strong> &#8211; for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to</li>
+<li><strong>iomport</strong> &#8211; for remote IOM case, not local Windows] the port IOM is listening on</li>
+<li><strong>omruser</strong> &#8211; user id for remote IOM access</li>
+<li><strong>omrpw</strong> &#8211; pw for user for remote IOM access</li>
+<li><strong>encoding</strong> &#8211; This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to</li>
+<li><strong>classpath</strong> &#8211; classpath to IOM client jars and saspyiom client jar.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <p><strong>Compute Service</strong></p>
-<p>and for the HTTP IO module to connect to SAS Viya
-ip        - host address
-port      - port; the code Defaults this to 80 (the Compute Services default port)
-context   - context name defined on the compute service
-options   - SAS options to include in the start up command line
-user      - user name to authenticate with
-pw        - password to authenticate with
-encoding  - This is the python encoding value that matches the SAS session encoding</p>
+<p>and for the HTTP IO module to connect to SAS Viya</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ip</strong> &#8211; host address</li>
+<li><strong>port</strong> &#8211; port; the code Defaults this to 80 (the Compute Services default port)</li>
+<li><strong>context</strong> &#8211; context name defined on the compute service</li>
+<li><strong>options</strong> &#8211; SAS options to include in the start up command line</li>
+<li><strong>user</strong> &#8211; user name to authenticate with</li>
+<li><strong>pw</strong> &#8211; password to authenticate with</li>
+<li><strong>encoding</strong> &#8211; This is the python encoding value that matches the SAS session encoding</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="saspy.SASsession.dataframe2sasdata">
-<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -243,7 +301,7 @@ encoding  - This is the python encoding value that matches the SAS session encod
 
 <dl class="method">
 <dt id="saspy.SASsession.datasets">
-<code class="descname">datasets</code><span class="sig-paren">(</span><em>libref: str = ''</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASsession.datasets" title="Permalink to this definition">¶</a></dt>
+<code class="descname">datasets</code><span class="sig-paren">(</span><em>libref: str = ''</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.datasets" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is used to query a libref. The results show information about the libref including members.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -259,7 +317,7 @@ encoding  - This is the python encoding value that matches the SAS session encod
 
 <dl class="method">
 <dt id="saspy.SASsession.df2sd">
-<code class="descname">df2sd</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
+<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;dataframe2sasdata&#8217;. Why type all that?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -282,7 +340,7 @@ encoding  - This is the python encoding value that matches the SAS session encod
 
 <dl class="method">
 <dt id="saspy.SASsession.exist">
-<code class="descname">exist</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em><span class="sig-paren">)</span> &rarr; bool<a class="headerlink" href="#saspy.SASsession.exist" title="Permalink to this definition">¶</a></dt>
+<code class="descname">exist</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#saspy.SASsession.exist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does the SAS data set currently exist</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -306,7 +364,7 @@ encoding  - This is the python encoding value that matches the SAS session encod
 
 <dl class="method">
 <dt id="saspy.SASsession.read_csv">
-<code class="descname">read_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str = '_csv'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.read_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descname">read_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str = '_csv'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.read_csv" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -328,7 +386,7 @@ encoding  - This is the python encoding value that matches the SAS session encod
 
 <dl class="method">
 <dt id="saspy.SASsession.sasdata">
-<code class="descname">sasdata</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>dsopts: dict = {}</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.sasdata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sasdata</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>dsopts: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to define an existing SAS dataset so that it can be accessed via SASPy</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -367,7 +425,7 @@ encoding  - This is the python encoding value that matches the SAS session encod
 
 <dl class="method">
 <dt id="saspy.SASsession.sasdata2dataframe">
-<code class="descname">sasdata2dataframe</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.sasdata2dataframe" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sasdata2dataframe</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sasdata2dataframe" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
 SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -407,7 +465,7 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 
 <dl class="method">
 <dt id="saspy.SASsession.sasets">
-<code class="descname">sasets</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; saspy.sasets.SASets<a class="headerlink" href="#saspy.SASsession.sasets" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sasets</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; saspy.sasets.SASets<a class="headerlink" href="#saspy.SASsession.sasets" title="Permalink to this definition">¶</a></dt>
 <dd><p>This methods creates a SASets object which you can use to run various analytics.
 See the sasets.py module.
 :return: sasets object</p>
@@ -415,7 +473,7 @@ See the sasets.py module.
 
 <dl class="method">
 <dt id="saspy.SASsession.saslib">
-<code class="descname">saslib</code><span class="sig-paren">(</span><em>libref: str</em>, <em>engine: str = ' '</em>, <em>path: str = ''</em>, <em>options: str = ' '</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASsession.saslib" title="Permalink to this definition">¶</a></dt>
+<code class="descname">saslib</code><span class="sig-paren">(</span><em>libref: str</em>, <em>engine: str = ' '</em>, <em>path: str = ''</em>, <em>options: str = ' '</em>, <em>prompt: dict = []</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.saslib" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -437,7 +495,7 @@ See the sasets.py module.
 
 <dl class="method">
 <dt id="saspy.SASsession.saslog">
-<code class="descname">saslog</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASsession.saslog" title="Permalink to this definition">¶</a></dt>
+<code class="descname">saslog</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.saslog" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is used to get the current, full contents of the SASLOG</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -453,7 +511,7 @@ See the sasets.py module.
 
 <dl class="method">
 <dt id="saspy.SASsession.sasml">
-<code class="descname">sasml</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; saspy.sasml.SASml<a class="headerlink" href="#saspy.SASsession.sasml" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sasml</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; saspy.sasml.SASml<a class="headerlink" href="#saspy.SASsession.sasml" title="Permalink to this definition">¶</a></dt>
 <dd><p>This methods creates a SASML object which you can use to run various analytics. See the sasml.py module.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -467,7 +525,7 @@ See the sasets.py module.
 
 <dl class="method">
 <dt id="saspy.SASsession.sasqc">
-<code class="descname">sasqc</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; saspy.sasqc.SASqc<a class="headerlink" href="#saspy.SASsession.sasqc" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sasqc</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; saspy.sasqc.SASqc<a class="headerlink" href="#saspy.SASsession.sasqc" title="Permalink to this definition">¶</a></dt>
 <dd><p>This methods creates a SASqc object which you can use to run various analytics. See the sasqc.py module.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -481,7 +539,7 @@ See the sasets.py module.
 
 <dl class="method">
 <dt id="saspy.SASsession.sasstat">
-<code class="descname">sasstat</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; saspy.sasstat.SASstat<a class="headerlink" href="#saspy.SASsession.sasstat" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sasstat</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; saspy.sasstat.SASstat<a class="headerlink" href="#saspy.SASsession.sasstat" title="Permalink to this definition">¶</a></dt>
 <dd><p>This methods creates a SASstat object which you can use to run various analytics.
 See the sasstat.py module.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -496,7 +554,7 @@ See the sasstat.py module.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.sasutil">
-<code class="descname">sasutil</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; saspy.sasutil.SASutil<a class="headerlink" href="#saspy.SASsession.sasutil" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sasutil</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; saspy.sasutil.SASutil<a class="headerlink" href="#saspy.SASsession.sasutil" title="Permalink to this definition">¶</a></dt>
 <dd><p>This methods creates a SASutil object which you can use to run various analytics.
 See the sasutil.py module.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -511,7 +569,7 @@ See the sasutil.py module.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.sd2df">
-<code class="descname">sd2df</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.sd2df" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sd2df</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;sasdata2dataframe&#8217;. Why type all that?
 SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -551,7 +609,7 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 
 <dl class="method">
 <dt id="saspy.SASsession.set_batch">
-<code class="descname">set_batch</code><span class="sig-paren">(</span><em>batch: bool</em><span class="sig-paren">)</span> &rarr; bool<a class="headerlink" href="#saspy.SASsession.set_batch" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_batch</code><span class="sig-paren">(</span><em>batch: bool</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#saspy.SASsession.set_batch" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method sets the batch attribute for the SASsession object; it stays in effect until changed.
 For methods that just display results like SASdata object methods (head, tail, hist, series, etc.)
 and SASresult object results, you can set &#8216;batch&#8217; to true to get the results back directly so you
@@ -577,7 +635,7 @@ but you can run this way too; get the objects display them yourself and/or write
 
 <dl class="method">
 <dt id="saspy.SASsession.set_results">
-<code class="descname">set_results</code><span class="sig-paren">(</span><em>results: str</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASsession.set_results" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_results</code><span class="sig-paren">(</span><em>results: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.set_results" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method set the results attribute for the SASsession object; it stays in effect till changed</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -595,7 +653,7 @@ but you can run this way too; get the objects display them yourself and/or write
 
 <dl class="method">
 <dt id="saspy.SASsession.submit">
-<code class="descname">submit</code><span class="sig-paren">(</span><em>code: str</em>, <em>results: str = ''</em>, <em>prompt: dict = []</em><span class="sig-paren">)</span> &rarr; dict<a class="headerlink" href="#saspy.SASsession.submit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">submit</code><span class="sig-paren">(</span><em>code: str</em>, <em>results: str = ''</em>, <em>prompt: dict = []</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#saspy.SASsession.submit" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.</p>
 <ul>
 <li><p class="first">code    - the SAS statements you want to execute</p>
@@ -642,7 +700,7 @@ HTML(results[&#8216;LST&#8217;])</dd>
 
 <dl class="method">
 <dt id="saspy.SASsession.write_csv">
-<code class="descname">write_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASsession.write_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.write_csv" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -697,24 +755,25 @@ TODO: add code example of build, score, and then assess</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>target</strong> &#8211; string that represents the target variable in the data</li>
-<li><strong>prediction</strong> &#8211; string that represents the numeric prediction column in the data. For nominal targets this should</li>
+<li><strong>prediction</strong> &#8211; string that represents the numeric prediction column in the data. For nominal targets this should a probability between (0,1).</li>
+<li><strong>nominal</strong> &#8211; boolean to indicate if the Target Variable is nominal because the assessment measures are different.</li>
+<li><strong>event</strong> &#8211; string which indicates which value of the nominal target variable is the event vs non-event</li>
+<li><strong>kwargs</strong> &#8211; </li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SAS result object</p>
 </td>
 </tr>
 </tbody>
 </table>
-<p>a probability between (0,1).
-:param nominal: boolean to indicate if the Target Variable is nominal because the assessment measures are different.
-:param event: string of either DESC or ASC which indicates which value of the target variable is the event vs non-event
-:param kwargs:
-:return: SAS result object</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="saspy.SASdata.bar">
-<code class="descname">bar</code><span class="sig-paren">(</span><em>var: str</em>, <em>title: str = ''</em>, <em>label: str = ''</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.bar" title="Permalink to this definition">¶</a></dt>
+<code class="descname">bar</code><span class="sig-paren">(</span><em>var: str</em>, <em>title: str = ''</em>, <em>label: str = ''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#saspy.SASdata.bar" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method requires a character column (use the contents method to see column types)
 and generates a bar chart.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -787,7 +846,7 @@ and generates a bar chart.</p>
 
 <dl class="method">
 <dt id="saspy.SASdata.heatmap">
-<code class="descname">heatmap</code><span class="sig-paren">(</span><em>x: str</em>, <em>y: str</em>, <em>options: str = ''</em>, <em>title: str = ''</em>, <em>label: str = ''</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.heatmap" title="Permalink to this definition">¶</a></dt>
+<code class="descname">heatmap</code><span class="sig-paren">(</span><em>x: str</em>, <em>y: str</em>, <em>options: str = ''</em>, <em>title: str = ''</em>, <em>label: str = ''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#saspy.SASdata.heatmap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Documentation link: <a class="reference external" href="http://support.sas.com/documentation/cdl/en/grstatproc/67909/HTML/default/viewer.htm#n0w12m4cn1j5c6n12ak64u1rys4w.htm">http://support.sas.com/documentation/cdl/en/grstatproc/67909/HTML/default/viewer.htm#n0w12m4cn1j5c6n12ak64u1rys4w.htm</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -811,7 +870,7 @@ and generates a bar chart.</p>
 
 <dl class="method">
 <dt id="saspy.SASdata.hist">
-<code class="descname">hist</code><span class="sig-paren">(</span><em>var: str</em>, <em>title: str = ''</em>, <em>label: str = ''</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.hist" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hist</code><span class="sig-paren">(</span><em>var: str</em>, <em>title: str = ''</em>, <em>label: str = ''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#saspy.SASdata.hist" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method requires a numeric column (use the contents method to see column types) and generates a histogram.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -861,7 +920,7 @@ and generates a bar chart.</p>
 
 <dl class="method">
 <dt id="saspy.SASdata.partition">
-<code class="descname">partition</code><span class="sig-paren">(</span><em>var: str = ''</em>, <em>fraction: float = 0.7</em>, <em>seed: int = 9878</em>, <em>kfold: int = 1</em>, <em>out: typing.Union[saspy.sasbase.SASdata</em>, <em>NoneType] = None</em>, <em>singleOut: bool = True</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.partition" title="Permalink to this definition">¶</a></dt>
+<code class="descname">partition</code><span class="sig-paren">(</span><em>var: str = ''</em>, <em>fraction: float = 0.7</em>, <em>seed: int = 9878</em>, <em>kfold: int = 1</em>, <em>out: typing.Union[saspy.sasbase.SASdata</em>, <em>NoneType] = None</em>, <em>singleOut: bool = True</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#saspy.SASdata.partition" title="Permalink to this definition">¶</a></dt>
 <dd><p>Partition a sas data object using SRS sampling or if a variable is specified then
 stratifying with respect to that variable</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -887,7 +946,7 @@ stratifying with respect to that variable</p>
 
 <dl class="method">
 <dt id="saspy.SASdata.score">
-<code class="descname">score</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.score" title="Permalink to this definition">¶</a></dt>
+<code class="descname">score</code><span class="sig-paren">(</span><em>file: str = ''</em>, <em>code: str = ''</em>, <em>out: typing.Union[saspy.sasbase.SASdata</em>, <em>NoneType] = None</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASdata.score" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is meant to update a SAS Data object with a model score file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -909,7 +968,7 @@ stratifying with respect to that variable</p>
 
 <dl class="method">
 <dt id="saspy.SASdata.series">
-<code class="descname">series</code><span class="sig-paren">(</span><em>x: str</em>, <em>y: list</em>, <em>title: str = ''</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.series" title="Permalink to this definition">¶</a></dt>
+<code class="descname">series</code><span class="sig-paren">(</span><em>x: str</em>, <em>y: list</em>, <em>title: str = ''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#saspy.SASdata.series" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method plots a series of x,y coordinates. You can provide a list of y columns for multiple line plots.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -948,7 +1007,7 @@ results - set the default result type for this SASdata object. &#8216;Pandas&#82
 
 <dl class="method">
 <dt id="saspy.SASdata.sort">
-<code class="descname">sort</code><span class="sig-paren">(</span><em>by: str</em>, <em>out: object = ''</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASdata.sort" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sort</code><span class="sig-paren">(</span><em>by: str</em>, <em>out: object = ''</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASdata.sort" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sort the SAS Data Set</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -998,7 +1057,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 
 <dl class="method">
 <dt id="saspy.SASdata.to_csv">
-<code class="descname">to_csv</code><span class="sig-paren">(</span><em>file: str</em><span class="sig-paren">)</span> &rarr; str<a class="headerlink" href="#saspy.SASdata.to_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_csv</code><span class="sig-paren">(</span><em>file: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASdata.to_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method will export a SAS Data Set to a file in CSV format.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1014,7 +1073,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 
 <dl class="method">
 <dt id="saspy.SASdata.to_df">
-<code class="descname">to_df</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.to_df" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_df</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASdata.to_df" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export this SAS Data Set to a Pandas Data Frame</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1030,7 +1089,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 
 <dl class="method">
 <dt id="saspy.SASdata.to_frame">
-<code class="descname">to_frame</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.to_frame" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_frame</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASdata.to_frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export this SAS Data Set to a Pandas Data Frame</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1040,13 +1099,15 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Pandas data frame</td>
 </tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">&#8216;pd.DataFrame&#8217;</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
 <dt id="saspy.SASdata.top">
-<code class="descname">top</code><span class="sig-paren">(</span><em>var: str</em>, <em>n: int = 10</em>, <em>order: str = 'freq'</em>, <em>title: str = ''</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASdata.top" title="Permalink to this definition">¶</a></dt>
+<code class="descname">top</code><span class="sig-paren">(</span><em>var: str</em>, <em>n: int = 10</em>, <em>order: str = 'freq'</em>, <em>title: str = ''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#saspy.SASdata.top" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the most commonly occuring items (levels)</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1069,7 +1130,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 
 <dl class="method">
 <dt id="saspy.SASdata.where">
-<code class="descname">where</code><span class="sig-paren">(</span><em>where: str</em><span class="sig-paren">)</span> &rarr; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASdata.where" title="Permalink to this definition">¶</a></dt>
+<code class="descname">where</code><span class="sig-paren">(</span><em>where: str</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASdata.where" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method returns a clone of the SASdata object, with the where attribute set. The original SASdata object is not affected.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1148,7 +1209,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 </ol>
 <dl class="method">
 <dt id="saspy.SASutil.hpbin">
-<code class="descname">hpbin</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASutil.hpbin" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hpbin</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASutil.hpbin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPBIN procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'cls',</span> <span class="pre">'code',</span> <span class="pre">'grow',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'out',</span> <span class="pre">'partition',</span> <span class="pre">'performance',</span> <span class="pre">'prune',</span> <span class="pre">'rules'}</span></code></p>
@@ -1170,7 +1231,7 @@ Documentation link:
 
 <dl class="method">
 <dt id="saspy.SASutil.hpimpute">
-<code class="descname">hpimpute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASutil.hpimpute" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hpimpute</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASutil.hpimpute" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPIMPUTE procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'cls',</span> <span class="pre">'code',</span> <span class="pre">'grow',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'out'</span>
@@ -1193,7 +1254,7 @@ Documentation link:
 
 <dl class="method">
 <dt id="saspy.SASutil.hpsample">
-<code class="descname">hpsample</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASutil.hpsample" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hpsample</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASutil.hpsample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPSAMPLE procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'cls',</span> <span class="pre">'code',</span> <span class="pre">'grow',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'out'</span>
@@ -1252,7 +1313,7 @@ Documentation link:
 </ol>
 <dl class="method">
 <dt id="saspy.SASml.cluster">
-<code class="descname">cluster</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASml.cluster" title="Permalink to this definition">¶</a></dt>
+<code class="descname">cluster</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.cluster" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPCLUS procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'input'}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'freq',</span> <span class="pre">'input',</span> <span class="pre">'id',</span> <span class="pre">'score'}</span></code></p>
@@ -1272,7 +1333,7 @@ Documentation link:
 
 <dl class="method">
 <dt id="saspy.SASml.forest">
-<code class="descname">forest</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASml.forest" title="Permalink to this definition">¶</a></dt>
+<code class="descname">forest</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.forest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPFOREST procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'input',</span> <span class="pre">'target'}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'freq',</span> <span class="pre">'input',</span> <span class="pre">'id',</span>
@@ -1293,7 +1354,7 @@ Documentation link:
 
 <dl class="method">
 <dt id="saspy.SASml.hp4score">
-<code class="descname">hp4score</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASml.hp4score" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hp4score</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.hp4score" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HP4SCORE procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'id',</span> <span class="pre">'importance',</span> <span class="pre">'performance',</span> <span class="pre">'score',</span> <span class="pre">'procopts'}</span></code></p>
@@ -1313,7 +1374,7 @@ Documentation link:
 
 <dl class="method">
 <dt id="saspy.SASml.hpbnet">
-<code class="descname">hpbnet</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASml.hpbnet" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hpbnet</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.hpbnet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPBNET procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'input',</span> <span class="pre">'target'}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'id',</span> <span class="pre">'code',</span> <span class="pre">'freq',</span> <span class="pre">'partition',</span> <span class="pre">'input',</span> <span class="pre">'performance',</span> <span class="pre">'target',</span> <span class="pre">'output',</span> <span class="pre">'procopts'}</span></code></p>
@@ -1333,7 +1394,7 @@ Documentation link:
 
 <dl class="method">
 <dt id="saspy.SASml.neural">
-<code class="descname">neural</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASml.neural" title="Permalink to this definition">¶</a></dt>
+<code class="descname">neural</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.neural" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPNEURAL procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'input',</span> <span class="pre">'target',</span> <span class="pre">'train'}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'architecture',</span> <span class="pre">'code',</span> <span class="pre">'hidden',</span> <span class="pre">'id',</span> <span class="pre">'input',</span>
@@ -1354,7 +1415,7 @@ Documentation link:
 
 <dl class="method">
 <dt id="saspy.SASml.treeboost">
-<code class="descname">treeboost</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASml.treeboost" title="Permalink to this definition">¶</a></dt>
+<code class="descname">treeboost</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASml.treeboost" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the TREEBOOST procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'input',</span> <span class="pre">'target'}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'assess',</span> <span class="pre">'code',</span> <span class="pre">'freq',</span> <span class="pre">'importance',</span> <span class="pre">'input',</span> <span class="pre">'performance',</span>
@@ -1381,7 +1442,7 @@ Documentation link:
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#saspy.SASml" title="saspy.SASml"><code class="xref py py-obj docutils literal"><span class="pre">SASml</span></code></a>(session,&nbsp;\*args,&nbsp;\*\*kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#saspy.SASml" title="saspy.SASml"><code class="xref py py-obj docutils literal"><span class="pre">SASml</span></code></a>(session,&nbsp;*args,&nbsp;**kwargs)</td>
 <td>This class is for SAS Enterprise Miner procedures to be called as python3 objects and use SAS as the computational engine</td>
 </tr>
 </tbody>
@@ -1422,7 +1483,7 @@ Documentation link:
 </ol>
 <dl class="method">
 <dt id="saspy.SASstat.glm">
-<code class="descname">glm</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASstat.glm" title="Permalink to this definition">¶</a></dt>
+<code class="descname">glm</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.glm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the GLM procedure</p>
 <p>For more information on the statements see the Documentation link.</p>
 <p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
@@ -1445,7 +1506,7 @@ Documentation link:
 
 <dl class="method">
 <dt id="saspy.SASstat.hplogistic">
-<code class="descname">hplogistic</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASstat.hplogistic" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hplogistic</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.hplogistic" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPLOGISTIC procedure</p>
 <p>For more information on the statements see the Documentation link.</p>
 <p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
@@ -1468,7 +1529,7 @@ Documentation link:
 
 <dl class="method">
 <dt id="saspy.SASstat.hpreg">
-<code class="descname">hpreg</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASstat.hpreg" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hpreg</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.hpreg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPREG procedure
 For more information on the statements see the Documentation link.</p>
 <p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
@@ -1491,7 +1552,7 @@ For more information on the statements see the Documentation link.</p>
 
 <dl class="method">
 <dt id="saspy.SASstat.hpsplit">
-<code class="descname">hpsplit</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASstat.hpsplit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">hpsplit</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.hpsplit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPSPLIT procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'cls',</span> <span class="pre">'code',</span> <span class="pre">'grow',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'out',</span> <span class="pre">'partition',</span> <span class="pre">'performance',</span> <span class="pre">'prune',</span> <span class="pre">'rules'}</span></code></p>
@@ -1505,7 +1566,7 @@ Documentation link:
 
 <dl class="method">
 <dt id="saspy.SASstat.logistic">
-<code class="descname">logistic</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASstat.logistic" title="Permalink to this definition">¶</a></dt>
+<code class="descname">logistic</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.logistic" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the LOGISTIC procedure</p>
 <p>For more information on the statements see the Documentation link.</p>
 <p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
@@ -1533,7 +1594,7 @@ statement.</p>
 
 <dl class="method">
 <dt id="saspy.SASstat.mixed">
-<code class="descname">mixed</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASstat.mixed" title="Permalink to this definition">¶</a></dt>
+<code class="descname">mixed</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.mixed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the MIXED procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
 <p><cite>legal_set= {&#8216;by&#8217;, &#8216;cls&#8217;, &#8216;code&#8217;, &#8216;contrast&#8217;, &#8216;estimate&#8217;, &#8216;id&#8217;, &#8216;lsmeans&#8217;, &#8216;model&#8217;,
@@ -1556,7 +1617,7 @@ For more information on the statements see the Documentation link.</p>
 
 <dl class="method">
 <dt id="saspy.SASstat.reg">
-<code class="descname">reg</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASstat.reg" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reg</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.reg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the REG procedure</p>
 <p>For more information on the statements see the Documentation link.</p>
 <p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
@@ -1578,7 +1639,7 @@ For more information on the statements see the Documentation link.</p>
 
 <dl class="method">
 <dt id="saspy.SASstat.tpspline">
-<code class="descname">tpspline</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &rarr; object<a class="headerlink" href="#saspy.SASstat.tpspline" title="Permalink to this definition">¶</a></dt>
+<code class="descname">tpspline</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.tpspline" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the TPSPLINE procedure</p>
 <p>For more information on the statements see the Documentation link.</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'model'}</span></code></p>
@@ -1636,7 +1697,7 @@ For more information on the statements see the Documentation link.</p>
 </ol>
 <dl class="method">
 <dt id="saspy.SASets.arima">
-<code class="descname">arima</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASets.arima" title="Permalink to this definition">¶</a></dt>
+<code class="descname">arima</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.arima" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the ARIMA procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set={'identify'}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set={</span> <span class="pre">'by',</span> <span class="pre">'identify',</span> <span class="pre">'estimate',</span> <span class="pre">'outlier',</span> <span class="pre">'forecast',</span> <span class="pre">'out'}</span></code></p>
@@ -1646,7 +1707,7 @@ For more information on the statements see the Documentation link.</p>
 
 <dl class="method">
 <dt id="saspy.SASets.esm">
-<code class="descname">esm</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASets.esm" title="Permalink to this definition">¶</a></dt>
+<code class="descname">esm</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.esm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the ESM procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">'by',</span> <span class="pre">'id',</span> <span class="pre">'forecast',</span> <span class="pre">'out'}</span></code></p>
@@ -1655,7 +1716,7 @@ For more information on the statements see the Documentation link.</p>
 
 <dl class="method">
 <dt id="saspy.SASets.timedata">
-<code class="descname">timedata</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASets.timedata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">timedata</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.timedata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the TIMEDATA procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'by',</span> <span class="pre">'id',</span> <span class="pre">'fcmport',</span> <span class="pre">'out',</span> <span class="pre">'outarrays',</span> <span class="pre">'outscalars',</span> <span class="pre">'var',</span> <span class="pre">'prog_stmts'}</span></code></p>
@@ -1665,7 +1726,7 @@ For more information on the statements see the Documentation link.</p>
 
 <dl class="method">
 <dt id="saspy.SASets.timeid">
-<code class="descname">timeid</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASets.timeid" title="Permalink to this definition">¶</a></dt>
+<code class="descname">timeid</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.timeid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the TIMEID procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{</span> <span class="pre">'by',</span> <span class="pre">'id',</span> <span class="pre">'out'}</span></code></p>
@@ -1674,7 +1735,7 @@ For more information on the statements see the Documentation link.</p>
 
 <dl class="method">
 <dt id="saspy.SASets.timeseries">
-<code class="descname">timeseries</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASets.timeseries" title="Permalink to this definition">¶</a></dt>
+<code class="descname">timeseries</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.timeseries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the TIMESERIES procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set={'id'}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set={</span> <span class="pre">'by',</span> <span class="pre">'corr',</span> <span class="pre">'crosscorr',</span> <span class="pre">'decomp',</span> <span class="pre">'id',</span> <span class="pre">'season',</span> <span class="pre">'trend',</span> <span class="pre">'var',</span> <span class="pre">'crossvar',</span> <span class="pre">'out'}</span></code></p>
@@ -1684,7 +1745,7 @@ For more information on the statements see the Documentation link.</p>
 
 <dl class="method">
 <dt id="saspy.SASets.ucm">
-<code class="descname">ucm</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASets.ucm" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ucm</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASets.ucm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the UCM procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'autoreg',</span> <span class="pre">'blockseason',</span> <span class="pre">'by',</span> <span class="pre">'cycle',</span> <span class="pre">'deplag',</span> <span class="pre">'estimate',</span> <span class="pre">'forecast',</span> <span class="pre">'id',</span> <span class="pre">'irregular',</span>
@@ -1732,7 +1793,7 @@ This class and all the useful work in this package require a licensed version of
 </ol>
 <dl class="method">
 <dt id="saspy.SASqc.capability">
-<code class="descname">capability</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASqc.capability" title="Permalink to this definition">¶</a></dt>
+<code class="descname">capability</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASqc.capability" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the CUSUM procedure
 <code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'cdfplot',</span> <span class="pre">'comphist',</span> <span class="pre">'histogram',</span> <span class="pre">'inset',</span> <span class="pre">'intervals',</span> <span class="pre">'output',</span> <span class="pre">'ppplot',</span> <span class="pre">'probplot',</span>
@@ -1743,7 +1804,7 @@ This class and all the useful work in this package require a licensed version of
 
 <dl class="method">
 <dt id="saspy.SASqc.cusum">
-<code class="descname">cusum</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASqc.cusum" title="Permalink to this definition">¶</a></dt>
+<code class="descname">cusum</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASqc.cusum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the CUSUM procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'by','xchart'}</span></code></p>
@@ -1753,7 +1814,7 @@ This class and all the useful work in this package require a licensed version of
 
 <dl class="method">
 <dt id="saspy.SASqc.macontrol">
-<code class="descname">macontrol</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASqc.macontrol" title="Permalink to this definition">¶</a></dt>
+<code class="descname">macontrol</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASqc.macontrol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the MACONTROL procedure</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
 <p>Documentation link:
@@ -1762,7 +1823,7 @@ This class and all the useful work in this package require a licensed version of
 
 <dl class="method">
 <dt id="saspy.SASqc.shewhart">
-<code class="descname">shewhart</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASqc.shewhart" title="Permalink to this definition">¶</a></dt>
+<code class="descname">shewhart</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASqc.shewhart" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the SHEWHART procedure</p>
 <p>Documentation link:
 <a class="reference external" href="http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_shewhart_toc.htm">http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_shewhart_toc.htm</a></p>
@@ -1818,7 +1879,7 @@ This class and all the useful work in this package require a licensed version of
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.0',
+            VERSION:'2.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -1828,7 +1889,7 @@ This class and all the useful work in this package require a licensed version of
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

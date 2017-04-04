@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced topics &mdash; saspy 2.1.0 documentation</title>
+  <title>Advanced topics &mdash; saspy 2.1.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.2 documentation" href="index.html"/>
         <link rel="next" title="Contributing new methods" href="adding-procedures.html"/>
         <link rel="prev" title="API Reference" href="api.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.0
+                2.1.2
               </div>
             
           
@@ -173,46 +173,153 @@
 <p>In this chapter we will explore more detailed explanations of specific functionality in SASPy.</p>
 <div class="section" id="using-batch-mode">
 <h2>Using Batch mode<a class="headerlink" href="#using-batch-mode" title="Permalink to this headline">¶</a></h2>
-<p>Batch mode is meant to be used when you want to automate your code as python scripts.
-In batch mode, any methods that would normally display results, will insted return a python dictionary
-with 2 keys; LOG, LST. This is the same as how the submit() method works normally. The LOG has the SAS Log
-and the LST contains the results. You will likely want to set the results= to HTML (this was the original
-default instead of Pandas), so that not only plots and graphs are html, but also tabular results too.</p>
-<p>The example below shows the contents of a python script that runs a linear regression and has all of the
-results written to a directory which you can access from a web browser and display these results by just
-clicking on them. Adjust the filesystem path below and you should be able to run this code yourself.</p>
-<p>The url to see these reults would be: <a class="reference external" href="file:///C:/Public/saspy_demo/">file:///C:/Public/saspy_demo/</a>. Of course, you can imagine integrating the
-results into nicer webpage for reporting, but with nothing more than this few lines of code, you can have the
-results updated and refreshed by just re-running the script.</p>
+<p>Batch mode is meant to be used when you want to automate your code as Python scripts.</p>
+<p>In batch mode, any method that would normally display results, returns a Python dictionary
+instead and with two keys; LOG, LST. This is the same as how the submit() method works
+normally.</p>
+<p>The LOG has the SAS Log and the LST contains the results. You will likely want to set
+the results parameter to HTML (this was originally the default instead of Pandas). When
+you set the results to HTML, not only are plots and graphs in HTML, but also tabular results
+too.</p>
+<p>The example below shows the contents of a Python script that runs a linear regression and
+writes all the results to a directory. You can access the directory with a web browser to
+view these results by clicking on them. Adjust the filesystem path below and you should
+be able to run this code yourself.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="ch">#! /usr/bin/python3.5</span>
+
+<span class="kn">import</span> <span class="nn">saspy</span>
+<span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">results</span><span class="o">=</span><span class="s1">&#39;html&#39;</span><span class="p">)</span>
+
+<span class="n">cars</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasdata</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="n">libref</span><span class="o">=</span><span class="s1">&#39;sashelp&#39;</span><span class="p">)</span>
+
+<span class="n">sas</span><span class="o">.</span><span class="n">set_batch</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="n">stat</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasstat</span><span class="p">()</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">reg</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="s1">&#39;horsepower = Cylinders EngineSize&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">cars</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ets_results</span><span class="o">.</span><span class="n">_names</span><span class="p">)):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="fm">__getattr__</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">out1</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">Public</span><span class="se">\\</span><span class="s2">saspy_demo</span><span class="se">\\</span><span class="s2">&quot;</span><span class="o">+</span><span class="n">res</span><span class="o">.</span><span class="n">_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;.html&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w+b&#39;</span><span class="p">)</span>
+        <span class="n">out1</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;LST&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+        <span class="n">out1</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">out1</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">Public</span><span class="se">\\</span><span class="s2">saspy_demo</span><span class="se">\\</span><span class="s2">&quot;</span><span class="o">+</span><span class="n">res</span><span class="o">.</span><span class="n">_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;.log&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w+b&#39;</span><span class="p">)</span>
+        <span class="n">out1</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+        <span class="n">out1</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The URL to see these results is: <a class="reference external" href="file:///C:/Public/saspy_demo/">file:///C:/Public/saspy_demo/</a>. Of course, you can
+imagine integrating the results into nicer web page for reporting, but with nothing more
+than this few lines of code, you can have the results updated and refreshed by just
+re-running the script.</p>
 </div>
 <div class="section" id="prompting">
 <h2>Prompting<a class="headerlink" href="#prompting" title="Permalink to this headline">¶</a></h2>
-<p>There are two types of prompting that SASPy will do. Meaning prompting the user for input while running.</p>
-<p>The first is prompting SASPy does on its own. When running the SASsession() method, any required parameters for the
-chosen access method that were not specified in the Configuration Definition will be prompted for. Also, when there is
-more than one Configuration Definition Name in SAS_config_names, and cfgname= is not specified on the SASsession() method
-(or an invalid name is specified), SASPy will prompt for which Configuration Definition to use.</p>
-<p>The other kind of prompting is prompting you control. The submit() method, and the saslib() methods both take an
-optional &#8216;prompt=&#8217; parameter. This parameter is how you can request that SASPy prompt the user for input at run time.
-This option is used in conjunction with SAS Macro variables that you code in the sas code or options for the method.
-The prompt= parameter taked a python Dictionay where the keys are the names of your macro variable and the value is
-True or False. The boolean value tells SASPy whether it is to hide what the user types in or not. It also controls
-whether the macro variables stay available to the SAS session or if they are deleted after running that code.</p>
-<p>What happens is that SASPy will prompt for the values of your keys, and will then assign those values to SAS Macro variables
-for you in SAS so that when your code runs the macro variables will be resolved. If you specified &#8216;True&#8217;, then the value
-the user types will not be displayed, nor will the macro variable in SAS be displayed in the log, and the Marco Variable
-will be deleted from SAS so as to not be accessible after that code submission. For &#8216;False, you can see what the user types,
-the Macro Variables can be seen in the log and they will remain available in that SAS session for later code submissions.</p>
-<p>The following are examples of how to use this in your programs. The first example is using the saslib() method to
-assign a libref to a third party database where the user needs to specify credentials. You don&#8217;t want to hardcode
-userid and passwords in your program, so the user should provide those at runtime.</p>
-<p>At runtime, the user would be prompted for user and password and they would see something like this when they entered values:</p>
-<p>Here&#8217;s another example where you want to create a table, but you will let the user choose the table name as well as the name
-of the column and a hidden value to assign to it. You can see what the user is prompted for and enters, and then you can see
-the SAS Log showing the non-hidden Marco Variables, followed by another code submission that uses the previously defined non-hidden
-variables which are still available.</p>
-<p>Sure, that&#8217;s kind of a cheesy example, but you get the idea. You can prompt users at runtime for values you want to
-use in your code, and those values can be kept around an used again later, or hidden and inaccessible later.</p>
+<p>There are two types of prompting that SASPy can perform&#8211;meaning to stop processing and
+prompt the user for input and then resume processing.</p>
+<p>The first type of prompting is performed by SASPy on its own. When you run the
+SASsession() method, if any required parameters for the chosen connection method
+were not specified in the configuration definition (in sascfg.py), SASPy interrupts
+processing so that it can prompt for the missing parameters. In addition, when there
+is more than one configuration definition in SAS_config_names, and cfgname is not
+specified in the SASsession() method (or an invalid name is specified), SASPy
+prompts the user to select the configuration definition to use.</p>
+<p>The other kind of prompting is prompting that you control. The submit() method,
+and the saslib() methods both take an optional prompt parameter. This parameter
+is how you request that SASPy prompts the user for input at run time. This option
+is used in conjunction with SAS macro variable names that you enter in the SAS
+code or options for the method.</p>
+<p>The prompt parameter takes a Python dictionary. The keys are the SAS macro variable
+names and the values are True or False. The Boolean value tells SASPy whether it
+is to hide what the user types in or not. It also controls whether the macro variables
+stay available to the SAS session or if they are deleted after running that code.</p>
+<p>SASPy prompts you for the values of your keys, and will then assign those values to
+SAS macro variables for you in SAS. When your code runs, the macro variables will be
+resolved. If you specified <code class="docutils literal"><span class="pre">True</span></code>, then the value the user types is not displayed,
+nor is the macro variable displayed in the SAS log, and the macro variable is deleted
+from SAS so that it is not accessible after that code submission. For <code class="docutils literal"><span class="pre">False</span></code>, the
+user can see the value as it is type, the macro variables can be seen in the SAS log
+and the variables remain available in that SAS session for later code submissions.</p>
+<p>The following are examples of how to use prompting in your programs. The first example
+uses the saslib() method to assign a libref to a third-party database. This is a
+common issue&#8211;the user needs to specify credentials, but you do not want to include
+user IDs and passwords in your programs. Prompting enables the user to provide
+credentials at runtime.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">sas</span><span class="o">.</span><span class="n">saslib</span><span class="p">(</span><span class="s1">&#39;Tera&#39;</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;Teradata&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="s1">&#39;user=&amp;user pw=&amp;mypw server=teracop1&#39;</span><span class="p">,</span>
+           <span class="n">prompt</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;mypw&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>At runtime, the user is prompted for user and password and sees something like the
+following when entering values (the user ID is visible and the password is obscured):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Please</span> <span class="n">enter</span> <span class="n">value</span> <span class="k">for</span> <span class="n">macro</span> <span class="n">variable</span> <span class="n">user</span> <span class="n">sasdemo</span>
+<span class="n">Please</span> <span class="n">enter</span> <span class="n">value</span> <span class="k">for</span> <span class="n">macro</span> <span class="n">variable</span> <span class="n">mypw</span> <span class="o">........</span>
+</pre></div>
+</div>
+<p>Another example might be that you have code that creates a table, but you want to let
+the user choose the table name as well as the name of the column and a hidden value
+to assign to it. By specifing <code class="docutils literal"><span class="pre">False</span></code>, the user can see the value, and the SAS log
+shows the non-hidden marco mariables, followed by another code submission that uses
+the previously defined non-hidden variables&#8211;which are still available.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">ll</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">data &amp;dsname;</span>
+<span class="s1">  do &amp;var1=&quot;&amp;pw&quot;;</span>
+<span class="s1">    output;</span>
+<span class="s1">  end;</span>
+<span class="s1">run;</span>
+<span class="s1">&#39;&#39;&#39;</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;var1&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;pw&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;dsname&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">})</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span>Please enter value for macro variable var1 MyColumnName
+Please enter value for macro variable hidden ........
+Please enter value for macro variable dsname TestTable1
+
+print(ll[&#39;LOG&#39;])
+
+103  ods listing close;ods html5 (id=saspy_internal) file=stdout options(bitmap_mode=&#39;inline&#39;) device=svg; ods graphics on /
+103! outputfmt=png;
+NOTE: Writing HTML5(SASPY_INTERNAL) Body file: STDOUT
+104
+105  options nosource nonotes;
+108  %let var1=MyColumnName;
+109  %let dsname=TestTable1;
+110
+111  data &amp;dsname;
+112    do &amp;var1=&quot;&amp;hidden&quot;;
+113      output;
+114    end;
+115  run;
+NOTE: The data set WORK.TESTTABLE1 has 1 observations and 1 variables.
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+
+116
+117  proc print data=&amp;dsname;
+118  run;
+NOTE: There were 1 observations read from the data set WORK.TESTTABLE1.
+NOTE: PROCEDURE PRINT used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+
+119
+120  options nosource nonotes;
+123
+124  ods html5 (id=saspy_internal) close;ods listing;
+
+
+HTML(sas.submit(&#39;&#39;&#39;
+proc print data=&amp;dsname;
+run;
+&#39;&#39;&#39;)[&#39;LST&#39;])
+
+Obs     MyColumnName
+1       cant see me
+</pre></div>
+</div>
+<p>That is a highly contrived example, but you get the idea. You can prompt users
+at runtime for values you want to use in the code, and those values can be
+kept around and used later in the code, or hidden and inaccessible afterward.</p>
 </div>
 </div>
 
@@ -260,7 +367,7 @@ use in your code, and those values can be kept around an used again later, or hi
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.0',
+            VERSION:'2.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -270,7 +377,7 @@ use in your code, and those values can be kept around an used again later, or hi
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting started &mdash; saspy 2.1.0 documentation</title>
+  <title>Getting started &mdash; saspy 2.1.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.2 documentation" href="index.html"/>
         <link rel="next" title="API Reference" href="api.html"/>
         <link rel="prev" title="Installation and configuration" href="install.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.0
+                2.1.2
               </div>
             
           
@@ -315,14 +315,14 @@ complete list.</p>
 </div>
 <div class="section" id="submit-sas-code-directly-from-python-session">
 <h2>Submit SAS code directly from Python session<a class="headerlink" href="#submit-sas-code-directly-from-python-session" title="Permalink to this headline">¶</a></h2>
-<p>The preceeding examples demonstrate commonly used Python
+<p>The proceeding examples demonstrate commonly used Python
 methods that are available with the SASPy module.</p>
 <p>If you encounter a situation where you need to submit SAS
 statements directly to the SAS system, the submit method can
 accomplish that. The following example creates a side-by-side
 panel plot to compare employees who have left versus employees
 still working at the company, based on their business unit,
-median performance rating, and satisifaction level.</p>
+median performance rating, and satisfaction level.</p>
 <p>The submit method returns a dictionary with two keys: LOG and LST.
 The LST has the results to display and the LOG has the portion
 of the SAS log for the code submission.</p>
@@ -340,7 +340,7 @@ of the SAS log for the code submission.</p>
 <div class="section" id="split-the-data-into-training-and-test">
 <h2>Split the data into training and test<a class="headerlink" href="#split-the-data-into-training-and-test" title="Permalink to this headline">¶</a></h2>
 <p>Partitioning data is essential to avoid overfitting during
-model development. This can be achived using the partition
+model development. This can be achieved using the partition
 method. In this example, the data is partitioned in-place
 and performs stratified sampling, based on the variable
 &#8216;left.&#8217; If you do not specify a variable or the variable
@@ -355,9 +355,9 @@ is an interval, then simple random sampling (SRS) is done.</p>
 </div>
 <div class="section" id="build-an-analytical-model">
 <h2>Build an analytical model<a class="headerlink" href="#build-an-analytical-model" title="Permalink to this headline">¶</a></h2>
-<p>One of the key activities for SASPy is analtycal modeling. The SAS
+<p>One of the key activities for SASPy is analytical modeling. The SAS
 system is capable of modeling in a number of distinct areas
-(statisics, machine learning, econometric time series, and so on).</p>
+(statistics, machine learning, econometric time series, and so on).</p>
 <p>The capabilities of SASPy are organized similarly to make it easier
 for users. Grouping functionality also avoids cluttered tab-complete
 lists with methods that you might not have licensed.</p>
@@ -464,7 +464,7 @@ target is a list (nominals must be a list).</p>
 <li>The parameters accept strings (str), lists (list), or dictionaries (dict) types.</li>
 <li>The target and input parameters are modified by a nominals parameter to
 identify the proper variables treatment.</li>
-<li>The nominals parameter must be a list type or you recieve a syntax warning.</li>
+<li>The nominals parameter must be a list type or you receive a syntax warning.</li>
 <li>Variables are treated as nominals if any of the following are met:<ul>
 <li>The variable is a character type in SAS.</li>
 <li>The variable is specificed in the nominals list.</li>
@@ -484,7 +484,7 @@ object type.</p>
 <div class="section" id="evaluating-model-diagnostics">
 <h2>Evaluating model diagnostics<a class="headerlink" href="#evaluating-model-diagnostics" title="Permalink to this headline">¶</a></h2>
 <p>Perhaps the most important part of modeling is evaluating the quality of the
-model. SASPy makes this very easy by leverging the rich graphical and tabular
+model. SASPy makes this very easy by leveraging the rich graphical and tabular
 output of <a class="reference external" href="http://support.sas.com/rnd/base/ods/">SAS ODS</a>.</p>
 <p>The output of a model in SASPy is a <a class="reference internal" href="api.html#saspy.SASresults" title="saspy.SASresults"><code class="xref any py py-class docutils literal"><span class="pre">SASresults</span></code></a> object. It contains all
 the ODS tables and graphics that were produced by the SAS procedure. You can
@@ -493,7 +493,7 @@ see all the available objects by using <code class="docutils literal"><span clas
 </pre></div>
 </div>
 <p>The returned list shows the available diagnostic output for this model. The
-output lists vary slightly, depending on the modeling algorthm, the settings,
+output lists vary slightly, depending on the modeling algorithm, the settings,
 and the target type (nominal or interval).</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;BASELINE&#39;</span><span class="p">,</span>
  <span class="s1">&#39;DATAACCESSINFO&#39;</span><span class="p">,</span>
@@ -513,7 +513,7 @@ use the <code class="docutils literal"><span class="pre">results</span></code> o
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">If an error occured during processing, the only artifact is ERROR_LOG.
+<p class="last">If an error occurred during processing, the only artifact is ERROR_LOG.
 This object contains the SAS log to aid you in resolving your error.</p>
 </div>
 <p>Below is an example where the variable name left is typed incorrectly as lefty.</p>
@@ -576,7 +576,7 @@ see the entire log for the model submission with code like the following:</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.0',
+            VERSION:'2.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -586,7 +586,7 @@ see the entire log for the model submission with code like the following:</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
