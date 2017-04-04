@@ -242,6 +242,14 @@ And then simply refer to the ``cp`` variable in the configuration definition:
 
 Also worth noting: these five JAR files are compatible with both Windows and Unix client systems.  
 
+.. note::
+    If you have a \\u or \\U in your classpath string, like: "c:\\User\\sastpw\\...', you will have to use either 
+    a double backslash instead, like \\\\u or \\\\U ("c:\\\\User\\sastpw\\...') or mark the string as raw (not 
+    unicode) with a r prefix, like r"C:\\User\\sastpw\\..." 
+    or else you will get an error like this: SyntaxError: (unicode error) 'unicodeescape' codec can't decode 
+    bytes in position 3-4: truncated \UXXXXXXXX escape 
+
+
 
 The IOM access method now had support for getting the required user/password from an authinfo file in the users home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it's _authinfo. The format of the line in the authinfo file is
