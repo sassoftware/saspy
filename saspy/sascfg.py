@@ -96,6 +96,7 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # 'java'      - [REQUIRED] the path to the java executable to use
 # 'iomhost'   - [REQUIRED for remote IOM case, Don't specify to use a local Windows Session] the resolvable host name, or ip to the IOM server to connect to
 # 'iomport'   - [REQUIRED for remote IOM case, Don't specify to use a local Windows Session] the port IOM is listening on
+# 'authkey'   - identifier for user/password credentials to read from .authinfo file. Eliminates prompting for credentials.
 # 'omruser'   - not suggested        [REQUIRED for remote IOM case but PROMTED for at runtime] Don't specify to use a local Windows Session
 # 'omrpw'     - really not suggested [REQUIRED for remote IOM case but PROMTED for at runtime] Don't specify to use a local Windows Session
 # 'encoding'  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
