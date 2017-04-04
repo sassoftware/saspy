@@ -372,8 +372,11 @@ for this file in your SAS deployment, though it is likely
 in SASHome\\SASFoundation\\9.4\\core\\sasext.
 
 If you add the file to the system PATH environment variable, only list the path to 
-the directory--do not include the file itself. For example, C:\\Program Files
-\\SASHome\\SASFoundation\\9.4\\core\\sasext. 
+the directory--do not include the file itself. For example:
+
+::
+
+    C:\Program Files\SASHome\SASFoundation\9.4\core\sasext 
 
 java      - 
     (Required) The path to the Java executable to use. 
