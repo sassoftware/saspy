@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 2.1.2 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.1.4 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.2 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.4 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview of SASPy" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.2
+                2.1.4
               </div>
             
           
@@ -390,6 +390,14 @@ file, like so:</p>
 </pre></div>
 </div>
 <p>Also worth noting: these five JAR files are compatible with both Windows and Unix client systems.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you have a \u or \U in your classpath string, like: &#8220;c:\User\sastpw\...&#8217;, you will have to use either
+a double backslash instead, like \\u or \\U (&#8220;c:\\User\sastpw\...&#8217;) or mark the string as raw (not
+unicode) with a r prefix, like r&#8221;C:\User\sastpw\...&#8221;
+or else you will get an error like this: SyntaxError: (unicode error) &#8216;unicodeescape&#8217; codec can&#8217;t decode
+bytes in position 3-4: truncated UXXXXXXXX escape</p>
+</div>
 <p>The IOM access method now had support for getting the required user/password from an authinfo file in the users home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it&#8217;s _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for <cite>authkey</cite>. Next is the &#8216;user&#8217; key followed by the value (the user id)
@@ -589,7 +597,7 @@ session instead of remote IOM (it is a different connection type).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.2',
+            VERSION:'2.1.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
