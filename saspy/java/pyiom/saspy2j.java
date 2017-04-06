@@ -49,6 +49,7 @@ public class saspy2j {
                 int outport = 0;
                 int errport = 0;
                 int iomport = 0;
+                int timeout = 600000;
                 int len = 0;
                 int slen = 0;
                 int nargs = args.length;
@@ -99,6 +100,8 @@ public class saspy2j {
                                 iomhost = args[x + 1];
                         else if (args[x].equalsIgnoreCase("-iomport"))
                                 iomport = Integer.parseInt(args[x + 1]);
+                        else if (args[x].equalsIgnoreCase("-timeout"))
+                                timeout = Integer.parseInt(args[x + 1]) * 1000;
                         else if (args[x].equalsIgnoreCase("-user"))
                                 omruser = args[x + 1];
                         else if (args[x].equalsIgnoreCase("-zero"))
@@ -142,7 +145,10 @@ public class saspy2j {
                                 ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
                                 // ConnectionFactoryAdminInterface admin =
                                 // cxf.getAdminInterface();
-                                cx = cxf.getConnection(omruser, omrpw, 600000);
+                                if (timeout > 0)
+                                   cx = cxf.getConnection(omruser, omrpw, timeout);
+                                else
+                                   cx = cxf.getConnection(omruser, omrpw);
                         } catch (ConnectionFactoryException e) {
                                 String msg = e.getMessage();
                                 errp.write(msg);

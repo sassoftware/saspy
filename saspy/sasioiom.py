@@ -57,6 +57,7 @@ class SASconfigIOM:
       self.encoding  = cfg.get('encoding', '')
       self.classpath = cfg.get('classpath', '')
       self.authkey   = cfg.get('authkey', '')
+      self.timeout   = cfg.get('timeout', None)
 
 
       # GET Config options
@@ -81,6 +82,13 @@ class SASconfigIOM:
             print("Parameter 'host' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.iomhost = inhost   
+
+      intout = kwargs.get('timeout', None)
+      if intout is not None:
+         if lock and self.timeout:
+            print("Parameter 'timeout' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.timeout = intout   
 
       inport = kwargs.get('iomport', None)
       if inport:
@@ -251,6 +259,8 @@ class SASsessionIOM():
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
+      if self.sascfg.timeout is not None:
+         parms += ["-timeout", str(self.sascfg.timeout)]
       if not zero:
          parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
          parms += ["-user", user]     
