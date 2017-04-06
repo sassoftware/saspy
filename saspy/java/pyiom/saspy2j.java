@@ -142,7 +142,7 @@ public class saspy2j {
                                 ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
                                 // ConnectionFactoryAdminInterface admin =
                                 // cxf.getAdminInterface();
-                                cx = cxf.getConnection(omruser, omrpw, 10000);
+                                cx = cxf.getConnection(omruser, omrpw, 600000);
                         } catch (ConnectionFactoryException e) {
                                 String msg = e.getMessage();
                                 errp.write(msg);
