@@ -25,6 +25,7 @@ import com.sas.iom.SAS.LNameNoAssign;
 import com.sas.iom.SAS.IDataServicePackage.NoLibrary;
 import com.sas.iom.SAS.IFileServicePackage.AssignmentContextSeqHolder;
 import com.sas.iom.SASIOMDefs.*;
+import com.sas.iom.orb.SASURI;
 import com.sas.services.connection.BridgeServer;
 //import com.sas.services.connection.ConnectionFactoryAdminInterface;
 import com.sas.services.connection.ConnectionFactoryConfiguration;
@@ -49,7 +50,7 @@ public class saspy2j {
                 int outport = 0;
                 int errport = 0;
                 int iomport = 0;
-                int timeout = 600000;
+                int timeout = 60000;
                 int len = 0;
                 int slen = 0;
                 int nargs = args.length;
@@ -57,6 +58,7 @@ public class saspy2j {
                 Socket sin = null;
                 Socket sout = null;
                 Socket serr = null;
+                String appName = "";
                 String iomhost = "";
                 String omruser = "";
                 String omrpw = "";
@@ -75,15 +77,15 @@ public class saspy2j {
                 BufferedWriter errp;
 
                 ConnectionInterface cx = null;
-                IWorkspace wksp = null;
-                ILanguageService lang = null;
-                IFileService filesvc = null;
-                ILibref libref = null;
-                IFileref fileref = null;
-                IDataService datasvc = null;
-                IBinaryStream bstr = null;
+                IWorkspace        wksp = null;
+                ILanguageService  lang = null;
+                IFileService   filesvc = null;
+                ILibref         libref = null;
+                IFileref       fileref = null;
+                IDataService   datasvc = null;
+                IBinaryStream     bstr = null;
                 OctetSeqHolder odsdata = null;
-                Server server = null;
+                BridgeServer    server = null;
 
                 // System.out.print("localhost="+InetAddress.getLocalHost()+'\n');
                 // System.out.print("nargs="+nargs+'\n');
@@ -104,6 +106,8 @@ public class saspy2j {
                                 timeout = Integer.parseInt(args[x + 1]) * 1000;
                         else if (args[x].equalsIgnoreCase("-user"))
                                 omruser = args[x + 1];
+                        else if (args[x].equalsIgnoreCase("-appname"))
+                                appName = args[x + 1];
                         else if (args[x].equalsIgnoreCase("-zero"))
                                 zero = true;
                 }
@@ -140,6 +144,9 @@ public class saspy2j {
                         omrpw = inp.readLine();
                         try {
                                 server = new BridgeServer(Server.CLSID_SAS, iomhost, iomport);
+                                if (appName != "")
+                                   server.setServerName(appName.replace("\'", ""));
+                                //server.setOption(SASURI.applicationNameKey, appName);
                                 ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
                                 ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
                                 ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
@@ -151,6 +158,8 @@ public class saspy2j {
                                    cx = cxf.getConnection(omruser, omrpw);
                         } catch (ConnectionFactoryException e) {
                                 String msg = e.getMessage();
+                                errp.write("AppName=");
+                                errp.write(appName);
                                 errp.write(msg);
                                 errp.flush();
                                 System.out.print(msg);
