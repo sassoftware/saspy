@@ -58,6 +58,7 @@ class SASconfigIOM:
       self.classpath = cfg.get('classpath', '')
       self.authkey   = cfg.get('authkey', '')
       self.timeout   = cfg.get('timeout', None)
+      self.appserver = cfg.get('appserver', '')
 
 
       # GET Config options
@@ -124,6 +125,13 @@ class SASconfigIOM:
             print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.authkey = inak   
+
+      inapp = kwargs.get('appserver', '')
+      if len(inapp) > 0:
+         if lock and len(self.apserver):
+            print("Parameter 'appserver' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.appserver = inapp   
 
       inencoding = kwargs.get('encoding', '')
       if len(inencoding) > 0:
@@ -261,6 +269,8 @@ class SASsessionIOM():
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
       if self.sascfg.timeout is not None:
          parms += ["-timeout", str(self.sascfg.timeout)]
+      if self.sascfg.appserver:
+         parms += ["-appname", "'"+self.sascfg.appserver+"'"]
       if not zero:
          parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
          parms += ["-user", user]     
