@@ -45,7 +45,7 @@ The current set of connection methods are as follows:
   method enables you to connect to SAS on the same host as SASPy and Python.
 
 `STDIO over SSH`_
-  This connection method is also avaialble on the Linux platform only. This 
+  This connection method is also available on the Linux platform only. This
   method can connect to SAS on the same host (local) or to SAS
   that is installed on a remote host, if you have passwordless SSH configured
   for your Linux user account.
@@ -175,7 +175,7 @@ STDIO over SSH
 This is the remote version of the original connection method. This also works 
 with Unix only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
-SSH configured between the two system. Google it, it's not that difficult.
+SSH configured between the two systems. Google it, it's not that difficult.
 
 In addition to the three keys for STDIO, there are two more keys to configure:
 
@@ -195,7 +195,7 @@ host -
                 'options' : ["-fullstimer"]
                }
 
-.. note:: The ``'ssh'`` key is the triger to use the STDIO over SSH connection
+.. note:: The ``'ssh'`` key is the trigger to use the STDIO over SSH connection
           method.
 
 
@@ -251,10 +251,10 @@ Also worth noting: these five JAR files are compatible with both Windows and Uni
 
 
 
-The IOM access method now had support for getting the required user/password from an authinfo file in the users home directory
+The IOM access method now has support for getting the required user/password from an authinfo file in the user's home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it's _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for `authkey`. Next is the 'user' key followed by the value (the user id)
-and then 'password' key followed by its value (the users password). Note that there are permission rules for this file. On linux the file must
+and then 'password' key followed by its value (the user's password). Note that there are permission rules for this file. On linux the file must
 have permissions of 600, only the user can read or write the file. On Windows, the file should be equally locked down to where only the owner
 can read and write it.  
 
@@ -293,7 +293,7 @@ iomport -
 classpath - 
     (Required) The CLASSPATH to the IOM client JAR files and SASPy client jar.
 authkey -
-    The keyword that starts a line in the authinfo file contining user and or password for this connection.
+    The keyword that starts a line in the authinfo file containing user and or password for this connection.
 omruser - 
     (**Discouraged**)  The user ID is required but if this field is left blank,
     the user is **prompted** for a user ID at runtime, unless it's found in the authinfo file.
@@ -408,7 +408,7 @@ encoding  -
                    'classpath' : cpW
                   }
 
-.. note:: Having the ``'java'`` key is the triger to use the IOM access method.
+.. note:: Having the ``'java'`` key is the trigger to use the IOM access method.
 .. note:: When using the IOM access method (``'java'`` key specified), the 
          absence of the ``'iomhost'`` key is the trigger to use a local Windows
          session instead of remote IOM (it is a different connection type).
