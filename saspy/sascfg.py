@@ -101,7 +101,8 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # 'omrpw'     - really not suggested [REQUIRED for remote IOM case but PROMTED for at runtime] Don't specify to use a local Windows Session
 # 'encoding'  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
 # 'classpath' - [REQUIRED] classpath to IOM client jars and saspy client jar.
-#
+# 'appserver' - name ofphysical workspace server (when more than one app server defined in OMR) i.e.: 'SASApp - Workspace Server'
+
 
 # build out a local classpath variable to use below for Linux clients
 cpL  =  "/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar"

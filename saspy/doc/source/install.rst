@@ -251,7 +251,7 @@ Also worth noting: these five JAR files are compatible with both Windows and Uni
 
 
 
-The IOM access method now had support for getting the required user/password from an authinfo file in the users home directory
+The IOM access method now has support for getting the required user/password from an authinfo file in the users home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it's _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for `authkey`. Next is the 'user' key followed by the value (the user id)
 and then 'password' key followed by its value (the users password). Note that there are permission rules for this file. On linux the file must
@@ -309,6 +309,10 @@ encoding  -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and 
     windows-1252, respectively. 
+appserver -
+    If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
+    that you want to connect to, i.e.: 'SASApp - Workspace Server'. Without this the Object spawner will only try the
+    first one in the list of app servers it supports.
 
 .. code-block:: ipython3
 
@@ -331,15 +335,17 @@ encoding  -
                 'iomhost'   : 'linux.iom.host',
                 'iomport'   : 8591,
                 'encoding'  : 'latin1',
-                'classpath' : cpL
-               }
+                'classpath' : cpL,
+                'appserver' : 'SASApp Prod - Workspace Server'
+                }
 
     # Unix client and Windows IOM server
     iomwin   = {'java'      : '/usr/bin/java',
                 'iomhost'   : 'windows.iom.host',
                 'iomport'   : 8591,
                 'encoding'  : 'windows-1252',
-                'classpath' : cpL
+                'classpath' : cpL,
+                'appserver' : 'SASApp Test - Workspace Server'
                }
 
     # Windows client and Unix IOM server
