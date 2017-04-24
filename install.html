@@ -398,7 +398,7 @@ unicode) with a r prefix, like r&#8221;C:\User\sastpw\...&#8221;
 or else you will get an error like this: SyntaxError: (unicode error) &#8216;unicodeescape&#8217; codec can&#8217;t decode
 bytes in position 3-4: truncated UXXXXXXXX escape</p>
 </div>
-<p>The IOM access method now had support for getting the required user/password from an authinfo file in the users home directory
+<p>The IOM access method now has support for getting the required user/password from an authinfo file in the users home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it&#8217;s _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for <cite>authkey</cite>. Next is the &#8216;user&#8217; key followed by the value (the user id)
 and then &#8216;password&#8217; key followed by its value (the users password). Note that there are permission rules for this file. On linux the file must
@@ -447,6 +447,10 @@ The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
 default encodings for running SAS in Unicode, on Unix, and on Windows,
 respectively. Those map to Python encoding values: utf8, latin1, and
 windows-1252, respectively.</dd>
+<dt>appserver -</dt>
+<dd>If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
+that you want to connect to, i.e.: &#8216;SASApp - Workspace Server&#8217;. Without this the Object spawner will only try the
+first one in the list of app servers it supports.</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Unix client class path</span>
 <span class="n">cpL</span>  <span class="o">=</span>  <span class="s2">&quot;/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar&quot;</span>
@@ -467,15 +471,17 @@ windows-1252, respectively.</dd>
             <span class="s1">&#39;iomhost&#39;</span>   <span class="p">:</span> <span class="s1">&#39;linux.iom.host&#39;</span><span class="p">,</span>
             <span class="s1">&#39;iomport&#39;</span>   <span class="p">:</span> <span class="mi">8591</span><span class="p">,</span>
             <span class="s1">&#39;encoding&#39;</span>  <span class="p">:</span> <span class="s1">&#39;latin1&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cpL</span>
-           <span class="p">}</span>
+            <span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cpL</span><span class="p">,</span>
+            <span class="s1">&#39;appserver&#39;</span> <span class="p">:</span> <span class="s1">&#39;SASApp Prod - Workspace Server&#39;</span>
+            <span class="p">}</span>
 
 <span class="c1"># Unix client and Windows IOM server</span>
 <span class="n">iomwin</span>   <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;/usr/bin/java&#39;</span><span class="p">,</span>
             <span class="s1">&#39;iomhost&#39;</span>   <span class="p">:</span> <span class="s1">&#39;windows.iom.host&#39;</span><span class="p">,</span>
             <span class="s1">&#39;iomport&#39;</span>   <span class="p">:</span> <span class="mi">8591</span><span class="p">,</span>
             <span class="s1">&#39;encoding&#39;</span>  <span class="p">:</span> <span class="s1">&#39;windows-1252&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cpL</span>
+            <span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cpL</span><span class="p">,</span>
+            <span class="s1">&#39;appserver&#39;</span> <span class="p">:</span> <span class="s1">&#39;SASApp Test - Workspace Server&#39;</span>
            <span class="p">}</span>
 
 <span class="c1"># Windows client and Unix IOM server</span>
