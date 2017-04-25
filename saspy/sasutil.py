@@ -61,22 +61,19 @@ class SASutil:
         """
         Python method to call the HPIMPUTE procedure
 
-        ``required_set = {}``
+        ``required_set = {'input'}``
 
-        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-        'partition', 'performance', 'prune', 'rules'}``
+        ``legal_set= {'input', 'impute', 'performance', 'id', 'freq', 'code'}``
 
-        cls is an alias for the class statement
         For more information on the statements see the Documentation link.
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+        http://support.sas.com/documentation/cdl/en/prochp/70117/HTML/default/viewer.htm#prochp_hpimpute_syntax01.htm
 
         :param kwargs: dict
         :return: SAS result object
         """
         required_set = {'input'}
-        legal_set = {'input', 'impute', 'performance', 'id', 'freq', 'code',
-                     'procopts'}
+        legal_set = {'input', 'impute', 'performance', 'id', 'freq', 'code', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPIMPUTE", required_set, legal_set, **kwargs)
 
@@ -86,18 +83,17 @@ class SASutil:
 
         ``required_set = {}``
 
-        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}``
+        ``legal_set= {'code', 'freq', 'id', 'performance', 'target', 'input'}``
 
-        cls is an alias for the class statement
         For more information on the statements see the Documentation link.
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+        http://support.sas.com/documentation/cdl/en/prochp/70117/HTML/default/viewer.htm#prochp_hpbin_syntax01.htm
 
         :param kwargs: dict
         :return: SAS result object
         """
         required_set = {}
-        legal_set = {'code', 'id', 'performance', 'target', 'input', 'procopts'}
+        legal_set = {'code', 'freq', 'id', 'performance', 'target', 'input', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPBIN", required_set, legal_set, **kwargs)
 
@@ -108,18 +104,17 @@ class SASutil:
 
         ``required_set = {}``
 
-        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-        'partition', 'performance', 'prune', 'rules'}``
+        ``legal_set= { 'cls', 'performance', 'target', 'var'}
 
         cls is an alias for the class statement
         For more information on the statements see the Documentation link.
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+        http://support.sas.com/documentation/cdl/en/prochp/70117/HTML/default/viewer.htm#prochp_hpsample_syntax01.htm
 
         :param kwargs: dict
         :return: SAS result object
         """
         required_set = {}
-        legal_set = { 'class', 'performance', 'target', 'var', 'procopts'}
+        legal_set = { 'cls', 'performance', 'target', 'var', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPSAMPLE", required_set, legal_set, **kwargs)
