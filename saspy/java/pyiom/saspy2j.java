@@ -188,7 +188,7 @@ public class saspy2j {
                                 // System.out.println(physicalName.value[0]);
                                 StringHolder retname = new StringHolder();
                                 // filesvc.MakeDirectory(physicalName.value[0], "tomods1");
-                                fileref = filesvc.AssignFileref("_tomods1", "", filesvc.FullName("tomods1", physicalName.value[0]), "",
+                                fileref = filesvc.AssignFileref("_tomods1", "", filesvc.FullName("tomods1", physicalName.value[0]), "encoding=\"utf-8\"",
                                                 retname);
 
                                 boolean[] arg0 = new boolean[0];
