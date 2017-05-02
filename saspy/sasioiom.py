@@ -1050,7 +1050,8 @@ class SASsessionIOM():
       else:
          tabname = table
 
-      code  = "data _null_; file LOG; d = open('"+tabname+"');\n"
+      code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
+      code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
       code += "length var $256;\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
@@ -1079,7 +1080,11 @@ class SASsessionIOM():
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
    
-      code  = "data _null_; set "+tabname+"(obs=1); put 'FMT_CATS=';\n"
+      topts             = dict(dsopts)
+      topts['obs']      = 1
+      topts['firstobs'] = ''
+
+      code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;"
@@ -1093,7 +1098,7 @@ class SASsessionIOM():
 
       delim = "'"+'%02d' % ord("\t".encode(self.sascfg.encoding))+"'x "
 
-      code = "data _null_; set "+tabname+";\n file _tomods1; put "
+      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1; put "
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
