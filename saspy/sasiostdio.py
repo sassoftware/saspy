@@ -862,7 +862,12 @@ class SASsessionSTDIO():
       import socket as socks
       datar = ""
 
-      code  = "proc sql; create view sasdata2dataframe as select * from "+libref+"."+table+self._sb._dsopts(dsopts)+";quit;\n"
+      if libref:
+         tabname = libref+"."+table
+      else:
+         tabname = table
+
+      code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code += "data _null_; file STDERR;d = open('sasdata2dataframe');\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
@@ -895,7 +900,7 @@ class SASsessionSTDIO():
       topts['obs']      = 1
       topts['firstobs'] = ''
       
-      code  = "data _null_; set "+libref+"."+table+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+      code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;\n"
@@ -922,7 +927,7 @@ class SASsessionSTDIO():
    
       code  = ""
       code += "filename sock socket '"+host+":"+str(port)+"' lrecl=32767 recfm=v termstr=LF;\n"
-      code += " data _null_; set "+libref+"."+table+self._sb._dsopts(dsopts)+";\n file sock; put "
+      code += " data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file sock; put "
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
