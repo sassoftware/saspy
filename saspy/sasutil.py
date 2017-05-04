@@ -61,12 +61,10 @@ class SASutil:
         """
         Python method to call the HPIMPUTE procedure
 
-        ``required_set = {}``
+        ``required_set = {'impute'}``
 
-        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-        'partition', 'performance', 'prune', 'rules'}``
+        ``legal_set = {'input', 'impute', 'performance', 'id', 'freq', 'code', 'procopts'}``
 
-        cls is an alias for the class statement
         For more information on the statements see the Documentation link.
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
@@ -74,7 +72,7 @@ class SASutil:
         :param kwargs: dict
         :return: SAS result object
         """
-        required_set = {'input'}
+        required_set = {'impute'}
         legal_set = {'input', 'impute', 'performance', 'id', 'freq', 'code',
                      'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
