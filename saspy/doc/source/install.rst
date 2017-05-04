@@ -309,6 +309,10 @@ encoding  -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and 
     windows-1252, respectively. 
+appserver -
+    If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
+    that you want to connect to, i.e.: 'SASApp - Workspace Server'. Without this the Object spawner will only try the
+    first one in the list of app servers it supports.
 
 .. code-block:: ipython3
 
@@ -331,15 +335,17 @@ encoding  -
                 'iomhost'   : 'linux.iom.host',
                 'iomport'   : 8591,
                 'encoding'  : 'latin1',
-                'classpath' : cpL
-               }
+                'classpath' : cpL,
+                'appserver' : 'SASApp Prod - Workspace Server'
+                }
 
     # Unix client and Windows IOM server
     iomwin   = {'java'      : '/usr/bin/java',
                 'iomhost'   : 'windows.iom.host',
                 'iomport'   : 8591,
                 'encoding'  : 'windows-1252',
-                'classpath' : cpL
+                'classpath' : cpL,
+                'appserver' : 'SASApp Test - Workspace Server'
                }
 
     # Windows client and Unix IOM server

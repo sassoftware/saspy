@@ -58,6 +58,7 @@ class SASconfigIOM:
       self.classpath = cfg.get('classpath', '')
       self.authkey   = cfg.get('authkey', '')
       self.timeout   = cfg.get('timeout', None)
+      self.appserver = cfg.get('appserver', '')
 
 
       # GET Config options
@@ -124,6 +125,13 @@ class SASconfigIOM:
             print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.authkey = inak   
+
+      inapp = kwargs.get('appserver', '')
+      if len(inapp) > 0:
+         if lock and len(self.apserver):
+            print("Parameter 'appserver' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.appserver = inapp   
 
       inencoding = kwargs.get('encoding', '')
       if len(inencoding) > 0:
@@ -261,6 +269,8 @@ class SASsessionIOM():
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
       if self.sascfg.timeout is not None:
          parms += ["-timeout", str(self.sascfg.timeout)]
+      if self.sascfg.appserver:
+         parms += ["-appname", "'"+self.sascfg.appserver+"'"]
       if not zero:
          parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
          parms += ["-user", user]     
@@ -383,7 +393,7 @@ class SASsessionIOM():
          while len(pw) == 0:
             pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
          pw += '\n'
-         self.stdin[0].send(pw.encode(self.sascfg.encoding))
+         self.stdin[0].send(pw.encode())
 
       ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
 
@@ -469,7 +479,7 @@ class SASsessionIOM():
                break
             sleep(0.5)
    
-      x = logf.decode(self.sascfg.encoding, errors='replace').replace(code1, " ")
+      x = logf.decode(errors='replace').replace(code1, " ")
       self._log += x
 
       if os.name == 'nt': 
@@ -537,7 +547,7 @@ class SASsessionIOM():
             self.pid = None
             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
  
-      return lstf.decode(self.sascfg.encoding, errors='replace')
+      return lstf.decode(errors='replace')
    
    def _getlsttxt(self, wait=5, jobid=None):
       f2 = [None]
@@ -560,7 +570,7 @@ class SASsessionIOM():
       
             if (eof != -1):
                final = lstf.partition(b"Tom was here")
-               f2 = final[0].decode(self.sascfg.encoding, errors='replace').rpartition(chr(12))
+               f2 = final[0].decode(errors='replace').rpartition(chr(12))
                break
 
       lst = f2[0]
@@ -602,7 +612,7 @@ class SASsessionIOM():
       if (ods):
          pgm += odsopen
    
-      pgm += code.encode(self.sascfg.encoding)+b'\n'+b'tom says EOL=ASYNCH                          \n'
+      pgm += code.encode()+b'\n'+b'tom says EOL=ASYNCH                          \n'
    
       if (ods):
          pgm += odsclose
@@ -706,13 +716,13 @@ class SASsessionIOM():
       if ods:
          pgm += odsopen
    
-      pgm += mj+b'\n'+pcodei.encode(self.sascfg.encoding)+pcodeiv.encode(self.sascfg.encoding)
-      pgm += code.encode(self.sascfg.encoding)+b'\n'+pcodeo.encode(self.sascfg.encoding)+b'\n'+mj
+      pgm += mj+b'\n'+pcodei.encode()+pcodeiv.encode()
+      pgm += code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj
    
       if ods:
          pgm += odsclose
 
-      pgm += b'\n'+logcodei.encode(self.sascfg.encoding)+b'\n'
+      pgm += b'\n'+logcodei.encode()+b'\n'
       self.stdin[0].send(pgm+b'tom says EOL='+logcodeo.encode()+b'\n')
 
       while not done:
@@ -738,7 +748,7 @@ class SASsessionIOM():
                        lstf = lstf.rsplit(logcodeo)[0]
                        break
                  try:
-                    lst = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+                    lst = self.stdout[0].recv(4096).decode(errors='replace')
                  except (BlockingIOError):
                     lst = b''
 
@@ -748,7 +758,7 @@ class SASsessionIOM():
                  else:
                     sleep(0.1)
                     try:
-                       log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace') 
+                       log = self.stderr[0].recv(4096).decode(errors='replace') 
                     except (BlockingIOError):
                        log = b''
 
@@ -758,7 +768,7 @@ class SASsessionIOM():
                        if logf.count(logcodeo) >= 1:
                           bail = True
                        if not bail and bc:
-                          self.stdin[0].send(odsclose+logcodei.encode(self.sascfg.encoding)+b'tom says EOL='+logcodeo.encode()+b'\n')
+                          self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo.encode()+b'\n')
                           bc = False
              done = True
 
@@ -791,7 +801,7 @@ class SASsessionIOM():
              else:
                 print('Exception ignored, continuing to process...\n')
 
-             self.stdin[0].send(odsclose+logcodei.encode(self.sascfg.encoding)+b'tom says EOL='+logcodeo.encode()+b'\n')
+             self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo.encode()+b'\n')
 
       trip = lstf.rpartition("/*]]>*/")      
       if len(trip[1]) > 0 and len(trip[2]) < 100:
@@ -849,7 +859,7 @@ class SASsessionIOM():
                 outrc = str(rc)
                 return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+outrc, LST='', ABORT=True)
 
-            lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
+            lst = self.stdout.read1(4096).decode(errors='replace')
             lstf += lst
             if len(lst) > 0:
                 lsts = lst.rpartition('Select:')
@@ -858,7 +868,7 @@ class SASsessionIOM():
                     query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                     print('Processing interrupt\nAttn handler Query is\n\n' + query)
                     response = self.sascfg._prompt("Please enter your Response: ")
-                    self.stdin[0].send(response.encode(self.sascfg.encoding) + b'\n')
+                    self.stdin[0].send(response.encode() + b'\n')
                     if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
                        bc = True
                        break
@@ -876,7 +886,7 @@ class SASsessionIOM():
                         #print("******************No 'Select' or 'Press' found in lst=")
                         pass
             else:
-                log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+                log = self.stderr[0].recv(4096).decode(errors='replace')
                 logf += log
                 self._log += log
 
@@ -1040,7 +1050,8 @@ class SASsessionIOM():
       else:
          tabname = table
 
-      code  = "data _null_; file LOG; d = open('"+tabname+"');\n"
+      code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
+      code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
       code += "length var $256;\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
@@ -1069,7 +1080,11 @@ class SASsessionIOM():
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
    
-      code  = "data _null_; set "+tabname+"(obs=1); put 'FMT_CATS=';\n"
+      topts             = dict(dsopts)
+      topts['obs']      = 1
+      topts['firstobs'] = ''
+
+      code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;"
@@ -1080,8 +1095,10 @@ class SASsessionIOM():
       l2 = l2[2].partition("\n")              
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
-   
-      code = "data _null_; set "+tabname+";\n file _tomods1; put "
+
+      delim = "'"+'%02d' % ord("\t".encode(self.sascfg.encoding))+"'x "
+
+      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1; put "
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
@@ -1096,11 +1113,14 @@ class SASsessionIOM():
                   else:
                      code += 'best32. '
          if i < (len(varlist)-1):
-            code += "'09'x "
+            code += delim
       code += ";\n run;"
 
       ll = self.submit(code, 'text')
-   
+
+      if ll['LST'][0] == "\ufeff":
+         ll['LST'] = ll['LST'][1:len(ll['LST'])]
+
       r = []
       for i in ll['LST'].splitlines():
          r.append(tuple(i.split(sep='\t')))
