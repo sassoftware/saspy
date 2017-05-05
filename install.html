@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 2.1.4 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.1.5 documentation</title>
   
 
   
@@ -37,9 +37,9 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.4 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.5 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
-        <link rel="prev" title="Overview of SASPy" href="overview.html"/> 
+        <link rel="prev" title="Overview" href="overview.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.4
+                2.1.5
               </div>
             
           
@@ -93,16 +93,17 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview of SASPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and configuration</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#install-saspy">Install SASPy</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#configure-saspy">Configure SASPy</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#sascfg-py-details">sascfg.py details</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stdio">STDIO</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#iom">IOM</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#remote">Remote</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#local">Local</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iom-to-mvs-sas">IOM to MVS SAS</a></li>
 </ul>
 </li>
 </ul>
@@ -180,9 +181,9 @@
             
   <div class="section" id="installation-and-configuration">
 <h1>Installation and configuration<a class="headerlink" href="#installation-and-configuration" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="install-saspy">
-<h2>Install SASPy<a class="headerlink" href="#install-saspy" title="Permalink to this headline">¶</a></h2>
-<p>The SASPy package installs just like any other Python package.
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>This package installs just like any other Python package.
 It is a pure Python package and works with Python 3.x
 installations.  To install the latest version using <cite>pip</cite>, you execute the following:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">saspy</span>
@@ -192,7 +193,7 @@ installations.  To install the latest version using <cite>pip</cite>, you execut
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sassoftware</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">saspy</span><span class="o">-</span><span class="n">X</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
 </pre></div>
 </div>
-<p>To use SASPy after installation, you need to edit the sascfg.py file to
+<p>To use this module after installation, you need to edit the sascfg.py file to
 configure it to be able to connect and start a SAS session. Follow the
 instructions in the next section.</p>
 <ul class="simple">
@@ -200,22 +201,21 @@ instructions in the next section.</p>
 <li>If you have questions, open an issue at <a class="reference external" href="https://github.com/sassoftware/saspy/issues">https://github.com/sassoftware/saspy/issues</a>.</li>
 </ul>
 </div>
-<div class="section" id="configure-saspy">
-<h2>Configure SASPy<a class="headerlink" href="#configure-saspy" title="Permalink to this headline">¶</a></h2>
-<p>SASPy can connect and start different kinds of SAS sessions. It can connect to SAS
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>This module can connect and start different kinds of SAS sessions. It can connect to SAS
 on Unix, Mainframe, and Windows. It can connect to a local SAS session or remote session.
 Because of the wide range of connection types, there are a number of different access methods
-that are part of SASPy each of which are used to connect to different kinds of SAS sessions.</p>
+which are used to connect to different kinds of SAS sessions.</p>
 <p>The current set of connection methods are as follows:</p>
 <dl class="docutils">
 <dt><a class="reference internal" href="#stdio">STDIO</a></dt>
 <dd>This connection method is available on the Linux platform only. This
-method enables you to connect to SAS on the same host as SASPy and Python.</dd>
+method enables you to connect to SAS on the same host as your Python process.</dd>
 <dt><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></dt>
 <dd>This connection method is also avaialble on the Linux platform only. This
-method can connect to SAS on the same host (local) or to SAS
-that is installed on a remote host, if you have passwordless SSH configured
-for your Linux user account.</dd>
+method can connect to SAS that is installed on a remote host, if you have passwordless
+SSH configured for your Linux user account.</dd>
 <dt><a class="reference internal" href="#iom">IOM</a></dt>
 <dd>The integrated object method (IOM) connection method supports SAS on any platform.
 This method can make a local Windows connection and it is also the way to connect
@@ -226,7 +226,7 @@ Server on any supported SAS platform.</dd>
 is used to enable all the connection methods. The file contains instructions and
 examples, but this section goes into more detail to explain how to configure each
 type of connection.</p>
-<p>Depending upon how you installed SASPy, the sascfg.py file may be in different
+<p>Depending upon how you did your installation, the sascfg.py file may be in different
 locations on the file system:</p>
 <ul class="simple">
 <li>In a regular pip install, it is under the site-packages directory in the Python
@@ -237,8 +237,8 @@ it may use the sascfg.py file from that location and not copy it to site-package
 <p>First, make sure that you update the sascfg.py file that Python uses. If you are
 familiar with pip and Git, then you probably know where to look. If you are not
 familiar with those tools, then there is a very simple way to determine the location
-that Python is using to get the SASPy modules.</p>
-<p>After installing SASPy, start Python and <code class="docutils literal"><span class="pre">import</span> <span class="pre">saspy</span></code>. Then, simply submit
+that Python is using to get at this module.</p>
+<p>After installing, start Python and <code class="docutils literal"><span class="pre">import</span> <span class="pre">saspy</span></code>. Then, simply submit
 <code class="docutils literal"><span class="pre">saspy.SAScfg</span></code>. Python will show you where it found the module. Edit that one.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># this is an example of a repo install on Windows:</span>
 
@@ -295,10 +295,10 @@ the list.</p>
 </div>
 <div class="section" id="stdio">
 <h3>STDIO<a class="headerlink" href="#stdio" title="Permalink to this headline">¶</a></h3>
-<p>This is the original connection method for SASPy. This works with Unix only,
+<p>This is the original access method. This works with Unix only,
 because SAS on Windows platforms does not support line-mode style connections
 (through stdin, stdout, stderr). This connection method is for a local
-connection to SAS that is installed on the same host as Python and SASPy.</p>
+connection to SAS that is installed on the same host as Python.</p>
 <p>There are only three keys for this configuration definition dictionary:</p>
 <dl class="docutils">
 <dt>saspath -</dt>
@@ -362,19 +362,19 @@ method.</p>
 to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
 Manager to control the distribution of connections to the various grid nodes
 and integrates all the monitoring and administration that SAS Grid Manager provides.</p>
-<p>The IOM connection method also enables SASPy to connect to SAS on Windows platforms.
+<p>The IOM connection method also enables you to connect to SAS on Windows platforms.
 The connection can be to a local SAS installation or a remote IOM server running on
 Windows.</p>
 <p>The IOM connection method requires the following:</p>
 <ul class="simple">
 <li>The SAS Java IOM Client</li>
 <li>Setting the CLASSPATH to access the SAS Java IOM Client JAR files.</li>
-<li>Setting the CLASSPATH to include the the SASPy JAR file.</li>
+<li>Setting the CLASSPATH to include the the saspyiom.jar file.</li>
 </ul>
 <p>The <code class="docutils literal"><span class="pre">'classpath'</span></code> key for the configuration definition requires a little additional
 explanation before we get to further details. There are four (4) JAR files that are
 required for the Java IOM Client. The JAR files are available from your existing SAS
-installation.  There is one JAR file that is provided with the SASPy package:
+installation.  There is one JAR file that is provided with this package:
 saspyiom.jar. These five JAR files must be provided (fully qualified paths) in a
 CLASSPATH environment variable. This is done in a very simple way in the sascfg.py
 file, like so:</p>
@@ -430,7 +430,7 @@ enter the fully qualified path.</dd>
 <dt>iomport -</dt>
 <dd>(Required) The port that IOM server is listening on for workspace connections.</dd>
 <dt>classpath -</dt>
-<dd>(Required) The CLASSPATH to the IOM client JAR files and SASPy client jar.</dd>
+<dd>(Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar.</dd>
 <dt>authkey -</dt>
 <dd>The keyword that starts a line in the authinfo file contining user and or password for this connection.</dd>
 <dt>omruser -</dt>
@@ -485,7 +485,7 @@ first one in the list of app servers it supports.</dd>
            <span class="p">}</span>
 
 <span class="c1"># Windows client and Unix IOM server</span>
-<span class="n">winiomwin</span>   <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;java&#39;</span><span class="p">,</span>
+<span class="n">winiomlinux</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;java&#39;</span><span class="p">,</span>
                <span class="s1">&#39;iomhost&#39;</span>   <span class="p">:</span> <span class="s1">&#39;linux.iom.host&#39;</span><span class="p">,</span>
                <span class="s1">&#39;iomport&#39;</span>   <span class="p">:</span> <span class="mi">8591</span><span class="p">,</span>
                <span class="s1">&#39;encoding&#39;</span>  <span class="p">:</span> <span class="s1">&#39;latin1&#39;</span><span class="p">,</span>
@@ -521,7 +521,7 @@ the directory&#8211;do not include the file itself. For example:</p>
 <dt>java      -</dt>
 <dd>(Required) The path to the Java executable to use.</dd>
 <dt>classpath -</dt>
-<dd>(Required) The CLASSPATH to the IOM client JAR files and SASPy client jar.</dd>
+<dd>(Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar.</dd>
 <dt>encoding  -</dt>
 <dd>This is the Python encoding value that matches the SAS session encoding of
 the IOM server to which you are connecting. The Python encoding values can be
@@ -557,6 +557,30 @@ absence of the <code class="docutils literal"><span class="pre">'iomhost'</span>
 session instead of remote IOM (it is a different connection type).</p>
 </div>
 </div>
+<div class="section" id="iom-to-mvs-sas">
+<h4>IOM to MVS SAS<a class="headerlink" href="#iom-to-mvs-sas" title="Permalink to this headline">¶</a></h4>
+<p>Yes, you can even connect to a SAS server running on MVS (Mainframe SAS).
+There are a couple of requirements for this to work right. First, you need version 2.1.5 or higher of this module.
+There were a couple tweaks I needed to make to the IOM access method and those are in 2.1.5.</p>
+<p>Also, you need to use the HFS file system for the WORK (and/or USER) library and you also need to set the default file
+system to HFS so temporary files used by this module use HFS instead of the native MVS file system. You can still access
+the native file system in the code you run, but for internal use, this module needs to access the HFS file system.
+To set the default file system (options filesystem=hfs;) you can either set it in the workspace severs config file,
+or you can submit the options statement from your python code after making a connection:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
+<span class="n">ll</span>  <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="s1">&#39;options filesystem=hfs;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The other thing is to set the encoding correctly for this to work. MVS is an EBCDIC system, not ASCII. For the most part,
+this is all handled in IOM for you, but there is a small amount of transcoding required internally in this module. The
+default encoding on MVS is OPEN_ED-1047, although it can be set to any number of other EBCDIC encodings. The default Python
+encodings do not include the 1047 code page. I did find a &#8216;cp1047&#8217; code page in a separate pip installable module which
+seems to match the OPEN_ED-1047 code page.</p>
+<p>At the time of this writing, the only transcoding I need to do in python for this to work can be accomplished using the
+&#8216;cp500&#8217; encoding which is part of the default set, so you don&#8217;t have to install other modules. It&#8217;s possible this could
+change in the future, but I don&#8217;t have any expectations of that for now, so using &#8216;cp500&#8217; is ok if you don&#8217;t want to
+install other non-standard python modules.</p>
+</div>
 </div>
 </div>
 </div>
@@ -574,7 +598,7 @@ session instead of remote IOM (it is a different connection type).</p>
         <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="overview.html" class="btn btn-neutral" title="Overview of SASPy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="overview.html" class="btn btn-neutral" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -605,7 +629,7 @@ session instead of remote IOM (it is a different connection type).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.4',
+            VERSION:'2.1.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

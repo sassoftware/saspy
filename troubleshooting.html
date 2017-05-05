@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Troubleshooting &mdash; saspy 2.1.4 documentation</title>
+  <title>Troubleshooting &mdash; saspy 2.1.5 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.4 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.5 documentation" href="index.html"/>
         <link rel="next" title="License" href="license.html"/>
         <link rel="prev" title="Contributing new methods" href="adding-procedures.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.4
+                2.1.5
               </div>
             
           
@@ -93,7 +93,7 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview of SASPy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -179,18 +179,18 @@
             
   <div class="section" id="troubleshooting">
 <h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h1>
-<p>This chapter covers troubleshooting procedures with SASPy. While we don&#8217;t expect you to have trouble,
+<p>This chapter covers troubleshooting procedures with this module. While we don&#8217;t expect you to have trouble,
 there are some cases where you might not have everything working right. We&#8217;ve tried to provide an easy reference
 for diagnosing and fixing those issues here.</p>
 <div class="section" id="connection-and-configuration-issues">
 <h2>Connection and configuration issues<a class="headerlink" href="#connection-and-configuration-issues" title="Permalink to this headline">¶</a></h2>
-<p>Although setting up and configuring SASPy is pretty simple, if you do have something not quite right, it
+<p>Although setup and configuration is pretty simple, if you do have something not quite right, it
 may be hard to figure out what&#8217;s wrong. That&#8217;s when you come to this chapter.</p>
 <p>We&#8217;ve added quite a bit of self diagnostics and error messages for many of the likely issues that can
 happen trying to start up a connection to SAS. Each access method has its own set of usual suspects. With a
 little help and explaination here, you can probably diagnose and correct any issue you might have.</p>
 <p>Problems in this category will be when using the saspy.SASsession() method to connect to a SAS session.
-The very first thing to look at is your sascfg.py file (in the SASPy installation). This is where the
+The very first thing to look at is your sascfg.py file (in the installation directory). This is where the
 configurations definition are. The file itself has documentation and so does <a class="reference internal" href="install.html"><span class="doc">Installation and configuration</span></a>.</p>
 <div class="section" id="common-diagnostics">
 <h3>Common diagnostics<a class="headerlink" href="#common-diagnostics" title="Permalink to this headline">¶</a></h3>
@@ -198,8 +198,8 @@ configurations definition are. The file itself has documentation and so does <a 
 you will get and can use to track down the issue.</p>
 <p>The first is that if the SASsession() method fails, it will return any erros it can, as well as the
 actual command it was trying to run to connect to SAS. That will vary with access method, but in each
-case, you can cut-n-paste that command into a shell on the machine where SASPy (Python) is running
-and that may provide more diagnostics and error messages that SASPy may have displayed.</p>
+case, you can cut-n-paste that command into a shell on the machine where Python is running
+and that may provide more diagnostics and error messages then may have been displayed from SASsession().</p>
 <p>For instance, here&#8217;s a very simple case using the STDIO access method on a local linux machine. The
 Configuration Definition is nothing but a valid path which should work.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">}</span>
@@ -258,9 +258,9 @@ valid on Unix, not Windows (both client side and SAS side). The &#8216;saspath&#
 it has to be right on the remote Unix machine that you are ssh&#8217;ing to. That might not be the same path
 as on your local Unix SAS deployment.</p>
 <p>Secondly, this requires that you have passwordless SSH configured and working for each user that will
-be connecting between the local and remote machines. That can be diagnosed independant of SASPy and
-Python. If the connection cannot be made, you should see that error message with the command that SASPy was
-trying to execute, and you can run it to get better diagnostic error messages that can tell you if its
+be connecting between the local and remote machines. That can be diagnosed independant of this module and
+Python. If the connection cannot be made, you should see that error message with the command that was
+trying to be executed, and you can run it to get better diagnostic error messages that can tell you if its
 a problem with your SSH credentials, the machine you&#8217;re trying to reach isn&#8217;t listening, or any other
 problem there might be.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
@@ -309,7 +309,7 @@ There are basically two possibilities where something can go wrong: Java or IOM.
 <li>You don&#8217;t have your classpath right, or don&#8217;t have the right JAR files.</li>
 </ol>
 </div></blockquote>
-<p>SASPy will catch Java startup problems and return the system error(s) that it got. And, like in the cases above,
+<p>Java startup problems will be caught and whatever system error(s) there were will be returned. And, like in the cases above,
 you will still get the exact command trying to be run, so you can always run it too and see if there are any more diagnostics
 and error messages.</p>
 <p>Here an example of the first case, a bad path to the Java command. This example is from Jupyter Notebook on Windows.</p>
@@ -362,7 +362,7 @@ The second case has a valid classpath, but is missing one of the IOM jars.</p>
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
 </pre></div>
 </div>
-<p>And if we submit that command, we see the same error that SASPy reported.</p>
+<p>And if we submit that command, we see the same error that was reported.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">:</span>\<span class="o">&gt;</span><span class="n">java</span> <span class="o">-</span><span class="n">classpath</span> <span class="s2">&quot;.&quot;</span> <span class="n">pyiom</span><span class="o">.</span><span class="n">saspy2j</span> <span class="o">-</span><span class="n">host</span> <span class="n">localhost</span> <span class="o">-</span><span class="n">stdinport</span> <span class="mi">59102</span> <span class="o">-</span><span class="n">stdoutport</span> <span class="mi">59103</span> <span class="o">-</span><span class="n">stderrport</span> <span class="mi">59104</span> <span class="o">-</span><span class="n">zero</span>
 <span class="n">Error</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">find</span> <span class="ow">or</span> <span class="n">load</span> <span class="n">main</span> <span class="k">class</span> <span class="nc">pyiom</span><span class="o">.</span><span class="n">saspy2j</span>
 </pre></div>
@@ -417,7 +417,7 @@ The second case has a valid classpath, but is missing one of the IOM jars.</p>
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
 </pre></div>
 </div>
-<p>And if we run that command ourselves... Same error as SASPy reported.</p>
+<p>And if we run that command ourselves... Same error as was reported.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">:</span>\<span class="o">&gt;</span> <span class="n">java</span> <span class="o">-</span><span class="n">classpath</span> <span class="s2">&quot;C:\java\sas.svc.connection.jar;C:\java\log4j.jar;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar&quot;</span> <span class="n">pyiom</span><span class="o">.</span><span class="n">saspy2j</span> <span class="o">-</span><span class="n">host</span> <span class="n">localhost</span> <span class="o">-</span><span class="n">stdinport</span> <span class="mi">59110</span> <span class="o">-</span><span class="n">stdoutport</span> <span class="mi">59111</span> <span class="o">-</span><span class="n">stderrport</span> <span class="mi">59112</span> <span class="o">-</span><span class="n">zero</span>
 
 <span class="n">Error</span><span class="p">:</span> <span class="n">A</span> <span class="n">JNI</span> <span class="n">error</span> <span class="n">has</span> <span class="n">occurred</span><span class="p">,</span> <span class="n">please</span> <span class="n">check</span> <span class="n">your</span> <span class="n">installation</span> <span class="ow">and</span> <span class="k">try</span> <span class="n">again</span>
@@ -451,7 +451,7 @@ The second case has a valid classpath, but is missing one of the IOM jars.</p>
 </div>
 <p>If you run the Java command and you see an error similar to the following, about a socket connection failure, that suggests that your CLASSPATH is correct
 and that the problem might be connecting to the IOM server. That error shows that java came up and is running code from saspyiom.jar. It is trying to connect
-back to the saspy python process, which isn&#8217;t running, thus the connection error. But it means, at least, saspyiom.jar was found.</p>
+back to the python process, which isn&#8217;t running, thus the connection error. But it means, at least, saspyiom.jar was found.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">ConnectException</span><span class="p">:</span> <span class="n">Connection</span> <span class="n">refused</span>
         <span class="n">at</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">PlainSocketImpl</span><span class="o">.</span><span class="n">socketConnect</span><span class="p">(</span><span class="n">Native</span> <span class="n">Method</span><span class="p">)</span>
         <span class="n">at</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">AbstractPlainSocketImpl</span><span class="o">.</span><span class="n">doConnect</span><span class="p">(</span><span class="n">AbstractPlainSocketImpl</span><span class="o">.</span><span class="n">java</span><span class="p">:</span><span class="mi">350</span><span class="p">)</span>
@@ -468,7 +468,7 @@ back to the saspy python process, which isn&#8217;t running, thus the connection
 </pre></div>
 </div>
 <p>So if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM.
-SASPy will report the IOM Error message followed by the command that was trying to to run.
+The IOM Error message will be reported, followed by the command that was trying to to run.
 There are a few obvious misconfigurations that can happen here.</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -516,7 +516,7 @@ There are a few obvious misconfigurations that can happen here.</p>
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
 </pre></div>
 </div>
-<p>So, hopefully this has shown you how to diagnose connection and configuration problems with SASPy. When you have things set up right, you shouldn&#8217;t
+<p>So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn&#8217;t
 have any problems, it should just work!</p>
 </div>
 </div>
@@ -631,7 +631,7 @@ following code (assuming your session object is named sas).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.4',
+            VERSION:'2.1.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
