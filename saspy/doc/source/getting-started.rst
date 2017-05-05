@@ -7,28 +7,28 @@
 Getting started
 ***************
 
-SASPy is an interface module to the SAS System. It connects to SAS 9.4 
+This is an interface module to the SAS System. It connects to SAS 9.4 
 (released July 2013) or newer and enables Python programmers to take 
 advantage of their licenced SAS infrastructure through Python 3.x.
 
-The SASPy interface is designed to enable programmers to use Python 
+The interface is designed to enable programmers to use Python 
 syntax and constructs to interact with SAS. The interface makes SAS the
 analytical engine--or "calculator" for data analysis. In its most simple
-form, SASPy is a code translator that accepts Python commands and 
+form, it is a code translator that accepts Python commands and 
 converts them into SAS language statements. The statements are run,
-and then SASPy displays the results in Python.
+and then the results are returned to Python to be displayed or accessed.
 
-SASPy is an open source project. Your contributions are appreciated 
+This is an open source project. Your contributions are appreciated 
 and encouraged. Please open issues in gitlab for problems that you see!
 
-The rest of this section demonstrates how to use SASPy with a simple example.
+The rest of this section demonstrates how to use this module with a simple example.
 The example uses `Kaggle Resources Analytics 
 <https://www.kaggle.com/ludobenistant/hr-analytics>`_ data.
 
  
 Initial import
 ==============
-It is assumed you have already :doc:`installed and configured <install>` SASPy.
+It is assumed you have already done the :doc:`installation and configuration <install>`.
 If you have not, refer to that section for more information.
 
 .. code-block:: ipython3
@@ -153,7 +153,7 @@ Basic heatmap
 Submit SAS code directly from Python session
 ============================================
 The proceeding examples demonstrate commonly used Python
-methods that are available with the SASPy module.
+methods that are available with this module.
 
 If you encounter a situation where you need to submit SAS
 statements directly to the SAS system, the submit method can
@@ -199,11 +199,11 @@ We create two partitions: test and training.
 
 Build an analytical model
 =========================
-One of the key activities for SASPy is analytical modeling. The SAS
+One of the key activities for this module is analytical modeling. The SAS
 system is capable of modeling in a number of distinct areas
 (statistics, machine learning, econometric time series, and so on).
 
-The capabilities of SASPy are organized similarly to make it easier 
+These capabilities are organized similarly to make it easier 
 for users. Grouping functionality also avoids cluttered tab-complete 
 lists with methods that you might not have licensed.
 
@@ -344,10 +344,10 @@ These rules apply to both target and input:
 Evaluating model diagnostics
 ============================
 Perhaps the most important part of modeling is evaluating the quality of the 
-model. SASPy makes this very easy by leveraging the rich graphical and tabular
+model. This is made very easy by leveraging the rich graphical and tabular
 output of `SAS ODS <http://support.sas.com/rnd/base/ods/>`_.
 
-The output of a model in SASPy is a :any:`SASresults` object. It contains all 
+The output of a model in is a :any:`SASresults` object. It contains all 
 the ODS tables and graphics that were produced by the SAS procedure. You can 
 see all the available objects by using ``dir()`` or tab-complete on the object.
 
