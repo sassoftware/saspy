@@ -347,7 +347,7 @@ appserver -
                }
 
     # Windows client and Unix IOM server
-    winiomwin   = {'java'      : 'java',
+    winiomlinux = {'java'      : 'java',
                    'iomhost'   : 'linux.iom.host',
                    'iomport'   : 8591,
                    'encoding'  : 'latin1',
