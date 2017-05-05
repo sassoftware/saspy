@@ -1,6 +1,6 @@
-#################
-Overview of SASPy
-#################
+########
+Overview
+########
 .. I used http://documentation-style-guide-sphinx.readthedocs.io/en/latest/style-guide.html
 
 
@@ -8,7 +8,7 @@ Overview of SASPy
 What is this?
 *************
 
-SASPy is a package that provides Python APIs to the SAS system. You can start a
+This module provides Python APIs to the SAS system. You can start a
 SAS session and run analytics from Python through a combination of
 object-oriented methods and Python magics.
 
@@ -40,7 +40,7 @@ releases.
 **************
 Jupyter magics
 **************
-Typically, programming with SASPy is performed with the Python functions
+Typically, programming with this module is performed with the Python functions
 that are provided by the package.  For example, to view the first few rows
 of a data set, you can use the ``head()`` method. However, if you are an
 experienced SAS programmer, there might be occasions in which you prefer

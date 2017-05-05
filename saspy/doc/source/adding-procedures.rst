@@ -11,10 +11,10 @@ Contributing new methods
 
 Overview
 --------
-SASPy is broken into product areas that largely follow the SAS product areas.
+This module is broken into product areas that largely follow the SAS product areas.
 There are many many procedures, which translate to object methods, that are not 
 currently included in the package. The aim of this document is to outline the 
-steps you can take to add additional methods (procedures) to SASPy.
+steps you can take to add additional methods (procedures).
 
 A copy of the process is included inline of each product file (sasstat.py, 
 sasets.py, sasqc.py, and so on). The project maintainers expect that a new 
@@ -50,7 +50,7 @@ To add a new procedure follow these steps:
 .. Example
 .. =======
 .. Following the procedure above, I will add a method for the ADAPTIVEREG procedure.
-.. I assume you have forked the SASPy repository and it is in your home directory.
+.. I assume you have forked this repository and it is in your home directory.
 
 .. video of forking the repository
 

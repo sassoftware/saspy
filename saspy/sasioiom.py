@@ -1118,7 +1118,7 @@ class SASsessionIOM():
 
       ll = self.submit(code, 'text')
 
-      if ll['LST'][0] == "\ufeff":
+      if (len(ll['LST']) > 1) and (ll['LST'][0] == "\ufeff"):
          ll['LST'] = ll['LST'][1:len(ll['LST'])]
 
       r = []
