@@ -202,7 +202,28 @@ class SASProcCommons:
         if 'identify' in args:
             self.logger.debug("identify statement,length: %s,%s", args['identify'], len(args['identify']))
             code += "identify %s;\n" % (args['identify'])
-
+        if 'impute' in args:
+            self.logger.debug("impute statement,length: %s,%s", args['impute'], len(args['impute']))
+            if not (isinstance(args['impute'], dict) or isinstance(args['impute'], str)):
+                raise SyntaxError("IMPUTE must be a dictionary: %s" % str(type(args['impute'])))
+            if isinstance(args['impute'], dict):
+                usedVars = []
+                tup_code = ''
+                contantValues = args['impute'].pop('value', None)
+                if contantValues is not None:
+                    if not all(isinstance(x, tuple) for x in contantValues):
+                        raise SyntaxError("The elements in the 'value' key must be tuples")
+                    for t in contantValues:
+                        tup_code += "impute %s / value = %s;\n" % (t[0], t[1])
+                        usedVars.append(t[0])
+                meth_code = ''
+                for key, values in args['impute'].items():
+                    for v in values:
+                        meth_code += 'impute %s / method = %s;\n' % (v, key)
+                        usedVars.append(v)
+                code += '\ninput ' + ' '.join(list(set(usedVars))) + ';\n' + tup_code + meth_code + 'run;'
+            elif isinstance(args['impute'], str):
+                code += "impute %s;\n" % (args['impute'])
         if 'input' in args:
             if isinstance(args['input'], str):
                 self.logger.debug("input statement,length: %s,%s", args['input'], len(args['input']))

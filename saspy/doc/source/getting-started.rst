@@ -9,7 +9,7 @@ Getting started
 
 This is an interface module to the SAS System. It connects to SAS 9.4 
 (released July 2013) or newer and enables Python programmers to take 
-advantage of their licenced SAS infrastructure through Python 3.x.
+advantage of their licensed SAS infrastructure through Python 3.x.
 
 The interface is designed to enable programmers to use Python 
 syntax and constructs to interact with SAS. The interface makes SAS the
@@ -155,6 +155,7 @@ Submit SAS code directly from Python session
 The proceeding examples demonstrate commonly used Python
 methods that are available with this module.
 
+
 If you encounter a situation where you need to submit SAS
 statements directly to the SAS system, the submit method can
 accomplish that. The following example creates a side-by-side
@@ -239,7 +240,7 @@ a SAS procedure. The API has a complete list of methods for each object.
 
 You can use the ``dir()`` function to see a list of the available methods. 
 For example, ``dir(stat)`` provides a list of the methods that are available. 
-**Not** all of the methods corresponds to a procedure but the vast majority do.
+**Not** all of the methods correspond to a procedure but the vast majority do.
 
 .. code-block:: python
 
@@ -332,7 +333,7 @@ These rules apply to both target and input:
 * Variables are treated as nominals if any of the following are met:
 
   * The variable is a character type in SAS.
-  * The variable is specificed in the nominals list.
+  * The variable is specified in the nominals list.
   * The variable is paired with dictionary key ``'nominal'``.
 
 .. note:: If a variable is a SAS character type then it does not need to be 

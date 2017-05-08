@@ -38,7 +38,7 @@
 
 import os
 import re
-#from pdb import set_trace as bp
+# from pdb import set_trace as bp
 import logging
 
 try:
@@ -1122,7 +1122,7 @@ class SASdata:
                 split_code += "\t%s.%s%s_score(drop=_Partind_ _cvfold:)\n" % (out_libref, out_table, j)
             split_code += ';\n \tset %s.%s;\n' % (out_libref, out_table)
             for z in range(1, k + 1):
-                split_code += "\tif _cvfold%s = 1 then output %s.%s%s_train;\n" % (z, out_libref, out_table, z)
+                split_code += "\tif _cvfold%s = 1 or _partind_ = 1 then output %s.%s%s_train;\n" % (z, out_libref, out_table, z)
                 split_code += "\telse output %s.%s%s_score;\n" % (out_libref, out_table, z)
             split_code += 'run;'
         runcode = True
@@ -1142,6 +1142,10 @@ class SASdata:
                 raise RuntimeError("\n".join(elog))
             if not singleOut:
                 outTableList = []
+                if k == 1:
+                    return (self.sas.sasdata(out_table + str(k) + "_train", out_libref, dsopts=self._dsopts()),
+                            self.sas.sasdata(out_table + str(k) + "_score", out_libref, dsopts=self._dsopts()))
+
                 for j in range(1, k + 1):
                     outTableList.append((self.sas.sasdata(out_table + str(j) + "_train", out_libref, dsopts=self._dsopts()),
                                                self.sas.sasdata(out_table + str(j) + "_score", out_libref, dsopts=self._dsopts())))
@@ -1229,7 +1233,7 @@ class SASdata:
 
         :return: Pandas data frame
         """
-        if self.results != 'Pandas':
+        if self.results.casefold() != 'pandas':
             print("The info method only works with Pandas results")
             return None
         info_code = """
@@ -1316,6 +1320,122 @@ class SASdata:
                   print(ll['LST'])
                else:
                   return ll
+
+    def impute(self, vars: dict, replace: bool = False, prefix: str = 'imp_', out: 'SASData' = None) -> 'SASdata':
+        """
+        Imputes missing values for a SASdata object.
+
+        :param vars: a dictionary in the form of {'varname':'impute type'} or {'impute type':'[var1, var2]'}
+        :param replace:
+        :param prefix:
+        :param out:
+        :return:
+        """
+        outstr = ''
+        if out:
+            if isinstance(out, str):
+                fn = out.partition('.')
+                if fn[1] == '.':
+                    out_libref = fn[0]
+                    out_table = fn[2]
+                else:
+                    out_libref = ''
+                    out_table = fn[0]
+            else:
+                out_libref = out.libref
+                out_table = out.table
+            outstr = "out=%s.%s" % (out_libref, out_table)
+
+        else:
+            out_table = self.table
+            out_libref = self.libref
+
+        # get list of variables and types
+        varcode = "data _null_; d = open('" + self.libref + "." + self.table + "');\n"
+        varcode += "nvars = attrn(d, 'NVARS');\n"
+        varcode += "vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
+        varcode += "put vn nvars; put vl;\n"
+        varcode += "do i = 1 to nvars; var = varname(d, i); put var; end;\n"
+        varcode += "put vt;\n"
+        varcode += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
+        varcode += "run;"
+        print(varcode)
+        ll = self.sas._io.submit(varcode, "text")
+        l2 = ll['LOG'].rpartition("VARNUMS= ")
+        l2 = l2[2].partition("\n")
+        nvars = int(float(l2[0]))
+        l2 = l2[2].partition("\n")
+        varlist = l2[2].upper().split("\n", nvars)
+        del varlist[nvars]
+        l2 = l2[2].partition("VARTYPE=")
+        l2 = l2[2].partition("\n")
+        vartype = l2[2].split("\n", nvars)
+        del vartype[nvars]
+        varListType = dict(zip(varlist, vartype))
+
+        # process vars dictionary to generate code
+        ## setup default statements
+        sql = "proc sql;\n  select\n"
+        sqlsel = ' %s(%s),\n'
+        sqlinto = ' into\n'
+        if len(out_libref)>0 :
+            ds1 = "data " + out_libref + "." + out_table + "; set " + self.libref + "." + self.table + self._dsopts() + ";\n"
+        else:
+            ds1 = "data " + out_table + "; set " + self.libref + "." + self.table + self._dsopts() + ";\n"
+        dsmiss = 'if missing({0}) then {1} = {2};\n'
+        if replace:
+            dsmiss = prefix+'{1} = {0}; if missing({0}) then %s{1} = {2};\n' % prefix
+
+        modesql = ''
+        modeq = "proc sql outobs=1;\n  select %s, count(*) as freq into :imp_mode_%s, :imp_mode_freq\n"
+        modeq += "  from %s where %s is not null group by %s order by freq desc, %s;\nquit;\n"
+
+        # pop the values key because it needs special treatment
+        contantValues = vars.pop('value', None)
+        if contantValues is not None:
+            if not all(isinstance(x, tuple) for x in contantValues):
+                raise SyntaxError("The elements in the 'value' key must be tuples")
+            for t in contantValues:
+                if varListType.get(t[0].upper()) == "N":
+                    ds1 += dsmiss.format((t[0], t[0], t[1]))
+                else:
+                    ds1 += dsmiss.format(t[0], t[0], '"' + str(t[1]) + '"')
+        for key, values in vars.items():
+            if key.lower() in ['midrange', 'random']:
+                for v in values:
+                    sql += sqlsel % ('max', v)
+                    sql += sqlsel % ('min', v)
+                    sqlinto += ' :imp_max_' + v + ',\n'
+                    sqlinto += ' :imp_min_' + v + ',\n'
+                    if key.lower() == 'midrange':
+                        ds1 += dsmiss.format(v, v, '(&imp_min_' + v + '.' + ' + ' + '&imp_max_' + v + '.' + ') / 2')
+                    elif key.lower() == 'random':
+                        # random * (max - min) + min
+                        ds1 += dsmiss.format(v, v, '(&imp_max_' + v + '.' + ' - ' + '&imp_min_' + v + '.' + ') * ranuni(0)' + '+ &imp_min_' + v + '.')
+                    else:
+                        raise SyntaxError("This should not happen!!!!")
+            else:
+                for v in values:
+                    sql += sqlsel % (key, v)
+                    sqlinto += ' :imp_' + v + ',\n'
+                    if key.lower == 'mode':
+                        modesql += modeq % (v, v, self.libref + "." + self.table + self._dsopts() , v, v, v)
+                    if varListType.get(v.upper()) == "N":
+                        ds1 += dsmiss.format(v, v, '&imp_' + v + '.')
+                    else:
+                        ds1 += dsmiss.format(v, v, '"&imp_' + v + '."')
+
+        if len(sql) > 20:
+            sql = sql.rstrip(', \n') + '\n' + sqlinto.rstrip(', \n') + '\n  from ' + self.libref + '.' + self.table + self._dsopts() + ';\nquit;\n'
+        else:
+            sql = ''
+        ds1 += 'run;\n'
+
+        if self.sas.nosub:
+            print(modesql + sql + ds1)
+            return None
+        ll = self.sas.submit(modesql + sql + ds1)
+        return self.sas.sasdata(out_table, libref=out_libref, results=self.results, dsopts=self._dsopts())
 
     def sort(self, by: str, out: object = '', **kwargs) -> 'SASdata':
         """
@@ -1423,7 +1543,7 @@ class SASdata:
                     self.libref, self.table, self._dsopts())
                 event_code += "\nclass %s ; \nrun;" % target
                 event_code += "data _null_; set work._DMDBCLASSTARGET; where ^(NRAW eq . and CRAW eq '') and lowcase(name)=lowcase('%s');" % target
-                ec = self.sas.submit(event_code)
+                ec = self.sas._io.submit(event_code)
                 HTML(ec['LST'])
                 # TODO: Finish output of the list of nominals variables
 
