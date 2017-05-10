@@ -891,6 +891,29 @@ and generates a bar chart.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="saspy.SASdata.impute">
+<code class="descname">impute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.impute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imputes missing values for a SASdata object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vars</strong> &#8211; a dictionary in the form of {&#8216;varname&#8217;:&#8217;impute type&#8217;} or {&#8216;impute type&#8217;:&#8217;[var1, var2]&#8217;}</li>
+<li><strong>replace</strong> &#8211; </li>
+<li><strong>prefix</strong> &#8211; </li>
+<li><strong>out</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASdata.info">
 <code class="descname">info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display the column info on a SAS data object</p>
@@ -1233,11 +1256,9 @@ Documentation link:
 <dt id="saspy.SASutil.hpimpute">
 <code class="descname">hpimpute</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASutil.hpimpute" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the HPIMPUTE procedure</p>
-<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
-<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'cls',</span> <span class="pre">'code',</span> <span class="pre">'grow',</span> <span class="pre">'id',</span> <span class="pre">'model',</span> <span class="pre">'out'</span>
-<span class="pre">'partition',</span> <span class="pre">'performance',</span> <span class="pre">'prune',</span> <span class="pre">'rules'}</span></code></p>
-<p>cls is an alias for the class statement
-For more information on the statements see the Documentation link.
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'impute'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'input',</span> <span class="pre">'impute',</span> <span class="pre">'performance',</span> <span class="pre">'id',</span> <span class="pre">'freq',</span> <span class="pre">'code',</span> <span class="pre">'procopts'}</span></code></p>
+<p>For more information on the statements see the Documentation link.
 Documentation link:
 <a class="reference external" href="http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm">http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm</a></p>
 <table class="docutils field-list" frame="void" rules="none">
