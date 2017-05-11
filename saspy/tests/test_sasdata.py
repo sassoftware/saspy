@@ -356,7 +356,7 @@ class TestSASdataObject(unittest.TestCase):
         
     def test_info1(self):
         tr = self.sas.sasdata("class", "sashelp")
-        tr.set_results('Pandas')
+        tr.set_results('P')
         res = tr.info()
         self.assertIsInstance(res, pd.DataFrame, msg= 'Data frame not returned')
         self.assertEqual(res.shape, (5, 4), msg="wrong shape returned")
@@ -366,6 +366,7 @@ class TestSASdataObject(unittest.TestCase):
         tr.set_results('text')
         res = tr.info()
         self.assertIsNone(res, msg = "only works with Pandas" )
+        self.ass
 
     def test_info3(self):
         tr = self.sas.sasdata("class", "sashelp")
