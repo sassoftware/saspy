@@ -16,7 +16,7 @@
 import logging
 import re
 from saspy.sasresults import SASresults
-from pdb import set_trace as bp
+# from pdb import set_trace as bp
 
 
 class SASProcCommons:
@@ -806,7 +806,6 @@ class SASProcCommons:
         if 'model' not in kwargs.keys():
             kwargs = SASProcCommons._processNominals(self, kwargs, data)
             if 'model' in required_set:
-                #bp()
                 tcls_str = ''
                 icls_str = ''
                 t_str, tcls_str = SASProcCommons._target_stmt(self, kwargs['target'])
