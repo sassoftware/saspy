@@ -270,3 +270,31 @@ class TestSASstat(unittest.TestCase):
         tr = self.sas.sasdata("class", "sashelp")
         stat.mixed(data=tr, weight='novar', model='weight=height', out=tsave)
         self.assertIsInstance(tsave, saspy.SASdata, msg="out= dataset not created properly")
+
+    def test_target_input_syntax1(self):
+        stat = self.sas.sasstat()
+        c = self.sas.sasdata("class", "sashelp")
+        t1 = 'weight'
+        t2 = {'interval': 'weight'}
+        t3 = ['weight']
+        i1 = {'interval': ['height'],
+              'nominal' : ['sex']}
+        i2 = {'interval': ['height']}
+        i3 = ['height']
+        m = stat.glm(data=c, cls='sex', model='weight = height sex');
+        ti1 = stat.glm(data=c, target=t1, input=i1)
+        self.assertEqual(m.__dir__(), ti1.__dir__())
+        ti2 = stat.glm(data=c, target=t2, input=i1)
+        self.assertEqual(m.__dir__(), ti2.__dir__())
+        ti3 = stat.glm(data=c, target=t3, input=i1)
+        self.assertEqual(m.__dir__(), ti3.__dir__())
+        m2 = stat.glm(data=c, model='weight = height');
+        ti4 = stat.glm(data=c, target=t2, input=i2)
+        self.assertEqual(m2.__dir__(), ti4.__dir__())
+        ti5 = stat.glm(data=c, target=t1, input=i3)
+        self.assertEqual(m2.__dir__(), ti5.__dir__())
+
+
+
+
+

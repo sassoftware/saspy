@@ -136,9 +136,6 @@ class SASProcCommons:
                 code += "class %s;\n" % (args['cls'])
             elif isinstance(args['cls'], list):
                 code += "class %s;\n" % (' '.join(args['cls']))
-            #   if 'class' in args:
-            #       self.logger.debug("class statement,length: %s,%s", args['class'], len(args['class']))
-            #       code += "class %s;\n" % (args['class'])
         if 'code' in args:
             self.logger.debug("code statement,length: %s,%s", args['code'], len(args['code']))
             code += "code file='%s';\n" % (args['code'])
@@ -257,7 +254,6 @@ class SASProcCommons:
                     raise SyntaxError("The input list has no members")
             else:
                 raise SyntaxError("INPUT is in an unknown format: %s" % str(args['input']))
-
         if 'inset' in args:
             self.logger.debug("inset statement,length: %s,%s", args['inset'], len(args['inset']))
             code += "inset %s;\n" % (args['inset'])
@@ -699,6 +695,100 @@ class SASProcCommons:
                 raise SyntaxError("input must be a string, list, or dictionary you provided: %s" % str(type(inputs)))
         return kwargs
 
+    def _target_stmt(self, stmt: object) -> tuple:
+        """
+        takes the target key from kwargs and processes it to aid in the generation of a model statement
+        :param stmt: str, list, or dict that contains the model information.
+        :return: tuple of strings one for the class statement one for the model statements
+        """
+        # make sure target is a single variable extra split to account for level= option
+        code = ''
+        cls  = ''
+        if isinstance(stmt, str):
+            if len(stmt.split('/')[0].split()) == 1:
+                code += "%s" % (stmt)
+            else:
+                raise SyntaxError(
+                    "ERROR in code submission. TARGET can only have one variable and you submitted: %s" % stmt)
+        elif isinstance(stmt, list):
+            if len(stmt) == 1:
+                code += "%s" % str(stmt[0])
+            else:
+                raise SyntaxError("The target list must have exactly one member")
+        elif isinstance(stmt, dict):
+            try:
+                # check there there is only one target:
+                length = 0
+                try:
+                    length += len([stmt['nominal'], stmt['interval']])
+                except KeyError:
+                    try:
+                        length += len([stmt['nominal']])
+                    except KeyError:
+                        try:
+                            length += len([stmt['interval']])
+                        except KeyError:
+                            raise
+                if length  == 1:
+                    if 'interval' in stmt.keys():
+                        if isinstance(stmt['interval'], str):
+                            code += "%s" % stmt['interval']
+                        if isinstance(stmt['interval'], list):
+                            code += "%s" % " ".join(stmt['interval'])
+                    if 'nominal' in stmt.keys():
+                        if isinstance(stmt['nominal'], str):
+                            code += "%s" % stmt['nominal']
+                            cls  += "%s" % stmt['nominal']
+
+                        if isinstance(stmt['nominal'], list):
+                            code += "%s" % " ".join(stmt['nominal'])
+                            cls  += "%s" % " ".join(stmt['nominal'])
+                else:
+                    raise SyntaxError
+            except SyntaxError:
+                print("SyntaxError: TARGET can only have one variable")
+            except KeyError:
+                print("KeyError: Proper keys not found for TARGET dictionary: %s" % stmt.keys())
+        else:
+            raise SyntaxError("TARGET is in an unknown format: %s" % str(stmt))
+        return (code, cls)
+
+    def _input_stmt(self, stmt: object) -> tuple:
+        """
+        takes the input key from kwargs and processes it to aid in the generation of a model statement
+        :param stmt: str, list, or dict that contains the model information.
+        :return: tuple of strings one for the class statement one for the model statements
+        """
+        code = ''
+        cls  = ''
+        if isinstance(stmt, str):
+            code += "%s " % (stmt)
+        elif isinstance(stmt, dict):
+            try:
+                if 'interval' in stmt.keys():
+                    if isinstance(stmt['interval'], str):
+                        code += "%s " % stmt['interval']
+                    if isinstance(stmt['interval'], list):
+                        code += "%s " % " ".join(stmt['interval'])
+                if 'nominal' in stmt.keys():
+                    if isinstance(stmt['nominal'], str):
+                        code += "%s " % stmt['nominal']
+                        cls += "%s " % stmt['nominal']
+                    if isinstance(stmt['nominal'], list):
+                        code += "%s " % " ".join(stmt['nominal'])
+                        cls += "%s " % " ".join(stmt['nominal'])
+            except:
+                raise SyntaxError("Proper Keys not found for INPUT dictionary: %s" % stmt.keys())
+        elif isinstance(stmt, list):
+            if len(stmt) == 1:
+                code += "%s" % str(stmt[0])
+            elif len(stmt) > 1:
+                code += "%s" % " ".join(stmt)
+            else:
+                raise SyntaxError("The input list has no members")
+        else:
+            raise SyntaxError("INPUT is in an unknown format: %s" % str(stmt))
+        return (code, cls)
 
     def _run_proc(self, procname: str, required_set: set, legal_set: set, **kwargs: dict):
         """
@@ -712,15 +802,23 @@ class SASProcCommons:
         :return: sas result object
         """
         data = kwargs.pop('data', None)
+        objtype = procname.lower()
         if 'model' not in kwargs.keys():
             kwargs = SASProcCommons._processNominals(self, kwargs, data)
+            if 'model' in required_set:
+                tcls_str = ''
+                icls_str = ''
+                t_str, tcls_str = SASProcCommons._target_stmt(self, kwargs['target'])
+                i_str, icls_str = SASProcCommons._input_stmt(self, kwargs['input'])
+
+                kwargs['model'] = str(t_str + ' = ' + i_str )
+                kwargs['cls'] = str(tcls_str + " " + icls_str)
         verifiedKwargs = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
         obj1 = []
         nosub = False
         objname = ''
         log = ''
         if len(verifiedKwargs):
-            objtype = procname.lower()
             objname = procname[:3].lower() + self.sas._objcnt()  # translate to a libname so needs to be less than 8
             code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, verifiedKwargs)
             self.logger.debug(procname + " macro submission: " + str(code))
