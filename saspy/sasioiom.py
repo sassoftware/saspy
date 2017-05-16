@@ -1037,12 +1037,13 @@ class SASsessionIOM():
       ll = self.submit("", 'text')
       return
    
-   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref  - the libref for the SAS Data Set.
-      port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
+      rowsep  - the row seperator character to use; defaults to '\n'
+      colsep  - the column seperator character to use; defaults to '\t'
       '''
       datar = ""
       if libref:
@@ -1096,9 +1097,10 @@ class SASsessionIOM():
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      delim = "'"+'%02d' % ord("\t".encode(self.sascfg.encoding))+"'x "
+      rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
+      cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
-      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1; put "
+      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1 termstr=NL; put "
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
@@ -1113,7 +1115,9 @@ class SASsessionIOM():
                   else:
                      code += 'best32. '
          if i < (len(varlist)-1):
-            code += delim
+            code += cdelim
+         else:
+            code += rdelim
       code += ";\n run;"
 
       ll = self.submit(code, 'text')
@@ -1122,8 +1126,9 @@ class SASsessionIOM():
          ll['LST'] = ll['LST'][1:len(ll['LST'])]
 
       r = []
-      for i in ll['LST'].splitlines():
-         r.append(tuple(i.split(sep='\t')))
+      for i in ll['LST'].split(sep=rowsep+'\n'):
+         if i != '':
+            r.append(tuple(i.split(sep=colsep)))
 
       df = pd.DataFrame.from_records(r, columns=varlist)
 

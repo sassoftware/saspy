@@ -850,7 +850,7 @@ class SASsessionSTDIO():
 
       self._asubmit(";run;", "text")
 
-   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -924,6 +924,9 @@ class SASsessionSTDIO():
          host = socks.gethostname()
       else:
          host = ''
+
+      rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
+      cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
    
       code  = ""
       code += "filename sock socket '"+host+":"+str(port)+"' lrecl=32767 recfm=v termstr=LF;\n"
@@ -942,7 +945,9 @@ class SASsessionSTDIO():
                   else:
                      code += 'best32. '
          if i < (len(varlist)-1):
-            code += "'09'x "
+            code += cdelim
+         else:
+            code += rdelim
       code += "; run;\n"
 
       sock.listen(0)
@@ -961,8 +966,9 @@ class SASsessionSTDIO():
       sock.close()
    
       r = []
-      for i in datar.splitlines():
-         r.append(tuple(i.split(sep='\t')))
+      for i in datar.split(sep=rowsep+'\n'):
+         if i != '':
+            r.append(tuple(i.split(sep=colsep)))
 
       df = pd.DataFrame.from_records(r, columns=varlist)
 
