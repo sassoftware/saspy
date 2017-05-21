@@ -42,6 +42,14 @@ SAS_config_names=['default']
 
 SAS_config_options = {'lock_down': True}
 
+# Configuration options for SAS output. By default output is HTML 5.0 (using "ods html5" statement) but certain templates might not work 
+# properly with HTML 5.0 so it can also be set to HTML 4.0 instead (using "ods html" statement).
+# valid key are:
+# 
+# 'output' = ['html5', 'html']
+#
+SAS_output_options = {'output' : 'html5'}
+
 
 # Configuration Definitions
 #
