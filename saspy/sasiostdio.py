@@ -53,7 +53,10 @@ class SASconfigSTDIO:
       self.iomc     = cfg.get('iomc', '')
 
       self.outopts = getattr(SAScfg, "SAS_output_options")
-      self.output = self.outopts.get('output', '')
+      self.output = self.outopts.get('output', 'html5')
+      if self.output == "html" and self.host != '':
+         print("HTML4 can only work in local mode. Please set SAS_config_names to 'default' (STDIO) or 'winlocal' (IOM) to use HTML4. Otherwise, change output to HTML5 by setting SAS_output_options = {'output' : 'html5'}. SAS process has terminated unexpectedly.")
+         return
 
       # GET Config options
       try:
@@ -395,14 +398,8 @@ class SASsessionSTDIO():
       # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
       # unnecessary read in submit as this can't happen in the current code. 
-      if self.sascfg.output == 'html5':
-         odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-         odsclose = b"ods html5 (id=saspy_internal) close;ods listing;\n"
-
-      if self.sascfg.output == 'html':
-         odsopen  = b"ods listing close;ods html (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-         odsclose = b"ods html (id=saspy_internal) close;ods listing;\n"
-
+      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
 
       if results.upper() != "HTML":
@@ -445,14 +442,8 @@ class SASsessionSTDIO():
             print(results['LOG'])
             HTML(results['LST']) 
       '''
-      if self.sascfg.output == 'html5':
-         odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-         odsclose = b"ods html5 (id=saspy_internal) close;ods listing;\n"
-
-      if self.sascfg.output == 'html':
-         odsopen  = b"ods listing close;ods html (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-         odsclose = b"ods html (id=saspy_internal) close;ods listing;\n"
-      
+      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
       lstf     = ''
@@ -727,8 +718,7 @@ class SASsessionSTDIO():
                found = True
 
             if found:
-               if self.sascfg.output == 'html5' ll = self.submit('ods html5 (id=saspy_internal) close;ods listing close;ods listing;libname work list;\n','text')
-               if self.sascfg.output == 'html' ll = self.submit('ods html (id=saspy_internal) close;ods listing close;ods listing;libname work list;\n','text')
+               ll = self.submit("ods "+self.sascfg.output+" (id=saspy_internal) close;ods listing close;ods listing;libname work list;\n",'text')
                break
 
             sleep(.25)

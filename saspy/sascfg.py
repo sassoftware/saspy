@@ -43,9 +43,9 @@ SAS_config_names=['default']
 SAS_config_options = {'lock_down': True}
 
 # Configuration options for SAS output. By default output is HTML 5.0 (using "ods html5" statement) but certain templates might not work 
-# properly with HTML 5.0 so it can also be set to HTML 4.0 instead (using "ods html" statement). Note that SAS HTML 4.0 will generate 
-# images separately which clutters the workspace and if you download the notebook as HTML, the HTML file will need to be put in the same 
-# folder as the images for them to appear.
+# properly with HTML 5.0 so it can also be set to HTML 4.0 instead (using "ods html" statement). This option will only work when using IOM
+# in local mode. Note that HTML 4.0 will generate images separately which clutters the workspace and if you download the notebook as HTML, 
+# the HTML file will need to be put in the same folder as the images for them to appear.
 # valid key are:
 # 
 # 'output' = ['html5', 'html']
