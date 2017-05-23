@@ -60,11 +60,15 @@ class SASconfigIOM:
       self.timeout   = cfg.get('timeout', None)
       self.appserver = cfg.get('appserver', '')
 
-      self.outopts = getattr(SAScfg, "SAS_output_options")
-      self.output = self.outopts.get('output', 'html5')
-      if self.output == 'html' and (self.iomhost != '' or self.iomport != None):
-         print("HTML4 can only work in local mode. Please set SAS_config_names to 'default' (STDIO) or 'winlocal' (IOM) to use HTML4. Otherwise, change output to HTML5 by setting SAS_output_options = {'output' : 'html5'}. SAS process has terminated unexpectedly.")
-         return
+      try:
+         self.outopts = getattr(SAScfg, "SAS_output_options")
+         self.output  = self.outopts.get('output', 'html5')
+      except:
+         self.output  = 'html5'
+
+      if self.output.lower() not in ['html', 'html5']:
+         print("Invalid value specified for SAS_output_options. Using the default of HTML5")
+         self.output  = 'html5'
 
       # GET Config options
       try:
@@ -236,6 +240,12 @@ class SASsessionIOM():
       self.sockerr.listen(0)
 
       if not zero:
+         if self.sascfg.output.lower() == 'html':
+            print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg.py).
+Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the default sascfg.py.
+Will use HTML5 for this SASsession.""")
+            self.sascfg.output = 'html5'
+
          user  = self.sascfg.omruser
          pw    = self.sascfg.omrpw
          found = False
@@ -1209,4 +1219,3 @@ sas_datetime_fmts = (
 'NLDATMYW','NLDATMZ','NLDDFDT','NLDDFDT','NORDFDT','NORDFDT','POLDFDT','POLDFDT','PTGDFDT','PTGDFDT','RUSDFDT','RUSDFDT',
 'SLODFDT','SLODFDT','SVEDFDT','SVEDFDT','TWMDY','YMDDTTM',
 )
-

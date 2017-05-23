@@ -52,11 +52,15 @@ class SASconfigSTDIO:
       self.metapw   = cfg.get('metapw', '')
       self.iomc     = cfg.get('iomc', '')
 
-      self.outopts = getattr(SAScfg, "SAS_output_options")
-      self.output = self.outopts.get('output', 'html5')
-      if self.output == "html" and self.host != '':
-         print("HTML4 can only work in local mode. Please set SAS_config_names to 'default' (STDIO) or 'winlocal' (IOM) to use HTML4. Otherwise, change output to HTML5 by setting SAS_output_options = {'output' : 'html5'}. SAS process has terminated unexpectedly.")
-         return
+      try:
+         self.outopts = getattr(SAScfg, "SAS_output_options")
+         self.output  = self.outopts.get('output', 'html5')
+      except:
+         self.output  = 'html5'
+
+      if self.output.lower() not in ['html', 'html5']:
+         print("Invalid value specified for SAS_output_options. Using the default of HTML5")
+         self.output  = 'html5'
 
       # GET Config options
       try:
@@ -177,6 +181,12 @@ class SASsessionSTDIO():
          pgm    = self.sascfg.ssh
          parms  = [pgm]
          parms += ["-t", self.sascfg.host, self.sascfg.saspath]
+
+         if self.sascfg.output.lower() == 'html':
+            print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg.py).
+Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the default sascfg.py.
+Will use HTML5 for this SASsession.""")
+            self.sascfg.output = 'html5'
       else:
          pgm    = self.sascfg.saspath
          parms  = [pgm]
@@ -398,7 +408,7 @@ class SASsessionSTDIO():
       # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
       # unnecessary read in submit as this can't happen in the current code. 
-      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen  = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=stdout options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
 
@@ -442,7 +452,7 @@ class SASsessionSTDIO():
             print(results['LOG'])
             HTML(results['LST']) 
       '''
-      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen  = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=stdout options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
@@ -1050,5 +1060,4 @@ sas_datetime_fmts = (
 'NLDATMYW','NLDATMZ','NLDDFDT','NLDDFDT','NORDFDT','NORDFDT','POLDFDT','POLDFDT','PTGDFDT','PTGDFDT','RUSDFDT','RUSDFDT',
 'SLODFDT','SLODFDT','SVEDFDT','SVEDFDT','TWMDY','YMDDTTM',
 )
-
 
