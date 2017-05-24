@@ -1208,7 +1208,9 @@ class SASdata:
 
         if self.results.upper() == 'PANDAS':
             code = "proc contents data=%s.%s %s ;ods output Variables=work._variables ;run;" % (self.libref, self.table, self._dsopts())
-            return self._returnPD(code, '_variables')
+            pd = self._returnPD(code, '_variables')
+            pd['Type'] = pd['Type'].str.rstrip()
+            return pd
 
         else:
             ll = self._is_valid()
