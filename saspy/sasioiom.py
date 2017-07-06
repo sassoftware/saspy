@@ -320,7 +320,13 @@ Will use HTML5 for this SASsession.""")
          pout = os.pipe()
          perr = os.pipe() 
       
-         pidpty = os.forkpty()
+         
+         try:
+            pidpty = os.forkpty()
+         except:
+            import pty
+            pidpty = pty.fork()
+         
          if pidpty[0]:
             # we are the parent
             self.pid = pidpty[0]
