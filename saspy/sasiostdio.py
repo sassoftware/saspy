@@ -229,7 +229,7 @@ Will use HTML5 for this SASsession.""")
       except:
          import pty
          pidpty = pty.fork()
-      
+         
       if pidpty[0]:
          # we are the parent
 
