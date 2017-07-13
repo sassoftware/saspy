@@ -118,9 +118,15 @@ class SASProcCommons:
             else:
                 print("ERROR in code submission. ARCHITECTURE can only have one of these")
                 print("values -- ['logistic', 'mlp', 'mlp direct'] you submitted: %s", args['architecture'])
+        if 'assess' in args:
+            self.logger.debug("assess statement,length: %s,%s", args['assess'], len(args['assess']))
+            code += "assess %s;\n" % (args['assess'])
         if 'autoreg' in args:
             self.logger.debug("autoreg statement,length: %s,%s", args['autoreg'], len(args['autoreg']))
             code += "autoreg %s;\n" % (args['autoreg'])
+        if 'bayes' in args:
+            self.logger.debug("bayes statement,length: %s,%s", args['bayes'], len(args['bayes']))
+            code += "bayes %s;\n" % (args['bayes'])
         if 'blockseason' in args:
             self.logger.debug("blockseason statement,length: %s,%s", args['blockseason'], len(args['blockseason']))
             code += "blockseason %s;\n" % (args['blockseason'])
@@ -190,12 +196,15 @@ class SASProcCommons:
             else:
                 for item in args['hidden']:
                     code += "hidden %s;\n" % item
-        if 'histogram' in args:
-            self.logger.debug("histogram statement,length: %s,%s", args['histogram'], len(args['histogram']))
-            code += "histogram %s;\n" % (args['histogram'])
         if 'id' in args:
             self.logger.debug("id statement,length: %s,%s", args['id'], len(args['id']))
             code += "id %s;\n" % (args['id'])
+        if 'histogram' in args:
+            self.logger.debug("histogram statement,length: %s,%s", args['histogram'], len(args['histogram']))
+            code += "histogram %s;\n" % (args['histogram'])
+        if 'hazardratio' in args:
+            self.logger.debug("hazardratio statement,length: %s,%s", args['hazardratio'], len(args['hazardratio']))
+            code += "hazardratio %s;\n" % (args['id'])
         if 'identify' in args:
             self.logger.debug("identify statement,length: %s,%s", args['identify'], len(args['identify']))
             code += "identify %s;\n" % (args['identify'])
@@ -296,6 +305,9 @@ class SASProcCommons:
         if 'lsmeans' in args:
             self.logger.debug("lsmeans statement,length: %s,%s", args['lsmeans'], len(args['lsmeans']))
             code += "lsmeans %s;\n" % (args['lsmeans'])
+        if 'lsmestimate' in args:
+            self.logger.debug("lsmestimate statement,length: %s,%s", args['lsmestimate'], len(args['lsmestimate']))
+            code += "lsmestimate %s;\n" % (args['lsmestimate'])
         if 'test' in args:
             self.logger.debug("test statement,length: %s,%s", args['test'], len(args['test']))
             code += "test %s;\n" % (args['test'])
@@ -320,9 +332,28 @@ class SASProcCommons:
         if 'outlier' in args:
             self.logger.debug("outlier statement,length: %s,%s", args['outlier'], len(args['outlier']))
             code += "outlier %s;\n" % (args['outlier'])
+        if 'paired' in args:
+            if isinstance(args['paired'], str):
+                self.logger.debug("paired statement,length: %s,%s", args['paired'], len(args['paired']))
+                code += "paired %s;\n" % (args['paired'])
+            elif isinstance(args['paired'], list):
+                if len(args['paired']) == 1:
+                    code += "paired %s;\n" % str(args['paired'][0])
+                elif len(args['paired']) > 1:
+                    code += "paired %s;\n" % " ".join(args['paired'])
+                else:
+                    raise SyntaxError("The paired list has no members")
+            else:
+                raise SyntaxError("paired is in an unknown format: %s" % str(args['paired']))
         if 'parms' in args:
             self.logger.debug("parms statement,length: %s,%s", args['parms'], len(args['parms']))
             code += "parms %s;\n" % (args['parms'])
+        if 'partial' in args:
+            self.logger.debug("partial statement,length: %s,%s", args['partial'], len(args['partial']))
+            code += "partial %s;\n" % (args['partial'])
+        if 'pathdiagram' in args:
+            self.logger.debug("pathdiagram statement,length: %s,%s", args['pathdiagram'], len(args['pathdiagram']))
+            code += "pathdiagram %s;\n" % (args['pathdiagram'])
         if 'performance' in args:
             self.logger.debug("performance statement,length: %s,%s", args['performance'], len(args['performance']))
             code += "performance %s;\n" % (args['performance'])
@@ -333,6 +364,19 @@ class SASProcCommons:
             # TODO: check that distribution is in the list
             self.logger.debug("prior statement,length: %s,%s", args['prior'], len(args['prior']))
             code += "prior %s;\n" % (args['prior'])
+        if 'priors' in args:
+            if isinstance(args['priors'], str):
+                self.logger.debug("priors statement,length: %s,%s", args['priors'], len(args['priors']))
+                code += "priors %s;\n" % (args['priors'])
+            elif isinstance(args['priors'], list):
+                if len(args['priors']) == 1:
+                    code += "priors %s;\n" % str(args['priors'][0])
+                elif len(args['priors']) > 1:
+                    code += "priors %s;\n" % " ".join(args['priors'])
+                else:
+                    raise SyntaxError("The priors list has no members")
+            else:
+                raise SyntaxError("priors is in an unknown format: %s" % str(args['priors']))
         if 'prog_stmts' in args:
             self.logger.debug("prog_stmts statement,length: %s,%s", args['prog_stmts'], len(args['prog_stmts']))
             code += " %s;\n" % (args['prog_stmts'])
@@ -389,6 +433,9 @@ class SASProcCommons:
         if 'splineseason' in args:
             self.logger.debug("splineseason statement,length: %s,%s", args['splineseason'], len(args['splineseason']))
             code += "splineseason %s;\n" % (args['splineseason'])
+        if 'store' in args:
+            self.logger.debug("store statement,length: %s,%s", args['store'], len(args['store']))
+            code += "store %s;\n" % (args['store'])
         if 'trend' in args:
             self.logger.debug("trend statement,length: %s,%s", args['trend'], len(args['trend']))
             code += "trend %s;\n" % (args['trend'])
@@ -533,7 +580,7 @@ class SASProcCommons:
             else:
                 raise SyntaxError("SAVE statement is not recognized for this procedure: %s" % str(objtype))
 
-        # passthrough facility from procedures with special circumstances
+        # passthrough facility for procedures with special circumstances
         if 'stmtpassthrough' in args:
             code += str(args['stmtpassthrough'])
 
