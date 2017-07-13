@@ -223,8 +223,13 @@ Will use HTML5 for this SASsession.""")
       pin  = os.pipe() 
       pout = os.pipe()
       perr = os.pipe() 
+
+      try:
+         pidpty = os.forkpty()
+      except:
+         import pty
+         pidpty = pty.fork()
       
-      pidpty = os.forkpty()
       if pidpty[0]:
          # we are the parent
 
@@ -763,12 +768,13 @@ Will use HTML5 for this SASsession.""")
    
       return exists
    
-   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False) -> '<SASdata object>':
+   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict ={}) -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+      opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
       '''
       code  = "filename x "
    
@@ -779,24 +785,26 @@ Will use HTML5 for this SASsession.""")
       code += "proc import datafile=x out="
       if len(libref):
          code += libref+"."
-      code += table+" dbms=csv replace; run;"
+      code += table+" dbms=csv replace; "+self._sb._impopts(opts)+" run;"
    
       if nosub:
          print(code)
       else:
          ll = self.submit(code, "text")
    
-   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict ={}) -> 'The LOG showing the results of the step':
+   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict ={}, opts: dict ={}) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CSV format.
       file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
       table   - the name of the SAS Data Set you want to export to a CSV file
       libref  - the libref for the SAS Data Set.
+      dsopts  - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
+      opts    - a dictionary containing any of the following Proc Export options(delimiter, putnames)
       '''
       code  = "options nosource;\n"
       code += "filename x \""+file+"\";\n"
       code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x"
-      code += " dbms=csv replace; run;"
+      code += " dbms=csv replace; "+self._sb._expopts(opts)+" run;"
       code += "options source;\n"
 
       if nosub:
