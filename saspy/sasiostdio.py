@@ -52,6 +52,16 @@ class SASconfigSTDIO:
       self.metapw   = cfg.get('metapw', '')
       self.iomc     = cfg.get('iomc', '')
 
+      try:
+         self.outopts = getattr(SAScfg, "SAS_output_options")
+         self.output  = self.outopts.get('output', 'html5')
+      except:
+         self.output  = 'html5'
+
+      if self.output.lower() not in ['html', 'html5']:
+         print("Invalid value specified for SAS_output_options. Using the default of HTML5")
+         self.output  = 'html5'
+
       # GET Config options
       try:
          self.cfgopts = getattr(SAScfg, "SAS_config_options")
@@ -171,6 +181,12 @@ class SASsessionSTDIO():
          pgm    = self.sascfg.ssh
          parms  = [pgm]
          parms += ["-t", self.sascfg.host, self.sascfg.saspath]
+
+         if self.sascfg.output.lower() == 'html':
+            print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg.py).
+Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the default sascfg.py.
+Will use HTML5 for this SASsession.""")
+            self.sascfg.output = 'html5'
       else:
          pgm    = self.sascfg.saspath
          parms  = [pgm]
@@ -207,8 +223,13 @@ class SASsessionSTDIO():
       pin  = os.pipe() 
       pout = os.pipe()
       perr = os.pipe() 
-      
-      pidpty = os.forkpty()
+
+      try:
+         pidpty = os.forkpty()
+      except:
+         import pty
+         pidpty = pty.fork()
+         
       if pidpty[0]:
          # we are the parent
 
@@ -392,8 +413,8 @@ class SASsessionSTDIO():
       # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
       # unnecessary read in submit as this can't happen in the current code. 
-      odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=stdout options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods html5 (id=saspy_internal) close;ods listing;\n"
+      odsopen  = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=stdout options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
 
       if results.upper() != "HTML":
@@ -436,8 +457,8 @@ class SASsessionSTDIO():
             print(results['LOG'])
             HTML(results['LST']) 
       '''
-      odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=stdout options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods html5 (id=saspy_internal) close;ods listing;\n"
+      odsopen  = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=stdout options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
       lstf     = ''
@@ -712,7 +733,7 @@ class SASsessionSTDIO():
                found = True
 
             if found:
-               ll = self.submit('ods html5 (id=saspy_internal) close;ods listing close;ods listing;libname work list;\n','text')
+               ll = self.submit("ods "+self.sascfg.output+" (id=saspy_internal) close;ods listing close;ods listing;libname work list;\n",'text')
                break
 
             sleep(.25)
@@ -747,12 +768,13 @@ class SASsessionSTDIO():
    
       return exists
    
-   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False) -> '<SASdata object>':
+   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict ={}) -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+      opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
       '''
       code  = "filename x "
    
@@ -763,24 +785,26 @@ class SASsessionSTDIO():
       code += "proc import datafile=x out="
       if len(libref):
          code += libref+"."
-      code += table+" dbms=csv replace; run;"
+      code += table+" dbms=csv replace; "+self._sb._impopts(opts)+" run;"
    
       if nosub:
          print(code)
       else:
          ll = self.submit(code, "text")
    
-   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict ={}) -> 'The LOG showing the results of the step':
+   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict ={}, opts: dict ={}) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CSV format.
       file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
       table   - the name of the SAS Data Set you want to export to a CSV file
       libref  - the libref for the SAS Data Set.
+      dsopts  - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
+      opts    - a dictionary containing any of the following Proc Export options(delimiter, putnames)
       '''
       code  = "options nosource;\n"
       code += "filename x \""+file+"\";\n"
       code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x"
-      code += " dbms=csv replace; run;"
+      code += " dbms=csv replace; "+self._sb._expopts(opts)+" run;"
       code += "options source;\n"
 
       if nosub:
@@ -850,7 +874,7 @@ class SASsessionSTDIO():
 
       self._asubmit(";run;", "text")
 
-   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -924,6 +948,9 @@ class SASsessionSTDIO():
          host = socks.gethostname()
       else:
          host = ''
+
+      rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
+      cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
    
       code  = ""
       code += "filename sock socket '"+host+":"+str(port)+"' lrecl=32767 recfm=v termstr=LF;\n"
@@ -942,7 +969,9 @@ class SASsessionSTDIO():
                   else:
                      code += 'best32. '
          if i < (len(varlist)-1):
-            code += "'09'x "
+            code += cdelim
+         else:
+            code += rdelim
       code += "; run;\n"
 
       sock.listen(0)
@@ -961,8 +990,9 @@ class SASsessionSTDIO():
       sock.close()
    
       r = []
-      for i in datar.splitlines():
-         r.append(tuple(i.split(sep='\t')))
+      for i in datar.split(sep=rowsep+'\n'):
+         if i != '':
+            r.append(tuple(i.split(sep=colsep)))
 
       df = pd.DataFrame.from_records(r, columns=varlist)
 
@@ -1038,5 +1068,4 @@ sas_datetime_fmts = (
 'NLDATMYW','NLDATMZ','NLDDFDT','NLDDFDT','NORDFDT','NORDFDT','POLDFDT','POLDFDT','PTGDFDT','PTGDFDT','RUSDFDT','RUSDFDT',
 'SLODFDT','SLODFDT','SVEDFDT','SVEDFDT','TWMDY','YMDDTTM',
 )
-
 

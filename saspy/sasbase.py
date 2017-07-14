@@ -37,6 +37,7 @@
 #
 
 import os
+import sys
 import re
 # from pdb import set_trace as bp
 import logging
@@ -268,6 +269,7 @@ class SASsession():
         x += "SAS Config name       = %s\n" % self.sascfg.name
         x += "WORK Path             = %s\n" % self.workpath    
         x += "SAS Version           = %s\n" % self.sasver        
+        x += "SASPy Version         = %s\n" % sys.modules['saspy'].__version__
         x += "Teach me SAS          = %s\n" % str(self.nosub)  
         x += "Batch                 = %s\n" % str(self.batch)    
         x += "Results               = %s\n" % self.results     
@@ -562,17 +564,19 @@ class SASsession():
             else:
                 print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0])
 
-    def read_csv(self, file: str, table: str = '_csv', libref: str = '', results: str = '') -> 'SASdata':
+    def read_csv(self, file: str, table: str = '_csv', libref: str = '', results: str = '', opts: dict ={}) -> 'SASdata':
         """
         :param file: either the OS filesystem path of the file, or HTTP://... for a url accessible file
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :param opts: a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
         :return: SASdata object
         """
         if results == '':
             results = self.results
-        self._io.read_csv(file, table, libref, self.nosub)
+
+        self._io.read_csv(file, table, libref, self.nosub, opts)
 
         if self.exist(table, libref):
             return SASdata(self, libref, table, results)
@@ -580,13 +584,14 @@ class SASsession():
             return None
 
     def write_csv(self, file: str, table: str, libref: str = '',
-                  dsopts: dict = {}) -> str:
+                  dsopts: dict = {}, opts: dict ={}) -> str:
         """
 
         :param file: the OS filesystem path of the file to be created (exported from the SAS Data Set)
         :param table: the name of the SAS Data Set you want to export to a CSV file
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
+        :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames)
 
             - where is a string
             - keep are strings or list of strings.
@@ -604,7 +609,7 @@ class SASsession():
                              }
         :return: SAS log
         """
-        log = self._io.write_csv(file, table, libref, self.nosub, dsopts)
+        log = self._io.write_csv(file, table, libref, self.nosub, dsopts, opts)
         if not self.batch:
             print(log)
         else:
@@ -732,7 +737,7 @@ class SASsession():
                               'obs'      :  10
                               'firstobs' : '12'
                              }
-        :return: dictionary
+        :return: str
         """
         opts = ''
 
@@ -762,6 +767,80 @@ class SASsession():
             if len(opts):
                 opts = '(' + opts + ')'
         return opts
+
+
+    def _impopts(self, opts):
+        """
+        :param opts: a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows):
+
+            - datarow      is a number
+            - delimiter    is a character
+            - getnames     is a boolean
+            - guessingrows is a numbers or the string 'MAX'
+
+            .. code-block:: python
+
+                             {'datarow'     : 2
+                              'delimiter'   : ',''
+                              'getnames'    : True
+                              'guessingrows': 20
+                             }
+        :return: str
+        """
+        optstr = ''
+
+        if len(opts):
+            for key in opts:
+                if len(str(opts[key])):
+                    if key     == 'datarow':
+                        optstr += 'datarow=' + str(opts[key]) + ';'
+                    elif key   == 'delimiter':
+                        optstr += 'delimiter='
+                        optstr += "'"+'%02x' % ord(opts[key].encode(self._io.sascfg.encoding))+"'x; "
+                    elif key   == 'getnames':
+                        optstr += 'getnames='
+                        if opts[key]:
+                           optstr += 'YES; '
+                        else:
+                           optstr += 'NO; '
+                    elif key   == 'guessingrows':
+                        optstr += 'guessingrows='
+                        if opts[key] == 'MAX':
+                           optstr += 'MAX; '
+                        else:
+                           optstr += str(opts[key])+'; '
+        return optstr
+
+
+    def _expopts(self, opts):
+        """
+        :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames):
+
+            - delimiter    is a character
+            - putnames     is a boolean
+
+            .. code-block:: python
+
+                             {'delimiter'   : ',''
+                              'putnames'    : True
+                             }
+        :return: str
+        """
+        optstr = ''
+
+        if len(opts):
+            for key in opts:
+                if len(str(opts[key])):
+                    if key     == 'delimiter':
+                        optstr += 'delimiter='
+                        optstr += "'"+'%02x' % ord(opts[key].encode(self._io.sascfg.encoding))+"'x; "
+                    elif key   == 'putnames':
+                        optstr += 'putnames='
+                        if opts[key]:
+                           optstr += 'YES; '
+                        else:
+                           optstr += 'NO; '
+        return optstr
 
 
 class SASdata:
@@ -1208,7 +1287,9 @@ class SASdata:
 
         if self.results.upper() == 'PANDAS':
             code = "proc contents data=%s.%s %s ;ods output Variables=work._variables ;run;" % (self.libref, self.table, self._dsopts())
-            return self._returnPD(code, '_variables')
+            pd = self._returnPD(code, '_variables')
+            pd['Type'] = pd['Type'].str.rstrip()
+            return pd
 
         else:
             ll = self._is_valid()
@@ -1631,7 +1712,7 @@ class SASdata:
         obj1 = SASProcCommons._objectmethods(self, objname)
         return SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
 
-    def to_csv(self, file: str) -> str:
+    def to_csv(self, file: str, opts: dict ={}) -> str:
         """
         This method will export a SAS Data Set to a file in CSV format.
 
@@ -1645,7 +1726,7 @@ class SASdata:
             else:
                 return ll
         else:
-            return self.sas.write_csv(file, self.table, self.libref, self.dsopts)
+            return self.sas.write_csv(file, self.table, self.libref, self.dsopts, opts)
 
     def score(self, file: str = '', code: str = '', out: 'SASdata' = None) -> 'SASdata':
         """
