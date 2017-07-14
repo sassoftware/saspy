@@ -321,7 +321,7 @@ class SASstat:
         Python method to call the PHREG procedure
         For more information on the statements see the Documentation link.
 
-        ``required_set = {'var'}``
+        ``required_set = {}``
 
         ``legal_set = {'by', 'cls', 'freq', 'paired', 'var', 'weight', 'procopts'}``
 
@@ -331,7 +331,7 @@ class SASstat:
         :param kwargs: dict
         :return: SAS result object
         """
-        required_set = {'var'}
+        required_set = {}
         legal_set = {'by', 'freq', 'priors', 'pathdiagram', 'partial', 'var', 'weight', 'procopts'}
 
         logging.debug("kwargs type: " + str(type(kwargs)))
