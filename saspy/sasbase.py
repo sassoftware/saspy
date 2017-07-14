@@ -37,6 +37,7 @@
 #
 
 import os
+import sys
 import re
 # from pdb import set_trace as bp
 import logging
@@ -268,6 +269,7 @@ class SASsession():
         x += "SAS Config name       = %s\n" % self.sascfg.name
         x += "WORK Path             = %s\n" % self.workpath    
         x += "SAS Version           = %s\n" % self.sasver        
+        x += "SASPy Version         = %s\n" % sys.modules['saspy'].__version__
         x += "Teach me SAS          = %s\n" % str(self.nosub)  
         x += "Batch                 = %s\n" % str(self.batch)    
         x += "Results               = %s\n" % self.results     
