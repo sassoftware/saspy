@@ -89,7 +89,7 @@ class SASconfigIOM:
       inhost = kwargs.get('iomhost', '')
       if len(inhost) > 0:
          if lock and len(self.iomhost):
-            print("Parameter 'host' passed to SAS_session was ignored due to configuration restriction.")
+            print("Parameter 'iomhost' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.iomhost = inhost   
 
@@ -216,6 +216,8 @@ class SASsessionIOM():
       # check for local iom server
       if len(self.sascfg.iomhost) > 0:
          zero = False
+         if isinstance(self.sascfg.iomhost, list):
+            self.sascfg.iomhost = ";".join(self.sascfg.iomhost)
       else:
          zero = True
 
@@ -276,9 +278,8 @@ Will use HTML5 for this SASsession.""")
 
       pgm    = self.sascfg.java
       parms  = [pgm]
-      parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
+      parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j", "-host", "localhost"]
       #parms += ["-classpath", self.sascfg.classpath+":/u/sastpw/tkpy2j", "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
-      parms += ["-host", "localhost"] 
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
