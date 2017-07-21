@@ -1505,6 +1505,27 @@ Documentation link:
 </li>
 </ol>
 <dl class="method">
+<dt id="saspy.SASstat.factor">
+<code class="descname">factor</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the PHREG procedure
+For more information on the statements see the Documentation link.</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'by',</span> <span class="pre">'cls',</span> <span class="pre">'freq',</span> <span class="pre">'paired',</span> <span class="pre">'var',</span> <span class="pre">'weight',</span> <span class="pre">'procopts'}</span></code></p>
+<p>Documentation link:
+<a class="reference external" href="http://go.documentation.sas.com/?docsetId=statug&amp;docsetVersion=14.2&amp;docsetTarget=statug_factor_overview.htm&amp;locale=en">http://go.documentation.sas.com/?docsetId=statug&amp;docsetVersion=14.2&amp;docsetTarget=statug_factor_overview.htm&amp;locale=en</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASstat.glm">
 <code class="descname">glm</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.glm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the GLM procedure</p>
@@ -1639,6 +1660,32 @@ For more information on the statements see the Documentation link.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="saspy.SASstat.phreg">
+<code class="descname">phreg</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.phreg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the PHREG procedure
+For more information on the statements see the Documentation link.</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'model'}</span></code></p>
+<dl class="docutils">
+<dt><a href="#id1"><span class="problematic" id="id2">``</span></a>legal_set = {&#8216;assess&#8217;, &#8216;bayes&#8217;, &#8216;by&#8217;, &#8216;cls&#8217;, &#8216;contrast&#8217;, &#8216;freq&#8217;, &#8216;effect&#8217;, &#8216;estimate&#8217;, </dt>
+<dd>&#8216;hazardratio&#8217;, &#8216;id&#8217;, &#8216;lsmeans&#8217;, &#8216;lsmestimate&#8217;, &#8216;model&#8217;, &#8216;out&#8217;, &#8216;roc&#8217;, 
+&#8216;random&#8217;, &#8216;slice&#8217;, &#8216;store&#8217;, &#8216;strata&#8217;, &#8216;test&#8217;, &#8216;weight&#8217;, &#8216;procopts&#8217;}``</dd>
+</dl>
+<p>cls is an alias for the class statement</p>
+<p>Documentation link:
+<a class="reference external" href="http://go.documentation.sas.com/?docsetId=statug&amp;docsetTarget=statug_phreg_toc.htm&amp;docsetVersion=14.2&amp;locale=en">http://go.documentation.sas.com/?docsetId=statug&amp;docsetTarget=statug_phreg_toc.htm&amp;docsetVersion=14.2&amp;locale=en</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASstat.reg">
 <code class="descname">reg</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.reg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the REG procedure</p>
@@ -1670,6 +1717,28 @@ For more information on the statements see the Documentation link.</p>
 <p>cls is an alias for the class statement</p>
 <p>Documentation link:
 <a class="reference external" href="http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_tpspline_toc.htm">http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_tpspline_toc.htm</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; dict</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SAS result object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASstat.ttest">
+<code class="descname">ttest</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.ttest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the PHREG procedure
+For more information on the statements see the Documentation link.</p>
+<p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'by',</span> <span class="pre">'cls',</span> <span class="pre">'freq',</span> <span class="pre">'paired',</span> <span class="pre">'var',</span> <span class="pre">'weight',</span> <span class="pre">'procopts'}</span></code></p>
+<p>cls is an alias for the class statement</p>
+<p>Documentation link:
+<a class="reference external" href="http://go.documentation.sas.com/?docsetId=statug&amp;docsetVersion=14.2&amp;docsetTarget=statug_ttest_overview.htm&amp;locale=en">http://go.documentation.sas.com/?docsetId=statug&amp;docsetVersion=14.2&amp;docsetTarget=statug_ttest_overview.htm&amp;locale=en</a></p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />

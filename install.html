@@ -331,8 +331,8 @@ default encodings for running SAS in Unicode, on Unix, and on Windows,
 respectively. Those map to Python encoding values: utf8, latin1, and
 windows-1252, respectively.</dd>
 </dl>
-<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span>
-            <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">]</span>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">,</span> <span class="s2">&quot;-autoexec&quot;</span><span class="p">,</span> <span class="s2">&quot;/user/tom/autoexec&quot;</span><span class="p">]</span>
             <span class="p">}</span>
 </pre></div>
 </div>
@@ -448,9 +448,11 @@ from either a Unix or Windows client.</p>
 path. On Windows, you might be able to simply enter <code class="docutils literal"><span class="pre">java</span></code>. If that is not successful,
 enter the fully qualified path.</dd>
 <dt>iomhost -</dt>
-<dd>(Required) The resolvable host name, or IP address to the IOM server.</dd>
+<dd>(Required) The resolvable host name, or IP address to the IOM object spawner.
+New in 2.1.6; this can be a list of all the object spawners hosts if you have load balanced object spawners.
+This provides Grid HA (High Availability)</dd>
 <dt>iomport -</dt>
-<dd>(Required) The port that IOM server is listening on for workspace connections.</dd>
+<dd>(Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).</dd>
 <dt>classpath -</dt>
 <dd>(Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar.</dd>
 <dt>authkey -</dt>
@@ -488,9 +490,9 @@ first one in the list of app servers it supports.</dd>
 <span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.core.jar&quot;</span>
 <span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">ProgramData</span><span class="se">\\</span><span class="s2">Anaconda3</span><span class="se">\\</span><span class="s2">Lib</span><span class="se">\\</span><span class="s2">site-packages</span><span class="se">\\</span><span class="s2">saspy</span><span class="se">\\</span><span class="s2">java</span><span class="se">\\</span><span class="s2">saspyiom.jar&quot;</span>
 
-<span class="c1"># Unix client and Unix IOM server</span>
+<span class="c1"># Unix client and Unix IOM server  NEW 2.1.6 - with load balanced object spawners</span>
 <span class="n">iomlinux</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;/usr/bin/java&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;iomhost&#39;</span>   <span class="p">:</span> <span class="s1">&#39;linux.iom.host&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;iomhost&#39;</span>   <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;linux.grid1.iom.host&#39;</span><span class="p">,</span><span class="s1">&#39;linux.grid2.iom.host&#39;</span><span class="p">,</span><span class="s1">&#39;linux.grid3.iom.host&#39;</span><span class="p">,</span><span class="s1">&#39;linux.grid4.iom.host&#39;</span><span class="p">],</span>
             <span class="s1">&#39;iomport&#39;</span>   <span class="p">:</span> <span class="mi">8591</span><span class="p">,</span>
             <span class="s1">&#39;encoding&#39;</span>  <span class="p">:</span> <span class="s1">&#39;latin1&#39;</span><span class="p">,</span>
             <span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cpL</span><span class="p">,</span>
