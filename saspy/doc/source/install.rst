@@ -178,8 +178,8 @@ encoding -
 
 .. code-block:: ipython3
 
-    default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
-                'options' : ["-fullstimer"]
+    default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+                'options' : ["-fullstimer", "-autoexec", "/user/tom/autoexec"]
                 }
 
 .. note:: The trigger to use the STDIO connection method is the absence of any
@@ -311,9 +311,11 @@ java    -
     path. On Windows, you might be able to simply enter ``java``. If that is not successful,
     enter the fully qualified path.
 iomhost - 
-    (Required) The resolvable host name, or IP address to the IOM server.
+    (Required) The resolvable host name, or IP address to the IOM object spawner.
+    New in 2.1.6; this can be a list of all the object spawners hosts if you have load balanced object spawners.
+    This provides Grid HA (High Availability)
 iomport - 
-    (Required) The port that IOM server is listening on for workspace connections.
+    (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
 classpath - 
     (Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar.
 authkey -
@@ -354,9 +356,9 @@ appserver -
     cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar"
     cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
 
-    # Unix client and Unix IOM server
+    # Unix client and Unix IOM server  NEW 2.1.6 - with load balanced object spawners
     iomlinux = {'java'      : '/usr/bin/java',
-                'iomhost'   : 'linux.iom.host',
+                'iomhost'   : ['linux.grid1.iom.host','linux.grid2.iom.host','linux.grid3.iom.host','linux.grid4.iom.host'],
                 'iomport'   : 8591,
                 'encoding'  : 'latin1',
                 'classpath' : cpL,
