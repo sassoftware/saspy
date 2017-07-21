@@ -263,3 +263,78 @@ class SASstat:
         logging.debug("kwargs type: " + str(type(kwargs)))
         kwargs['ODSGraphics']=False
         return SASProcCommons._run_proc(self, "HPREG", required_set, legal_set, **kwargs)
+
+    def phreg(self, **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the PHREG procedure
+        For more information on the statements see the Documentation link.
+
+        ``required_set = {'model'}``
+
+        ``legal_set = {'assess', 'bayes', 'by', 'cls', 'contrast', 'freq', 'effect', 'estimate', 
+                     'hazardratio', 'id', 'lsmeans', 'lsmestimate', 'model', 'out', 'roc', 
+                     'random', 'slice', 'store', 'strata', 'test', 'weight', 'procopts'}``
+
+        cls is an alias for the class statement
+
+        Documentation link:
+        http://go.documentation.sas.com/?docsetId=statug&docsetTarget=statug_phreg_toc.htm&docsetVersion=14.2&locale=en
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'model'}
+        legal_set = {'assess', 'bayes', 'by', 'cls', 'contrast', 'freq', 'effect', 'estimate',
+                     'hazardratio', 'id', 'lsmeans', 'lsmestimate', 'model', 'out', 'roc',
+                     'random', 'slice', 'store', 'strata', 'test', 'weight', 'procopts'}
+
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        kwargs['ODSGraphics']=True
+        return SASProcCommons._run_proc(self, "PHREG", required_set, legal_set, **kwargs)
+
+    def ttest(self, **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the PHREG procedure
+        For more information on the statements see the Documentation link.
+
+        ``required_set = {}``
+
+        ``legal_set = {'by', 'cls', 'freq', 'paired', 'var', 'weight', 'procopts'}``
+
+        cls is an alias for the class statement
+
+        Documentation link:
+        http://go.documentation.sas.com/?docsetId=statug&docsetVersion=14.2&docsetTarget=statug_ttest_overview.htm&locale=en
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {}
+        legal_set = {'by', 'cls', 'freq', 'paired', 'var', 'weight', 'procopts'}
+
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        kwargs['ODSGraphics']=True
+        return SASProcCommons._run_proc(self, "TTEST", required_set, legal_set, **kwargs)
+
+    def factor(self, **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the PHREG procedure
+        For more information on the statements see the Documentation link.
+
+        ``required_set = {}``
+
+        ``legal_set = {'by', 'cls', 'freq', 'paired', 'var', 'weight', 'procopts'}``
+
+        Documentation link:
+        http://go.documentation.sas.com/?docsetId=statug&docsetVersion=14.2&docsetTarget=statug_factor_overview.htm&locale=en
+
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {}
+        legal_set = {'by', 'freq', 'priors', 'pathdiagram', 'partial', 'var', 'weight', 'procopts'}
+
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        kwargs['ODSGraphics']=True
+        return SASProcCommons._run_proc(self, "FACTOR", required_set, legal_set, **kwargs)
+
