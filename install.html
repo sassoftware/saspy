@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 2.1.5 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.1.6 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.5 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.6 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.5
+                2.1.6
               </div>
             
           
@@ -97,6 +97,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation and configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sascfg-personal-py">sascfg_personal.py</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sascfg-py-details">sascfg.py details</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stdio">STDIO</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></li>
@@ -272,6 +273,21 @@ that Python is using to get at this module.</p>
 <span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy.sascfg&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/usr/lib/python3.5/site-packages/saspy/sascfg.py&#39;</span><span class="o">&gt;</span>
 <span class="o">&gt;&gt;&gt;</span>
 </pre></div>
+</div>
+<div class="section" id="sascfg-personal-py">
+<h3>sascfg_personal.py<a class="headerlink" href="#sascfg-personal-py" title="Permalink to this headline">¶</a></h3>
+<p>Since the saspy.cfg file is in the saspy repo, as an example configuration file, it can be updated
+on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
+you&#8217;ve configured for your site. That means you would need to keep a copy elsewhere and then replace
+the new one with your copy after upgrading or pulling, if yours was replaced.</p>
+<p>There is a simple solution to this. Your configurations can be in a file named sascfg_personal.py.
+This file doesn&#8217;t exist in the repo, so it will never be overwritten when you upgrade or pull.
+saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
+import sascfg.py.</p>
+<p>So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
+file. Then you won&#8217;t have to worry about sascfg.py getting clobbered when you pull or upgrade.</p>
+<p>Also, everything in this doc applies to the _personal version; it&#8217;s the same, just a version of the file
+that will be used if it exists instead of the original one, but it won&#8217;t get overwritten.</p>
 </div>
 <div class="section" id="sascfg-py-details">
 <h3>sascfg.py details<a class="headerlink" href="#sascfg-py-details" title="Permalink to this headline">¶</a></h3>
@@ -635,7 +651,7 @@ install other non-standard python modules.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.5',
+            VERSION:'2.1.6',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

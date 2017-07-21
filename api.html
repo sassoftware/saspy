@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 2.1.5 documentation</title>
+  <title>API Reference &mdash; saspy 2.1.6 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.5 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.6 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.5
+                2.1.6
               </div>
             
           
@@ -364,7 +364,7 @@ Most of these parameters will be configured in the sascfg.py configuration file.
 
 <dl class="method">
 <dt id="saspy.SASsession.read_csv">
-<code class="descname">read_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str = '_csv'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.read_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descname">read_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str = '_csv'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>opts: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.read_csv" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -374,6 +374,7 @@ Most of these parameters will be configured in the sascfg.py configuration file.
 <li><strong>table</strong> &#8211; the name of the SAS Data Set to create</li>
 <li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
 <li><strong>results</strong> &#8211; format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</li>
+<li><strong>opts</strong> &#8211; a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)</li>
 </ul>
 </td>
 </tr>
@@ -700,7 +701,7 @@ HTML(results[&#8216;LST&#8217;])</dd>
 
 <dl class="method">
 <dt id="saspy.SASsession.write_csv">
-<code class="descname">write_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.write_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>opts: dict = {}</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.write_csv" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -709,7 +710,8 @@ HTML(results[&#8216;LST&#8217;])</dd>
 <li><strong>file</strong> &#8211; the OS filesystem path of the file to be created (exported from the SAS Data Set)</li>
 <li><strong>table</strong> &#8211; the name of the SAS Data Set you want to export to a CSV file</li>
 <li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
-<li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
+<li><strong>dsopts</strong> &#8211; a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)</li>
+<li><strong>opts</strong> &#8211; <p>a dictionary containing any of the following Proc Export options(delimiter, putnames)</p>
 <ul>
 <li>where is a string</li>
 <li>keep are strings or list of strings.</li>
@@ -1080,7 +1082,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 
 <dl class="method">
 <dt id="saspy.SASdata.to_csv">
-<code class="descname">to_csv</code><span class="sig-paren">(</span><em>file: str</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASdata.to_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>opts: dict = {}</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASdata.to_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method will export a SAS Data Set to a file in CSV format.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1900,7 +1902,7 @@ This class and all the useful work in this package require a licensed version of
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.5',
+            VERSION:'2.1.6',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
