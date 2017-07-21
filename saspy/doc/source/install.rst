@@ -49,7 +49,6 @@ The current set of connection methods are as follows:
   method can connect to SAS that is installed on a remote host, if you have passwordless
   SSH configured for your Linux user account.
 
-
 `IOM`_
   The integrated object method (IOM) connection method supports SAS on any platform.
   This method can make a local Windows connection and it is also the way to connect 
@@ -111,6 +110,25 @@ After installing, start Python and ``import saspy``. Then, simply submit
     <module 'saspy.sascfg' from '/usr/lib/python3.5/site-packages/saspy/sascfg.py'>
     >>>
     
+
+sascfg_personal.py
+==================
+
+Since the saspy.cfg file is in the saspy repo, as an example configuration file, it can be updated
+on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
+you've configured for your site. That means you would need to keep a copy elsewhere and then replace
+the new one with your copy after upgrading or pulling, if yours was replaced. 
+
+There is a simple solution to this. Your configurations can be in a file named sascfg_personal.py.
+This file doesn't exist in the repo, so it will never be overwritten when you upgrade or pull.
+saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
+import sascfg.py.
+
+So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
+file. Then you won't have to worry about sascfg.py getting clobbered when you pull or upgrade.
+
+Also, everything in this doc applies to the _personal version; it's the same, just a version of the file
+that will be used if it exists instead of the original one, but it won't get overwritten.
         
 sascfg.py details
 =================
