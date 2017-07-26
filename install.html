@@ -288,6 +288,13 @@ import sascfg.py.</p>
 file. Then you won&#8217;t have to worry about sascfg.py getting clobbered when you pull or upgrade.</p>
 <p>Also, everything in this doc applies to the _personal version; it&#8217;s the same, just a version of the file
 that will be used if it exists instead of the original one, but it won&#8217;t get overwritten.</p>
+<p>Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
+al long as that location is in the python search path. The python search path can be found by looking
+at the PYTHONPATH environment variable (if it&#8217;s set), but more definitively by submitting the following:</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="sascfg-py-details">
 <h3>sascfg.py details<a class="headerlink" href="#sascfg-py-details" title="Permalink to this headline">¶</a></h3>
