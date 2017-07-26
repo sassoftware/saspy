@@ -129,6 +129,16 @@ file. Then you won't have to worry about sascfg.py getting clobbered when you pu
 
 Also, everything in this doc applies to the _personal version; it's the same, just a version of the file
 that will be used if it exists instead of the original one, but it won't get overwritten.
+
+Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
+al long as that location is in the python search path. The python search path can be found by looking
+at the PYTHONPATH environment variable (if it's set), but more definitively by submitting the following:
+
+.. code-block:: ipython3
+
+    import sys
+    sys.path
+
         
 sascfg.py details
 =================
