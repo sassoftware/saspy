@@ -21,7 +21,7 @@ import getpass
 from time import sleep
 
 try:
-   import saspy.sascfg_personal as SAScfg
+   import sascfg_personal as SAScfg
 except ImportError:
    import saspy.sascfg as SAScfg
 
