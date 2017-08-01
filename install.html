@@ -390,7 +390,7 @@ The connection can be to a local SAS installation or a remote IOM server running
 Windows.</p>
 <p>The IOM connection method requires the following:</p>
 <ul class="simple">
-<li>The SAS Java IOM Client</li>
+<li>The SAS Java IOM Client (just the jars listed below; these can be copied to your client system from wherever your SAS install is)</li>
 <li>Setting the CLASSPATH to access the SAS Java IOM Client JAR files.</li>
 <li>Setting the CLASSPATH to include the the saspyiom.jar file.</li>
 <li>Setting the CLASSPATH to include client side encryption jars, if you have encryption configured for your IOM</li>
@@ -418,7 +418,8 @@ file, like so:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="s1">&#39;classpath&#39;</span> <span class="p">:</span> <span class="n">cp</span><span class="p">,</span>
 </pre></div>
 </div>
-<p>Also worth noting: these five JAR files are compatible with both Windows and Unix client systems.</p>
+<p>Also worth noting: these five JAR files are compatible with both Windows and Unix client systems. So you can copy the jars from whatever system
+SAS is installed on, to your client (where python is running), even if one is Unix and the other is Windows (either way).</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">If you have a \u or \U in your classpath string, like: &#8220;c:\User\sastpw\...&#8217;, you will have to use either
@@ -461,7 +462,8 @@ This provides Grid HA (High Availability)</dd>
 <dt>iomport -</dt>
 <dd>(Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).</dd>
 <dt>classpath -</dt>
-<dd>(Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar.</dd>
+<dd>(Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar. These can be wherever. Just make sure the path is correct.
+These jars work across platforms, so you can copy them from a Unix system to Windows or the other way too. Same with saspyiom.jar.</dd>
 <dt>authkey -</dt>
 <dd>The keyword that starts a line in the authinfo file containing user and or password for this connection.</dd>
 <dt>omruser -</dt>
@@ -484,17 +486,19 @@ that you want to connect to, i.e.: &#8216;SASApp - Workspace Server&#8217;. With
 first one in the list of app servers it supports.</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Unix client class path</span>
-<span class="n">cpL</span>  <span class="o">=</span>  <span class="s2">&quot;/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar&quot;</span>
-<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/log4j.jar&quot;</span>
-<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.security.sspi.jar&quot;</span>
-<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.core.jar&quot;</span>
-<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/usr/lib/python3.5/site-packages/saspy/java/saspyiom.jar&quot;</span>
+<span class="n">cpL</span>  <span class="o">=</span>  <span class="s2">&quot;/whever/I/put/these/jars/sas.svc.connection.jar&quot;</span>
+<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/whever/I/put/these/jars/log4j.jar&quot;</span>
+<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/whever/I/put/these/jars/sas.security.sspi.jar&quot;</span>
+<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/whever/I/put/these/jars/sas.core.jar&quot;</span>
+<span class="n">cpL</span> <span class="o">+=</span> <span class="s2">&quot;:/whever/I/put/these/jars/saspyiom.jar&quot;</span>
+<span class="c1">#cpL += &quot;:/usr/lib/python3.5/site-packages/saspy/java/saspyiom.jar&quot;</span>
 
 <span class="c1"># Windows client class path</span>
-<span class="n">cpW</span>  <span class="o">=</span>  <span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.svc.connection.jar&quot;</span>
-<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">log4j.jar&quot;</span>
-<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.security.sspi.jar&quot;</span>
-<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.core.jar&quot;</span>
+<span class="n">cpW</span>  <span class="o">=</span>  <span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">wherever</span><span class="se">\\</span><span class="s2">I</span><span class="se">\\</span><span class="s2">put</span><span class="se">\\</span><span class="s2">these</span><span class="se">\\</span><span class="s2">jars</span><span class="se">\\</span><span class="s2">sas.svc.connection.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">wherever</span><span class="se">\\</span><span class="s2">I</span><span class="se">\\</span><span class="s2">put</span><span class="se">\\</span><span class="s2">these</span><span class="se">\\</span><span class="s2">jars</span><span class="se">\\</span><span class="s2">log4j.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">wherever</span><span class="se">\\</span><span class="s2">I</span><span class="se">\\</span><span class="s2">put</span><span class="se">\\</span><span class="s2">these</span><span class="se">\\</span><span class="s2">jars</span><span class="se">\\</span><span class="s2">sas.security.sspi.jar&quot;</span>
+<span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">wherever</span><span class="se">\\</span><span class="s2">I</span><span class="se">\\</span><span class="s2">put</span><span class="se">\\</span><span class="s2">these</span><span class="se">\\</span><span class="s2">jars</span><span class="se">\\</span><span class="s2">sas.core.jar&quot;</span>
+<span class="c1">#cpW += &quot;;C:\\wherever\\I\\put\\these\\jars\\saspyiom.jar&quot;</span>
 <span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">ProgramData</span><span class="se">\\</span><span class="s2">Anaconda3</span><span class="se">\\</span><span class="s2">Lib</span><span class="se">\\</span><span class="s2">site-packages</span><span class="se">\\</span><span class="s2">saspy</span><span class="se">\\</span><span class="s2">java</span><span class="se">\\</span><span class="s2">saspyiom.jar&quot;</span>
 
 <span class="c1"># Unix client and Unix IOM server  NEW 2.1.6 - with load balanced object spawners</span>
