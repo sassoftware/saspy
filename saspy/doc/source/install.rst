@@ -241,7 +241,7 @@ Windows.
 
 The IOM connection method requires the following:
 
-* The SAS Java IOM Client
+* The SAS Java IOM Client (just the jars listed below; these can be copied to your client system from wherever your SAS install is)
 * Setting the CLASSPATH to access the SAS Java IOM Client JAR files.
 * Setting the CLASSPATH to include the the saspyiom.jar file.
 * Setting the CLASSPATH to include client side encryption jars, if you have encryption configured for your IOM
@@ -274,7 +274,8 @@ And then simply refer to the ``cp`` variable in the configuration definition:
 
     'classpath' : cp,
 
-Also worth noting: these five JAR files are compatible with both Windows and Unix client systems.  
+Also worth noting: these five JAR files are compatible with both Windows and Unix client systems. So you can copy the jars from whatever system
+SAS is installed on, to your client (where python is running), even if one is Unix and the other is Windows (either way).  
 
 .. note::
     If you have a \\u or \\U in your classpath string, like: "c:\\User\\sastpw\\...', you will have to use either 
@@ -327,7 +328,8 @@ iomhost -
 iomport - 
     (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
 classpath - 
-    (Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar.
+    (Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar. These can be wherever. Just make sure the path is correct.
+    These jars work across platforms, so you can copy them from a Unix system to Windows or the other way too. Same with saspyiom.jar.
 authkey -
     The keyword that starts a line in the authinfo file containing user and or password for this connection.
 omruser - 
@@ -353,17 +355,19 @@ appserver -
 .. code-block:: ipython3
 
     # Unix client class path
-    cpL  =  "/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar"
-    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/log4j.jar"
-    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.security.sspi.jar"
-    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.core.jar"
-    cpL += ":/usr/lib/python3.5/site-packages/saspy/java/saspyiom.jar"
+    cpL  =  "/whever/I/put/these/jars/sas.svc.connection.jar"
+    cpL += ":/whever/I/put/these/jars/log4j.jar"
+    cpL += ":/whever/I/put/these/jars/sas.security.sspi.jar"
+    cpL += ":/whever/I/put/these/jars/sas.core.jar"
+    cpL += ":/whever/I/put/these/jars/saspyiom.jar"
+    #cpL += ":/usr/lib/python3.5/site-packages/saspy/java/saspyiom.jar"
 
     # Windows client class path
-    cpW  =  "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar"
-    cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar"
-    cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar"
-    cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar"
+    cpW  =  "C:\\wherever\\I\\put\\these\\jars\\sas.svc.connection.jar"
+    cpW += ";C:\\wherever\\I\\put\\these\\jars\\log4j.jar"
+    cpW += ";C:\\wherever\\I\\put\\these\\jars\\sas.security.sspi.jar"
+    cpW += ";C:\\wherever\\I\\put\\these\\jars\\sas.core.jar"
+    #cpW += ";C:\\wherever\\I\\put\\these\\jars\\saspyiom.jar"
     cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
 
     # Unix client and Unix IOM server  NEW 2.1.6 - with load balanced object spawners
