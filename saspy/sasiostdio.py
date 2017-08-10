@@ -827,7 +827,7 @@ class SASsessionSTDIO():
          code += "length"+length+";\n"
       if len(format):
          code += "format "+format+";\n"
-      code += "infile datalines delimiter='09'x DSD TRUNCOVER;\n input "+input+";\n datalines;"
+      code += "infile datalines delimiter='09'x DSD STOPOVER;\n input "+input+";\n datalines;"
       self._asubmit(code, "text")
 
       for row in df.itertuples(index=False):
