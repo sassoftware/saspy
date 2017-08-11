@@ -17,7 +17,7 @@ SASPy
 **Issues and Ideas:** `<https://github.com/sassoftware/saspy/issues>`_
 
 
-The SASPy project provides Python APIs to the SAS system. You can start a 
+This project provides Python APIs to the SAS system. You can start a 
 SAS session and run analytics from Python through a combination of 
 object-oriented methods and Python magics. 
 

@@ -7,3 +7,13 @@ SAS_kernel.egg-info/
 saspy.egg-info/
 *.rej
 sascfg_personal.py
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+.idea/
+build/
+dist/
+saspy/__pycache__/
