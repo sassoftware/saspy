@@ -21,7 +21,7 @@ from time import sleep
 import socket as socks
 
 try:
-   import saspy.sascfg_personal as SAScfg
+   import sascfg_personal as SAScfg
 except ImportError:
    import saspy.sascfg as SAScfg
 
@@ -56,7 +56,19 @@ class SASconfigIOM:
       self.omrpw     = cfg.get('omrpw', '')
       self.encoding  = cfg.get('encoding', '')
       self.classpath = cfg.get('classpath', '')
+      self.authkey   = cfg.get('authkey', '')
+      self.timeout   = cfg.get('timeout', None)
+      self.appserver = cfg.get('appserver', '')
 
+      try:
+         self.outopts = getattr(SAScfg, "SAS_output_options")
+         self.output  = self.outopts.get('output', 'html5')
+      except:
+         self.output  = 'html5'
+
+      if self.output.lower() not in ['html', 'html5']:
+         print("Invalid value specified for SAS_output_options. Using the default of HTML5")
+         self.output  = 'html5'
 
       # GET Config options
       try:
@@ -77,9 +89,16 @@ class SASconfigIOM:
       inhost = kwargs.get('iomhost', '')
       if len(inhost) > 0:
          if lock and len(self.iomhost):
-            print("Parameter 'host' passed to SAS_session was ignored due to configuration restriction.")
+            print("Parameter 'iomhost' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.iomhost = inhost
+
+      intout = kwargs.get('timeout', None)
+      if intout is not None:
+         if lock and self.timeout:
+            print("Parameter 'timeout' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.timeout = intout   
 
       inport = kwargs.get('iomport', None)
       if inport:
@@ -108,6 +127,20 @@ class SASconfigIOM:
             print("Parameter 'classpath' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.classpath = incp
+
+      inak = kwargs.get('authkey', '')
+      if len(inak) > 0:
+         if lock and len(self.authkey):
+            print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.authkey = inak   
+
+      inapp = kwargs.get('appserver', '')
+      if len(inapp) > 0:
+         if lock and len(self.apserver):
+            print("Parameter 'appserver' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.appserver = inapp   
 
       inencoding = kwargs.get('encoding', '')
       if len(inencoding) > 0:
@@ -183,6 +216,8 @@ class SASsessionIOM():
       # check for local iom server
       if len(self.sascfg.iomhost) > 0:
          zero = False
+         if isinstance(self.sascfg.iomhost, list):
+            self.sascfg.iomhost = ";".join(self.sascfg.iomhost)
       else:
          zero = True
 
@@ -207,20 +242,54 @@ class SASsessionIOM():
       self.sockerr.listen(0)
 
       if not zero:
-         while len(self.sascfg.omruser) == 0:
-            self.sascfg.omruser = self.sascfg._prompt("Please enter the IOM user id: ")
+         if self.sascfg.output.lower() == 'html':
+            print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg.py).
+Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the default sascfg.py.
+Will use HTML5 for this SASsession.""")
+            self.sascfg.output = 'html5'
+
+         user  = self.sascfg.omruser
+         pw    = self.sascfg.omrpw
+         found = False
+         if self.sascfg.authkey:
+            if os.name == 'nt': 
+               pwf = os.path.expanduser('~')+os.sep+'_authinfo'
+            else:
+               pwf = os.path.expanduser('~')+os.sep+'.authinfo'
+            try:
+               fid = open(pwf, mode='r')
+               for line in fid:
+                  if line.startswith(self.sascfg.authkey): 
+                     user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                     pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                     found = True
+               fid.close()
+            except OSError as e:
+               print('Error trying to read authinfo file:'+pwf+'\n'+str(e))
+               pass
+            except:
+               pass
+
+            if not found:
+               print('Did not find key '+self.sascfg.authkey+' in authinfo file:'+pwf+'\n')
+
+         while len(user) == 0:
+            user = self.sascfg._prompt("Please enter the IOM user id: ")
 
       pgm    = self.sascfg.java
       parms  = [pgm]
-      parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
+      parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j", "-host", "localhost"]
       #parms += ["-classpath", self.sascfg.classpath+":/u/sastpw/tkpy2j", "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
-      parms += ["-host", "localhost"]
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
+      if self.sascfg.timeout is not None:
+         parms += ["-timeout", str(self.sascfg.timeout)]
+      if self.sascfg.appserver:
+         parms += ["-appname", "'"+self.sascfg.appserver+"'"]
       if not zero:
-         parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]
-         parms += ["-user", self.sascfg.omruser]
+         parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
+         parms += ["-user", user]     
       else:
          parms += ["-zero"]
       parms += ['']
@@ -250,9 +319,14 @@ class SASsessionIOM():
 
          pin  = os.pipe()
          pout = os.pipe()
-         perr = os.pipe()
+         perr = os.pipe() 
+      
+         try:
+            pidpty = os.forkpty()
+         except:
+            import pty
+            pidpty = pty.fork()
 
-         pidpty = os.forkpty()
          if pidpty[0]:
             # we are the parent
             self.pid = pidpty[0]
@@ -337,11 +411,10 @@ class SASsessionIOM():
       self.stderr[0].setblocking(False)
 
       if not zero:
-         pw = self.sascfg.omrpw
          while len(pw) == 0:
             pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
          pw += '\n'
-         self.stdin[0].send(pw.encode(self.sascfg.encoding))
+         self.stdin[0].send(pw.encode())
 
       ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
 
@@ -426,8 +499,8 @@ class SASsessionIOM():
             if quit < 0 or len(logf) > 0:
                break
             sleep(0.5)
-
-      x = logf.decode(self.sascfg.encoding, errors='replace').replace(code1, " ")
+   
+      x = logf.decode(errors='replace').replace(code1, " ")
       self._log += x
 
       if os.name == 'nt':
@@ -494,9 +567,9 @@ class SASsessionIOM():
          if rc != None:
             self.pid = None
             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
-
-      return lstf.decode(self.sascfg.encoding, errors='replace')
-
+ 
+      return lstf.decode(errors='replace')
+   
    def _getlsttxt(self, wait=5, jobid=None):
       f2 = [None]
       lstf = b''
@@ -518,7 +591,7 @@ class SASsessionIOM():
 
             if (eof != -1):
                final = lstf.partition(b"Tom was here")
-               f2 = final[0].decode(self.sascfg.encoding, errors='replace').rpartition(chr(12))
+               f2 = final[0].decode(errors='replace').rpartition(chr(12))
                break
 
       lst = f2[0]
@@ -548,9 +621,10 @@ class SASsessionIOM():
       # anything to the lst, then unless _getlst[txt] is called, then next submit will happen to get the lst this wrote, plus
       # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
-      # unnecessary read in submit as this can't happen in the current code.
-      odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods html5 (id=saspy_internal) close;ods listing;\n"
+
+      # unnecessary read in submit as this can't happen in the current code. 
+      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True
       pgm      = b""
 
@@ -559,9 +633,9 @@ class SASsessionIOM():
 
       if (ods):
          pgm += odsopen
-
-      pgm += code.encode(self.sascfg.encoding)+b'\n'+b'tom says EOL=ASYNCH                          \n'
-
+   
+      pgm += code.encode()+b'\n'+b'tom says EOL=ASYNCH                          \n'
+   
       if (ods):
          pgm += odsclose
 
@@ -595,8 +669,8 @@ class SASsessionIOM():
             HTML(results['LST'])
       '''
       #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods html5 (id=saspy_internal) close;ods listing;\n"
+      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
       lstf     = ''
@@ -663,14 +737,14 @@ class SASsessionIOM():
 
       if ods:
          pgm += odsopen
-
-      pgm += mj+b'\n'+pcodei.encode(self.sascfg.encoding)+pcodeiv.encode(self.sascfg.encoding)
-      pgm += code.encode(self.sascfg.encoding)+b'\n'+pcodeo.encode(self.sascfg.encoding)+b'\n'+mj
-
+   
+      pgm += mj+b'\n'+pcodei.encode()+pcodeiv.encode()
+      pgm += code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj
+   
       if ods:
          pgm += odsclose
 
-      pgm += b'\n'+logcodei.encode(self.sascfg.encoding)+b'\n'
+      pgm += b'\n'+logcodei.encode()+b'\n'
       self.stdin[0].send(pgm+b'tom says EOL='+logcodeo.encode()+b'\n')
 
       while not done:
@@ -696,7 +770,7 @@ class SASsessionIOM():
                        lstf = lstf.rsplit(logcodeo)[0]
                        break
                  try:
-                    lst = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+                    lst = self.stdout[0].recv(4096).decode(errors='replace')
                  except (BlockingIOError):
                     lst = b''
 
@@ -706,7 +780,9 @@ class SASsessionIOM():
                  else:
                     sleep(0.1)
                     try:
-                       log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+
+                       log = self.stderr[0].recv(4096).decode(errors='replace') 
+
                     except (BlockingIOError):
                        log = b''
 
@@ -716,7 +792,7 @@ class SASsessionIOM():
                        if logf.count(logcodeo) >= 1:
                           bail = True
                        if not bail and bc:
-                          self.stdin[0].send(odsclose+logcodei.encode(self.sascfg.encoding)+b'tom says EOL='+logcodeo.encode()+b'\n')
+                          self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo.encode()+b'\n')
                           bc = False
              done = True
 
@@ -749,7 +825,7 @@ class SASsessionIOM():
              else:
                 print('Exception ignored, continuing to process...\n')
 
-             self.stdin[0].send(odsclose+logcodei.encode(self.sascfg.encoding)+b'tom says EOL='+logcodeo.encode()+b'\n')
+             self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo.encode()+b'\n')
 
       trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 100:
@@ -807,7 +883,7 @@ class SASsessionIOM():
                 outrc = str(rc)
                 return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+outrc, LST='', ABORT=True)
 
-            lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
+            lst = self.stdout.read1(4096).decode(errors='replace')
             lstf += lst
             if len(lst) > 0:
                 lsts = lst.rpartition('Select:')
@@ -816,7 +892,7 @@ class SASsessionIOM():
                     query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                     print('Processing interrupt\nAttn handler Query is\n\n' + query)
                     response = self.sascfg._prompt("Please enter your Response: ")
-                    self.stdin[0].send(response.encode(self.sascfg.encoding) + b'\n')
+                    self.stdin[0].send(response.encode() + b'\n')
                     if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
                        bc = True
                        break
@@ -834,7 +910,7 @@ class SASsessionIOM():
                         #print("******************No 'Select' or 'Press' found in lst=")
                         pass
             else:
-                log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+                log = self.stderr[0].recv(4096).decode(errors='replace')
                 logf += log
                 self._log += log
 
@@ -878,13 +954,14 @@ class SASsessionIOM():
       exists = int(l2[0])
 
       return exists
-
-   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False) -> '<SASdata object>':
+   
+   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict ={}) -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+      opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
       '''
       code  = "filename x "
 
@@ -895,23 +972,26 @@ class SASsessionIOM():
       code += "proc import datafile=x out="
       if len(libref):
          code += libref+"."
-      code += table+" dbms=csv replace; run;"
-
+      code += table+" dbms=csv replace; "+self._sb._impopts(opts)+" run;"
+   
       if nosub:
          print(code)
       else:
          ll = self.submit(code, "text")
-
-   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict ={}) -> 'The LOG showing the results of the step':
+   
+   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict ={}, opts: dict ={}) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CSV format.
       file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
       table   - the name of the SAS Data Set you want to export to a CSV file
       libref  - the libref for the SAS Data Set.
+      dsopts  - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
+      opts    - a dictionary containing any of the following Proc Export options(delimiter, putnames)
       '''
       code  = "options nosource;\n"
       code += "filename x \""+file+"\";\n"
-      code += "proc export data="+libref+"."+table+" outfile=x dbms=csv replace; run\n;"
+      code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
+      code += self._sb._expopts(opts)+" run\n;"
       code += "options source;\n"
 
       if nosub:
@@ -984,13 +1064,14 @@ class SASsessionIOM():
       self._asubmit(code+";\nrun;", "text")
       ll = self.submit("", 'text')
       return
-
-   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
+   
+   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref  - the libref for the SAS Data Set.
-      port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
+      rowsep  - the row seperator character to use; defaults to '\n'
+      colsep  - the column seperator character to use; defaults to '\t'
       '''
       datar = ""
       if libref:
@@ -998,7 +1079,8 @@ class SASsessionIOM():
       else:
          tabname = table
 
-      code  = "data _null_; file LOG; d = open('"+tabname+"');\n"
+      code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
+      code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
       code += "length var $256;\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
@@ -1026,8 +1108,13 @@ class SASsessionIOM():
       l2 = l2[2].partition("\n")
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
+   
+      topts             = dict(dsopts)
+      topts['obs']      = 1
+      topts['firstobs'] = ''
 
-      code  = "data _null_; set "+tabname+"(obs=1); put 'FMT_CATS=';\n"
+      code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;"
@@ -1039,7 +1126,11 @@ class SASsessionIOM():
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      code = "data _null_; set "+tabname+";\n file _tomods1; put "
+      rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
+      cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
+
+      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1 termstr=NL; put 
+      
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
@@ -1054,14 +1145,20 @@ class SASsessionIOM():
                   else:
                      code += 'best32. '
          if i < (len(varlist)-1):
-            code += "'09'x "
+            code += cdelim
+         else:
+            code += rdelim
       code += ";\n run;"
 
       ll = self.submit(code, 'text')
 
+      if (len(ll['LST']) > 1) and (ll['LST'][0] == "\ufeff"):
+         ll['LST'] = ll['LST'][1:len(ll['LST'])]
+
       r = []
-      for i in ll['LST'].splitlines():
-         r.append(tuple(i.split(sep='\t')))
+      for i in ll['LST'].split(sep=rowsep+'\n'):
+         if i != '':
+            r.append(tuple(i.split(sep=colsep)))
 
       df = pd.DataFrame.from_records(r, columns=varlist)
 
@@ -1137,7 +1234,3 @@ sas_datetime_fmts = (
 'NLDATMYW','NLDATMZ','NLDDFDT','NLDDFDT','NORDFDT','NORDFDT','POLDFDT','POLDFDT','PTGDFDT','PTGDFDT','RUSDFDT','RUSDFDT',
 'SLODFDT','SLODFDT','SVEDFDT','SVEDFDT','TWMDY','YMDDTTM',
 )
-
-
-
-

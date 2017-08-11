@@ -42,6 +42,16 @@ SAS_config_names=['default']
 
 SAS_config_options = {'lock_down': True}
 
+# Configuration options for SAS output. By default output is HTML 5.0 (using "ods html5" statement) but certain templates might not work 
+# properly with HTML 5.0 so it can also be set to HTML 4.0 instead (using "ods html" statement). This option will only work when using IOM
+# in local mode. Note that HTML 4.0 will generate images separately which clutters the workspace and if you download the notebook as HTML, 
+# the HTML file will need to be put in the same folder as the images for them to appear.
+# valid key are:
+# 
+# 'output' = ['html5', 'html']
+#
+SAS_output_options = {'output' : 'html5'}
+
 
 # Configuration Definitions
 #
@@ -96,11 +106,13 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # 'java'      - [REQUIRED] the path to the java executable to use
 # 'iomhost'   - [REQUIRED for remote IOM case, Don't specify to use a local Windows Session] the resolvable host name, or ip to the IOM server to connect to
 # 'iomport'   - [REQUIRED for remote IOM case, Don't specify to use a local Windows Session] the port IOM is listening on
+# 'authkey'   - identifier for user/password credentials to read from .authinfo file. Eliminates prompting for credentials.
 # 'omruser'   - not suggested        [REQUIRED for remote IOM case but PROMTED for at runtime] Don't specify to use a local Windows Session
 # 'omrpw'     - really not suggested [REQUIRED for remote IOM case but PROMTED for at runtime] Don't specify to use a local Windows Session
 # 'encoding'  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
 # 'classpath' - [REQUIRED] classpath to IOM client jars and saspy client jar.
-#
+# 'appserver' - name ofphysical workspace server (when more than one app server defined in OMR) i.e.: 'SASApp - Workspace Server'
+
 
 # build out a local classpath variable to use below for Linux clients
 cpL  =  "/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar"
@@ -125,11 +137,17 @@ iomwin   = {'java'      : '/usr/bin/java',
 
          
 # build out a local classpath variable to use below for Windows clients
-cpW  =  "C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.svc.connection.jar"
-cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\log4j.jar"
-cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.security.sspi.jar"
-cpW += ";C:\Program Files\SASHome\SASDeploymentManager\9.4\products\deploywiz__94472__prt__xx__sp0__1\deploywiz\sas.core.jar"
-cpW += ";C:\ProgramData\Anaconda3\Lib\site-packages\saspy\java\saspyiom.jar"
+cpW  =  "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar"
+cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar"
+cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar"
+cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar"
+cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
+
+# And, if you've configured IOM to use Encryption, you need these client side jars.
+cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904300.0.0.20150204190000_v940m3\\sas.rutil.jar"
+cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil.nls_904300.0.0.20150204190000_v940m3\\sas.rutil.nls.jar"
+cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.rutil_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar"
+
 
 winlocal = {'java'      : 'java',
             'encoding'  : 'windows-1252',

@@ -8,7 +8,7 @@
 Advanced topics
 ===============
 
-In this chapter we will explore more detailed explanations of specific functionality in SASPy.
+In this chapter we will explore more detailed explanations of specific functionality.
 
 
 ****************
@@ -68,30 +68,30 @@ re-running the script.
 Prompting
 *********
 
-There are two types of prompting that SASPy can perform--meaning to stop processing and
+There are two types of prompting that can be performed; meaning to stop processing and
 prompt the user for input and then resume processing.
 
-The first type of prompting is performed by SASPy on its own. When you run the 
+The first type of prompting is performed implicity. When you run the 
 SASsession() method, if any required parameters for the chosen connection method 
-were not specified in the configuration definition (in sascfg.py), SASPy interrupts 
-processing so that it can prompt for the missing parameters. In addition, when there 
+were not specified in the configuration definition (in sascfg.py), processing is interrupted 
+so that the user can be prompted for the missing parameters. In addition, when there 
 is more than one configuration definition in SAS_config_names, and cfgname is not 
-specified in the SASsession() method (or an invalid name is specified), SASPy 
-prompts the user to select the configuration definition to use.
+specified in the SASsession() method (or an invalid name is specified), the user will 
+be prompted to select the configuration definition to use.
 
 The other kind of prompting is prompting that you control. The submit() method, 
 and the saslib() methods both take an optional prompt parameter. This parameter 
-is how you request that SASPy prompts the user for input at run time. This option 
+is how you request to have the user prompted for input at run time. This option 
 is used in conjunction with SAS macro variable names that you enter in the SAS 
 code or options for the method.
 
 The prompt parameter takes a Python dictionary. The keys are the SAS macro variable 
-names and the values are True or False. The Boolean value tells SASPy whether it 
+names and the values are True or False. The Boolean value indicates whether it 
 is to hide what the user types in or not. It also controls whether the macro variables 
 stay available to the SAS session or if they are deleted after running that code. 
 
-SASPy prompts you for the values of your keys, and will then assign those values to 
-SAS macro variables for you in SAS. When your code runs, the macro variables will be 
+You will be prompted for the values of your keys, and those values will be assigned
+to the SAS macro variables for you in SAS. When your code runs, the macro variables will be 
 resolved. If you specified ``True``, then the value the user types is not displayed, 
 nor is the macro variable displayed in the SAS log, and the macro variable is deleted 
 from SAS so that it is not accessible after that code submission. For ``False``, the 
