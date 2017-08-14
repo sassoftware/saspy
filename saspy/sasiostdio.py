@@ -835,6 +835,8 @@ Will use HTML5 for this SASsession.""")
          input += "'"+df.columns[name]+"'n "
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
             col_l = df[df.columns[name]].map(len, 'ignore').max()
+            if col_l == 0:
+               col_l = 8
             length += " '"+df.columns[name]+"'n $"+str(col_l)
             dts.append('C')
          else:
