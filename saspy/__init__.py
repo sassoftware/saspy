@@ -22,7 +22,7 @@ from saspy.sasresults     import *
 from saspy.sasutil        import *
 from saspy.sasproccommons import *
 from saspy.SASLogLexer    import *
-from saspy.version        import __version__
+from saspy.version        import __version__ 
 
 def isnotebook():
     try:
@@ -35,3 +35,7 @@ def isnotebook():
             return False  # Other type (?)
     except NameError:
         return False      # Probably standard Python interpreter
+
+if isnotebook():
+	from .sas_magic import SASMagic
+	get_ipython().register_magics(SASMagic)
