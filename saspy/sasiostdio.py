@@ -22,8 +22,11 @@ from time import sleep
 
 try:
    import saspy.sascfg_personal as SAScfg
-except ImportError:
-   import saspy.sascfg as SAScfg
+except:
+   try:
+      import sascfg_personal as SAScfg
+   except:
+      import saspy.sascfg as SAScfg
 
 try:
    import pandas as pd
@@ -36,13 +39,13 @@ except ImportError:
 
 class SASconfigSTDIO:
    '''
-   This object is not intended to be used directly. Instantiate a SASsession object instead 
+   This object is not intended to be used directly. Instantiate a SASsession object instead
    '''
    def __init__(self, **kwargs):
       self._kernel  = kwargs.get('kernel', None)
 
       self.name     = kwargs.get('sascfgname', '')
-      cfg           = getattr(SAScfg, self.name) 
+      cfg           = getattr(SAScfg, self.name)
 
       self.saspath  = cfg.get('saspath', '')
       self.options  = cfg.get('options', [])
@@ -72,42 +75,42 @@ class SASconfigSTDIO:
       # in lock down mode, don't allow runtime overrides of option values from the config file.
 
 
-      insaspath = kwargs.get('saspath', '')   
+      insaspath = kwargs.get('saspath', '')
       if len(insaspath) > 0:
          if lock and len(self.saspath):
             print("Parameter 'saspath' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.saspath = insaspath   
+            self.saspath = insaspath
 
       inoptions = kwargs.get('options', '')
       if len(inoptions) > 0:
          if lock and len(self.options):
             print("Parameter 'options' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.options = inoptions   
+            self.options = inoptions
 
       inssh = kwargs.get('ssh', '')
       if len(inssh) > 0:
          if lock and len(self.ssh):
             print("Parameter 'ssh' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.ssh = inssh   
+            self.ssh = inssh
 
       inhost = kwargs.get('host', '')
       if len(inhost) > 0:
          if lock and len(self.host):
             print("Parameter 'host' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.host = inhost   
+            self.host = inhost
 
       inencoding = kwargs.get('encoding', '')
       if len(inencoding) > 0:
          if lock and len(self.encoding):
             print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.encoding = inencoding   
+            self.encoding = inencoding
       if not self.encoding:
-         self.encoding = 'utf-8'  
+         self.encoding = 'utf-8'
 
       while len(self.saspath) == 0:
          if not lock:
@@ -134,7 +137,7 @@ class SASconfigSTDIO:
                                                 password=pw)
           except (KeyboardInterrupt):
              return ''
-                   
+
 class SASsessionSTDIO():
    '''
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
@@ -219,8 +222,8 @@ Will use HTML5 for this SASsession.""")
 
       PIPE_READ  = 0
       PIPE_WRITE = 1
-      
-      pin  = os.pipe() 
+
+      pin  = os.pipe()
       pout = os.pipe()
       perr = os.pipe() 
 
@@ -235,8 +238,8 @@ Will use HTML5 for this SASsession.""")
 
          pid = pidpty[0]
          os.close(pin[PIPE_READ])
-         os.close(pout[PIPE_WRITE]) 
-         os.close(perr[PIPE_WRITE]) 
+         os.close(pout[PIPE_WRITE])
+         os.close(perr[PIPE_WRITE])
 
       else:
          # we are the child
@@ -253,16 +256,16 @@ Will use HTML5 for this SASsession.""")
          os.close(pin[PIPE_READ])
          os.close(pin[PIPE_WRITE])
          os.close(pout[PIPE_READ])
-         os.close(pout[PIPE_WRITE]) 
+         os.close(pout[PIPE_WRITE])
          os.close(perr[PIPE_READ])
-         os.close(perr[PIPE_WRITE]) 
+         os.close(perr[PIPE_WRITE])
 
          try:
             #sleep(5)
             os.execv(pgm, parms)
          except OSError as e:
             print("The OS Error was:\n"+e.strerror+'\n')
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
+            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
             os._exit(-6)
@@ -279,21 +282,21 @@ Will use HTML5 for this SASsession.""")
       fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
 
       if self.pid is None:
-         print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
+         print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
          print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
          return NULL
       else:
          self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
          if self.pid is None:
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
+            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
             return None
 
-      print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")  
+      print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")
       return self.pid
-    
+
    def _endsas(self):
       rc = 0
       if self.pid:
@@ -325,7 +328,7 @@ Will use HTML5 for this SASsession.""")
             if quit < 0 or len(logf) > 0:
                break
             sleep(0.5)
-   
+
       x = logf.decode(self.sascfg.encoding).replace(code1, " ")
       self._log += x
 
@@ -344,23 +347,23 @@ Will use HTML5 for this SASsession.""")
       eof = 0
       bof = False
       lenf = 0
-   
+
       while True:
          lst = self.stdout.read1(4096)
          if len(lst) > 0:
             lstf += lst
-                             
+
             if ((not bof) and lst.count(b"<!DOCTYPE html>", 0, 20) > 0):
                bof = True
          else:
             lenf = len(lstf)
-      
+
             if (lenf > 15):
                eof = lstf.count(b"</html>", (lenf - 15), lenf)
-      
+
             if (eof > 0):
                   break
-            
+
             if not bof:
                quit -= 1
                if quit < 0:
@@ -375,22 +378,22 @@ Will use HTML5 for this SASsession.""")
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       return lstf.decode(self.sascfg.encoding)
-   
+
    def _getlsttxt(self, wait=5, jobid=None):
       f2 = [None]
       lstf = b''
       quit = wait * 2
       eof = 0
       self._asubmit("data _null_;file print;put 'Tom was here';run;", "text")
-   
+
       while True:
          lst = self.stdout.read1(4096)
          if len(lst) > 0:
             lstf += lst
-   
+
             lenf = len(lstf)
             eof = lstf.find(b"Tom was here", lenf - 25, lenf)
-      
+
             if (eof != -1):
                final = lstf.partition(b"Tom was here")
                f2 = final[0].decode(self.sascfg.encoding).rpartition(chr(12))
@@ -419,12 +422,12 @@ Will use HTML5 for this SASsession.""")
 
       if results.upper() != "HTML":
          ods = False
-   
+
       if (ods):
          self.stdin.write(odsopen)
-   
+
       out = self.stdin.write(code.encode(self.sascfg.encoding)+b'\n')
-   
+
       if (ods):
          self.stdin.write(odsclose)
 
@@ -435,7 +438,7 @@ Will use HTML5 for this SASsession.""")
    def submit(self, code: str, results: str ="html", prompt: dict ={}) -> dict:
       '''
       This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
-      code    - the SAS statements you want to execute 
+      code    - the SAS statements you want to execute
       results - format of results, HTML is default, TEXT is the alternative
       prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete
                 The keys are the names of the macro variables and the boolean flag is to either hide what you type and delete
@@ -455,7 +458,7 @@ Will use HTML5 for this SASsession.""")
       NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()
       i.e,: results = sas.submit("data a; x=1; run; proc print;run')
             print(results['LOG'])
-            HTML(results['LST']) 
+            HTML(results['LST'])
       '''
       odsopen  = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=stdout options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
@@ -490,7 +493,7 @@ Will use HTML5 for this SASsession.""")
 
       if results.upper() != "HTML":
          ods = False
-   
+
       if len(prompt):
          pcodei += 'options nosource nonotes;\n'
          pcodeo += 'options nosource nonotes;\n'
@@ -512,11 +515,11 @@ Will use HTML5 for this SASsession.""")
 
       if ods:
          self.stdin.write(odsopen)
-   
+
       pgm  = mj+b'\n'+pcodei.encode(self.sascfg.encoding)+pcodeiv.encode(self.sascfg.encoding)
       pgm += code.encode(self.sascfg.encoding)+b'\n'+pcodeo.encode(self.sascfg.encoding)+b'\n'+mj
       out  = self.stdin.write(pgm)
-   
+
       if ods:
          self.stdin.write(odsclose)
 
@@ -539,7 +542,7 @@ Will use HTML5 for this SASsession.""")
                  if len(lst) > 0:
                      lstf += lst
                  else:
-                     log = self.stderr.read1(4096).decode(self.sascfg.encoding) 
+                     log = self.stderr.read1(4096).decode(self.sascfg.encoding)
                      if len(log) > 0:
                          logf += log
                          if logf.count(logcodeo) >= 1:
@@ -555,7 +558,7 @@ Will use HTML5 for this SASsession.""")
              rc = os.waitpid(self.pid, 0)
              self.pid = None
              return dict(LOG=logf.partition(logcodeo)[0]+'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
-             
+
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
              ll = self._breakprompt(logcodeo)
@@ -575,7 +578,7 @@ Will use HTML5 for this SASsession.""")
              self.stdin.write(odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
              self.stdin.flush()
 
-      trip = lstf.rpartition("/*]]>*/")      
+      trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 100:
          lstf = ''
 
@@ -609,7 +612,7 @@ Will use HTML5 for this SASsession.""")
               if response.upper() == 'T':
                  break
               response = self.sascfg._prompt("Please enter (T) to terminate SAS or (C) to continue.")
-              
+
         interrupt = signal.SIGINT
         os.kill(self.pid, interrupt)
         sleep(.25)
@@ -698,7 +701,7 @@ Will use HTML5 for this SASsession.""")
                      else:
                         print("Unknown 'Select' choices found: ")
                         response = ''
-   
+
                print("'Select' Response="+response+'\n')
                self._asubmit(response+'\n','text')
             else:
@@ -757,15 +760,15 @@ Will use HTML5 for this SASsession.""")
       code  = "data _null_; e = exist('"
       if len(libref):
          code += libref+"."
-      code += table+"');\n" 
+      code += table+"');\n"
       code += "te='TABLE_EXISTS='; put te e;run;"
-   
+
       ll = self.submit(code, "text")
 
       l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
       l2 = l2[2].partition("\n")
       exists = int(l2[0])
-   
+
       return exists
    
    def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict ={}) -> '<SASdata object>':
@@ -777,14 +780,15 @@ Will use HTML5 for this SASsession.""")
       opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
       '''
       code  = "filename x "
-   
+
       if file.lower().startswith("http"):
          code += "url "
-   
+
       code += "\""+file+"\";\n"
       code += "proc import datafile=x out="
       if len(libref):
          code += libref+"."
+
       code += table+" dbms=csv replace; "+self._sb._impopts(opts)+" run;"
    
       if nosub:
@@ -831,6 +835,8 @@ Will use HTML5 for this SASsession.""")
          input += "'"+df.columns[name]+"'n "
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
             col_l = df[df.columns[name]].map(len, 'ignore').max()
+            if col_l == 0:
+               col_l = 8
             length += " '"+df.columns[name]+"'n $"+str(col_l)
             dts.append('C')
          else:
@@ -851,7 +857,7 @@ Will use HTML5 for this SASsession.""")
          code += "length"+length+";\n"
       if len(format):
          code += "format "+format+";\n"
-      code += "infile datalines delimiter='09'x;\n input "+input+";\n datalines;"
+      code += "infile datalines delimiter='09'x DSD STOPOVER;\n input "+input+";\n datalines;"
       self._asubmit(code, "text")
 
       for row in df.itertuples(index=False):
@@ -862,7 +868,7 @@ Will use HTML5 for this SASsession.""")
             #var = str(row[1][col])
             if dts[col] == 'N' and var == 'nan':
                var = '.'
-            if dts[col] == 'D': 
+            if dts[col] == 'D':
                if var == 'nan':
                   var = '.'
                else:
@@ -900,26 +906,26 @@ Will use HTML5 for this SASsession.""")
       code += "put vt;\n"
       code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
       code += "run;"
-   
+
       ll = self.submit(code, "text")
-   
+
       l2 = ll['LOG'].rpartition("LRECL= ")
       l2 = l2[2].partition("\n")
       lrecl = int(l2[0])
-   
+
       l2 = l2[2].partition("VARNUMS= ")
       l2 = l2[2].partition("\n")
       nvars = int(l2[0])
-   
+
       l2 = l2[2].partition("\n")
       varlist = l2[2].split("\n", nvars)
       del varlist[nvars]
-   
+
       l2 = l2[2].partition("VARTYPE=")
       l2 = l2[2].partition("\n")
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
-   
+
       topts             = dict(dsopts)
       topts['obs']      = 1
       topts['firstobs'] = ''
@@ -928,14 +934,14 @@ Will use HTML5 for this SASsession.""")
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;\n"
-   
+
       ll = self.submit(code, "text")
 
       l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")              
+      l2 = l2[2].partition("\n")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
-   
+
       try:
          sock = socks.socket()
          sock.bind(("",port))
@@ -977,18 +983,18 @@ Will use HTML5 for this SASsession.""")
       sock.listen(0)
       self._asubmit(code, 'text')
       newsock = sock.accept()
-   
+
       while True:
          data = newsock[0].recv(4096)
          if len(data):
             datar += data.decode(self.sascfg.encoding)
          else:
             break
-   
+
       newsock[0].shutdown(socks.SHUT_RDWR)
       newsock[0].close()
       sock.close()
-   
+
       r = []
       for i in datar.split(sep=rowsep+'\n'):
          if i != '':
@@ -999,12 +1005,12 @@ Will use HTML5 for this SASsession.""")
       for i in range(nvars):
          if vartype[i] == 'N':
             if varcat[i] not in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
-               df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce') 
+               df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce')
             else:
-               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='ignore') 
+               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='ignore')
 
       return df
-   
+
 if __name__ == "__main__":
     startsas()
 

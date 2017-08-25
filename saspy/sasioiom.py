@@ -22,8 +22,11 @@ import socket as socks
 
 try:
    import saspy.sascfg_personal as SAScfg
-except ImportError:
-   import saspy.sascfg as SAScfg
+except:
+   try:
+      import sascfg_personal as SAScfg
+   except:
+      import saspy.sascfg as SAScfg
 
 try:
    import pandas as pd
@@ -41,13 +44,13 @@ except ImportError:
 
 class SASconfigIOM:
    '''
-   This object is not intended to be used directly. Instantiate a SASsession object instead 
+   This object is not intended to be used directly. Instantiate a SASsession object instead
    '''
    def __init__(self, **kwargs):
       self._kernel  = kwargs.get('kernel', None)
 
       self.name      = kwargs.get('sascfgname', '')
-      cfg            = getattr(SAScfg, self.name) 
+      cfg            = getattr(SAScfg, self.name)
 
       self.java      = cfg.get('java', '')
       self.iomhost   = cfg.get('iomhost', '')
@@ -84,14 +87,14 @@ class SASconfigIOM:
          if lock and len(self.java):
             print("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.java = injava   
+            self.java = injava
 
       inhost = kwargs.get('iomhost', '')
       if len(inhost) > 0:
          if lock and len(self.iomhost):
-            print("Parameter 'host' passed to SAS_session was ignored due to configuration restriction.")
+            print("Parameter 'iomhost' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.iomhost = inhost   
+            self.iomhost = inhost
 
       intout = kwargs.get('timeout', None)
       if intout is not None:
@@ -105,28 +108,28 @@ class SASconfigIOM:
          if lock and self.iomport:
             print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.iomport = inport   
+            self.iomport = inport
 
       inomruser = kwargs.get('omruser', '')
       if len(inomruser) > 0:
          if lock and len(self.omruser):
             print("Parameter 'omruser' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.omruser = inomruser   
+            self.omruser = inomruser
 
       inomrpw = kwargs.get('omrpw', '')
       if len(inomrpw) > 0:
          if lock and len(self.omrpw):
             print("Parameter 'omrpw' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.omrpw = inomrpw   
+            self.omrpw = inomrpw
 
       incp = kwargs.get('classpath', '')
       if len(incp) > 0:
          if lock and len(self.classpath):
             print("Parameter 'classpath' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.classpath = incp   
+            self.classpath = incp
 
       inak = kwargs.get('authkey', '')
       if len(inak) > 0:
@@ -147,9 +150,9 @@ class SASconfigIOM:
          if lock and len(self.encoding):
             print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.encoding = inencoding   
+            self.encoding = inencoding
       if not self.encoding:
-         self.encoding = 'utf-8'  
+         self.encoding = 'utf-8'
 
       return
 
@@ -171,7 +174,7 @@ class SASconfigIOM:
                                                 password=pw)
           except (KeyboardInterrupt):
              return ''
-                   
+
 class SASsessionIOM():
    '''
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
@@ -216,6 +219,8 @@ class SASsessionIOM():
       # check for local iom server
       if len(self.sascfg.iomhost) > 0:
          zero = False
+         if isinstance(self.sascfg.iomhost, list):
+            self.sascfg.iomhost = ";".join(self.sascfg.iomhost)
       else:
          zero = True
 
@@ -276,9 +281,8 @@ Will use HTML5 for this SASsession.""")
 
       pgm    = self.sascfg.java
       parms  = [pgm]
-      parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j"]
+      parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j", "-host", "localhost"]
       #parms += ["-classpath", self.sascfg.classpath+":/u/sastpw/tkpy2j", "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
-      parms += ["-host", "localhost"] 
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
@@ -290,7 +294,7 @@ Will use HTML5 for this SASsession.""")
          parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
          parms += ["-user", user]     
       else:
-         parms += ["-zero"]     
+         parms += ["-zero"]
       parms += ['']
 
       s = ''
@@ -300,13 +304,13 @@ Will use HTML5 for this SASsession.""")
          else:
             s += parms[i]+' '
 
-      if os.name == 'nt': 
+      if os.name == 'nt':
          try:
             self.pid = subprocess.Popen(parms, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             pid = self.pid.pid
          except OSError as e:
             print("The OS Error was:\n"+e.strerror+'\n')
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
+            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
             return None
@@ -315,8 +319,8 @@ Will use HTML5 for this SASsession.""")
 
          PIPE_READ  = 0
          PIPE_WRITE = 1
-         
-         pin  = os.pipe() 
+
+         pin  = os.pipe()
          pout = os.pipe()
          perr = os.pipe() 
       
@@ -332,8 +336,8 @@ Will use HTML5 for this SASsession.""")
             pid = self.pid
 
             os.close(pin[PIPE_READ])
-            os.close(pout[PIPE_WRITE]) 
-            os.close(perr[PIPE_WRITE]) 
+            os.close(pout[PIPE_WRITE])
+            os.close(perr[PIPE_WRITE])
 
          else:
             # we are the child
@@ -342,37 +346,37 @@ Will use HTML5 for this SASsession.""")
             os.close(0)
             os.close(1)
             os.close(2)
-          
+
             os.dup2(pin[PIPE_READ],   0)
             os.dup2(pout[PIPE_WRITE], 1)
             os.dup2(perr[PIPE_WRITE], 2)
-          
+
             os.close(pin[PIPE_READ])
             os.close(pin[PIPE_WRITE])
             os.close(pout[PIPE_READ])
-            os.close(pout[PIPE_WRITE]) 
+            os.close(pout[PIPE_WRITE])
             os.close(perr[PIPE_READ])
-            os.close(perr[PIPE_WRITE]) 
-          
+            os.close(perr[PIPE_WRITE])
+
             try:
                #sleep(5)
                os.execv(pgm, parms)
             except OSError as e:
                print("The OS Error was:\n"+e.strerror+'\n')
-               print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
+               print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
                print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
                print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
                os._exit(-6)
 
-      if os.name == 'nt': 
+      if os.name == 'nt':
          try:
             self.pid.wait(1)
 
-            error  = self.pid.stderr.read(4096).decode()+'\n' 
-            error += self.pid.stdout.read(4096).decode() 
+            error  = self.pid.stderr.read(4096).decode()+'\n'
+            error += self.pid.stdout.read(4096).decode()
             print("Java Error:\n"+error)
 
-            print("Subprocess failed to start. Double check you settings in sascfg.py file.\n") 
+            print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
             self.pid = None
@@ -385,7 +389,7 @@ Will use HTML5 for this SASsession.""")
          self.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
          self.stderr = os.fdopen(perr[PIPE_READ], mode='rb')
          self.stdout = os.fdopen(pout[PIPE_READ], mode='rb')
-   
+
          fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
          fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
 
@@ -394,10 +398,10 @@ Will use HTML5 for this SASsession.""")
          if rc[0] == 0:
             pass
          else:
-            error  = self.stderr.read1(4096).decode()+'\n' 
-            error += self.stdout.read1(4096).decode() 
+            error  = self.stderr.read1(4096).decode()+'\n'
+            error += self.stdout.read1(4096).decode()
             print("Java Error:\n"+error)
-            print("SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check you settings in sascfg.py file.\n")  
+            print("SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check you settings in sascfg.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
             self.pid = None
@@ -419,20 +423,20 @@ Will use HTML5 for this SASsession.""")
 
       if self.pid is None:
          print(ll['LOG'])
-         print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")  
+         print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
          if zero:
             print("Be sure the path to sspiauth.dll is in your System PATH"+"\n")
          return None
 
-      print("SAS Connection established. Subprocess id is "+str(pid)+"\n")  
+      print("SAS Connection established. Subprocess id is "+str(pid)+"\n")
       return self.pid
-   
+
    def _endsas(self):
       rc = 0
       if self.pid:
          self.stdin[0].send(b'\ntom says EOL=ENDSAS                          \n')
-         if os.name == 'nt': 
+         if os.name == 'nt':
             pid = self.pid.pid
             try:
                rc = self.pid.wait(5)
@@ -470,11 +474,11 @@ Will use HTML5 for this SASsession.""")
          self.stderr[0].shutdown(socks.SHUT_RDWR)
          self.stderr[0].close()
          self.sockerr.close()
-      
+
          print("SAS Connection terminated. Subprocess id was "+str(pid))
          self.pid = None
 
-      return 
+      return
 
 
 
@@ -502,7 +506,7 @@ Will use HTML5 for this SASsession.""")
       x = logf.decode(errors='replace').replace(code1, " ")
       self._log += x
 
-      if os.name == 'nt': 
+      if os.name == 'nt':
          try:
             rc = self.pid.wait(0)
             self.pid = None
@@ -516,7 +520,7 @@ Will use HTML5 for this SASsession.""")
          if rc != None:
             self.pid = None
             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
- 
+
       return x
 
    def _getlst(self, wait=5, jobid=None):
@@ -525,7 +529,7 @@ Will use HTML5 for this SASsession.""")
       eof = 0
       bof = False
       lenf = 0
-   
+
       while True:
          try:
             lst = self.stdout[0].recv(4096)
@@ -534,25 +538,25 @@ Will use HTML5 for this SASsession.""")
 
          if len(lst) > 0:
             lstf += lst
-                             
+
             if ((not bof) and lst.count(b"<!DOCTYPE html>", 0, 20) > 0):
                bof = True
          else:
             lenf = len(lstf)
-      
+
             if (lenf > 15):
                eof = lstf.count(b"</html>", (lenf - 15), lenf)
-      
+
             if (eof > 0):
                   break
-            
+
             if not bof:
                quit -= 1
                if quit < 0:
                   break
                sleep(0.5)
 
-      if os.name == 'nt': 
+      if os.name == 'nt':
          try:
             rc = self.pid.wait(0)
             self.pid = None
@@ -575,7 +579,7 @@ Will use HTML5 for this SASsession.""")
       quit = wait * 2
       eof = 0
       self._asubmit("data _null_;file print;put 'Tom was here';run;", "text")
-   
+
       while True:
          try:
             lst = self.stdout[0].recv(4096)
@@ -584,10 +588,10 @@ Will use HTML5 for this SASsession.""")
 
          if len(lst) > 0:
             lstf += lst
-   
+
             lenf = len(lstf)
             eof = lstf.find(b"Tom was here", lenf - 25, lenf)
-      
+
             if (eof != -1):
                final = lstf.partition(b"Tom was here")
                f2 = final[0].decode(errors='replace').rpartition(chr(12))
@@ -595,7 +599,7 @@ Will use HTML5 for this SASsession.""")
 
       lst = f2[0]
 
-      if os.name == 'nt': 
+      if os.name == 'nt':
          try:
             rc = self.pid.wait(0)
             self.pid = None
@@ -609,7 +613,7 @@ Will use HTML5 for this SASsession.""")
          if rc != None:
             self.pid = None
             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
- 
+
       return lst.replace(chr(12), '\n')
    '''
 
@@ -620,6 +624,7 @@ Will use HTML5 for this SASsession.""")
       # anything to the lst, then unless _getlst[txt] is called, then next submit will happen to get the lst this wrote, plus
       # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
+
       # unnecessary read in submit as this can't happen in the current code. 
       odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
@@ -628,7 +633,7 @@ Will use HTML5 for this SASsession.""")
 
       if results.upper() != "HTML":
          ods = False
-   
+
       if (ods):
          pgm += odsopen
    
@@ -639,12 +644,12 @@ Will use HTML5 for this SASsession.""")
 
       self.stdin[0].send(pgm)
 
-      return 
+      return
 
    def submit(self, code: str, results: str ="html", prompt: dict ={}) -> dict:
       '''
       This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
-      code    - the SAS statements you want to execute 
+      code    - the SAS statements you want to execute
       results - format of results, HTML is default, TEXT is the alternative
       prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete
                 The keys are the names of the macro variables and the boolean flag is to either hide what you type and delete
@@ -664,7 +669,7 @@ Will use HTML5 for this SASsession.""")
       NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()
       i.e,: results = sas.submit("data a; x=1; run; proc print;run')
             print(results['LOG'])
-            HTML(results['LST']) 
+            HTML(results['LST'])
       '''
       #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
@@ -689,7 +694,7 @@ Will use HTML5 for this SASsession.""")
          print("No SAS process attached. SAS process has terminated unexpectedly.")
          return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
 
-      if os.name == 'nt': 
+      if os.name == 'nt':
          try:
             rc = self.pid.wait(0)
             self.pid = None
@@ -705,7 +710,7 @@ Will use HTML5 for this SASsession.""")
          if rc[1]:
             self.pid = None
             return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
- 
+
       # to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
       # removing this and adding comment in _asubmit to use _getlst[txt] so this will never be necessary; delete later
       #while(len(self.stdout.read1(4096)) > 0):
@@ -713,7 +718,7 @@ Will use HTML5 for this SASsession.""")
 
       if results.upper() != "HTML":
          ods = False
-   
+
       if len(prompt):
          pcodei += 'options nosource nonotes;\n'
          pcodeo += 'options nosource nonotes;\n'
@@ -748,7 +753,7 @@ Will use HTML5 for this SASsession.""")
       while not done:
          try:
              while True:
-                 if os.name == 'nt': 
+                 if os.name == 'nt':
                     try:
                        rc = self.pid.wait(0)
                        self.pid = None
@@ -778,7 +783,9 @@ Will use HTML5 for this SASsession.""")
                  else:
                     sleep(0.1)
                     try:
+
                        log = self.stderr[0].recv(4096).decode(errors='replace') 
+
                     except (BlockingIOError):
                        log = b''
 
@@ -794,7 +801,7 @@ Will use HTML5 for this SASsession.""")
 
          except (ConnectionResetError):
              rc = 0
-             if os.name == 'nt': 
+             if os.name == 'nt':
                 try:
                    rc = self.pid.wait()
                 except:
@@ -804,7 +811,7 @@ Will use HTML5 for this SASsession.""")
 
              self.pid = None
              return dict(LOG=logf.partition(logcodeo)[0]+'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
-             
+
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
              ll = self._breakprompt(logcodeo)
@@ -823,7 +830,7 @@ Will use HTML5 for this SASsession.""")
 
              self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo.encode()+b'\n')
 
-      trip = lstf.rpartition("/*]]>*/")      
+      trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 100:
          lstf = ''
 
@@ -857,8 +864,8 @@ Will use HTML5 for this SASsession.""")
               if response.upper() == 'T':
                  break
               response = self.sascfg._prompt("Please enter (T) to terminate SAS or (C) to continue.")
-              
-        if os.name == 'nt': 
+
+        if os.name == 'nt':
            self.pid.kill()
         else:
            interrupt = signal.SIGINT
@@ -940,15 +947,15 @@ Will use HTML5 for this SASsession.""")
       code  = "data _null_; e = exist('"
       if len(libref):
          code += libref+"."
-      code += table+"');\n" 
+      code += table+"');\n"
       code += "te='TABLE_EXISTS='; put te e;run;\n"
-   
+
       ll = self.submit(code, "text")
 
       l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
       l2 = l2[2].partition("\n")
       exists = int(l2[0])
-   
+
       return exists
    
    def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict ={}) -> '<SASdata object>':
@@ -960,10 +967,10 @@ Will use HTML5 for this SASsession.""")
       opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
       '''
       code  = "filename x "
-   
+
       if file.lower().startswith("http"):
          code += "url "
-   
+
       code += "\""+file+"\";\n"
       code += "proc import datafile=x out="
       if len(libref):
@@ -1014,6 +1021,8 @@ Will use HTML5 for this SASsession.""")
          input += "'"+df.columns[name]+"'n "
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
             col_l = df[df.columns[name]].map(len, 'ignore').max()
+            if col_l == 0:
+               col_l = 8
             length += " '"+df.columns[name]+"'n $"+str(col_l)
             dts.append('C')
          else:
@@ -1030,11 +1039,11 @@ Will use HTML5 for this SASsession.""")
       if len(libref):
          code += libref+"."
       code += table+";\n"
-      if len(length):                                                         
+      if len(length):
          code += "length "+length+";\n"
       if len(format):
          code += "format "+format+";\n"
-      code += "infile datalines delimiter='03'x;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\ndatalines;"
+      code += "infile datalines delimiter='03'x DSD STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\ndatalines;"
       self._asubmit(code, "text")
 
       code = ""
@@ -1044,7 +1053,7 @@ Will use HTML5 for this SASsession.""")
             var = str(row[col])
             if dts[col] == 'N' and var == 'nan':
                var = '.'
-            if dts[col] == 'D': 
+            if dts[col] == 'D':
                if var == 'nan':
                   var = '.'
                else:
@@ -1085,21 +1094,21 @@ Will use HTML5 for this SASsession.""")
       code += "put vt;\n"
       code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
       code += "run;"
-   
+
       ll = self.submit(code, "text")
-   
+
       l2 = ll['LOG'].rpartition("LRECL= ")
       l2 = l2[2].partition("\n")
       lrecl = int(l2[0])
-   
+
       l2 = l2[2].partition("VARNUMS= ")
       l2 = l2[2].partition("\n")
       nvars = int(l2[0])
-   
+
       l2 = l2[2].partition("\n")
       varlist = l2[2].split("\n", nvars)
       del varlist[nvars]
-   
+
       l2 = l2[2].partition("VARTYPE=")
       l2 = l2[2].partition("\n")
       vartype = l2[2].split("\n", nvars)
@@ -1110,14 +1119,15 @@ Will use HTML5 for this SASsession.""")
       topts['firstobs'] = ''
 
       code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "run;"
-   
+
       ll = self.submit(code, "text")
 
       l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")              
+      l2 = l2[2].partition("\n")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
@@ -1125,6 +1135,7 @@ Will use HTML5 for this SASsession.""")
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
       code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1 termstr=NL; put "
+      
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
@@ -1159,12 +1170,12 @@ Will use HTML5 for this SASsession.""")
       for i in range(nvars):
          if vartype[i] == 'N':
             if varcat[i] not in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
-               df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce') 
+               df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce')
             else:
-               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='ignore') 
+               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='ignore')
 
       return df
-   
+
 if __name__ == "__main__":
     startsas()
 

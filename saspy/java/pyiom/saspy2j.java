@@ -72,6 +72,9 @@ public class saspy2j {
                 boolean zero = false;
                 boolean failed = false;
 
+                String[] iomhosts;
+                int hosts = 0;
+                
                 BufferedReader inp;
                 BufferedWriter outp;
                 BufferedWriter errp;
@@ -142,28 +145,34 @@ public class saspy2j {
 
                 } else {
                         omrpw = inp.readLine();
-                        try {
-                                server = new BridgeServer(Server.CLSID_SAS, iomhost, iomport);
-                                if (appName != "")
-                                   server.setServerName(appName.replace("\'", ""));
-                                //server.setOption(SASURI.applicationNameKey, appName);
-                                ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
-                                ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
-                                ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
-                                // ConnectionFactoryAdminInterface admin =
-                                // cxf.getAdminInterface();
-                                if (timeout > 0)
-                                   cx = cxf.getConnection(omruser, omrpw, timeout);
-                                else
-                                   cx = cxf.getConnection(omruser, omrpw);
-                        } catch (ConnectionFactoryException e) {
-                                String msg = e.getMessage();
-                                errp.write("AppName=");
-                                errp.write(appName);
-                                errp.write(msg);
-                                errp.flush();
-                                System.out.print(msg);
-                                failed = true;
+                        iomhosts = iomhost.split(";");
+                        hosts = iomhosts.length;
+                        for (int i=0; i < hosts; i++)
+                        {
+	                       try {
+	                                server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
+	                                if (appName != "")
+	                                   server.setServerName(appName.replace("\'", ""));
+	                                //server.setOption(SASURI.applicationNameKey, appName);
+	                                ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
+	                                ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
+	                                ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
+	                                // ConnectionFactoryAdminInterface admin =
+	                                // cxf.getAdminInterface();
+	                                if (timeout > 0)
+	                                   cx = cxf.getConnection(omruser, omrpw, timeout);
+	                                else
+	                                   cx = cxf.getConnection(omruser, omrpw);
+	                                break;
+	                        } catch (ConnectionFactoryException e) {
+	                                String msg = e.getMessage();
+	                                System.out.print(msg+"\n");
+	                                errp.write(msg+"\n");
+	                                errp.flush();
+	                                if (i+1 < hosts)
+	                                	continue;
+	                                failed = true;
+	                        }
                         }
                 }
 

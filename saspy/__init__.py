@@ -22,7 +22,7 @@ from saspy.sasresults     import *
 from saspy.sasutil        import *
 from saspy.sasproccommons import *
 from saspy.SASLogLexer    import *
-from saspy.version        import __version__ 
+from saspy.version        import __version__
 
 def isnotebook():
     try:

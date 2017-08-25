@@ -49,8 +49,11 @@ except ImportError:
 
 try:
    import saspy.sascfg_personal as SAScfg
-except ImportError:
-   import saspy.sascfg as SAScfg
+except:
+   try:
+      import sascfg_personal as SAScfg
+   except:
+      import saspy.sascfg as SAScfg
 
 try:
     import saspy.sasiostdio as sasiostdio

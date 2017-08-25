@@ -49,7 +49,6 @@ The current set of connection methods are as follows:
   method can connect to SAS that is installed on a remote host, if you have passwordless
   SSH configured for your Linux user account.
 
-
 `IOM`_
   The integrated object method (IOM) connection method supports SAS on any platform.
   This method can make a local Windows connection and it is also the way to connect 
@@ -111,6 +110,35 @@ After installing, start Python and ``import saspy``. Then, simply submit
     <module 'saspy.sascfg' from '/usr/lib/python3.5/site-packages/saspy/sascfg.py'>
     >>>
     
+
+sascfg_personal.py
+==================
+
+Since the saspy.cfg file is in the saspy repo, as an example configuration file, it can be updated
+on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
+you've configured for your site. That means you would need to keep a copy elsewhere and then replace
+the new one with your copy after upgrading or pulling, if yours was replaced. 
+
+There is a simple solution to this. Your configurations can be in a file named sascfg_personal.py.
+This file doesn't exist in the repo, so it will never be overwritten when you upgrade or pull.
+saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
+import sascfg.py.
+
+So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
+file. Then you won't have to worry about sascfg.py getting clobbered when you pull or upgrade.
+
+Also, everything in this doc applies to the _personal version; it's the same, just a version of the file
+that will be used if it exists instead of the original one, but it won't get overwritten.
+
+Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
+al long as that location is in the python search path. The python search path can be found by looking
+at the PYTHONPATH environment variable (if it's set), but more definitively by submitting the following:
+
+.. code-block:: ipython3
+
+    import sys
+    sys.path
+
         
 sascfg.py details
 =================
@@ -160,8 +188,8 @@ encoding -
 
 .. code-block:: ipython3
 
-    default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
-                'options' : ["-fullstimer"]
+    default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+                'options' : ["-fullstimer", "-autoexec", "/user/tom/autoexec"]
                 }
 
 .. note:: The trigger to use the STDIO connection method is the absence of any
@@ -213,7 +241,7 @@ Windows.
 
 The IOM connection method requires the following:
 
-* The SAS Java IOM Client
+* The SAS Java IOM Client (just the jars listed below; these can be copied to your client system from wherever your SAS install is)
 * Setting the CLASSPATH to access the SAS Java IOM Client JAR files.
 * Setting the CLASSPATH to include the the saspyiom.jar file.
 * Setting the CLASSPATH to include client side encryption jars, if you have encryption configured for your IOM
@@ -246,7 +274,8 @@ And then simply refer to the ``cp`` variable in the configuration definition:
 
     'classpath' : cp,
 
-Also worth noting: these five JAR files are compatible with both Windows and Unix client systems.  
+Also worth noting: these five JAR files are compatible with both Windows and Unix client systems. So you can copy the jars from whatever system
+SAS is installed on, to your client (where python is running), even if one is Unix and the other is Windows (either way).  
 
 .. note::
     If you have a \\u or \\U in your classpath string, like: "c:\\User\\sastpw\\...', you will have to use either 
@@ -293,11 +322,14 @@ java    -
     path. On Windows, you might be able to simply enter ``java``. If that is not successful,
     enter the fully qualified path.
 iomhost - 
-    (Required) The resolvable host name, or IP address to the IOM server.
+    (Required) The resolvable host name, or IP address to the IOM object spawner.
+    New in 2.1.6; this can be a list of all the object spawners hosts if you have load balanced object spawners.
+    This provides Grid HA (High Availability)
 iomport - 
-    (Required) The port that IOM server is listening on for workspace connections.
+    (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
 classpath - 
-    (Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar.
+    (Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar. These can be wherever. Just make sure the path is correct.
+    These jars work across platforms, so you can copy them from a Unix system to Windows or the other way too. Same with saspyiom.jar.
 authkey -
     The keyword that starts a line in the authinfo file containing user and or password for this connection.
 omruser - 
@@ -323,22 +355,24 @@ appserver -
 .. code-block:: ipython3
 
     # Unix client class path
-    cpL  =  "/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar"
-    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/log4j.jar"
-    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.security.sspi.jar"
-    cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.core.jar"
-    cpL += ":/usr/lib/python3.5/site-packages/saspy/java/saspyiom.jar"
+    cpL  =  "/whever/I/put/these/jars/sas.svc.connection.jar"
+    cpL += ":/whever/I/put/these/jars/log4j.jar"
+    cpL += ":/whever/I/put/these/jars/sas.security.sspi.jar"
+    cpL += ":/whever/I/put/these/jars/sas.core.jar"
+    cpL += ":/whever/I/put/these/jars/saspyiom.jar"
+    #cpL += ":/usr/lib/python3.5/site-packages/saspy/java/saspyiom.jar"
 
     # Windows client class path
-    cpW  =  "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar"
-    cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar"
-    cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar"
-    cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar"
+    cpW  =  "C:\\wherever\\I\\put\\these\\jars\\sas.svc.connection.jar"
+    cpW += ";C:\\wherever\\I\\put\\these\\jars\\log4j.jar"
+    cpW += ";C:\\wherever\\I\\put\\these\\jars\\sas.security.sspi.jar"
+    cpW += ";C:\\wherever\\I\\put\\these\\jars\\sas.core.jar"
+    #cpW += ";C:\\wherever\\I\\put\\these\\jars\\saspyiom.jar"
     cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
 
-    # Unix client and Unix IOM server
+    # Unix client and Unix IOM server  NEW 2.1.6 - with load balanced object spawners
     iomlinux = {'java'      : '/usr/bin/java',
-                'iomhost'   : 'linux.iom.host',
+                'iomhost'   : ['linux.grid1.iom.host','linux.grid2.iom.host','linux.grid3.iom.host','linux.grid4.iom.host'],
                 'iomport'   : 8591,
                 'encoding'  : 'latin1',
                 'classpath' : cpL,
