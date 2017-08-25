@@ -62,6 +62,25 @@ results. ::
     set sashelp.cars;
   run;
 
+If you are also invoking ``saspy`` methods directly in other cells within the 
+same notebook, you may indicate that a ``%%SAS`` cell should share the same 
+SAS session by passing your existing session as a parameter.
+
+In a prior cell in the notebook: ::
+
+  import saspy
+  my_session = saspy.SASsession()
+  
+  # sending a dataset to SAS as 'mydata'
+  mydata = sas.df2sd(some_pandas_dataframe, 'mydata')
+
+Then later, invoke a SAS cell and pass your existing session so that the remote data 
+set is accessible: ::
+
+  %%SAS my_session
+  proc print data=work.mydata;
+  run;
+
 The ``%%IML`` magic enables you to submit the contents of a cell to your SAS
 session for processing with PROC IML. The cell magic executes the contents
 of the cell and returns any results. The PROC IML statement and the trailing
