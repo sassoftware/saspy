@@ -13,15 +13,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from saspy.sasbase     import *
-from saspy.sasstat     import *
-from saspy.sasets      import *
-from saspy.sasml       import *
-from saspy.sasqc       import *
-from saspy.sasresults  import *
-from saspy.sasutil  import *
+from saspy.sasbase        import *
+from saspy.sasstat        import *
+from saspy.sasets         import *
+from saspy.sasml          import *
+from saspy.sasqc          import *
+from saspy.sasresults     import *
+from saspy.sasutil        import *
 from saspy.sasproccommons import *
-from saspy.SASLogLexer import *
+from saspy.SASLogLexer    import *
 
 __version__ = '2.1.1'
 

@@ -25,6 +25,7 @@ import com.sas.iom.SAS.LNameNoAssign;
 import com.sas.iom.SAS.IDataServicePackage.NoLibrary;
 import com.sas.iom.SAS.IFileServicePackage.AssignmentContextSeqHolder;
 import com.sas.iom.SASIOMDefs.*;
+import com.sas.iom.orb.SASURI;
 import com.sas.services.connection.BridgeServer;
 //import com.sas.services.connection.ConnectionFactoryAdminInterface;
 import com.sas.services.connection.ConnectionFactoryConfiguration;
@@ -49,6 +50,7 @@ public class saspy2j {
                 int outport = 0;
                 int errport = 0;
                 int iomport = 0;
+                int timeout = 60000;
                 int len = 0;
                 int slen = 0;
                 int nargs = args.length;
@@ -56,6 +58,7 @@ public class saspy2j {
                 Socket sin = null;
                 Socket sout = null;
                 Socket serr = null;
+                String appName = "";
                 String iomhost = "";
                 String omruser = "";
                 String omrpw = "";
@@ -69,20 +72,23 @@ public class saspy2j {
                 boolean zero = false;
                 boolean failed = false;
 
+                String[] iomhosts;
+                int hosts = 0;
+                
                 BufferedReader inp;
                 BufferedWriter outp;
                 BufferedWriter errp;
 
                 ConnectionInterface cx = null;
-                IWorkspace wksp = null;
-                ILanguageService lang = null;
-                IFileService filesvc = null;
-                ILibref libref = null;
-                IFileref fileref = null;
-                IDataService datasvc = null;
-                IBinaryStream bstr = null;
+                IWorkspace        wksp = null;
+                ILanguageService  lang = null;
+                IFileService   filesvc = null;
+                ILibref         libref = null;
+                IFileref       fileref = null;
+                IDataService   datasvc = null;
+                IBinaryStream     bstr = null;
                 OctetSeqHolder odsdata = null;
-                Server server = null;
+                BridgeServer    server = null;
 
                 // System.out.print("localhost="+InetAddress.getLocalHost()+'\n');
                 // System.out.print("nargs="+nargs+'\n');
@@ -99,8 +105,12 @@ public class saspy2j {
                                 iomhost = args[x + 1];
                         else if (args[x].equalsIgnoreCase("-iomport"))
                                 iomport = Integer.parseInt(args[x + 1]);
+                        else if (args[x].equalsIgnoreCase("-timeout"))
+                                timeout = Integer.parseInt(args[x + 1]) * 1000;
                         else if (args[x].equalsIgnoreCase("-user"))
                                 omruser = args[x + 1];
+                        else if (args[x].equalsIgnoreCase("-appname"))
+                                appName = args[x + 1];
                         else if (args[x].equalsIgnoreCase("-zero"))
                                 zero = true;
                 }
@@ -135,20 +145,34 @@ public class saspy2j {
 
                 } else {
                         omrpw = inp.readLine();
-                        try {
-                                server = new BridgeServer(Server.CLSID_SAS, iomhost, iomport);
-                                ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
-                                ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
-                                ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
-                                // ConnectionFactoryAdminInterface admin =
-                                // cxf.getAdminInterface();
-                                cx = cxf.getConnection(omruser, omrpw, 10000);
-                        } catch (ConnectionFactoryException e) {
-                                String msg = e.getMessage();
-                                errp.write(msg);
-                                errp.flush();
-                                System.out.print(msg);
-                                failed = true;
+                        iomhosts = iomhost.split(";");
+                        hosts = iomhosts.length;
+                        for (int i=0; i < hosts; i++)
+                        {
+	                       try {
+	                                server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
+	                                if (appName != "")
+	                                   server.setServerName(appName.replace("\'", ""));
+	                                //server.setOption(SASURI.applicationNameKey, appName);
+	                                ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
+	                                ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
+	                                ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
+	                                // ConnectionFactoryAdminInterface admin =
+	                                // cxf.getAdminInterface();
+	                                if (timeout > 0)
+	                                   cx = cxf.getConnection(omruser, omrpw, timeout);
+	                                else
+	                                   cx = cxf.getConnection(omruser, omrpw);
+	                                break;
+	                        } catch (ConnectionFactoryException e) {
+	                                String msg = e.getMessage();
+	                                System.out.print(msg+"\n");
+	                                errp.write(msg+"\n");
+	                                errp.flush();
+	                                if (i+1 < hosts)
+	                                	continue;
+	                                failed = true;
+	                        }
                         }
                 }
 
@@ -173,7 +197,7 @@ public class saspy2j {
                                 // System.out.println(physicalName.value[0]);
                                 StringHolder retname = new StringHolder();
                                 // filesvc.MakeDirectory(physicalName.value[0], "tomods1");
-                                fileref = filesvc.AssignFileref("_tomods1", "", filesvc.FullName("tomods1", physicalName.value[0]), "",
+                                fileref = filesvc.AssignFileref("_tomods1", "", filesvc.FullName("tomods1", physicalName.value[0]), "encoding=\"utf-8\"",
                                                 retname);
 
                                 boolean[] arg0 = new boolean[0];
