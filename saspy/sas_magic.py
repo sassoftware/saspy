@@ -63,7 +63,7 @@ class SASMagic(ipym.Magics):
                 return 'Invalid SAS Session object supplied'
         elif len(line) and not line in self.shell.user_ns:  # string supplied but not a session
             return 'Invalid SAS Session object supplied'
-        else:  # no string should default to last session called
+        else:  # no string should default to unnamed session
             try:
                 if mva is None:
                     mva = SASsession()
