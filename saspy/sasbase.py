@@ -845,6 +845,48 @@ class SASsession():
                            optstr += 'NO; '
         return optstr
 
+    def symput(self, name, value):
+        """
+        :param name:  name of the macro varable to set:
+        :param value: python variable to use for the value to assign to the marco variable:
+
+            - name    is a character
+            - value   is a variable that can be resolved to a string
+
+            .. code-block:: python
+
+                             {'name'   : 'var1'
+                              'value'  : var_val
+                             }
+        """
+        ll = self.submit("%let "+name +"=%NRBQUOTE("+str(value)+");\n")
+
+
+    def symget(self, name):
+        """
+        :param name:  name of the macro varable to set:
+
+            - name    is a character
+
+            .. code-block:: python
+
+                             {'name'   : 'var1'
+                             }
+        """
+        ll = self.submit("%put "+name+"=&"+name+";\n")
+
+        l2 = ll['LOG'].rpartition(name+"=")
+        l2 = l2[2].partition("\n")
+        try:
+           var = int(l2[0])
+        except:
+           try:
+              var = float(l2[0])
+           except:
+              var = l2[0]
+        
+        return var
+
 
 class SASdata:
     def __init__(self, sassession, libref, table, results='', dsopts={}):
