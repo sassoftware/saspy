@@ -731,6 +731,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -739,6 +740,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
         :return: str
         """
@@ -748,7 +750,13 @@ class SASsession():
             for key in dsopts:
                 if len(str(dsopts[key])):
                     if key == 'where':
-                        opts += 'where=(' + dsopts[key] + ') '
+                        if isinstance(dsopts[key], str):
+                            opts += 'where=(' + dsopts[key] + ') '
+                        elif isinstance(dsopts[key], list):
+                            opts += 'where=(' + " and ".join(dsopts[key]) + ') '
+                        else:
+                            print("Bad key type. %s must be a str or list type") % key
+
                     elif key == 'drop':
                         opts += 'drop='
                         if isinstance(dsopts[key], list):
@@ -765,8 +773,23 @@ class SASsession():
                             opts += dsopts[key] + ' '
                     elif key == 'obs':
                         opts += 'obs=' + str(dsopts[key]) + ' '
+
                     elif key == 'firstobs':
                         opts += 'firstobs=' + str(dsopts[key]) + ' '
+
+                    elif key == 'format':
+                        fmat=''
+                        if isinstance(dsopts[key], str):
+                            fmat = 'format' + dsopts[key] + ';'
+                        elif isinstance(dsopts[key], dict):
+                            fmat = 'format '
+                            for k, v in dsopts[key].items():
+                                 fmat += ' '.join((k, v)) + ' '
+                            fmat += ';'
+                        else:
+                            print("Bad key type. %s must be a str or dict type") % key
+                        if len(fmat)>0:
+                            self._io.submit("%s.%s; %s; run;") % (self.libref, self.table, fmat)
             if len(opts):
                 opts = '(' + opts + ')'
         return opts
@@ -1962,7 +1985,7 @@ class SASdata:
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
 
-        if type(y) == list:
+        if isinstance(y, list):
             num = len(y)
         else:
             num = 1
@@ -1970,6 +1993,46 @@ class SASdata:
 
         for i in range(num):
             code += "\tseries x=" + x + " y=" + y[i] + ";\n"
+
+        code += 'run;\n' + 'title \"\";'
+
+        if self.sas.nosub:
+            print(code)
+            return
+
+        ll = self._is_valid()
+        if not ll:
+            html = self.HTML
+            self.HTML = 1
+            ll = self.sas._io.submit(code)
+            self.HTML = html
+        if not self.sas.batch:
+            DISPLAY(HTML(ll['LST']))
+        else:
+            return ll
+
+    def scatter(self, x: str, y: list, title: str = '') -> object:
+        """
+        This method plots a scatter of x,y coordinates. You can provide a list of y columns for multiple line plots.
+
+        :param x: the x axis variable; generally a time or continuous variable.
+        :param y: the y axis variable(s), you can specify a single column or a list of columns
+        :param title: an optional Title for the chart
+        :return: graph object
+        """
+
+        code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts() + ";\n"
+        if len(title) > 0:
+            code += '\ttitle "' + title + '";\n'
+
+        if isinstance(y, list):
+            num = len(y)
+        else:
+            num = 1
+            y = [y]
+
+        for i in range(num):
+            code += "\tscatter x=" + x + " y=" + y[i] + ";\n"
 
         code += 'run;\n' + 'title \"\";'
 
