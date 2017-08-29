@@ -726,7 +726,7 @@ class SASsession():
         """
         :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
 
-            - where is a string
+            - where is a string or list of strings
             - keep are strings or list of strings.
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
@@ -745,7 +745,7 @@ class SASsession():
         :return: str
         """
         opts = ''
-
+        fmat = ''
         if len(dsopts):
             for key in dsopts:
                 if len(str(dsopts[key])):
@@ -755,7 +755,7 @@ class SASsession():
                         elif isinstance(dsopts[key], list):
                             opts += 'where=(' + " and ".join(dsopts[key]) + ') '
                         else:
-                            print("Bad key type. %s must be a str or list type") % key
+                            raise TypeError("Bad key type. %s must be a str or list type") % key
 
                     elif key == 'drop':
                         opts += 'drop='
@@ -778,20 +778,22 @@ class SASsession():
                         opts += 'firstobs=' + str(dsopts[key]) + ' '
 
                     elif key == 'format':
-                        fmat=''
                         if isinstance(dsopts[key], str):
-                            fmat = 'format' + dsopts[key] + ';'
+                            fmat = 'format ' + dsopts[key] + ';'
                         elif isinstance(dsopts[key], dict):
                             fmat = 'format '
                             for k, v in dsopts[key].items():
-                                 fmat += ' '.join((k, v)) + ' '
+                                fmat += ' '.join((k, v)) + ' '
                             fmat += ';'
                         else:
-                            print("Bad key type. %s must be a str or dict type") % key
-                        if len(fmat)>0:
-                            self._io.submit("%s.%s; %s; run;") % (self.libref, self.table, fmat)
+                            raise TypeError("Bad key type. %s must be a str or dict type") % key
+
             if len(opts):
                 opts = '(' + opts + ')'
+                if len(fmat) > 0:
+                    opts += ';\n\t' + fmat
+            elif len(fmat) > 0:
+                opts = ';' + fmat
         return opts
 
 
