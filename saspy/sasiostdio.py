@@ -50,8 +50,8 @@ class SASconfigSTDIO:
       self.saspath  = cfg.get('saspath', '')
       self.options  = cfg.get('options', [])
       self.ssh      = cfg.get('ssh', '')
-      self.tunnel   = cfg.get('tunnel', '')
-      self.port     = cfg.get('port', '')
+      self.tunnel   = cfg.get('tunnel', None)
+      self.port     = cfg.get('port', None)
       self.host     = cfg.get('host', '')
       self.encoding = cfg.get('encoding', '')
       self.metapw   = cfg.get('metapw', '')
@@ -98,6 +98,20 @@ class SASconfigSTDIO:
          else:
             self.ssh = inssh
 
+      intunnel = kwargs.get('tunnel', None)
+      if intunnel is not None:
+         if lock:
+            print("Parameter 'tunnel' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.tunnel = intunnel
+      
+      inport = kwargs.get('port', None)
+      if inport is not None:
+         if lock:
+            print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.port = inport
+      
       inhost = kwargs.get('host', '')
       if len(inhost) > 0:
          if lock and len(self.host):
