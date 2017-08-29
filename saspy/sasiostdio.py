@@ -978,8 +978,10 @@ Will use HTML5 for this SASsession.""")
 
       try:
          sock = socks.socket()
-         sock.setsockopt(socks.SOL_SOCKET, socks.SO_REUSEADDR, 1)
-         sock.bind(("localhost",port))
+         if self.sascfg.tunnel:
+            sock.bind(('localhost', port))
+         else:
+            sock.bind(('', port))
          port = sock.getsockname()[1]
       except OSError:
          print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
