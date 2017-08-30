@@ -18,6 +18,7 @@ from IPython.display import HTML
 import IPython.core.magic as ipym
 import re
 from saspy.SASLogLexer import SASLogStyle, SASLogLexer
+from saspy import SASsession
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
 
@@ -31,10 +32,9 @@ class SASMagic(ipym.Magics):
 
     def __init__(self, shell):
         super(SASMagic, self).__init__(shell)
-        import saspy as saspy
         self.lst_len = -99  # initialize the length to a negative number to trigger function
-        self.mva = saspy.SASsession(kernel=None)
-        if self.lst_len < 0:
+        self.mva = None
+        if self.lst_len < 0 and isinstance(self.mva, SASsession) :
             self._get_lst_len()
 
     @ipym.cell_magic
@@ -54,22 +54,40 @@ class SASMagic(ipym.Magics):
             run;
         """
         
+        mva = self.mva
+        if len(line) and line in self.shell.user_ns:  # session supplied
+            _mva = self.shell.user_ns[line]
+            if isinstance(_mva, SASsession):
+                mva = _mva
+            else:
+                return 'Invalid SAS Session object supplied'
+        elif len(line) and not line in self.shell.user_ns:  # string supplied but not a session
+            return 'Invalid SAS Session object supplied'
+        else:  # no string should default to unnamed session
+            try:
+                if mva is None:
+                    mva = SASsession()
+                    self.mva = mva  # save the session for reuse
+                else:
+                    mva = self.mva
+            except:
+                return "this shouldn't happen"
         saveOpts="proc optsave out=__jupyterSASKernel__; run;"
         restoreOpts="proc optload data=__jupyterSASKernel__; run;"
         if len(line)>0:  # Save current SAS Options
-            self.mva.submit(saveOpts)
+            mva.submit(saveOpts)
 
         if line.lower()=='smalllog':
-            self.mva.submit("options nosource nonotes;")
+            mva.submit("options nosource nonotes;")
 
         elif line is not None and line.startswith('option'):
-            self.mva.submit(line + ';')
+            mva.submit(line + ';')
 
-        res = self.mva.submit(cell)
+        res = mva.submit(cell)
         dis = self._which_display(res['LOG'], res['LST'])
 
         if len(line)>0:  # Restore SAS options 
-            self.mva.submit(restoreOpts)
+            mva.submit(restoreOpts)
 
         return dis
 
