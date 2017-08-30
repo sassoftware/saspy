@@ -755,7 +755,7 @@ class SASsession():
                         elif isinstance(dsopts[key], list):
                             opts += 'where=(' + " and ".join(dsopts[key]) + ') '
                         else:
-                            raise TypeError("Bad key type. %s must be a str or list type") % key
+                            raise TypeError("Bad key type. {} must be a str or list type".format(key))
 
                     elif key == 'drop':
                         opts += 'drop='
@@ -786,7 +786,7 @@ class SASsession():
                                 fmat += ' '.join((k, v)) + ' '
                             fmat += ';'
                         else:
-                            raise TypeError("Bad key type. %s must be a str or dict type") % key
+                            raise TypeError("Bad key type. {} must be a str or dict type".format(key))
 
             if len(opts):
                 opts = '(' + opts + ')'
