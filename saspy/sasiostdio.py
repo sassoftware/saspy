@@ -50,6 +50,8 @@ class SASconfigSTDIO:
       self.saspath  = cfg.get('saspath', '')
       self.options  = cfg.get('options', [])
       self.ssh      = cfg.get('ssh', '')
+      self.tunnel   = cfg.get('tunnel', None)
+      self.port     = cfg.get('port', None)
       self.host     = cfg.get('host', '')
       self.encoding = cfg.get('encoding', '')
       self.metapw   = cfg.get('metapw', '')
@@ -96,6 +98,20 @@ class SASconfigSTDIO:
          else:
             self.ssh = inssh
 
+      intunnel = kwargs.get('tunnel', None)
+      if intunnel is not None:
+         if lock:
+            print("Parameter 'tunnel' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.tunnel = intunnel
+      
+      inport = kwargs.get('port', None)
+      if inport is not None:
+         if lock:
+            print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.port = inport
+      
       inhost = kwargs.get('host', '')
       if len(inhost) > 0:
          if lock and len(self.host):
@@ -175,46 +191,59 @@ class SASsessionSTDIO():
           self._log_cnt += 1
        return '%08d' % self._log_cnt
 
-   def _startsas(self):
-      #import pdb;pdb.set_trace()
-      if self.pid:
-         return self.pid
-
-      if self.sascfg.ssh:
-         pgm    = self.sascfg.ssh
+   def _buildcommand(self, sascfg):
+      if sascfg.ssh:
+         pgm    = sascfg.ssh
          parms  = [pgm]
-         parms += ["-t", self.sascfg.host, self.sascfg.saspath]
+         parms += ["-t", sascfg.host]
 
-         if self.sascfg.output.lower() == 'html':
+         if sascfg.port:
+            parms += ["-p", str(sascfg.port)]
+         
+         if sascfg.tunnel:
+            parms += ["-R", '%d:localhost:%d' % (sascfg.tunnel,sascfg.tunnel)]
+
+         parms += [sascfg.saspath]
+
+         if sascfg.output.lower() == 'html':
             print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg.py).
 Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the default sascfg.py.
 Will use HTML5 for this SASsession.""")
-            self.sascfg.output = 'html5'
+            sascfg.output = 'html5'
       else:
-         pgm    = self.sascfg.saspath
+         pgm    = sascfg.saspath
          parms  = [pgm]
 
       # temporary hack for testing grid w/ sasgsub and iomc ...
-      if self.sascfg.iomc:
-         pgm    = self.sascfg.iomc
+      if sascfg.iomc:
+         pgm    = sascfg.iomc
          parms  = [pgm]
          parms += ["user", "sas", "pw", "sas"]
          parms += ['']
-      elif self.sascfg.metapw:
-         pgm    = self.sascfg.ssh
+      elif sascfg.metapw:
+         pgm    = sascfg.ssh
          parms  = [pgm]
-         parms += ["-t", "-i", "/u/sastpw/idrsacnn", self.sascfg.host]
-         parms += self.sascfg.options
-         #parms += ['"'+self.sascfg.saspath+' -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX"']
+         parms += ["-t", "-i", "/u/sastpw/idrsacnn", sascfg.host]
+         parms += sascfg.options
+         #parms += ['"'+sascfg.saspath+' -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX"']
          parms += ['']
       else:
-         parms += self.sascfg.options
+         parms += sascfg.options
          parms += ["-nodms"]
          parms += ["-stdio"]
          parms += ["-terminal"]
          parms += ["-nosyntaxcheck"]
          parms += ["-pagesize", "MAX"]
          parms += ['']
+
+      return [pgm, parms]
+
+   def _startsas(self):
+      #import pdb;pdb.set_trace()
+      if self.pid:
+         return self.pid
+
+      pgm, parms = self._buildcommand(self.sascfg)
 
       s = ''
       for i in range(len(parms)):
@@ -888,6 +917,11 @@ Will use HTML5 for this SASsession.""")
       port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       '''
       port =  kwargs.get('port', 0)
+
+      if port==0 and self.sascfg.tunnel:
+         # we are using a tunnel; default to that port
+         port = self.sascfg.tunnel
+
       #import pandas as pd
       import socket as socks
       datar = ""
@@ -944,14 +978,20 @@ Will use HTML5 for this SASsession.""")
 
       try:
          sock = socks.socket()
-         sock.bind(("",port))
+         if self.sascfg.tunnel:
+            sock.bind(('localhost', port))
+         else:
+            sock.bind(('', port))
          port = sock.getsockname()[1]
       except OSError:
          print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
          return None
 
       if self.sascfg.ssh:
-         host = socks.gethostname()
+         if not self.sascfg.tunnel:
+            host = socks.gethostname()
+         else:
+            host = 'localhost'
       else:
          host = ''
 

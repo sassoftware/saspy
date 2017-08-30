@@ -74,6 +74,10 @@ SAS_output_options = {'output' : 'html5'}
 # 'ssh'     - [REQUIRED] the ssh command to run
 # 'host'    - [REQUIRED] the host to connect to
 #
+# Additional valid keys for ssh:
+# 'port'    - [integer] the remote ssh port
+# 'tunnel'  - [integer] local port to open via reverse tunnel, if remote host cannot otherwise reach this client
+#
 default  = {'saspath'  : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
             }
 

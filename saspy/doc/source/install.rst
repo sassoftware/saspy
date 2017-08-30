@@ -225,6 +225,26 @@ host -
 .. note:: The ``'ssh'`` key is the trigger to use the STDIO over SSH connection
           method.
 
+To accomodate alternative SSH configurations, you may also provide one or both of the 
+following optional keys:
+
+port -
+    (Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the ``-p`` option)
+
+tunnel -
+    (Optional: integer) Certain methods of saspy require opening a local port and accepting data 
+    streamed from the SAS instance. If the remote SAS server would not be able to reach ports on your client machine 
+    due to a firewall or other security configuration, you may pass a local port number to be reverse tunneled 
+    (using the ``-R`` ssh option) so that the remote SAS server can connect using this port.
+
+.. code-block:: ipython3
+
+    ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+                'ssh'     : '/usr/bin/ssh',
+                'host'    : 'remote.linux.host',
+                'port'    : 9922,
+                'tunnel'  : 9911
+               }
 
 
 IOM
