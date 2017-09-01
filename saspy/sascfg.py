@@ -116,6 +116,7 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # 'encoding'  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
 # 'classpath' - [REQUIRED] classpath to IOM client jars and saspy client jar.
 # 'appserver' - name ofphysical workspace server (when more than one app server defined in OMR) i.e.: 'SASApp - Workspace Server'
+# 'sspi'      - boolean. use IWA instead of user/pw to connect to the IOM workspace server
 
 
 # build out a local classpath variable to use below for Linux clients
@@ -172,6 +173,13 @@ winiomwin  = {'java'    : 'java',
             'classpath' : cpW
             }
 
+winiomIWA  = {'java'    : 'java',
+            'iomhost'   : 'windows.iom.host',
+            'iomport'   : 8591,
+            'encoding'  : 'windows-1252',
+            'classpath' : cpW,
+            'sspi'      : True
+            }
 
 # Future - for the HTTP access method to connect to the Compute Service
 #          This access method is not available yet.
