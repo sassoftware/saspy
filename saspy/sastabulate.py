@@ -146,7 +146,8 @@ class Grouping:
 # distribute arg(as key) from value(as list, None, or False)
 def build_kwargs(key, value, n):
     if value==False:
-        kwargs = [dict(label='') for i in range(n)]
+        # mainly used for clearing all labels w/ label=False
+        kwargs = [{key:''} for i in range(n)]
     elif value and isinstance(value, str):
         kwargs = [{key:value} for i in range(n)]
     elif value and len(value)==n:
