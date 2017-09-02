@@ -20,6 +20,7 @@ from saspy.sasml          import *
 from saspy.sasqc          import *
 from saspy.sasresults     import *
 from saspy.sasutil        import *
+from saspy.sastabulate    import *
 from saspy.sasproccommons import *
 from saspy.SASLogLexer    import *
 from saspy.version        import __version__ 
