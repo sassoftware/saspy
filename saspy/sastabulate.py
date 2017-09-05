@@ -112,7 +112,7 @@ class Grouping:
     
     def __mul__(self, other):
         if self.child:
-            self.child.__mul__(other)
+            self.child = self.child.__mul__(other)
         else:
             self.child = other
         return self
