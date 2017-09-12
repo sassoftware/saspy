@@ -63,6 +63,7 @@ class SASconfigIOM:
       self.timeout   = cfg.get('timeout', None)
       self.appserver = cfg.get('appserver', '')
       self.sspi      = cfg.get('sspi', False)
+      self.javaparms = cfg.get('javaparms', '')
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -161,6 +162,13 @@ class SASconfigIOM:
             self.encoding = inencoding
       if not self.encoding:
          self.encoding = 'utf-8'
+
+      injparms = kwargs.get('javaparms', '')
+      if len(injparms) > 0:
+         if lock:
+            print("Parameter 'javaparms' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.javaparms = injparms
 
       return
 
@@ -290,6 +298,8 @@ Will use HTML5 for this SASsession.""")
    
       pgm    = self.sascfg.java
       parms  = [pgm]
+      if len(self.sascfg.javaparms) > 0:
+         parms += self.sascfg.javaparms
       parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j", "-host", "localhost"]
       #parms += ["-classpath", self.sascfg.classpath+":/u/sastpw/tkpy2j", "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
