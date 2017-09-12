@@ -62,6 +62,8 @@ class SASconfigIOM:
       self.authkey   = cfg.get('authkey', '')
       self.timeout   = cfg.get('timeout', None)
       self.appserver = cfg.get('appserver', '')
+      self.sspi      = cfg.get('sspi', False)
+      self.javaparms = cfg.get('javaparms', '')
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -124,6 +126,13 @@ class SASconfigIOM:
          else:
             self.omrpw = inomrpw
 
+      insspi = kwargs.get('sspi', False)
+      if insspi:
+         if lock and self.sspi:
+            print("Parameter 'sspi' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.sspi = insspi
+
       incp = kwargs.get('classpath', '')
       if len(incp) > 0:
          if lock and len(self.classpath):
@@ -153,6 +162,13 @@ class SASconfigIOM:
             self.encoding = inencoding
       if not self.encoding:
          self.encoding = 'utf-8'
+
+      injparms = kwargs.get('javaparms', '')
+      if len(injparms) > 0:
+         if lock:
+            print("Parameter 'javaparms' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.javaparms = injparms
 
       return
 
@@ -251,36 +267,39 @@ Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in t
 Will use HTML5 for this SASsession.""")
             self.sascfg.output = 'html5'
 
-         user  = self.sascfg.omruser
-         pw    = self.sascfg.omrpw
-         found = False
-         if self.sascfg.authkey:
-            if os.name == 'nt': 
-               pwf = os.path.expanduser('~')+os.sep+'_authinfo'
-            else:
-               pwf = os.path.expanduser('~')+os.sep+'.authinfo'
-            try:
-               fid = open(pwf, mode='r')
-               for line in fid:
-                  if line.startswith(self.sascfg.authkey): 
-                     user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                     pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                     found = True
-               fid.close()
-            except OSError as e:
-               print('Error trying to read authinfo file:'+pwf+'\n'+str(e))
-               pass
-            except:
-               pass
-
-            if not found:
-               print('Did not find key '+self.sascfg.authkey+' in authinfo file:'+pwf+'\n')
-
-         while len(user) == 0:
-            user = self.sascfg._prompt("Please enter the IOM user id: ")
-
+         if not self.sascfg.sspi:
+            user  = self.sascfg.omruser
+            pw    = self.sascfg.omrpw
+            found = False
+            if self.sascfg.authkey:
+               if os.name == 'nt': 
+                  pwf = os.path.expanduser('~')+os.sep+'_authinfo'
+               else:
+                  pwf = os.path.expanduser('~')+os.sep+'.authinfo'
+               try:
+                  fid = open(pwf, mode='r')
+                  for line in fid:
+                     if line.startswith(self.sascfg.authkey): 
+                        user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                        pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                        found = True
+                  fid.close()
+               except OSError as e:
+                  print('Error trying to read authinfo file:'+pwf+'\n'+str(e))
+                  pass
+               except:
+                  pass
+   
+               if not found:
+                  print('Did not find key '+self.sascfg.authkey+' in authinfo file:'+pwf+'\n')
+   
+            while len(user) == 0:
+               user = self.sascfg._prompt("Please enter the IOM user id: ")
+   
       pgm    = self.sascfg.java
       parms  = [pgm]
+      if len(self.sascfg.javaparms) > 0:
+         parms += self.sascfg.javaparms
       parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j", "-host", "localhost"]
       #parms += ["-classpath", self.sascfg.classpath+":/u/sastpw/tkpy2j", "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
@@ -292,7 +311,10 @@ Will use HTML5 for this SASsession.""")
          parms += ["-appname", "'"+self.sascfg.appserver+"'"]
       if not zero:
          parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
-         parms += ["-user", user]     
+         if not self.sascfg.sspi:
+            parms += ["-user", user]     
+         else:
+            parms += ["-spn"]
       else:
          parms += ["-zero"]
       parms += ['']
@@ -414,10 +436,11 @@ Will use HTML5 for this SASsession.""")
       self.stderr[0].setblocking(False)
 
       if not zero:
-         while len(pw) == 0:
-            pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
-         pw += '\n'
-         self.stdin[0].send(pw.encode())
+         if not self.sascfg.sspi:
+            while len(pw) == 0:
+               pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
+            pw += '\n'
+            self.stdin[0].send(pw.encode())
 
       ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
 
