@@ -886,7 +886,7 @@ Will use HTML5 for this SASsession.""")
          code += "length"+length+";\n"
       if len(format):
          code += "format "+format+";\n"
-      code += "infile datalines delimiter='09'x DSD STOPOVER;\n input "+input+";\n datalines;"
+      code += "infile datalines delimiter='03'x DSD STOPOVER;\n input "+input+";\n datalines4;"
       self._asubmit(code, "text")
 
       for row in df.itertuples(index=False):
@@ -903,11 +903,12 @@ Will use HTML5 for this SASsession.""")
                else:
                   var = str(row[col].to_datetime64())[:26]
                   #var = str(row[1][col].to_datetime64())
-            card += var+chr(9)
+            if col < (ncols-1):
+               card += var+chr(3)
          self.stdin.write(card.encode(self.sascfg.encoding)+b'\n')
          #self._asubmit(card, "text")
 
-      self._asubmit(";run;", "text")
+      self._asubmit(";;;;run;", "text")
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
       '''
@@ -1023,7 +1024,8 @@ Will use HTML5 for this SASsession.""")
       sock.listen(0)
       self._asubmit(code, 'text')
       newsock = sock.accept()
-
+      
+      r = []
       while True:
          data = newsock[0].recv(4096)
          if len(data):
@@ -1031,24 +1033,27 @@ Will use HTML5 for this SASsession.""")
          else:
             break
 
+         data  = datar.rpartition(rowsep+'\n')
+         datap = data[0]+data[1]
+         datar = data[2] 
+
+         for i in datap.split(sep=rowsep+'\n'):
+            if i != '':
+               r.append(tuple(i.split(sep=colsep)))
+   
       newsock[0].shutdown(socks.SHUT_RDWR)
       newsock[0].close()
       sock.close()
-
-      r = []
-      for i in datar.split(sep=rowsep+'\n'):
-         if i != '':
-            r.append(tuple(i.split(sep=colsep)))
 
       df = pd.DataFrame.from_records(r, columns=varlist)
 
       for i in range(nvars):
          if vartype[i] == 'N':
             if varcat[i] not in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
-               df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce')
+               df[varlist[i]] = pd.to_numeric (df[varlist[i]], errors='coerce')
             else:
                df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='ignore')
-
+      
       return df
 
 if __name__ == "__main__":

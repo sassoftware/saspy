@@ -1066,7 +1066,7 @@ Will use HTML5 for this SASsession.""")
          code += "length "+length+";\n"
       if len(format):
          code += "format "+format+";\n"
-      code += "infile datalines delimiter='03'x DSD STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\ndatalines;"
+      code += "infile datalines delimiter='03'x DSD STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\ndatalines4;"
       self._asubmit(code, "text")
 
       code = ""
@@ -1089,7 +1089,7 @@ Will use HTML5 for this SASsession.""")
             self._asubmit(code, "text")
             code = ""
 
-      self._asubmit(code+";\nrun;", "text")
+      self._asubmit(code+";;;;\nrun;", "text")
       ll = self.submit("", 'text')
       return
    
@@ -1101,6 +1101,12 @@ Will use HTML5 for this SASsession.""")
       rowsep  - the row seperator character to use; defaults to '\n'
       colsep  - the column seperator character to use; defaults to '\t'
       '''
+
+      logf     = ''
+      logn     = self._logcnt()
+      logcodei = "%put E3969440A681A24088859985" + logn + ";"
+      logcodeo = "\nE3969440A681A24088859985" + logn
+
       datar = ""
       if libref:
          tabname = libref+"."+table
@@ -1178,15 +1184,67 @@ Will use HTML5 for this SASsession.""")
             code += rdelim
       code += ";\n run;"
 
-      ll = self.submit(code, 'text')
+      ll = self._asubmit(code, 'text')
 
-      if (len(ll['LST']) > 1) and (ll['LST'][0] == "\ufeff"):
-         ll['LST'] = ll['LST'][1:len(ll['LST'])]
+      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode()+b'\n')
 
       r = []
-      for i in ll['LST'].split(sep=rowsep+'\n'):
-         if i != '':
-            r.append(tuple(i.split(sep=colsep)))
+      while True:
+         try:
+            datar = self.stdout[0].recv(4096).decode(errors='replace')
+         except (BlockingIOError):
+            datar = b''
+
+         if len(datar) > 0:
+            if datar[0] == "\ufeff":
+               datar = datar[1:len(datar)]
+            break;
+
+      done = False
+      while not done:
+         
+             while True:
+                 if os.name == 'nt':
+                    try:
+                       rc = self.pid.wait(0)
+                       self.pid = None
+                       print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                       return None
+                    except:
+                       pass
+                 else:
+                    rc = os.waitpid(self.pid, os.WNOHANG)
+                    if rc[1]:
+                        self.pid = None
+                        print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                        return None
+                 try:
+                    data = self.stdout[0].recv(4096).decode(errors='replace')
+                 except (BlockingIOError):
+                    data = b''
+
+                 if len(data) > 0:
+                    datar += data
+                    data   = datar.rpartition(rowsep+'\n')
+                    datap  = data[0]+data[1]
+                    datar  = data[2] 
+
+                    for i in datap.split(sep=rowsep+'\n'):
+                       if i != '':
+                          r.append(tuple(i.split(sep=colsep)))
+                 else:
+                    sleep(0.1)
+                    try:
+                       log = self.stderr[0].recv(4096).decode(errors='replace') 
+                    except (BlockingIOError):
+                       log = b''
+
+                    if len(log) > 0:
+                       logf += log
+                       if logf.count(logcodeo) >= 1:
+                          break
+             done = True
+
 
       df = pd.DataFrame.from_records(r, columns=varlist)
 
