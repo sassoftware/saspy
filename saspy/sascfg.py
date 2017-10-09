@@ -27,14 +27,14 @@
 # that are defined already. Any necessary option (like user, pw for IOM or HTTP) that are not defined will be 
 # prompted for at run time. To dissallow overrides of as OPTION, when you don't have a value, simply
 # specify options=''. This way it's specified so it can't be overridden, even though you don't have any
-# specifi value you want applied.
+# specific value you want applied.
 # 
 #SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http']
 #
 
 SAS_config_names=['default']
 
-# Configuration options for pysas - python Dict
+# Configuration options for saspy - python Dict
 # valid key are:
 # 
 # 'lock_down' - True | False. True = Prevent runtime overrides of SAS_Config values below
