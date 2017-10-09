@@ -1107,7 +1107,6 @@ Will use HTML5 for this SASsession.""")
       logcodei = "%put E3969440A681A24088859985" + logn + ";"
       logcodeo = "\nE3969440A681A24088859985" + logn
 
-      datar = ""
       if libref:
          tabname = libref+"."+table
       else:
@@ -1188,21 +1187,14 @@ Will use HTML5 for this SASsession.""")
 
       self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode()+b'\n')
 
-      r = []
-      while True:
-         try:
-            datar = self.stdout[0].recv(4096).decode(errors='replace')
-         except (BlockingIOError):
-            datar = b''
-
-         if len(datar) > 0:
-            if datar[0] == "\ufeff":
-               datar = datar[1:len(datar)]
-            break;
-
-      done = False
+      r     = []
+      done  = False
+      first = True
+      datar = ""
+      bail  = False
+      
       while not done:
-         
+        
              while True:
                  if os.name == 'nt':
                     try:
@@ -1218,12 +1210,21 @@ Will use HTML5 for this SASsession.""")
                         self.pid = None
                         print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
                         return None
+
+                 if bail:
+                    if datar.count(logcodeo) >= 1:
+                       break
                  try:
                     data = self.stdout[0].recv(4096).decode(errors='replace')
                  except (BlockingIOError):
                     data = b''
 
                  if len(data) > 0:
+                    if first:
+                       if data[0] == "\ufeff":
+                          data = data[1:len(data)]
+                       first = False
+
                     datar += data
                     data   = datar.rpartition(rowsep+'\n')
                     datap  = data[0]+data[1]
@@ -1242,7 +1243,7 @@ Will use HTML5 for this SASsession.""")
                     if len(log) > 0:
                        logf += log
                        if logf.count(logcodeo) >= 1:
-                          break
+                          bail = True
              done = True
 
 
