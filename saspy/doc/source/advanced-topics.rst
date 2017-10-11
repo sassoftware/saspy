@@ -46,7 +46,7 @@ be able to run this code yourself.
     stat = sas.sasstat()
     res = stat.reg(model='horsepower = Cylinders EngineSize', data=cars)
     
-    for i in range(len(ets_results._names)):
+    for i in range(len(res._names)):
         x = res.__getattr__(res._names[i])
         if type(x) is not str:
             out1 = open("C:\\Public\\saspy_demo\\"+res._names[i]+".html", mode='w+b')
