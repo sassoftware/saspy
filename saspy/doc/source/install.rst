@@ -373,7 +373,7 @@ appserver -
     first one in the list of app servers it supports.
 sspi -
     New in 2.17, there is support for IWA (Integrated Windows Authentication) from a Windows client to remote IOM server.
-    This is simply a boolean, so to use it you specify 'sspi' : True . Also, to use this, you must have the path to the
+    This is simply a boolean, so to use it you specify 'sspi' : True. Also, to use this, you must have the path to the
     spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
     See the second paragraph under Local IOM for more on this.
 
