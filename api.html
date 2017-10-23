@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 2.1.6 documentation</title>
+  <title>API Reference &mdash; saspy 2.1.7 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.6 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.7 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.6
+                2.1.7
               </div>
             
           
@@ -180,6 +180,11 @@
             
   <div class="section" id="module-saspy">
 <span id="api-reference"></span><span id="api"></span><h1>API Reference<a class="headerlink" href="#module-saspy" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="saspy.isnotebook">
+<code class="descclassname">saspy.</code><code class="descname">isnotebook</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.isnotebook" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <div class="section" id="sas-session-object">
 <h2>SAS Session Object<a class="headerlink" href="#sas-session-object" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -688,6 +693,54 @@ or show what you type and keep the macros (they will still be available later).<
 <dd>print(results[&#8216;LOG&#8217;])
 HTML(results[&#8216;LST&#8217;])</dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.symget">
+<code class="descname">symget</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.symget" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; <p>name of the macro varable to set:</p>
+<ul class="simple">
+<li>name    is a character</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;name&#39;</span>   <span class="p">:</span> <span class="s1">&#39;var1&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.symput">
+<code class="descname">symput</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.symput" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; name of the macro varable to set:</li>
+<li><strong>value</strong> &#8211; <p>python variable to use for the value to assign to the marco variable:</p>
+<ul>
+<li>name    is a character</li>
+<li>value   is a variable that can be resolved to a string</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;name&#39;</span>   <span class="p">:</span> <span class="s1">&#39;var1&#39;</span>
+ <span class="s1">&#39;value&#39;</span>  <span class="p">:</span> <span class="n">var_val</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1640,11 +1693,11 @@ statement.</p>
 <dt id="saspy.SASstat.mixed">
 <code class="descname">mixed</code><span class="sig-paren">(</span><em>**kwargs: dict</em><span class="sig-paren">)</span> &#x2192; saspy.sasresults.SASresults<a class="headerlink" href="#saspy.SASstat.mixed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the MIXED procedure</p>
-<p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
-<p><cite>legal_set= {&#8216;by&#8217;, &#8216;cls&#8217;, &#8216;code&#8217;, &#8216;contrast&#8217;, &#8216;estimate&#8217;, &#8216;id&#8217;, &#8216;lsmeans&#8217;, &#8216;model&#8217;,
-&#8216;out&#8217;, &#8216;random&#8217;, &#8216;repeated&#8217;,&#8217;slice&#8217;, &#8216;weight&#8217;}`</cite></p>
 <p>cls is an alias for the class statement
 For more information on the statements see the Documentation link.</p>
+<p><code class="docutils literal"><span class="pre">required_set={'model'}</span></code></p>
+<p><code class="docutils literal"><span class="pre">legal_set=</span> <span class="pre">{'by',</span> <span class="pre">'cls',</span> <span class="pre">'code',</span> <span class="pre">'contrast',</span> <span class="pre">'estimate',</span> <span class="pre">'id',</span> <span class="pre">'lsmeans',</span> <span class="pre">'model',</span>
+<span class="pre">'out',</span> <span class="pre">'random',</span> <span class="pre">'repeated',</span> <span class="pre">'slice',</span> <span class="pre">'weight'}</span></code></p>
 <p>Documentation link:
 <a class="reference external" href="http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm">http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm</a></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1971,7 +2024,7 @@ This class and all the useful work in this package require a licensed version of
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.6',
+            VERSION:'2.1.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

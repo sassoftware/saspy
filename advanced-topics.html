@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced topics &mdash; saspy 2.1.6 documentation</title>
+  <title>Advanced topics &mdash; saspy 2.1.7 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.6 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.7 documentation" href="index.html"/>
         <link rel="next" title="Contributing new methods" href="adding-procedures.html"/>
         <link rel="prev" title="API Reference" href="api.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.6
+                2.1.7
               </div>
             
           
@@ -100,6 +100,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Advanced topics</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#using-batch-mode">Using Batch mode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#prompting">Prompting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#moving-values-between-pythion-variables-and-sas-macro-variables">Moving values between Pythion Variables and SAS Macro Variables</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
@@ -321,6 +322,21 @@ Obs     MyColumnName
 at runtime for values you want to use in the code, and those values can be
 kept around and used later in the code, or hidden and inaccessible afterward.</p>
 </div>
+<div class="section" id="moving-values-between-pythion-variables-and-sas-macro-variables">
+<h2>Moving values between Pythion Variables and SAS Macro Variables<a class="headerlink" href="#moving-values-between-pythion-variables-and-sas-macro-variables" title="Permalink to this headline">¶</a></h2>
+<p>There are two methods on the SASsession object you can use to transfer values between Python and SAS.
+symget() and symput(). To get a value from a SAS Macro Variable and assign it to a Python variable you
+just call symget with the name of the macro variable.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">py_var</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">symget</span><span class="p">(</span><span class="n">sas_macro_var</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To set the value of a SAS Macro Variable using the value of a Python variable, use symput() specifying
+the macro variable name, and providing the python variable continaing the value.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">py_var</span> <span class="o">=</span> <span class="n">some_value</span>
+<span class="n">sas</span><span class="o">.</span><span class="n">symput</span><span class="p">(</span><span class="n">sas_macro_var_name</span><span class="p">,</span> <span class="n">py_var</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -367,7 +383,7 @@ kept around and used later in the code, or hidden and inaccessible afterward.</p
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.6',
+            VERSION:'2.1.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
