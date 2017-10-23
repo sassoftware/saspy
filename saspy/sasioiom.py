@@ -1162,24 +1162,22 @@ Will use HTML5 for this SASsession.""")
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
-      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1 termstr=NL; put "
+      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1 dlm="+cdelim+" termstr=NL; put "
       
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
             if varcat[i] in sas_date_fmts:
-               code += 'E8601DA10. '
+               code += 'E8601DA10. '+cdelim
             else:
                if varcat[i] in sas_time_fmts:
-                  code += 'E8601TM15.6 '
+                  code += 'E8601TM15.6 '+cdelim
                else:
                   if varcat[i] in sas_datetime_fmts:
-                     code += 'E8601DT26.6 '
+                     code += 'E8601DT26.6 '+cdelim
                   else:
-                     code += 'best32. '
-         if i < (len(varlist)-1):
-            code += cdelim
-         else:
+                     code += 'best32. '+cdelim
+         if not (i < (len(varlist)-1)):
             code += rdelim
       code += ";\n run;"
 
@@ -1226,11 +1224,11 @@ Will use HTML5 for this SASsession.""")
                        first = False
 
                     datar += data
-                    data   = datar.rpartition(rowsep+'\n')
+                    data   = datar.rpartition(colsep+rowsep+'\n')
                     datap  = data[0]+data[1]
                     datar  = data[2] 
 
-                    for i in datap.split(sep=rowsep+'\n'):
+                    for i in datap.split(sep=colsep+rowsep+'\n'):
                        if i != '':
                           r.append(tuple(i.split(sep=colsep)))
                  else:
