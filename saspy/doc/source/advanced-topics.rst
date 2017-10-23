@@ -189,7 +189,7 @@ kept around and used later in the code, or hidden and inaccessible afterward.
 
 
 ***************************************************************
-Moving values between Pythion Variables and SAS Macro Variables
+Moving values between Python Variables and SAS Macro Variables
 ***************************************************************
 
 There are two methods on the SASsession object you can use to transfer values between Python and SAS.
@@ -206,6 +206,6 @@ the macro variable name, and providing the python variable continaing the value.
 .. code-block:: ipython3
 
     py_var = some_value
-    sas.symput(sas_macro_var_name, py_var)
+    sas.symput(sas_macro_var, py_var)
 
 

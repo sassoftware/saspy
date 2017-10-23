@@ -841,11 +841,6 @@ class SASsession():
             - name    is a character
             - value   is a variable that can be resolved to a string
 
-            .. code-block:: python
-
-                             {'name'   : 'var1'
-                              'value'  : var_val
-                             }
         """
         ll = self.submit("%let "+name +"=%NRBQUOTE("+str(value)+");\n")
 
@@ -856,10 +851,6 @@ class SASsession():
 
             - name    is a character
 
-            .. code-block:: python
-
-                             {'name'   : 'var1'
-                             }
         """
         ll = self.submit("%put "+name+"=&"+name+";\n")
 
