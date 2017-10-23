@@ -181,23 +181,3 @@ winiomIWA  = {'java'    : 'java',
             'sspi'      : True
             }
 
-# Future - for the HTTP access method to connect to the Compute Service
-#          This access method is not available yet.
-#
-#
-# These need ip addr and port, other values will be prompted for - python Dict
-# valid keys are:
-# 'ip'      - [REQUIRED] host address 
-# 'port'    - [REQUIRED] port; the code Defaults this to 80 (the Compute Services default port)
-# 'context' - context name defined on the compute service  [PROMTED for at runtime if more than one defined]
-# 'options' - SAS options to include (no '-' (dashes), just option names and values)
-# 'user'    - not suggested [REQUIRED but PROMTED for at runtime]
-# 'pw'      - really not suggested [REQUIRED but PROMTED for at runtime]
-# 
-#
-             
-http     = {'ip'      : 'host.running.compute.service',
-            'port'    :  80,
-            'context' : 'Tom2'
-            }
-

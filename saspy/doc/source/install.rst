@@ -371,6 +371,11 @@ appserver -
     If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
     that you want to connect to, i.e.: 'SASApp - Workspace Server'. Without this the Object spawner will only try the
     first one in the list of app servers it supports.
+sspi -
+    New in 2.17, there is support for IWA (Integrated Windows Authentication) from a Windows client to remote IOM server.
+    This is simply a boolean, so to use it you specify 'sspi' : True
+    Also, to use this, you must have the path to the spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
+    See the second paragraph under Local IOM for more on this.
 
 .. code-block:: ipython3
 
@@ -422,6 +427,14 @@ appserver -
                    'iomport'   : 8591,
                    'encoding'  : 'windows-1252',
                    'classpath' : cpW
+                  }
+
+    # Windows client and with IWA to Remote IOM server
+    winiomIWA   = {'java'      : 'java',
+                   'iomhost'   : 'some.iom.host',
+                   'iomport'   : 8591,
+                   'classpath' : cpW,
+                   'sspi'      : True
                   }
 
 
