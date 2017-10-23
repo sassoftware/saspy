@@ -200,18 +200,6 @@ class SASsession():
     :param encoding: This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
     :param classpath: classpath to IOM client jars and saspyiom client jar.
 
-    **Compute Service**
-
-    and for the HTTP IO module to connect to SAS Viya
-
-    :param ip: host address
-    :param port: port; the code Defaults this to 80 (the Compute Services default port)
-    :param context: context name defined on the compute service
-    :param options: SAS options to include in the start up command line
-    :param user: user name to authenticate with
-    :param pw: password to authenticate with
-    :param encoding: This is the python encoding value that matches the SAS session encoding
-
     """
 
     # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
