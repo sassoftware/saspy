@@ -262,25 +262,6 @@ Most of these parameters will be configured in the sascfg.py configuration file.
 </tr>
 </tbody>
 </table>
-<p><strong>Compute Service</strong></p>
-<p>and for the HTTP IO module to connect to SAS Viya</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>ip</strong> &#8211; host address</li>
-<li><strong>port</strong> &#8211; port; the code Defaults this to 80 (the Compute Services default port)</li>
-<li><strong>context</strong> &#8211; context name defined on the compute service</li>
-<li><strong>options</strong> &#8211; SAS options to include in the start up command line</li>
-<li><strong>user</strong> &#8211; user name to authenticate with</li>
-<li><strong>pw</strong> &#8211; password to authenticate with</li>
-<li><strong>encoding</strong> &#8211; This is the python encoding value that matches the SAS session encoding</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
 <dl class="method">
 <dt id="saspy.SASsession.dataframe2sasdata">
 <code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
