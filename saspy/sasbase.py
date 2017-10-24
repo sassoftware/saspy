@@ -514,7 +514,7 @@ class SASsession():
                options: str = ' ', prompt: dict = []) -> str:
         """
 
-        :param libref:  the libref for be assigned
+        :param libref:  the libref to be assigned
         :param engine:  the engine name used to access the SAS Library (engine defaults to BASE, per SAS)
         :param path:    path to the library (for engines that take a path parameter)
         :param options: other engine or engine supervisor options
