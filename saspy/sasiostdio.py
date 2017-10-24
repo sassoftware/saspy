@@ -310,6 +310,12 @@ Will use HTML5 for this SASsession.""")
       fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
 
+      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+      if rc != None:
+         self.pid = None
+         lst = self.stdout.read1(4096)
+         print("stdout from subprocess is:\n"+lst.decode()) 
+         
       if self.pid is None:
          print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
@@ -1021,25 +1027,37 @@ Will use HTML5 for this SASsession.""")
 
       sock.listen(0)
       self._asubmit(code, 'text')
-      newsock = sock.accept()
-      
-      r = []
-      while True:
-         data = newsock[0].recv(4096)
 
-         if len(data):
-            datar += data.decode(self.sascfg.encoding)
-         else:
-            break
-
-         data  = datar.rpartition(colsep+rowsep+'\n')
-         datap = data[0]+data[1]
-         datar = data[2] 
-
-         for i in datap.split(sep=colsep+rowsep+'\n'):
-            if i != '':
-               r.append(tuple(i.split(sep=colsep)))
+      newsock = (0,0)
+      try:
+         newsock = sock.accept()
+         
+         r = []
+         while True:
+            data = newsock[0].recv(4096)
    
+            if len(data):
+               datar += data.decode(self.sascfg.encoding)
+            else:
+               break
+   
+            data  = datar.rpartition(colsep+rowsep+'\n')
+            datap = data[0]+data[1]
+            datar = data[2] 
+   
+            for i in datap.split(sep=colsep+rowsep+'\n'):
+               if i != '':
+                  r.append(tuple(i.split(sep=colsep)))
+      
+      except:
+         print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
+         if newsock[0]:
+            newsock[0].shutdown(socks.SHUT_RDWR)
+            newsock[0].close()
+         sock.close()
+         ll = self.submit("", 'text')
+         return ll['LOG']
+
       newsock[0].shutdown(socks.SHUT_RDWR)
       newsock[0].close()
       sock.close()
