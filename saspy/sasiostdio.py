@@ -1031,7 +1031,6 @@ Will use HTML5 for this SASsession.""")
       newsock = (0,0)
       try:
          newsock = sock.accept()
-         
          r = []
          while True:
             data = newsock[0].recv(4096)

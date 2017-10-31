@@ -796,7 +796,10 @@ Will use HTML5 for this SASsession.""")
                        lstf = lstf.rsplit(logcodeo)[0]
                        break
                  try:
-                    lst = self.stdout[0].recv(4096).decode(errors='replace')
+                    if ods:
+                       lst = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+                    else:
+                       lst = self.stdout[0].recv(4096).decode(errors='replace')
                  except (BlockingIOError):
                     lst = b''
 
@@ -1213,7 +1216,7 @@ Will use HTML5 for this SASsession.""")
                     if datar.count(logcodeo) >= 1:
                        break
                  try:
-                    data = self.stdout[0].recv(4096).decode(errors='replace')
+                    data = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
                  except (BlockingIOError):
                     data = b''
 
