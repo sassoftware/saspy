@@ -33,6 +33,7 @@ import com.sas.services.connection.ConnectionFactoryException;
 import com.sas.services.connection.ConnectionFactoryInterface;
 import com.sas.services.connection.ConnectionFactoryManager;
 import com.sas.services.connection.ConnectionInterface;
+import com.sas.services.connection.Credential;
 import com.sas.services.connection.ManualConnectionFactoryConfiguration;
 import com.sas.services.connection.Server;
 
@@ -70,11 +71,12 @@ public class saspy2j {
                 int idx = 0;
                 boolean fndeol;
                 boolean zero = false;
+                boolean spn = false;
                 boolean failed = false;
 
                 String[] iomhosts;
                 int hosts = 0;
-                
+
                 BufferedReader inp;
                 BufferedWriter outp;
                 BufferedWriter errp;
@@ -113,6 +115,8 @@ public class saspy2j {
                                 appName = args[x + 1];
                         else if (args[x].equalsIgnoreCase("-zero"))
                                 zero = true;
+                        else if (args[x].equalsIgnoreCase("-spn"))
+                                spn = true;
                 }
 
                 try {
@@ -144,35 +148,48 @@ public class saspy2j {
                         }
 
                 } else {
-                        omrpw = inp.readLine();
+                        if (! spn)
+                           omrpw = inp.readLine();
                         iomhosts = iomhost.split(";");
                         hosts = iomhosts.length;
                         for (int i=0; i < hosts; i++)
                         {
-	                       try {
-	                                server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
-	                                if (appName != "")
-	                                   server.setServerName(appName.replace("\'", ""));
-	                                //server.setOption(SASURI.applicationNameKey, appName);
-	                                ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
-	                                ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
-	                                ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
-	                                // ConnectionFactoryAdminInterface admin =
-	                                // cxf.getAdminInterface();
-	                                if (timeout > 0)
-	                                   cx = cxf.getConnection(omruser, omrpw, timeout);
-	                                else
-	                                   cx = cxf.getConnection(omruser, omrpw);
-	                                break;
-	                        } catch (ConnectionFactoryException e) {
-	                                String msg = e.getMessage();
-	                                System.out.print(msg+"\n");
-	                                errp.write(msg+"\n");
-	                                errp.flush();
-	                                if (i+1 < hosts)
-	                                	continue;
-	                                failed = true;
-	                        }
+                               try {
+                                        server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
+                                        if (appName != "")
+                                           server.setServerName(appName.replace("\'", ""));
+                                        //server.setOption(SASURI.applicationNameKey, appName);
+                                        server.setOption(SASURI.applicationNameKey, "SASPy");
+
+                                        if (spn)
+                                           {
+                                            server.setSecurityPackage(Server.SECURITY_PACKAGE_NEGOTIATE);
+                                            //server.setSPN("");
+                                           }
+                                        ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
+                                        ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
+                                        ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
+                                        // ConnectionFactoryAdminInterface admin =
+                                        // cxf.getAdminInterface();
+                                        if (spn)
+                                           {
+                                            Credential cred = SecurityPackageCredential.getInstance();
+                                            cx = cxf.getConnection(cred);
+                                           }
+                                        else if (timeout > 0)
+                                           cx = cxf.getConnection(omruser, omrpw, timeout);
+                                        else
+                                           cx = cxf.getConnection(omruser, omrpw);
+                                        break;
+                                } catch (ConnectionFactoryException e) {
+                                        String msg = e.getMessage();
+                                        System.out.print(msg+"\n");
+                                        errp.write(msg+"\n");
+                                        errp.flush();
+                                        if (i+1 < hosts)
+                                                continue;
+                                        failed = true;
+                                }
                         }
                 }
 

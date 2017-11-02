@@ -46,7 +46,7 @@ be able to run this code yourself.
     stat = sas.sasstat()
     res = stat.reg(model='horsepower = Cylinders EngineSize', data=cars)
     
-    for i in range(len(ets_results._names)):
+    for i in range(len(res._names)):
         x = res.__getattr__(res._names[i])
         if type(x) is not str:
             out1 = open("C:\\Public\\saspy_demo\\"+res._names[i]+".html", mode='w+b')
@@ -186,3 +186,26 @@ the previously defined non-hidden variables--which are still available.
 That is a highly contrived example, but you get the idea. You can prompt users 
 at runtime for values you want to use in the code, and those values can be 
 kept around and used later in the code, or hidden and inaccessible afterward.
+
+
+***************************************************************
+Moving values between Python Variables and SAS Macro Variables
+***************************************************************
+
+There are two methods on the SASsession object you can use to transfer values between Python and SAS.
+symget() and symput(). To get a value from a SAS Macro Variable and assign it to a Python variable you
+just call symget with the name of the macro variable.
+
+.. code-block:: ipython3
+
+    py_var = sas.symget(sas_macro_var)
+
+To set the value of a SAS Macro Variable using the value of a Python variable, use symput() specifying
+the macro variable name, and providing the python variable continaing the value.
+
+.. code-block:: ipython3
+
+    py_var = some_value
+    sas.symput(sas_macro_var, py_var)
+
+

@@ -200,18 +200,6 @@ class SASsession():
     :param encoding: This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
     :param classpath: classpath to IOM client jars and saspyiom client jar.
 
-    **Compute Service**
-
-    and for the HTTP IO module to connect to SAS Viya
-
-    :param ip: host address
-    :param port: port; the code Defaults this to 80 (the Compute Services default port)
-    :param context: context name defined on the compute service
-    :param options: SAS options to include in the start up command line
-    :param user: user name to authenticate with
-    :param pw: password to authenticate with
-    :param encoding: This is the python encoding value that matches the SAS session encoding
-
     """
 
     # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
@@ -526,7 +514,7 @@ class SASsession():
                options: str = ' ', prompt: dict = []) -> str:
         """
 
-        :param libref:  the libref for be assigned
+        :param libref:  the libref to be assigned
         :param engine:  the engine name used to access the SAS Library (engine defaults to BASE, per SAS)
         :param path:    path to the library (for engines that take a path parameter)
         :param options: other engine or engine supervisor options
@@ -878,11 +866,6 @@ class SASsession():
             - name    is a character
             - value   is a variable that can be resolved to a string
 
-            .. code-block:: python
-
-                             {'name'   : 'var1'
-                              'value'  : var_val
-                             }
         """
         ll = self.submit("%let "+name +"=%NRBQUOTE("+str(value)+");\n")
 
@@ -893,10 +876,6 @@ class SASsession():
 
             - name    is a character
 
-            .. code-block:: python
-
-                             {'name'   : 'var1'
-                             }
         """
         ll = self.submit("%put "+name+"=&"+name+";\n")
 

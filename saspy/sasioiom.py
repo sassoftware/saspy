@@ -62,6 +62,8 @@ class SASconfigIOM:
       self.authkey   = cfg.get('authkey', '')
       self.timeout   = cfg.get('timeout', None)
       self.appserver = cfg.get('appserver', '')
+      self.sspi      = cfg.get('sspi', False)
+      self.javaparms = cfg.get('javaparms', '')
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -124,6 +126,13 @@ class SASconfigIOM:
          else:
             self.omrpw = inomrpw
 
+      insspi = kwargs.get('sspi', False)
+      if insspi:
+         if lock and self.sspi:
+            print("Parameter 'sspi' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.sspi = insspi
+
       incp = kwargs.get('classpath', '')
       if len(incp) > 0:
          if lock and len(self.classpath):
@@ -153,6 +162,13 @@ class SASconfigIOM:
             self.encoding = inencoding
       if not self.encoding:
          self.encoding = 'utf-8'
+
+      injparms = kwargs.get('javaparms', '')
+      if len(injparms) > 0:
+         if lock:
+            print("Parameter 'javaparms' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.javaparms = injparms
 
       return
 
@@ -251,36 +267,39 @@ Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in t
 Will use HTML5 for this SASsession.""")
             self.sascfg.output = 'html5'
 
-         user  = self.sascfg.omruser
-         pw    = self.sascfg.omrpw
-         found = False
-         if self.sascfg.authkey:
-            if os.name == 'nt': 
-               pwf = os.path.expanduser('~')+os.sep+'_authinfo'
-            else:
-               pwf = os.path.expanduser('~')+os.sep+'.authinfo'
-            try:
-               fid = open(pwf, mode='r')
-               for line in fid:
-                  if line.startswith(self.sascfg.authkey): 
-                     user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                     pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                     found = True
-               fid.close()
-            except OSError as e:
-               print('Error trying to read authinfo file:'+pwf+'\n'+str(e))
-               pass
-            except:
-               pass
-
-            if not found:
-               print('Did not find key '+self.sascfg.authkey+' in authinfo file:'+pwf+'\n')
-
-         while len(user) == 0:
-            user = self.sascfg._prompt("Please enter the IOM user id: ")
-
+         if not self.sascfg.sspi:
+            user  = self.sascfg.omruser
+            pw    = self.sascfg.omrpw
+            found = False
+            if self.sascfg.authkey:
+               if os.name == 'nt': 
+                  pwf = os.path.expanduser('~')+os.sep+'_authinfo'
+               else:
+                  pwf = os.path.expanduser('~')+os.sep+'.authinfo'
+               try:
+                  fid = open(pwf, mode='r')
+                  for line in fid:
+                     if line.startswith(self.sascfg.authkey): 
+                        user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                        pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                        found = True
+                  fid.close()
+               except OSError as e:
+                  print('Error trying to read authinfo file:'+pwf+'\n'+str(e))
+                  pass
+               except:
+                  pass
+   
+               if not found:
+                  print('Did not find key '+self.sascfg.authkey+' in authinfo file:'+pwf+'\n')
+   
+            while len(user) == 0:
+               user = self.sascfg._prompt("Please enter the IOM user id: ")
+   
       pgm    = self.sascfg.java
       parms  = [pgm]
+      if len(self.sascfg.javaparms) > 0:
+         parms += self.sascfg.javaparms
       parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j", "-host", "localhost"]
       #parms += ["-classpath", self.sascfg.classpath+":/u/sastpw/tkpy2j", "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
@@ -292,7 +311,10 @@ Will use HTML5 for this SASsession.""")
          parms += ["-appname", "'"+self.sascfg.appserver+"'"]
       if not zero:
          parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
-         parms += ["-user", user]     
+         if not self.sascfg.sspi:
+            parms += ["-user", user]     
+         else:
+            parms += ["-spn"]
       else:
          parms += ["-zero"]
       parms += ['']
@@ -414,10 +436,11 @@ Will use HTML5 for this SASsession.""")
       self.stderr[0].setblocking(False)
 
       if not zero:
-         while len(pw) == 0:
-            pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
-         pw += '\n'
-         self.stdin[0].send(pw.encode())
+         if not self.sascfg.sspi:
+            while len(pw) == 0:
+               pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
+            pw += '\n'
+            self.stdin[0].send(pw.encode())
 
       ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
 
@@ -1043,7 +1066,7 @@ Will use HTML5 for this SASsession.""")
          code += "length "+length+";\n"
       if len(format):
          code += "format "+format+";\n"
-      code += "infile datalines delimiter='03'x DSD STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\ndatalines;"
+      code += "infile datalines delimiter='03'x DSD STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\ndatalines4;"
       self._asubmit(code, "text")
 
       code = ""
@@ -1066,7 +1089,7 @@ Will use HTML5 for this SASsession.""")
             self._asubmit(code, "text")
             code = ""
 
-      self._asubmit(code+";\nrun;", "text")
+      self._asubmit(code+";;;;\nrun;", "text")
       ll = self.submit("", 'text')
       return
    
@@ -1078,7 +1101,12 @@ Will use HTML5 for this SASsession.""")
       rowsep  - the row seperator character to use; defaults to '\n'
       colsep  - the column seperator character to use; defaults to '\t'
       '''
-      datar = ""
+
+      logf     = ''
+      logn     = self._logcnt()
+      logcodei = "%put E3969440A681A24088859985" + logn + ";"
+      logcodeo = "\nE3969440A681A24088859985" + logn
+
       if libref:
          tabname = libref+"."+table
       else:
@@ -1134,36 +1162,88 @@ Will use HTML5 for this SASsession.""")
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
-      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1 termstr=NL; put "
+      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1 dlm="+cdelim+" termstr=NL; put "
       
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
             if varcat[i] in sas_date_fmts:
-               code += 'E8601DA10. '
+               code += 'E8601DA10. '+cdelim
             else:
                if varcat[i] in sas_time_fmts:
-                  code += 'E8601TM15.6 '
+                  code += 'E8601TM15.6 '+cdelim
                else:
                   if varcat[i] in sas_datetime_fmts:
-                     code += 'E8601DT26.6 '
+                     code += 'E8601DT26.6 '+cdelim
                   else:
-                     code += 'best32. '
-         if i < (len(varlist)-1):
-            code += cdelim
-         else:
+                     code += 'best32. '+cdelim
+         if not (i < (len(varlist)-1)):
             code += rdelim
       code += ";\n run;"
 
-      ll = self.submit(code, 'text')
+      ll = self._asubmit(code, 'text')
 
-      if (len(ll['LST']) > 1) and (ll['LST'][0] == "\ufeff"):
-         ll['LST'] = ll['LST'][1:len(ll['LST'])]
+      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode()+b'\n')
 
-      r = []
-      for i in ll['LST'].split(sep=rowsep+'\n'):
-         if i != '':
-            r.append(tuple(i.split(sep=colsep)))
+      r     = []
+      done  = False
+      first = True
+      datar = ""
+      bail  = False
+      
+      while not done:
+        
+             while True:
+                 if os.name == 'nt':
+                    try:
+                       rc = self.pid.wait(0)
+                       self.pid = None
+                       print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                       return None
+                    except:
+                       pass
+                 else:
+                    rc = os.waitpid(self.pid, os.WNOHANG)
+                    if rc[1]:
+                        self.pid = None
+                        print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                        return None
+
+                 if bail:
+                    if datar.count(logcodeo) >= 1:
+                       break
+                 try:
+                    data = self.stdout[0].recv(4096).decode(errors='replace')
+                 except (BlockingIOError):
+                    data = b''
+
+                 if len(data) > 0:
+                    if first:
+                       if data[0] == "\ufeff":
+                          data = data[1:len(data)]
+                       first = False
+
+                    datar += data
+                    data   = datar.rpartition(colsep+rowsep+'\n')
+                    datap  = data[0]+data[1]
+                    datar  = data[2] 
+
+                    for i in datap.split(sep=colsep+rowsep+'\n'):
+                       if i != '':
+                          r.append(tuple(i.split(sep=colsep)))
+                 else:
+                    sleep(0.1)
+                    try:
+                       log = self.stderr[0].recv(4096).decode(errors='replace') 
+                    except (BlockingIOError):
+                       log = b''
+
+                    if len(log) > 0:
+                       logf += log
+                       if logf.count(logcodeo) >= 1:
+                          bail = True
+             done = True
+
 
       df = pd.DataFrame.from_records(r, columns=varlist)
 

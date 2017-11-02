@@ -104,13 +104,13 @@ class SASstat:
         """
         Python method to call the MIXED procedure
 
-        ``required_set={'model'}``
-
-        `legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id', 'lsmeans', 'model',
-        'out', 'random', 'repeated','slice', 'weight'}``
-
         cls is an alias for the class statement
         For more information on the statements see the Documentation link.
+
+        ``required_set={'model'}``
+
+        ``legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id', 'lsmeans', 'model',
+        'out', 'random', 'repeated', 'slice', 'weight'}``
 
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm
