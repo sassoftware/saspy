@@ -10,6 +10,7 @@ import org.omg.CORBA.StringHolder;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
 import com.sas.iom.SAS.ILanguageService;
@@ -120,16 +121,18 @@ public class saspy2j {
                 }
 
                 try {
-                        sin = new Socket(addr, inport);
+                        sin  = new Socket(addr, inport);
                         sout = new Socket(addr, outport);
                         serr = new Socket(addr, errport);
                 } catch (IOException e) {
                         e.printStackTrace();
                 }
 
-                inp = new BufferedReader(new InputStreamReader(sin.getInputStream()));
-                outp = new BufferedWriter(new OutputStreamWriter(sout.getOutputStream()));
-                errp = new BufferedWriter(new OutputStreamWriter(serr.getOutputStream()));
+                OutputStream odsout = sout.getOutputStream();
+
+                inp  = new BufferedReader(new InputStreamReader(sin.getInputStream(), "UTF-8"));
+                outp = new BufferedWriter(new OutputStreamWriter(sout.getOutputStream(), "UTF-8"));
+                errp = new BufferedWriter(new OutputStreamWriter(serr.getOutputStream(), "UTF-8"));
 
                 if (zero) {
                         try {
@@ -215,7 +218,7 @@ public class saspy2j {
                                 StringHolder retname = new StringHolder();
                                 // filesvc.MakeDirectory(physicalName.value[0], "tomods1");
                                 fileref = filesvc.AssignFileref("_tomods1", "", filesvc.FullName("tomods1", physicalName.value[0]), "encoding=\"utf-8\"",
-                                                retname);
+                                        retname);
 
                                 boolean[] arg0 = new boolean[0];
                                 StringSeqHolder arg1 = new StringSeqHolder();
@@ -275,11 +278,10 @@ public class saspy2j {
                                         try {
                                                 while (slen > 0) {
                                                         bstr.Read(9999999, odsdata);
-                                                        String s = new String(odsdata.value);
-                                                        slen = s.length();
+                                                        slen = odsdata.value.length;
                                                         if (slen > 0) {
-                                                                outp.write(s);
-                                                                outp.flush();
+                                                                odsout.write(odsdata.value);
+                                                                odsout.flush();
                                                         }
                                                 }
                                         } catch (IOException e) {
