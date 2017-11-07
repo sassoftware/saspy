@@ -542,9 +542,24 @@ class SASProcCommons:
             self.logger.debug("partition statement,length: %s,%s", args['partition'], len(args['partition']))
             code += "partition %s;\n" % (args['partition'])
         if 'out' in args and not len(outmeth):
-            outds = args['out']
-            outstr = outds.libref + '.' + outds.table
-            code += "output out=%s;\n" % outstr
+            if not isinstance(args['out'], dict):
+                outds = args['out']
+                outstr = outds.libref + '.' + outds.table
+                code += "output out=%s;\n" % outstr
+            else:
+                t = args['out'].pop("table", None)
+                l = args['out'].pop("libref", None)
+                d = args['out'].pop("data", None)
+                if t and l:
+                    outstr = l + '.' + t
+                elif d:
+                    outstr = d.libref + '.' + d.table
+                else:
+                    raise SyntaxError("OUT statement is not in a recognized form either {'libname':'foo', 'table':'bar'} or {'data':'sasdataobject'}  %s" % str(objtype))
+
+                varlist = ' '.join('{}={}'.format(key, val) for key, val in args['out'].items())
+                code += "output out=%s %s;\n" % (outstr, varlist)
+
         if 'xchart' in args:
             self.logger.debug("xchart statement,length: %s,%s", args['xchart'], len(args['xchart']))
             code += "xchart %s;\n" % (args['xchart'])
@@ -922,7 +937,7 @@ class SASProcCommons:
                 totSet = legalSet | reqSet
             else:
                 totSet = legalSet
-            generalSet = set(['ODSGraphics', 'stmtpassthrough', 'targOpts'])
+            generalSet = set(['ODSGraphics', 'stmtpassthrough', 'targOpts', 'procopts'])
             extraSet = set(stmt.keys() - generalSet).difference(totSet)  # find keys not in legal or required sets
             if extraSet:
                 for item in extraSet:
