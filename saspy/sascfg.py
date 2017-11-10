@@ -17,7 +17,7 @@
 
 # Configuration Names for SAS - python List
 # This is the list of allowed configuration definitions that can be used. The definition are defined below.
-# if there is nore than one name in the list, and cfgname= is not specified in SASsession(), then the user
+# if there is more than one name in the list, and cfgname= is not specified in SASsession(), then the user
 # will be prompted to choose which configuration to use.
 #
 # The various options for the different access methods can be specified on the SASsession() i.e.:
@@ -68,7 +68,7 @@ SAS_output_options = {'output' : 'html5'}
 # valid keys are:
 # 'saspath'  - [REQUIRED] path to SAS startup script i.e.: /opt/sasinside/SASHome/SASFoundation/9.4/sas
 # 'options'  - SAS options to include in the start up command line - Python List
-# 'encoding' - This is the python encoding value that matches the SAS session encoding youe SAS session is using 
+# 'encoding' - This is the python encoding value that matches the SAS session encoding your SAS session is using 
 #
 # For passwordless ssh connection, the following are also reuqired:
 # 'ssh'     - [REQUIRED] the ssh command to run
@@ -92,7 +92,7 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # For IOM (Grid Manager or any IOM) and Local Windows via IOM access method
 # These configuration definitions are for connecting over IOM. This is designed to be used to connect to a SAS Grid, via Grid Manager
 # and also to connect to a local Windows SAS session. The client side (python and java) for this access method can be either Linux or Windows.
-# The STDIO access method above is only for Linux. PC SAS requires this IOM interface. 
+# The STDIO access method above is only for Linux. PC SAS requires this IOM interface.
 #
 # The absence of the iomhost option triggers local Windows SAS mode. In this case none of 'iomhost', 'iomport', 'omruser', 'omrpw' are needed.
 # a local SAS session is started up and connected to.
