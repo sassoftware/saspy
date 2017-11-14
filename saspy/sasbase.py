@@ -671,7 +671,35 @@ class SASsession():
         """
         return self.sasdata2dataframe(table, libref, dsopts, **kwargs)
 
-    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {},
+    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'pd.DataFrame':
+        """
+        This is an alias for 'sasdata2dataframe' specifying method='CSV'. Why type all that?
+        SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+
+        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
+        :param libref: the libref for the SAS Data Set.
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+
+            - where is a string
+            - keep are strings or list of strings.
+            - drop are strings or list of strings.
+            - obs is a numbers - either string or int
+            - first obs is a numbers - either string or int
+
+            .. code-block:: python
+
+                             {'where'    : 'msrp < 20000 and make = "Ford"'
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
+                              'obs'      :  10
+                              'firstobs' : '12'
+                             }
+        :param kwargs: dictionary
+        :return: Pandas data frame
+        """
+        return self.sasdata2dataframe(table, libref, dsopts, method='CSV', **kwargs)
+
+    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {}, method: str = 'MEMORY',
                           **kwargs) -> 'pd.DataFrame':
         """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -696,6 +724,7 @@ class SASsession():
                               'firstobs' : '12'
                              }
 
+        :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
         :param kwargs: dictionary
         :return: Pandas data frame
         """
@@ -708,7 +737,7 @@ class SASsession():
             print("too complicated to show the code, read the source :), sorry.")
             return None
         else:
-            return self._io.sasdata2dataframe(table, libref, dsopts, **kwargs)
+            return self._io.sasdata2dataframe(table, libref, dsopts, method=method, **kwargs)
 
     def _dsopts(self, dsopts):
         """
@@ -1839,6 +1868,16 @@ class SASdata:
             return None
         else:
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, **kwargs)
+
+    def to_df_CSV(self, **kwargs) -> 'pd.DataFrame':
+        """
+        Export this SAS Data Set to a Pandas Data Frame via CSV file
+
+        :param kwargs:
+        :return: Pandas data frame
+        :rtype: 'pd.DataFrame'
+        """
+        return self.to_df(method='CSV', **kwargs)
 
     def heatmap(self, x: str, y: str, options: str = '', title: str = '',
                 label: str = '') -> object:
