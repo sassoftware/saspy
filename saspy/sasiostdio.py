@@ -1032,7 +1032,7 @@ Will use HTML5 for this SASsession.""")
             code += rdelim
       code += "; run;\n"
 
-      sock.listen(0)
+      sock.listen(1)
       self._asubmit(code, 'text')
 
       r     = []
@@ -1216,7 +1216,7 @@ Will use HTML5 for this SASsession.""")
       code += "options source;\n"
 
       if self.sascfg.ssh:
-         sock.listen(0)
+         sock.listen(1)
          self._asubmit(code, 'text')
 
          newsock = (0,0)
