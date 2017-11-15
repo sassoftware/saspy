@@ -256,9 +256,9 @@ class SASsessionIOM():
       except OSError:
          print('Error try to open a socket in the _startsas method. Call failed.')
          return None
-      self.sockin.listen(0)
-      self.sockout.listen(0)
-      self.sockerr.listen(0)
+      self.sockin.listen(1)
+      self.sockout.listen(1)
+      self.sockerr.listen(1)
 
       if not zero:
          if self.sascfg.output.lower() == 'html':
