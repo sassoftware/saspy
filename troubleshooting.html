@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Troubleshooting &mdash; saspy 2.1.7 documentation</title>
+  <title>Troubleshooting &mdash; saspy 2.1.8 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.7 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.8 documentation" href="index.html"/>
         <link rel="next" title="License" href="license.html"/>
         <link rel="prev" title="Contributing new methods" href="adding-procedures.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.7
+                2.1.8
               </div>
             
           
@@ -475,8 +475,12 @@ There are a few obvious misconfigurations that can happen here.</p>
 <li>The &#8216;iomhost&#8217; or &#8216;iomport&#8217; you&#8217;ve specified aren&#8217;t right, or the server isn&#8217;t up and available to be connected to.</li>
 <li>Your credentials were specifed wrong, or you don&#8217;t have permission to connect.</li>
 <li>for Windows Local connection, you don&#8217;t have the path to the sspiauth.dll in yout System Path variable.</li>
+<li>for Windows Local connection, the registry doesn&#8217;t have the right path to the SAS start up command.</li>
 </ol>
 </div></blockquote>
+<ol class="arabic simple">
+<li>The application could not log on to the server &#8220;Linux-1:333&#8221;. No server is available at that port on that machine.</li>
+</ol>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">iomport</span><span class="o">=</span><span class="mi">333</span><span class="p">)</span> <span class="c1"># clearly the wrong port</span>
 
 <span class="n">The</span> <span class="n">application</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">log</span> <span class="n">on</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span> <span class="s2">&quot;Linux-1:333&quot;</span><span class="o">.</span> <span class="n">No</span> <span class="n">server</span> <span class="ow">is</span> <span class="n">available</span> <span class="n">at</span> <span class="n">that</span> <span class="n">port</span> <span class="n">on</span> <span class="n">that</span> <span class="n">machine</span><span class="o">.</span>
@@ -489,6 +493,9 @@ There are a few obvious misconfigurations that can happen here.</p>
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
 </pre></div>
 </div>
+<ol class="arabic simple" start="2">
+<li>The application could not log on to the server &#8220;Linux-1:8591&#8221;. The user ID &#8220;wrong_user&#8221; or the password is incorrect.</li>
+</ol>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">omruser</span><span class="o">=</span><span class="s1">&#39;wrong_user&#39;</span><span class="p">)</span>
 
 <span class="n">The</span> <span class="n">application</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">log</span> <span class="n">on</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span> <span class="s2">&quot;Linux-1:8591&quot;</span><span class="o">.</span> <span class="n">The</span> <span class="n">user</span> <span class="n">ID</span> <span class="s2">&quot;wrong_user&quot;</span> <span class="ow">or</span> <span class="n">the</span> <span class="n">password</span> <span class="ow">is</span> <span class="n">incorrect</span><span class="o">.</span>
@@ -501,6 +508,9 @@ There are a few obvious misconfigurations that can happen here.</p>
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
 </pre></div>
 </div>
+<ol class="arabic simple" start="3">
+<li>The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.</li>
+</ol>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
 
@@ -514,6 +524,28 @@ There are a few obvious misconfigurations that can happen here.</p>
 <span class="n">Be</span> <span class="n">sure</span> <span class="n">the</span> <span class="n">path</span> <span class="n">to</span> <span class="n">sspiauth</span><span class="o">.</span><span class="n">dll</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">System</span> <span class="n">PATH</span>
 
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>The application could not find a command to launch a SAS Workspace Server.</li>
+</ol>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
+<span class="n">The</span> <span class="n">application</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">find</span> <span class="n">a</span> <span class="n">command</span> <span class="n">to</span> <span class="n">launch</span> <span class="n">a</span> <span class="n">SAS</span> <span class="n">Workspace</span> <span class="n">Server</span><span class="o">.</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span> <span class="nn">wait</span> <span class="nn">was</span><span class="p">:</span> <span class="mi">4294967290</span>
+<span class="n">SAS</span> <span class="n">Connection</span> <span class="n">failed</span><span class="o">.</span> <span class="n">No</span> <span class="n">connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Double</span> <span class="n">check</span> <span class="n">you</span> <span class="n">settings</span> <span class="ow">in</span> <span class="n">sascfg</span><span class="o">.</span><span class="n">py</span> <span class="nb">file</span><span class="o">.</span>
+
+<span class="n">Attempted</span> <span class="n">to</span> <span class="n">run</span> <span class="n">program</span> <span class="n">java</span> <span class="k">with</span> <span class="n">the</span> <span class="n">following</span> <span class="n">parameters</span><span class="p">:[</span><span class="s1">&#39;java&#39;</span><span class="p">,</span> <span class="s1">&#39;-classpath&#39;</span><span class="p">,</span> <span class="s1">&#39;C:</span><span class="se">\\</span><span class="s1">java</span><span class="se">\\</span><span class="s1">sas.svc.connection.jar;C:</span><span class="se">\\</span><span class="s1">java</span><span class="se">\\</span><span class="s1">log4j.jar;C:</span><span class="se">\\</span><span class="s1">jars</span><span class="se">\\</span><span class="s1">sas.security.sspi.jar;C:</span><span class="se">\\</span><span class="s1">jars</span><span class="se">\\</span><span class="s1">saspyiom.jar&#39;</span><span class="p">,</span>
+<span class="s1">&#39;pyiom.saspy2j&#39;</span><span class="p">,</span> <span class="s1">&#39;-host&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="s1">&#39;-stdinport&#39;</span><span class="p">,</span> <span class="s1">&#39;59110&#39;</span><span class="p">,</span> <span class="s1">&#39;-stdoutport&#39;</span><span class="p">,</span> <span class="s1">&#39;59111&#39;</span><span class="p">,</span> <span class="s1">&#39;-stderrport&#39;</span><span class="p">,</span> <span class="s1">&#39;59112&#39;</span><span class="p">,</span> <span class="s1">&#39;-zero&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+
+<span class="n">Be</span> <span class="n">sure</span> <span class="n">the</span> <span class="n">path</span> <span class="n">to</span> <span class="n">sspiauth</span><span class="o">.</span><span class="n">dll</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">System</span> <span class="n">PATH</span>
+
+<span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>If you get this error: The application could not find a command to launch a SAS Workspace Server.
+There is a workaround you can use. Oh course, having a clean SAS install should keep this from happening, but this error has been reported a couple times.
+The work around for this is to use the &#8216;javaparms&#8217; option on the configuration definition to specify the command manually as follows (use the right path on your system, of course):</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="s1">&#39;javaparms&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd=C:\PROGRA~1\SASHome\SASFOU~1\9.4\SAS.EXE&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn&#8217;t
@@ -631,7 +663,7 @@ following code (assuming your session object is named sas).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.7',
+            VERSION:'2.1.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

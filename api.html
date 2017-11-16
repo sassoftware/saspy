@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 2.1.7 documentation</title>
+  <title>API Reference &mdash; saspy 2.1.8 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.7 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.8 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.7
+                2.1.8
               </div>
             
           
@@ -466,7 +466,7 @@ See the sasets.py module.
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>libref</strong> &#8211; the libref for be assigned</li>
+<li><strong>libref</strong> &#8211; the libref to be assigned</li>
 <li><strong>engine</strong> &#8211; the engine name used to access the SAS Library (engine defaults to BASE, per SAS)</li>
 <li><strong>path</strong> &#8211; path to the library (for engines that take a path parameter)</li>
 <li><strong>options</strong> &#8211; other engine or engine supervisor options</li>
@@ -988,6 +988,28 @@ stratifying with respect to that variable</p>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Tuples or SAS data object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.scatter">
+<code class="descname">scatter</code><span class="sig-paren">(</span><em>x: str</em>, <em>y: list</em>, <em>title: str = ''</em><span class="sig-paren">)</span> &#x2192; object<a class="headerlink" href="#saspy.SASdata.scatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method plots a scatter of x,y coordinates. You can provide a list of y columns for multiple line plots.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> &#8211; the x axis variable; generally a time or continuous variable.</li>
+<li><strong>y</strong> &#8211; the y axis variable(s), you can specify a single column or a list of columns</li>
+<li><strong>title</strong> &#8211; an optional Title for the chart</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">graph object</p>
 </td>
 </tr>
 </tbody>
@@ -1996,7 +2018,7 @@ This class and all the useful work in this package require a licensed version of
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.7',
+            VERSION:'2.1.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

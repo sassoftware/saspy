@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 2.1.7 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.1.8 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.7 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.1.8 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.7
+                2.1.8
               </div>
             
           
@@ -98,7 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#sascfg-personal-py">sascfg_personal.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sascfg-py-details">sascfg.py details</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sascfg-py-saspy-personal-py-details">sascfg.py (saspy_personal.py) details</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stdio">STDIO</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#iom">IOM</a><ul>
@@ -296,8 +296,8 @@ at the PYTHONPATH environment variable (if it&#8217;s set), but more definitivel
 </pre></div>
 </div>
 </div>
-<div class="section" id="sascfg-py-details">
-<h3>sascfg.py details<a class="headerlink" href="#sascfg-py-details" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="sascfg-py-saspy-personal-py-details">
+<h3>sascfg.py (saspy_personal.py) details<a class="headerlink" href="#sascfg-py-saspy-personal-py-details" title="Permalink to this headline">¶</a></h3>
 <p>There are three main parts to this configuration file.</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -508,6 +508,9 @@ first one in the list of app servers it supports.</dd>
 This is simply a boolean, so to use it you specify &#8216;sspi&#8217; : True. Also, to use this, you must have the path to the
 spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
 See the second paragraph under Local IOM for more on this.</dd>
+<dt>javaparms -</dt>
+<dd>The javaparms option allows you to specify Java command line options. These aren&#8217;t generally needed, but this
+does allows for a way to specify them if something was needed.</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Unix client class path</span>
 <span class="n">cpL</span>  <span class="o">=</span>  <span class="s2">&quot;/whever/I/put/these/jars/sas.svc.connection.jar&quot;</span>
@@ -597,6 +600,9 @@ The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
 default encodings for running SAS in Unicode, on Unix, and on Windows,
 respectively. Those map to Python encoding values: utf8, latin1, and
 windows-1252, respectively.</dd>
+<dt>javaparms -</dt>
+<dd>The javaparms option allows you to specify Java command line options. These aren&#8217;t generally needed, but this
+does allows for a way to specify them if something was needed.</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Windows client class path</span>
 <span class="n">cpW</span>  <span class="o">=</span>  <span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.svc.connection.jar&quot;</span>
@@ -696,7 +702,7 @@ install other non-standard python modules.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.7',
+            VERSION:'2.1.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
