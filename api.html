@@ -412,7 +412,7 @@ Most of these parameters will be configured in the sascfg.py configuration file.
 
 <dl class="method">
 <dt id="saspy.SASsession.sasdata2dataframe">
-<code class="descname">sasdata2dataframe</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sasdata2dataframe" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sasdata2dataframe</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>method: str = 'MEMORY'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sasdata2dataframe" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
 SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -439,6 +439,7 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 </pre></div>
 </div>
 </li>
+<li><strong>method</strong> &#8211; defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data</li>
 <li><strong>kwargs</strong> &#8211; dictionary</li>
 </ul>
 </td>
@@ -556,8 +557,49 @@ See the sasutil.py module.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.sd2df">
-<code class="descname">sd2df</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sd2df</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>method: str = 'MEMORY'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;sasdata2dataframe&#8217;. Why type all that?
+SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table</strong> &#8211; the name of the SAS Data Set you want to export to a Pandas Data Frame</li>
+<li><strong>libref</strong> &#8211; the libref for the SAS Data Set.</li>
+<li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
+<ul>
+<li>where is a string</li>
+<li>keep are strings or list of strings.</li>
+<li>drop are strings or list of strings.</li>
+<li>obs is a numbers - either string or int</li>
+<li>first obs is a numbers - either string or int</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><strong>method</strong> &#8211; defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data</li>
+<li><strong>kwargs</strong> &#8211; dictionary</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Pandas data frame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.sd2df_CSV">
+<code class="descname">sd2df_CSV</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_CSV" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an alias for &#8216;sasdata2dataframe&#8217; specifying method=&#8217;CSV&#8217;. Why type all that?
 SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1145,8 +1187,29 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 
 <dl class="method">
 <dt id="saspy.SASdata.to_df">
-<code class="descname">to_df</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASdata.to_df" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_df</code><span class="sig-paren">(</span><em>method: str = 'MEMORY'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASdata.to_df" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export this SAS Data Set to a Pandas Data Frame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>method</strong> &#8211; defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data</li>
+<li><strong>kwargs</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Pandas data frame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASdata.to_df_CSV">
+<code class="descname">to_df_CSV</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASdata.to_df_CSV" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export this SAS Data Set to a Pandas Data Frame via CSV file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1154,6 +1217,8 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Pandas data frame</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">&#8216;pd.DataFrame&#8217;</td>
 </tr>
 </tbody>
 </table>
