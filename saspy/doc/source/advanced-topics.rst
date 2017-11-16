@@ -209,3 +209,28 @@ the macro variable name, and providing the python variable continaing the value.
     sas.symput(sas_macro_var, py_var)
 
 
+
+******************************************************************************
+Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )
+******************************************************************************
+
+Transferring data from SAS into Python (and the reverse) has been in this module from the beginning. As usage of this has grown, 
+larger sized data sets have been shown to be much slower to load and consume lots of memory. After investigations, this has to do with
+trying to build out the dataframes 'in memory'. This works fine up to a point, but the memory consumption and CPU usage doesn't scale.
+
+I've made enhancements to the algorithm, so it will work, as opposed to run indefinitely consuming too many resources, but it is still
+too slow.
+
+So, I've added a second method for doing this, using a CSV file as an intermediate store, then using the Pandas read_csv() method to create
+the dataframe. This performs significantly faster, as it doesn't consume memory for storing the data in python objects. The read_csv() method
+is much faster than trying to append data in memory as it's streamed into python from SAS.
+
+There is now a parameter for these methods to specify which method to use: method=['MEMORY' | 'CSV'].
+The default is still MEMORY. But you can specify CSV to use this new method: to_df(method='CSV'), sd2df(method='CSV').
+
+There are also alias routines which specify this for you: to_df_csv() and sd2df_csv().
+
+Another optimization with this is when saspy and SAS are on the same machine. When this is the case, there is no transfer required.
+The CSV file written by SAS is the file specified in read_csv(). For remote connections, the CSV file still needs to be transferred from
+SAS to saspy and written to disk locally for the read_csv() method. This is still significantly faster for larger data.
+

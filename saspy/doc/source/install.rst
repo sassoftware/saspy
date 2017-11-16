@@ -140,8 +140,8 @@ at the PYTHONPATH environment variable (if it's set), but more definitively by s
     sys.path
 
         
-sascfg.py details
-=================
+sascfg.py (saspy_personal.py) details
+=====================================
 There are three main parts to this configuration file.
 
         1) SAS_config_names
@@ -376,6 +376,10 @@ sspi -
     This is simply a boolean, so to use it you specify 'sspi' : True. Also, to use this, you must have the path to the
     spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
     See the second paragraph under Local IOM for more on this.
+javaparms -
+    The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
+    does allows for a way to specify them if something was needed.
+
 
 .. code-block:: ipython3
 
@@ -470,6 +474,10 @@ encoding  -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and 
     windows-1252, respectively. 
+javaparms -
+    The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
+    does allows for a way to specify them if something was needed.
+
 
 .. code-block:: ipython3
 
