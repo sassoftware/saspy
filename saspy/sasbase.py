@@ -643,7 +643,7 @@ class SASsession():
         else:
             return None
 
-    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'pd.DataFrame':
+    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, method: str = 'MEMORY', **kwargs) -> 'pd.DataFrame':
         """
         This is an alias for 'sasdata2dataframe'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -666,10 +666,11 @@ class SASsession():
                               'obs'      :  10
                               'firstobs' : '12'
                              }
+        :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
         :param kwargs: dictionary
         :return: Pandas data frame
         """
-        return self.sasdata2dataframe(table, libref, dsopts, **kwargs)
+        return self.sasdata2dataframe(table, libref, dsopts, method, **kwargs)
 
     def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'pd.DataFrame':
         """
@@ -1855,10 +1856,11 @@ class SASdata:
         """
         return self.to_df(**kwargs)
 
-    def to_df(self, **kwargs) -> 'pd.DataFrame':
+    def to_df(self, method: str = 'MEMORY', **kwargs) -> 'pd.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame
 
+        :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
         :param kwargs:
         :return: Pandas data frame
         """
@@ -1867,7 +1869,7 @@ class SASdata:
             print(ll['LOG'])
             return None
         else:
-            return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, **kwargs)
+            return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
 
     def to_df_CSV(self, **kwargs) -> 'pd.DataFrame':
         """
