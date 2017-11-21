@@ -35,7 +35,7 @@ setup(name='saspy',
       packages = ['saspy'],
       cmdclass = {},
       package_data = {'': ['*.js', '*.md', '*.yaml', '*.css', '*.rst'], 'saspy': ['*.sas', 'java/*.*', 'java/pyiom/*.*']},
-      install_requires = ['pygments', 'ipython>=4.0.0', 'pre-commit'],
+      install_requires = ['pygments', 'ipython>=4.0.0'],
       classifiers = [
         'Programming Language :: Python :: 3',
         "Programming Language :: Python :: 3.4",

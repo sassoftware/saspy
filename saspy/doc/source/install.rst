@@ -140,8 +140,8 @@ at the PYTHONPATH environment variable (if it's set), but more definitively by s
     sys.path
 
         
-sascfg.py details
-=================
+sascfg.py (saspy_personal.py) details
+=====================================
 There are three main parts to this configuration file.
 
         1) SAS_config_names
@@ -225,6 +225,26 @@ host -
 .. note:: The ``'ssh'`` key is the trigger to use the STDIO over SSH connection
           method.
 
+To accomodate alternative SSH configurations, you may also provide one or both of the 
+following optional keys:
+
+port -
+    (Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the ``-p`` option)
+
+tunnel -
+    (Optional: integer) Certain methods of saspy require opening a local port and accepting data 
+    streamed from the SAS instance. If the remote SAS server would not be able to reach ports on your client machine 
+    due to a firewall or other security configuration, you may pass a local port number to be reverse tunneled 
+    (using the ``-R`` ssh option) so that the remote SAS server can connect using this port.
+
+.. code-block:: ipython3
+
+    ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+                'ssh'     : '/usr/bin/ssh',
+                'host'    : 'remote.linux.host',
+                'port'    : 9922,
+                'tunnel'  : 9911
+               }
 
 
 IOM
@@ -351,6 +371,15 @@ appserver -
     If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
     that you want to connect to, i.e.: 'SASApp - Workspace Server'. Without this the Object spawner will only try the
     first one in the list of app servers it supports.
+sspi -
+    New in 2.17, there is support for IWA (Integrated Windows Authentication) from a Windows client to remote IOM server.
+    This is simply a boolean, so to use it you specify 'sspi' : True. Also, to use this, you must have the path to the
+    spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
+    See the second paragraph under Local IOM for more on this.
+javaparms -
+    The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
+    does allows for a way to specify them if something was needed.
+
 
 .. code-block:: ipython3
 
@@ -404,6 +433,14 @@ appserver -
                    'classpath' : cpW
                   }
 
+    # Windows client and with IWA to Remote IOM server
+    winiomIWA   = {'java'      : 'java',
+                   'iomhost'   : 'some.iom.host',
+                   'iomport'   : 8591,
+                   'classpath' : cpW,
+                   'sspi'      : True
+                  }
+
 
 Local
 ~~~~~
@@ -437,6 +474,10 @@ encoding  -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and 
     windows-1252, respectively. 
+javaparms -
+    The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
+    does allows for a way to specify them if something was needed.
+
 
 .. code-block:: ipython3
 

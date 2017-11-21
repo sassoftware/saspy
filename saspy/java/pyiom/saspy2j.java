@@ -10,6 +10,7 @@ import org.omg.CORBA.StringHolder;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
 import com.sas.iom.SAS.ILanguageService;
@@ -33,6 +34,7 @@ import com.sas.services.connection.ConnectionFactoryException;
 import com.sas.services.connection.ConnectionFactoryInterface;
 import com.sas.services.connection.ConnectionFactoryManager;
 import com.sas.services.connection.ConnectionInterface;
+import com.sas.services.connection.Credential;
 import com.sas.services.connection.ManualConnectionFactoryConfiguration;
 import com.sas.services.connection.Server;
 
@@ -70,11 +72,12 @@ public class saspy2j {
                 int idx = 0;
                 boolean fndeol;
                 boolean zero = false;
+                boolean spn = false;
                 boolean failed = false;
 
                 String[] iomhosts;
                 int hosts = 0;
-                
+
                 BufferedReader inp;
                 BufferedWriter outp;
                 BufferedWriter errp;
@@ -113,19 +116,23 @@ public class saspy2j {
                                 appName = args[x + 1];
                         else if (args[x].equalsIgnoreCase("-zero"))
                                 zero = true;
+                        else if (args[x].equalsIgnoreCase("-spn"))
+                                spn = true;
                 }
 
                 try {
-                        sin = new Socket(addr, inport);
+                        sin  = new Socket(addr, inport);
                         sout = new Socket(addr, outport);
                         serr = new Socket(addr, errport);
                 } catch (IOException e) {
                         e.printStackTrace();
                 }
 
-                inp = new BufferedReader(new InputStreamReader(sin.getInputStream()));
-                outp = new BufferedWriter(new OutputStreamWriter(sout.getOutputStream()));
-                errp = new BufferedWriter(new OutputStreamWriter(serr.getOutputStream()));
+                OutputStream odsout = sout.getOutputStream();
+
+                inp  = new BufferedReader(new InputStreamReader(sin.getInputStream(), "UTF-8"));
+                outp = new BufferedWriter(new OutputStreamWriter(sout.getOutputStream(), "UTF-8"));
+                errp = new BufferedWriter(new OutputStreamWriter(serr.getOutputStream(), "UTF-8"));
 
                 if (zero) {
                         try {
@@ -144,35 +151,48 @@ public class saspy2j {
                         }
 
                 } else {
-                        omrpw = inp.readLine();
+                        if (! spn)
+                           omrpw = inp.readLine();
                         iomhosts = iomhost.split(";");
                         hosts = iomhosts.length;
                         for (int i=0; i < hosts; i++)
                         {
-	                       try {
-	                                server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
-	                                if (appName != "")
-	                                   server.setServerName(appName.replace("\'", ""));
-	                                //server.setOption(SASURI.applicationNameKey, appName);
-	                                ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
-	                                ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
-	                                ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
-	                                // ConnectionFactoryAdminInterface admin =
-	                                // cxf.getAdminInterface();
-	                                if (timeout > 0)
-	                                   cx = cxf.getConnection(omruser, omrpw, timeout);
-	                                else
-	                                   cx = cxf.getConnection(omruser, omrpw);
-	                                break;
-	                        } catch (ConnectionFactoryException e) {
-	                                String msg = e.getMessage();
-	                                System.out.print(msg+"\n");
-	                                errp.write(msg+"\n");
-	                                errp.flush();
-	                                if (i+1 < hosts)
-	                                	continue;
-	                                failed = true;
-	                        }
+                               try {
+                                        server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
+                                        if (appName != "")
+                                           server.setServerName(appName.replace("\'", ""));
+                                        //server.setOption(SASURI.applicationNameKey, appName);
+                                        server.setOption(SASURI.applicationNameKey, "SASPy");
+
+                                        if (spn)
+                                           {
+                                            server.setSecurityPackage(Server.SECURITY_PACKAGE_NEGOTIATE);
+                                            //server.setSPN("");
+                                           }
+                                        ConnectionFactoryConfiguration cxfConfig = new ManualConnectionFactoryConfiguration(server);
+                                        ConnectionFactoryManager cxfManager = new ConnectionFactoryManager();
+                                        ConnectionFactoryInterface cxf = cxfManager.getFactory(cxfConfig);
+                                        // ConnectionFactoryAdminInterface admin =
+                                        // cxf.getAdminInterface();
+                                        if (spn)
+                                           {
+                                            Credential cred = SecurityPackageCredential.getInstance();
+                                            cx = cxf.getConnection(cred);
+                                           }
+                                        else if (timeout > 0)
+                                           cx = cxf.getConnection(omruser, omrpw, timeout);
+                                        else
+                                           cx = cxf.getConnection(omruser, omrpw);
+                                        break;
+                                } catch (ConnectionFactoryException e) {
+                                        String msg = e.getMessage();
+                                        System.out.print(msg+"\n");
+                                        errp.write(msg+"\n");
+                                        errp.flush();
+                                        if (i+1 < hosts)
+                                                continue;
+                                        failed = true;
+                                }
                         }
                 }
 
@@ -198,7 +218,7 @@ public class saspy2j {
                                 StringHolder retname = new StringHolder();
                                 // filesvc.MakeDirectory(physicalName.value[0], "tomods1");
                                 fileref = filesvc.AssignFileref("_tomods1", "", filesvc.FullName("tomods1", physicalName.value[0]), "encoding=\"utf-8\"",
-                                                retname);
+                                        retname);
 
                                 boolean[] arg0 = new boolean[0];
                                 StringSeqHolder arg1 = new StringSeqHolder();
@@ -258,11 +278,10 @@ public class saspy2j {
                                         try {
                                                 while (slen > 0) {
                                                         bstr.Read(9999999, odsdata);
-                                                        String s = new String(odsdata.value);
-                                                        slen = s.length();
+                                                        slen = odsdata.value.length;
                                                         if (slen > 0) {
-                                                                outp.write(s);
-                                                                outp.flush();
+                                                                odsout.write(odsdata.value);
+                                                                odsout.flush();
                                                         }
                                                 }
                                         } catch (IOException e) {
