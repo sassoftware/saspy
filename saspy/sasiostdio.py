@@ -365,7 +365,7 @@ Will use HTML5 for this SASsession.""")
                break
             sleep(0.5)
 
-      x = logf.decode(self.sascfg.encoding).replace(code1, " ")
+      x = logf.decode(self.sascfg.encoding, errors='replace').replace(code1, " ")
       self._log += x
 
       if self.pid == None:
@@ -413,7 +413,10 @@ Will use HTML5 for this SASsession.""")
          self.pid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
-      return lstf.decode(self.sascfg.encoding)
+      if eof:
+         return lstf.decode(errors='replace')
+      else:
+         return lstf.decode(self.sascfg.encoding, errors='replace')
 
    def _getlsttxt(self, wait=5, jobid=None):
       f2 = [None]
@@ -432,7 +435,7 @@ Will use HTML5 for this SASsession.""")
 
             if (eof != -1):
                final = lstf.partition(b"Tom was here")
-               f2 = final[0].decode(self.sascfg.encoding).rpartition(chr(12))
+               f2 = final[0].decode(self.sascfg.encoding, errors='replace').rpartition(chr(12))
                break
 
       lst = f2[0]
@@ -664,7 +667,7 @@ Will use HTML5 for this SASsession.""")
                 return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
                             outrc, LST='',ABORT=True)
 
-            lst = self.stdout.read1(4096).decode(self.sascfg.encoding)
+            lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
             lstf += lst
             if len(lst) > 0:
                 lsts = lst.rpartition('Select:')
@@ -693,7 +696,7 @@ Will use HTML5 for this SASsession.""")
                         #print("******************No 'Select' or 'Press' found in lst=")
                         pass
             else:
-                log = self.stderr.read1(4096).decode(self.sascfg.encoding)
+                log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
                 logf += log
                 self._log += log
 
@@ -764,9 +767,9 @@ Will use HTML5 for this SASsession.""")
                   pass
 
             sleep(.25)
-            lst = self.stdout.read1(4096).decode(self.sascfg.encoding)
+            lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
          else:
-            log = self.stderr.read1(4096).decode(self.sascfg.encoding)
+            log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
             self._log += log
             logn = self._logcnt(False)
 
@@ -779,7 +782,7 @@ Will use HTML5 for this SASsession.""")
                break
 
             sleep(.25)
-            lst = self.stdout.read1(4096).decode(self.sascfg.encoding)
+            lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
 
       return log
 
