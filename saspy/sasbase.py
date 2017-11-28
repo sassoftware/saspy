@@ -291,14 +291,14 @@ class SASsession():
     def _getlsttxt(self, **kwargs):
         return self._io._getlsttxt(**kwargs)
 
-    def _asubmit(self, code, result):
+    def _asubmit(self, code, results):
         if results == '':
             if self.results.upper() == 'PANDAS':
                 results = 'HTML'
             else:
                 results = self.results
 
-        return self._io._asubmit(code, result)
+        return self._io._asubmit(code, results)
 
     def submit(self, code: str, results: str = '', prompt: dict = []) -> dict:
         '''
