@@ -574,11 +574,14 @@ Will use HTML5 for this SASsession.""")
                      eof -= 1
                  if eof < 0:
                      break
-                 lst = self.stdout.read1(4096).decode(self.sascfg.encoding)
+                 if ods:
+                    lst = self.stdout.read1(4096).decode(errors='replace')
+                 else:
+                    lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
                  if len(lst) > 0:
                      lstf += lst
                  else:
-                     log = self.stderr.read1(4096).decode(self.sascfg.encoding)
+                     log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
                      if len(log) > 0:
                          logf += log
                          if logf.count(logcodeo) >= 1:
@@ -1048,7 +1051,7 @@ Will use HTML5 for this SASsession.""")
             data = newsock[0].recv(4096)
    
             if len(data):
-               datar += data.decode(self.sascfg.encoding)
+               datar += data.decode(self.sascfg.encoding, errors='replace')
             else:
                break
    
