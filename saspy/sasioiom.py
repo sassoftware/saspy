@@ -1198,7 +1198,8 @@ Will use HTML5 for this SASsession.""")
       datar = ""
       bail  = False
       r     = []
-      df    = pd.DataFrame(columns=varlist)
+      #df    = pd.DataFrame(columns=varlist)
+      df    = None
       trows = kwargs.get('trows', None)
       if not trows:
          trows = 100000
@@ -1250,13 +1251,16 @@ Will use HTML5 for this SASsession.""")
                        for i in range(nvars):
                           if vartype[i] == 'N':
                              if varcat[i] not in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
-                                if tdf.dtypes[df.columns[i]].kind not in ('f','u','i','b','B','c','?'):
+                                if tdf.dtypes[tdf.columns[i]].kind not in ('f','u','i','b','B','c','?'):
                                    tdf[varlist[i]] = pd.to_numeric(tdf[varlist[i]], errors='coerce')
                              else:
-                                if tdf.dtypes[df.columns[i]].kind not in ('M'):
+                                if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
                                    tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
                        
+                    if df:
                        df = df.append(tdf, ignore_index=True)
+                    else:
+                       df = tdf
                        r = []
                  else:
                     sleep(0.1)
@@ -1277,13 +1281,16 @@ Will use HTML5 for this SASsession.""")
          for i in range(nvars):
             if vartype[i] == 'N':
                if varcat[i] not in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
-                  if tdf.dtypes[df.columns[i]].kind not in ('f','u','i','b','B','c','?'):
+                  if tdf.dtypes[tdf.columns[i]].kind not in ('f','u','i','b','B','c','?'):
                      tdf[varlist[i]] = pd.to_numeric(tdf[varlist[i]], errors='coerce')
                else:
-                  if tdf.dtypes[df.columns[i]].kind not in ('M'):
+                  if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
                      tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
          
-         df = df.append(tdf, ignore_index=True)
+         if df:
+            df = df.append(tdf, ignore_index=True)
+         else:
+            df = tdf
 
       return df
 
