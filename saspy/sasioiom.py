@@ -1257,10 +1257,10 @@ Will use HTML5 for this SASsession.""")
                                 if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
                                    tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
                        
-                    if df is not None:
-                       df = df.append(tdf, ignore_index=True)
-                    else:
-                       df = tdf
+                       if df is not None:
+                          df = df.append(tdf, ignore_index=True)
+                       else:
+                          df = tdf
                        r = []
                  else:
                     sleep(0.1)
