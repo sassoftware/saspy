@@ -570,6 +570,7 @@ Will use HTML5 for this SASsession.""")
              while True:
                  rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
                  if rc is not None:
+                     log = ''
                      try:
                         log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
                         if len(log) > 0:
@@ -579,7 +580,7 @@ Will use HTML5 for this SASsession.""")
                         pass
                      self.pid = None
                      return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
-                                 str(rc), LST='')
+                                 str(rc)+'\n'+logf, LST='')
                  if bail:
                      eof -= 1
                  if eof < 0:
@@ -603,6 +604,7 @@ Will use HTML5 for this SASsession.""")
              done = True
 
          except (ConnectionResetError):
+             log = ''
              try:
                 log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
                 if len(log) > 0:
@@ -613,7 +615,8 @@ Will use HTML5 for this SASsession.""")
              rc = 0
              rc = os.waitpid(self.pid, 0)
              self.pid = None
-             return dict(LOG=logf.partition(logcodeo)[0]+'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+             return dict(LOG=logf.partition(logcodeo)[0]+'\nConnection Reset: SAS process has terminated unexpectedly. '+
+                         'Pid State= '+str(rc)+'\n'+logf, LST='')
 
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
