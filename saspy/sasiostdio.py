@@ -1241,8 +1241,8 @@ Will use HTML5 for this SASsession.""")
       code += ";\n run;\n"
       ll = self.submit(code, "text")
 
-      dts = kwargs.pop('dtype', None)
-      if not dts:
+      dts = kwargs.pop('dtype', '')
+      if dts == '':
          dts = {}
          for i in range(nvars):
             if vartype[i] == 'N':

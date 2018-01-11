@@ -1400,8 +1400,8 @@ Will use HTML5 for this SASsession.""")
       bail  = False
       datar = ""
 
-      dts = kwargs.pop('dtype', None)
-      if not dts:
+      dts = kwargs.pop('dtype', '')
+      if dts == '':
          dts = {}
          for i in range(nvars):
             if vartype[i] == 'N':
