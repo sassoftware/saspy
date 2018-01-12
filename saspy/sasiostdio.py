@@ -570,9 +570,17 @@ Will use HTML5 for this SASsession.""")
              while True:
                  rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
                  if rc is not None:
+                     log = ''
+                     try:
+                        log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
+                        if len(log) > 0:
+                            logf += log
+                        self._log += logf
+                     except:
+                        pass
                      self.pid = None
                      return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
-                                 str(rc), LST='')
+                                 str(rc)+'\n'+logf, LST='')
                  if bail:
                      eof -= 1
                  if eof < 0:
@@ -596,10 +604,19 @@ Will use HTML5 for this SASsession.""")
              done = True
 
          except (ConnectionResetError):
+             log = ''
+             try:
+                log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
+                if len(log) > 0:
+                    logf += log
+                self._log += logf
+             except:
+                pass
              rc = 0
              rc = os.waitpid(self.pid, 0)
              self.pid = None
-             return dict(LOG=logf.partition(logcodeo)[0]+'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+             return dict(LOG=logf.partition(logcodeo)[0]+'\nConnection Reset: SAS process has terminated unexpectedly. '+
+                         'Pid State= '+str(rc)+'\n'+logf, LST='')
 
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
@@ -932,7 +949,7 @@ Will use HTML5 for this SASsession.""")
       colsep  - the column seperator character to use; defaults to '\t'
       port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       '''
-      method = kwargs.get('method', None)
+      method = kwargs.pop('method', None)
       if method and method.lower() == 'csv':
          return self.sasdata2dataframeCSV(table, libref, dsopts, **kwargs)
 
@@ -1224,6 +1241,18 @@ Will use HTML5 for this SASsession.""")
       code += ";\n run;\n"
       ll = self.submit(code, "text")
 
+      dts = kwargs.pop('dtype', '')
+      if dts == '':
+         dts = {}
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               if varcat[i] not in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
+                  dts[varlist[i]] = 'float'
+               else:
+                  dts[varlist[i]] = 'str'
+            else:
+               dts[varlist[i]] = 'str'
+
       code += "options nosource;\n"
       code += "proc export data=sasdata2dataframe outfile=sock dbms=csv replace; run\n;"
       code += "options source;\n"
@@ -1257,22 +1286,17 @@ Will use HTML5 for this SASsession.""")
          sock.close()
 
          csv.seek(0)
-         df = pd.read_csv(csv, index_col=False, engine='c')
+         df = pd.read_csv(csv, index_col=False, engine='c', dtype=dts, **kwargs)
          csv.close()
       else:
          ll = self.submit(code, "text")
-         df = pd.read_csv(tempdir.name+os.sep+"tomods2", index_col=False, engine='c')
+         df = pd.read_csv(tempdir.name+os.sep+"tomods2", index_col=False, engine='c', dtype=dts, **kwargs)
          tempdir.cleanup()
 
       for i in range(nvars):
-         if vartype[i] == 'N':
-            if varcat[i] not in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
-               if df.dtypes[df.columns[i]].kind not in ('f','u','i','b','B','c','?'):
-                  df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce')
-            else:
-             if df.dtypes[df.columns[i]].kind not in ('M'):
-                df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
-         
+         if varcat[i] in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
+            df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
+
       return df
 
 if __name__ == "__main__":

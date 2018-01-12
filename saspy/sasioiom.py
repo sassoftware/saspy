@@ -1106,7 +1106,7 @@ Will use HTML5 for this SASsession.""")
       colsep  - the column seperator character to use; defaults to '\t'
       '''
 
-      method = kwargs.get('method', None)
+      method = kwargs.pop('method', None)
       if method and method.lower() == 'csv':
          return self.sasdata2dataframeCSV(table, libref, dsopts, **kwargs)
 
@@ -1400,6 +1400,18 @@ Will use HTML5 for this SASsession.""")
       bail  = False
       datar = ""
 
+      dts = kwargs.pop('dtype', '')
+      if dts == '':
+         dts = {}
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               if varcat[i] not in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
+                  dts[varlist[i]] = 'float'
+               else:
+                  dts[varlist[i]] = 'str'
+            else:
+               dts[varlist[i]] = 'str'
+
       if not tempdir:
          csv = tempfile.TemporaryFile()
 
@@ -1458,7 +1470,7 @@ Will use HTML5 for this SASsession.""")
                 done = True
 
          csv.seek(0)
-         df = pd.read_csv(csv, index_col=False, engine='c')
+         df = pd.read_csv(csv, index_col=False, engine='c', dtype=dts, **kwargs)
          csv.close()
       else:
          while True:
@@ -1487,18 +1499,14 @@ Will use HTML5 for this SASsession.""")
             if done and bail:
                break
 
-         df = pd.read_csv(tempdir.name+os.sep+"tomods2", index_col=False, engine='c')
+         df = pd.read_csv(tempdir.name+os.sep+"tomods2", index_col=False, engine='c', dtype=dts, **kwargs)
          tempdir.cleanup()
          
+
       for i in range(nvars):
-         if vartype[i] == 'N':
-            if varcat[i] not in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
-               if df.dtypes[df.columns[i]].kind not in ('f','u','i','b','B','c','?'):
-                  df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce')
-            else:
-               if df.dtypes[df.columns[i]].kind not in ('M'):
-                  df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
-       
+         if varcat[i] in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
+            df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
+
       return df
 
 if __name__ == "__main__":
