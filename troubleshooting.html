@@ -449,6 +449,23 @@ The second case has a valid classpath, but is missing one of the IOM jars.</p>
         <span class="o">...</span> <span class="mi">19</span> <span class="n">more</span>
 </pre></div>
 </div>
+<p>A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
+This can be resolved by adding it back in, using the &#8216;javaparms&#8217; key of your configuration definition as shown below.</p>
+<p>If you see an error like this:</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">Using</span> <span class="n">SAS</span> <span class="n">Config</span> <span class="n">named</span><span class="p">:</span> <span class="n">winiomwin</span>
+<span class="n">Java</span> <span class="n">Error</span><span class="p">:</span>
+<span class="n">Error</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">initialize</span> <span class="n">main</span> <span class="k">class</span> <span class="nc">pyiom</span><span class="o">.</span><span class="n">saspy2j</span>
+<span class="n">Caused</span> <span class="n">by</span><span class="p">:</span> <span class="n">java</span><span class="o">.</span><span class="n">lang</span><span class="o">.</span><span class="n">NoClassDefFoundError</span><span class="p">:</span> <span class="n">org</span><span class="o">/</span><span class="n">omg</span><span class="o">/</span><span class="n">CORBA</span><span class="o">/</span><span class="n">UserException</span>
+</pre></div>
+</div>
+<p>Then you can add CORBA back into the search path via the &#8216;javaparms&#8217; key (there may be other ways you can do this, but this has been reported to work):</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">winiomwin</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;java&quot;</span>     <span class="p">:</span> <span class="s2">&quot;java&quot;</span><span class="p">,</span>
+             <span class="s2">&quot;encoding&quot;</span> <span class="p">:</span> <span class="s2">&quot;windows-1252&quot;</span><span class="p">,</span>
+             <span class="s2">&quot;classpath&quot;</span><span class="p">:</span> <span class="n">cpW</span><span class="p">,</span>
+             <span class="s2">&quot;javaparms&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;--add-modules=java.corba&quot;</span><span class="p">],</span>
+            <span class="p">}</span>
+</pre></div>
+</div>
 <p>If you run the Java command and you see an error similar to the following, about a socket connection failure, that suggests that your CLASSPATH is correct
 and that the problem might be connecting to the IOM server. That error shows that java came up and is running code from saspyiom.jar. It is trying to connect
 back to the python process, which isn&#8217;t running, thus the connection error. But it means, at least, saspyiom.jar was found.</p>
