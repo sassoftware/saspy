@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 2.1.8 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.2.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.8 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.2.1 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.8
+                2.2.1
               </div>
             
           
@@ -399,7 +399,7 @@ due to a firewall or other security configuration, you may pass a local port num
 </div>
 <div class="section" id="iom">
 <h3>IOM<a class="headerlink" href="#iom" title="Permalink to this headline">¶</a></h3>
-<p>The connection method opens many connectivity options. This method enables you to use
+<p>This connection method opens many connectivity options. This method enables you to use
 <a class="reference external" href="https://www.sas.com/en_us/software/foundation/grid-manager.html">SAS Grid Manager</a>
 to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
 Manager to control the distribution of connections to the various grid nodes
@@ -466,8 +466,13 @@ can read and write it.</p>
 </div>
 <div class="section" id="remote">
 <h4>Remote<a class="headerlink" href="#remote" title="Permalink to this headline">¶</a></h4>
-<p>A remote connection is defined as a connection to any workspace server on any SAS platform
-from either a Unix or Windows client.</p>
+<p>A remote connection is defined as a connection to any Workspace Server on any SAS platform
+from either a Unix or Windows client. This module does not connect to a SAS Metadata Server (OMR),
+but rather connects directly to an Object Spawner to get access to a Woekspace Server. If you already
+access these with other SAS clients, like Enterprise Guide (EG), you may already be familiar with
+connecting to OMR, but not directly to the others by host/port. There is information in the
+<a class="reference internal" href="advanced-topics.html"><span class="doc">Advanced topics</span></a> section about using Proc iomoperate to find Object Spawners and Workspace
+Server to get values for the three keys defined below (iomhost, iomport, appserver).</p>
 <p>The following keys are available for the configuration definition dictionary:</p>
 <dl class="docutils">
 <dt>java    -</dt>
@@ -702,7 +707,7 @@ install other non-standard python modules.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.8',
+            VERSION:'2.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

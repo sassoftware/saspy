@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced topics &mdash; saspy 2.1.8 documentation</title>
+  <title>Advanced topics &mdash; saspy 2.2.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.1.8 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.2.1 documentation" href="index.html"/>
         <link rel="next" title="Contributing new methods" href="adding-procedures.html"/>
         <link rel="prev" title="API Reference" href="api.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.1.8
+                2.2.1
               </div>
             
           
@@ -102,6 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#prompting">Prompting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#moving-values-between-python-variables-and-sas-macro-variables">Moving values between Python Variables and SAS Macro Variables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
@@ -355,6 +356,80 @@ The default is still MEMORY. But you can specify CSV to use this new method: to_
 The CSV file written by SAS is the file specified in read_csv(). For remote connections, the CSV file still needs to be transferred from
 SAS to saspy and written to disk locally for the read_csv() method. This is still significantly faster for larger data.</p>
 </div>
+<div class="section" id="using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">
+<h2>Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports<a class="headerlink" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports" title="Permalink to this headline">¶</a></h2>
+<p>If you already use a client to connect to IOM servers, you may have the host and port to OMR
+(the SAS Metadata Server), but not necessarily those of the Object Spawners or Workspace Servers.
+For Remote IOM connections there are three configuration keys that require some of this other information.
+If you can connect to your OMR Server, then you can use the following code to find out the information you need.</p>
+<p>The three configuration keys are:</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">iomhost</span> <span class="o">-</span>
+    <span class="p">(</span><span class="n">Required</span><span class="p">)</span> <span class="n">The</span> <span class="n">resolvable</span> <span class="n">host</span> <span class="n">name</span><span class="p">,</span> <span class="ow">or</span> <span class="n">IP</span> <span class="n">address</span> <span class="n">to</span> <span class="n">the</span> <span class="n">IOM</span> <span class="nb">object</span> <span class="n">spawner</span><span class="o">.</span>
+    <span class="n">New</span> <span class="ow">in</span> <span class="mf">2.1</span><span class="o">.</span><span class="mi">6</span><span class="p">;</span> <span class="n">this</span> <span class="n">can</span> <span class="n">be</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="nb">all</span> <span class="n">the</span> <span class="nb">object</span> <span class="n">spawners</span> <span class="n">hosts</span> <span class="k">if</span> <span class="n">you</span> <span class="n">have</span> <span class="n">load</span> <span class="n">balanced</span> <span class="nb">object</span> <span class="n">spawners</span><span class="o">.</span>
+    <span class="n">This</span> <span class="n">provides</span> <span class="n">Grid</span> <span class="n">HA</span> <span class="p">(</span><span class="n">High</span> <span class="n">Availability</span><span class="p">)</span>
+<span class="n">iomport</span> <span class="o">-</span>
+    <span class="p">(</span><span class="n">Required</span><span class="p">)</span> <span class="n">The</span> <span class="n">port</span> <span class="n">that</span> <span class="nb">object</span> <span class="n">spawner</span> <span class="ow">is</span> <span class="n">listening</span> <span class="n">on</span> <span class="k">for</span> <span class="n">workspace</span> <span class="n">server</span> <span class="n">connections</span> <span class="p">(</span><span class="n">workspace</span> <span class="n">server</span> <span class="n">port</span> <span class="o">-</span> <span class="ow">not</span> <span class="nb">object</span> <span class="n">spawner</span> <span class="n">port</span><span class="o">!)</span>.
+<span class="n">appserver</span> <span class="o">-</span>
+    <span class="n">If</span> <span class="n">you</span> <span class="n">have</span> <span class="n">more</span> <span class="n">than</span> <span class="n">one</span> <span class="n">AppServer</span> <span class="n">defined</span> <span class="n">on</span> <span class="n">OMR</span><span class="p">,</span> <span class="n">then</span> <span class="n">you</span> <span class="n">must</span> <span class="k">pass</span> <span class="n">the</span> <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">physical</span> <span class="n">workspace</span> <span class="n">server</span>
+    <span class="n">that</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">e</span><span class="o">.</span><span class="p">:</span> <span class="s1">&#39;SASApp - Workspace Server&#39;</span><span class="o">.</span> <span class="n">Without</span> <span class="n">this</span> <span class="n">the</span> <span class="n">Object</span> <span class="n">spawner</span> <span class="n">will</span> <span class="n">only</span> <span class="k">try</span> <span class="n">the</span>
+    <span class="n">first</span> <span class="n">one</span> <span class="ow">in</span> <span class="n">the</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">app</span> <span class="n">servers</span> <span class="n">it</span> <span class="n">supports</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>First, query to find any available Object Spawners. You would use the &#8216;Machine name :&#8217; value(s) from
+this for the &#8216;iomhost&#8217; configuration key. Note that often there will only be one Object Spawner, but
+there can be more then one configured.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">proc</span> <span class="n">iomoperate</span>
+  <span class="n">uri</span><span class="o">=</span><span class="s2">&quot;iom://omrhost.abc.xyz.com:8561;Bridge;USER=omruserid,PASS=omrpasswd&quot;</span><span class="p">;</span>
+  <span class="nb">list</span> <span class="n">DEFINED</span> <span class="n">FILTER</span><span class="o">=</span><span class="s2">&quot;Object&quot;</span><span class="p">;</span>
+<span class="n">quit</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The reuslts from this should include output like the following for any defined Object Spawners.
+Use the &#8216;Machine name :&#8217; value for your &#8216;iomhost&#8217; key.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">Object</span> <span class="n">Spawner</span> <span class="o">-</span> <span class="n">objhost</span> <span class="p">(</span><span class="n">A5H4N590</span><span class="o">.</span><span class="n">AY000003</span><span class="p">)</span>
+    <span class="n">Server</span> <span class="k">class</span> <span class="err">: </span><span class="nc">IOM</span> <span class="n">Spawner</span>
+    <span class="n">Spawnable</span> <span class="n">server</span> <span class="n">component</span> <span class="p">:</span> <span class="n">Operating</span> <span class="n">System</span> <span class="n">Services</span> <span class="o">-</span> <span class="n">objhost</span>
+    <span class="n">Spawnable</span> <span class="n">server</span> <span class="n">component</span> <span class="p">:</span> <span class="n">SASApp</span> <span class="o">-</span> <span class="n">Pooled</span> <span class="n">Workspace</span> <span class="n">Server</span>
+    <span class="n">Spawnable</span> <span class="n">server</span> <span class="n">component</span> <span class="p">:</span> <span class="n">SASApp</span> <span class="o">-</span> <span class="n">Stored</span> <span class="n">Process</span> <span class="n">Server</span>
+    <span class="n">Spawnable</span> <span class="n">server</span> <span class="n">component</span> <span class="p">:</span> <span class="n">SASApp</span> <span class="o">-</span> <span class="n">Workspace</span> <span class="n">Server</span>
+    <span class="n">Operator</span> <span class="n">port</span> <span class="p">:</span> <span class="mi">8581</span>
+    <span class="n">PortBank</span> <span class="n">port</span> <span class="p">:</span> <span class="mi">8801</span>
+    <span class="n">PortBank</span> <span class="n">port</span> <span class="p">:</span> <span class="mi">8811</span>
+    <span class="n">PortBank</span> <span class="n">port</span> <span class="p">:</span> <span class="mi">8821</span>
+    <span class="n">Machine</span> <span class="n">name</span> <span class="p">:</span> <span class="n">objhost</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">xyz</span><span class="o">.</span><span class="n">com</span>
+</pre></div>
+</div>
+<p>Next, query to find any available Workspace Servers. You would use the &#8216;Bridge port :&#8217; value from
+this for the &#8216;iomport&#8217; configuration key. When you have multiple Workspace Servers configured, which
+really means you have multipe SASApp&#8217;s defined (see &#8216;Server context :&#8217; value in the output below),
+you will want to set the &#8216;appserver&#8217; configuration key to the SASApp Workspace Server that you want
+to (or have permission to) connect to. The value to use is the name shown in the output for the server;
+&#8216;SASApp - Workspace Server&#8217; in the output below.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">proc</span> <span class="n">iomoperate</span>
+  <span class="n">uri</span><span class="o">=</span><span class="s2">&quot;iom://omrhost.abc.xyz.com:8561;Bridge;USER=omruserid,PASS=omrpasswd&quot;</span><span class="p">;</span>
+  <span class="nb">list</span> <span class="n">DEFINED</span> <span class="n">FILTER</span><span class="o">=</span><span class="s2">&quot;- Workspace&quot;</span><span class="p">;</span>
+<span class="n">quit</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The reuslts from this should include output like the following for any defined Workspace Servers.
+Use the &#8216;Bridge port :&#8217; value for your &#8216;iomport&#8217; key.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">SASApp</span> <span class="o">-</span> <span class="n">Workspace</span> <span class="n">Server</span> <span class="p">(</span><span class="n">A5H4N590</span><span class="o">.</span><span class="n">AY000009</span><span class="p">)</span>
+    <span class="n">Server</span> <span class="k">class</span> <span class="err">: 440196</span><span class="nc">D4</span><span class="o">-</span><span class="mi">90</span><span class="n">F0</span><span class="o">-</span><span class="mi">11</span><span class="n">D0</span><span class="o">-</span><span class="mi">9</span><span class="n">F41</span><span class="o">-</span><span class="mo">00</span><span class="n">A024BB830C</span>
+    <span class="n">Logical</span> <span class="n">name</span> <span class="p">:</span> <span class="n">SASApp</span> <span class="o">-</span> <span class="n">Logical</span> <span class="n">Workspace</span> <span class="n">Server</span>
+    <span class="n">Server</span> <span class="n">context</span> <span class="p">:</span> <span class="n">SASApp</span>
+    <span class="n">Bridge</span> <span class="n">port</span> <span class="p">:</span> <span class="mi">8591</span>
+    <span class="n">Machine</span> <span class="n">name</span> <span class="p">:</span> <span class="n">wrkhost</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">xyz</span><span class="o">.</span><span class="n">com</span>
+</pre></div>
+</div>
+<p>If your site has a complex setup, you may have multiple Object Spawners and/or Workspace Servers.
+If so, it&#8217;s possible that the Workspace Server you want to use is only spawnable for a particular
+Object Spawner. You can correlate those by looking for the name of your Workspace Server in the
+&#8216;Spawnable server component :&#8217; of the Object Spawner output.</p>
+<p>Also, if you have multiple Workspace Server that you want to be able to connect to, you can define
+a separate configuration definition (in your sascfg[_personal].py) for each one. A good naming
+convention for these is to use the &#8216;Server context :&#8217; value as the config name. That way it&#8217;s easy
+to know which server you will be connecting to.</p>
+</div>
 </div>
 
 
@@ -401,7 +476,7 @@ SAS to saspy and written to disk locally for the read_csv() method. This is stil
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.1.8',
+            VERSION:'2.2.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
