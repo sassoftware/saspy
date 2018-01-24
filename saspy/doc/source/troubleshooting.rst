@@ -326,6 +326,28 @@ And if we run that command ourselves... Same error as was reported.
             at java.lang.ClassLoader.loadClass(Unknown Source)
             ... 19 more
         
+
+A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
+This can be resolved by adding it back in, using the 'javaparms' key of your configuration definition as shown below.
+
+If you see an error like this:
+
+.. code-block:: ipython3
+
+    Using SAS Config named: winiomwin
+    Java Error:
+    Error: Unable to initialize main class pyiom.saspy2j
+    Caused by: java.lang.NoClassDefFoundError: org/omg/CORBA/UserException
+   
+Then you can add CORBA back into the search path via the 'javaparms' key (there may be other ways you can do this, but this has been reported to work):
+
+.. code-block:: ipython3
+
+    winiomwin = {"java"     : "java",
+                 "encoding" : "windows-1252",
+                 "classpath": cpW,
+                 "javaparms": ["--add-modules=java.corba"],
+                }
     
 
 If you run the Java command and you see an error similar to the following, about a socket connection failure, that suggests that your CLASSPATH is correct

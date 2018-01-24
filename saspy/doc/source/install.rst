@@ -304,6 +304,13 @@ SAS is installed on, to your client (where python is running), even if one is Un
     or else you will get an error like this: SyntaxError: (unicode error) 'unicodeescape' codec can't decode 
     bytes in position 3-4: truncated \UXXXXXXXX escape 
 
+It has been reported to me that Java9 no longer includes CORBA in it's default search path. CORBA is a requirement for
+the IOM Client. This can easily be added back in using the 'javaparms' configuration key (defined below), as follows.
+
+::
+
+    "javaparms": ["--add-modules=java.corba"],
+  
 
 
 The IOM access method now has support for getting the required user/password from an authinfo file in the user's home directory
