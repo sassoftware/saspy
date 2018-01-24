@@ -249,7 +249,7 @@ tunnel -
 
 IOM
 ===
-The connection method opens many connectivity options. This method enables you to use
+This connection method opens many connectivity options. This method enables you to use
 `SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__
 to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
 Manager to control the distribution of connections to the various grid nodes
@@ -332,8 +332,13 @@ The authinfo file in the home directory for user Bob, with a password of BobsPW1
 
 Remote
 ~~~~~~
-A remote connection is defined as a connection to any workspace server on any SAS platform 
-from either a Unix or Windows client. 
+A remote connection is defined as a connection to any Workspace Server on any SAS platform 
+from either a Unix or Windows client. This module does not connect to a SAS Metadata Server (OMR),
+but rather connects directly to an Object Spawner to get access to a Woekspace Server. If you already
+access these with other SAS clients, like Enterprise Guide (EG), you may already be familiar with
+connecting to OMR, but not directly to the others by host/port. There is information in the
+:doc:`advanced-topics` section about using Proc iomoperate to find Object Spawners and Workspace 
+Server to get values for the three keys defined below (iomhost, iomport, appserver).
 
 The following keys are available for the configuration definition dictionary:
 

@@ -234,3 +234,97 @@ Another optimization with this is when saspy and SAS are on the same machine. Wh
 The CSV file written by SAS is the file specified in read_csv(). For remote connections, the CSV file still needs to be transferred from
 SAS to saspy and written to disk locally for the read_csv() method. This is still significantly faster for larger data.
 
+
+*****************************************************************************
+Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports
+*****************************************************************************
+
+If you already use a client to connect to IOM servers, you may have the host and port to OMR
+(the SAS Metadata Server), but not necessarily those of the Object Spawners or Workspace Servers.
+For Remote IOM connections there are three configuration keys that require some of this other information.
+If you can connect to your OMR Server, then you can use the following code to find out the information you need.
+
+The three configuration keys are:
+
+.. code-block:: ipython3
+
+    iomhost - 
+        (Required) The resolvable host name, or IP address to the IOM object spawner.
+        New in 2.1.6; this can be a list of all the object spawners hosts if you have load balanced object spawners.
+        This provides Grid HA (High Availability)
+    iomport - 
+        (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
+    appserver -
+        If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
+        that you want to connect to, i.e.: 'SASApp - Workspace Server'. Without this the Object spawner will only try the
+        first one in the list of app servers it supports.
+
+
+First, query to find any available Object Spawners. You would use the 'Machine name :' value(s) from
+this for the 'iomhost' configuration key. Note that often there will only be one Object Spawner, but
+there can be more then one configured.
+
+.. code-block:: ipython3
+
+    proc iomoperate
+      uri="iom://omrhost.abc.xyz.com:8561;Bridge;USER=omruserid,PASS=omrpasswd";
+      list DEFINED FILTER="Object";
+    quit;
+
+The reuslts from this should include output like the following for any defined Object Spawners.
+Use the 'Machine name :' value for your 'iomhost' key.
+
+.. code-block:: ipython3
+
+    Object Spawner - objhost (A5H4N590.AY000003)
+        Server class : IOM Spawner
+        Spawnable server component : Operating System Services - objhost
+        Spawnable server component : SASApp - Pooled Workspace Server
+        Spawnable server component : SASApp - Stored Process Server
+        Spawnable server component : SASApp - Workspace Server
+        Operator port : 8581
+        PortBank port : 8801
+        PortBank port : 8811
+        PortBank port : 8821
+        Machine name : objhost.abc.xyz.com
+
+
+Next, query to find any available Workspace Servers. You would use the 'Bridge port :' value from
+this for the 'iomport' configuration key. When you have multiple Workspace Servers configured, which
+really means you have multipe SASApp's defined (see 'Server context :' value in the output below), 
+you will want to set the 'appserver' configuration key to the SASApp Workspace Server that you want
+to (or have permission to) connect to. The value to use is the name shown in the output for the server;
+'SASApp - Workspace Server' in the output below.  
+
+.. code-block:: ipython3
+
+    proc iomoperate
+      uri="iom://omrhost.abc.xyz.com:8561;Bridge;USER=omruserid,PASS=omrpasswd";
+      list DEFINED FILTER="- Workspace";
+    quit;
+
+The reuslts from this should include output like the following for any defined Workspace Servers.
+Use the 'Bridge port :' value for your 'iomport' key.
+
+.. code-block:: ipython3
+
+    SASApp - Workspace Server (A5H4N590.AY000009)
+        Server class : 440196D4-90F0-11D0-9F41-00A024BB830C
+        Logical name : SASApp - Logical Workspace Server
+        Server context : SASApp
+        Bridge port : 8591
+        Machine name : wrkhost.abc.xyz.com
+
+
+If your site has a complex setup, you may have multiple Object Spawners and/or Workspace Servers.
+If so, it's possible that the Workspace Server you want to use is only spawnable for a particular
+Object Spawner. You can correlate those by looking for the name of your Workspace Server in the
+'Spawnable server component :' of the Object Spawner output. 
+
+Also, if you have multiple Workspace Server that you want to be able to connect to, you can define
+a separate configuration definition (in your sascfg[_personal].py) for each one. A good naming 
+convention for these is to use the 'Server context :' value as the config name. That way it's easy
+to know which server you will be connecting to.
+
+
+
