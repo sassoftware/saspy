@@ -1938,7 +1938,7 @@ class SASdata:
         code += ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
-        code += "\tdensity " + var + ';\nrun;\n' + 'title \"\";'
+        code += "\tdensity " + var + ';\nrun;\n' + 'title;'
 
         if self.sas.nosub:
             print(code)
@@ -1971,7 +1971,7 @@ class SASdata:
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
         code += "proc print data=tmpFreqOut(obs=%s); \nrun;" % n
-        code += 'title \"\";'
+        code += 'title;'
 
         if self.sas.nosub:
             print(code)
@@ -2017,8 +2017,7 @@ class SASdata:
         code += ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
-        code += 'title \"\";'
-        code += 'run;'
+        code += 'run;\ntitle;'
 
         if self.sas.nosub:
             print(code)
@@ -2058,7 +2057,7 @@ class SASdata:
         for i in range(num):
             code += "\tseries x=" + x + " y=" + y[i] + ";\n"
 
-        code += 'run;\n' + 'title \"\";'
+        code += 'run;\n' + 'title;'
 
         if self.sas.nosub:
             print(code)
@@ -2098,7 +2097,7 @@ class SASdata:
         for i in range(num):
             code += "\tscatter x=" + x + " y=" + y[i] + ";\n"
 
-        code += 'run;\n' + 'title \"\";'
+        code += 'run;\n' + 'title;'
 
         if self.sas.nosub:
             print(code)
