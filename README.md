@@ -20,7 +20,7 @@ All of the doc, including install and configuration information can be found at
 
 # Installation
 
-Thsi module can be installed via pip. This will pull down the latest PyPI package and install it.
+This module can be installed via pip. This will pull down the latest PyPI package and install it.
 
     pip install saspy
 
