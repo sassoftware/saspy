@@ -341,7 +341,7 @@ Remote
 ~~~~~~
 A remote connection is defined as a connection to any Workspace Server on any SAS platform 
 from either a Unix or Windows client. This module does not connect to a SAS Metadata Server (OMR),
-but rather connects directly to an Object Spawner to get access to a Woekspace Server. If you already
+but rather connects directly to an Object Spawner to get access to a Workspace Server. If you already
 access these with other SAS clients, like Enterprise Guide (EG), you may already be familiar with
 connecting to OMR, but not directly to the others by host/port. There is information in the
 :doc:`advanced-topics` section about using Proc iomoperate to find Object Spawners and Workspace 
