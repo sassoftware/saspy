@@ -120,7 +120,7 @@ following when entering values (the user ID is visible and the password is obscu
 Another example might be that you have code that creates a table, but you want to let 
 the user choose the table name as well as the name of the column and a hidden value 
 to assign to it. By specifing ``False``, the user can see the value, and the SAS log 
-shows the non-hidden marco mariables, followed by another code submission that uses 
+shows the non-hidden macro mariables, followed by another code submission that uses 
 the previously defined non-hidden variables--which are still available.
 
 .. code-block:: ipython3
