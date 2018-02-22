@@ -306,7 +306,7 @@ class SASsession():
 
         - code    - the SAS statements you want to execute
         - results - format of results, HTLML and TEXT is the alternative
-        - prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete 
+        - prompt  - dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete 
                     the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
                     or show what you type and keep the macros (they will still be available later).
 
@@ -891,7 +891,7 @@ class SASsession():
     def symput(self, name, value):
         """
         :param name:  name of the macro varable to set:
-        :param value: python variable to use for the value to assign to the marco variable:
+        :param value: python variable to use for the value to assign to the macro variable:
 
             - name    is a character
             - value   is a variable that can be resolved to a string
