@@ -49,10 +49,10 @@ except ImportError:
 
 try:
    import saspy.sascfg_personal as SAScfg
-except:
+except ImportError:
    try:
       import sascfg_personal as SAScfg
-   except:
+   except ImportError:
       import saspy.sascfg as SAScfg
 
 try:
