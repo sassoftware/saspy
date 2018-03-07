@@ -933,8 +933,9 @@ Will use HTML5 for this SASsession.""")
                else:
                   var = str(row[col].to_datetime64())[:26]
                   #var = str(row[1][col].to_datetime64())
+            card += var
             if col < (ncols-1):
-               card += var+chr(3)
+               card += chr(3)
          self.stdin.write(card.encode(self.sascfg.encoding)+b'\n')
          #self._asubmit(card, "text")
 
