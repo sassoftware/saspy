@@ -85,6 +85,9 @@ class SASconfigIOM:
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
 
+      self.verbose = self.cfgopts.get('verbose', False)
+      self.verbose = kwargs.get('verbose', self.verbose)
+
       injava = kwargs.get('java', '')
       if len(injava) > 0:
          if lock and len(self.java):
@@ -454,7 +457,8 @@ Will use HTML5 for this SASsession.""")
             print("Be sure the path to sspiauth.dll is in your System PATH"+"\n")
          return None
 
-      print("SAS Connection established. Subprocess id is "+str(pid)+"\n")
+      if self.sascfg.verbose:
+         print("SAS Connection established. Subprocess id is "+str(pid)+"\n")
       return self.pid
 
    def _endsas(self):
@@ -467,7 +471,8 @@ Will use HTML5 for this SASsession.""")
                rc = self.pid.wait(5)
                self.pid = None
             except (subprocess.TimeoutExpired):
-               print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+               if self.sascfg.verbose:
+                  print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                self.pid.kill()
          else:
             pid = self.pid
@@ -484,7 +489,8 @@ Will use HTML5 for this SASsession.""")
             if rc[0] != 0:
                pass
             else:
-               print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+               if self.sascfg.verbose:
+                  print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                os.kill(self.pid, signal.SIGKILL)
 
 
@@ -500,7 +506,8 @@ Will use HTML5 for this SASsession.""")
          self.stderr[0].close()
          self.sockerr.close()
 
-         print("SAS Connection terminated. Subprocess id was "+str(pid))
+         if self.sascfg.verbose:
+            print("SAS Connection terminated. Subprocess id was "+str(pid))
          self.pid = None
 
       return

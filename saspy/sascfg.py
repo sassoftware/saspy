@@ -34,13 +34,16 @@
 
 SAS_config_names=['default']
 
-# Configuration options for saspy - python Dict
+# Configuration options for pysas - python Dict
 # valid key are:
 # 
 # 'lock_down' - True | False. True = Prevent runtime overrides of SAS_Config values below
 #
-
-SAS_config_options = {'lock_down': True}
+# 'verbose'   - True | False. True = Allow print statements for debug type messages
+#
+SAS_config_options = {'lock_down': False,
+                      'verbose'  : True
+                     }
 
 # Configuration options for SAS output. By default output is HTML 5.0 (using "ods html5" statement) but certain templates might not work 
 # properly with HTML 5.0 so it can also be set to HTML 4.0 instead (using "ods html" statement). This option will only work when using IOM

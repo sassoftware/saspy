@@ -77,6 +77,8 @@ class SASconfigSTDIO:
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
 
+      self.verbose = self.cfgopts.get('verbose', False)
+      self.verbose = kwargs.get('verbose', self.verbose)
 
       insaspath = kwargs.get('saspath', '')
       if len(insaspath) > 0:
@@ -330,7 +332,8 @@ Will use HTML5 for this SASsession.""")
             print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
             return None
 
-      print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")
+      if self.sascfg.verbose:
+         print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")
       return self.pid
 
    def _endsas(self):
@@ -340,14 +343,18 @@ Will use HTML5 for this SASsession.""")
          self._getlog(wait=1)
          self._asubmit(code,'text')
          sleep(1)
+         ret = None
          try:
             rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
          except (subprocess.TimeoutExpired):
-            print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+            if self.sascfg.verbose:
+               print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+               ret = rc
             os.kill(self.pid, signal.SIGKILL)
-         print("SAS Connection terminated. Subprocess id was "+str(self.pid))
+         if self.sascfg.verbose:
+            print("SAS Connection terminated. Subprocess id was "+str(self.pid))
          self.pid = None
-      return rc
+      return ret
 
    def _getlog(self, wait=5, jobid=None):
       logf   = b''
