@@ -216,6 +216,7 @@ class SASsessionIOM():
       self._log_cnt = 0
       self._log     = ""
       self._sb      = kwargs.get('sb', None)
+      self._tomods1 = b"_tomods1"
 
       self._startsas()
 
@@ -650,7 +651,7 @@ Will use HTML5 for this SASsession.""")
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
 
       # unnecessary read in submit as this can't happen in the current code. 
-      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True
       pgm      = b""
@@ -696,7 +697,7 @@ Will use HTML5 for this SASsession.""")
             HTML(results['LST'])
       '''
       #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
@@ -794,7 +795,11 @@ Will use HTML5 for this SASsession.""")
 
                  if bail:
                     if lstf.count(logcodeo) >= 1:
-                       lstf = lstf.rsplit(logcodeo)[0]
+                       x = lstf.rsplit(logcodeo)
+                       lstf = x[0]
+                       if len(x[1]) > 7 and "_tomods" in x[1]:
+                          self._tomods1 = x[1].encode()
+                          #print("Tomods is now "+ self._tomods1.decode())
                        break
                  try:
                     if ods:
@@ -1170,7 +1175,7 @@ Will use HTML5 for this SASsession.""")
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
-      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1 dlm="+cdelim+" termstr=NL; put "
+      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file "+self._tomods1.decode()+" dlm="+cdelim+" termstr=NL; put "
       
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
@@ -1379,13 +1384,13 @@ Will use HTML5 for this SASsession.""")
       code += ";\n run;\n"
       ll = self.submit(code, "text")
 
-      if self.sascfg.iomhost.lower() in ('', 'localhost', '192.0.0.1'):
+      if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
          tempdir = tempfile.TemporaryDirectory()
-         outname = "_tomods2"
-         code    = "filename _tomods2 '"+tempdir.name+os.sep+"tomods2' encoding='utf-8';\n"
+         outname = "_tomodsx"
+         code    = "filename _tomodsx '"+tempdir.name+os.sep+"tomodsx' encoding='utf-8';\n"
       else:
          tempdir = None
-         outname = "_tomods1"
+         outname = self._tomods1.decode()
          code = ''
 
       code += "options nosource;\n"
@@ -1499,7 +1504,7 @@ Will use HTML5 for this SASsession.""")
             if done and bail:
                break
 
-         df = pd.read_csv(tempdir.name+os.sep+"tomods2", index_col=False, engine='c', dtype=dts, **kwargs)
+         df = pd.read_csv(tempdir.name+os.sep+"tomodsx", index_col=False, engine='c', dtype=dts, **kwargs)
          tempdir.cleanup()
          
 
