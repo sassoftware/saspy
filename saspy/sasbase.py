@@ -2011,9 +2011,9 @@ class SASdata:
         :return: graphic plot
         """
         code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
-        code += ";\n\tvbar " + var + " ; "
+        code += ";\n\tvbar " + var 
         if len(label) > 0:
-            code += " LegendLABEL='" + label + "'"
+            code += " / LegendLABEL='" + label + "'"
         code += ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
