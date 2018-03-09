@@ -131,31 +131,24 @@ class SASconfigSTDIO:
       if not self.encoding:
          self.encoding = 'utf-8'
 
-      while len(self.saspath) == 0:
-         if not lock:
-            self.saspath = self._prompt("Please enter the path to the SAS start up script: ")
-         else:
-            print("In lockdown mode and missing saspath in the config named: "+cfgname )
-            return
-
    def _prompt(self, prompt, pw=False):
       if self._kernel is None:
           if not pw:
               try:
                  return input(prompt)
               except (KeyboardInterrupt):
-                 return ''
+                 return None
           else:
               try:
                  return getpass.getpass(prompt)
               except (KeyboardInterrupt):
-                 return ''
+                 return None
       else:
           try:
              return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
                                                 password=pw)
           except (KeyboardInterrupt):
-             return ''
+             return None
 
 class SASsessionSTDIO():
    '''
@@ -547,6 +540,8 @@ Will use HTML5 for this SASsession.""")
             gotit = False
             while not gotit:
                var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
+               if var is None:
+                  raise KeyboardInterrupt 
                if len(var) > 0:
                   gotit = True
                else:
@@ -673,7 +668,7 @@ Will use HTML5 for this SASsession.""")
            response = self.sascfg._prompt(
                      "SAS attention handling not supported over ssh. Please enter (T) to terminate SAS or (C) to continue.")
            while True:
-              if response.upper() == 'C':
+              if response is None or response.upper() == 'C':                   
                  return dict(LOG='', LST='', BC=True)
               if response.upper() == 'T':
                  break
@@ -699,7 +694,9 @@ Will use HTML5 for this SASsession.""")
                     found = True
                     query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                     print('Processing interrupt\nAttn handler Query is\n\n' + query)
-                    response = self.sascfg._prompt("Please enter your Response: ")
+                    response = None
+                    while response is None:
+                       response = self.sascfg._prompt("Please enter your Response: ")
                     self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
                     self.stdin.flush()
                     if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
@@ -710,7 +707,9 @@ Will use HTML5 for this SASsession.""")
                     if lsts[0] != '' and lsts[1] != '':
                         query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                         print('Secondary Query is:\n\n' + query)
-                        response = self.sascfg._prompt("Please enter your Response: ")
+                        response = None
+                        while response is None:
+                           response = self.sascfg._prompt("Please enter your Response: ")
                         self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
                         self.stdin.flush()
                         if (response == 'N' or response == 'n') and query.count("N to continue") >= 1:

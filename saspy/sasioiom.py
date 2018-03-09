@@ -182,18 +182,18 @@ class SASconfigIOM:
               try:
                  return input(prompt)
               except (KeyboardInterrupt):
-                 return ''
+                 return None
           else:
               try:
                  return getpass.getpass(prompt)
               except (KeyboardInterrupt):
-                 return ''
+                 return None
       else:
           try:
              return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
                                                 password=pw)
           except (KeyboardInterrupt):
-             return ''
+             return None
 
 class SASsessionIOM():
    '''
@@ -300,7 +300,13 @@ Will use HTML5 for this SASsession.""")
    
             while len(user) == 0:
                user = self.sascfg._prompt("Please enter the IOM user id: ")
-   
+               if user is None:
+                  self.sockin.close()
+                  self.sockout.close()
+                  self.sockerr.close()
+                  self.pid = None
+                  raise KeyboardInterrupt
+
       pgm    = self.sascfg.java
       parms  = [pgm]
       if len(self.sascfg.javaparms) > 0:
@@ -444,6 +450,13 @@ Will use HTML5 for this SASsession.""")
          if not self.sascfg.sspi:
             while len(pw) == 0:
                pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
+               if pw is None:
+                  if os.name == 'nt':
+                     self.pid.kill()
+                  else:
+                     os.kill(self.pid, signal.SIGKILL)
+                  self.pid = None
+                  raise KeyboardInterrupt
             pw += '\n'
             self.stdin[0].send(pw.encode())
 
@@ -758,6 +771,8 @@ Will use HTML5 for this SASsession.""")
             gotit = False
             while not gotit:
                var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
+               if var is None:
+                  raise KeyboardInterrupt 
                if len(var) > 0:
                   gotit = True
                else:
@@ -898,7 +913,7 @@ Will use HTML5 for this SASsession.""")
            response = self.sascfg._prompt(
                      "SAS attention handling is not yet supported over IOM. Please enter (T) to terminate SAS or (C) to continue.")
            while True:
-              if response.upper() == 'C':
+              if response is None or response.upper() == 'C':
                  return dict(LOG='', LST='', BC=True)
               if response.upper() == 'T':
                  break
