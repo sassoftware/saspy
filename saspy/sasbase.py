@@ -933,6 +933,7 @@ class SASsession():
     def disconnect(self):
         """
         This method disconnects an IOM session to allow for reconnecting when switching networks
+        See the Advanced topics section of the doc for details
         """
         if self.sascfg.mode != 'IOM':
            res = "This method is only available with the IOM access method"

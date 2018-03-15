@@ -327,4 +327,31 @@ convention for these is to use the 'Server context :' value as the config name. 
 to know which server you will be connecting to.
 
 
+**************************************************************
+Disconnecting from an IOM session and reconnecting back to it.
+**************************************************************
+
+The IOM access method has the ability to disconnect from the workspace server and
+reconnect to it (the same one); IF the reconnect setting is configured for that workspace
+server in the Metadata Server. See 'Client Reconnect' Advanced Options of the Workspace Server.
+This feature is new in version 2.2.2.
+
+This was implemented for cases like having a laptop in a docking station, connected to LAN (Ethernet).
+Then needing to take the laptop to a meeting; network switched to WiFi. Switching the network will lose
+the connection to the workspace server.
+
+In order to have this work, before disconnecting from your current network, you submit the disconnect()
+method of the SASsession object. You can then change networks. After you have a good network connection again,
+the next thing you submit will reconnect to that same workspace server and run.
+ 
+
+.. code-block:: ipython3
+
+    sas = saspy.SASsession(cfgname='someIOMconfig')
+    [do some work with saspy]
+    sas.disconnect()
+    [switch networks. be sure you have established a network connection]
+    do more saspy work
+
+
 
