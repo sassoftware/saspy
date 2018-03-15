@@ -120,7 +120,6 @@ public class saspy2j
 
       boolean fndeol = false;
       boolean zero   = false;
-      boolean failed = false;
       boolean ods    = false;
 
       OctetSeqHolder odsdata = new OctetSeqHolder();
@@ -214,13 +213,6 @@ public class saspy2j
                   {
                   eol = pgm.substring(idx + 13, idx + 13 + 33);
 
-                  /* test out reconnect */
-                  if (failed)
-                     {
-                     cx.close();
-                     failed = false;
-                     }
-
                   if (eol.contains("ASYNCH"))
                      {
                      try
@@ -296,14 +288,6 @@ public class saspy2j
                   }
                }
 
-
-            /* test out reconnect */
-            if (failed)
-               {
-               cx.close();
-               failed = false;
-               }
-
             blen = 0;
             slen = 1;
             bstr = null;
@@ -328,13 +312,6 @@ public class saspy2j
                   {
                   try
                      {
-                     /* test out reconnect */
-                     if (failed)
-                        {
-                        cx.close();
-                        failed = false;
-                        }
-
                      bstr.Read(9999999, odsdata);
                      slen = odsdata.value.length;
                      if (slen > 0)
@@ -378,13 +355,6 @@ public class saspy2j
                   {
                   try
                      {
-                     /* test out reconnect */
-                     if (failed)
-                        {
-                        cx.close();
-                        failed = false;
-                        }
-
                      lst = lang.FlushList(9999999);
                      slen = lst.length();
                      if (slen > 0)
@@ -417,13 +387,6 @@ public class saspy2j
                      {
                      try
                         {
-                        /* test out reconnect */
-                        if (failed)
-                           {
-                           cx.close();
-                           failed = false;
-                           }
-
                         log = lang.FlushLog(9999999);
                         slen = log.length();
                         if (slen > 0)
@@ -470,7 +433,6 @@ public class saspy2j
              break;
              }
           }
-
       }
 
 private static void connect(boolean recon, boolean ods) throws IOException, ConnectionFactoryException, GenericError
