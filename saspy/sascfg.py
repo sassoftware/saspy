@@ -34,7 +34,7 @@
 
 SAS_config_names=['default']
 
-# Configuration options for pysas - python Dict
+# Configuration options for saspy - python Dict
 # valid key are:
 # 
 # 'lock_down' - True | False. True = Prevent runtime overrides of SAS_Config values below
