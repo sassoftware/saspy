@@ -991,6 +991,28 @@ Will use HTML5 for this SASsession.""")
       '''
       return self._log
 
+
+   def disconnect(self):
+      '''
+      This method disconnects an IOM session to allow for reconnecting when switching networks
+      '''
+
+      pgm = b'\n'+b'tom says EOL=DISCONNECT                      \n'
+      self.stdin[0].send(pgm)
+
+      while True:
+         try:
+            log = self.stderr[0].recv(4096).decode(errors='replace') 
+         except (BlockingIOError):
+            log = b''
+
+         if len(log) > 0:
+            if log.count("DISCONNECT") >= 1:
+               break
+
+      return log.rstrip("DISCONNECT")
+
+
    def exist(self, table: str, libref: str ="") -> bool:
       '''
       table  - the name of the SAS Data Set

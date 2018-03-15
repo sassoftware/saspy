@@ -100,363 +100,378 @@ public class saspy2j
    static String[] iomhosts;
 
 
-	public static void main(String[] args) throws
-	                   InterruptedException, IOException, ConnectionFactoryException, GenericError
-	   {
-	    int inport  = 0;
-	    int outport = 0;
-	    int errport = 0;
-	    int len     = 0;
-	    int blen    = 0;
-	    int slen    = 0;
-	    int idx     = 0;
-	    int nargs   = args.length;
+   public static void main(String[] args) throws
+                       InterruptedException, IOException, ConnectionFactoryException, GenericError
+      {
+      int inport  = 0;
+      int outport = 0;
+      int errport = 0;
+      int len     = 0;
+      int blen    = 0;
+      int slen    = 0;
+      int idx     = 0;
+      int nargs   = args.length;
 
-	    String addr = "";
-	    String log  = "";
-	    String lst  = "";
-	    String pgm  = "";
-	    String eol  = "";
+      String addr = "";
+      String log  = "";
+      String lst  = "";
+      String pgm  = "";
+      String eol  = "";
 
-	    boolean fndeol = false;
-	    boolean zero   = false;
-	    boolean failed = false;
-	    boolean ods    = false;
+      boolean fndeol = false;
+      boolean zero   = false;
+      boolean failed = false;
+      boolean ods    = false;
 
-	    OctetSeqHolder odsdata = new OctetSeqHolder();
-	    char[]         in      = new char[4097];
+      OctetSeqHolder odsdata = new OctetSeqHolder();
+      char[]         in      = new char[4097];
 
-	    for (int x = 0; x < nargs; x++)
-	       {
-	       if (args[x].equalsIgnoreCase("-host"))
-	          addr = args[x + 1];
-	       else if (args[x].equalsIgnoreCase("-stdinport"))
-	          inport = Integer.parseInt(args[x + 1]);
-	       else if (args[x].equalsIgnoreCase("-stdoutport"))
-	          outport = Integer.parseInt(args[x + 1]);
-	       else if (args[x].equalsIgnoreCase("-stderrport"))
-	          errport = Integer.parseInt(args[x + 1]);
-	       else if (args[x].equalsIgnoreCase("-iomhost"))
-	          iomhost = args[x + 1];
-	       else if (args[x].equalsIgnoreCase("-iomport"))
-	          iomport = Integer.parseInt(args[x + 1]);
-	       else if (args[x].equalsIgnoreCase("-timeout"))
-	          timeout = Integer.parseInt(args[x + 1]) * 1000;
-	       else if (args[x].equalsIgnoreCase("-user"))
-	          omruser = args[x + 1];
-	       else if (args[x].equalsIgnoreCase("-appname"))
-	          appName = args[x + 1];
-	       else if (args[x].equalsIgnoreCase("-zero"))
-	          zero = true;
-	       else if (args[x].equalsIgnoreCase("-spn"))
-	          spn = true;
-	       }
+      for (int x = 0; x < nargs; x++)
+         {
+         if (args[x].equalsIgnoreCase("-host"))
+            addr = args[x + 1];
+         else if (args[x].equalsIgnoreCase("-stdinport"))
+            inport = Integer.parseInt(args[x + 1]);
+         else if (args[x].equalsIgnoreCase("-stdoutport"))
+            outport = Integer.parseInt(args[x + 1]);
+         else if (args[x].equalsIgnoreCase("-stderrport"))
+            errport = Integer.parseInt(args[x + 1]);
+         else if (args[x].equalsIgnoreCase("-iomhost"))
+            iomhost = args[x + 1];
+         else if (args[x].equalsIgnoreCase("-iomport"))
+            iomport = Integer.parseInt(args[x + 1]);
+         else if (args[x].equalsIgnoreCase("-timeout"))
+            timeout = Integer.parseInt(args[x + 1]) * 1000;
+         else if (args[x].equalsIgnoreCase("-user"))
+            omruser = args[x + 1];
+         else if (args[x].equalsIgnoreCase("-appname"))
+            appName = args[x + 1];
+         else if (args[x].equalsIgnoreCase("-zero"))
+            zero = true;
+         else if (args[x].equalsIgnoreCase("-spn"))
+            spn = true;
+         }
 
-	    iomhosts = iomhost.split(";");
-	    hosts    = iomhosts.length;
+      iomhosts = iomhost.split(";");
+      hosts    = iomhosts.length;
 
-	    try
-	       {
-	       sin  = new Socket(addr, inport);
-	       sout = new Socket(addr, outport);
-	       serr = new Socket(addr, errport);
-	       }
-	    catch (IOException e)
-	       {
-	       e.printStackTrace();
-	       }
+      try
+         {
+         sin  = new Socket(addr, inport);
+         sout = new Socket(addr, outport);
+         serr = new Socket(addr, errport);
+         }
+      catch (IOException e)
+         {
+         e.printStackTrace();
+         }
 
-	    OutputStream odsout = sout.getOutputStream();
+      OutputStream odsout = sout.getOutputStream();
 
-	    inp  = new BufferedReader(new InputStreamReader(  sin.getInputStream(),  "UTF-8"));
-	    outp = new BufferedWriter(new OutputStreamWriter(sout.getOutputStream(), "UTF-8"));
-	    errp = new BufferedWriter(new OutputStreamWriter(serr.getOutputStream(), "UTF-8"));
+      inp  = new BufferedReader(new InputStreamReader(  sin.getInputStream(),  "UTF-8"));
+      outp = new BufferedWriter(new OutputStreamWriter(sout.getOutputStream(), "UTF-8"));
+      errp = new BufferedWriter(new OutputStreamWriter(serr.getOutputStream(), "UTF-8"));
 
-	    if (zero)
-	       {
-	       try
-	          {
-	          ZeroConfigWorkspaceServer            zserver = new ZeroConfigWorkspaceServer();
-	          ManualConnectionFactoryConfiguration config  = new ManualConnectionFactoryConfiguration(zserver);
-	          ConnectionFactoryManager             manager = new ConnectionFactoryManager();
-	          ConnectionFactoryInterface           factory = manager.getFactory(config);
-	          SecurityPackageCredential            zcred   = new SecurityPackageCredential();
+      if (zero)
+         {
+         try
+            {
+            ZeroConfigWorkspaceServer            zserver = new ZeroConfigWorkspaceServer();
+            ManualConnectionFactoryConfiguration config  = new ManualConnectionFactoryConfiguration(zserver);
+            ConnectionFactoryManager             manager = new ConnectionFactoryManager();
+            ConnectionFactoryInterface           factory = manager.getFactory(config);
+            SecurityPackageCredential            zcred   = new SecurityPackageCredential();
 
-	          cx = factory.getConnection(zcred);
-	          }
-	       catch (ConnectionFactoryException e)
-	          {
-	          String msg = e.getMessage();
-	          errp.write(msg);
-	          errp.flush();
-	          System.out.print(msg);
-              sin.close();
-              sout.close();
-              serr.close();
-              System.exit(-6);
-	          }
-	       }
-	    else
-	       {
-	       if (! spn)
-	          omrpw = inp.readLine();
-	       connect(false, false);
-	       }
+            cx = factory.getConnection(zcred);
+            }
+         catch (ConnectionFactoryException e)
+            {
+            String msg = e.getMessage();
+            errp.write(msg);
+            errp.flush();
+            System.out.print(msg);
+            sin.close();
+            sout.close();
+            serr.close();
+            System.exit(-6);
+            }
+         }
+      else
+         {
+         if (! spn)
+            omrpw = inp.readLine();
+         connect(false, false);
+         }
 
-	    while (true)
-	       {
-	       try
-	          {
-	          pgm = new String();
-	          while (true)
-	             {
-	             if ((idx = pgm.indexOf("tom says EOL=")) >= 0 && pgm.length() > idx + 13 + 32)
-	                {
-	                eol = pgm.substring(idx + 13, idx + 13 + 33);
+      while (true)
+         {
+         try
+            {
+            pgm = new String();
+            while (true)
+               {
+               if ((idx = pgm.indexOf("tom says EOL=")) >= 0 && pgm.length() > idx + 13 + 32)
+                  {
+                  eol = pgm.substring(idx + 13, idx + 13 + 33);
 
-                    /* test out reconnect */
-	                if (failed)
-	                   {
-	                   cx.close();
-	                   failed = false;
-	                   }
+                  /* test out reconnect */
+                  if (failed)
+                     {
+                     cx.close();
+                     failed = false;
+                     }
 
-	                if (eol.contains("ASYNCH"))
-	                   {
-	                   try
-	                      {
-	                      lang.Submit(pgm.substring(0, idx));
-	                      pgm = pgm.substring(idx + 13 + 33);
-	                      }
-		  			   catch (org.omg.CORBA.COMM_FAILURE e)
-					      {
-					      if (reconnect)
-					         {
-					         connect(true, false);
-	                         lang.Submit(pgm.substring(0, idx));
-	                         pgm = pgm.substring(idx + 13 + 33);
-					         }
-					      else
-					    	 throw new IOException();
-					      }
-	                   }
-	                else if (eol.contains("ENDSAS"))
-	                   {
-	                   try
-	                      {
-	                      lang._release();
-	                      }
-	                   catch (org.omg.CORBA.COMM_FAILURE e)
-	                      {}
-	                   cx.close();
-	                   sin.close();
-	                   sout.close();
-	                   serr.close();
-	                   return;
-	                   }
-	                else
-	                   {
-	                   pgm = pgm.substring(0, idx);
-	                   try{
-	                      lang.Submit(pgm);
-	                      break;
-	                      }
-	                   catch(org.omg.CORBA.COMM_FAILURE e)
-	                      {
-	                      if (reconnect)
-	                         {
-	                         connect(true, false);
-	                         lang.Submit(pgm);
-	                         break;
-	                         }
-					      else
-					    	 throw new IOException();
-	                      }
-	                   }
-	                }
-	             else
-	                {
-	                len = inp.read(in, 0, 4096);
-	                if (len > 0)
-	                   pgm += String.valueOf(Arrays.copyOfRange(in, 0, len));
-	                }
-	             }
+                  if (eol.contains("ASYNCH"))
+                     {
+                     try
+                        {
+                        lang.Submit(pgm.substring(0, idx));
+                        pgm = pgm.substring(idx + 13 + 33);
+                        }
+                     catch (org.omg.CORBA.COMM_FAILURE e)
+                        {
+                        if (reconnect)
+                           {
+                           connect(true, false);
+                           lang.Submit(pgm.substring(0, idx));
+                           pgm = pgm.substring(idx + 13 + 33);
+                           }
+                        else
+                           throw new IOException();
+                        }
+                     }
+                  else if (eol.contains("DISCONNECT"))
+                     {
+                     if (reconnect)
+                        {
+                        cx.close();
+                        errp.write("Succesfully disconnected. Be sure to have a valid network connection before submitting anything else.DISCONNECT");
+                        }
+                     else
+                        errp.write("This workspace server is not configured for reconnecting. Did not disconnect.DISCONNECT");
+                       
+                     errp.flush();
+                     pgm = pgm.substring(idx + 13 + 33);
+
+                     }
+                  else if (eol.contains("ENDSAS"))
+                     {
+                     try
+                        {
+                        lang._release();
+                        }
+                     catch (org.omg.CORBA.COMM_FAILURE e)
+                        {}
+                     cx.close();
+                     sin.close();
+                     sout.close();
+                     serr.close();
+                     return;
+                     }
+                  else
+                     {
+                     pgm = pgm.substring(0, idx);
+                     try{
+                        lang.Submit(pgm);
+                        break;
+                        }
+                     catch(org.omg.CORBA.COMM_FAILURE e)
+                        {
+                        if (reconnect)
+                           {
+                           connect(true, false);
+                           lang.Submit(pgm);
+                           break;
+                           }
+                        else
+                           throw new IOException();
+                        }
+                     }
+                  }
+               else
+                  {
+                  len = inp.read(in, 0, 4096);
+                  if (len > 0)
+                     pgm += String.valueOf(Arrays.copyOfRange(in, 0, len));
+                  }
+               }
 
 
-              /* test out reconnect */
-	          if (failed)
-	             {
-	             cx.close();
-	             failed = false;
-	             }
+            /* test out reconnect */
+            if (failed)
+               {
+               cx.close();
+               failed = false;
+               }
 
-	          blen = 0;
-	          slen = 1;
-              bstr = null;
-	          try
-	             {
-	             bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
-	             }
-			  catch (org.omg.CORBA.COMM_FAILURE e)
-		         {
-		         if (reconnect)
-		            {
-		            connect(true, false);
-		            bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
-		            }
-		         }
-	          catch (GenericError e)
-	             {}
+            blen = 0;
+            slen = 1;
+            bstr = null;
+            try
+               {
+               bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
+               }
+            catch (org.omg.CORBA.COMM_FAILURE e)
+               {
+               if (reconnect)
+                  {
+                  connect(true, false);
+                  bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
+                  }
+               }
+            catch (GenericError e)
+               {}
 
-	          if (! (bstr == null))
-	             {
-		         while (slen > 0)
-		            {
-	   		        try
-		               {
-		               /* test out reconnect */
-		               if (failed)
-		                  {
-		                  cx.close();
-		                  failed = false;
-		                  }
+            if (! (bstr == null))
+               {
+               while (slen > 0)
+                  {
+                  try
+                     {
+                     /* test out reconnect */
+                     if (failed)
+                        {
+                        cx.close();
+                        failed = false;
+                        }
 
-		               bstr.Read(9999999, odsdata);
-		               slen = odsdata.value.length;
-		               if (slen > 0)
-		                  {
-		                  blen += slen;
-		                  odsout.write(odsdata.value);
-		                  odsout.flush();
-		                  }
-		               }
-				    catch (org.omg.CORBA.COMM_FAILURE e)
-			           {
-			           if (reconnect)
-			              {
-			        	  ods = true;
-			              connect(true, true);
-			              bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
-			              bstr.Read(blen, odsdata);
-			              }
-			           else
-	                      throw new IOException();
-			           }
-		            }
-			     bstr.Close();
-			     if (! ods)
-     	            fileref.DeleteFile();
-			     else
-		      	    {
-			    	StringHolder retname = new StringHolder();
-			        filenum ++;
-			        fn = "_tomods"+filenum;
-		            physname = filesvc.FullName(fn, physicalName.value[0]);
-		       	    fileref = filesvc.AssignFileref(fn, "", physname, "encoding=\"utf-8\"", retname);
-		      	    }
-	             }
+                     bstr.Read(9999999, odsdata);
+                     slen = odsdata.value.length;
+                     if (slen > 0)
+                        {
+                        blen += slen;
+                        odsout.write(odsdata.value);
+                        odsout.flush();
+                        }
+                     }
+                  catch (org.omg.CORBA.COMM_FAILURE e)
+                     {
+                     if (reconnect)
+                        {
+                        ods = true;
+                        connect(true, true);
+                        bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
+                        bstr.Read(blen, odsdata);
+                        }
+                     else
+                        throw new IOException();
+                     }
+                  }
+               bstr.Close();
+               if (! ods)
+                  fileref.DeleteFile();
+               else
+                  {
+                  StringHolder retname = new StringHolder();
+                  filenum ++;
+                  fn = "_tomods"+filenum;
+                  physname = filesvc.FullName(fn, physicalName.value[0]);
+                  fileref = filesvc.AssignFileref(fn, "", physname, "encoding=\"utf-8\"", retname);
+                  }
+               }
 
-              fndeol = false;
-              while (true)
-		         {
-                 slen = 1;
-		         while (slen > 0)
-		            {
-				    try
-				       {
-	                   /* test out reconnect */
-		               if (failed)
-		                  {
-		                  cx.close();
-		                  failed = false;
-		                  }
+            fndeol = false;
+            while (true)
+               {
+               slen = 1;
+               while (slen > 0)
+                  {
+                  try
+                     {
+                     /* test out reconnect */
+                     if (failed)
+                        {
+                        cx.close();
+                        failed = false;
+                        }
 
-		               lst = lang.FlushList(9999999);
-		               slen = lst.length();
-		               if (slen > 0)
-		                  {
-		                  outp.write(lst);
-		                  outp.flush();
-		                  }
-		               }
-					catch (org.omg.CORBA.COMM_FAILURE e)
-			           {
-			           if (reconnect)
-  			              connect(true, false);
-				       else
-				          throw new IOException();
-			           }
-			        catch (IOException e)
-			           {
-			           sin.close();
-			           sout.close();
-			           serr.close();
-			           break;
-			           }
-		            }
+                     lst = lang.FlushList(9999999);
+                     slen = lst.length();
+                     if (slen > 0)
+                        {
+                        outp.write(lst);
+                        outp.flush();
+                        }
+                     }
+                  catch (org.omg.CORBA.COMM_FAILURE e)
+                     {
+                     if (reconnect)
+                        connect(true, false);
+                     else
+                        throw new IOException();
+                     }
+                  catch (IOException e)
+                     {
+                     sin.close();
+                     sout.close();
+                     serr.close();
+                     break;
+                     }
+                  }
 
-		         if (fndeol)
-		            break;
+                  if (fndeol)
+                     break;
 
-		         slen = 1;
-			     while (slen > 0)
-			        {
-					try
-					   {
-	                   /* test out reconnect */
-		               if (failed)
-		                  {
-		                  cx.close();
-		                  failed = false;
-		                  }
+                  slen = 1;
+                  while (slen > 0)
+                     {
+                     try
+                        {
+                        /* test out reconnect */
+                        if (failed)
+                           {
+                           cx.close();
+                           failed = false;
+                           }
 
-			           log = lang.FlushLog(9999999);
-			           slen = log.length();
-			           if (slen > 0)
-			              {
-			              errp.write(log);
-			              errp.flush();
+                        log = lang.FlushLog(9999999);
+                        slen = log.length();
+                        if (slen > 0)
+                           {
+                           errp.write(log);
+                           errp.flush();
 
-			              if (log.contains(eol))
-			                 {
-			                 outp.write(eol);
-			                 if (ods)
-			                	{
-				                outp.write(fn);
-			                	ods = false;
-			                	}
-			                 outp.flush();
-			                 fndeol = true;
-			                 }
-			              }
-			           }
-				    catch (org.omg.CORBA.COMM_FAILURE e)
-			           {
-			           if (reconnect)
-   			              connect(true, false);
-                       else
-				          throw new IOException();
-			           }
-			        catch (IOException e)
-			           {
-			           sin.close();
-			           sout.close();
-			           serr.close();
-			           break;
-			           }
-			        }
-			     }
-    		  }
-       catch (GenericError e)
-      	  {
-          sin.close();
-          sout.close();
-          serr.close();
-          e.printStackTrace();
-          break;
-      	  }
-       }
-    }
+                           if (log.contains(eol))
+                              {
+                              outp.write(eol);
+                              if (ods)
+                                 {
+                                 outp.write(fn);
+                                 ods = false;
+                                 }
+                              outp.flush();
+                              fndeol = true;
+                              }
+                           }
+                        }
+                     catch (org.omg.CORBA.COMM_FAILURE e)
+                        {
+                        if (reconnect)
+                           connect(true, false);
+                        else
+                           throw new IOException();
+                        }
+                     catch (IOException e)
+                        {
+                        sin.close();
+                        sout.close();
+                        serr.close();
+                        break;
+                        }
+                     }
+                  }
+               }
+          catch (GenericError e)
+             {
+             sin.close();
+             sout.close();
+             serr.close();
+             e.printStackTrace();
+             break;
+             }
+          }
+
+      }
 
 private static void connect(boolean recon, boolean ods) throws IOException, ConnectionFactoryException, GenericError
    {
@@ -474,13 +489,13 @@ private static void connect(boolean recon, boolean ods) throws IOException, Conn
        try
           {
           server     = (BridgeServer) Server.fromURI(uri);
-	      ad         = server.getDomain();
+          ad         = server.getDomain();
 
           cxfConfig  = new ManualConnectionFactoryConfiguration(server);
-	      cxfManager = new ConnectionFactoryManager();
-	      cxf        = cxfManager.getFactory(cxfConfig);
+          cxfManager = new ConnectionFactoryManager();
+          cxf        = cxfManager.getFactory(cxfConfig);
 
-	      if (spn)
+          if (spn)
              cx = cxf.getConnection(cred);
           else if (timeout > 0)
              cx = cxf.getConnection(omruser, omrpw, ad, timeout);
@@ -498,60 +513,61 @@ private static void connect(boolean recon, boolean ods) throws IOException, Conn
        }
     else
        {
-	   for (int i=0; i < hosts; i++)
-	      {
-	      try {
-	          server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
-	          if (appName != "")
-	             server.setServerName(appName.replace("\'", ""));
-	          server.setOption(SASURI.applicationNameKey, "SASPy");
+       for (int i=0; i < hosts; i++)
+          {
+          try
+             {
+             server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
+             if (appName != "")
+                server.setServerName(appName.replace("\'", ""));
+             server.setOption(SASURI.applicationNameKey, "SASPy");
 
-	          if (spn)
-	             server.setSecurityPackage(Server.SECURITY_PACKAGE_NEGOTIATE);
+             if (spn)
+                server.setSecurityPackage(Server.SECURITY_PACKAGE_NEGOTIATE);
 
-	          cxfConfig  = new ManualConnectionFactoryConfiguration(server);
-	          cxfManager = new ConnectionFactoryManager();
-	          cxf        = cxfManager.getFactory(cxfConfig);
+             cxfConfig  = new ManualConnectionFactoryConfiguration(server);
+             cxfManager = new ConnectionFactoryManager();
+             cxf        = cxfManager.getFactory(cxfConfig);
 
-	          if (spn)
-	             {
-	             cred = SecurityPackageCredential.getInstance();
-	             cx = cxf.getConnection(cred);
-	             }
-	          else if (timeout > 0)
-	             cx = cxf.getConnection(omruser, omrpw, timeout);
-	          else
-	             cx = cxf.getConnection(omruser, omrpw);
-	          break;
-	          }
-	       catch (ConnectionFactoryException e)
-	          {
-	          String msg = e.getMessage();
-	          System.out.print(msg+"\n");
-	          errp.write(msg+"\n");
-	          errp.flush();
-	          if (i+1 < hosts)
-	             continue;
-	          failed = true;
-	          }
+             if (spn)
+                {
+                cred = SecurityPackageCredential.getInstance();
+                cx = cxf.getConnection(cred);
+                }
+             else if (timeout > 0)
+                cx = cxf.getConnection(omruser, omrpw, timeout);
+             else
+                cx = cxf.getConnection(omruser, omrpw);
+             break;
+             }
+          catch (ConnectionFactoryException e)
+             {
+             String msg = e.getMessage();
+             System.out.print(msg+"\n");
+             errp.write(msg+"\n");
+             errp.flush();
+             if (i+1 < hosts)
+                continue;
+             failed = true;
+             }
           }
        }
 
     if (!failed)
        {
-   	   obj1    = cx.getObject();
-	   iDisco1 = IDisconnectHelper.narrow(obj1);
-	   try
-	      {
-		  uriStr    = iDisco1.EnableDisconnect(60,false);
-		  uri       = SASURI.create(uriStr);
-		  reconnect = true;
+       obj1    = cx.getObject();
+       iDisco1 = IDisconnectHelper.narrow(obj1);
+       try
+          {
+          uriStr    = iDisco1.EnableDisconnect(60,false);
+          uri       = SASURI.create(uriStr);
+          reconnect = true;
           }
-	   catch (iomReconnectNotAllowed | iomReconnectInvalidTimeout | iomReconnectDisabled |
-			  iomEnableFailed | iomNoReconnectPortsAvailable | GenericError e1)
-	      {
-		  reconnect = false;
-		  }
+       catch (iomReconnectNotAllowed | iomReconnectInvalidTimeout | iomReconnectDisabled |
+                     iomEnableFailed | iomNoReconnectPortsAvailable | GenericError e1)
+          {
+          reconnect = false;
+          }
 
        wksp    = IWorkspaceHelper.narrow(obj1);
        uuid1   = wksp.UniqueIdentifier();
@@ -561,15 +577,15 @@ private static void connect(boolean recon, boolean ods) throws IOException, Conn
 
        try
           {
-    	  if (! recon)
-    	     {
+          if (! recon)
+             {
              libref = datasvc.UseLibref("work");
              libref.LevelInfo(fieldInclusionMask, engineName, engineAttrs, libraryAttrs,
-            		          physicalName, infoPropertyNames, infoPropertyValues);
+                                  physicalName, infoPropertyNames, infoPropertyValues);
              physname = filesvc.FullName(fn, physicalName.value[0]);
-       	     fileref = filesvc.AssignFileref(fn, "", physname, "encoding=\"utf-8\"", retname);
-     	     }
-    	  else
+             fileref = filesvc.AssignFileref(fn, "", physname, "encoding=\"utf-8\"", retname);
+             }
+          else
              fileref = filesvc.UseFileref(fn);
           }
        catch (GenericError | LNameNoAssign | NoLibrary e)

@@ -930,6 +930,17 @@ class SASsession():
         return var
 
 
+    def disconnect(self):
+        """
+        This method disconnects an IOM session to allow for reconnecting when switching networks
+        """
+        if self.sascfg.mode != 'IOM':
+           res = "This method is only available with the IOM access method"
+        else:
+           res = self._io.disconnect()
+        return res
+
+
 class SASdata:
     def __init__(self, sassession, libref, table, results='', dsopts={}):
         """
@@ -2019,9 +2030,9 @@ class SASdata:
         :return: graphic plot
         """
         code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
-        code += ";\n\tvbar " + var + " ; "
+        code += ";\n\tvbar " + var 
         if len(label) > 0:
-            code += " LegendLABEL='" + label + "'"
+            code += " / LegendLABEL='" + label + "'"
         code += ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
