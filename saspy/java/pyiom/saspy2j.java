@@ -521,7 +521,7 @@ private static void connect(boolean recon, boolean ods) throws IOException, Conn
        iDisco1 = IDisconnectHelper.narrow(obj1);
        try
           {
-          uriStr    = iDisco1.EnableDisconnect(60,false);
+          uriStr    = iDisco1.EnableDisconnect(0,false);
           uri       = SASURI.create(uriStr);
           reconnect = true;
           }
