@@ -85,6 +85,9 @@ class SASconfigIOM:
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
 
+      self.verbose = self.cfgopts.get('verbose', True)
+      self.verbose = kwargs.get('verbose', self.verbose)
+
       injava = kwargs.get('java', '')
       if len(injava) > 0:
          if lock and len(self.java):
@@ -179,18 +182,18 @@ class SASconfigIOM:
               try:
                  return input(prompt)
               except (KeyboardInterrupt):
-                 return ''
+                 return None
           else:
               try:
                  return getpass.getpass(prompt)
               except (KeyboardInterrupt):
-                 return ''
+                 return None
       else:
           try:
              return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
                                                 password=pw)
           except (KeyboardInterrupt):
-             return ''
+             return None
 
 class SASsessionIOM():
    '''
@@ -216,6 +219,7 @@ class SASsessionIOM():
       self._log_cnt = 0
       self._log     = ""
       self._sb      = kwargs.get('sb', None)
+      self._tomods1 = b"_tomods1"
 
       self._startsas()
 
@@ -296,7 +300,13 @@ Will use HTML5 for this SASsession.""")
    
             while len(user) == 0:
                user = self.sascfg._prompt("Please enter the IOM user id: ")
-   
+               if user is None:
+                  self.sockin.close()
+                  self.sockout.close()
+                  self.sockerr.close()
+                  self.pid = None
+                  raise KeyboardInterrupt
+
       pgm    = self.sascfg.java
       parms  = [pgm]
       if len(self.sascfg.javaparms) > 0:
@@ -440,6 +450,13 @@ Will use HTML5 for this SASsession.""")
          if not self.sascfg.sspi:
             while len(pw) == 0:
                pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
+               if pw is None:
+                  if os.name == 'nt':
+                     self.pid.kill()
+                  else:
+                     os.kill(self.pid, signal.SIGKILL)
+                  self.pid = None
+                  raise KeyboardInterrupt
             pw += '\n'
             self.stdin[0].send(pw.encode())
 
@@ -453,7 +470,8 @@ Will use HTML5 for this SASsession.""")
             print("Be sure the path to sspiauth.dll is in your System PATH"+"\n")
          return None
 
-      print("SAS Connection established. Subprocess id is "+str(pid)+"\n")
+      if self.sascfg.verbose:
+         print("SAS Connection established. Subprocess id is "+str(pid)+"\n")
       return self.pid
 
    def _endsas(self):
@@ -466,7 +484,8 @@ Will use HTML5 for this SASsession.""")
                rc = self.pid.wait(5)
                self.pid = None
             except (subprocess.TimeoutExpired):
-               print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+               if self.sascfg.verbose:
+                  print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                self.pid.kill()
          else:
             pid = self.pid
@@ -483,7 +502,8 @@ Will use HTML5 for this SASsession.""")
             if rc[0] != 0:
                pass
             else:
-               print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+               if self.sascfg.verbose:
+                  print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                os.kill(self.pid, signal.SIGKILL)
 
 
@@ -499,7 +519,8 @@ Will use HTML5 for this SASsession.""")
          self.stderr[0].close()
          self.sockerr.close()
 
-         print("SAS Connection terminated. Subprocess id was "+str(pid))
+         if self.sascfg.verbose:
+            print("SAS Connection terminated. Subprocess id was "+str(pid))
          self.pid = None
 
       return
@@ -650,7 +671,7 @@ Will use HTML5 for this SASsession.""")
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
 
       # unnecessary read in submit as this can't happen in the current code. 
-      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True
       pgm      = b""
@@ -696,7 +717,7 @@ Will use HTML5 for this SASsession.""")
             HTML(results['LST'])
       '''
       #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file=_tomods1 options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
+      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
@@ -750,6 +771,8 @@ Will use HTML5 for this SASsession.""")
             gotit = False
             while not gotit:
                var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
+               if var is None:
+                  raise KeyboardInterrupt 
                if len(var) > 0:
                   gotit = True
                else:
@@ -794,7 +817,11 @@ Will use HTML5 for this SASsession.""")
 
                  if bail:
                     if lstf.count(logcodeo) >= 1:
-                       lstf = lstf.rsplit(logcodeo)[0]
+                       x = lstf.rsplit(logcodeo)
+                       lstf = x[0]
+                       if len(x[1]) > 7 and "_tomods" in x[1]:
+                          self._tomods1 = x[1].encode()
+                          #print("Tomods is now "+ self._tomods1.decode())
                        break
                  try:
                     if ods:
@@ -886,7 +913,7 @@ Will use HTML5 for this SASsession.""")
            response = self.sascfg._prompt(
                      "SAS attention handling is not yet supported over IOM. Please enter (T) to terminate SAS or (C) to continue.")
            while True:
-              if response.upper() == 'C':
+              if response is None or response.upper() == 'C':
                  return dict(LOG='', LST='', BC=True)
               if response.upper() == 'T':
                  break
@@ -963,6 +990,28 @@ Will use HTML5 for this SASsession.""")
       this method is used to get the current, full contents of the SASLOG
       '''
       return self._log
+
+
+   def disconnect(self):
+      '''
+      This method disconnects an IOM session to allow for reconnecting when switching networks
+      '''
+
+      pgm = b'\n'+b'tom says EOL=DISCONNECT                      \n'
+      self.stdin[0].send(pgm)
+
+      while True:
+         try:
+            log = self.stderr[0].recv(4096).decode(errors='replace') 
+         except (BlockingIOError):
+            log = b''
+
+         if len(log) > 0:
+            if log.count("DISCONNECT") >= 1:
+               break
+
+      return log.rstrip("DISCONNECT")
+
 
    def exist(self, table: str, libref: str ="") -> bool:
       '''
@@ -1170,7 +1219,7 @@ Will use HTML5 for this SASsession.""")
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
-      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file _tomods1 dlm="+cdelim+" termstr=NL; put "
+      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file "+self._tomods1.decode()+" dlm="+cdelim+" termstr=NL; put "
       
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
@@ -1379,13 +1428,13 @@ Will use HTML5 for this SASsession.""")
       code += ";\n run;\n"
       ll = self.submit(code, "text")
 
-      if self.sascfg.iomhost.lower() in ('', 'localhost', '192.0.0.1'):
+      if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
          tempdir = tempfile.TemporaryDirectory()
-         outname = "_tomods2"
-         code    = "filename _tomods2 '"+tempdir.name+os.sep+"tomods2' encoding='utf-8';\n"
+         outname = "_tomodsx"
+         code    = "filename _tomodsx '"+tempdir.name+os.sep+"tomodsx' encoding='utf-8';\n"
       else:
          tempdir = None
-         outname = "_tomods1"
+         outname = self._tomods1.decode()
          code = ''
 
       code += "options nosource;\n"
@@ -1499,7 +1548,7 @@ Will use HTML5 for this SASsession.""")
             if done and bail:
                break
 
-         df = pd.read_csv(tempdir.name+os.sep+"tomods2", index_col=False, engine='c', dtype=dts, **kwargs)
+         df = pd.read_csv(tempdir.name+os.sep+"tomodsx", index_col=False, engine='c', dtype=dts, **kwargs)
          tempdir.cleanup()
          
 

@@ -77,6 +77,8 @@ class SASconfigSTDIO:
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
 
+      self.verbose = self.cfgopts.get('verbose', True)
+      self.verbose = kwargs.get('verbose', self.verbose)
 
       insaspath = kwargs.get('saspath', '')
       if len(insaspath) > 0:
@@ -129,31 +131,24 @@ class SASconfigSTDIO:
       if not self.encoding:
          self.encoding = 'utf-8'
 
-      while len(self.saspath) == 0:
-         if not lock:
-            self.saspath = self._prompt("Please enter the path to the SAS start up script: ")
-         else:
-            print("In lockdown mode and missing saspath in the config named: "+cfgname )
-            return
-
    def _prompt(self, prompt, pw=False):
       if self._kernel is None:
           if not pw:
               try:
                  return input(prompt)
               except (KeyboardInterrupt):
-                 return ''
+                 return None
           else:
               try:
                  return getpass.getpass(prompt)
               except (KeyboardInterrupt):
-                 return ''
+                 return None
       else:
           try:
              return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
                                                 password=pw)
           except (KeyboardInterrupt):
-             return ''
+             return None
 
 class SASsessionSTDIO():
    '''
@@ -330,7 +325,8 @@ Will use HTML5 for this SASsession.""")
             print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
             return None
 
-      print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")
+      if self.sascfg.verbose:
+         print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")
       return self.pid
 
    def _endsas(self):
@@ -340,14 +336,18 @@ Will use HTML5 for this SASsession.""")
          self._getlog(wait=1)
          self._asubmit(code,'text')
          sleep(1)
+         ret = None
          try:
             rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
          except (subprocess.TimeoutExpired):
-            print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+            if self.sascfg.verbose:
+               print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+               ret = rc
             os.kill(self.pid, signal.SIGKILL)
-         print("SAS Connection terminated. Subprocess id was "+str(self.pid))
+         if self.sascfg.verbose:
+            print("SAS Connection terminated. Subprocess id was "+str(self.pid))
          self.pid = None
-      return rc
+      return ret
 
    def _getlog(self, wait=5, jobid=None):
       logf   = b''
@@ -540,6 +540,8 @@ Will use HTML5 for this SASsession.""")
             gotit = False
             while not gotit:
                var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
+               if var is None:
+                  raise KeyboardInterrupt 
                if len(var) > 0:
                   gotit = True
                else:
@@ -666,7 +668,7 @@ Will use HTML5 for this SASsession.""")
            response = self.sascfg._prompt(
                      "SAS attention handling not supported over ssh. Please enter (T) to terminate SAS or (C) to continue.")
            while True:
-              if response.upper() == 'C':
+              if response is None or response.upper() == 'C':                   
                  return dict(LOG='', LST='', BC=True)
               if response.upper() == 'T':
                  break
@@ -692,7 +694,9 @@ Will use HTML5 for this SASsession.""")
                     found = True
                     query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                     print('Processing interrupt\nAttn handler Query is\n\n' + query)
-                    response = self.sascfg._prompt("Please enter your Response: ")
+                    response = None
+                    while response is None:
+                       response = self.sascfg._prompt("Please enter your Response: ")
                     self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
                     self.stdin.flush()
                     if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
@@ -703,7 +707,9 @@ Will use HTML5 for this SASsession.""")
                     if lsts[0] != '' and lsts[1] != '':
                         query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
                         print('Secondary Query is:\n\n' + query)
-                        response = self.sascfg._prompt("Please enter your Response: ")
+                        response = None
+                        while response is None:
+                           response = self.sascfg._prompt("Please enter your Response: ")
                         self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
                         self.stdin.flush()
                         if (response == 'N' or response == 'n') and query.count("N to continue") >= 1:

@@ -19,10 +19,15 @@ or, for a specific release::
 
     pip install http://github.com/sassoftware/saspy/releases/saspy-X.X.X.tar.gz
 
+or, for a given branch (put the name of the branch after @)::
+
+    pip install git+https://git@github.com/sassoftware/saspy.git@branchname
 
 To use this module after installation, you need to edit the sascfg.py file to 
-configure it to be able to connect and start a SAS session. Follow the 
-instructions in the next section.
+configure it to be able to connect and start a SAS session. Note, you should 
+actually copy sascfg.py to sascfg_personal.py and edit sascfg_personal.py.
+This way your edit's won't be overridden if a new sascfg.py is pulled.
+Follow the instructions in the next section.
 
 * If you run into any problems, see :doc:`troubleshooting`.
 * If you have questions, open an issue at https://github.com/sassoftware/saspy/issues.
@@ -151,8 +156,9 @@ There are three main parts to this configuration file.
 In reverse order, the configuration definitions are Python dictionaries. Each dictionary 
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
 
-SAS_config_options has one option. The option restricts (or allows) an end users' ability 
-to override settings in the configuration definitions using ``SASsession()``.
+SAS_config_options has two options. The first option (lock_down) restricts (or allows) an end
+users' ability to override settings in the configuration definitions using ``SASsession()``.
+The second (verbose) controls the printing of some debug type messages.
 
 SAS_config_names is the list of configuration definition names to make available to an
 end user at connection time. Any configuration definitions that are not listed in 

@@ -114,9 +114,11 @@ class SASconfig:
                         str(configs) + " ")
 
         while cfgname not in configs:
-            cfgname = self._prompt(
-                "The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: " +
-                str(configs) + " ")
+           cfgname = self._prompt(
+              "The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: " +
+              str(configs) + " ")
+           if cfgname is None:
+              raise KeyboardInterrupt
 
         self.name = cfgname
         cfg = getattr(SAScfg, cfgname)
@@ -136,6 +138,7 @@ class SASconfig:
         elif len(path) > 0:
             self.mode = 'STDIO'
         else:
+            print("Configuration Definition "+cfgname+" is not valid. Failed to create a SASsession.")
             self.valid = False
 
     def _prompt(self, prompt, pw=False):
@@ -144,18 +147,18 @@ class SASconfig:
                 try:
                     return input(prompt)
                 except KeyboardInterrupt:
-                    return ''
+                    return None
             else:
                 try:
                     return getpass.getpass(prompt)
                 except KeyboardInterrupt:
-                    return ''
+                    return None
         else:
             try:
                 return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
                                                    password=pw)
             except KeyboardInterrupt:
-                return ''
+                return None
 
 
 class SASsession():
@@ -217,6 +220,7 @@ class SASsession():
         self.sascei         = ''
 
         if not self.sascfg.valid:
+            self._io = None
             return
 
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
@@ -256,6 +260,9 @@ class SASsession():
 
         :return: output
         """
+        if self._io is None:
+           return "This SASsession object is not valid\n"
+
         x  = "Access Method         = %s\n" % self.sascfg.mode
         x += "SAS Config name       = %s\n" % self.sascfg.name
         x += "WORK Path             = %s\n" % self.workpath    
@@ -270,7 +277,8 @@ class SASsession():
 
     def __del__(self):
         if self._io:
-           return self._io.__del__()
+           if self._io:
+              return self._io.__del__()
 
     def _objcnt(self):
         self._obj_cnt += 1
@@ -920,6 +928,18 @@ class SASsession():
               var = l2[0]
         
         return var
+
+
+    def disconnect(self):
+        """
+        This method disconnects an IOM session to allow for reconnecting when switching networks
+        See the Advanced topics section of the doc for details
+        """
+        if self.sascfg.mode != 'IOM':
+           res = "This method is only available with the IOM access method"
+        else:
+           res = self._io.disconnect()
+        return res
 
 
 class SASdata:
