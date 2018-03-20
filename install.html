@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 2.2.1 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.2.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.2.1 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.2.2 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.2.1
+                2.2.2
               </div>
             
           
@@ -194,9 +194,15 @@ installations.  To install the latest version using <cite>pip</cite>, you execut
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sassoftware</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">saspy</span><span class="o">-</span><span class="n">X</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
 </pre></div>
 </div>
+<p>or, for a given branch (put the name of the branch after &#64;):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sassoftware</span><span class="o">/</span><span class="n">saspy</span><span class="o">.</span><span class="n">git</span><span class="nd">@branchname</span>
+</pre></div>
+</div>
 <p>To use this module after installation, you need to edit the sascfg.py file to
-configure it to be able to connect and start a SAS session. Follow the
-instructions in the next section.</p>
+configure it to be able to connect and start a SAS session. Note, you should
+actually copy sascfg.py to sascfg_personal.py and edit sascfg_personal.py.
+This way your edit&#8217;s won&#8217;t be overridden if a new sascfg.py is pulled.
+Follow the instructions in the next section.</p>
 <ul class="simple">
 <li>If you run into any problems, see <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting</span></a>.</li>
 <li>If you have questions, open an issue at <a class="reference external" href="https://github.com/sassoftware/saspy/issues">https://github.com/sassoftware/saspy/issues</a>.</li>
@@ -308,8 +314,9 @@ at the PYTHONPATH environment variable (if it&#8217;s set), but more definitivel
 </div></blockquote>
 <p>In reverse order, the configuration definitions are Python dictionaries. Each dictionary
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.</p>
-<p>SAS_config_options has one option. The option restricts (or allows) an end users&#8217; ability
-to override settings in the configuration definitions using <code class="docutils literal"><span class="pre">SASsession()</span></code>.</p>
+<p>SAS_config_options has two options. The first option (lock_down) restricts (or allows) an end
+users&#8217; ability to override settings in the configuration definitions using <code class="docutils literal"><span class="pre">SASsession()</span></code>.
+The second (verbose) controls the printing of some debug type messages.</p>
 <p>SAS_config_names is the list of configuration definition names to make available to an
 end user at connection time. Any configuration definitions that are not listed in
 SAS_config_names are simply inaccessible by an end user. You can add several configuration
@@ -473,7 +480,7 @@ can read and write it.</p>
 <h4>Remote<a class="headerlink" href="#remote" title="Permalink to this headline">¶</a></h4>
 <p>A remote connection is defined as a connection to any Workspace Server on any SAS platform
 from either a Unix or Windows client. This module does not connect to a SAS Metadata Server (OMR),
-but rather connects directly to an Object Spawner to get access to a Woekspace Server. If you already
+but rather connects directly to an Object Spawner to get access to a Workspace Server. If you already
 access these with other SAS clients, like Enterprise Guide (EG), you may already be familiar with
 connecting to OMR, but not directly to the others by host/port. There is information in the
 <a class="reference internal" href="advanced-topics.html"><span class="doc">Advanced topics</span></a> section about using Proc iomoperate to find Object Spawners and Workspace
@@ -712,7 +719,7 @@ install other non-standard python modules.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.1',
+            VERSION:'2.2.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

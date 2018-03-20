@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 2.2.1 documentation</title>
+  <title>API Reference &mdash; saspy 2.2.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.2.1 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.2.2 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.2.1
+                2.2.2
               </div>
             
           
@@ -190,7 +190,7 @@
 <dl class="class">
 <dt id="saspy.SASsession">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASsession</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASsession<a class="headerlink" href="#saspy.SASsession" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p><strong>Overview</strong></p>
 <p>The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
 Most of these parameters will be configured in the sascfg.py configuration file.</p>
@@ -325,6 +325,13 @@ Most of these parameters will be configured in the sascfg.py configuration file.
 </dd></dl>
 
 <dl class="method">
+<dt id="saspy.SASsession.disconnect">
+<code class="descname">disconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method disconnects an IOM session to allow for reconnecting when switching networks
+See the Advanced topics section of the doc for details</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASsession.exist">
 <code class="descname">exist</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#saspy.SASsession.exist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does the SAS data set currently exist</p>
@@ -341,7 +348,7 @@ Most of these parameters will be configured in the sascfg.py configuration file.
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Boolean True it the Data Set exists and False if it does not</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)">bool</a></p>
 </td>
 </tr>
 </tbody>
@@ -491,7 +498,7 @@ See the sasets.py module.
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">SAS log</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)">str</a></td>
 </tr>
 </tbody>
 </table>
@@ -654,7 +661,7 @@ but you can run this way too; get the objects display them yourself and/or write
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>batch</strong> &#8211; bool</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)">bool</a></td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True = return dict([LOG, LST]. False = display LST to screen.</td>
 </tr>
@@ -674,7 +681,7 @@ but you can run this way too; get the objects display them yourself and/or write
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string of the return type</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)">str</a></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)">str</a></td>
 </tr>
 </tbody>
 </table>
@@ -690,7 +697,7 @@ but you can run this way too; get the objects display them yourself and/or write
 <li><p class="first">results - format of results, HTLML and TEXT is the alternative</p>
 </li>
 <li><dl class="first docutils">
-<dt>prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete </dt>
+<dt>prompt  - dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete </dt>
 <dd><blockquote class="first">
 <div><p>the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
 or show what you type and keep the macros (they will still be available later).</p>
@@ -744,7 +751,7 @@ HTML(results[&#8216;LST&#8217;])</dd>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> &#8211; name of the macro varable to set:</li>
-<li><strong>value</strong> &#8211; <p>python variable to use for the value to assign to the marco variable:</p>
+<li><strong>value</strong> &#8211; <p>python variable to use for the value to assign to the macro variable:</p>
 <ul>
 <li>name    is a character</li>
 <li>value   is a variable that can be resolved to a string</li>
@@ -813,7 +820,7 @@ HTML(results[&#8216;LST&#8217;])</dd>
 <dl class="class">
 <dt id="saspy.SASdata">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASdata</code><span class="sig-paren">(</span><em>sassession</em>, <em>libref</em>, <em>table</em>, <em>results=''</em>, <em>dsopts={}</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <dl class="method">
 <dt id="saspy.SASdata.assessModel">
 <code class="descname">assessModel</code><span class="sig-paren">(</span><em>target: str</em>, <em>prediction: str</em>, <em>nominal: bool = True</em>, <em>event: str = ''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.assessModel" title="Permalink to this definition">¶</a></dt>
@@ -1289,7 +1296,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <dl class="class">
 <dt id="saspy.SASProcCommons">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASProcCommons</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASProcCommons" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -1298,7 +1305,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <dl class="class">
 <dt id="saspy.SASresults">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASresults</code><span class="sig-paren">(</span><em>attrs</em>, <em>session</em>, <em>objname</em>, <em>nosub=False</em>, <em>log=''</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASresults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Return results from a SAS Model object</p>
 <dl class="method">
 <dt id="saspy.SASresults.ALL">
@@ -1316,7 +1323,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <dl class="class">
 <dt id="saspy.SASutil">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASutil</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASutil" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>This class is for SAS BASE procedures to be called as python3 objects and use SAS as the computational engine</p>
 <p>This class and all the useful work in this package require a licensed version of SAS.</p>
 <p>To add a new procedure do the following:</p>
@@ -1418,7 +1425,7 @@ Documentation link:
 <dl class="class">
 <dt id="saspy.SASml">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASml</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASml" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>This class is for SAS Enterprise Miner procedures to be called as python3 objects and use SAS as the computational engine</p>
 <p>This class and all the useful work in this package require a licensed version of SAS.</p>
 <p>To add a new procedure do the following:</p>
@@ -1588,7 +1595,7 @@ Documentation link:
 <dl class="class">
 <dt id="saspy.SASstat">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASstat</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASstat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>This class is for SAS/STAT procedures to be called as python3 objects and use SAS as the computational engine</p>
 <p>This class and all the useful work in this package require a licensed version of SAS.</p>
 <p>To add a new procedure do the following:</p>
@@ -1871,7 +1878,7 @@ For more information on the statements see the Documentation link.</p>
 <dl class="class">
 <dt id="saspy.SASets">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASets</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>This class is for SAS/ETS procedures to be called as python3 objects and use SAS as the computational engine</p>
 <p>This class and all the useful work in this package require a licensed version of SAS.</p>
 <p>To add a new procedure do the following:</p>
@@ -1967,7 +1974,7 @@ For more information on the statements see the Documentation link.</p>
 <dl class="class">
 <dt id="saspy.SASqc">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASqc</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASqc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>This class is for SAS/QC procedures to be called as python3 objects and use SAS as the computational engine
 This class and all the useful work in this package require a licensed version of SAS.</p>
 <p>To add a new procedure do the following:</p>
@@ -2083,7 +2090,7 @@ This class and all the useful work in this package require a licensed version of
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.1',
+            VERSION:'2.2.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

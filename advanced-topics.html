@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced topics &mdash; saspy 2.2.1 documentation</title>
+  <title>Advanced topics &mdash; saspy 2.2.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.2.1 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.2.2 documentation" href="index.html"/>
         <link rel="next" title="Contributing new methods" href="adding-procedures.html"/>
         <link rel="prev" title="API Reference" href="api.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.2.1
+                2.2.2
               </div>
             
           
@@ -103,6 +103,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#moving-values-between-python-variables-and-sas-macro-variables">Moving values between Python Variables and SAS Macro Variables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#disconnecting-from-an-iom-session-and-reconnecting-back-to-it">Disconnecting from an IOM session and reconnecting back to it.</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
@@ -262,7 +263,7 @@ following when entering values (the user ID is visible and the password is obscu
 <p>Another example might be that you have code that creates a table, but you want to let
 the user choose the table name as well as the name of the column and a hidden value
 to assign to it. By specifing <code class="docutils literal"><span class="pre">False</span></code>, the user can see the value, and the SAS log
-shows the non-hidden marco mariables, followed by another code submission that uses
+shows the non-hidden macro mariables, followed by another code submission that uses
 the previously defined non-hidden variables&#8211;which are still available.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">ll</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
 <span class="s1">data &amp;dsname;</span>
@@ -430,6 +431,26 @@ a separate configuration definition (in your sascfg[_personal].py) for each one.
 convention for these is to use the &#8216;Server context :&#8217; value as the config name. That way it&#8217;s easy
 to know which server you will be connecting to.</p>
 </div>
+<div class="section" id="disconnecting-from-an-iom-session-and-reconnecting-back-to-it">
+<h2>Disconnecting from an IOM session and reconnecting back to it.<a class="headerlink" href="#disconnecting-from-an-iom-session-and-reconnecting-back-to-it" title="Permalink to this headline">¶</a></h2>
+<p>The IOM access method has the ability to disconnect from the workspace server and
+reconnect to it (the same one); IF the reconnect setting is configured for that workspace
+server in the Metadata Server. See &#8216;Client Reconnect&#8217; Advanced Options of the Workspace Server.
+This feature is new in version 2.2.2.</p>
+<p>This was implemented for cases like having a laptop in a docking station, connected to LAN (Ethernet).
+Then needing to take the laptop to a meeting; network switched to WiFi. Switching the network will lose
+the connection to the workspace server.</p>
+<p>In order to have this work, before disconnecting from your current network, you submit the disconnect()
+method of the SASsession object. You can then change networks. After you have a good network connection again,
+the next thing you submit will reconnect to that same workspace server and run.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;someIOMconfig&#39;</span><span class="p">)</span>
+<span class="p">[</span><span class="n">do</span> <span class="n">some</span> <span class="n">work</span> <span class="k">with</span> <span class="n">saspy</span><span class="p">]</span>
+<span class="n">sas</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+<span class="p">[</span><span class="n">switch</span> <span class="n">networks</span><span class="o">.</span> <span class="n">be</span> <span class="n">sure</span> <span class="n">you</span> <span class="n">have</span> <span class="n">established</span> <span class="n">a</span> <span class="n">network</span> <span class="n">connection</span><span class="p">]</span>
+<span class="n">do</span> <span class="n">more</span> <span class="n">saspy</span> <span class="n">work</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -476,7 +497,7 @@ to know which server you will be connecting to.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.1',
+            VERSION:'2.2.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
