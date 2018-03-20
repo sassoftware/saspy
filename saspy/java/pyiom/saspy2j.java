@@ -76,6 +76,14 @@ public class saspy2j
    static ConnectionFactoryInterface     cxf        = null;
    static Credential                     cred       = null;
 
+   static boolean[]                     fieldInclusionMask = new boolean[0];
+   static StringHolder                  retname            = new StringHolder();
+   static LongSeqHolder                 libraryAttrs       = new LongSeqHolder();
+   static StringSeqHolder               engineName         = new StringSeqHolder();
+   static VariableArray2dOfLongHolder   engineAttrs        = new VariableArray2dOfLongHolder();
+   static VariableArray2dOfStringHolder infoPropertyNames  = new VariableArray2dOfStringHolder();
+   static VariableArray2dOfStringHolder infoPropertyValues = new VariableArray2dOfStringHolder();
+
    static ConnectionInterface cx      = null;
    static IWorkspace          wksp    = null;
    static ILanguageService    lang    = null;
@@ -182,8 +190,21 @@ public class saspy2j
             SecurityPackageCredential            zcred   = new SecurityPackageCredential();
 
             cx = factory.getConnection(zcred);
+
+            obj1    = cx.getObject();
+            wksp    = IWorkspaceHelper.narrow(obj1);
+            uuid1   = wksp.UniqueIdentifier();
+            lang    = wksp.LanguageService();
+            filesvc = wksp.FileService();
+            datasvc = wksp.DataService();
+
+            libref = datasvc.UseLibref("work");
+            libref.LevelInfo(fieldInclusionMask, engineName, engineAttrs, libraryAttrs,
+                                 physicalName, infoPropertyNames, infoPropertyValues);
+            physname = filesvc.FullName(fn, physicalName.value[0]);
+            fileref = filesvc.AssignFileref(fn, "", physname, "encoding=\"utf-8\"", retname);
             }
-         catch (ConnectionFactoryException e)
+         catch (ConnectionFactoryException | LNameNoAssign | NoLibrary e)
             {
             String msg = e.getMessage();
             errp.write(msg);
@@ -241,7 +262,7 @@ public class saspy2j
                         }
                      else
                         errp.write("This workspace server is not configured for reconnecting. Did not disconnect.DISCONNECT");
-                       
+
                      errp.flush();
                      pgm = pgm.substring(idx + 13 + 33);
 
@@ -438,13 +459,6 @@ public class saspy2j
 private static void connect(boolean recon, boolean ods) throws IOException, ConnectionFactoryException, GenericError
    {
     boolean                       failed             = false;
-    boolean[]                     fieldInclusionMask = new boolean[0];
-    StringHolder                  retname            = new StringHolder();
-    LongSeqHolder                 libraryAttrs       = new LongSeqHolder();
-    StringSeqHolder               engineName         = new StringSeqHolder();
-    VariableArray2dOfLongHolder   engineAttrs        = new VariableArray2dOfLongHolder();
-    VariableArray2dOfStringHolder infoPropertyNames  = new VariableArray2dOfStringHolder();
-    VariableArray2dOfStringHolder infoPropertyValues = new VariableArray2dOfStringHolder();
 
     if (recon)
        {
