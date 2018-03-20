@@ -77,7 +77,7 @@ class SASconfigSTDIO:
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
 
-      self.verbose = self.cfgopts.get('verbose', False)
+      self.verbose = self.cfgopts.get('verbose', True)
       self.verbose = kwargs.get('verbose', self.verbose)
 
       insaspath = kwargs.get('saspath', '')
