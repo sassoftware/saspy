@@ -76,14 +76,6 @@ public class saspy2j
    static ConnectionFactoryInterface     cxf        = null;
    static Credential                     cred       = null;
 
-   static boolean[]                     fieldInclusionMask = new boolean[0];
-   static StringHolder                  retname            = new StringHolder();
-   static LongSeqHolder                 libraryAttrs       = new LongSeqHolder();
-   static StringSeqHolder               engineName         = new StringSeqHolder();
-   static VariableArray2dOfLongHolder   engineAttrs        = new VariableArray2dOfLongHolder();
-   static VariableArray2dOfStringHolder infoPropertyNames  = new VariableArray2dOfStringHolder();
-   static VariableArray2dOfStringHolder infoPropertyValues = new VariableArray2dOfStringHolder();
-
    static ConnectionInterface cx      = null;
    static IWorkspace          wksp    = null;
    static ILanguageService    lang    = null;
@@ -191,20 +183,9 @@ public class saspy2j
 
             cx = factory.getConnection(zcred);
 
-            obj1    = cx.getObject();
-            wksp    = IWorkspaceHelper.narrow(obj1);
-            uuid1   = wksp.UniqueIdentifier();
-            lang    = wksp.LanguageService();
-            filesvc = wksp.FileService();
-            datasvc = wksp.DataService();
-
-            libref = datasvc.UseLibref("work");
-            libref.LevelInfo(fieldInclusionMask, engineName, engineAttrs, libraryAttrs,
-                                 physicalName, infoPropertyNames, infoPropertyValues);
-            physname = filesvc.FullName(fn, physicalName.value[0]);
-            fileref = filesvc.AssignFileref(fn, "", physname, "encoding=\"utf-8\"", retname);
+            connect(false, false, true);
             }
-         catch (ConnectionFactoryException | LNameNoAssign | NoLibrary e)
+         catch (ConnectionFactoryException e)
             {
             String msg = e.getMessage();
             errp.write(msg);
@@ -220,7 +201,7 @@ public class saspy2j
          {
          if (! spn)
             omrpw = inp.readLine();
-         connect(false, false);
+         connect(false, false, false);
          }
 
       while (true)
@@ -245,7 +226,7 @@ public class saspy2j
                         {
                         if (reconnect)
                            {
-                           connect(true, false);
+                           connect(true, false, false);
                            lang.Submit(pgm.substring(0, idx));
                            pgm = pgm.substring(idx + 13 + 33);
                            }
@@ -292,7 +273,7 @@ public class saspy2j
                         {
                         if (reconnect)
                            {
-                           connect(true, false);
+                           connect(true, false, false);
                            lang.Submit(pgm);
                            break;
                            }
@@ -320,7 +301,7 @@ public class saspy2j
                {
                if (reconnect)
                   {
-                  connect(true, false);
+                  connect(true, false, false);
                   bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
                   }
                }
@@ -347,7 +328,7 @@ public class saspy2j
                      if (reconnect)
                         {
                         ods = true;
-                        connect(true, true);
+                        connect(true, true, false);
                         bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
                         bstr.Read(blen, odsdata);
                         }
@@ -387,7 +368,7 @@ public class saspy2j
                   catch (org.omg.CORBA.COMM_FAILURE e)
                      {
                      if (reconnect)
-                        connect(true, false);
+                        connect(true, false, false);
                      else
                         throw new IOException();
                      }
@@ -431,7 +412,7 @@ public class saspy2j
                      catch (org.omg.CORBA.COMM_FAILURE e)
                         {
                         if (reconnect)
-                           connect(true, false);
+                           connect(true, false, false);
                         else
                            throw new IOException();
                         }
@@ -456,75 +437,85 @@ public class saspy2j
           }
       }
 
-private static void connect(boolean recon, boolean ods) throws IOException, ConnectionFactoryException, GenericError
+private static void connect(boolean recon, boolean ods, boolean zero) throws IOException, ConnectionFactoryException, GenericError
    {
     boolean                       failed             = false;
+    boolean[]                     fieldInclusionMask = new boolean[0];
+    StringHolder                  retname            = new StringHolder();
+    LongSeqHolder                 libraryAttrs       = new LongSeqHolder();
+    StringSeqHolder               engineName         = new StringSeqHolder();
+    VariableArray2dOfLongHolder   engineAttrs        = new VariableArray2dOfLongHolder();
+    VariableArray2dOfStringHolder infoPropertyNames  = new VariableArray2dOfStringHolder();
+    VariableArray2dOfStringHolder infoPropertyValues = new VariableArray2dOfStringHolder();
 
-    if (recon)
+    if (! zero)
        {
-       try
-          {
-          server     = (BridgeServer) Server.fromURI(uri);
-          ad         = server.getDomain();
-
-          cxfConfig  = new ManualConnectionFactoryConfiguration(server);
-          cxfManager = new ConnectionFactoryManager();
-          cxf        = cxfManager.getFactory(cxfConfig);
-
-          if (spn)
-             cx = cxf.getConnection(cred);
-          else if (timeout > 0)
-             cx = cxf.getConnection(omruser, omrpw, ad, timeout);
-          else
-             cx = cxf.getConnection(omruser, omrpw, ad);
-          }
-       catch(ConnectionFactoryException e)
-          {
-          String msg = e.getMessage();
-          System.out.print(msg+"\n");
-          errp.write(msg+"\n");
-          errp.flush();
-          failed = true;
-          }
-       }
-    else
-       {
-       for (int i=0; i < hosts; i++)
+       if (recon)
           {
           try
              {
-             server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
-             if (appName != "")
-                server.setServerName(appName.replace("\'", ""));
-             server.setOption(SASURI.applicationNameKey, "SASPy");
-
-             if (spn)
-                server.setSecurityPackage(Server.SECURITY_PACKAGE_NEGOTIATE);
-
+             server     = (BridgeServer) Server.fromURI(uri);
+             ad         = server.getDomain();
+   
              cxfConfig  = new ManualConnectionFactoryConfiguration(server);
              cxfManager = new ConnectionFactoryManager();
              cxf        = cxfManager.getFactory(cxfConfig);
-
+   
              if (spn)
-                {
-                cred = SecurityPackageCredential.getInstance();
                 cx = cxf.getConnection(cred);
-                }
              else if (timeout > 0)
-                cx = cxf.getConnection(omruser, omrpw, timeout);
+                cx = cxf.getConnection(omruser, omrpw, ad, timeout);
              else
-                cx = cxf.getConnection(omruser, omrpw);
-             break;
+                cx = cxf.getConnection(omruser, omrpw, ad);
              }
-          catch (ConnectionFactoryException e)
+          catch(ConnectionFactoryException e)
              {
              String msg = e.getMessage();
              System.out.print(msg+"\n");
              errp.write(msg+"\n");
              errp.flush();
-             if (i+1 < hosts)
-                continue;
              failed = true;
+             }
+          }
+       else
+          {
+          for (int i=0; i < hosts; i++)
+             {
+             try
+                {
+                server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
+                if (appName != "")
+                   server.setServerName(appName.replace("\'", ""));
+                server.setOption(SASURI.applicationNameKey, "SASPy");
+   
+                if (spn)
+                   server.setSecurityPackage(Server.SECURITY_PACKAGE_NEGOTIATE);
+   
+                cxfConfig  = new ManualConnectionFactoryConfiguration(server);
+                cxfManager = new ConnectionFactoryManager();
+                cxf        = cxfManager.getFactory(cxfConfig);
+   
+                if (spn)
+                   {
+                   cred = SecurityPackageCredential.getInstance();
+                   cx = cxf.getConnection(cred);
+                   }
+                else if (timeout > 0)
+                   cx = cxf.getConnection(omruser, omrpw, timeout);
+                else
+                   cx = cxf.getConnection(omruser, omrpw);
+                break;
+                }
+             catch (ConnectionFactoryException e)
+                {
+                String msg = e.getMessage();
+                System.out.print(msg+"\n");
+                errp.write(msg+"\n");
+                errp.flush();
+                if (i+1 < hosts)
+                   continue;
+                failed = true;
+                }
              }
           }
        }
