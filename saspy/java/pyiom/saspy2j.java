@@ -187,13 +187,14 @@ public class saspy2j
             }
          catch (ConnectionFactoryException e)
             {
-            String msg = e.getMessage();
+            String msg = "We failed in getConnection\n"+e.getMessage();
             errp.write(msg);
             errp.flush();
             System.out.print(msg);
             sin.close();
             sout.close();
             serr.close();
+            e.printStackTrace();
             System.exit(-6);
             }
          }
@@ -231,7 +232,14 @@ public class saspy2j
                            pgm = pgm.substring(idx + 13 + 33);
                            }
                         else
+                           {
+                           String msg = "We failed in Submit\n"+e.getMessage();
+                           errp.write(msg);
+                           errp.flush();
+                           System.out.print(msg);
+                           e.printStackTrace();
                            throw new IOException();
+                           }
                         }
                      }
                   else if (eol.contains("DISCONNECT"))
@@ -278,7 +286,14 @@ public class saspy2j
                            break;
                            }
                         else
+                           {
+                           String msg = "We failed in Submit\n"+e.getMessage();
+                           errp.write(msg);
+                           errp.flush();
+                           System.out.print(msg);
+                           e.printStackTrace();
                            throw new IOException();
+                           }
                         }
                      }
                   }
@@ -333,7 +348,14 @@ public class saspy2j
                         bstr.Read(blen, odsdata);
                         }
                      else
+                        {
+                        String msg = "We failed in Submit\n"+e.getMessage();
+                        errp.write(msg);
+                        errp.flush();
+                        System.out.print(msg);
+                        e.printStackTrace();
                         throw new IOException();
+                        }
                      }
                   }
                bstr.Close();
@@ -370,13 +392,25 @@ public class saspy2j
                      if (reconnect)
                         connect(true, false, false);
                      else
+                        {
+                        String msg = "We failed in reading the List\n"+e.getMessage();
+                        errp.write(msg);
+                        errp.flush();
+                        System.out.print(msg);
+                        e.printStackTrace();
                         throw new IOException();
+                        }
                      }
                   catch (IOException e)
                      {
+                     String msg = "We failed in reading the List\n"+e.getMessage();
+                     errp.write(msg);
+                     errp.flush();
+                     System.out.print(msg);
                      sin.close();
                      sout.close();
                      serr.close();
+                     e.printStackTrace();
                      break;
                      }
                   }
@@ -414,13 +448,25 @@ public class saspy2j
                         if (reconnect)
                            connect(true, false, false);
                         else
+                           {
+                           String msg = "We failed in reading the Log\n"+e.getMessage();
+                           errp.write(msg);
+                           errp.flush();
+                           System.out.print(msg);
+                           e.printStackTrace();
                            throw new IOException();
+                           }
                         }
                      catch (IOException e)
                         {
+                        String msg = "We failed in reading the Log\n"+e.getMessage();
+                        errp.write(msg);
+                        errp.flush();
+                        System.out.print(msg);
                         sin.close();
                         sout.close();
                         serr.close();
+                        e.printStackTrace();
                         break;
                         }
                      }
@@ -428,6 +474,10 @@ public class saspy2j
                }
           catch (GenericError e)
              {
+             String msg = "We failed in outer loop\n"+e.getMessage();
+             errp.write(msg);
+             errp.flush();
+             System.out.print(msg);
              sin.close();
              sout.close();
              serr.close();
@@ -470,10 +520,11 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
              }
           catch(ConnectionFactoryException e)
              {
-             String msg = e.getMessage();
+             String msg = "We failed in getConnection\n"+e.getMessage();
              System.out.print(msg+"\n");
              errp.write(msg+"\n");
              errp.flush();
+             e.printStackTrace();
              failed = true;
              }
           }
@@ -508,12 +559,12 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
                 }
              catch (ConnectionFactoryException e)
                 {
-                String msg = e.getMessage();
+                if (i+1 < hosts)
+                   continue;
+                String msg = "We failed in getConnection\n"+e.getMessage();
                 System.out.print(msg+"\n");
                 errp.write(msg+"\n");
                 errp.flush();
-                if (i+1 < hosts)
-                   continue;
                 failed = true;
                 }
              }
@@ -536,11 +587,22 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
           reconnect = false;
           }
 
-       wksp    = IWorkspaceHelper.narrow(obj1);
-       uuid1   = wksp.UniqueIdentifier();
-       lang    = wksp.LanguageService();
-       filesvc = wksp.FileService();
-       datasvc = wksp.DataService();
+       try
+          {
+          wksp    = IWorkspaceHelper.narrow(obj1);
+          uuid1   = wksp.UniqueIdentifier();
+          lang    = wksp.LanguageService();
+          filesvc = wksp.FileService();
+          datasvc = wksp.DataService();
+          }
+       catch (Exception e)
+          {
+          String msg = "We failed in getConnection\n"+e.getMessage();
+          System.out.print(msg+"\n");
+          errp.write(msg+"\n");
+          errp.flush();
+          e.printStackTrace();
+          }
 
        try
           {
@@ -557,6 +619,10 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
           }
        catch (GenericError | LNameNoAssign | NoLibrary e)
           {
+          String msg = "We failed in getConnection\n"+e.getMessage();
+          System.out.print(msg+"\n");
+          errp.write(msg+"\n");
+          errp.flush();
           e.printStackTrace();
           }
        }
