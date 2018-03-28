@@ -1144,7 +1144,7 @@ class SASdata:
         :param obs: the number of rows of the table that you want to display. The default is 5
         :return:
         """
-        code = "proc sql;select count(*) into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;quit;"
+        code = "proc sql;select count(*) format best32. into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;quit;"
 
         nosub = self.sas.nosub
         self.sas.nosub = False
