@@ -157,7 +157,13 @@ In reverse order, the configuration definitions are Python dictionaries. Each di
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
 
 SAS_config_options has two options. The first option (lock_down) restricts (or allows) an end
-users' ability to override settings in the configuration definitions using ``SASsession()``.
+users' ability to override settings in the configuration definitions by passing them as parameters
+on the ``SASsession()``. Each of the keys in the configuration definition can be passed in at
+run time on the SASsession(). If lock_down is set to True, any keys defined in the configuration
+definition cannot be specified in SASsession(), Keys that are not specified in the Config Def, can be
+specified at run time on the SASsession(). If set to False, any config def key can be specified 
+on the SASsession(). 
+
 The second (verbose) controls the printing of some debug type messages.
 
 SAS_config_names is the list of configuration definition names to make available to an
