@@ -233,6 +233,28 @@ similar to the the one below is displayed.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">SAS</span> <span class="n">Connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="ow">is</span> <span class="mi">28207</span>
 </pre></div>
 </div>
+<p>Any of the keys in the configuration definition can be supplied as parameters
+on the SASsession() method. This allows you to change these values at run time,
+without having to edit the configuration file. However, whether you are allowed
+to override keys that are defined in the config def, is controlled by one of the
+configuration options (also in the sascfg[_personal].py); lock_down. If lock_down
+is True, the only keys you can supply as parameters on SASsession() are ones that
+are not specified in the config def. If lock_down is False, any key can be specified
+on the SASsession() method.</p>
+<p>For instance, with lock_down set to False and the following config def, you can
+override things at run time:</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">ssh</span>      <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span> <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ssh&#39;</span>     <span class="p">:</span> <span class="s1">&#39;/usr/bin/ssh&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;host&#39;</span>    <span class="p">:</span> <span class="s1">&#39;remote.linux.host&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">]</span>
+           <span class="p">}</span>
+
+
+<span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;ssh&#39;</span><span class="p">,</span>
+                       <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">,</span> <span class="s2">&quot;-autoexec&quot;</span><span class="p">,</span> <span class="s2">&quot;/home/my.autoexec.sas&quot;</span><span class="p">],</span>
+                       <span class="n">host</span><span class="o">=</span><span class="s2">&quot;&#39;other.host.with.sas&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="load-data-into-sas">
 <h2>Load data into SAS<a class="headerlink" href="#load-data-into-sas" title="Permalink to this headline">¶</a></h2>

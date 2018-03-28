@@ -315,8 +315,13 @@ at the PYTHONPATH environment variable (if it&#8217;s set), but more definitivel
 <p>In reverse order, the configuration definitions are Python dictionaries. Each dictionary
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.</p>
 <p>SAS_config_options has two options. The first option (lock_down) restricts (or allows) an end
-users&#8217; ability to override settings in the configuration definitions using <code class="docutils literal"><span class="pre">SASsession()</span></code>.
-The second (verbose) controls the printing of some debug type messages.</p>
+users&#8217; ability to override settings in the configuration definitions by passing them as parameters
+on the <code class="docutils literal"><span class="pre">SASsession()</span></code>. Each of the keys in the configuration definition can be passed in at
+run time on the SASsession(). If lock_down is set to True, any keys defined in the configuration
+definition cannot be specified in SASsession(), Keys that are not specified in the Config Def, can be
+specified at run time on the SASsession(). If set to False, any config def key can be specified
+on the SASsession().</p>
+<p>The second (verbose) controls the printing of some debug type messages.</p>
 <p>SAS_config_names is the list of configuration definition names to make available to an
 end user at connection time. Any configuration definitions that are not listed in
 SAS_config_names are simply inaccessible by an end user. You can add several configuration
