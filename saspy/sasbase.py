@@ -960,10 +960,10 @@ class SASdata:
 
             .. code-block:: python
 
-                             {'where'    : 'msrp < 20000 and make = "Ford"'
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
-                              'obs'      :  10
+                             {'where'    : 'msrp < 20000 and make = "Ford"',
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight',
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'],
+                              'obs'      :  10,
                               'firstobs' : '12'
                              }
         end comment
