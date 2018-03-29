@@ -77,7 +77,7 @@ class SASProcCommons:
         if self.sasproduct.lower() == 'em':
             outmeth = ''
             plot = ''
-        if self.sasproduct.lower() == 'dmml':
+        if self.sasproduct.lower() == 'vddml':
             outmeth = 'out'
             plot = ''
         self.logger.debug("product caller: " + self.sasproduct.lower())
@@ -113,17 +113,57 @@ class SASProcCommons:
         # only three valid values logistic, mlp, mlp direct
         if 'architecture' in args:
             self.logger.debug("architecture statement,length: %s,%s", args['architecture'], len(args['architecture']))
-            if args['architecture'].lower().strip() in ['logistic', 'mlp', 'mlp direct']:
-                code += "architecture %s;\n" % (args['architecture'])
+            if self.sasproduct.lower() == 'vddml':
+                if args['architecture'].lower().strip() in ['glim', 'mlp', 'mlp direct']:
+                    code += "architecture %s;\n" % (args['architecture'])
+                else:
+                    print("ERROR in code submission. ARCHITECTURE can only have one of these")
+                    print("values -- ['glim', 'mlp', 'mlp direct'] you submitted: %s", args['architecture'])
             else:
-                print("ERROR in code submission. ARCHITECTURE can only have one of these")
-                print("values -- ['logistic', 'mlp', 'mlp direct'] you submitted: %s", args['architecture'])
+                if args['architecture'].lower().strip() in ['logistic', 'mlp', 'mlp direct']:
+                    code += "architecture %s;\n" % (args['architecture'])
+                else:
+                    print("ERROR in code submission. ARCHITECTURE can only have one of these")
+                    print("values -- ['logistic', 'mlp', 'mlp direct'] you submitted: %s", args['architecture'])
+
+
         if 'assess' in args:
             self.logger.debug("assess statement,length: %s,%s", args['assess'], len(args['assess']))
             code += "assess %s;\n" % (args['assess'])
         if 'autoreg' in args:
             self.logger.debug("autoreg statement,length: %s,%s", args['autoreg'], len(args['autoreg']))
             code += "autoreg %s;\n" % (args['autoreg'])
+        if 'autotune' in args:
+            if isinstance(args['autotune'], bool):
+                if args['autotune'] == True:
+                    code += 'autotune;\n'
+            elif isinstance(args['autotune'], str):
+                self.logger.debug("autotune statement,length: %s,%s", args['autotune'], len(args['autotune']))
+                code += "autotune %s;\n" % (args['autotune'])
+            elif isinstance(args['autotune'], dict):
+                try:
+                    if 'interval' in args['autotune'].keys():
+                        if isinstance(args['autotune']['interval'], str):
+                            code += "input %s /level=%s;\n" % (args['autotune']['interval'], intstr)
+                        if isinstance(args['autotune']['interval'], list):
+                            code += "input %s /level=%s;\n" % (" ".join(args['autotune']['interval']), intstr)
+                    if 'nominal' in args['autotune'].keys():
+                        if isinstance(args['autotune']['nominal'], str):
+                            code += "input %s /level=%s;\n" % (args['autotune']['nominal'], nomstr)
+                        if isinstance(args['autotune']['nominal'], list):
+                            code += "input %s /level=%s;\n" % (" ".join(args['autotune']['nominal']), nomstr)
+                except:
+                    raise SyntaxError("Proper Keys not found for AUTOTUNE dictionary: %s" % args['autotune'].keys())
+            elif isinstance(args['autotune'], list):
+                if len(args['autotune']) == 1:
+                    code += "autotune %s;\n" % str(args['autotune'][0])
+                elif len(args['autotune']) > 1:
+                    code += "autotune %s;\n" % " ".join(args['autotune'])
+                else:
+                    raise SyntaxError("The autotune list has no members")
+            else:
+                raise SyntaxError("AUTOTUNE is in an unknown format: %s" % str(args['input']))
+
         if 'bayes' in args:
             self.logger.debug("bayes statement,length: %s,%s", args['bayes'], len(args['bayes']))
             code += "bayes %s;\n" % (args['bayes'])
@@ -323,6 +363,9 @@ class SASProcCommons:
         if 'oddsratio' in args:
             self.logger.debug("oddsratio statement,length: %s,%s", args['oddsratio'], len(args['oddsratio']))
             code += "oddsratio %s;\n" % (args['oddsratio'])
+        if 'optimization' in args:
+            self.logger.debug("optimization statement,length: %s,%s", args['optimization'], len(args['optimization']))
+            code += "optimization %s;\n" % (args['optimization'])
         if 'outarrays' in args:
             self.logger.debug("outarrays statement,length: %s,%s", args['outarrays'], len(args['outarrays']))
             code += "outarrays %s;\n" % (args['outarrays'])

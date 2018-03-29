@@ -46,7 +46,7 @@ class SASViyaML:
         """
         Submit an initial set of macros to prepare the SAS system
         """
-        self.sasproduct = "dmml"
+        self.sasproduct = "vddml"
         # create logging
         # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
@@ -56,84 +56,130 @@ class SASViyaML:
 
     def factmac(self, **kwargs: dict) -> object:
         """
-        Python method to call the HPFOREST procedure
+        Python method to call the FACTMAC procedure
 
         required_set = {'input', 'target'}
-        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score'}
+        legal_set= {'code','input', 'id', 'output', 'savestate', 'target', 'autotune'}
 
         Documentation link:
-        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+        http://documentation.sas.com/?docsetId=casml&docsetTarget=viyaml_factmac_toc.htm&docsetVersion=8.2&locale=en
         :param kwargs: dict
         :return: SAS result object
         """
         required_set = {'input', 'target'}
-        legal_set = {'freq', 'input', 'id', 'target', 'save', 'score', 'procopts'}
-        # print ("I am HERE")
+        legal_set = {'code', 'input', 'id', 'output', 'savestate', 'target', 'autotune'}
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("HPFOREST", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc("FACTMAC", required_set, legal_set, **kwargs)
+
+    def fastknn(self, **kwargs: dict) -> object:
+        """
+        Python method to call the FASTKNN procedure
+
+        required_set = {'input', 'id'}
+        legal_set = {'input', 'id', 'output'}
+
+        Documentation link:
+        http://documentation.sas.com/?docsetId=casml&docsetTarget=viyaml_fastknn_toc.htm&docsetVersion=8.2&locale=en
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'input', 'id'}
+        legal_set = {'input', 'id', 'output'}
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc("FASTKNN", required_set, legal_set, **kwargs)
 
     def forest(self, **kwargs: dict) -> object:
         """
-        Python method to call the HPCLUS procedure
 
-        required_set = {'input'}
-        legal_set= {'freq', 'input', 'id', 'score'}
+        Python method to call the FOREST procedure
+
+        required_set = {'input', 'target'}
+        legal_set = {'autotune', 'code', 'crossvalidation', 'grow', 'id', 'input',
+                     'output', 'partition', 'savestate', 'target', 'weight', 'procopts'}
 
         Documentation link:
-        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+        http://documentation.sas.com/?docsetId=casml&docsetTarget=viyaml_forest_toc.htm&docsetVersion=8.2&locale=en
         :param kwargs: dict
         :return: SAS result object
         """
-        required_set = {'input'}
-        legal_set = {'freq', 'input', 'id', 'score', 'procopts'}
+        required_set = {'input', 'target'}
+        legal_set = {'autotune', 'code', 'crossvalidation', 'grow', 'id', 'input',
+                     'output', 'partition', 'savestate', 'target', 'weight', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("HPCLUS", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc("FOREST", required_set, legal_set, **kwargs)
 
     def gradboost(self, **kwargs: dict) -> object:
         """
         Python method to call the HPCLUS procedure
 
-        required_set = {'input'}
-        legal_set= {'freq', 'input', 'id', 'score'}
+        legal_set = {'autotune', 'code', 'crossvalidation', 'id', 'input',
+                     'output', 'partition', 'savestate', 'target', 'weight', 'procopts'}
 
         Documentation link:
-        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+        http://documentation.sas.com/?docsetId=casml&docsetTarget=viyaml_gradboost_toc.htm&docsetVersion=8.2&locale=en
         :param kwargs: dict
         :return: SAS result object
         """
-        required_set = {'input'}
-        legal_set = {'freq', 'input', 'id', 'score', 'procopts'}
+        required_set = {'input', 'target'}
+        legal_set = {'autotune', 'code', 'crossvalidation', 'id', 'input',
+                     'output', 'partition', 'savestate', 'target', 'weight', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("HPCLUS", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc("GRADBOOST", required_set, legal_set, **kwargs)
 
     def nnet(self, **kwargs: dict) -> object:
         """
         Python method to call the HPNEURAL procedure
 
         required_set = {'input', 'target', 'train'}
-        legal_set= {'freq', 'input', 'id', 'target', 'save', 'score',
-                    'architecture', 'weight', 'hidden', 'partition', 'train'}
+        legal_set= {'input', 'hidden', 'target', 'train', 'crossvalidation', 'code',
+                    'architecture', 'weight', 'optimization', 'partition', 'procopts'}
         Documentation link:
-        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+        http://documentation.sas.com/?docsetId=casml&docsetTarget=viyaml_nnet_toc.htm&docsetVersion=8.2&locale=en
         :param kwargs: dict
         :return: SAS result object
         """
         required_set = {'input', 'target', 'train'}
-        legal_set = {'freq', 'input', 'id', 'target', 'save', 'score',
-                     'architecture', 'weight', 'hidden', 'partition', 'train', 'procopts'}
+        legal_set = {'input', 'hidden', 'target', 'train', 'crossvalidation', 'code',
+                     'architecture', 'weight', 'optimization', 'partition', 'procopts'}
         logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("HPNEURAL", required_set, legal_set, **kwargs)
+        return SASProcCommons._run_proc("NNET", required_set, legal_set, **kwargs)
 
-    def svmachine(self, **kwargs: dict) -> object:
+    def svdd(self, **kwargs: dict) -> object:
         """
-        Python method to call the HPSVM procedure
+        Python method to call the SVDD procedure
 
+        required_set = {'input'}
+        legal_set = {'code', 'input', 'id', 'solver', 'savestate', 'kernel',
+                     'weight', 'procopts'}
         Documentation link:
-        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+        http://documentation.sas.com/?docsetId=casml&docsetTarget=viyaml_svdd_toc.htm&docsetVersion=8.2&locale=en
         :param kwargs: dict
         :return: SAS result object
         """
-        pass
+        required_set = {'input'}
+        legal_set = {'code', 'input', 'id', 'solver', 'savestate', 'kernel',
+                     'weight', 'procopts'}
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc("SVDD", required_set, legal_set, **kwargs)
+
+    def svmachine(self, **kwargs: dict) -> object:
+        """
+        Python method to call the SVMACHINE procedure
+        required_set = {'input'}
+        legal_set = {'autotune', 'code', 'input', 'id', 'solver', 'savestate', 'kernel', 'partition','
+
+                     'target', 'procopts'}
+
+        Documentation link:
+        http://documentation.sas.com/?docsetId=casml&docsetTarget=viyaml_svmachine_toc.htm&docsetVersion=8.2&locale=en
+        :param kwargs: dict
+        :return: SAS result object
+        """
+        required_set = {'input', 'target'}
+        legal_set = {'autotune', 'code', 'input', 'id', 'savestate', 'kernel',
+                     'partition', 'target', 'procopts'}
+        logging.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc("SVMACHINE", required_set, legal_set, **kwargs)
 
     def textmine(self, **kwargs: dict) -> object:
         """
