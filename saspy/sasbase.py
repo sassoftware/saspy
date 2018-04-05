@@ -41,6 +41,7 @@ import sys
 import re
 # from pdb import set_trace as bp
 import logging
+from types import ModuleType
 
 try:
    import pandas as pd
@@ -88,13 +89,35 @@ class SASconfig:
         self.mode = ''
 
         # GET Config options
-        try:
-            self.cfgopts = getattr(SAScfg, "SAS_config_options")
-        except:
-            self.cfgopts = {}
+        # if sascfg.py is setup to use configparser, do so
+        # otherwise use module-level attributes to preserve functionality
+        
+        # if a filename is specified, read that config, else use the default
+        # created at install-time
+        local_config = __file__.replace("sasbase.py", "config.ini")
+        configFileName = kwargs.get("filename", local_config)
+
+        # if the module has read_config, we will use a config file
+        if hasattr(SAScfg, "read_config"):
+            useConfig = True
+            print("use config: ", useConfig)
+            cp = SAScfg.read_config(configFileName)
+            if "SAS_config_options" in cp:
+                self.cfgopts = dict(cp["SAS_config_options"])
+            else:
+                self.cfgopts = {}
+        else:
+            useConfig = False
+            try:
+                self.cfgopts = getattr(SAScfg, "SAS_config_options")
+            except:
+                self.cfgopts = {}
 
         # GET Config names
-        configs = getattr(SAScfg, "SAS_config_names")
+        if useConfig:
+            configs = cp.get("SAS_config_names", "names").split(',')
+        else:
+            configs = getattr(SAScfg, "SAS_config_names")
 
         cfgname = kwargs.get('cfgname', '')
 
@@ -121,7 +144,10 @@ class SASconfig:
               raise KeyboardInterrupt
 
         self.name = cfgname
-        cfg = getattr(SAScfg, cfgname)
+        if useConfig:
+            cfg = dict(cp[cfgname])
+        else:
+            cfg = getattr(SAScfg, cfgname)
 
         ip           = cfg.get('ip', '')
         ssh          = cfg.get('ssh', '')

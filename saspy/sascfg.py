@@ -92,6 +92,18 @@ def handle_classpath():
     cpW += localPath+"java\\saspyiom.jar"
     return cpW
 
+
+def read_config(path):
+    """
+    Wrapper to read a config file. This function's existence in this module 
+    gets checked and is used to determine if we're using a config file or
+    a sascfg.py that directly sets module-level attributes
+    """
+    cp = configparser.ConfigParser()
+    cp.read(path)
+    return cp
+
+
 SAS_config_names=['default']
 
 # Configuration options for saspy - python Dict
