@@ -31,13 +31,66 @@
 # 
 #SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http']
 #
+import configparser
+import os
+
 def init_config():
     """
     Attempt to create a reasonable config file for the system being installed
     onto.
     """
-    pass
+    # init a blank config file that we will add sections to
+    cp = configparser.ConfigParser()
+    sec = "SAS_config_names"
+    cp.add_section(sec)
+    cp.set(sec, "names", "default,winlocal")
 
+    sec = "SAS_config_options"
+    cp.add_section(sec)
+    cp.set(sec, "lock_down", "False")
+    cp.set(sec, "verbose", "True")
+
+    sec = "SAS_output_options"
+    cp.add_section(sec)
+    cp.set(sec, "output", "html5")
+
+    sec = "winlocal"
+    cp.add_section(sec)
+    cp.set(sec, "java", "java")
+    cp.set(sec, "encoding", "windows-1252")
+    cp.set(sec, "classpath", handle_classpath())
+    confname = __file__.replace("sascfg.py", '')
+    with open(confname+'config.ini', 'w') as conf:
+        cp.write(conf)
+
+
+def handle_classpath():
+    """
+    Attempt to make a smart guess as to default locations of jars required
+    in classpath of java call
+    """
+    # build out a local classpath variable to use below for Windows clients
+    cpW = ""
+    # these are the jars we need
+    targetsW = ["sas.svc.connection.jar", "log4j.jar",
+                "sas.security.sspi.jar", "sas.core.jar"]
+    # this is the default location on Windows
+    depDir = "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\"
+    # try to get the folders in that location
+    if os.path.isdir(depDir):
+    	ls = os.walk(depDir)
+    else:
+    	ls = []
+    # check each folder for the jars we want (only look in deploywiz folder) 
+    # and remove from targetsW to avoid duplicates
+    for path, _, files in ls:
+        for fname in files:
+            if fname in targetsW:
+                if path.lower().find("deploywiz") > -1:
+                    cpW += path+'\\'+targetsW.pop(targetsW.index(fname))+';'
+    localPath = __file__.replace("sascfg.py","")
+    cpW += localPath+"java\\saspyiom.jar"
+    return cpW
 
 SAS_config_names=['default']
 
