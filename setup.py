@@ -19,11 +19,29 @@ exec(open('./saspy/version.py').read())
 
 try:
     from setuptools import setup
+    from setuptools.command.develop import develop
+    from setuptools.command.install import install
 except ImportError:
     from distutils.core import setup
 
 with open('README.md') as f:
     readme = f.read()
+
+
+class PostDevelopCommand(develop):
+    """Post-installation for development mode."""
+    def run(self):
+        import saspy
+        saspy.sascfg.init_config()
+        develop.run(self)
+
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        import saspy
+        saspy.sascfg.init_config()
+        install.run(self)
 
 setup(name='saspy',
       version = __version__,
@@ -33,7 +51,10 @@ setup(name='saspy',
       author_email = 'Tom.Weber@sas.com',
       url = 'https://github.com/sassoftware/saspy',
       packages = ['saspy'],
-      cmdclass = {},
+      cmdclass = {
+                  'develop': PostDevelopCommand,
+                   'install': PostInstallCommand
+                  },
       package_data = {'': ['*.js', '*.md', '*.yaml', '*.css', '*.rst'], 'saspy': ['*.sas', 'java/*.*', 'java/pyiom/*.*']},
       install_requires = ['pygments', 'ipython>=4.0.0'],
       classifiers = [

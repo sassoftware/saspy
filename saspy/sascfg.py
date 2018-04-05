@@ -31,6 +31,13 @@
 # 
 #SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http']
 #
+def init_config():
+    """
+    Attempt to create a reasonable config file for the system being installed
+    onto.
+    """
+    pass
+
 
 SAS_config_names=['default']
 
