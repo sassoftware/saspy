@@ -50,6 +50,7 @@ specify the cfgname parameter. If the file has more than one connection
 definition and you do not specify the one to use with cfgname, you are 
 prompted for the connection to use. 
 
+
 After a connection is made and a SAS session is started, a note that is 
 similar to the the one below is displayed.
 
@@ -61,6 +62,33 @@ similar to the the one below is displayed.
 .. parsed-literal::
 
     SAS Connection established. Subprocess id is 28207
+
+
+Any of the keys in the configuration definition can be supplied as parameters
+on the SASsession() method. This allows you to change these values at run time,
+without having to edit the configuration file. However, whether you are allowed 
+to override keys that are defined in the config def, is controlled by one of the
+configuration options (also in the sascfg[_personal].py); lock_down. If lock_down
+is True, the only keys you can supply as parameters on SASsession() are ones that
+are not specified in the config def. If lock_down is False, any key can be specified
+on the SASsession() method.
+
+For instance, with lock_down set to False and the following config def, you can
+override things at run time:
+
+.. code-block:: ipython3
+
+
+    ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+                'ssh'     : '/usr/bin/ssh',
+                'host'    : 'remote.linux.host',
+                'options' : ["-fullstimer"]
+               }
+
+
+    sas = saspy.SASsession(cfgname='ssh', 
+                           options=["-fullstimer", "-autoexec", "/home/my.autoexec.sas"],
+                           host="'other.host.with.sas")
 
 
 Load data into SAS

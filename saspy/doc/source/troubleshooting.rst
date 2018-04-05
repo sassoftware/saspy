@@ -326,6 +326,28 @@ And if we run that command ourselves... Same error as was reported.
             at java.lang.ClassLoader.loadClass(Unknown Source)
             ... 19 more
         
+
+A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
+This can be resolved by adding it back in, using the 'javaparms' key of your configuration definition as shown below.
+
+If you see an error like this:
+
+.. code-block:: ipython3
+
+    Using SAS Config named: winiomwin
+    Java Error:
+    Error: Unable to initialize main class pyiom.saspy2j
+    Caused by: java.lang.NoClassDefFoundError: org/omg/CORBA/UserException
+   
+Then you can add CORBA back into the search path via the 'javaparms' key (there may be other ways you can do this, but this has been reported to work):
+
+.. code-block:: ipython3
+
+    winiomwin = {"java"     : "java",
+                 "encoding" : "windows-1252",
+                 "classpath": cpW,
+                 "javaparms": ["--add-modules=java.corba"],
+                }
     
 
 If you run the Java command and you see an error similar to the following, about a socket connection failure, that suggests that your CLASSPATH is correct
@@ -355,7 +377,11 @@ There are a few obvious misconfigurations that can happen here.
    1) The 'iomhost' or 'iomport' you've specified aren't right, or the server isn't up and available to be connected to.
    2) Your credentials were specifed wrong, or you don't have permission to connect.
    3) for Windows Local connection, you don't have the path to the sspiauth.dll in yout System Path variable.
+   4) for Windows Local connection, the registry doesn't have the right path to the SAS start up command.
+   5) for Windows Local connection, the start up command in the registry isn't formated just right. Blanks, quotes, ...
 
+
+1) The application could not log on to the server "Linux-1:333". No server is available at that port on that machine.
 
 .. code-block:: ipython3
 
@@ -371,6 +397,8 @@ There are a few obvious misconfigurations that can happen here.
     No SAS process attached. SAS process has terminated unexpectedly.
     
 
+2) The application could not log on to the server "Linux-1:8591". The user ID "wrong_user" or the password is incorrect.
+
 .. code-block:: ipython3
 
 
@@ -385,6 +413,8 @@ There are a few obvious misconfigurations that can happen here.
     
     No SAS process attached. SAS process has terminated unexpectedly.
 
+
+3)  The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.
 
 .. code-block:: ipython3
 
@@ -404,10 +434,80 @@ There are a few obvious misconfigurations that can happen here.
     No SAS process attached. SAS process has terminated unexpectedly.
     
     
+4) The application could not find a command to launch a SAS Workspace Server.
+
+.. code-block:: ipython3
+
+
+    >>> sas = saspy.SASsession()
+    The application could not find a command to launch a SAS Workspace Server.
+    SAS process has terminated unexpectedly. RC from wait was: 4294967290
+    SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
+    
+    Attempted to run program java with the following parameters:['java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
+    'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
+    
+    Be sure the path to sspiauth.dll is in your System PATH
+    
+    No SAS process attached. SAS process has terminated unexpectedly.
+
+
+
+If you get this error: The application could not find a command to launch a SAS Workspace Server.
+There is a workaround you can use. Oh course, having a clean SAS install should keep this from happening, but this error has been reported a couple times.
+The work around for this is to use the 'javaparms' option on the configuration definition to specify the command manually as follows (use the right path on your system, of course):
+
+.. code-block:: ipython3
+    
+    'javaparms' : ['-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd="C:\PROGRA~1\SASHome\SASFOU~1\9.4\SAS.EXE"']
+   
+
+    
+5) The application could not log on to the server. The server process did not start.
+
+.. code-block:: ipython3
+
+    >>> sas = saspy.SASsession()
+    The application could not log on to the server. The server process did not start.
+    SAS process has terminated unexpectedly. RC from wait was: 4294967290
+    SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
+    
+    Attempted to run program java with the following parameters:['java', '-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd=C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\SAS.EXE -config C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\sasv9.cfg -objectserver 
+    -nologo -noinal -noprngetlist', '-classpath', 
+    'C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar;
+    C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485___xx__sp0__1\\deploywiz\\log4j.jar;
+    C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar;
+    C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__pxx__sp0__1\\deploywiz\\sas.core.jar;
+    C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
+    'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                  
+
+    Be sure the path to sspiauth.dll is in your System PATH
+    
+    No SAS process attached. SAS process has terminated unexpectedly.
+
+
+If you get this error: The application could not log on to the server. The server process did not start.
+And you have what seems to be the correct start up command in your registry; key=HKEY_CLASSES_ROOT\CLSID\{440196D4-90F0-11D0-9F41-00A024BB830C}\LocalServer32.
+It may still not be formatted exactly right regaring quoted paths, or blanks in the paths, or the char8 '~' parts.
+There is a easy way to have SAS re-register this in the Windows Registry that should clean this up and make it correct.
+Run your sas.exe (you can do this from a CMD Prompt; may need fully qualified path for sas.exe) with the following option: /regserver
+
+.. code-block:: ipython3
+    
+    [C:\...\]sas.exe /regserver
+   
+If this doesn't fix the issue, you can try the same workaround as #4 above, using the javaparms to specify the command.
+The best option is to quote all paths in that command. In the error message above, you can see that javaparms was used to specify the command,
+which failed. If I quote both of the paths in that parameter, then it works.
+
+.. code-block:: ipython3
+
+    '-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd="C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\SAS.EXE" -config "C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\sasv9.cfg" -objectserver -nologo -noinal -noprngetlist'
+
+
 
 So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn't
 have any problems, it should just work! 
-
 
 
 *********************

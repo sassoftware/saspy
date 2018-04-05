@@ -19,10 +19,15 @@ or, for a specific release::
 
     pip install http://github.com/sassoftware/saspy/releases/saspy-X.X.X.tar.gz
 
+or, for a given branch (put the name of the branch after @)::
+
+    pip install git+https://git@github.com/sassoftware/saspy.git@branchname
 
 To use this module after installation, you need to edit the sascfg.py file to 
-configure it to be able to connect and start a SAS session. Follow the 
-instructions in the next section.
+configure it to be able to connect and start a SAS session. Note, you should 
+actually copy sascfg.py to sascfg_personal.py and edit sascfg_personal.py.
+This way your edit's won't be overridden if a new sascfg.py is pulled.
+Follow the instructions in the next section.
 
 * If you run into any problems, see :doc:`troubleshooting`.
 * If you have questions, open an issue at https://github.com/sassoftware/saspy/issues.
@@ -140,8 +145,8 @@ at the PYTHONPATH environment variable (if it's set), but more definitively by s
     sys.path
 
         
-sascfg.py details
-=================
+sascfg.py (saspy_personal.py) details
+=====================================
 There are three main parts to this configuration file.
 
         1) SAS_config_names
@@ -151,8 +156,15 @@ There are three main parts to this configuration file.
 In reverse order, the configuration definitions are Python dictionaries. Each dictionary 
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
 
-SAS_config_options has one option. The option restricts (or allows) an end users' ability 
-to override settings in the configuration definitions using ``SASsession()``.
+SAS_config_options has two options. The first option (lock_down) restricts (or allows) an end
+users' ability to override settings in the configuration definitions by passing them as parameters
+on the ``SASsession()``. Each of the keys in the configuration definition can be passed in at
+run time on the SASsession(). If lock_down is set to True, any keys defined in the configuration
+definition cannot be specified in SASsession(), Keys that are not specified in the Config Def, can be
+specified at run time on the SASsession(). If set to False, any config def key can be specified 
+on the SASsession(). 
+
+The second (verbose) controls the printing of some debug type messages.
 
 SAS_config_names is the list of configuration definition names to make available to an
 end user at connection time. Any configuration definitions that are not listed in 
@@ -249,7 +261,7 @@ tunnel -
 
 IOM
 ===
-The connection method opens many connectivity options. This method enables you to use
+This connection method opens many connectivity options. This method enables you to use
 `SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__
 to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
 Manager to control the distribution of connections to the various grid nodes
@@ -304,6 +316,13 @@ SAS is installed on, to your client (where python is running), even if one is Un
     or else you will get an error like this: SyntaxError: (unicode error) 'unicodeescape' codec can't decode 
     bytes in position 3-4: truncated \UXXXXXXXX escape 
 
+It has been reported to me that Java9 no longer includes CORBA in it's default search path. CORBA is a requirement for
+the IOM Client. This can easily be added back in using the 'javaparms' configuration key (defined below), as follows.
+
+::
+
+    "javaparms": ["--add-modules=java.corba"],
+  
 
 
 The IOM access method now has support for getting the required user/password from an authinfo file in the user's home directory
@@ -332,8 +351,13 @@ The authinfo file in the home directory for user Bob, with a password of BobsPW1
 
 Remote
 ~~~~~~
-A remote connection is defined as a connection to any workspace server on any SAS platform 
-from either a Unix or Windows client. 
+A remote connection is defined as a connection to any Workspace Server on any SAS platform 
+from either a Unix or Windows client. This module does not connect to a SAS Metadata Server (OMR),
+but rather connects directly to an Object Spawner to get access to a Workspace Server. If you already
+access these with other SAS clients, like Enterprise Guide (EG), you may already be familiar with
+connecting to OMR, but not directly to the others by host/port. There is information in the
+:doc:`advanced-topics` section about using Proc iomoperate to find Object Spawners and Workspace 
+Server to get values for the three keys defined below (iomhost, iomport, appserver).
 
 The following keys are available for the configuration definition dictionary:
 
@@ -371,6 +395,15 @@ appserver -
     If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
     that you want to connect to, i.e.: 'SASApp - Workspace Server'. Without this the Object spawner will only try the
     first one in the list of app servers it supports.
+sspi -
+    New in 2.17, there is support for IWA (Integrated Windows Authentication) from a Windows client to remote IOM server.
+    This is simply a boolean, so to use it you specify 'sspi' : True. Also, to use this, you must have the path to the
+    spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
+    See the second paragraph under Local IOM for more on this.
+javaparms -
+    The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
+    does allows for a way to specify them if something was needed.
+
 
 .. code-block:: ipython3
 
@@ -424,6 +457,14 @@ appserver -
                    'classpath' : cpW
                   }
 
+    # Windows client and with IWA to Remote IOM server
+    winiomIWA   = {'java'      : 'java',
+                   'iomhost'   : 'some.iom.host',
+                   'iomport'   : 8591,
+                   'classpath' : cpW,
+                   'sspi'      : True
+                  }
+
 
 Local
 ~~~~~
@@ -457,6 +498,10 @@ encoding  -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and 
     windows-1252, respectively. 
+javaparms -
+    The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
+    does allows for a way to specify them if something was needed.
+
 
 .. code-block:: ipython3
 

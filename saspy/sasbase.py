@@ -49,10 +49,10 @@ except ImportError:
 
 try:
    import saspy.sascfg_personal as SAScfg
-except:
+except ImportError:
    try:
       import sascfg_personal as SAScfg
-   except:
+   except ImportError:
       import saspy.sascfg as SAScfg
 
 try:
@@ -115,9 +115,11 @@ class SASconfig:
                         str(configs) + " ")
 
         while cfgname not in configs:
-            cfgname = self._prompt(
-                "The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: " +
-                str(configs) + " ")
+           cfgname = self._prompt(
+              "The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: " +
+              str(configs) + " ")
+           if cfgname is None:
+              raise KeyboardInterrupt
 
         self.name = cfgname
         cfg = getattr(SAScfg, cfgname)
@@ -137,6 +139,7 @@ class SASconfig:
         elif len(path) > 0:
             self.mode = 'STDIO'
         else:
+            print("Configuration Definition "+cfgname+" is not valid. Failed to create a SASsession.")
             self.valid = False
 
     def _prompt(self, prompt, pw=False):
@@ -145,18 +148,18 @@ class SASconfig:
                 try:
                     return input(prompt)
                 except KeyboardInterrupt:
-                    return ''
+                    return None
             else:
                 try:
                     return getpass.getpass(prompt)
                 except KeyboardInterrupt:
-                    return ''
+                    return None
         else:
             try:
                 return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
                                                    password=pw)
             except KeyboardInterrupt:
-                return ''
+                return None
 
 
 class SASsession():
@@ -201,18 +204,6 @@ class SASsession():
     :param encoding: This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
     :param classpath: classpath to IOM client jars and saspyiom client jar.
 
-    **Compute Service**
-
-    and for the HTTP IO module to connect to SAS Viya
-
-    :param ip: host address
-    :param port: port; the code Defaults this to 80 (the Compute Services default port)
-    :param context: context name defined on the compute service
-    :param options: SAS options to include in the start up command line
-    :param user: user name to authenticate with
-    :param pw: password to authenticate with
-    :param encoding: This is the python encoding value that matches the SAS session encoding
-
     """
 
     # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
@@ -230,6 +221,7 @@ class SASsession():
         self.sascei         = ''
 
         if not self.sascfg.valid:
+            self._io = None
             return
 
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
@@ -269,6 +261,9 @@ class SASsession():
 
         :return: output
         """
+        if self._io is None:
+           return "This SASsession object is not valid\n"
+
         x  = "Access Method         = %s\n" % self.sascfg.mode
         x += "SAS Config name       = %s\n" % self.sascfg.name
         x += "WORK Path             = %s\n" % self.workpath    
@@ -283,7 +278,8 @@ class SASsession():
 
     def __del__(self):
         if self._io:
-           return self._io.__del__()
+           if self._io:
+              return self._io.__del__()
 
     def _objcnt(self):
         self._obj_cnt += 1
@@ -304,14 +300,14 @@ class SASsession():
     def _getlsttxt(self, **kwargs):
         return self._io._getlsttxt(**kwargs)
 
-    def _asubmit(self, code, result):
+    def _asubmit(self, code, results):
         if results == '':
             if self.results.upper() == 'PANDAS':
                 results = 'HTML'
             else:
                 results = self.results
 
-        return self._io._asubmit(code, result)
+        return self._io._asubmit(code, results)
 
     def submit(self, code: str, results: str = '', prompt: dict = []) -> dict:
         '''
@@ -319,7 +315,7 @@ class SASsession():
 
         - code    - the SAS statements you want to execute
         - results - format of results, HTLML and TEXT is the alternative
-        - prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete 
+        - prompt  - dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete 
                     the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
                     or show what you type and keep the macros (they will still be available later).
 
@@ -527,7 +523,7 @@ class SASsession():
                options: str = ' ', prompt: dict = []) -> str:
         """
 
-        :param libref:  the libref for be assigned
+        :param libref:  the libref to be assigned
         :param engine:  the engine name used to access the SAS Library (engine defaults to BASE, per SAS)
         :param path:    path to the library (for engines that take a path parameter)
         :param options: other engine or engine supervisor options
@@ -656,9 +652,38 @@ class SASsession():
         else:
             return None
 
-    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'pd.DataFrame':
+    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, method: str = 'MEMORY', **kwargs) -> 'pd.DataFrame':
         """
         This is an alias for 'sasdata2dataframe'. Why type all that?
+        SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
+
+        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
+        :param libref: the libref for the SAS Data Set.
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+
+            - where is a string
+            - keep are strings or list of strings.
+            - drop are strings or list of strings.
+            - obs is a numbers - either string or int
+            - first obs is a numbers - either string or int
+
+            .. code-block:: python
+
+                             {'where'    : 'msrp < 20000 and make = "Ford"'
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
+                              'obs'      :  10
+                              'firstobs' : '12'
+                             }
+        :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
+        :param kwargs: dictionary
+        :return: Pandas data frame
+        """
+        return self.sasdata2dataframe(table, libref, dsopts, method, **kwargs)
+
+    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'pd.DataFrame':
+        """
+        This is an alias for 'sasdata2dataframe' specifying method='CSV'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
 
         :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -682,9 +707,9 @@ class SASsession():
         :param kwargs: dictionary
         :return: Pandas data frame
         """
-        return self.sasdata2dataframe(table, libref, dsopts, **kwargs)
+        return self.sasdata2dataframe(table, libref, dsopts, method='CSV', **kwargs)
 
-    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {},
+    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {}, method: str = 'MEMORY',
                           **kwargs) -> 'pd.DataFrame':
         """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -709,6 +734,7 @@ class SASsession():
                               'firstobs' : '12'
                              }
 
+        :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
         :param kwargs: dictionary
         :return: Pandas data frame
         """
@@ -721,17 +747,18 @@ class SASsession():
             print("too complicated to show the code, read the source :), sorry.")
             return None
         else:
-            return self._io.sasdata2dataframe(table, libref, dsopts, **kwargs)
+            return self._io.sasdata2dataframe(table, libref, dsopts, method=method, **kwargs)
 
     def _dsopts(self, dsopts):
         """
         :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
 
-            - where is a string
+            - where is a string or list of strings
             - keep are strings or list of strings.
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -740,16 +767,23 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
         :return: str
         """
         opts = ''
-
+        fmat = ''
         if len(dsopts):
             for key in dsopts:
                 if len(str(dsopts[key])):
                     if key == 'where':
-                        opts += 'where=(' + dsopts[key] + ') '
+                        if isinstance(dsopts[key], str):
+                            opts += 'where=(' + dsopts[key] + ') '
+                        elif isinstance(dsopts[key], list):
+                            opts += 'where=(' + " and ".join(dsopts[key]) + ') '
+                        else:
+                            raise TypeError("Bad key type. {} must be a str or list type".format(key))
+
                     elif key == 'drop':
                         opts += 'drop='
                         if isinstance(dsopts[key], list):
@@ -766,10 +800,27 @@ class SASsession():
                             opts += dsopts[key] + ' '
                     elif key == 'obs':
                         opts += 'obs=' + str(dsopts[key]) + ' '
+
                     elif key == 'firstobs':
                         opts += 'firstobs=' + str(dsopts[key]) + ' '
+
+                    elif key == 'format':
+                        if isinstance(dsopts[key], str):
+                            fmat = 'format ' + dsopts[key] + ';'
+                        elif isinstance(dsopts[key], dict):
+                            fmat = 'format '
+                            for k, v in dsopts[key].items():
+                                fmat += ' '.join((k, v)) + ' '
+                            fmat += ';'
+                        else:
+                            raise TypeError("Bad key type. {} must be a str or dict type".format(key))
+
             if len(opts):
                 opts = '(' + opts + ')'
+                if len(fmat) > 0:
+                    opts += ';\n\t' + fmat
+            elif len(fmat) > 0:
+                opts = ';' + fmat
         return opts
 
 
@@ -849,16 +900,11 @@ class SASsession():
     def symput(self, name, value):
         """
         :param name:  name of the macro varable to set:
-        :param value: python variable to use for the value to assign to the marco variable:
+        :param value: python variable to use for the value to assign to the macro variable:
 
             - name    is a character
             - value   is a variable that can be resolved to a string
 
-            .. code-block:: python
-
-                             {'name'   : 'var1'
-                              'value'  : var_val
-                             }
         """
         ll = self.submit("%let "+name +"=%NRBQUOTE("+str(value)+");\n")
 
@@ -869,10 +915,6 @@ class SASsession():
 
             - name    is a character
 
-            .. code-block:: python
-
-                             {'name'   : 'var1'
-                             }
         """
         ll = self.submit("%put "+name+"=&"+name+";\n")
 
@@ -887,6 +929,18 @@ class SASsession():
               var = l2[0]
         
         return var
+
+
+    def disconnect(self):
+        """
+        This method disconnects an IOM session to allow for reconnecting when switching networks
+        See the Advanced topics section of the doc for details
+        """
+        if self.sascfg.mode != 'IOM':
+           res = "This method is only available with the IOM access method"
+        else:
+           res = self._io.disconnect()
+        return res
 
 
 class SASdata:
@@ -907,10 +961,10 @@ class SASdata:
 
             .. code-block:: python
 
-                             {'where'    : 'msrp < 20000 and make = "Ford"'
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
-                              'obs'      :  10
+                             {'where'    : 'msrp < 20000 and make = "Ford"',
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight',
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'],
+                              'obs'      :  10,
                               'firstobs' : '12'
                              }
         end comment
@@ -1092,7 +1146,7 @@ class SASdata:
         :param obs: the number of rows of the table that you want to display. The default is 5
         :return:
         """
-        code = "proc sql;select count(*) into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;quit;"
+        code = "proc sql;select count(*) format best32. into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;quit;"
 
         nosub = self.sas.nosub
         self.sas.nosub = False
@@ -1824,10 +1878,11 @@ class SASdata:
         """
         return self.to_df(**kwargs)
 
-    def to_df(self, **kwargs) -> 'pd.DataFrame':
+    def to_df(self, method: str = 'MEMORY', **kwargs) -> 'pd.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame
 
+        :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
         :param kwargs:
         :return: Pandas data frame
         """
@@ -1836,7 +1891,17 @@ class SASdata:
             print(ll['LOG'])
             return None
         else:
-            return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, **kwargs)
+            return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
+
+    def to_df_CSV(self, **kwargs) -> 'pd.DataFrame':
+        """
+        Export this SAS Data Set to a Pandas Data Frame via CSV file
+
+        :param kwargs:
+        :return: Pandas data frame
+        :rtype: 'pd.DataFrame'
+        """
+        return self.to_df(method='CSV', **kwargs)
 
     def heatmap(self, x: str, y: str, options: str = '', title: str = '',
                 label: str = '') -> object:
@@ -1895,7 +1960,7 @@ class SASdata:
         code += ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
-        code += "\tdensity " + var + ';\nrun;\n' + 'title \"\";'
+        code += "\tdensity " + var + ';\nrun;\n' + 'title;'
 
         if self.sas.nosub:
             print(code)
@@ -1928,7 +1993,7 @@ class SASdata:
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
         code += "proc print data=tmpFreqOut(obs=%s); \nrun;" % n
-        code += 'title \"\";'
+        code += 'title;'
 
         if self.sas.nosub:
             print(code)
@@ -1968,14 +2033,13 @@ class SASdata:
         :return: graphic plot
         """
         code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
-        code += ";\n\tvbar " + var + " ; "
+        code += ";\n\tvbar " + var 
         if len(label) > 0:
-            code += " LegendLABEL='" + label + "'"
+            code += " / LegendLABEL='" + label + "'"
         code += ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
-        code += 'title \"\";'
-        code += 'run;'
+        code += 'run;\ntitle;'
 
         if self.sas.nosub:
             print(code)
@@ -2006,7 +2070,7 @@ class SASdata:
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
 
-        if type(y) == list:
+        if isinstance(y, list):
             num = len(y)
         else:
             num = 1
@@ -2015,7 +2079,47 @@ class SASdata:
         for i in range(num):
             code += "\tseries x=" + x + " y=" + y[i] + ";\n"
 
-        code += 'run;\n' + 'title \"\";'
+        code += 'run;\n' + 'title;'
+
+        if self.sas.nosub:
+            print(code)
+            return
+
+        ll = self._is_valid()
+        if not ll:
+            html = self.HTML
+            self.HTML = 1
+            ll = self.sas._io.submit(code)
+            self.HTML = html
+        if not self.sas.batch:
+            DISPLAY(HTML(ll['LST']))
+        else:
+            return ll
+
+    def scatter(self, x: str, y: list, title: str = '') -> object:
+        """
+        This method plots a scatter of x,y coordinates. You can provide a list of y columns for multiple line plots.
+
+        :param x: the x axis variable; generally a time or continuous variable.
+        :param y: the y axis variable(s), you can specify a single column or a list of columns
+        :param title: an optional Title for the chart
+        :return: graph object
+        """
+
+        code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts() + ";\n"
+        if len(title) > 0:
+            code += '\ttitle "' + title + '";\n'
+
+        if isinstance(y, list):
+            num = len(y)
+        else:
+            num = 1
+            y = [y]
+
+        for i in range(num):
+            code += "\tscatter x=" + x + " y=" + y[i] + ";\n"
+
+        code += 'run;\n' + 'title;'
 
         if self.sas.nosub:
             print(code)

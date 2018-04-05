@@ -17,7 +17,7 @@
 
 # Configuration Names for SAS - python List
 # This is the list of allowed configuration definitions that can be used. The definition are defined below.
-# if there is nore than one name in the list, and cfgname= is not specified in SASsession(), then the user
+# if there is more than one name in the list, and cfgname= is not specified in SASsession(), then the user
 # will be prompted to choose which configuration to use.
 #
 # The various options for the different access methods can be specified on the SASsession() i.e.:
@@ -27,20 +27,23 @@
 # that are defined already. Any necessary option (like user, pw for IOM or HTTP) that are not defined will be 
 # prompted for at run time. To dissallow overrides of as OPTION, when you don't have a value, simply
 # specify options=''. This way it's specified so it can't be overridden, even though you don't have any
-# specifi value you want applied.
+# specific value you want applied.
 # 
 #SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http']
 #
 
 SAS_config_names=['default']
 
-# Configuration options for pysas - python Dict
+# Configuration options for saspy - python Dict
 # valid key are:
 # 
 # 'lock_down' - True | False. True = Prevent runtime overrides of SAS_Config values below
 #
-
-SAS_config_options = {'lock_down': True}
+# 'verbose'   - True | False. True = Allow print statements for debug type messages
+#
+SAS_config_options = {'lock_down': False,
+                      'verbose'  : True
+                     }
 
 # Configuration options for SAS output. By default output is HTML 5.0 (using "ods html5" statement) but certain templates might not work 
 # properly with HTML 5.0 so it can also be set to HTML 4.0 instead (using "ods html" statement). This option will only work when using IOM
@@ -68,7 +71,7 @@ SAS_output_options = {'output' : 'html5'}
 # valid keys are:
 # 'saspath'  - [REQUIRED] path to SAS startup script i.e.: /opt/sasinside/SASHome/SASFoundation/9.4/sas
 # 'options'  - SAS options to include in the start up command line - Python List
-# 'encoding' - This is the python encoding value that matches the SAS session encoding youe SAS session is using 
+# 'encoding' - This is the python encoding value that matches the SAS session encoding your SAS session is using 
 #
 # For passwordless ssh connection, the following are also reuqired:
 # 'ssh'     - [REQUIRED] the ssh command to run
@@ -92,7 +95,7 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # For IOM (Grid Manager or any IOM) and Local Windows via IOM access method
 # These configuration definitions are for connecting over IOM. This is designed to be used to connect to a SAS Grid, via Grid Manager
 # and also to connect to a local Windows SAS session. The client side (python and java) for this access method can be either Linux or Windows.
-# The STDIO access method above is only for Linux. PC SAS requires this IOM interface. 
+# The STDIO access method above is only for Linux. PC SAS requires this IOM interface.
 #
 # The absence of the iomhost option triggers local Windows SAS mode. In this case none of 'iomhost', 'iomport', 'omruser', 'omrpw' are needed.
 # a local SAS session is started up and connected to.
@@ -115,7 +118,8 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # 'omrpw'     - really not suggested [REQUIRED for remote IOM case but PROMTED for at runtime] Don't specify to use a local Windows Session
 # 'encoding'  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
 # 'classpath' - [REQUIRED] classpath to IOM client jars and saspy client jar.
-# 'appserver' - name ofphysical workspace server (when more than one app server defined in OMR) i.e.: 'SASApp - Workspace Server'
+# 'appserver' - name of physical workspace server (when more than one app server defined in OMR) i.e.: 'SASApp - Workspace Server'
+# 'sspi'      - boolean. use IWA instead of user/pw to connect to the IOM workspace server
 
 
 # build out a local classpath variable to use below for Linux clients
@@ -148,9 +152,9 @@ cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploy
 cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
 
 # And, if you've configured IOM to use Encryption, you need these client side jars.
-cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904300.0.0.20150204190000_v940m3\\sas.rutil.jar"
-cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil.nls_904300.0.0.20150204190000_v940m3\\sas.rutil.nls.jar"
-cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.rutil_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar"
+#cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904300.0.0.20150204190000_v940m3\\sas.rutil.jar"
+#cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil.nls_904300.0.0.20150204190000_v940m3\\sas.rutil.nls.jar"
+#cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.rutil_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar"
 
 
 winlocal = {'java'      : 'java',
@@ -172,24 +176,11 @@ winiomwin  = {'java'    : 'java',
             'classpath' : cpW
             }
 
-
-# Future - for the HTTP access method to connect to the Compute Service
-#          This access method is not available yet.
-#
-#
-# These need ip addr and port, other values will be prompted for - python Dict
-# valid keys are:
-# 'ip'      - [REQUIRED] host address 
-# 'port'    - [REQUIRED] port; the code Defaults this to 80 (the Compute Services default port)
-# 'context' - context name defined on the compute service  [PROMTED for at runtime if more than one defined]
-# 'options' - SAS options to include (no '-' (dashes), just option names and values)
-# 'user'    - not suggested [REQUIRED but PROMTED for at runtime]
-# 'pw'      - really not suggested [REQUIRED but PROMTED for at runtime]
-# 
-#
-             
-http     = {'ip'      : 'host.running.compute.service',
-            'port'    :  80,
-            'context' : 'Tom2'
+winiomIWA  = {'java'    : 'java',
+            'iomhost'   : 'windows.iom.host',
+            'iomport'   : 8591,
+            'encoding'  : 'windows-1252',
+            'classpath' : cpW,
+            'sspi'      : True
             }
 
