@@ -102,6 +102,7 @@ def read_config(path):
     cp = configparser.ConfigParser()
     cp.read(path)
     return cp
+os.environ["PATH"] += ';'+r'C:\Program Files\SASHome\SASFoundation\9.4\core\sasext'
 
 
 SAS_config_names=['default']

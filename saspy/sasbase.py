@@ -41,7 +41,6 @@ import sys
 import re
 # from pdb import set_trace as bp
 import logging
-from types import ModuleType
 
 try:
    import pandas as pd
@@ -77,9 +76,73 @@ except ImportError:
     pass
 
 
+def check_mode(**kwargs):
+    """
+    Function to check the mode of connection given input arguments to SASsession.
+    The reason this is separate is so that instead of instantiating a
+    SASconfig object then later a SASconfigIOM (or other) object, we will
+    simply have the specific-classes inherit from SASconfig and call
+    the correct constructor from SASsession.
+
+    :param cfgname: value in SAS_config_names or section of config file
+    :param filename: path to the config file if using config rather than .py
+
+    returns:
+        mode (str): one of 'IOM', 'HTTP', 'ssh', 'STDIO', None
+        useConfig (bool): True if we're using a config file, False if using sascfg.py module directly
+        valid (bool): True if we succeeded in reading config, else False
+    """
+    # if sascfg.py is setup to use configparser, do so
+    # otherwise use module-level attributes to preserve functionality
+
+    # if a filename is specified, read that config, else use the default
+    # created at install-time
+    local_config = __file__.replace("sasbase.py", "config.ini")
+    configFileName = kwargs.get("filename", local_config)
+
+    # if the module has read_config, we will use a config file
+    if hasattr(SAScfg, "read_config"):
+        useConfig = True
+        cp = SAScfg.read_config(configFileName)
+    else:
+        useConfig = False
+    cfgname = kwargs.get('cfgname', None)
+
+    if cfgname is None:
+        if not useConfig:
+            configs = getattr(SAScfg, "SAS_config_names")
+            if len(configs) == 1:
+                cfgname = configs[0]
+            else:
+                print("no cfgname specified and more than one option!")
+                return None, None, False
+        if useConfig:
+            cfgname = "default"
+    if useConfig:
+        cfg = dict(cp[cfgname])
+
+    else:
+        cfg = getattr(SAScfg, cfgname)
+
+    if "java" in cfg:
+        mode = "IOM"
+    elif "ip" in cfg:
+        mode = "HTTP"
+    elif "ssh" in cfg:
+        mode = "ssh"
+    elif "saspath" in cfg:
+        mode = "STDIO"
+    else:
+        print("Configuration Definition "+cfgname+" is not valid. Failed to create a SASsession.")
+        return None, None, False
+    return mode, useConfig, True
+
+
 class SASconfig:
     """
     This object is not intended to be used directly. Instantiate a SASsession object instead
+
+    **Note some duplicate work is done here as well as check_mode -- refactor.
     """
 
     def __init__(self, **kwargs):
@@ -91,7 +154,7 @@ class SASconfig:
         # GET Config options
         # if sascfg.py is setup to use configparser, do so
         # otherwise use module-level attributes to preserve functionality
-        
+
         # if a filename is specified, read that config, else use the default
         # created at install-time
         local_config = __file__.replace("sasbase.py", "config.ini")
@@ -99,23 +162,27 @@ class SASconfig:
 
         # if the module has read_config, we will use a config file
         if hasattr(SAScfg, "read_config"):
-            useConfig = True
-            print("use config: ", useConfig)
-            cp = SAScfg.read_config(configFileName)
-            if "SAS_config_options" in cp:
-                self.cfgopts = dict(cp["SAS_config_options"])
+            self.useConfig = True
+            print("use config: ", self.useConfig)
+            self.cp = SAScfg.read_config(configFileName)
+            if "SAS_config_options" in self.cp:
+                self.cfgopts = dict(self.cp["SAS_config_options"])
+                if "lock_down" in self.cfgopts:
+                    # configparser.getboolean() to convert 'False' to False
+                    ld = self.cp.getboolean("SAS_config_options", "lock_down")
+                    self.cfgopts["lock_down"] = ld
             else:
                 self.cfgopts = {}
         else:
-            useConfig = False
+            self.useConfig = False
             try:
                 self.cfgopts = getattr(SAScfg, "SAS_config_options")
-            except:
+            except AttributeError:
                 self.cfgopts = {}
 
         # GET Config names
-        if useConfig:
-            configs = cp.get("SAS_config_names", "names").split(',')
+        if self.useConfig:
+            configs = self.cp.get("SAS_config_names", "names").split(',')
         else:
             configs = getattr(SAScfg, "SAS_config_names")
 
@@ -144,24 +211,24 @@ class SASconfig:
               raise KeyboardInterrupt
 
         self.name = cfgname
-        if useConfig:
-            cfg = dict(cp[cfgname])
+        if self.useConfig:
+            self.cfg = dict(self.cp[cfgname])
         else:
-            cfg = getattr(SAScfg, cfgname)
+            self.cfg = getattr(SAScfg, cfgname)
 
-        ip           = cfg.get('ip', '')
-        ssh          = cfg.get('ssh', '')
-        path         = cfg.get('saspath', '')
-        java         = cfg.get('java', '')
-        self.results = cfg.get('results', None)
+        self.ip      = self.cfg.get('ip', '')
+        self.ssh     = self.cfg.get('ssh', '')
+        self.path    = self.cfg.get('saspath', '')
+        self.java    = self.cfg.get('java', '')
+        self.results = self.cfg.get('results', None)
 
-        if len(java) > 0:
+        if len(self.java) > 0:
             self.mode = 'IOM'
-        elif len(ip) > 0:
+        elif len(self.ip) > 0:
             self.mode = 'HTTP'
-        elif len(ssh) > 0:
+        elif len(self.ssh) > 0:
             self.mode = 'SSH'
-        elif len(path) > 0:
+        elif len(self.path) > 0:
             self.mode = 'STDIO'
         else:
             print("Configuration Definition "+cfgname+" is not valid. Failed to create a SASsession.")
@@ -185,6 +252,141 @@ class SASconfig:
                                                    password=pw)
             except KeyboardInterrupt:
                 return None
+
+
+class SASconfigIOM(SASconfig):
+   '''
+   This object is not intended to be used directly. Instantiate a SASsession object instead
+   '''
+   def __init__(self, **kwargs):
+      # this call to super() will call sasbase.SASconfig().init(**kwargs)
+      super(SASconfigIOM, self).__init__(**kwargs)
+#      self._kernel  = kwargs.get('kernel', None)  # set in super
+
+#      self.name      = kwargs.get('sascfgname', '')  # set in super
+#      cfg            = getattr(SAScfg, self.name)  # set in super
+
+#      self.java      = self.cfg.get('java', '')
+      self.iomhost   = self.cfg.get('iomhost', '')
+      self.iomport   = self.cfg.get('iomport', None)
+      self.omruser   = self.cfg.get('omruser', '')
+      self.omrpw     = self.cfg.get('omrpw', '')
+      self.encoding  = self.cfg.get('encoding', '')
+      self.classpath = self.cfg.get('classpath', '')
+      self.authkey   = self.cfg.get('authkey', '')
+      self.timeout   = self.cfg.get('timeout', None)
+      self.appserver = self.cfg.get('appserver', '')
+      self.sspi      = self.cfg.get('sspi', False)
+      self.javaparms = self.cfg.get('javaparms', '')
+
+      if self.useConfig:
+          if "SAS_output_options" in self.cp:
+              self.output = self.cp["SAS_output_options"].get("output", "html5")
+      else:
+          try:
+             self.outopts = getattr(SAScfg, "SAS_output_options")
+             self.output  = self.outopts.get('output', 'html5')
+          except:
+             self.output  = 'html5'
+
+      if self.output.lower() not in ['html', 'html5']:
+         print("Invalid value specified for SAS_output_options. Using the default of HTML5")
+         self.output  = 'html5'
+
+      print(self.cfgopts)
+      lock = self.cfgopts.get('lock_down', True)
+      # in lock down mode, don't allow runtime overrides of option values from the config file.
+
+      self.verbose = self.cfgopts.get('verbose', True)
+      self.verbose = kwargs.get('verbose', self.verbose)
+
+      injava = kwargs.get('java', '')
+      if len(injava) > 0:
+         if lock and len(self.java):
+            print("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.java = injava
+
+      inhost = kwargs.get('iomhost', '')
+      if len(inhost) > 0:
+         if lock and len(self.iomhost):
+            print("Parameter 'iomhost' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.iomhost = inhost
+
+      intout = kwargs.get('timeout', None)
+      if intout is not None:
+         if lock and self.timeout:
+            print("Parameter 'timeout' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.timeout = intout   
+
+      inport = kwargs.get('iomport', None)
+      if inport:
+         if lock and self.iomport:
+            print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.iomport = inport
+
+      inomruser = kwargs.get('omruser', '')
+      if len(inomruser) > 0:
+         if lock and len(self.omruser):
+            print("Parameter 'omruser' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.omruser = inomruser
+
+      inomrpw = kwargs.get('omrpw', '')
+      if len(inomrpw) > 0:
+         if lock and len(self.omrpw):
+            print("Parameter 'omrpw' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.omrpw = inomrpw
+
+      insspi = kwargs.get('sspi', False)
+      if insspi:
+         if lock and self.sspi:
+            print("Parameter 'sspi' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.sspi = insspi
+
+      incp = kwargs.get('classpath', '')
+      if len(incp) > 0:
+         if lock and len(self.classpath):
+            print("Parameter 'classpath' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.classpath = incp
+
+      inak = kwargs.get('authkey', '')
+      if len(inak) > 0:
+         if lock and len(self.authkey):
+            print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.authkey = inak   
+
+      inapp = kwargs.get('appserver', '')
+      if len(inapp) > 0:
+         if lock and len(self.apserver):
+            print("Parameter 'appserver' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.appserver = inapp   
+
+      inencoding = kwargs.get('encoding', '')
+      if len(inencoding) > 0:
+         if lock and len(self.encoding):
+            print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.encoding = inencoding
+      if not self.encoding:
+         self.encoding = 'utf-8'
+
+      injparms = kwargs.get('javaparms', '')
+      if len(injparms) > 0:
+         if lock:
+            print("Parameter 'javaparms' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.javaparms = injparms
+
+      return
 
 
 class SASsession():
@@ -236,9 +438,16 @@ class SASsession():
         self._loaded_macros = False
         self._obj_cnt       = 0
         self.nosub          = False
-        self.sascfg         = SASconfig(**kwargs)
+        mode, useConfig, val= check_mode(**kwargs)
+        if not val:
+            self._io = None
+            return
+        if mode == "IOM":
+            self.sascfg = SASconfigIOM(**kwargs)
+        else:
+            self.sascfg         = SASconfig(**kwargs)
         self.batch          = False
-        self.results        = kwargs.get('results', self.sascfg.results)
+        self.results        = self.sascfg.results
         if not self.results:
            self.results     = 'Pandas'
         self.workpath       = ''
@@ -256,7 +465,7 @@ class SASsession():
                 print(
                     "Cannot use STDIO I/O module on Windows. No SASsession established. Choose an IOM SASconfig definition")
         elif self.sascfg.mode == 'IOM':
-            self._io = sasioiom.SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
+            self._io = sasioiom.SASsessionIOM(sascfg=self.sascfg, sb=self, **kwargs)
         '''
         elif self.sascfg.mode == 'HTTP':
             self._io = sasiohttp.SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
