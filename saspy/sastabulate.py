@@ -1,5 +1,7 @@
 import logging
+import pandas as pd
 from saspy.sasresults import SASresults
+from saspy.sasproccommons import SASProcCommons
 try:
     from IPython.display import HTML
     from IPython.display import display as DISPLAY
@@ -166,6 +168,7 @@ class Tabulate:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.WARN)
         self.sasproduct = 'base'
+        logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @staticmethod
     def as_class(*args, **kwargs):
@@ -197,8 +200,45 @@ class Tabulate:
 
     def table(self, **kwargs: dict) -> 'SASresults':
         """
-        Generates and executes a PROC TABULATE statement 
+        Executes a PROC TABULATE statement and displays results in HTML
 
+        :param left: the query for the left side of the table
+        :param top: the query for the top of the table
+        :return:
+        """
+        return self.execute_table('HTML', **kwargs)
+
+    def text_table(self, **kwargs: dict) -> 'SASresults':
+        """
+        Executes a PROC TABULATE statement and displays results as plain text
+
+        :param left: the query for the left side of the table
+        :param top: the query for the top of the table
+        :return:
+        """
+        return self.execute_table('text', **kwargs)
+
+    def to_dataframe(self, **kwargs: dict) -> 'SASresults':
+        """
+        Executes a PROC TABULATE statement and converts results to a MultiIndex DataFrame
+
+        :param left: the query for the left side of the table
+        :param top: the query for the top of the table
+        :return:
+        """
+        return self.execute_table('Pandas', **kwargs)
+
+    def execute_table(self, _output_type, **kwargs: dict) -> 'SASresults':
+        """
+        executes a PROC TABULATE statement 
+
+        You must specify an output type to use this method, of 'HTML', 'text', or 'Pandas'.
+        There are three convenience functions for generating specific output; see:
+            .text_table()
+            .table()
+            .to_dataframe()
+
+        :param _output_type: style of output to use
         :param left: the query for the left side of the table
         :param top: the query for the top of the table
         :return:
@@ -208,36 +248,87 @@ class Tabulate:
         top = kwargs.pop('top', None)
         sets = dict(classes=set(), vars=set())
         left._gather(sets)
-        top._gather(sets)
+        if top: top._gather(sets)
 
-        table = '%s, %s' % (str(left), str(top))
+        table = top \
+            and '%s, %s' % (str(left), str(top)) \
+            or str(left)
+
         proc_kwargs = dict(
             cls   = ' '.join(sets['classes']),
             var   = ' '.join(sets['vars']),
             table = table
         )
 
-        code = "proc tabulate data=%s.%s %s;\n" % (self.data.libref, self.data.table, self.data._dsopts())
-        code += "  class %s;\n" % proc_kwargs['cls']
-        code += "  var %s;\n" % proc_kwargs['var']
-        code += "  table %s;\n" % proc_kwargs['table']
+        # permit additional valid options if passed; for now, just 'where'
+        proc_kwargs.update(kwargs)
+
+        # we can't easily use the SASProcCommons approach for submiting, 
+        # since this is merely an output / display proc for us;
+        # but we can at least use it to check valid options in the canonical saspy way
+        required_options = {'cls', 'var', 'table'}
+        allowed_options = {'cls', 'var', 'table', 'where'}
+        verifiedKwargs = SASProcCommons._stmt_check(self, required_options, allowed_options, proc_kwargs)
+
+        if (_output_type == 'Pandas'):
+            # for pandas, use the out= directive
+            code = "proc tabulate data=%s.%s %s out=temptab;\n" % (self.data.libref, self.data.table, self.data._dsopts())
+        else:
+            code = "proc tabulate data=%s.%s %s;\n" % (self.data.libref, self.data.table, self.data._dsopts())
+
+        # build the code
+        for arg,value in verifiedKwargs.items():
+            code += "  %s %s;\n" % (arg=='cls' and 'class' or arg, value)
         code += "run;"
 
-        if self.sas.nosub:
+        # teach_me_SAS
+        if self.sas.nosub: 
             print(code)
             return
 
+        # submit the code
         ll = self.data._is_valid()
-        if not ll:
-            html = self.data.HTML
-            self.data.HTML = 1
-            ll = self.sas._io.submit(code)
-            self.data.HTML = html
-        if not self.sas.batch:
-            DISPLAY(HTML(ll['LST']))
-            check, errorMsg = self.data._checkLogForError(ll['LOG'])
-            if not check:
-                raise ValueError("Internal code execution failed: " + errorMsg)
-        else:
-            return ll
+
+        if _output_type == 'HTML':
+            if not ll:
+                html = self.data.HTML
+                self.data.HTML = 1
+                ll = self.sas._io.submit(code)
+                self.data.HTML = html
+            if not self.sas.batch:
+                DISPLAY(HTML(ll['LST']))
+                check, errorMsg = self.data._checkLogForError(ll['LOG'])
+                if not check:
+                    raise ValueError("Internal code execution failed: " + errorMsg)
+            else:
+                return ll
         
+        elif _output_type == 'text':
+            if not ll:
+                html = self.data.HTML
+                self.data.HTML = 1
+                ll = self.sas._io.submit(code, 'text')
+                self.data.HTML = html
+            print(ll['LST'])
+            return
+        
+        elif _output_type == 'Pandas':
+            return self.to_nested_dataframe(code)
+
+
+    def to_nested_dataframe(self, code):
+        result = self.sas.submit(code)
+        outdata = self.sas.sd2df('temptab')
+        
+        # slice groupings (classes) and stats from results table
+        classes = outdata.columns[:outdata.columns.tolist().index('_TYPE_')].tolist()
+        stats = outdata.columns[outdata.columns.tolist().index('_TABLE_')+1:].tolist()
+        
+        # build frame with nested indices
+        frame = pd.DataFrame.from_dict({
+            tuple([row['_TYPE_'][i]=='1' and row[c] or '_ALL_' for i,c in enumerate(classes)]): dict((stat, row[stat]) for stat in stats)
+            for row in outdata.to_dict(orient='records')
+        }, orient='index')
+        frame.index = frame.index.set_names(classes)
+
+        return frame
