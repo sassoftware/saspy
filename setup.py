@@ -32,18 +32,18 @@ class PostDevelopCommand(develop):
     """Post-installation for development mode."""
     def run(self):
         develop.run(self)
-        import saspy
+        import sascfg
         print("running post-install config init")
-        saspy.sascfg.init_config()
+        sascfg.init_config()
 
 
 class PostInstallCommand(install):
     """Post-installation for installation mode."""
     def run(self):
         install.run(self)
-        import saspy
+        import sascfg
         print("running post-install config init")
-        saspy.sascfg.init_config()
+        sascfg.init_config()
 
 
 setup(name='saspy',
