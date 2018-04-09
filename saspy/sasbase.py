@@ -103,8 +103,10 @@ def check_mode(**kwargs):
     # if the module has read_config, we will use a config file
     if hasattr(SAScfg, "read_config"):
         useConfig = True
+        print("using config file: ", configFileName)
         cp = SAScfg.read_config(configFileName)
     else:
+        print("using sascfg.py to set up configuration")
         useConfig = False
     cfgname = kwargs.get('cfgname', None)
 
