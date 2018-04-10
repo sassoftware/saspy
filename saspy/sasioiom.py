@@ -65,6 +65,7 @@ class SASconfigIOM:
       self.appserver = cfg.get('appserver', '')
       self.sspi      = cfg.get('sspi', False)
       self.javaparms = cfg.get('javaparms', '')
+      self.lrecl     = cfg.get('lrecl', None)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -173,6 +174,15 @@ class SASconfigIOM:
             print("Parameter 'javaparms' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.javaparms = injparms
+
+      inlrecl = kwargs.get('lrecl', None)
+      if inlrecl:
+         if lock and self.lrecl:
+            print("Parameter 'lrecl' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.lrecl = inlrecl
+      if not self.lrecl:
+         self.lrecl = 1048576
 
       return
 
@@ -313,6 +323,7 @@ Will use HTML5 for this SASsession.""")
          parms += self.sascfg.javaparms
       parms += ["-classpath",  self.sascfg.classpath, "pyiom.saspy2j", "-host", "localhost"]
       #parms += ["-classpath", self.sascfg.classpath+":/u/sastpw/tkpy2j", "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
+      #parms += ["-classpath", self.sascfg.classpath+";U:\\tkpy2j", "pyiom.saspy2j_sleep", "-host", "tomspc.na.sas.com"]
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
@@ -328,6 +339,7 @@ Will use HTML5 for this SASsession.""")
             parms += ["-spn"]
       else:
          parms += ["-zero"]
+      parms += ["-lrecl", str(self.sascfg.lrecl)]
       parms += ['']
 
       s = ''
@@ -1346,9 +1358,10 @@ Will use HTML5 for this SASsession.""")
    def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-      table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
-      libref  - the libref for the SAS Data Set.
-      dsopts  - data set options for the input SAS Data Set
+      table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref   - the libref for the SAS Data Set.
+      dsopts   - data set options for the input SAS Data Set
+      tempfile - file to use to store CSV, else temporary file will be used.
       '''
 
       logf     = ''
@@ -1362,6 +1375,14 @@ Will use HTML5 for this SASsession.""")
          tabname = libref+"."+table
       else:
          tabname = table
+
+      tmpdir  = None
+      tmpfile = kwargs.pop('tempfile', None)
+      if tmpfile is None:
+         tmpdir = tempfile.TemporaryDirectory()
+         tmpcsv = tmpdir.name+os.sep+"tomodsx" 
+      else:
+         tmpcsv = tmpfile
 
       code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
@@ -1429,17 +1450,17 @@ Will use HTML5 for this SASsession.""")
       ll = self.submit(code, "text")
 
       if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
-         tempdir = tempfile.TemporaryDirectory()
+         local   = True
          outname = "_tomodsx"
-         code    = "filename _tomodsx '"+tempdir.name+os.sep+"tomodsx' encoding='utf-8';\n"
+         code    = "filename _tomodsx '"+tmpcsv+"' encoding='utf-8' lrecl="+str(self.sascfg.lrecl)+";\n"
       else:
-         tempdir = None
+         local   = False
          outname = self._tomods1.decode()
          code = ''
 
-      code += "options nosource;\n"
+      #code += "options nosource;\n"
       code += "proc export data=sasdata2dataframe outfile="+outname+" dbms=csv replace; run\n;"
-      code += "options source;\n"
+      #code += "options source;\n"
 
       ll = self._asubmit(code, 'text')
 
@@ -1461,11 +1482,9 @@ Will use HTML5 for this SASsession.""")
             else:
                dts[varlist[i]] = 'str'
 
-      if not tempdir:
-         csv = tempfile.TemporaryFile()
-
+      if not local:
+         csv = open(tmpcsv, mode='w+b')
          while not done:
-           
                 while True:
                     if os.name == 'nt':
                        try:
@@ -1518,9 +1537,10 @@ Will use HTML5 for this SASsession.""")
                              bail = True
                 done = True
 
-         csv.seek(0)
-         df = pd.read_csv(csv, index_col=False, engine='c', dtype=dts, **kwargs)
+         #csv.seek(0)
          csv.close()
+         df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
+         #csv.close()
       else:
          while True:
             try:
@@ -1548,9 +1568,10 @@ Will use HTML5 for this SASsession.""")
             if done and bail:
                break
 
-         df = pd.read_csv(tempdir.name+os.sep+"tomodsx", index_col=False, engine='c', dtype=dts, **kwargs)
-         tempdir.cleanup()
-         
+         df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
+
+      if tmpdir:
+         tmpdir.cleanup()
 
       for i in range(nvars):
          if varcat[i] in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
