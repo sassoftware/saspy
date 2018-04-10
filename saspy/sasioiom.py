@@ -1570,6 +1570,8 @@ Will use HTML5 for this SASsession.""")
 
          df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
 
+      self._log += logf
+
       if tmpdir:
          tmpdir.cleanup()
 
