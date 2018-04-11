@@ -1483,7 +1483,7 @@ Will use HTML5 for this SASsession.""")
                dts[varlist[i]] = 'str'
 
       if not local:
-         csv = open(tmpcsv, mode='w+b')
+         csv = open(tmpcsv, mode='wb')
          while not done:
                 while True:
                     if os.name == 'nt':
@@ -1536,6 +1536,7 @@ Will use HTML5 for this SASsession.""")
                           if logf.count(logcodeo) >= 1:
                              bail = True
                 done = True
+                self._log += logf
 
          #csv.seek(0)
          csv.close()
@@ -1569,8 +1570,6 @@ Will use HTML5 for this SASsession.""")
                break
 
          df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
-
-      self._log += logf
 
       if tmpdir:
          tmpdir.cleanup()
