@@ -669,10 +669,12 @@ Will use HTML5 for this SASsession.""")
       # anything to the lst, then unless _getlst[txt] is called, then next submit will happen to get the lst this wrote, plus
       # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
-
       # unnecessary read in submit as this can't happen in the current code. 
-      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
+
+      odsopen  = b"ods listing close;ods "+self.sascfg.output.encode()+ \
+                 b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style.encode()+ \
+                 b"; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods "+self.sascfg.output.encode()+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True
       pgm      = b""
 
@@ -717,8 +719,10 @@ Will use HTML5 for this SASsession.""")
             HTML(results['LST'])
       '''
       #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsopen = b"ods listing close;ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods "+str.encode(self.sascfg.output)+b" (id=saspy_internal) close;ods listing;\n"
+      odsopen  = b"ods listing close;ods "+self.sascfg.output.encode()+ \
+                 b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style.encode()+ \
+                 b"; ods graphics on / outputfmt=png;\n"
+      odsclose = b"ods "+self.sascfg.output.encode()+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
       lstf     = ''
