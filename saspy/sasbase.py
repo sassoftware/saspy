@@ -1901,6 +1901,48 @@ class SASdata:
         """
         return self.to_df(method='CSV', **kwargs)
 
+    def to_json(self, pretty: bool = False, sastag: bool = False, **kwargs) -> str:
+        """
+        Export this SAS Data Set to a JSON Object
+        PROC JSON documentation: http://go.documentation.sas.com/?docsetId=proc&docsetVersion=9.4&docsetTarget=p06hstivs0b3hsn1cb4zclxukkut.htm&locale=en
+
+        :param pretty: boolean False return JSON on one line True returns formatted JSON
+        :param sastag: include SAS meta tags
+        :param kwargs:
+        :return: JSON str
+        """
+        code = "filename file1 temp;"
+        code += "proc json out=file1"
+        if pretty:
+            code += " pretty "
+        if not sastag:
+            code += " nosastags "
+        code +=";\n export %s.%s %s;\n run;" % (self.libref, self.table, self._dsopts())
+
+        if self.sas.nosub:
+            print(code)
+            return
+
+        ll = self._is_valid()
+        if ll:
+            runcode = False
+        if runcode:
+            ll = self.sas.submit(code, "text")
+            elog = []
+            fpath=''
+            for line in ll['LOG'].splitlines():
+                if line.startswith('JSONFilePath:'):
+                    fpath = line[14:]
+                if line.startswith('ERROR'):
+                    elog.append(line)
+            if len(elog):
+                raise RuntimeError("\n".join(elog))
+            if len(fpath):
+                with open(fpath, 'r') as myfile:
+                    json_str = myfile.read()
+                return json_str
+
+
     def heatmap(self, x: str, y: str, options: str = '', title: str = '',
                 label: str = '') -> object:
         """
