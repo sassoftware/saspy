@@ -616,7 +616,7 @@ class SASsession():
             return log
 
     def df2sd(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
-              results: str = '') -> 'SASdata':
+              results: str = '', keep_outer_quotes: bool=False) -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
@@ -626,10 +626,10 @@ class SASsession():
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
         :return: SASdata object
         """
-        return self.dataframe2sasdata(df, table, libref, results)
+        return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes)
 
     def dataframe2sasdata(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
-                          results: str = '') -> 'SASdata':
+                          results: str = '', keep_outer_quotes: bool=False) -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
@@ -645,7 +645,7 @@ class SASsession():
             print("too complicated to show the code, read the source :), sorry.")
             return None
         else:
-            self._io.dataframe2sasdata(df, table, libref)
+            self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes)
 
         if self.exist(table, libref):
             return SASdata(self, libref, table, results)

@@ -1079,7 +1079,7 @@ Will use HTML5 for this SASsession.""")
          ll = self.submit(code, "text")
          return ll['LOG']
 
-   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str =""):
+   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="", keep_outer_quotes: bool=False):
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
@@ -1100,6 +1100,8 @@ Will use HTML5 for this SASsession.""")
             if col_l == 0:
                col_l = 8
             length += " '"+df.columns[name]+"'n $"+str(col_l)
+            if keep_outer_quotes:
+               input  += "~ "
             dts.append('C')
          else:
             if df.dtypes[df.columns[name]].kind in ('M'):
