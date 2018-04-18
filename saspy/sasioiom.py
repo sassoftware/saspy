@@ -22,14 +22,6 @@ import socket as socks
 import tempfile
 
 try:
-   import saspy.sascfg_personal as SAScfg
-except ImportError:
-   try:
-      import sascfg_personal as SAScfg
-   except ImportError:
-      import saspy.sascfg as SAScfg
-
-try:
    import pandas as pd
 except ImportError:
    pass
@@ -43,157 +35,7 @@ try:
 except ImportError:
    pass
 
-class SASconfigIOM:
-   '''
-   This object is not intended to be used directly. Instantiate a SASsession object instead
-   '''
-   def __init__(self, **kwargs):
-      self._kernel  = kwargs.get('kernel', None)
 
-      self.name      = kwargs.get('sascfgname', '')
-      cfg            = getattr(SAScfg, self.name)
-
-      self.java      = cfg.get('java', '')
-      self.iomhost   = cfg.get('iomhost', '')
-      self.iomport   = cfg.get('iomport', None)
-      self.omruser   = cfg.get('omruser', '')
-      self.omrpw     = cfg.get('omrpw', '')
-      self.encoding  = cfg.get('encoding', '')
-      self.classpath = cfg.get('classpath', '')
-      self.authkey   = cfg.get('authkey', '')
-      self.timeout   = cfg.get('timeout', None)
-      self.appserver = cfg.get('appserver', '')
-      self.sspi      = cfg.get('sspi', False)
-      self.javaparms = cfg.get('javaparms', '')
-
-      try:
-         self.outopts = getattr(SAScfg, "SAS_output_options")
-         self.output  = self.outopts.get('output', 'html5')
-      except:
-         self.output  = 'html5'
-
-      if self.output.lower() not in ['html', 'html5']:
-         print("Invalid value specified for SAS_output_options. Using the default of HTML5")
-         self.output  = 'html5'
-
-      # GET Config options
-      try:
-         self.cfgopts = getattr(SAScfg, "SAS_config_options")
-      except:
-         self.cfgopts = {}
-
-      lock = self.cfgopts.get('lock_down', True)
-      # in lock down mode, don't allow runtime overrides of option values from the config file.
-
-      self.verbose = self.cfgopts.get('verbose', True)
-      self.verbose = kwargs.get('verbose', self.verbose)
-
-      injava = kwargs.get('java', '')
-      if len(injava) > 0:
-         if lock and len(self.java):
-            print("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.java = injava
-
-      inhost = kwargs.get('iomhost', '')
-      if len(inhost) > 0:
-         if lock and len(self.iomhost):
-            print("Parameter 'iomhost' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.iomhost = inhost
-
-      intout = kwargs.get('timeout', None)
-      if intout is not None:
-         if lock and self.timeout:
-            print("Parameter 'timeout' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.timeout = intout   
-
-      inport = kwargs.get('iomport', None)
-      if inport:
-         if lock and self.iomport:
-            print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.iomport = inport
-
-      inomruser = kwargs.get('omruser', '')
-      if len(inomruser) > 0:
-         if lock and len(self.omruser):
-            print("Parameter 'omruser' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.omruser = inomruser
-
-      inomrpw = kwargs.get('omrpw', '')
-      if len(inomrpw) > 0:
-         if lock and len(self.omrpw):
-            print("Parameter 'omrpw' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.omrpw = inomrpw
-
-      insspi = kwargs.get('sspi', False)
-      if insspi:
-         if lock and self.sspi:
-            print("Parameter 'sspi' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.sspi = insspi
-
-      incp = kwargs.get('classpath', '')
-      if len(incp) > 0:
-         if lock and len(self.classpath):
-            print("Parameter 'classpath' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.classpath = incp
-
-      inak = kwargs.get('authkey', '')
-      if len(inak) > 0:
-         if lock and len(self.authkey):
-            print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.authkey = inak   
-
-      inapp = kwargs.get('appserver', '')
-      if len(inapp) > 0:
-         if lock and len(self.apserver):
-            print("Parameter 'appserver' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.appserver = inapp   
-
-      inencoding = kwargs.get('encoding', '')
-      if len(inencoding) > 0:
-         if lock and len(self.encoding):
-            print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.encoding = inencoding
-      if not self.encoding:
-         self.encoding = 'utf-8'
-
-      injparms = kwargs.get('javaparms', '')
-      if len(injparms) > 0:
-         if lock:
-            print("Parameter 'javaparms' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.javaparms = injparms
-
-      return
-
-   def _prompt(self, prompt, pw=False):
-      if self._kernel is None:
-          if not pw:
-              try:
-                 return input(prompt)
-              except (KeyboardInterrupt):
-                 return None
-          else:
-              try:
-                 return getpass.getpass(prompt)
-              except (KeyboardInterrupt):
-                 return None
-      else:
-          try:
-             return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
-                                                password=pw)
-          except (KeyboardInterrupt):
-             return None
 
 class SASsessionIOM():
    '''
@@ -215,7 +57,7 @@ class SASsessionIOM():
       self.stderr = None
       self.stdout = None
 
-      self.sascfg   = SASconfigIOM(**kwargs)
+      self.sascfg   = kwargs["sascfg"]
       self._log_cnt = 0
       self._log     = ""
       self._sb      = kwargs.get('sb', None)
