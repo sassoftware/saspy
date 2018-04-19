@@ -1897,6 +1897,8 @@ class SASdata:
         """
         Export this SAS Data Set to a Pandas Data Frame via CSV file
 
+        :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param kwargs:
         :return: Pandas data frame
         :rtype: 'pd.DataFrame'
