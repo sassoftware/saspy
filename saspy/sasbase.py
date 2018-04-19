@@ -703,6 +703,8 @@ class SASsession():
                               'obs'      :  10
                               'firstobs' : '12'
                              }
+        :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param kwargs: dictionary
         :return: Pandas data frame
         """

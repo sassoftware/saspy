@@ -1157,6 +1157,7 @@ Will use HTML5 for this SASsession.""")
       dsopts   - data set options for the input SAS Data Set
       port     - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       tempfile - file to use to store CSV, else temporary file will be used.
+      tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       '''
       port =  kwargs.get('port', 0)
 

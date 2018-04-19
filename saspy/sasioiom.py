@@ -1362,6 +1362,7 @@ Will use HTML5 for this SASsession.""")
       libref   - the libref for the SAS Data Set.
       dsopts   - data set options for the input SAS Data Set
       tempfile - file to use to store CSV, else temporary file will be used.
+      tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       '''
 
       logf     = ''
