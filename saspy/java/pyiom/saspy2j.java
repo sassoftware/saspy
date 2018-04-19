@@ -268,6 +268,33 @@ public class saspy2j
                      catch (org.omg.CORBA.COMM_FAILURE e)
                         {}
                      cx.close();
+                     if (reconnect)
+                        {
+                        try
+                           {
+                           server     = (BridgeServer) Server.fromURI(uri);
+                           ad         = server.getDomain();
+                           
+                           cxfConfig  = new ManualConnectionFactoryConfiguration(server);
+                           cxfManager = new ConnectionFactoryManager();
+                           cxf        = cxfManager.getFactory(cxfConfig);
+                           
+                           if (spn)
+                              cx = cxf.getConnection(cred);
+                           else
+                              cx = cxf.getConnection(omruser, omrpw, ad);
+
+                           cx.close();
+                           }
+                        catch(ConnectionFactoryException e)
+                           {
+                           String msg = "We failed reconnecting in ENDSAS. WUWT?\n"+e.getMessage();
+                           System.out.print(msg+"\n");
+                           errp.write(msg+"\n");
+                           errp.flush();
+                           e.printStackTrace();
+                           }
+                        }
                      sin.close();
                      sout.close();
                      serr.close();

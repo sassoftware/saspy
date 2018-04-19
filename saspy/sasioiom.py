@@ -1457,7 +1457,7 @@ Will use HTML5 for this SASsession.""")
       else:
          local   = False
          outname = self._tomods1.decode()
-         code = ''
+         code    = ''
 
       #code += "options nosource;\n"
       code += "proc export data=sasdata2dataframe outfile="+outname+" dbms=csv replace; run\n;"
