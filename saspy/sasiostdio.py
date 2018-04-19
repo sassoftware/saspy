@@ -18,7 +18,7 @@ import os
 import signal
 import subprocess
 import getpass
-import tempfile
+import tempfile as tf
 from time import sleep
 import socket as socks
 
@@ -1149,7 +1149,7 @@ Will use HTML5 for this SASsession.""")
 
       return df
 
-   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict ={}, tempfile: str=None, tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -1170,15 +1170,12 @@ Will use HTML5 for this SASsession.""")
          tabname = table
 
       tmpdir  = None
-      tmpkeep = False
-      tmpfile = kwargs.pop('tempfile', None)
 
-      if tmpfile is None:
-         tmpdir = tempfile.TemporaryDirectory()
+      if tempfile is None:
+         tmpdir = tf.TemporaryDirectory()
          tmpcsv = tmpdir.name+os.sep+"tomodsx" 
       else:
-         tmpcsv = tmpfile
-         tmpkeep = kwargs.pop('tempkeep', False)
+         tmpcsv  = tempfile
 
       code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code += "data _null_; file STDERR;d = open('sasdata2dataframe');\n"
@@ -1321,7 +1318,7 @@ Will use HTML5 for this SASsession.""")
       if tmpdir:
          tmpdir.cleanup()
       else:
-         if not tmpkeep:
+         if not tempkeep:
             os.remove(tmpcsv)
 
       for i in range(nvars):
