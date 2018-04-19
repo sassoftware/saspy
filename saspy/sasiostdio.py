@@ -20,6 +20,7 @@ import subprocess
 import getpass
 import tempfile
 from time import sleep
+import socket as socks
 
 try:
    import saspy.sascfg_personal as SAScfg
@@ -56,6 +57,7 @@ class SASconfigSTDIO:
       self.host     = cfg.get('host', '')
       self.encoding = cfg.get('encoding', '')
       self.metapw   = cfg.get('metapw', '')
+      self.lrecl    = cfg.get('lrecl', None)
       self.iomc     = cfg.get('iomc', '')
 
       try:
@@ -130,6 +132,15 @@ class SASconfigSTDIO:
             self.encoding = inencoding
       if not self.encoding:
          self.encoding = 'utf-8'
+
+      inlrecl = kwargs.get('lrecl', None)
+      if inlrecl:
+         if lock and self.lrecl:
+            print("Parameter 'lrecl' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.lrecl = inlrecl
+      if not self.lrecl:
+         self.lrecl = 1048576
 
    def _prompt(self, prompt, pw=False):
       if self._kernel is None:
@@ -966,8 +977,6 @@ Will use HTML5 for this SASsession.""")
          # we are using a tunnel; default to that port
          port = self.sascfg.tunnel
 
-      #import pandas as pd
-      import socket as socks
       datar = ""
 
       if libref:
@@ -1043,7 +1052,7 @@ Will use HTML5 for this SASsession.""")
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
    
       code  = ""
-      code += "filename sock socket '"+host+":"+str(port)+"' lrecl=32767 recfm=v termstr=LF;\n"
+      code += "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF;\n"
       code += " data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file sock dlm="+cdelim+"; put "
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
@@ -1143,10 +1152,11 @@ Will use HTML5 for this SASsession.""")
    def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-      table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
-      libref  - the libref for the SAS Data Set.
-      dsopts  - data set options for the input SAS Data Set
-      port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
+      table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref   - the libref for the SAS Data Set.
+      dsopts   - data set options for the input SAS Data Set
+      port     - port to use for socket. Defaults to 0 which uses a random available ephemeral port
+      tempfile - file to use to store CSV, else temporary file will be used.
       '''
       port =  kwargs.get('port', 0)
 
@@ -1154,12 +1164,21 @@ Will use HTML5 for this SASsession.""")
          # we are using a tunnel; default to that port
          port = self.sascfg.tunnel
 
-      import socket as socks
-
       if libref:
          tabname = libref+"."+table
       else:
          tabname = table
+
+      tmpdir  = None
+      tmpkeep = False
+      tmpfile = kwargs.pop('tempfile', None)
+
+      if tmpfile is None:
+         tmpdir = tempfile.TemporaryDirectory()
+         tmpcsv = tmpdir.name+os.sep+"tomodsx" 
+      else:
+         tmpcsv = tmpfile
+         tmpkeep = kwargs.pop('tempkeep', False)
 
       code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code += "data _null_; file STDERR;d = open('sasdata2dataframe');\n"
@@ -1217,18 +1236,15 @@ Will use HTML5 for this SASsession.""")
          except OSError:
             print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
             return None
-
-         csv = tempfile.TemporaryFile()
-
+         
          if not self.sascfg.tunnel:
             host = socks.gethostname()
          else:
             host = 'localhost'
-         code  = "filename sock socket '"+host+":"+str(port)+"' lrecl=32767 recfm=v termstr=LF;\n"
+         code  = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v encoding='utf-8';\n"
       else:
-         tempdir = tempfile.TemporaryDirectory()
          host = ''
-         code = "filename sock '"+tempdir.name+os.sep+"tomods2' encoding='utf-8';\n"
+         code = "filename sock '"+tmpcsv+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v encoding='utf-8';\n"
 
       code += "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
             
@@ -1260,11 +1276,13 @@ Will use HTML5 for this SASsession.""")
             else:
                dts[varlist[i]] = 'str'
 
-      code += "options nosource;\n"
-      code += "proc export data=sasdata2dataframe outfile=sock dbms=csv replace; run\n;"
-      code += "options source;\n"
+      code  = ''
+      #code += "options nosource;\n"
+      code  = "proc export data=sasdata2dataframe outfile=sock dbms=csv replace; run\n;"
+      #code += "options source;\n"
 
       if self.sascfg.ssh:
+         csv = open(tmpcsv, mode='wb')
          sock.listen(1)
          self._asubmit(code, 'text')
 
@@ -1278,7 +1296,6 @@ Will use HTML5 for this SASsession.""")
                   break
       
                csv.write(data)
-    
          except:
             print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
             if newsock[0]:
@@ -1291,14 +1308,21 @@ Will use HTML5 for this SASsession.""")
          newsock[0].shutdown(socks.SHUT_RDWR)
          newsock[0].close()
          sock.close()
+         ll = self.submit("", 'text')
 
-         csv.seek(0)
-         df = pd.read_csv(csv, index_col=False, engine='c', dtype=dts, **kwargs)
+         #csv.seek(0)
          csv.close()
+         df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
+         #csv.close()
       else:
          ll = self.submit(code, "text")
-         df = pd.read_csv(tempdir.name+os.sep+"tomods2", index_col=False, engine='c', dtype=dts, **kwargs)
-         tempdir.cleanup()
+         df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
+
+      if tmpdir:
+         tmpdir.cleanup()
+      else:
+         if not tmpkeep:
+            os.remove(tmpcsv)
 
       for i in range(nvars):
          if varcat[i] in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:

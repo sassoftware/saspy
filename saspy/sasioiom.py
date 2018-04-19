@@ -1377,12 +1377,15 @@ Will use HTML5 for this SASsession.""")
          tabname = table
 
       tmpdir  = None
+      tmpkeep = False
       tmpfile = kwargs.pop('tempfile', None)
+
       if tmpfile is None:
          tmpdir = tempfile.TemporaryDirectory()
          tmpcsv = tmpdir.name+os.sep+"tomodsx" 
       else:
-         tmpcsv = tmpfile
+         tmpcsv  = tmpfile
+         tmpkeep = kwargs.pop('tempkeep', False)
 
       code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
@@ -1452,7 +1455,7 @@ Will use HTML5 for this SASsession.""")
       if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
          local   = True
          outname = "_tomodsx"
-         code    = "filename _tomodsx '"+tmpcsv+"' encoding='utf-8' lrecl="+str(self.sascfg.lrecl)+";\n"
+         code    = "filename _tomodsx '"+tmpcsv+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v  encoding='utf-8';\n"
       else:
          local   = False
          outname = self._tomods1.decode()
@@ -1573,6 +1576,9 @@ Will use HTML5 for this SASsession.""")
 
       if tmpdir:
          tmpdir.cleanup()
+      else:
+         if not tmpkeep:
+            os.remove(tmpcsv)
 
       for i in range(nvars):
          if varcat[i] in sas_date_fmts + sas_time_fmts + sas_datetime_fmts:
