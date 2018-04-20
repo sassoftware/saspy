@@ -264,7 +264,7 @@ Most of these parameters will be configured in the sascfg.py configuration file.
 </table>
 <dl class="method">
 <dt id="saspy.SASsession.dataframe2sasdata">
-<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -303,7 +303,7 @@ Most of these parameters will be configured in the sascfg.py configuration file.
 
 <dl class="method">
 <dt id="saspy.SASsession.df2sd">
-<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
+<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;dataframe2sasdata&#8217;. Why type all that?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -632,6 +632,8 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 </pre></div>
 </div>
 </li>
+<li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local CSV file; default it a temporary file that&#8217;s cleaned up</li>
+<li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
 <li><strong>kwargs</strong> &#8211; dictionary</li>
 </ul>
 </td>
@@ -1221,11 +1223,18 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> &#8211; </td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local CSV file; default it a temporary file that&#8217;s cleaned up</li>
+<li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
+<li><strong>kwargs</strong> &#8211; </li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Pandas data frame</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Pandas data frame</p>
+</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">&#8216;pd.DataFrame&#8217;</td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">&#8216;pd.DataFrame&#8217;</p>
+</td>
 </tr>
 </tbody>
 </table>
