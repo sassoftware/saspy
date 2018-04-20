@@ -1,12 +1,13 @@
 import unittest
 import saspy
 import pandas
-
+import tempfile
+import os
 
 class TestPandasDataFrameIntegration(unittest.TestCase):
     @classmethod    
     def setUpClass(cls):
-        cls.sas = saspy.SASsession() #cfgname='default')
+        cls.sas = saspy.SASsession() 
         #cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
 
     @classmethod
@@ -55,4 +56,73 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         for i in range(len(rows)):
            retrieved.append(rows[i].split())
         self.assertIn(expected, retrieved, msg="td2.head() result didn't contain row 1")
+
+    def test_Pandas_sd2df_CSV1(self):
+        #test sas data to data frame
+        td = self.sas.sasdata('testdata', results='text')
+        df = td.to_df_CSV()
+        self.assertIsInstance(df, pandas.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        result = df.head()
+        expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
+        rows = result.to_string().splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="df.head() result didn't contain row 1")
+
+    def test_Pandas_sd2df_CSV2(self):
+        #test sas data to data frame
+        td = self.sas.sasdata('testdata', results='text')
+
+        tmpdir = tempfile.TemporaryDirectory()
+        tmpcsv = tmpdir.name+os.sep+"tomodsx" 
+
+        df = td.to_df_CSV(tempfile=tmpcsv)
+        self.assertIsInstance(df, pandas.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        result = df.head()
+        expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
+        rows = result.to_string().splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="df.head() result didn't contain row 1")
+        tmpdir.cleanup()
+
+    def test_Pandas_sd2df_CSV3(self):
+        #test sas data to data frame
+        td = self.sas.sasdata('testdata', results='text')
+
+        tmpdir = tempfile.TemporaryDirectory()
+        tmpcsv = tmpdir.name+os.sep+"tomodsx" 
+
+        df = td.to_df_CSV(tempfile=tmpcsv, tempkeep=True)
+        self.assertIsInstance(df, pandas.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        result = df.head()
+        expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
+        rows = result.to_string().splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="df.head() result didn't contain row 1")
+        os.remove(tmpcsv)
+        tmpdir.cleanup()
+
+    def test_Pandas_sd2df_CSV4(self):
+        #test sas data to data frame
+        td = self.sas.sasdata('testdata', results='text')
+
+        tmpdir = tempfile.TemporaryDirectory()
+        tmpcsv = tmpdir.name+os.sep+"tomodsx" 
+
+        df = td.to_df_CSV(tempfile=tmpcsv, tempkeep=False)
+        self.assertIsInstance(df, pandas.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        result = df.head()
+        expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
+        rows = result.to_string().splitlines()
+        retrieved = []
+        for i in range(len(rows)):
+           retrieved.append(rows[i].split())
+        self.assertIn(expected, retrieved, msg="df.head() result didn't contain row 1")
+        tmpdir.cleanup()
+
 

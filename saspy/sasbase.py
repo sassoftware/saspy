@@ -681,7 +681,7 @@ class SASsession():
         """
         return self.sasdata2dataframe(table, libref, dsopts, method, **kwargs)
 
-    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'pd.DataFrame':
+    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = {}, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
         """
         This is an alias for 'sasdata2dataframe' specifying method='CSV'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -704,10 +704,12 @@ class SASsession():
                               'obs'      :  10
                               'firstobs' : '12'
                              }
+        :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param kwargs: dictionary
         :return: Pandas data frame
         """
-        return self.sasdata2dataframe(table, libref, dsopts, method='CSV', **kwargs)
+        return self.sasdata2dataframe(table, libref, dsopts, method='CSV', tempfile=tempfile, tempkeep=tempkeep, **kwargs)
 
     def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {}, method: str = 'MEMORY',
                           **kwargs) -> 'pd.DataFrame':
@@ -1893,15 +1895,17 @@ class SASdata:
         else:
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
 
-    def to_df_CSV(self, **kwargs) -> 'pd.DataFrame':
+    def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame via CSV file
 
+        :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param kwargs:
         :return: Pandas data frame
         :rtype: 'pd.DataFrame'
         """
-        return self.to_df(method='CSV', **kwargs)
+        return self.to_df(method='CSV', tempfile=tempfile, tempkeep=tempkeep, **kwargs)
 
     def heatmap(self, x: str, y: str, options: str = '', title: str = '',
                 label: str = '') -> object:
