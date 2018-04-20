@@ -605,7 +605,7 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 
 <dl class="method">
 <dt id="saspy.SASsession.sd2df_CSV">
-<code class="descname">sd2df_CSV</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_CSV" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sd2df_CSV</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_CSV" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;sasdata2dataframe&#8217; specifying method=&#8217;CSV&#8217;. Why type all that?
 SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1215,7 +1215,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 
 <dl class="method">
 <dt id="saspy.SASdata.to_df_CSV">
-<code class="descname">to_df_CSV</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASdata.to_df_CSV" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_df_CSV</code><span class="sig-paren">(</span><em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASdata.to_df_CSV" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export this SAS Data Set to a Pandas Data Frame via CSV file</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
