@@ -624,6 +624,7 @@ class SASsession():
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :return: SASdata object
         """
         return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes)
@@ -637,6 +638,7 @@ class SASsession():
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :return: SASdata object
         """
         if results == '':
