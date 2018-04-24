@@ -219,6 +219,7 @@ class SASsession():
         self.workpath       = ''
         self.sasver         = ''
         self.sascei         = ''
+        self.HTML_Style     = "HTMLBlue"
 
         if not self.sascfg.valid:
             self._io = None
