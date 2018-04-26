@@ -274,6 +274,10 @@ public class saspy2j
                            {
                            server     = (BridgeServer) Server.fromURI(uri);
                            ad         = server.getDomain();
+
+                           if (appName != "")
+                              server.setServerName(appName.replace("\'", ""));
+                           server.setOption(SASURI.applicationNameKey, "SASPy");
                            
                            cxfConfig  = new ManualConnectionFactoryConfiguration(server);
                            cxfManager = new ConnectionFactoryManager();
@@ -536,6 +540,9 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
              {
              server     = (BridgeServer) Server.fromURI(uri);
              ad         = server.getDomain();
+             if (appName != "")
+                server.setServerName(appName.replace("\'", ""));
+             server.setOption(SASURI.applicationNameKey, "SASPy");
    
              cxfConfig  = new ManualConnectionFactoryConfiguration(server);
              cxfManager = new ConnectionFactoryManager();
