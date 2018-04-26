@@ -1293,7 +1293,7 @@ Will use HTML5 for this SASsession.""")
                     if datar.count(logcodeo) >= 1:
                        break
                  try:
-                    data = self.stdout[0].recv(4096).decode(errors='replace')
+                    data = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
                  except (BlockingIOError):
                     data = b''
 
@@ -1332,7 +1332,7 @@ Will use HTML5 for this SASsession.""")
                  else:
                     sleep(0.1)
                     try:
-                       log = self.stderr[0].recv(4096).decode(errors='replace') 
+                       log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace') 
                     except (BlockingIOError):
                        log = b''
 
@@ -1509,7 +1509,7 @@ Will use HTML5 for this SASsession.""")
                            return None
 
                     try:
-                       data = self.stdout[0].recv(4096).decode(errors='replace')
+                       data = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
                     except (BlockingIOError):
                        data = b''
 
