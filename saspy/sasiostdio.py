@@ -1137,7 +1137,7 @@ Will use HTML5 for this SASsession.""")
       newsock[0].close()
       sock.close()
 
-      if len(r) > 1:   
+      if len(r) > 0:   
          tdf = pd.DataFrame.from_records(r, columns=varlist)
          
          for i in range(nvars):
