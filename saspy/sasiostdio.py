@@ -23,14 +23,6 @@ from time import sleep
 import socket as socks
 
 try:
-   import saspy.sascfg_personal as SAScfg
-except ImportError:
-   try:
-      import sascfg_personal as SAScfg
-   except ImportError:
-      import saspy.sascfg as SAScfg
-
-try:
    import pandas as pd
 except ImportError:
    pass
@@ -43,10 +35,11 @@ class SASconfigSTDIO:
    '''
    This object is not intended to be used directly. Instantiate a SASsession object instead
    '''
-   def __init__(self, **kwargs):
+   def __init__(self, session, **kwargs):
       self._kernel  = kwargs.get('kernel', None)
 
-      self.name     = kwargs.get('sascfgname', '')
+      SAScfg        = session._sb.sascfg.SAScfg
+      self.name     = session._sb.sascfg.name
       cfg           = getattr(SAScfg, self.name)
 
       self.saspath  = cfg.get('saspath', '')
@@ -142,24 +135,9 @@ class SASconfigSTDIO:
       if not self.lrecl:
          self.lrecl = 1048576
 
-   def _prompt(self, prompt, pw=False):
-      if self._kernel is None:
-          if not pw:
-              try:
-                 return input(prompt)
-              except (KeyboardInterrupt):
-                 return None
-          else:
-              try:
-                 return getpass.getpass(prompt)
-              except (KeyboardInterrupt):
-                 return None
-      else:
-          try:
-             return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
-                                                password=pw)
-          except (KeyboardInterrupt):
-             return None
+      self._prompt = session._sb.sascfg._prompt
+
+      return
 
 class SASsessionSTDIO():
    '''
@@ -181,10 +159,10 @@ class SASsessionSTDIO():
       self.stderr = None
       self.stdout = None
 
-      self.sascfg   = SASconfigSTDIO(**kwargs)
+      self._sb      = kwargs.get('sb', None)
+      self.sascfg   = SASconfigSTDIO(self, **kwargs)
       self._log_cnt = 0
       self._log     = ""
-      self._sb      = kwargs.get('sb', None)
 
       self._startsas()
 

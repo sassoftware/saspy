@@ -39,8 +39,9 @@
 import os
 import sys
 import re
-# from pdb import set_trace as bp
 import logging
+import getpass
+import tempfile
 
 try:
    import pandas as pd
@@ -83,11 +84,42 @@ class SASconfig:
     """
 
     def __init__(self, **kwargs):
-        configs = []
         self._kernel = kwargs.get('kernel', None)
+        configs    = []
         self.valid = True
-        self.mode = ''
+        self.mode  = ''
 
+        cfgfile = kwargs.get('cfgfile', None)
+        if cfgfile:
+           tempdir = tempfile.TemporaryDirectory()
+           try:
+              fdin = open(cfgfile)
+           except:
+              print("Couldn't open cfgfile "+cfgfile)
+              cfgfile = None
+
+           if cfgfile:
+              f1 = fdin.read()
+              fdout = open(tempdir.name+os.sep+"sascfgfile.py",'w')
+              fdout.write(f1)
+              fdout.close()
+              fdin.close()
+              sys.path.append(tempdir.name)
+              import sascfgfile as SAScfg
+              tempdir.cleanup()
+              sys.path.remove(tempdir.name)
+        
+        if not cfgfile:
+           try:
+              import saspy.sascfg_personal as SAScfg
+           except ImportError:
+              try:
+                 import sascfg_personal as SAScfg
+              except ImportError:
+                 import saspy.sascfg as SAScfg
+        
+        self.SAScfg  = SAScfg
+        
         # GET Config options
         try:
             self.cfgopts = getattr(SAScfg, "SAS_config_options")
@@ -241,7 +273,7 @@ class SASsession():
         try:
            if self._io:
              ll = self.submit('libname work list;')
-             self.workpath = ll['LOG'].partition('Physical Name=')[2].partition('\n')[0].strip()
+             self.workpath = ll['LOG'].partition('Physical Name=')[2].strip().partition('\n')[0].strip()
              win = self.workpath.count('\\')
              lnx = self.workpath.count('/')
              if (win > lnx):
