@@ -69,7 +69,7 @@ from saspy.sasml import *
 from saspy.sasqc import *
 from saspy.sasutil import *
 from saspy.sasresults import *
-#from saspy.sastabulate import Tabulate
+from saspy.sastabulate import Tabulate
 
 try:
     from IPython.display import HTML
@@ -1044,7 +1044,7 @@ class SASdata:
         self.table = table
         self.dsopts = dsopts
         self.results = results
-        #self.tabulate = Tabulate(sassession, self)
+        self.tabulate = Tabulate(sassession, self)
 
     def __getitem__(self, key):
 

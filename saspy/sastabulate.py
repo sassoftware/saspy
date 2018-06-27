@@ -1,5 +1,6 @@
 import logging
 import pandas as pd
+from collections import ChainMap 
 from saspy.sasresults import SASresults
 from saspy.sasproccommons import SASProcCommons
 try:
@@ -177,12 +178,7 @@ class Tabulate:
     @staticmethod
     def classes(*args, labels=[]):
         label_kwargs = build_kwargs('label', labels, len(args))
-        ret = []
-        for i in range(len(args)):
-           ret.append(Class(args[i], **label_kwargs[i]))
-
-        return ret
-        #return [Class(args[i], **label_kwargs[i]) for i in range(len(args))]
+        return [Class(args[i], **label_kwargs[i]) for i in range(len(args))]
 
     @staticmethod
     def as_var(*args, **kwargs):
@@ -191,12 +187,7 @@ class Tabulate:
     @staticmethod
     def vars(*args, labels=[]):
         label_kwargs = build_kwargs('label', labels, len(args))
-        ret = []
-        for i in range(len(args)):
-           ret.append(Var(args[i], **label_kwargs[i]))
-
-        return ret
-        #return [Var(args[i], **label_kwargs[i]) for i in range(len(args))]
+        return [Var(args[i], **label_kwargs[i]) for i in range(len(args))]
 
     @staticmethod
     def stat(*args, **kwargs):
@@ -206,12 +197,10 @@ class Tabulate:
     def stats(*args, labels=[], formats=[]):
         label_kwargs = build_kwargs('label', labels, len(args))
         format_kwargs = build_kwargs('format', formats, len(args))
-        ret = []
-        for i in range(len(args)):
-           ret.append(Statistic(args[i], **label_kwargs[i], **format_kwargs[i]))
-
-        return ret
-        #return [Statistic(args[i], **label_kwargs[i], **format_kwargs[i]) for i in range(len(args))]
+        return [
+            Statistic(args[i], **dict(ChainMap(label_kwargs[i], format_kwargs[i]))) 
+            for i in range(len(args))
+        ]
 
     def table(self, **kwargs: dict) -> 'SASresults':
         """
