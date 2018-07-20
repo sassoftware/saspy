@@ -304,7 +304,7 @@ Will use HTML5 for this SASsession.""")
          print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
          print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
-         return NULL
+         return None
       else:
          self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
          if self.pid is None:
