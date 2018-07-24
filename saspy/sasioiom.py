@@ -815,10 +815,7 @@ Will use HTML5 for this SASsession.""")
                           #print("Tomods is now "+ self._tomods1.decode())
                        break
                  try:
-                    if ods:
-                       lst = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
-                    else:
-                       lst = self.stdout[0].recv(4096).decode(errors='replace')
+                    lst = self.stdout[0].recv(4096).decode(errors='replace')
                  except (BlockingIOError):
                     lst = b''
 
