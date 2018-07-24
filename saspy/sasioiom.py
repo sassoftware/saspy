@@ -1234,88 +1234,89 @@ Will use HTML5 for this SASsession.""")
       ll = self._asubmit(code, 'text')
 
       self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode()+b'\n')
+             
 
+      BOM   = "\ufeff".encode()
       done  = False
       first = True
-      datar = ""
+      datar = b''
       bail  = False
       r     = []
-      #df    = pd.DataFrame(columns=varlist)
       df    = None
       trows = kwargs.get('trows', None)
       if not trows:
          trows = 100000
 
       while not done:
-        
-             while True:
-                 if os.name == 'nt':
-                    try:
-                       rc = self.pid.wait(0)
-                       self.pid = None
-                       print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                       return None
-                    except:
-                       pass
-                 else:
-                    rc = os.waitpid(self.pid, os.WNOHANG)
-                    if rc[1]:
-                        self.pid = None
-                        print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                        return None
+         while True:
+             if os.name == 'nt':
+                try:
+                   rc = self.pid.wait(0)
+                   self.pid = None
+                   print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                   return None
+                except:
+                   pass
+             else:
+                rc = os.waitpid(self.pid, os.WNOHANG)
+                if rc[1]:
+                    self.pid = None
+                    print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                    return None
 
-                 if bail:
-                    if datar.count(logcodeo) >= 1:
-                       break
-                 try:
-                    data = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
-                 except (BlockingIOError):
-                    data = b''
+             if bail:
+                if datar.count(logcodeo.encode()) >= 1:
+                   break
+             try:
+                data = self.stdout[0].recv(4096)
+             except (BlockingIOError):
+                data = b''
 
-                 if len(data) > 0:
-                    if first:
-                       if data[0] == "\ufeff":
-                          data = data[1:len(data)]
-                       first = False
+             if len(data) > 0:
+                if first:
+                   if data[0:3] == BOM:
+                      data = data[3:len(data)]
+                   first = False
 
-                    datar += data
-                    data   = datar.rpartition(colsep+rowsep+'\n')
-                    datap  = data[0]+data[1]
-                    datar  = data[2] 
-                    
-                    for i in datap.split(sep=colsep+rowsep+'\n'):
-                       if i != '':
-                          r.append(tuple(i.split(sep=colsep)))
+                datar += data
+                data   = datar.rpartition(colsep.encode()+rowsep.encode()+'\n'.encode())
+                datap  = data[0]+data[1]
+                datar  = data[2] 
 
-                    if len(r) > trows:   
-                       tdf = pd.DataFrame.from_records(r, columns=varlist)
-                       
-                       for i in range(nvars):
-                          if vartype[i] == 'N':
-                             if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                                if tdf.dtypes[tdf.columns[i]].kind not in ('f','u','i','b','B','c','?'):
-                                   tdf[varlist[i]] = pd.to_numeric(tdf[varlist[i]], errors='coerce')
-                             else:
-                                if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
-                                   tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
-                       
-                       if df is not None:
-                          df = df.append(tdf, ignore_index=True)
-                       else:
-                          df = tdf
-                       r = []
-                 else:
-                    sleep(0.1)
-                    try:
-                       log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace') 
-                    except (BlockingIOError):
-                       log = b''
+                datap = datap.decode(self.sascfg.encoding, errors='replace')
+                for i in datap.split(sep=colsep+rowsep+'\n'):
+                   if i != '':
+                      r.append(tuple(i.split(sep=colsep)))
 
-                    if len(log) > 0:
-                       logf += log
-                       if logf.count(logcodeo) >= 1:
-                          bail = True
-             done = True
+                if len(r) > trows:   
+                   tdf = pd.DataFrame.from_records(r, columns=varlist)
+                   
+                   for i in range(nvars):
+                      if vartype[i] == 'N':
+                         if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                            if tdf.dtypes[tdf.columns[i]].kind not in ('f','u','i','b','B','c','?'):
+                               tdf[varlist[i]] = pd.to_numeric(tdf[varlist[i]], errors='coerce')
+                         else:
+                            if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
+                               tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
+                   
+                   if df is not None:
+                      df = df.append(tdf, ignore_index=True)
+                   else:
+                      df = tdf
+                   r = []
+             else:
+                sleep(0.1)
+                try:
+                   log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace') 
+                except (BlockingIOError):
+                   log = b''
+
+                if len(log) > 0:
+                   logf += log
+                   if logf.count(logcodeo) >= 1:
+                      bail = True
+         done = True
       
       if len(r) > 0:   
          tdf = pd.DataFrame.from_records(r, columns=varlist)
@@ -1450,7 +1451,7 @@ Will use HTML5 for this SASsession.""")
 
       done  = False
       bail  = False
-      datar = ""
+      datar = b""
 
       dts = kwargs.pop('dtype', '')
       if dts == '':
@@ -1484,26 +1485,26 @@ Will use HTML5 for this SASsession.""")
                            return None
 
                     try:
-                       data = self.stdout[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+                       data = self.stdout[0].recv(4096)
                     except (BlockingIOError):
                        data = b''
 
                     if len(data) > 0:
                        datar += data
-                       data   = datar.rpartition('\n')
+                       data   = datar.rpartition(b'\n')
                        datap  = data[0]+data[1]
                        datar  = data[2] 
 
-                       if datap.count(lstcodeo) >= 1:
+                       if datap.count(lstcodeo.encode()) >= 1:
                           done  = True
-                          datar = datap.rpartition(logcodeo)
+                          datar = datap.rpartition(logcodeo.encode())
                           datap = datar[0]
                           
-                       csv.write(datap.encode())
+                       csv.write(datap.decode(self.sascfg.encoding, errors='replace').encode())
                        if bail and done:
                           break
                     else:
-                       if datar.count(lstcodeo) >= 1:
+                       if datar.count(lstcodeo.encode()) >= 1:
                           done = True
                        if bail and done:
                           break
