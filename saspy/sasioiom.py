@@ -712,15 +712,15 @@ Will use HTML5 for this SASsession.""")
       odsclose = b"ods "+self.sascfg.output.encode()+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
-      lstf     = ''
-      logf     = ''
+      lstf     = b''
+      logf     = b''
       bail     = False
       eof      = 5
       bc       = False
       done     = False
       logn     = self._logcnt()
       logcodei = "%put E3969440A681A24088859985" + logn + ";"
-      logcodeo = "\nE3969440A681A24088859985" + logn
+      logcodeo = b"\nE3969440A681A24088859985" + logn.encode()
       pcodei   = ''
       pcodeiv  = ''
       pcodeo   = ''
@@ -786,7 +786,7 @@ Will use HTML5 for this SASsession.""")
          pgm += odsclose
 
       pgm += b'\n'+logcodei.encode()+b'\n'
-      self.stdin[0].send(pgm+b'tom says EOL='+logcodeo.encode()+b'\n')
+      self.stdin[0].send(pgm+b'tom says EOL='+logcodeo+b'\n')
 
       while not done:
          try:
@@ -795,7 +795,8 @@ Will use HTML5 for this SASsession.""")
                     try:
                        rc = self.pid.wait(0)
                        self.pid = None
-                       return dict(LOG=logf.partition(logcodeo)[0]+'\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc), LST='')
+                       log = logf.partition(logcodeo)[0]+b'\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc).encode() 
+                       return dict(LOG=log.decode(errors='replace'), LST='')
                     except:
                        pass
                  else:
@@ -803,19 +804,20 @@ Will use HTML5 for this SASsession.""")
                     rc = os.waitpid(self.pid, os.WNOHANG)
                     #if rc is not None:
                     if rc[1]:
-                        self.pid = None
-                        return dict(LOG=logf.partition(logcodeo)[0]+'\nSAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+                       self.pid = None
+                       log = logf.partition(logcodeo)[0]+b'\nSAS process has terminated unexpectedly. Pid State= '+str(rc).encode()
+                       return dict(LOG=log.decode(errors='replace'), LST='')
 
                  if bail:
                     if lstf.count(logcodeo) >= 1:
                        x = lstf.rsplit(logcodeo)
                        lstf = x[0]
-                       if len(x[1]) > 7 and "_tomods" in x[1]:
-                          self._tomods1 = x[1].encode()
+                       if len(x[1]) > 7 and b"_tomods" in x[1]:
+                          self._tomods1 = x[1]
                           #print("Tomods is now "+ self._tomods1.decode())
                        break
                  try:
-                    lst = self.stdout[0].recv(4096).decode(errors='replace')
+                    lst = self.stdout[0].recv(4096)
                  except (BlockingIOError):
                     lst = b''
 
@@ -825,9 +827,7 @@ Will use HTML5 for this SASsession.""")
                  else:
                     sleep(0.1)
                     try:
-
-                       log = self.stderr[0].recv(4096).decode(errors='replace') 
-
+                       log = self.stderr[0].recv(4096)
                     except (BlockingIOError):
                        log = b''
 
@@ -837,7 +837,7 @@ Will use HTML5 for this SASsession.""")
                        if logf.count(logcodeo) >= 1:
                           bail = True
                        if not bail and bc:
-                          self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo.encode()+b'\n')
+                          self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo+b'\n')
                           bc = False
              done = True
 
@@ -852,7 +852,8 @@ Will use HTML5 for this SASsession.""")
                 rc = os.waitpid(self.pid, 0)
 
              self.pid = None
-             return dict(LOG=logf.partition(logcodeo)[0]+'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+             log =logf.partition(logcodeo)[0]+b'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc).encode()
+             return dict(LOG=log.decode(errors='replace'), LST='')
 
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
@@ -870,7 +871,10 @@ Will use HTML5 for this SASsession.""")
              else:
                 print('Exception ignored, continuing to process...\n')
 
-             self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo.encode()+b'\n')
+             self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo+b'\n')
+
+      lstf = lstf.decode()
+      logf = logf.decode()
 
       trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 100:
@@ -890,19 +894,19 @@ Will use HTML5 for this SASsession.""")
 
    def _breakprompt(self, eos):
         found = False
-        logf  = ''
-        lstf  = ''
+        logf  = b''
+        lstf  = b''
         bc    = False
 
         if self.pid is None:
-            return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='', ABORT=True)
+            return dict(LOG=b"No SAS process attached. SAS process has terminated unexpectedly.", LST=b'', ABORT=True)
 
         if True:
            response = self.sascfg._prompt(
                      "SAS attention handling is not yet supported over IOM. Please enter (T) to terminate SAS or (C) to continue.")
            while True:
               if response is None or response.upper() == 'C':
-                 return dict(LOG='', LST='', BC=True)
+                 return dict(LOG=b'', LST=b'', BC=True)
               if response.upper() == 'T':
                  break
               response = self.sascfg._prompt("Please enter (T) to terminate SAS or (C) to continue.")
@@ -915,7 +919,7 @@ Will use HTML5 for this SASsession.""")
            sleep(.25)
 
         self.pid = None
-        return dict(LOG="SAS process terminated", LST='', ABORT=True)
+        return dict(LOG=b"SAS process terminated", LST=b'', ABORT=True)
 
 
 
@@ -1276,7 +1280,7 @@ Will use HTML5 for this SASsession.""")
                    first = False
 
                 datar += data
-                data   = datar.rpartition(colsep.encode()+rowsep.encode()+'\n'.encode())
+                data   = datar.rpartition(colsep.encode()+rowsep.encode()+b'\n')
                 datap  = data[0]+data[1]
                 datar  = data[2] 
 
