@@ -401,7 +401,7 @@ public class saspy2j
                   filenum ++;
                   fn       = "_tomods"+filenum;
                   physname = filesvc.FullName(fn, physicalName.value[0]);
-                  fileref  = filesvc.AssignFileref(fn, "", physname, "encoding=\"utf-8\" lrecl="+lrecl, retname);
+                  fileref  = filesvc.AssignFileref(fn, "", physname, " lrecl="+lrecl, retname);
                   }
                }
 
@@ -649,7 +649,7 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
              libref.LevelInfo(fieldInclusionMask, engineName, engineAttrs, libraryAttrs,
                                   physicalName, infoPropertyNames, infoPropertyValues);
              physname = filesvc.FullName(fn, physicalName.value[0]);
-             fileref  = filesvc.AssignFileref(fn, "", physname, "encoding=\'utf-8\' lrecl="+lrecl, retname);
+             fileref  = filesvc.AssignFileref(fn, "", physname, " lrecl="+lrecl, retname);
              }
           else
              fileref  = filesvc.UseFileref(fn);

@@ -496,15 +496,15 @@ Will use HTML5 for this SASsession.""")
       odsclose = b"ods "+self.sascfg.output.encode()+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True;
       mj       = b";*\';*\";*/;"
-      lstf     = ''
-      logf     = ''
+      lstf     = b''
+      logf     = b''
       bail     = False
       eof      = 5
       bc       = False
       done     = False
       logn     = self._logcnt()
       logcodei = "%put E3969440A681A24088859985" + logn + ";"
-      logcodeo = "\nE3969440A681A24088859985" + logn
+      logcodeo = b"\nE3969440A681A24088859985" + logn.encode()
       pcodei   = ''
       pcodeiv  = ''
       pcodeo   = ''
@@ -565,12 +565,12 @@ Will use HTML5 for this SASsession.""")
              while True:
                  rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
                  if rc is not None:
-                     log = ''
+                     log = b''
                      try:
-                        log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
+                        log = self.stderr.read1(4096)
                         if len(log) > 0:
                             logf += log
-                        self._log += logf
+                        self._log += logf.decode(self.sascfg.encoding, errors='replace')
                      except:
                         pass
                      self.pid = None
@@ -581,13 +581,13 @@ Will use HTML5 for this SASsession.""")
                  if eof < 0:
                      break
                  if ods:
-                    lst = self.stdout.read1(4096).decode(errors='replace')
+                    lst = self.stdout.read1(4096)         #.decode(errors='replace')
                  else:
-                    lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
+                    lst = self.stdout.read1(4096)         #.decode(self.sascfg.encoding, errors='replace')
                  if len(lst) > 0:
                      lstf += lst
                  else:
-                     log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
+                     log = self.stderr.read1(4096)        #.decode(self.sascfg.encoding, errors='replace')
                      if len(log) > 0:
                          logf += log
                          if logf.count(logcodeo) >= 1:
@@ -601,17 +601,17 @@ Will use HTML5 for this SASsession.""")
          except (ConnectionResetError):
              log = ''
              try:
-                log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
+                log = self.stderr.read1(4096)             #.decode(self.sascfg.encoding, errors='replace')
                 if len(log) > 0:
-                    logf += log
-                self._log += logf
+                   logf += log
+                self._log += logf.decode(self.sascfg.encoding, errors='replace')
              except:
                 pass
              rc = 0
              rc = os.waitpid(self.pid, 0)
              self.pid = None
-             return dict(LOG=logf.partition(logcodeo)[0]+'\nConnection Reset: SAS process has terminated unexpectedly. '+
-                         'Pid State= '+str(rc)+'\n'+logf, LST='')
+             log = logf.partition(logcodeo)[0]+b'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc).encode()+b'\n'+logf
+             return dict(LOG=log.encode(), LST='')
 
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
@@ -632,6 +632,12 @@ Will use HTML5 for this SASsession.""")
              self.stdin.write(odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
              self.stdin.flush()
 
+      if ods:
+         lstf = lstf.decode(errors='replace')
+      else:
+         lstf = lstf.decode(self.sascfg.encoding, errors='replace')
+      logf    = logf.decode(self.sascfg.encoding, errors='replace')
+
       trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 100:
          lstf = ''
@@ -650,19 +656,19 @@ Will use HTML5 for this SASsession.""")
 
    def _breakprompt(self, eos):
         found = False
-        logf  = ''
-        lstf  = ''
+        logf  = b''
+        lstf  = b''
         bc    = False
 
         if self.pid is None:
-            return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='', ABORT=True)
+            return dict(LOG=b"No SAS process attached. SAS process has terminated unexpectedly.", LST=b'', ABORT=True)
 
         if self.sascfg.ssh:
            response = self.sascfg._prompt(
                      "SAS attention handling not supported over ssh. Please enter (T) to terminate SAS or (C) to continue.")
            while True:
               if response is None or response.upper() == 'C':                   
-                 return dict(LOG='', LST='', BC=True)
+                 return dict(LOG=b'', LST=b'', BC=True)
               if response.upper() == 'T':
                  break
               response = self.sascfg._prompt("Please enter (T) to terminate SAS or (C) to continue.")
@@ -676,17 +682,16 @@ Will use HTML5 for this SASsession.""")
             if rc is not None:
                 self.pid = None
                 outrc = str(rc)
-                return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
-                            outrc, LST='',ABORT=True)
+                return dict(LOG=b'SAS process has terminated unexpectedly. Pid State= '+outrc.encode(), LST=b'',ABORT=True)
 
-            lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
+            lst = self.stdout.read1(4096) 
             lstf += lst
             if len(lst) > 0:
-                lsts = lst.rpartition('Select:')
-                if lsts[0] != '' and lsts[1] != '':
+                lsts = lst.rpartition(b'Select:')
+                if lsts[0] != b'' and lsts[1] != b'':
                     found = True
-                    query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
-                    print('Processing interrupt\nAttn handler Query is\n\n' + query)
+                    query = lsts[1] + lsts[2].rsplit(b'\n?')[0] + b'\n'
+                    print('Processing interrupt\nAttn handler Query is\n\n' + query.decode(self.sascfg.encoding, errors='replace'))
                     response = None
                     while response is None:
                        response = self.sascfg._prompt("Please enter your Response: ")
@@ -696,10 +701,10 @@ Will use HTML5 for this SASsession.""")
                        bc = True
                        break
                 else:
-                    lsts = lst.rpartition('Press')
-                    if lsts[0] != '' and lsts[1] != '':
-                        query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
-                        print('Secondary Query is:\n\n' + query)
+                    lsts = lst.rpartition(b'Press')
+                    if lsts[0] != b'' and lsts[1] != b'':
+                        query = lsts[1] + lsts[2].rsplit(b'\n?')[0] + b'\n'
+                        print('Secondary Query is:\n\n' + query.decode(self.sascfg.encoding, errors='replace'))
                         response = None
                         while response is None:
                            response = self.sascfg._prompt("Please enter your Response: ")
@@ -709,12 +714,12 @@ Will use HTML5 for this SASsession.""")
                            bc = True
                            break
                     else:
-                        #print("******************No 'Select' or 'Press' found in lst=")
+                        #print("******************No 'Select' or 'Press' found in lst="+lstf.decode(self.sascfg.encoding, errors='replace'))
                         pass
             else:
-                log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
+                log = self.stderr.read1(4096) 
                 logf += log
-                self._log += log
+                self._log += log.decode(self.sascfg.encoding, errors='replace')
 
                 if log.count(eos) >= 1:
                     print("******************Found end of step. No interrupt processed")
@@ -1059,8 +1064,8 @@ Will use HTML5 for this SASsession.""")
       self._asubmit(code, 'text')
 
       r     = []
-      #df    = pd.DataFrame(columns=varlist)
       df    = None
+      datar = b''
       trows = kwargs.get('trows', None)
       if not trows:
          trows = 100000
@@ -1072,14 +1077,15 @@ Will use HTML5 for this SASsession.""")
             data = newsock[0].recv(4096)
    
             if len(data):
-               datar += data.decode(self.sascfg.encoding, errors='replace')
+               datar += data
             else:
                break
    
-            data  = datar.rpartition(colsep+rowsep+'\n')
+            data  = datar.rpartition(colsep.encode()+rowsep.encode()+b'\n')
             datap = data[0]+data[1]
             datar = data[2] 
    
+            datap = datap.decode(self.sascfg.encoding, errors='replace')
             for i in datap.split(sep=colsep+rowsep+'\n'):
                if i != '':
                   r.append(tuple(i.split(sep=colsep)))
