@@ -55,7 +55,7 @@ class SASutil:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.WARN)
         self.sas = session
-        logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
+        self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     def hpimpute(self, **kwargs: dict) -> 'SASresults':
         """
@@ -75,7 +75,7 @@ class SASutil:
         required_set = {'impute'}
         legal_set = {'input', 'impute', 'performance', 'id', 'freq', 'code',
                      'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPIMPUTE", required_set, legal_set, **kwargs)
 
     def hpbin(self, **kwargs: dict) -> 'SASresults':
@@ -96,7 +96,7 @@ class SASutil:
         """
         required_set = {}
         legal_set = {'code', 'id', 'performance', 'target', 'input', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPBIN", required_set, legal_set, **kwargs)
 
 

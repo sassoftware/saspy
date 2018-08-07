@@ -52,7 +52,7 @@ class SASViyaML:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.WARN)
         self.sas = session
-        logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
+        self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     def factmac(self, **kwargs: dict) -> object:
         """
@@ -69,8 +69,8 @@ class SASViyaML:
         required_set = {'input', 'target'}
         legal_set = {'freq', 'input', 'id', 'target', 'save', 'score', 'procopts'}
         # print ("I am HERE")
-        logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("HPFOREST", required_set, legal_set, **kwargs)
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc(self, "HPFOREST", required_set, legal_set, **kwargs)
 
     def forest(self, **kwargs: dict) -> object:
         """
@@ -86,8 +86,8 @@ class SASViyaML:
         """
         required_set = {'input'}
         legal_set = {'freq', 'input', 'id', 'score', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("HPCLUS", required_set, legal_set, **kwargs)
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc(self, "HPCLUS", required_set, legal_set, **kwargs)
 
     def gradboost(self, **kwargs: dict) -> object:
         """
@@ -103,8 +103,8 @@ class SASViyaML:
         """
         required_set = {'input'}
         legal_set = {'freq', 'input', 'id', 'score', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("HPCLUS", required_set, legal_set, **kwargs)
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc(self, "HPCLUS", required_set, legal_set, **kwargs)
 
     def nnet(self, **kwargs: dict) -> object:
         """
@@ -121,8 +121,8 @@ class SASViyaML:
         required_set = {'input', 'target', 'train'}
         legal_set = {'freq', 'input', 'id', 'target', 'save', 'score',
                      'architecture', 'weight', 'hidden', 'partition', 'train', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("HPNEURAL", required_set, legal_set, **kwargs)
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
+        return SASProcCommons._run_proc(self, "HPNEURAL", required_set, legal_set, **kwargs)
 
     def svmachine(self, **kwargs: dict) -> object:
         """
