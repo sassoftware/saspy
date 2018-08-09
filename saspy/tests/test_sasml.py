@@ -1,5 +1,6 @@
 import unittest
 import saspy
+from saspy.tests.util import Utilities
 
 
 class TestSASml(unittest.TestCase):
@@ -7,8 +8,9 @@ class TestSASml(unittest.TestCase):
         # Use the first entry in the configuration list
         self.sas = saspy.SASsession(cfgname=saspy.SAScfg.SAS_config_names[0])
         self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
+        self.util = Utilities(self.sas)
         procNeeded = ['forest', 'hp4score', 'cluster', 'neural', 'treeboost', 'hpbnet']
-        if not self.procFound(procNeeded):
+        if not self.util.procFound(procNeeded):
             self.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
     def tearDown(self):
