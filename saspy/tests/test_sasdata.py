@@ -279,7 +279,7 @@ class TestSASdataObject(unittest.TestCase):
             b = stat.hplogistic(data=tr, model='sex = weight height', code=fname)
             tr.score(file=fname)
             # check that p_weight is in columnInfo
-            self.assertTrue('P_SexF ' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
+            self.assertTrue('P_SexF' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
 
         res1 = tr.assessModel(target = 'sex', prediction='P_SexF', nominal=True, event='F')
         a = ['ASSESSMENTBINSTATISTICS', 'ASSESSMENTSTATISTICS', 'LOG', 'SGPLOT']
@@ -297,7 +297,7 @@ class TestSASdataObject(unittest.TestCase):
         tr = self.sas.sasdata("class", "work")
         tr.set_results('PANDAS')
         tr.partition(var='sex', fraction = .5, kfold=1, out=None, singleOut=True)
-        self.assertTrue('_PartInd_ ' in tr.columnInfo()['Variable'].values, msg="Partition Column not found")
+        self.assertTrue('_PartInd_' in tr.columnInfo()['Variable'].values, msg="Partition Column not found")
 
     def test_partition2(self):
         self.sas.submit("""
@@ -308,7 +308,7 @@ class TestSASdataObject(unittest.TestCase):
         tr = self.sas.sasdata("class", "work")
         tr.set_results('PANDAS')
         tr.partition(var='sex', fraction = .5, kfold=2, out=None, singleOut=True)
-        self.assertTrue('_cvfold2 ' in tr.columnInfo()['Variable'].values, msg="Partition Column not found")
+        self.assertTrue('_cvfold2' in tr.columnInfo()['Variable'].values, msg="Partition Column not found")
 
     def test_partition3(self):
         self.sas.submit("""
@@ -321,9 +321,9 @@ class TestSASdataObject(unittest.TestCase):
         tr.set_results('PANDAS')
         out.set_results('PANDAS')
         tr.partition(var='sex', fraction = .5, kfold=2, out=out, singleOut=True)
-        self.assertFalse('_cvfold1 ' in tr.columnInfo()['Variable'].values, msg="Writing to wrong table")
+        self.assertFalse('_cvfold1' in tr.columnInfo()['Variable'].values, msg="Writing to wrong table")
         self.assertFalse('_PartInd_ ' in tr.columnInfo()['Variable'].values, msg="Writing to wrong table")
-        self.assertTrue('_cvfold2 ' in out.columnInfo()['Variable'].values, msg="Partition Column not found")
+        self.assertTrue('_cvfold2' in out.columnInfo()['Variable'].values, msg="Partition Column not found")
 
     def test_partition4(self):
         self.sas.submit("""
@@ -336,9 +336,9 @@ class TestSASdataObject(unittest.TestCase):
         tr.set_results('PANDAS')
         out.set_results('PANDAS')
         res1 = tr.partition(var='sex', fraction = .5, kfold=2, out=out, singleOut=False)
-        self.assertFalse('_cvfold1 ' in tr.columnInfo()['Variable'].values, msg="Writing to wrong table")
+        self.assertFalse('_cvfold1' in tr.columnInfo()['Variable'].values, msg="Writing to wrong table")
         self.assertFalse('_PartInd_ ' in tr.columnInfo()['Variable'].values, msg="Writing to wrong table")
-        self.assertTrue('_cvfold2 ' in out.columnInfo()['Variable'].values, msg="Partition Column not found")
+        self.assertTrue('_cvfold2' in out.columnInfo()['Variable'].values, msg="Partition Column not found")
         self.assertIsInstance(res1, list, "Is return type correct")
         self.assertIsInstance(res1[0], tuple, "Is return type correct")
         self.assertIsInstance(res1[0][1], saspy.SASdata, "Is return type correct")
@@ -352,7 +352,7 @@ class TestSASdataObject(unittest.TestCase):
         tr = self.sas.sasdata("class", "work")
         tr.set_results('PANDAS')
         tr.partition(fraction = .5, kfold=1, out=None, singleOut=True)
-        self.assertTrue('_PartInd_ ' in tr.columnInfo()['Variable'].values, msg="Partition Column not found")
+        self.assertTrue('_PartInd_' in tr.columnInfo()['Variable'].values, msg="Partition Column not found")
         
     def test_info1(self):
         tr = self.sas.sasdata("class", "sashelp")
@@ -372,3 +372,6 @@ class TestSASdataObject(unittest.TestCase):
         tr.set_results('html')
         res = tr.info()
         self.assertIsNone(res, msg="only works with Pandas")
+
+if __name__ == "__main__":
+    unittest.main()
