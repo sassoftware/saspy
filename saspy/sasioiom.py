@@ -22,6 +22,7 @@ import tempfile as tf
 
 try:
    import pandas as pd
+   import numpy  as np
 except ImportError:
    pass
 try:
@@ -1300,6 +1301,8 @@ Will use HTML5 for this SASsession.""")
                          else:
                             if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
                                tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
+                      else:
+                         tdf[varlist[i]].replace(' ', np.nan, True)
                    
                    if df is not None:
                       df = df.append(tdf, ignore_index=True)
@@ -1330,6 +1333,8 @@ Will use HTML5 for this SASsession.""")
                else:
                   if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
                      tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
+            else:
+               tdf[varlist[i]].replace(' ', np.nan, True)
          
          if df is not None:
             df = df.append(tdf, ignore_index=True)

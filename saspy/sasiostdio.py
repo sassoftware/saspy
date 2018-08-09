@@ -23,6 +23,7 @@ import socket as socks
 
 try:
    import pandas as pd
+   import numpy  as np
 except ImportError:
    pass
 try:
@@ -581,13 +582,13 @@ Will use HTML5 for this SASsession.""")
                  if eof < 0:
                      break
                  if ods:
-                    lst = self.stdout.read1(4096)         #.decode(errors='replace')
+                    lst = self.stdout.read1(4096)
                  else:
-                    lst = self.stdout.read1(4096)         #.decode(self.sascfg.encoding, errors='replace')
+                    lst = self.stdout.read1(4096)
                  if len(lst) > 0:
                      lstf += lst
                  else:
-                     log = self.stderr.read1(4096)        #.decode(self.sascfg.encoding, errors='replace')
+                     log = self.stderr.read1(4096)
                      if len(log) > 0:
                          logf += log
                          if logf.count(logcodeo) >= 1:
@@ -601,7 +602,7 @@ Will use HTML5 for this SASsession.""")
          except (ConnectionResetError):
              log = ''
              try:
-                log = self.stderr.read1(4096)             #.decode(self.sascfg.encoding, errors='replace')
+                log = self.stderr.read1(4096)
                 if len(log) > 0:
                    logf += log
                 self._log += logf.decode(self.sascfg.encoding, errors='replace')
@@ -1101,7 +1102,9 @@ Will use HTML5 for this SASsession.""")
                      else:
                         if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
                            tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
-               
+                  else:
+                     tdf[varlist[i]].replace(' ', np.nan, True)
+
                if df is not None:
                   df = df.append(tdf, ignore_index=True)
                else:
@@ -1131,7 +1134,9 @@ Will use HTML5 for this SASsession.""")
                else:
                   if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
                      tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
-         
+            else:
+               tdf[varlist[i]].replace(' ', np.nan, True)
+
          if df is not None:
             df = df.append(tdf, ignore_index=True)
          else:
