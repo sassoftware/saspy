@@ -17,16 +17,6 @@ class TestSASml(unittest.TestCase):
         if self.sas:
             self.sas._endsas()
 
-    def procFound(self, plist: list) -> bool:
-        assert isinstance(plist, list)
-        for proc in plist:
-            res = self.sas.submit("proc %s; run;" % proc)
-            log = res['LOG'].splitlines()
-            for line in log:
-                if line == 'ERROR: Procedure %s not found.' % proc.upper():
-                    return False
-        return True
-
     def testForestSmoke1(self):
         ml = self.sas.sasml()
         dt = self.sas.sasdata("class", "sashelp")

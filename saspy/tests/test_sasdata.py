@@ -256,7 +256,7 @@ class TestSASdataObject(unittest.TestCase):
             b = stat.hpreg(data=tr, model='weight=height', code=fname)
             tr.score(file=os.path.join(temppath, 'hpreg_code.sas'))
             # check that p_weight is in columnInfo
-            self.assertTrue('P_Weight ' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
+            self.assertTrue('P_Weight' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
 
         res1 = tr.assessModel(target = 'weight', prediction='P_weight', nominal=False)
         a = ['ASSESSMENTBINSTATISTICS', 'ASSESSMENTSTATISTICS', 'LOG']
