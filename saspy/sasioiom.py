@@ -1087,23 +1087,23 @@ Will use HTML5 for this SASsession.""")
       ncols  = len(df.columns)
 
       for name in range(ncols):
-         input += "'"+df.columns[name]+"'n "
+         input += "'"+str(df.columns[name])+"'n "
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
-            col_l = df[df.columns[name]].map(len, 'ignore').max()
+            col_l = df[df.columns[name]].astype(str).map(len, 'ignore').max()
             if col_l == 0:
                col_l = 8
-            length += " '"+df.columns[name]+"'n $"+str(col_l)
+            length += " '"+str(df.columns[name])+"'n $"+str(col_l)
             if keep_outer_quotes:
                input  += "~ "
             dts.append('C')
          else:
             if df.dtypes[df.columns[name]].kind in ('M'):
-               length += " '"+df.columns[name]+"'n 8"
+               length += " '"+str(df.columns[name])+"'n 8"
                input  += ":E8601DT26.6 "
-               format += "'"+df.columns[name]+"'n E8601DT26.6 "
+               format += "'"+str(df.columns[name])+"'n E8601DT26.6 "
                dts.append('D')
             else:
-               length += " '"+df.columns[name]+"'n 8"
+               length += " '"+str(df.columns[name])+"'n 8"
                dts.append('N')
 
       code = "data "
