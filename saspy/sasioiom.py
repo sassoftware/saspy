@@ -1124,6 +1124,8 @@ Will use HTML5 for this SASsession.""")
             var = str(row[col])
             if dts[col] == 'N' and var == 'nan':
                var = '.'
+            if dts[col] == 'C' and var == 'nan':
+               var = ' '
             if dts[col] == 'D':
                if var == 'nan':
                   var = '.'
@@ -1302,7 +1304,7 @@ Will use HTML5 for this SASsession.""")
                             if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
                                tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
                       else:
-                         tdf[varlist[i]].replace(' ', np.nan, True)
+                         tdf[varlist[i]].replace(' ', np.NaN, True)
                    
                    if df is not None:
                       df = df.append(tdf, ignore_index=True)
@@ -1334,7 +1336,7 @@ Will use HTML5 for this SASsession.""")
                   if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
                      tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
             else:
-               tdf[varlist[i]].replace(' ', np.nan, True)
+               tdf[varlist[i]].replace(' ', np.NaN, True)
          
          if df is not None:
             df = df.append(tdf, ignore_index=True)
