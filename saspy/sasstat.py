@@ -51,7 +51,7 @@ class SASstat:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.WARN)
         self.sas = session
-        logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
+        self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     def hpsplit(self, **kwargs: dict) -> 'SASresults':
         """
@@ -72,7 +72,7 @@ class SASstat:
         required_set = {}
         legal_set = {'cls', 'code', 'grow', 'id', 'model', 'out',
                      'partition', 'performance', 'prune', 'rules', 'target', 'input', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPSPLIT", required_set, legal_set, **kwargs)
 
     def reg(self, **kwargs: dict) -> 'SASresults':
@@ -97,7 +97,7 @@ class SASstat:
                      'lsmeans', 'model', 'random', 'repeated',
                      'slice', 'test', 'weight', 'out', 'procopts'}
 
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "REG", required_set, legal_set, **kwargs)
 
     def mixed(self, **kwargs: dict) -> 'SASresults':
@@ -123,7 +123,7 @@ class SASstat:
                      'lsmeans', 'model', 'out', 'random', 'repeated',
                      'slice', 'weight', 'procopts'}
 
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "MIXED", required_set, legal_set, **kwargs)
 
     def glm(self, **kwargs: dict) -> 'SASresults':
@@ -150,7 +150,7 @@ class SASstat:
                      'lsmeans', 'manova', 'means', 'model', 'out', 'random', 'repeated',
                      'test', 'weight', 'procopts'}
 
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "GLM", required_set, legal_set, **kwargs)
 
     def logistic(self, **kwargs: dict) -> 'SASresults':
@@ -183,7 +183,7 @@ class SASstat:
                      'exact', 'freq', 'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice',
                      'store', 'strata', 'units', 'weight', 'procopts'}
 
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "LOGISTIC", required_set, legal_set, **kwargs)
 
     def tpspline(self, **kwargs: dict) -> 'SASresults':
@@ -207,7 +207,7 @@ class SASstat:
         required_set = {'model'}
         legal_set = {'by', 'freq', 'id', 'model', 'output', 'score', 'procopts'}
 
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TPSPLINE", required_set, legal_set, **kwargs)
 
     def hplogistic(self, **kwargs: dict) -> 'SASresults':
@@ -232,7 +232,7 @@ class SASstat:
         legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
                      'partition', 'score', 'selection', 'weight'}
 
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
 
         # ODS graphics are created by default for STAT this stops them form generation
         kwargs['ODSGraphics']=False
@@ -260,7 +260,7 @@ class SASstat:
         legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
                      'partition', 'performance', 'score', 'selection', 'weight'}
 
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         kwargs['ODSGraphics']=False
         return SASProcCommons._run_proc(self, "HPREG", required_set, legal_set, **kwargs)
 
@@ -288,7 +288,7 @@ class SASstat:
                      'hazardratio', 'id', 'lsmeans', 'lsmestimate', 'model', 'out', 'roc',
                      'random', 'slice', 'store', 'strata', 'test', 'weight', 'procopts'}
 
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         kwargs['ODSGraphics']=True
         return SASProcCommons._run_proc(self, "PHREG", required_set, legal_set, **kwargs)
 
@@ -312,7 +312,7 @@ class SASstat:
         required_set = {}
         legal_set = {'by', 'cls', 'freq', 'paired', 'var', 'weight', 'procopts'}
 
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         kwargs['ODSGraphics']=True
         return SASProcCommons._run_proc(self, "TTEST", required_set, legal_set, **kwargs)
 
@@ -334,7 +334,7 @@ class SASstat:
         required_set = {}
         legal_set = {'by', 'freq', 'priors', 'pathdiagram', 'partial', 'var', 'weight', 'procopts'}
 
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         kwargs['ODSGraphics']=True
         return SASProcCommons._run_proc(self, "FACTOR", required_set, legal_set, **kwargs)
 

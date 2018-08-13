@@ -169,7 +169,7 @@ class Tabulate:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.WARN)
         self.sasproduct = 'base'
-        logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
+        self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @staticmethod
     def as_class(*args, **kwargs):
