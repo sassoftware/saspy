@@ -1104,7 +1104,10 @@ Will use HTML5 for this SASsession.""")
                dts.append('D')
             else:
                length += " '"+str(df.columns[name])+"'n 8"
-               dts.append('N')
+               if df.dtypes[df.columns[name]] == 'bool':
+                  dts.append('B')
+               else:   
+                  dts.append('N')
 
       code = "data "
       if len(libref):
@@ -1126,6 +1129,8 @@ Will use HTML5 for this SASsession.""")
                var = '.'
             if dts[col] == 'C' and var == 'nan':
                var = ' '
+            if dts[col] == 'B':
+               var = str(int(row[col]))
             if dts[col] == 'D':
                if var == 'nan':
                   var = '.'
