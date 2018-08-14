@@ -1,5 +1,9 @@
 import logging
-import pandas as pd
+try:
+   import pandas as pd
+except ImportError:
+    pass
+
 from collections import ChainMap 
 from saspy.sasresults import SASresults
 from saspy.sasproccommons import SASProcCommons

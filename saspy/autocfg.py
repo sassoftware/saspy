@@ -74,6 +74,7 @@ os.environ["PATH"] += ';'+r'SSPIPATH'
    depDir = "C:\\Program Files\\SASHome\\SASFoundation\\9.4\\core\\sasext"
    
    # try to get the folders in that location
+
    if os.path.isdir(depDir):
     ls = os.walk(depDir)
    else:
@@ -99,9 +100,9 @@ os.environ["PATH"] += ';'+r'SSPIPATH'
    
    fd = open(cfgfile, 'w')
    fd.write(cfg)
-+   fd.close()
-+
-+   print("Generated configurations file: "+cfgfile+"\n")
-+   
-+if __name__ == "__main__":
-+   main(sys.argv)
+   fd.close()
+
+   print("Generated configurations file: "+cfgfile+"\n")
+   
+if __name__ == "__main__":
+   main(sys.argv)
