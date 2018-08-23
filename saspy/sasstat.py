@@ -14,6 +14,8 @@
 #  limitations under the License.
 #
 import logging
+import sys
+from functools import wraps
 from saspy.sasproccommons import SASProcCommons
 from saspy.sasresults import SASresults
 #from pdb import set_trace as bp
@@ -52,28 +54,55 @@ class SASstat:
         self.logger.setLevel(logging.WARN)
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
+        if sys.version_info[0] < 3 or (sys.version_info[0] >= 3 and sys.version_info[1] >= 4):
+            raise SyntaxWarning("Python 3.4 is required to get correct tab complete and docstring "
+                                "information for methods")
 
-    def hpsplit(self, **kwargs: dict) -> 'SASresults':
+
+    def proc_decorator(proc, req_set):
+        """
+        Decorator that provides the wrapped function with an attribute 'actual_kwargs'
+        containing just those keyword arguments actually passed in to the function.
+        """
+
+        def decorator(func):
+            @wraps(func)
+            def inner(self, *args, **kwargs):
+                inner.proc_decorator = kwargs
+                self.logger.debug("processing proc:{}".format(proc))
+                self.logger.debug(kwargs.keys())
+                self.logger.debug(req_set)
+                legal_set = set(kwargs.keys())
+                self.logger.debug(legal_set)
+                self.logger.debug("kwargs type: " + str(type(kwargs)))
+                return SASProcCommons._run_proc(self, proc.lower(), req_set, legal_set, **kwargs)
+
+            return inner
+
+        return decorator
+
+    @proc_decorator('hpsplit', {})
+    def hpsplit(self, data: 'SASData' = None,
+                target: [str, list, dict] = None,
+                input: [str, list, dict] = None,
+                partition: [str, dict] = 'Rolevar',
+                score: [bool, str] = True,
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPSPLIT procedure
-
-        ``required_set = {}``
-
-        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}``
-
-        cls is an alias for the class statement
-
         For more information on the statements see the Documentation link.
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
-        :param kwargs: dict
+
+        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}``
+
+
+        :param data: SASData object This parameter is required
+        :param target: The target can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :param input:   The input can be a string, list or dict type. It refers to the independent or X variables.
+        :param kwargs:
         :return: SAS result object
         """
-        required_set = {}
-        legal_set = {'cls', 'code', 'grow', 'id', 'model', 'out',
-                     'partition', 'performance', 'prune', 'rules', 'target', 'input', 'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPSPLIT", required_set, legal_set, **kwargs)
 
     def reg(self, **kwargs: dict) -> 'SASresults':
         """

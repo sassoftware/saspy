@@ -329,6 +329,7 @@ class SASProcCommons:
         # manova moved
         # means moved
         if 'model' in args:
+            # TODO: allow model to take a dict in addition to a str
             self.logger.debug("model statement,length: %s,%s", args['model'], len(args['model']))
             code += "model %s;\n" % (args['model'])
         if 'contrast' in args:
@@ -582,6 +583,7 @@ class SASProcCommons:
             self.logger.debug("rules statement,length: %s,%s", args['rules'], len(args['rules']))
             code += "rules %s;\n" % (args['rules'])
         if 'partition' in args:
+            # TODO: Allow partition to take more than a str
             self.logger.debug("partition statement,length: %s,%s", args['partition'], len(args['partition']))
             code += "partition %s;\n" % (args['partition'])
         if 'out' in args and not len(outmeth):
@@ -907,6 +909,8 @@ class SASProcCommons:
         :return: sas result object
         """
         data = kwargs.pop('data', None)
+        if required_set is None:
+            required_set = {}
         objtype = procname.lower()
         if 'model' not in kwargs.keys():
             kwargs = SASProcCommons._processNominals(self, kwargs, data)
@@ -955,7 +959,7 @@ class SASProcCommons:
         :param req: set
         :param legal: set
         :param stmt: dict
-        :return: dictonary of verified statements
+        :return: dictionary of verified statements
         """
         # debug the argument list
         if self.logger.level == 10:
