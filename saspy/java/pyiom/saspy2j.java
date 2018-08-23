@@ -91,13 +91,14 @@ public class saspy2j
    static Socket   serr     = null;
    static String   appName  = "";
    static String   iomhost  = "";
-   static int      iomport  =  0;
+   static int      iomport  = 0;
    static String   omruser  = "";
    static String   omrpw    = "";
    static String   ad       = "";
    static String   physname = "";
    static int      hosts    = 0;
    static String[] iomhosts;
+   static int      lrecl    = 32767;
 
 
    public static void main(String[] args) throws
@@ -149,6 +150,8 @@ public class saspy2j
             zero = true;
          else if (args[x].equalsIgnoreCase("-spn"))
             spn = true;
+         else if (args[x].equalsIgnoreCase("-lrecl"))
+            lrecl = Integer.parseInt(args[x + 1]);
          }
 
       iomhosts = iomhost.split(";");
@@ -265,6 +268,37 @@ public class saspy2j
                      catch (org.omg.CORBA.COMM_FAILURE e)
                         {}
                      cx.close();
+                     if (reconnect)
+                        {
+                        try
+                           {
+                           server     = (BridgeServer) Server.fromURI(uri);
+                           ad         = server.getDomain();
+
+                           if (appName != "")
+                              server.setServerName(appName.replace("\'", ""));
+                           server.setOption(SASURI.applicationNameKey, "SASPy");
+                           
+                           cxfConfig  = new ManualConnectionFactoryConfiguration(server);
+                           cxfManager = new ConnectionFactoryManager();
+                           cxf        = cxfManager.getFactory(cxfConfig);
+                           
+                           if (spn)
+                              cx = cxf.getConnection(cred);
+                           else
+                              cx = cxf.getConnection(omruser, omrpw, ad);
+
+                           cx.close();
+                           }
+                        catch(ConnectionFactoryException e)
+                           {
+                           String msg = "We failed reconnecting in ENDSAS. WUWT?\n"+e.getMessage();
+                           System.out.print(msg+"\n");
+                           errp.write(msg+"\n");
+                           errp.flush();
+                           e.printStackTrace();
+                           }
+                        }
                      sin.close();
                      sout.close();
                      serr.close();
@@ -365,9 +399,9 @@ public class saspy2j
                   {
                   StringHolder retname = new StringHolder();
                   filenum ++;
-                  fn = "_tomods"+filenum;
+                  fn       = "_tomods"+filenum;
                   physname = filesvc.FullName(fn, physicalName.value[0]);
-                  fileref = filesvc.AssignFileref(fn, "", physname, "encoding=\"utf-8\"", retname);
+                  fileref  = filesvc.AssignFileref(fn, "", physname, " lrecl="+lrecl, retname);
                   }
                }
 
@@ -379,7 +413,7 @@ public class saspy2j
                   {
                   try
                      {
-                     lst = lang.FlushList(9999999);
+                     lst  = lang.FlushList(9999999);
                      slen = lst.length();
                      if (slen > 0)
                         {
@@ -423,7 +457,7 @@ public class saspy2j
                      {
                      try
                         {
-                        log = lang.FlushLog(9999999);
+                        log  = lang.FlushLog(9999999);
                         slen = log.length();
                         if (slen > 0)
                            {
@@ -506,6 +540,9 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
              {
              server     = (BridgeServer) Server.fromURI(uri);
              ad         = server.getDomain();
+             if (appName != "")
+                server.setServerName(appName.replace("\'", ""));
+             server.setOption(SASURI.applicationNameKey, "SASPy");
    
              cxfConfig  = new ManualConnectionFactoryConfiguration(server);
              cxfManager = new ConnectionFactoryManager();
@@ -549,7 +586,7 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
                 if (spn)
                    {
                    cred = SecurityPackageCredential.getInstance();
-                   cx = cxf.getConnection(cred);
+                   cx   = cxf.getConnection(cred);
                    }
                 else if (timeout > 0)
                    cx = cxf.getConnection(omruser, omrpw, timeout);
@@ -612,10 +649,10 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
              libref.LevelInfo(fieldInclusionMask, engineName, engineAttrs, libraryAttrs,
                                   physicalName, infoPropertyNames, infoPropertyValues);
              physname = filesvc.FullName(fn, physicalName.value[0]);
-             fileref = filesvc.AssignFileref(fn, "", physname, "encoding=\"utf-8\"", retname);
+             fileref  = filesvc.AssignFileref(fn, "", physname, " lrecl="+lrecl, retname);
              }
           else
-             fileref = filesvc.UseFileref(fn);
+             fileref  = filesvc.UseFileref(fn);
           }
        catch (GenericError | LNameNoAssign | NoLibrary e)
           {

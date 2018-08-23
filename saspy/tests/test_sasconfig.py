@@ -17,6 +17,9 @@ class TestSASconfigObject(unittest.TestCase):
     def tearDown(self):
         pass
 
+    '''
+    none of this is valid anymore adter reworking the import of sascfg to be in sasbase only
+
     def test_SASconfig(self):
         # basic mock configuration
         bare_config = dict(
@@ -124,3 +127,6 @@ class TestSASconfigObject(unittest.TestCase):
 
                 self.assertNotIn('-R', params, msg=u'ssh tunnel argument was allowed with lock_down=True')
                 self.assertNotIn('-p', params, msg=u'ssh alternate port argument was allowed with lock_down=True')
+
+    '''
+

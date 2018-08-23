@@ -49,7 +49,7 @@ class SASml:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.WARN)
         self.sas = session
-        logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
+        self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     def forest(self, **kwargs: dict) -> 'SASresults':
         """
@@ -68,7 +68,7 @@ class SASml:
         """
         required_set = {'input', 'target'}
         legal_set = {'freq', 'input', 'id', 'target', 'save', 'score', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPFOREST", required_set, legal_set, **kwargs)
 
     def hp4score(self, **kwargs: dict) -> 'SASresults':
@@ -87,7 +87,7 @@ class SASml:
         """
         required_set = {}
         legal_set = {'id', 'importance', 'performance', 'score', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HP4SCORE", required_set, legal_set, **kwargs)
 
     def cluster(self, **kwargs: dict) -> 'SASresults':
@@ -106,7 +106,7 @@ class SASml:
         """
         required_set = {'input'}
         legal_set = {'freq', 'input', 'id', 'score', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPCLUS", required_set, legal_set, **kwargs)
 
     def neural(self, **kwargs: dict) -> 'SASresults':
@@ -128,7 +128,7 @@ class SASml:
         legal_set = {'architecture', 'code', 'hidden', 'id', 'input',
                      'partition', 'score', 'target', 'train',
                      'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPNEURAL", required_set, legal_set, **kwargs)
 
     def treeboost(self, **kwargs: dict) -> 'SASresults':
@@ -149,7 +149,7 @@ class SASml:
         required_set = {'input', 'target'}
         legal_set = {'assess', 'code', 'freq', 'importance', 'input', 'performance', 'target', 'save', 'score',
                      'subseries', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TREEBOOST", required_set, legal_set, **kwargs)
 
     def hpbnet(self, **kwargs: dict) -> 'SASresults':
@@ -168,5 +168,5 @@ class SASml:
         """
         required_set = {'input', 'target'}
         legal_set = {'id', 'code', 'freq', 'partition', 'input', 'performance', 'target', 'output', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "HPBNET", required_set, legal_set, **kwargs)

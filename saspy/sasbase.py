@@ -39,8 +39,9 @@
 import os
 import sys
 import re
-# from pdb import set_trace as bp
 import logging
+import getpass
+import tempfile
 
 try:
    import pandas as pd
@@ -68,6 +69,7 @@ from saspy.sasml import *
 from saspy.sasqc import *
 from saspy.sasutil import *
 from saspy.sasresults import *
+from saspy.sastabulate import Tabulate
 
 try:
     from IPython.display import HTML
@@ -82,11 +84,42 @@ class SASconfig:
     """
 
     def __init__(self, **kwargs):
-        configs = []
         self._kernel = kwargs.get('kernel', None)
+        configs    = []
         self.valid = True
-        self.mode = ''
+        self.mode  = ''
 
+        cfgfile = kwargs.get('cfgfile', None)
+        if cfgfile:
+           tempdir = tempfile.TemporaryDirectory()
+           try:
+              fdin = open(cfgfile)
+           except:
+              print("Couldn't open cfgfile "+cfgfile)
+              cfgfile = None
+
+           if cfgfile:
+              f1 = fdin.read()
+              fdout = open(tempdir.name+os.sep+"sascfgfile.py",'w')
+              fdout.write(f1)
+              fdout.close()
+              fdin.close()
+              sys.path.append(tempdir.name)
+              import sascfgfile as SAScfg
+              tempdir.cleanup()
+              sys.path.remove(tempdir.name)
+        
+        if not cfgfile:
+           try:
+              import saspy.sascfg_personal as SAScfg
+           except ImportError:
+              try:
+                 import sascfg_personal as SAScfg
+              except ImportError:
+                 import saspy.sascfg as SAScfg
+        
+        self.SAScfg  = SAScfg
+        
         # GET Config options
         try:
             self.cfgopts = getattr(SAScfg, "SAS_config_options")
@@ -207,17 +240,21 @@ class SASsession():
 
     # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
     def __init__(self, **kwargs) -> 'SASsession':
-        self._loaded_macros = False
-        self._obj_cnt       = 0
-        self.nosub          = False
-        self.sascfg         = SASconfig(**kwargs)
-        self.batch          = False
-        self.results        = kwargs.get('results', self.sascfg.results)
+        self._loaded_macros     = False
+        self._obj_cnt           = 0
+        self.nosub              = False
+        self.sascfg             = SASconfig(**kwargs)
+        self.batch              = False
+        self.results            = kwargs.get('results', self.sascfg.results)
         if not self.results:
-           self.results     = 'Pandas'
-        self.workpath       = ''
-        self.sasver         = ''
-        self.sascei         = ''
+           self.results         = 'Pandas'
+        self.workpath           = ''
+        self.sasver             = ''
+        self.sascei             = ''
+        self.HTML_Style         = "HTMLBlue"
+        self.sas_date_fmts      = sas_date_fmts
+        self.sas_time_fmts      = sas_time_fmts
+        self.sas_datetime_fmts  = sas_datetime_fmts
 
         if not self.sascfg.valid:
             self._io = None
@@ -239,7 +276,7 @@ class SASsession():
         try:
            if self._io:
              ll = self.submit('libname work list;')
-             self.workpath = ll['LOG'].partition('Physical Name=')[2].partition('\n')[0].strip()
+             self.workpath = ll['LOG'].partition('Physical Name=')[2].strip().partition('\n')[0].strip()
              win = self.workpath.count('\\')
              lnx = self.workpath.count('/')
              if (win > lnx):
@@ -615,7 +652,7 @@ class SASsession():
             return log
 
     def df2sd(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
-              results: str = '') -> 'SASdata':
+              results: str = '', keep_outer_quotes: bool=False) -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
@@ -623,12 +660,13 @@ class SASsession():
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :return: SASdata object
         """
-        return self.dataframe2sasdata(df, table, libref, results)
+        return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes)
 
     def dataframe2sasdata(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
-                          results: str = '') -> 'SASdata':
+                          results: str = '', keep_outer_quotes: bool=False) -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
@@ -636,6 +674,7 @@ class SASsession():
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :return: SASdata object
         """
         if results == '':
@@ -644,7 +683,7 @@ class SASsession():
             print("too complicated to show the code, read the source :), sorry.")
             return None
         else:
-            self._io.dataframe2sasdata(df, table, libref)
+            self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes)
 
         if self.exist(table, libref):
             return SASdata(self, libref, table, results)
@@ -680,7 +719,7 @@ class SASsession():
         """
         return self.sasdata2dataframe(table, libref, dsopts, method, **kwargs)
 
-    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = {}, **kwargs) -> 'pd.DataFrame':
+    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = {}, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
         """
         This is an alias for 'sasdata2dataframe' specifying method='CSV'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -703,10 +742,12 @@ class SASsession():
                               'obs'      :  10
                               'firstobs' : '12'
                              }
+        :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param kwargs: dictionary
         :return: Pandas data frame
         """
-        return self.sasdata2dataframe(table, libref, dsopts, method='CSV', **kwargs)
+        return self.sasdata2dataframe(table, libref, dsopts, method='CSV', tempfile=tempfile, tempkeep=tempkeep, **kwargs)
 
     def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {}, method: str = 'MEMORY',
                           **kwargs) -> 'pd.DataFrame':
@@ -1003,6 +1044,7 @@ class SASdata:
         self.table = table
         self.dsopts = dsopts
         self.results = results
+        self.tabulate = Tabulate(sassession, self)
 
     def __getitem__(self, key):
 
@@ -1891,15 +1933,17 @@ class SASdata:
         else:
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
 
-    def to_df_CSV(self, **kwargs) -> 'pd.DataFrame':
+    def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame via CSV file
 
+        :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param kwargs:
         :return: Pandas data frame
         :rtype: 'pd.DataFrame'
         """
-        return self.to_df(method='CSV', **kwargs)
+        return self.to_df(method='CSV', tempfile=tempfile, tempkeep=tempkeep, **kwargs)
 
     def to_json(self, pretty: bool = False, sastag: bool = False, **kwargs) -> str:
         """
@@ -2187,3 +2231,56 @@ if __name__ == "__main__":
 
     endsas()
 
+sas_date_fmts = (
+'AFRDFDD','AFRDFDE','AFRDFDE','AFRDFDN','AFRDFDWN','AFRDFMN','AFRDFMY','AFRDFMY','AFRDFWDX','AFRDFWKX','ANYDTDTE','B8601DA',
+'B8601DA','B8601DJ','CATDFDD','CATDFDE','CATDFDE','CATDFDN','CATDFDWN','CATDFMN','CATDFMY','CATDFMY','CATDFWDX','CATDFWKX',
+'CRODFDD','CRODFDE','CRODFDE','CRODFDN','CRODFDWN','CRODFMN','CRODFMY','CRODFMY','CRODFWDX','CRODFWKX','CSYDFDD','CSYDFDE',
+'CSYDFDE','CSYDFDN','CSYDFDWN','CSYDFMN','CSYDFMY','CSYDFMY','CSYDFWDX','CSYDFWKX','DANDFDD','DANDFDE','DANDFDE','DANDFDN',
+'DANDFDWN','DANDFMN','DANDFMY','DANDFMY','DANDFWDX','DANDFWKX','DATE','DATE','DAY','DDMMYY','DDMMYY','DDMMYYB',
+'DDMMYYC','DDMMYYD','DDMMYYN','DDMMYYP','DDMMYYS','DESDFDD','DESDFDE','DESDFDE','DESDFDN','DESDFDWN','DESDFMN','DESDFMY',
+'DESDFMY','DESDFWDX','DESDFWKX','DEUDFDD','DEUDFDE','DEUDFDE','DEUDFDN','DEUDFDWN','DEUDFMN','DEUDFMY','DEUDFMY','DEUDFWDX',
+'DEUDFWKX','DOWNAME','E8601DA','E8601DA','ENGDFDD','ENGDFDE','ENGDFDE','ENGDFDN','ENGDFDWN','ENGDFMN','ENGDFMY','ENGDFMY',
+'ENGDFWDX','ENGDFWKX','ESPDFDD','ESPDFDE','ESPDFDE','ESPDFDN','ESPDFDWN','ESPDFMN','ESPDFMY','ESPDFMY','ESPDFWDX','ESPDFWKX',
+'EURDFDD','EURDFDE','EURDFDE','EURDFDN','EURDFDWN','EURDFMN','EURDFMY','EURDFMY','EURDFWDX','EURDFWKX','FINDFDD','FINDFDE',
+'FINDFDE','FINDFDN','FINDFDWN','FINDFMN','FINDFMY','FINDFMY','FINDFWDX','FINDFWKX','FRADFDD','FRADFDE','FRADFDE','FRADFDN',
+'FRADFDWN','FRADFMN','FRADFMY','FRADFMY','FRADFWDX','FRADFWKX','FRSDFDD','FRSDFDE','FRSDFDE','FRSDFDN','FRSDFDWN','FRSDFMN',
+'FRSDFMY','FRSDFMY','FRSDFWDX','FRSDFWKX','HUNDFDD','HUNDFDE','HUNDFDE','HUNDFDN','HUNDFDWN','HUNDFMN','HUNDFMY','HUNDFMY',
+'HUNDFWDX','HUNDFWKX','IS8601DA','IS8601DA','ITADFDD','ITADFDE','ITADFDE','ITADFDN','ITADFDWN','ITADFMN','ITADFMY','ITADFMY',
+'ITADFWDX','ITADFWKX','JDATEMD','JDATEMDW','JDATEMNW','JDATEMON','JDATEQRW','JDATEQTR','JDATESEM','JDATESMW','JDATEWK','JDATEYDW',
+'JDATEYM','JDATEYMD','JDATEYMD','JDATEYMW','JNENGO','JNENGO','JNENGOW','JULDATE','JULDAY','JULIAN','JULIAN','MACDFDD',
+'MACDFDE','MACDFDE','MACDFDN','MACDFDWN','MACDFMN','MACDFMY','MACDFMY','MACDFWDX','MACDFWKX','MINGUO','MINGUO','MMDDYY',
+'MMDDYY','MMDDYYB','MMDDYYC','MMDDYYD','MMDDYYN','MMDDYYP','MMDDYYS','MMYY','MMYYC','MMYYD','MMYYN','MMYYP',
+'MMYYS','MONNAME','MONTH','MONYY','MONYY','ND8601DA','NENGO','NENGO','NLDATE','NLDATE','NLDATEL','NLDATEM',
+'NLDATEMD','NLDATEMDL','NLDATEMDM','NLDATEMDS','NLDATEMN','NLDATES','NLDATEW','NLDATEW','NLDATEWN','NLDATEYM','NLDATEYML','NLDATEYMM',
+'NLDATEYMS','NLDATEYQ','NLDATEYQL','NLDATEYQM','NLDATEYQS','NLDATEYR','NLDATEYW','NLDDFDD','NLDDFDE','NLDDFDE','NLDDFDN','NLDDFDWN',
+'NLDDFMN','NLDDFMY','NLDDFMY','NLDDFWDX','NLDDFWKX','NORDFDD','NORDFDE','NORDFDE','NORDFDN','NORDFDWN','NORDFMN','NORDFMY',
+'NORDFMY','NORDFWDX','NORDFWKX','POLDFDD','POLDFDE','POLDFDE','POLDFDN','POLDFDWN','POLDFMN','POLDFMY','POLDFMY','POLDFWDX',
+'POLDFWKX','PTGDFDD','PTGDFDE','PTGDFDE','PTGDFDN','PTGDFDWN','PTGDFMN','PTGDFMY','PTGDFMY','PTGDFWDX','PTGDFWKX','QTR',
+'QTRR','RUSDFDD','RUSDFDE','RUSDFDE','RUSDFDN','RUSDFDWN','RUSDFMN','RUSDFMY','RUSDFMY','RUSDFWDX','RUSDFWKX','SLODFDD',
+'SLODFDE','SLODFDE','SLODFDN','SLODFDWN','SLODFMN','SLODFMY','SLODFMY','SLODFWDX','SLODFWKX','SVEDFDD','SVEDFDE','SVEDFDE',
+'SVEDFDN','SVEDFDWN','SVEDFMN','SVEDFMY','SVEDFMY','SVEDFWDX','SVEDFWKX','WEEKDATE','WEEKDATX','WEEKDAY','WEEKU','WEEKU',
+'WEEKV','WEEKV','WEEKW','WEEKW','WORDDATE','WORDDATX','XYYMMDD','XYYMMDD','YEAR','YYMM','YYMMC','YYMMD',
+'YYMMDD','YYMMDD','YYMMDDB','YYMMDDC','YYMMDDD','YYMMDDN','YYMMDDP','YYMMDDS','YYMMN','YYMMN','YYMMP','YYMMS',
+'YYMON','YYQ','YYQ','YYQC','YYQD','YYQN','YYQP','YYQR','YYQRC','YYQRD','YYQRN','YYQRP',
+'YYQRS','YYQS','YYQZ','YYQZ','YYWEEKU','YYWEEKV','YYWEEKW',
+)
+
+sas_time_fmts = (
+'ANYDTTME','B8601LZ','B8601LZ','B8601TM','B8601TM','B8601TZ','B8601TZ','E8601LZ','E8601LZ','E8601TM','E8601TM','E8601TZ',
+'E8601TZ','HHMM','HOUR','IS8601LZ','IS8601LZ','IS8601TM','IS8601TM','IS8601TZ','IS8601TZ','JTIMEH','JTIMEHM','JTIMEHMS',
+'JTIMEHW','JTIMEMW','JTIMESW','MMSS','ND8601TM','ND8601TZ','NLTIMAP','NLTIMAP','NLTIME','NLTIME','STIMER','TIME',
+'TIME','TIMEAMPM','TOD',
+)
+
+sas_datetime_fmts = (
+'AFRDFDT','AFRDFDT','ANYDTDTM','B8601DN','B8601DN','B8601DT','B8601DT','B8601DZ','B8601DZ','CATDFDT','CATDFDT','CRODFDT',
+'CRODFDT','CSYDFDT','CSYDFDT','DANDFDT','DANDFDT','DATEAMPM','DATETIME','DATETIME','DESDFDT','DESDFDT','DEUDFDT','DEUDFDT',
+'DTDATE','DTMONYY','DTWKDATX','DTYEAR','DTYYQC','E8601DN','E8601DN','E8601DT','E8601DT','E8601DZ','E8601DZ','ENGDFDT',
+'ENGDFDT','ESPDFDT','ESPDFDT','EURDFDT','EURDFDT','FINDFDT','FINDFDT','FRADFDT','FRADFDT','FRSDFDT','FRSDFDT','HUNDFDT',
+'HUNDFDT','IS8601DN','IS8601DN','IS8601DT','IS8601DT','IS8601DZ','IS8601DZ','ITADFDT','ITADFDT','JDATEYT','JDATEYTW','JNENGOT',
+'JNENGOTW','MACDFDT','MACDFDT','MDYAMPM','MDYAMPM','ND8601DN','ND8601DT','ND8601DZ','NLDATM','NLDATM','NLDATMAP','NLDATMAP',
+'NLDATMDT','NLDATML','NLDATMM','NLDATMMD','NLDATMMDL','NLDATMMDM','NLDATMMDS','NLDATMMN','NLDATMS','NLDATMTM','NLDATMTZ','NLDATMW',
+'NLDATMW','NLDATMWN','NLDATMWZ','NLDATMYM','NLDATMYML','NLDATMYMM','NLDATMYMS','NLDATMYQ','NLDATMYQL','NLDATMYQM','NLDATMYQS','NLDATMYR',
+'NLDATMYW','NLDATMZ','NLDDFDT','NLDDFDT','NORDFDT','NORDFDT','POLDFDT','POLDFDT','PTGDFDT','PTGDFDT','RUSDFDT','RUSDFDT',
+'SLODFDT','SLODFDT','SVEDFDT','SVEDFDT','TWMDY','YMDDTTM',
+)

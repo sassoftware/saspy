@@ -49,7 +49,7 @@ class SASqc:
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.WARN)
         self.sas = session
-        logging.debug("Initialization of SAS Macro: " + self.sas.saslog())
+        self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
     
     def cusum(self, **kwargs: dict) -> 'SASresults':
         """
@@ -64,7 +64,7 @@ class SASqc:
         """
         required_set = {}
         legal_set = {'by', 'xchart', 'procopts'}
-        logger.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "CUSUM", required_set, legal_set, **kwargs)
 
     def macontrol(self, **kwargs: dict) -> 'SASresults':
@@ -78,7 +78,7 @@ class SASqc:
         """
         required_set = {}
         legal_set = {'procopts'}
-        logger.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "MACONTROL", required_set, legal_set, **kwargs)
 
     def capability(self, **kwargs: dict) -> 'SASresults':
@@ -95,7 +95,7 @@ class SASqc:
         required_set = {}
         legal_set = {'cdfplot', 'comphist', 'histogram', 'inset', 'intervals', 'output', 'ppplot', 'probplot',
                      'qqplot', 'freq', 'weight', 'id', 'by', 'spec', 'out', 'procopts'}
-        logger.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "CAPABILITY", required_set, legal_set, **kwargs)
 
     def shewhart(self, **kwargs: dict) -> 'SASresults':
@@ -107,6 +107,6 @@ class SASqc:
         """
         required_set = {}
         legal_set = {'procopts'}
-        logger.debug("kwargs type: " + str(type(kwargs)))
+        self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "SHEWHART", required_set, legal_set, **kwargs)
 
