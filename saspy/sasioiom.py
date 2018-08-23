@@ -874,8 +874,15 @@ Will use HTML5 for this SASsession.""")
 
              self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo+b'\n')
 
-      lstf = lstf.decode()
-      logf = logf.decode()
+      try:
+         lstf = lstf.decode()
+      except UnicodeDecodeError:
+         try:
+            lstf = lstf.decode(self.sascfg.encoding)
+         except UnicodeDecodeError:
+            lstf = lstf.decode(errors='replace')
+
+      logf = logf.decode(errors='replace')
 
       trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 100:
