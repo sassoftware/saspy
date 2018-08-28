@@ -509,7 +509,7 @@ class SASProcCommons:
                     raise SyntaxError("The target list must have exactly one member")
             elif isinstance(args['target'], dict):
                 try:
-                    # check there there is only one target:
+                    # check that there is only one target:
                     length=0
                     try:
                         length += len([args['target']['nominal'], args['target']['interval'] ])
@@ -563,6 +563,7 @@ class SASProcCommons:
                 code += "train %s;\n" % (args['train'])
         # test moved
         if 'var' in args:
+            # TODO allow var to be a list
             self.logger.debug("var statement,length: %s,%s", args['var'], len(args['var']))
             code += "var %s;\n" % (args['var'])
         if 'weight' in args:
@@ -912,6 +913,7 @@ class SASProcCommons:
         if required_set is None:
             required_set = {}
         objtype = procname.lower()
+
         if 'model' not in kwargs.keys():
             kwargs = SASProcCommons._processNominals(self, kwargs, data)
             if 'model' in required_set:

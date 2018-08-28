@@ -94,7 +94,6 @@ class SASresults(object):
             else:
                code = '%%getdata(%s, %s);' % (self._name, attr)
                df   = self.sas.submit(code)
-               #df = self.sas.submit("proc print data="+lref+"."+attr+";run;")
             return df
 
 
