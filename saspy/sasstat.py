@@ -140,31 +140,47 @@ class SASstat:
         :param kwargs: dict
         :return: SAS result object
         """
-    def mixed(self, **kwargs: dict) -> 'SASresults':
+
+    @proc_decorator({'model'})
+    def mixed(self, data: 'SASData' = None,
+              model: str = None,
+              by: str = None,
+              cls: str = None,
+              id: str = None,
+              contrast: str = None,
+              estimate: str = None,
+              lsmeans: str = None,
+              random: str = None,
+              repeated: str = None,
+              slice: str = None,
+              weight: str = None,
+              score: [bool, 'SASdata'] = True,
+              **kwargs: dict) -> 'SASresults':
         """
         Python method to call the MIXED procedure
 
         cls is an alias for the class statement
         For more information on the statements see the Documentation link.
 
-        ``required_set={'model'}``
-
-        ``legal_set= {'by', 'cls', 'code', 'contrast', 'estimate', 'id', 'lsmeans', 'model',
-        'out', 'random', 'repeated', 'slice', 'weight'}``
-
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data:
+        :param model:
+        :param by:
+        :param cls:
+        :param id:
+        :param contrast:
+        :param estimate:
+        :param lsmeans:
+        :param random:
+        :param repeated:
+        :param slice:
+        :param weight:
+        :param score:
+        :param kwargs:
+        :return:
         """
-        required_set = {'model'}
-        legal_set = {'by', 'cls', 'code', 'contrast', 'estimate', 'id',
-                     'lsmeans', 'model', 'out', 'random', 'repeated',
-                     'slice', 'weight', 'procopts'}
-
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "MIXED", required_set, legal_set, **kwargs)
 
     def glm(self, **kwargs: dict) -> 'SASresults':
         """
