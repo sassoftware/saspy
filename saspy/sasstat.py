@@ -18,6 +18,7 @@ import sys
 from functools import wraps
 from saspy.sasproccommons import SASProcCommons
 from saspy.sasresults import SASresults
+from saspy.sasbase import SASdata
 #from pdb import set_trace as bp
 
 
@@ -59,7 +60,7 @@ class SASstat:
                                 "information for methods")
 
 
-    def proc_decorator(proc, req_set):
+    def proc_decorator(req_set):
         """
         Decorator that provides the wrapped function with an attribute 'actual_kwargs'
         containing just those keyword arguments actually passed in to the function.
@@ -69,19 +70,18 @@ class SASstat:
             @wraps(func)
             def inner(self, *args, **kwargs):
                 inner.proc_decorator = kwargs
-                self.logger.debug("processing proc:{}".format(proc))
+                self.logger.debug("processing proc:{}".format(func.__name__))
                 self.logger.debug(kwargs.keys())
                 self.logger.debug(req_set)
                 legal_set = set(kwargs.keys())
                 self.logger.debug(legal_set)
                 self.logger.debug("kwargs type: " + str(type(kwargs)))
-                return SASProcCommons._run_proc(self, proc.lower(), req_set, legal_set, **kwargs)
-
+                return SASProcCommons._run_proc(self, func.__name__.lower(), req_set, legal_set, **kwargs)
             return inner
 
         return decorator
 
-    @proc_decorator('hpsplit', {})
+    @proc_decorator({})
     def hpsplit(self, data: 'SASData' = None,
                 target: [str, list, dict] = None,
                 input: [str, list, dict] = None,
@@ -100,11 +100,45 @@ class SASstat:
         :param data: SASData object This parameter is required
         :param target: The target can be a string, list or dict type. It refers to the dependent, y, or label variable.
         :param input:   The input can be a string, list or dict type. It refers to the independent or X variables.
-        :param kwargs:
+        :param partition:
+        :param score:
         :return: SAS result object
         """
+    @proc_decorator({'model'})
+    def reg(self, data: 'SASData' = None,
+            model: str = None,
+            by: str = None,
+            id: str = None,
+            var: [str, list] = None,
+            lsmeans: str = None,
+            random: str = None,
+            repeated: str = None,
+            slice: str = None,
+            test: str = None,
+            weight: str = None,
+            score: [bool, 'SASdata'] = True,
+            **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the REG procedure
 
-    def reg(self, **kwargs: dict) -> 'SASresults':
+        For more information on the statements see the Documentation link.
+        Documentation link:
+        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm
+
+        :param data:
+        :param model:
+        :param by: 
+        :param id:
+        :param var:
+        :param lsmeans:
+        :param random:
+        :param repeated:
+        :param slice:
+        :param test:
+        :param weight: takes a single variable
+        :param score:
+        :return:
+        """
         """
         Python method to call the REG procedure
 
