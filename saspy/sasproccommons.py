@@ -15,6 +15,7 @@
 #
 import logging
 import re
+import warnings
 from saspy.sasresults import SASresults
 # from pdb import set_trace as bp
 
@@ -102,8 +103,9 @@ class SASProcCommons:
         self.logger.debug("args type: " + str(type(args)))
 
         # this list is largely alphabetical but there are exceptions in order to
-        # satisfy the order needs of the statements for the procedure
-        # as an example... http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
+        # satisfy the order needs of the statements for the procedures
+        # as an example...
+        # http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
         if 'absorb' in args:
             self.logger.debug("absorb statement,length: %s,%s", args['absorb'], len(args['absorb']))
             code += "absorb %s;\n" % (args['absorb'])
@@ -126,7 +128,6 @@ class SASProcCommons:
                     print("ERROR in code submission. ARCHITECTURE can only have one of these")
                     print("values -- ['logistic', 'mlp', 'mlp direct'] you submitted: %s", args['architecture'])
 
-
         if 'assess' in args:
             self.logger.debug("assess statement,length: %s,%s", args['assess'], len(args['assess']))
             code += "assess %s;\n" % (args['assess'])
@@ -142,6 +143,8 @@ class SASProcCommons:
                 code += "autotune %s;\n" % (args['autotune'])
             elif isinstance(args['autotune'], dict):
                 try:
+                    nomstr = 'nominal'
+                    intstr = 'interval'
                     if 'interval' in args['autotune'].keys():
                         if isinstance(args['autotune']['interval'], str):
                             code += "input %s /level=%s;\n" % (args['autotune']['interval'], intstr)
@@ -279,7 +282,7 @@ class SASProcCommons:
                     # fix var type names for HPNEURAL
                     nomstr = 'nominal'
                     intstr = 'interval'
-                    if objtype.casefold() =='hpneural':
+                    if objtype.casefold() == 'hpneural':
                         nomstr = 'nom'
                         intstr = 'int'
                     if 'interval' in args['input'].keys():
@@ -614,7 +617,7 @@ class SASProcCommons:
                 code += "score %s;\n" % args['score']
             else:
                 scoreds = args['score']
-                if objtype.upper() == "HP4SCORE":
+                if objtype.upper() == 'HP4SCORE':
                    f = scoreds.get('file')
                    d = scoreds.get('out')
                    o = d.libref+'.'+d.table
@@ -625,21 +628,21 @@ class SASProcCommons:
                    code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
         # save statement must be after input and target for TREEBOOST
         if 'save' in args:
-            #self.logger.debug("save statement,length: %s,%s", args['save'], len(args['save']))
-            if objtype=="hpforest":
+            if objtype == 'hpforest':
                 code += "save file='%s';\n" % (args['save'])
-            elif objtype=="treeboost":
+            elif objtype == 'treeboost':
                 if isinstance(args['save'], bool):
                     libref=objname
-                    code += "save fit=%s.%s importance=%s.%s model=%s.%s nodestats=%s.%s rules=%s.%s;\n" % \
+                    code += 'save fit=%s.%s importance=%s.%s model=%s.%s nodestats=%s.%s rules=%s.%s;\n' % \
                             (libref, "fit", libref, "importance", libref, "model",
                              libref, "nodestats", libref, "rules" )
                 elif isinstance(args['save'], dict):
-                    code += "save %s ;"  % ' '.join('{}={}'.format(key, val) for key, val in args['save'].items())
+                    code += 'save %s ;' % ' '.join('{} = {}'.format(key, val) for key, val in args['save'].items())
                 else:
-                    raise SyntaxError("SAVE statement object type is not recognized, must be a bool or dict. You provided: %s" % str(type(save)))
+                    raise SyntaxError('SAVE statement object type is not recognized,'
+                                      'must be a bool or dict. You provided: %s' % str(type(save)))
             else:
-                raise SyntaxError("SAVE statement is not recognized for this procedure: %s" % str(objtype))
+                raise SyntaxError('SAVE statement is not recognized for this procedure: %s' % str(objtype))
 
         # passthrough facility for procedures with special circumstances
         if 'stmtpassthrough' in args:
@@ -898,6 +901,24 @@ class SASProcCommons:
             raise SyntaxError("INPUT is in an unknown format: %s" % str(stmt))
         return (code, cls)
 
+
+    def _convert_model_to_target(self):
+        target = kwargs['model'].split('=', maxsplit=1)[0].split()[0]
+        input_list = kwargs['model'].split('=', maxsplit=1)[1].split('/')[0].split()
+        if len(kwargs['model'].split('=', maxsplit=1)[1].split('/')[1]) > 0:
+            warnings.warn("\nThe options after the '/' '{}' will be ignored.".format(
+                kwargs['model'].split('=', maxsplit=1)[1].split('/')[1]))
+        if len(kwargs['cls']) > 0:
+            cls = kwargs['cls'].split()
+            inputs = {'nominal': cls,
+                      'interval': list(set(input_list).difference(cls))}
+        else:
+            inputs = {'intveral': input_list}
+
+        kwargs['target'] = target
+        kwargs['input'] = inputs
+        return True
+
     def _run_proc(self, procname: str, required_set: set, legal_set: set, **kwargs: dict):
         """
         This internal method takes the options and statements from the PROC and generates
@@ -914,16 +935,21 @@ class SASProcCommons:
             required_set = {}
         objtype = procname.lower()
 
-        if 'model' not in kwargs.keys():
+        if {'model'}.intersection(required_set) and 'target' in kwargs.keys() and 'model' not in kwargs.keys():
             kwargs = SASProcCommons._processNominals(self, kwargs, data)
-            if 'model' in required_set:
-                tcls_str = ''
-                icls_str = ''
-                t_str, tcls_str = SASProcCommons._target_stmt(self, kwargs['target'])
-                i_str, icls_str = SASProcCommons._input_stmt(self, kwargs['input'])
+            tcls_str = ''
+            icls_str = ''
+            t_str, tcls_str = SASProcCommons._target_stmt(self, kwargs['target'])
+            i_str, icls_str = SASProcCommons._input_stmt(self, kwargs['input'])
+            kwargs['model'] = str(t_str + ' = ' + i_str)
+            kwargs['cls'] = str(tcls_str + " " + icls_str)
+            #_convert_target_to_model(self)
+        elif {'target'}.intersection(required_set) and 'model' in kwargs.keys() and 'target' not in kwargs.keys():
+            SASProcCommons._convert_model_to_target(self)
 
-                kwargs['model'] = str(t_str + ' = ' + i_str )
-                kwargs['cls'] = str(tcls_str + " " + icls_str)
+        else:
+            raise SyntaxWarning ("expected code problems")
+
         verifiedKwargs = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
         obj1 = []
         nosub = False
@@ -986,7 +1012,7 @@ class SASProcCommons:
                 totSet = legalSet | reqSet
             else:
                 totSet = legalSet
-            generalSet = set(['ODSGraphics', 'stmtpassthrough', 'targOpts', 'procopts'])
+            generalSet = {'ODSGraphics', 'stmtpassthrough', 'targOpts', 'procopts'}
             extraSet = set(stmt.keys() - generalSet).difference(totSet)  # find keys not in legal or required sets
             if extraSet:
                 for item in extraSet:
