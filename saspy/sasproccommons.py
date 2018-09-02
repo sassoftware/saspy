@@ -22,7 +22,6 @@ from saspy.sasresults import SASresults
 
 class SASProcCommons:
     def __init__(self, session, *args, **kwargs):
-        self.sas = session
         # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.WARN)

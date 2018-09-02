@@ -13,13 +13,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+
 import logging
 import sys
 import warnings
 from functools import wraps
 from saspy.sasproccommons import SASProcCommons
 from saspy.sasresults import SASresults
-from saspy.sasbase import SASdata
 #from pdb import set_trace as bp
 
 
@@ -57,7 +57,7 @@ class SASstat:
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
         if sys.version_info[0] < 3 or (sys.version_info[0] >= 3 and sys.version_info[1] < 4):
-            warnings.warn('Python 3.4 is required to get correct tab complete and docstring ''
+            warnings.warn('Python 3.4 is required to get correct tab complete and docstring '
                           'information for methods')
 
 
