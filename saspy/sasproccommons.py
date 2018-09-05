@@ -565,11 +565,11 @@ class SASProcCommons:
                 code += "train %s;\n" % (args['train'])
         # test moved
         if 'var' in args:
-            if isinstance(agrs['var'], str):
-                self.logger.debug("var statement,length: %s,%s", args['var'], len(args['var']))
+            if isinstance(args['var'], str):
                 code += "var %s;\n" % (args['var'])
-            elif isinstance(agrs['var'], list):
-                code += "var %s;\n" % " ".join(args['input'])
+            elif isinstance(args['var'], list):
+                code += "var %s;\n" % (' '.join(args['var']))
+
         if 'weight' in args:
             self.logger.debug("weight statement,length: %s,%s", args['weight'], len(args['weight']))
             # check to make sure it is only one variable
@@ -589,8 +589,19 @@ class SASProcCommons:
             code += "rules %s;\n" % (args['rules'])
         if 'partition' in args:
             # TODO: Allow partition to take more than a str
-            self.logger.debug("partition statement,length: %s,%s", args['partition'], len(args['partition']))
-            code += "partition %s;\n" % (args['partition'])
+            if isinstance(args['partition'], str):
+                self.logger.debug("partition statement,length: %s,%s", args['partition'], len(args['partition']))
+                code += "partition %s;\n" % (args['partition'])
+            elif isinstance(args['partition'], bool) and args['partition'] == True:
+                code += "partition fraction(test=0 validation=30 seed=9878);\n"
+            elif isinstance(args['partition'], dict):
+                if args['partition'].keys() in ['rolevar']:
+                    pass
+                elif args['partition'].keys() in ['fraction']:
+                    pass
+                else:
+                    raise SyntaxWarning("invalid key for partition statement")
+
         if 'out' in args and not len(outmeth):
             if not isinstance(args['out'], dict):
                 outds = args['out']
@@ -947,9 +958,6 @@ class SASProcCommons:
             #_convert_target_to_model(self)
         elif {'target'}.intersection(required_set) and 'model' in kwargs.keys() and 'target' not in kwargs.keys():
             SASProcCommons._convert_model_to_target(self)
-
-        else:
-            raise SyntaxWarning ("expected code problems")
 
         verifiedKwargs = SASProcCommons._stmt_check(self, required_set, legal_set, kwargs)
         obj1 = []

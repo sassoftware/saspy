@@ -49,7 +49,7 @@ class SASstat:
         """
         Submit an initial set of macros to prepare the SAS system
         """
-        self.sasproduct = "stat"
+        self.sasproduct = 'stat'
         # create logging
         # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ class SASstat:
             warnings.warn('Python 3.4 is required to get correct tab complete and docstring '
                           'information for methods')
 
-
+    # TODO Move decorator function into file for all proc methods to use.
     def proc_decorator(req_set):
         """
         Decorator that provides the wrapped function with an attribute 'actual_kwargs'
@@ -182,34 +182,53 @@ class SASstat:
         :param kwargs:
         :return:
         """
-
-    def glm(self, **kwargs: dict) -> 'SASresults':
+    @proc_decorator({'model'})
+    def glm(self, data: 'SASData' = None,
+            model: str = None,
+            absorb: str = None,
+            by: str = None,
+            cls: str = None,
+            id: str = None,
+            freq: str = None,
+            contrast: str = None,
+            estimate: str = None,
+            lsmeans: str = None,
+            random: str = None,
+            repeated: str = None,
+            manova: str = None,
+            test: str = None,
+            weight: str = None,
+            score: [bool, 'SASdata'] = True,
+            **kwargs: dict) -> 'SASresults':
         """
         Python method to call the GLM procedure
 
         For more information on the statements see the Documentation link.
-
-        ``required_set={'model'}``
-
-        ``legal_set= {'absorb', 'by', 'cls', 'contrast', 'estimate', 'freq', 'id', 'lsmeans', 'manova',
-        'means', 'model', 'out', 'random', 'repeated', 'test', 'weight'}``
 
         cls is an alias for the class statement
 
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_toc.htm
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data:
+        :param model:
+        :param absorb:
+        :param by:
+        :param cls:
+        :param id:
+        :param freq:
+        :param contrast:
+        :param estimate:
+        :param lsmeans:
+        :param random:
+        :param repeated:
+        :param manova:
+        :param test:
+        :param weight:
+        :param score:
+        :param kwargs:
+        :return:
         """
-        required_set = {'model'}
-        legal_set = {'absorb', 'by', 'cls', 'contrast', 'estimate', 'freq', 'id',
-                     'lsmeans', 'manova', 'means', 'model', 'out', 'random', 'repeated',
-                     'test', 'weight', 'procopts'}
-
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "GLM", required_set, legal_set, **kwargs)
-
     def logistic(self, **kwargs: dict) -> 'SASresults':
         """
         Python method to call the LOGISTIC procedure
@@ -266,34 +285,41 @@ class SASstat:
 
         self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TPSPLINE", required_set, legal_set, **kwargs)
-
-    def hplogistic(self, **kwargs: dict) -> 'SASresults':
+    @proc_decorator({'model'})
+    def hplogistic(self, data,
+                   model: str = None,
+                   by: str = None,
+                   cls : str = None,
+                   code : str = None,
+                   freq : str = None,
+                   id : str = None,
+                   out : str = None,
+                   partition: [str, bool, dict] = True,
+                   score: str = None,
+                   selection: str = 'stepwise',
+                   weight: str = None,
+                   **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPLOGISTIC procedure
 
         For more information on the statements see the Documentation link.
-
-        ``required_set={'model'}``
-
-        ``legal_set= {'by', 'cls', 'code', 'freq', 'id', 'model',
-        'out', 'partition', 'score', 'selection', 'weight'}``
-
-        cls is an alias for the class statement
-        Documentation link:
         https://support.sas.com/documentation/onlinedoc/stat/141/hplogistic.pdf
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SAS data object
+        :param model: model statment target and input can also be submitted and they will be converted
+        :param by:
+        :param cls:
+        :param code:
+        :param freq:
+        :param id:
+        :param out:
+        :param partition: supports both types of partition statements ['fraction', 'rolevar']
+        :param score:
+        :param selection:
+        :param weight:
+        :param kwargs:
+        :return:
         """
-        required_set = {'model'}
-        legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
-                     'partition', 'score', 'selection', 'weight'}
-
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-
-        # ODS graphics are created by default for STAT this stops them form generation
-        kwargs['ODSGraphics']=False
-        return SASProcCommons._run_proc(self, "HPLOGISTIC", required_set, legal_set, **kwargs)
 
     def hpreg(self, **kwargs: dict) -> 'SASresults':
         """
