@@ -565,9 +565,11 @@ class SASProcCommons:
                 code += "train %s;\n" % (args['train'])
         # test moved
         if 'var' in args:
-            # TODO allow var to be a list
-            self.logger.debug("var statement,length: %s,%s", args['var'], len(args['var']))
-            code += "var %s;\n" % (args['var'])
+            if isinstance(agrs['var'], str):
+                self.logger.debug("var statement,length: %s,%s", args['var'], len(args['var']))
+                code += "var %s;\n" % (args['var'])
+            elif isinstance(agrs['var'], list):
+                code += "var %s;\n" % " ".join(args['input'])
         if 'weight' in args:
             self.logger.debug("weight statement,length: %s,%s", args['weight'], len(args['weight']))
             # check to make sure it is only one variable
