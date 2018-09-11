@@ -18,6 +18,9 @@ This module requires Python3.x or above. It also requires SAS 9.4 or above.
 All of the doc, including install and configuration information can be found at
 [sassoftware.github.io/saspy](https://sassoftware.github.io/saspy/).
 
+Also, example Notebooks and use cases can be found at
+[sassoftware/saspy-examples](https://github.com/sassoftware/saspy-examples/).
+
 # Installation
 
 This module can be installed via pip. This will pull down the latest PyPI package and install it.
