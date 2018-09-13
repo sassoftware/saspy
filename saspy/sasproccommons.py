@@ -65,7 +65,7 @@ class SASProcCommons:
 
         # The different SAS products vary slightly in plotting and out methods.
         # this block sets the options correctly for plotting and output statements
-        if self.sasproduct.lower() == 'stat' and not ('ODSGraphics' in args.keys() or ODSGraphics == False) :
+        if self.sasproduct.lower() == 'stat' and not ('ODSGraphics' in args.keys() or ODSGraphics == False):
             outmeth = ''
             plot = 'plot=all'
         if self.sasproduct.lower() == 'qc':
@@ -946,7 +946,6 @@ class SASProcCommons:
         if required_set is None:
             required_set = {}
         objtype = procname.lower()
-
         if {'model'}.intersection(required_set) and 'target' in kwargs.keys() and 'model' not in kwargs.keys():
             kwargs = SASProcCommons._processNominals(self, kwargs, data)
             tcls_str = ''
@@ -955,6 +954,11 @@ class SASProcCommons:
             i_str, icls_str = SASProcCommons._input_stmt(self, kwargs['input'])
             kwargs['model'] = str(t_str + ' = ' + i_str)
             kwargs['cls'] = str(tcls_str + " " + icls_str)
+            drop_target = kwargs.pop('target', None)
+            drop_input  = kwargs.pop('input', None)
+            self.logger.debug(drop_target)
+            self.logger.debug(drop_input)
+
             #_convert_target_to_model(self)
         elif {'target'}.intersection(required_set) and 'model' in kwargs.keys() and 'target' not in kwargs.keys():
             SASProcCommons._convert_model_to_target(self)
@@ -1001,14 +1005,12 @@ class SASProcCommons:
         # debug the argument list
         if self.logger.level == 10:
             for k, v in stmt.items():
-                if type(v) is str:
-                    print("Key: " + k + ", Value: " + v)
-                else:
-                    print("Key: " + k + ", Value: " + str(type(v)))
+                print("Key: " + k + ", Value: " + str(v) + ", Type: " + str(type(v)))
 
         # required statements
         reqSet = req
         if len(reqSet):
+            self.logger.debug("reqSet: {}".format(reqSet))
             missing_set = reqSet.difference(set(stmt.keys()))
             if missing_set:
                 if not stmt.get('score'): # till we handle either/or required. proc can be called more than one way w/ diff requirements
@@ -1017,6 +1019,7 @@ class SASProcCommons:
         # legal statements
         legalSet = legal
         if len(legalSet):
+            self.logger.debug("legalSet: {}".format(legalSet))
             if len(reqSet):
                 totSet = legalSet | reqSet
             else:
@@ -1026,5 +1029,5 @@ class SASProcCommons:
             if extraSet:
                 for item in extraSet:
                     stmt.pop(item, None)
-                SyntaxWarning("The following %d statements are invalid and will be ignored:\nextraSet " % len(extraSet))
+                warnings.warn("The following %d statements are invalid and will be ignored:\nextraSet " % len(extraSet))
         return stmt
