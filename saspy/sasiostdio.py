@@ -576,7 +576,7 @@ Will use HTML5 for this SASsession.""")
                         pass
                      self.pid = None
                      return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
-                                 str(rc)+'\n'+logf, LST='')
+                                 str(rc)+'\n'+logf.decode(self.sascfg.encoding, errors='replace'), LST='')
                  if bail:
                      eof -= 1
                  if eof < 0:
@@ -634,10 +634,17 @@ Will use HTML5 for this SASsession.""")
              self.stdin.flush()
 
       if ods:
-         lstf = lstf.decode(errors='replace')
+         try:
+            lstf = lstf.decode()
+         except UnicodeDecodeError:
+            try:
+               lstf = lstf.decode(self.sascfg.encoding)
+            except UnicodeDecodeError:
+               lstf = lstf.decode(errors='replace')
       else:
          lstf = lstf.decode(self.sascfg.encoding, errors='replace')
-      logf    = logf.decode(self.sascfg.encoding, errors='replace')
+
+      logf = logf.decode(self.sascfg.encoding, errors='replace')
 
       trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 100:
