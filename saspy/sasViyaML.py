@@ -183,6 +183,8 @@ class SASViyaML:
         required_set = {'input', 'target'}
         legal_set = {'autotune', 'code', 'input', 'id', 'savestate', 'kernel',
                      'partition', 'target', 'procopts'}
+
+        # TODO: Note: If you specify both AUTOTUNE statement and OUTPUT statement, the PROC SVMACHINE exits with error message.
         logging.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc("SVMACHINE", required_set, legal_set, **kwargs)
 

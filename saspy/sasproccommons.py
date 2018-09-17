@@ -17,14 +17,14 @@ import logging
 import re
 import warnings
 from saspy.sasresults import SASresults
-# from pdb import set_trace as bp
+from pdb import set_trace as bp
 
 
 class SASProcCommons:
     def __init__(self, session, *args, **kwargs):
         # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.WARN)
+        self.logger.setLevel(logging.DEBUG)
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
@@ -42,7 +42,7 @@ class SASProcCommons:
                 elog = elog + e
             return "\n".join(elog)
         else:
-            print("log is not a string but type:%s" % (str(type(log))))
+            raise SyntaxError("log is not a string but type:%s" % (str(type(log))))
 
     def _makeProcCallMacro(self, objtype: str, objname: str, data: object = None, args: dict = None) -> str:
         """
@@ -593,7 +593,7 @@ class SASProcCommons:
                 self.logger.debug("partition statement,length: %s,%s", args['partition'], len(args['partition']))
                 code += "partition %s;\n" % (args['partition'])
             elif isinstance(args['partition'], bool) and args['partition'] == True:
-                code += "partition fraction(test=0 validation=30 seed=9878);\n"
+                code += "partition fraction(test=0 validation=.30 seed=9878);\n"
             elif isinstance(args['partition'], dict):
                 if args['partition'].keys() in ['rolevar']:
                     pass
@@ -913,7 +913,6 @@ class SASProcCommons:
             raise SyntaxError("INPUT is in an unknown format: %s" % str(stmt))
         return (code, cls)
 
-
     def _convert_model_to_target(self):
         target = kwargs['model'].split('=', maxsplit=1)[0].split()[0]
         input_list = kwargs['model'].split('=', maxsplit=1)[1].split('/')[0].split()
@@ -954,12 +953,12 @@ class SASProcCommons:
             i_str, icls_str = SASProcCommons._input_stmt(self, kwargs['input'])
             kwargs['model'] = str(t_str + ' = ' + i_str)
             kwargs['cls'] = str(tcls_str + " " + icls_str)
+            legal_set.add('cls')
             drop_target = kwargs.pop('target', None)
             drop_input  = kwargs.pop('input', None)
             self.logger.debug(drop_target)
             self.logger.debug(drop_input)
 
-            #_convert_target_to_model(self)
         elif {'target'}.intersection(required_set) and 'model' in kwargs.keys() and 'target' not in kwargs.keys():
             SASProcCommons._convert_model_to_target(self)
 
@@ -1027,7 +1026,9 @@ class SASProcCommons:
             generalSet = {'ODSGraphics', 'stmtpassthrough', 'targOpts', 'procopts'}
             extraSet = set(stmt.keys() - generalSet).difference(totSet)  # find keys not in legal or required sets
             if extraSet:
+                self.logger.debug("extraSet: {}".format(extraSet))
                 for item in extraSet:
                     stmt.pop(item, None)
-                warnings.warn("The following %d statements are invalid and will be ignored:\nextraSet " % len(extraSet))
+                warnings.warn("The following {} statements are invalid and will be ignored:\n{}".format(len(extraSet), extraSet))
+        self.logger.debug("stmt: {}".format(stmt))
         return stmt
