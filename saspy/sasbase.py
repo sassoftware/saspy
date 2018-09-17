@@ -1895,7 +1895,7 @@ class SASdata:
 
         if self.sas.nosub:
             print(code)
-            return
+            return None
 
         ll = self._is_valid()
         if not ll:
@@ -1965,9 +1965,10 @@ class SASdata:
 
         if self.sas.nosub:
             print(code)
-            return
+            return None
 
         ll = self._is_valid()
+        runcode = True
         if ll:
             runcode = False
         if runcode:
@@ -2161,7 +2162,7 @@ class SASdata:
             y = [y]
 
         for i in range(num):
-            code += "\tseries x=" + x + " y=" + y[i] + ";\n"
+            code += "\tseries x=" + x + " y=" + str(y[i]) + ";\n"
 
         code += 'run;\n' + 'title;'
 

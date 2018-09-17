@@ -20,6 +20,7 @@ import warnings
 from functools import wraps
 from saspy.sasproccommons import SASProcCommons
 from saspy.sasresults import SASresults
+from saspy.sasdecorator import procDecorator
 from pdb import set_trace as bp
 
 
@@ -51,7 +52,6 @@ class SASstat:
         """
         self.sasproduct = 'stat'
         # create logging
-        # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
         self.sas = session
@@ -60,30 +60,7 @@ class SASstat:
             warnings.warn('Python 3.4 is required to get correct tab complete and docstring '
                           'information for methods')
 
-    # TODO Move decorator function into file for all proc methods to use.
-    def proc_decorator(req_set):
-        """
-        Decorator that provides the wrapped function with an attribute 'actual_kwargs'
-        containing just those keyword arguments actually passed in to the function.
-        """
-
-        def decorator(func):
-            @wraps(func)
-            def inner(self, *args, **kwargs):
-                inner.proc_decorator = kwargs
-                self.logger.debug("processing proc:{}".format(func.__name__))
-                self.logger.debug(req_set)
-                self.logger.debug("kwargs type: " + str(type(kwargs)))
-                if func.__name__.lower() in ['hplogistic', 'hpreg']:
-                    kwargs['ODSGraphics'] = kwargs.get('ODSGraphics', False)
-                legal_set = set(kwargs.keys())
-                self.logger.debug(legal_set)
-                return SASProcCommons._run_proc(self, func.__name__.lower(), req_set, legal_set, **kwargs)
-            return inner
-
-        return decorator
-
-    @proc_decorator({})
+    @procDecorator.proc_decorator({})
     def hpsplit(self, data: 'SASData' = None,
                 target: [str, list, dict] = None,
                 input: [str, list, dict] = None,
@@ -106,7 +83,7 @@ class SASstat:
         :param score:
         :return: SAS result object
         """
-    @proc_decorator({'model'})
+    @procDecorator.proc_decorator({'model'})
     def reg(self, data: 'SASData' = None,
             model: str = None,
             by: str = None,
@@ -143,7 +120,7 @@ class SASstat:
         :return: SAS result object
         """
 
-    @proc_decorator({'model'})
+    @procDecorator.proc_decorator({'model'})
     def mixed(self, data: 'SASData' = None,
               model: str = None,
               by: str = None,
@@ -183,7 +160,7 @@ class SASstat:
         :param kwargs:
         :return:
         """
-    @proc_decorator({'model'})
+    @procDecorator.proc_decorator({'model'})
     def glm(self, data: 'SASData' = None,
             model: str = None,
             absorb: str = None,
@@ -286,7 +263,8 @@ class SASstat:
 
         self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TPSPLINE", required_set, legal_set, **kwargs)
-    @proc_decorator({'model'})
+
+    @procDecorator.proc_decorator({'model'})
     def hplogistic(self, data,
                    model: str = None,
                    by: str = None,

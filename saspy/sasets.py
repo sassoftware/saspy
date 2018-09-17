@@ -16,6 +16,7 @@
 import logging
 from saspy.sasproccommons import SASProcCommons
 from saspy.sasresults import SASresults
+from saspy.sasdecorator import procDecorator
 
 
 class SASets:
@@ -66,20 +67,32 @@ class SASets:
         self.logger.debug("kwargs type: " + str(type(kwargs)))
         return SASProcCommons._run_proc(self, "TIMESERIES", required_set, legal_set, **kwargs)
 
-    def arima(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'identify'})
+    def arima(self, data: 'SASData' = None,
+              by: str = None,
+              identify: str = None,
+              estimate: str = None,
+              outlier: str = None,
+              forecast : str = None,
+              out: str = None,
+              **kwargs: dict) -> 'SASresults':
         """
         Python method to call the ARIMA procedure
 
-        ``required_set={'identify'}``
-
-        ``legal_set={ 'by', 'identify', 'estimate', 'outlier', 'forecast', 'out'}``
-
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
+
+
+        :param data:
+        :param by:
+        :param identify:
+        :param estimate:
+        :param outlier:
+        :param forecast:
+        :param out:
+        :param kwargs:
+        :return:
         """
-        required_set = {'identify'}
-        legal_set = {'by', 'identify', 'estimate', 'outlier', 'forecast', 'out', 'procopts'}
-        return SASProcCommons._run_proc(self, "ARIMA", required_set, legal_set, **kwargs)
 
     def ucm(self, **kwargs: dict) -> 'SASresults':
         """
