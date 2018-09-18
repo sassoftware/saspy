@@ -15,14 +15,14 @@
 #
 
 import logging
-import sys
-import warnings
 from functools import wraps
+from .sasproccommons import SASProcCommons
 
 
 class procDecorator:
     def __init__(self):
-        pass
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
 
     def proc_decorator(req_set):
         """
@@ -43,5 +43,4 @@ class procDecorator:
                 self.logger.debug(legal_set)
                 return SASProcCommons._run_proc(self, func.__name__.lower(), req_set, legal_set, **kwargs)
             return inner
-
         return decorator
