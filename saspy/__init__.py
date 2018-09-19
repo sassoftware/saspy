@@ -17,12 +17,14 @@ from saspy.sasbase        import *
 from saspy.sasstat        import *
 from saspy.sasets         import *
 from saspy.sasml          import *
+from saspy.sasViyaML      import *
 from saspy.sasqc          import *
 from saspy.sasresults     import *
 from saspy.sasutil        import *
 from saspy.sastabulate    import *
 from saspy.sasproccommons import *
 from saspy.SASLogLexer    import *
+from saspy.sasdecorator   import *
 from saspy.version        import __version__
 
 def isnotebook():
@@ -38,5 +40,5 @@ def isnotebook():
         return False      # Probably standard Python interpreter
 
 if isnotebook():
-	from .sas_magic import SASMagic
-	get_ipython().register_magics(SASMagic)
+    from .sas_magic import SASMagic
+    get_ipython().register_magics(SASMagic)

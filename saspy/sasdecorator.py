@@ -15,6 +15,7 @@
 #
 
 import logging
+import warnings
 from functools import wraps
 from .sasproccommons import SASProcCommons
 
@@ -23,6 +24,9 @@ class procDecorator:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
+        if sys.version_info[0] < 3 or (sys.version_info[0] >= 3 and sys.version_info[1] < 4):
+            warnings.warn('Python 3.4+ is required to get correct tab complete and docstring '
+                          'information for methods')
 
     def proc_decorator(req_set):
         """
@@ -44,3 +48,16 @@ class procDecorator:
                 return SASProcCommons._run_proc(self, func.__name__.lower(), req_set, legal_set, **kwargs)
             return inner
         return decorator
+
+    def doc_convert(ls):
+        ls_list = list(ls)
+        doc_list = []
+        for i in ls_list:
+            doc_str = ': str = None,'
+            if i.lower() in ['target', 'input']:
+                doc_str = ': [str, list, dict] = None,'
+            if i.lower() == 'score':
+                doc_str = ": [str, bool, 'SASdata' ] = True,"
+            doc_list.append(''.join([i, doc_str, '\n']))
+        doc_list.sort()
+        return ''.join(doc_list)

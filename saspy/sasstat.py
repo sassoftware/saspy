@@ -17,7 +17,6 @@
 import logging
 import sys
 import warnings
-from functools import wraps
 from saspy.sasproccommons import SASProcCommons
 from saspy.sasresults import SASresults
 from saspy.sasdecorator import procDecorator
@@ -56,16 +55,13 @@ class SASstat:
         self.logger.setLevel(logging.DEBUG)
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
-        if sys.version_info[0] < 3 or (sys.version_info[0] >= 3 and sys.version_info[1] < 4):
-            warnings.warn('Python 3.4 is required to get correct tab complete and docstring '
-                          'information for methods')
 
     @procDecorator.proc_decorator({})
     def hpsplit(self, data: 'SASData' = None,
                 target: [str, list, dict] = None,
                 input: [str, list, dict] = None,
                 partition: [str, dict] = 'Rolevar',
-                score: [bool, 'SASdata' ] = True,
+                score: [str, bool, 'SASdata' ] = True,
                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPSPLIT procedure

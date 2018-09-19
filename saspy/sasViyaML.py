@@ -15,17 +15,13 @@
 #
 import logging
 from saspy.sasproccommons import SASProcCommons
-
-
-# create logging
-# logging = logging.getLogger(__name__)
-# logging.addHandler(logging.NullHandler)
-# logging.setLevel(logging.DEBUG)
+from saspy.sasresults import SASresults
+from saspy.sasdecorator import procDecorator
 
 
 class SASViyaML:
     """
-    This class is for SAS/STAT procedures to be called as python3 objects and use SAS as the computational engine
+    This class is for SAS Viya procedures to be called as python3 objects and use SAS as the computational engine
     This class and all the useful work in this package require a licensed version of SAS.
     To add a new procedure do the following:
     1. Create a new method for the procedure
@@ -48,28 +44,38 @@ class SASViyaML:
         """
         self.sasproduct = "vddml"
         # create logging
-        # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.WARN)
+        self.logger.setLevel(logging.DEBUG)
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def factmac(self, **kwargs: dict) -> object:
+    @procDecorator.proc_decorator({'input','target'})
+    def factmac(self, data: 'SASData' = None,
+                autotune: str = None,
+                code: str = None,
+                id: str = None,
+                input: [str, list, dict] = None,
+                output: str = None,
+                savestate: str = None,
+                target: [str, list, dict] = None,
+                **kwargs: dict) -> object:
         """
         Python method to call the FACTMAC procedure
 
-        required_set = {'input', 'target'}
-        legal_set= {'code','input', 'id', 'output', 'savestate', 'target', 'autotune'}
-
         Documentation link:
         http://documentation.sas.com/?docsetId=casml&docsetTarget=viyaml_factmac_toc.htm&docsetVersion=8.2&locale=en
-        :param kwargs: dict
-        :return: SAS result object
+
+        :param data:
+        :param autotune:
+        :param code:
+        :param id:
+        :param input:
+        :param output:
+        :param savestate:
+        :param target:
+        :param kwargs:
+        :return:
         """
-        required_set = {'input', 'target'}
-        legal_set = {'code', 'input', 'id', 'output', 'savestate', 'target', 'autotune'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc("FACTMAC", required_set, legal_set, **kwargs)
 
     def fastknn(self, **kwargs: dict) -> object:
         """

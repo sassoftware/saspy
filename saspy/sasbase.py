@@ -68,6 +68,7 @@ from saspy.sasets import *
 from saspy.sasml import *
 from saspy.sasqc import *
 from saspy.sasutil import *
+from saspy.sasViyaML import *
 from saspy.sasresults import *
 from saspy.sastabulate import Tabulate
 
@@ -504,6 +505,19 @@ class SASsession():
             self._loaded_macros = True
 
         return SASutil(self)
+
+    def sasviyaml(self) -> 'SASViyaML':
+        '''
+        This methods creates a SASViyaML object which you can use to run various analytics.
+        See the SASViyaML.py module.
+
+        :return: SASViyaML object
+        '''
+        if not self._loaded_macros:
+            self._loadmacros()
+            self._loaded_macros = True
+
+        return SASViyaML(self)
 
     def _loadmacros(self):
         """
