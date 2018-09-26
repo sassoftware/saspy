@@ -1024,6 +1024,10 @@ Will use HTML5 for this SASsession.""")
       if len(libref):
          code += libref+"."
       code += table+"');\n"
+      code += "v = exist('"
+      if len(libref):
+         code += libref+"."
+      code += table+"', 'VIEW');\n if e or v then e = 1;\n"
       code += "te='TABLE_EXISTS='; put te e;run;\n"
 
       ll = self.submit(code, "text")
