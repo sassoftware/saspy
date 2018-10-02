@@ -52,7 +52,7 @@ class SASconfigSTDIO:
       self.metapw   = cfg.get('metapw', '')
       self.lrecl    = cfg.get('lrecl', None)
       self.iomc     = cfg.get('iomc', '')
-      self.autoexec = cfg.get('autoexec', '')
+      self.autoexec = cfg.get('autoexec', None)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")

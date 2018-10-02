@@ -59,7 +59,7 @@ class SASconfigIOM:
       self.sspi      = cfg.get('sspi', False)
       self.javaparms = cfg.get('javaparms', '')
       self.lrecl     = cfg.get('lrecl', None)
-      self.autoexec  = cfg.get('autoexec', '')
+      self.autoexec  = cfg.get('autoexec', None)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
