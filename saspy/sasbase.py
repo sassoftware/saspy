@@ -275,8 +275,8 @@ class SASsession():
 
         try:
            if self._io:
-             ll = self.submit('libname work list;')
-             self.workpath = ll['LOG'].partition('Physical Name=')[2].strip().partition('\n')[0].strip()
+             ll = self.submit('%put WORKpath=%sysfunc(pathname(work));')
+             self.workpath = ll['LOG'].rpartition('WORKpath=')[2].strip().partition('\n')[0].strip()
              win = self.workpath.count('\\')
              lnx = self.workpath.count('/')
              if (win > lnx):
@@ -287,6 +287,9 @@ class SASsession():
              self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
              ll = self.submit('proc options option=encoding;run;')
              self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
+
+             if self._io.sascfg.autoexec:
+                ll = self.submit(self._io.sascfg.autoexec)
 
         except (AttributeError):
            self._io = None
@@ -534,6 +537,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -542,6 +546,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
 
         :return: SASdata object
@@ -634,6 +639,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -642,6 +648,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
         :return: SAS log
         """
@@ -704,6 +711,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -712,6 +720,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
         :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
         :param kwargs: dictionary
@@ -733,6 +742,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -741,6 +751,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
         :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
@@ -764,6 +775,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -772,6 +784,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
 
         :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
@@ -998,6 +1011,7 @@ class SASdata:
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -1006,6 +1020,7 @@ class SASdata:
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'],
                               'obs'      :  10,
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
         end comment
         """

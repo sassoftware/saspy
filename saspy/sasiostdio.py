@@ -52,6 +52,7 @@ class SASconfigSTDIO:
       self.metapw   = cfg.get('metapw', '')
       self.lrecl    = cfg.get('lrecl', None)
       self.iomc     = cfg.get('iomc', '')
+      self.autoexec = cfg.get('autoexec', '')
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -125,6 +126,13 @@ class SASconfigSTDIO:
             self.encoding = inencoding
       if not self.encoding:
          self.encoding = 'utf-8'
+
+      inautoexec = kwargs.get('autoexec', None)   
+      if inautoexec:
+         if lock and self.autoexec:
+           print("Parameter 'autoexec' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.autoexec = inautoexec
 
       inlrecl = kwargs.get('lrecl', None)
       if inlrecl:

@@ -59,6 +59,7 @@ class SASconfigIOM:
       self.sspi      = cfg.get('sspi', False)
       self.javaparms = cfg.get('javaparms', '')
       self.lrecl     = cfg.get('lrecl', None)
+      self.autoexec  = cfg.get('autoexec', '')
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -167,6 +168,13 @@ class SASconfigIOM:
             print("Parameter 'javaparms' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.javaparms = injparms
+
+      inautoexec = kwargs.get('autoexec', None)   
+      if inautoexec:
+         if lock and self.autoexec:
+           print("Parameter 'autoexec' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.autoexec = inautoexec
 
       inlrecl = kwargs.get('lrecl', None)
       if inlrecl:
