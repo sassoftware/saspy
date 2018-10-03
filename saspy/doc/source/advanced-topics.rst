@@ -354,4 +354,31 @@ the next thing you submit will reconnect to that same workspace server and run.
     do more saspy work
 
 
+*******************************************************************
+Configuring Grid Option Sets to have saspy run on a specific Queue.
+*******************************************************************
+
+Working with Grid Options Sets is documented here (the 'Doc' referred to below):
+http://support.sas.com/documentation/cdl/en/gridref/67371/HTML/default/viewer.htm#n1inymfs0b7go2n147xdknz0ygpx.htm
+
+There is also a SASPy issue with details on this here: 
+https://github.com/sassoftware/saspy/issues/82
+
+This is specific to the IOM Access Method, as that is how saspy connects to the SAS Grid with this functionality.
+The Appname that saspy connects as is 'SASPy'; as in APPNAME=SASPy 
+ 
+There are 2 steps to setting this up. The first is to define the SASPy Application in metadata and set it as Grid Capable.
+That part in the doc (link referenced above) is at the bottom, named 'Specifying That an Application Is Grid Capable'. 
+
+The second is to select and configure that SASPy App in the Grid Options Set Mapping Wizard; the first part of the doc. 
+
+1) in the 'Folders' view in SMC (like in the picture in the doc link), there's a list of applications. The doc has the SAS Addin for Microsoft Office selected.
+If you right click on Applications, you can selct 'New'->'Folder.
+
+2) Do that and set the name of the new folder to SASPy. Then right click and select Properties - just like in the picture in the doc. 
+Then add a Keyword-> 'isGridCapable' and save it. Just like the picture in the doc.
+
+After creating the SASPy folder (application), and setting it to grid capable, when you go back in to the grid options mapping wizard (the first part
+of the document referenced above), SASPy should now be available to choose and you can set this up as you want.
+
 

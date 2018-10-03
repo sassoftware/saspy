@@ -230,7 +230,7 @@ class SASstat:
         """
         required_set = {'model'}
         legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
-                     'partition', 'score', 'selection', 'weight'}
+        'partition', 'score', 'selection', 'weight'}
 
         self.logger.debug("kwargs type: " + str(type(kwargs)))
 
@@ -272,8 +272,8 @@ class SASstat:
         ``required_set = {'model'}``
 
         ``legal_set = {'assess', 'bayes', 'by', 'cls', 'contrast', 'freq', 'effect', 'estimate', 
-                     'hazardratio', 'id', 'lsmeans', 'lsmestimate', 'model', 'out', 'roc', 
-                     'random', 'slice', 'store', 'strata', 'test', 'weight', 'procopts'}``
+        'hazardratio', 'id', 'lsmeans', 'lsmestimate', 'model', 'out', 'roc', 
+        'random', 'slice', 'store', 'strata', 'test', 'weight', 'procopts'}``
 
         cls is an alias for the class statement
 

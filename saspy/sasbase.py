@@ -126,6 +126,9 @@ class SASconfig:
         except:
             self.cfgopts = {}
 
+        # in lock down mode, don't allow runtime overrides of option values from the config file.
+        lock = self.cfgopts.get('lock_down', True)
+
         # GET Config names
         configs = getattr(SAScfg, "SAS_config_names")
 
@@ -156,11 +159,19 @@ class SASconfig:
         self.name = cfgname
         cfg = getattr(SAScfg, cfgname)
 
-        ip           = cfg.get('ip', '')
-        ssh          = cfg.get('ssh', '')
-        path         = cfg.get('saspath', '')
-        java         = cfg.get('java', '')
-        self.results = cfg.get('results', None)
+        ip            = cfg.get('ip', '')
+        ssh           = cfg.get('ssh', '')
+        path          = cfg.get('saspath', '')
+        java          = cfg.get('java', '')
+        self.results  = cfg.get('results', None)
+        self.autoexec = cfg.get('autoexec', None)
+
+        inautoexec = kwargs.get('autoexec', None)   
+        if inautoexec:
+           if lock and self.autoexec:
+             print("Parameter 'autoexec' passed to SAS_session was ignored due to configuration restriction.")
+           else:
+              self.autoexec = inautoexec
 
         if len(java) > 0:
             self.mode = 'IOM'
@@ -203,9 +214,11 @@ class SASsession():
 
     Common parms for all access methods are:
 
-    :param cfgname: value in SAS_config_names List of the sascfg.py file
+    :param cfgname: the Configuration Definition to use - value in SAS_config_names List in the sascfg_personal.py file
+    :param cfgfile: fully qualified file name of your sascfg_personal.py file, if it's not in the python search path
     :param kernel: None - internal use when running the SAS_kernel notebook
     :param results: Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
+    :param autoexec: A string of SAS code that will be submitted upon establishing a connection
     :return: 'SASsession'
     :rtype: 'SASsession'
 
@@ -288,8 +301,8 @@ class SASsession():
              ll = self.submit('proc options option=encoding;run;')
              self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
 
-             if self._io.sascfg.autoexec:
-                ll = self.submit(self._io.sascfg.autoexec)
+             if self.sascfg.autoexec:
+                ll = self.submit(self.sascfg.autoexec)
 
         except (AttributeError):
            self._io = None
@@ -1558,7 +1571,7 @@ class SASdata:
                else:
                   return ll
 
-    def impute(self, vars: dict, replace: bool = False, prefix: str = 'imp_', out: 'SASData' = None) -> 'SASdata':
+    def impute(self, vars: dict, replace: bool = False, prefix: str = 'imp_', out: 'SASdata' = None) -> 'SASdata':
         """
         Imputes missing values for a SASdata object.
 

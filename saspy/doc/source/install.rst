@@ -136,8 +136,17 @@ Also, everything in this doc applies to the _personal version; it's the same, ju
 that will be used if it exists instead of the original one, but it won't get overwritten.
 
 Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
-al long as that location is in the python search path. The python search path can be found by looking
-at the PYTHONPATH environment variable (if it's set), but more definitively by submitting the following:
+al long as that location is accessible to python. If the path is in the python search path, then your good.
+If it is not in the python search path, you can use the cfgfile= parameter in your SASsession() invocation to 
+specify it:
+
+.. code-block:: ipython3
+
+    sas = SASsession(cfgfile='/some/path/to/your/config/sascfg_personal.py')
+
+
+The python search path can be found by looking at the PYTHONPATH environment variable (if it's set), 
+but more definitively by submitting the following:
 
 .. code-block:: ipython3
 
@@ -173,6 +182,20 @@ definitions in the file but not make them available by simply excluding the name
 the list.
 
 
+So, your sascfg_personal.py file only need a few things in it; not everything in the example sascfg.py file.
+For example, if you had SAS installed on your Linux system, your sascfg_personal.py file may simply be the following:
+
+.. code-block:: ipython3
+
+    SAS_config_names   = ['mycfg']
+    SAS_config_options = {'lock_down': False,
+                          'verbose'  : True
+                         }
+    mycfg              = {'saspath'  : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
+                         }
+
+
+
 STDIO
 =====
 This is the original access method. This works with Unix only,
@@ -184,9 +207,11 @@ There are only three keys for this configuration definition dictionary:
 
 saspath - 
     (Required) Path to SAS startup script
+
 options -
     SAS options to include in the start up command line. These **must** be a
     Python list.
+
 encoding -
     This is the Python encoding value that matches the SAS session encoding
     of the SAS session to which you are connecting. The Python encoding 
@@ -196,6 +221,10 @@ encoding -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and
     windows-1252, respectively. 
+
+autoexec -
+    This is a string of SAS code that will be submitted upon establishing a connection.
+    You can use this to preassign libraries you always want available, or whatever you want.
 
 
 .. code-block:: ipython3
@@ -400,6 +429,10 @@ sspi -
     This is simply a boolean, so to use it you specify 'sspi' : True. Also, to use this, you must have the path to the
     spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
     See the second paragraph under Local IOM for more on this.
+autoexec -
+    This is a string of SAS code that will be submitted upon establishing a connection.
+    You can use this to preassign libraries you always want available, or whatever you want.
+
 javaparms -
     The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
     does allows for a way to specify them if something was needed.
@@ -498,6 +531,10 @@ encoding  -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and 
     windows-1252, respectively. 
+autoexec -
+    This is a string of SAS code that will be submitted upon establishing a connection.
+    You can use this to preassign libraries you always want available, or whatever you want.
+
 javaparms -
     The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
     does allows for a way to specify them if something was needed.
