@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 2.2.4 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.2.9 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.2.4 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.2.9 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.2.4
+                2.2.9
               </div>
             
           
@@ -295,8 +295,14 @@ file. Then you won&#8217;t have to worry about sascfg.py getting clobbered when 
 <p>Also, everything in this doc applies to the _personal version; it&#8217;s the same, just a version of the file
 that will be used if it exists instead of the original one, but it won&#8217;t get overwritten.</p>
 <p>Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
-al long as that location is in the python search path. The python search path can be found by looking
-at the PYTHONPATH environment variable (if it&#8217;s set), but more definitively by submitting the following:</p>
+al long as that location is accessible to python. If the path is in the python search path, then your good.
+If it is not in the python search path, you can use the cfgfile= parameter in your SASsession() invocation to
+specify it:</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">sas</span> <span class="o">=</span> <span class="n">SASsession</span><span class="p">(</span><span class="n">cfgfile</span><span class="o">=</span><span class="s1">&#39;/some/path/to/your/config/sascfg_personal.py&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The python search path can be found by looking at the PYTHONPATH environment variable (if it&#8217;s set),
+but more definitively by submitting the following:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
 </pre></div>
@@ -327,6 +333,16 @@ end user at connection time. Any configuration definitions that are not listed i
 SAS_config_names are simply inaccessible by an end user. You can add several configuration
 definitions in the file but not make them available by simply excluding the names from
 the list.</p>
+<p>So, your sascfg_personal.py file only need a few things in it; not everything in the example sascfg.py file.
+For example, if you had SAS installed on your Linux system, your sascfg_personal.py file may simply be the following:</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">SAS_config_names</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mycfg&#39;</span><span class="p">]</span>
+<span class="n">SAS_config_options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lock_down&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+                      <span class="s1">&#39;verbose&#39;</span>  <span class="p">:</span> <span class="bp">True</span>
+                     <span class="p">}</span>
+<span class="n">mycfg</span>              <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span>  <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span>
+                     <span class="p">}</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="stdio">
 <h3>STDIO<a class="headerlink" href="#stdio" title="Permalink to this headline">¶</a></h3>
@@ -349,6 +365,9 @@ The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
 default encodings for running SAS in Unicode, on Unix, and on Windows,
 respectively. Those map to Python encoding values: utf8, latin1, and
 windows-1252, respectively.</dd>
+<dt>autoexec -</dt>
+<dd>This is a string of SAS code that will be submitted upon establishing a connection.
+You can use this to preassign libraries you always want available, or whatever you want.</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
             <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">,</span> <span class="s2">&quot;-autoexec&quot;</span><span class="p">,</span> <span class="s2">&quot;/user/tom/autoexec&quot;</span><span class="p">]</span>
@@ -530,6 +549,9 @@ first one in the list of app servers it supports.</dd>
 This is simply a boolean, so to use it you specify &#8216;sspi&#8217; : True. Also, to use this, you must have the path to the
 spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
 See the second paragraph under Local IOM for more on this.</dd>
+<dt>autoexec -</dt>
+<dd>This is a string of SAS code that will be submitted upon establishing a connection.
+You can use this to preassign libraries you always want available, or whatever you want.</dd>
 <dt>javaparms -</dt>
 <dd>The javaparms option allows you to specify Java command line options. These aren&#8217;t generally needed, but this
 does allows for a way to specify them if something was needed.</dd>
@@ -622,6 +644,9 @@ The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
 default encodings for running SAS in Unicode, on Unix, and on Windows,
 respectively. Those map to Python encoding values: utf8, latin1, and
 windows-1252, respectively.</dd>
+<dt>autoexec -</dt>
+<dd>This is a string of SAS code that will be submitted upon establishing a connection.
+You can use this to preassign libraries you always want available, or whatever you want.</dd>
 <dt>javaparms -</dt>
 <dd>The javaparms option allows you to specify Java command line options. These aren&#8217;t generally needed, but this
 does allows for a way to specify them if something was needed.</dd>
@@ -724,7 +749,7 @@ install other non-standard python modules.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.4',
+            VERSION:'2.2.9',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

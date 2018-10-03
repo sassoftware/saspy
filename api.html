@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 2.2.4 documentation</title>
+  <title>API Reference &mdash; saspy 2.2.9 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.2.4 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.2.9 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.2.4
+                2.2.9
               </div>
             
           
@@ -190,7 +190,7 @@
 <dl class="class">
 <dt id="saspy.SASsession">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASsession</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASsession<a class="headerlink" href="#saspy.SASsession" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p><strong>Overview</strong></p>
 <p>The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
 Most of these parameters will be configured in the sascfg.py configuration file.</p>
@@ -200,9 +200,11 @@ Most of these parameters will be configured in the sascfg.py configuration file.
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>cfgname</strong> &#8211; value in SAS_config_names List of the sascfg.py file</li>
+<li><strong>cfgname</strong> &#8211; the Configuration Definition to use - value in SAS_config_names List in the sascfg_personal.py file</li>
+<li><strong>cfgfile</strong> &#8211; fully qualified file name of your sascfg_personal.py file, if it&#8217;s not in the python search path</li>
 <li><strong>kernel</strong> &#8211; None - internal use when running the SAS_kernel notebook</li>
 <li><strong>results</strong> &#8211; Type of tabular results to return. default is &#8216;Pandas&#8217;, other options are &#8216;HTML or &#8216;TEXT&#8217;</li>
+<li><strong>autoexec</strong> &#8211; A string of SAS code that will be submitted upon establishing a connection</li>
 </ul>
 </td>
 </tr>
@@ -350,7 +352,7 @@ See the Advanced topics section of the doc for details</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Boolean True it the Data Set exists and False if it does not</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)">bool</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
 </td>
 </tr>
 </tbody>
@@ -399,12 +401,14 @@ See the Advanced topics section of the doc for details</p>
 <li>drop are strings or list of strings.</li>
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
+<li>format is a string or dictionary { var: format }</li>
 </ul>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
  <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
  <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
  <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
  <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+ <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -438,12 +442,14 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 <li>drop are strings or list of strings.</li>
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
+<li>format is a string or dictionary { var: format }</li>
 </ul>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
  <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
  <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
  <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
  <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+ <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -500,7 +506,7 @@ See the sasets.py module.
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">SAS log</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)">str</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
 </tr>
 </tbody>
 </table>
@@ -583,12 +589,14 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 <li>drop are strings or list of strings.</li>
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
+<li>format is a string or dictionary { var: format }</li>
 </ul>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
  <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
  <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
  <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
  <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+ <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -624,12 +632,14 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 <li>drop are strings or list of strings.</li>
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
+<li>format is a string or dictionary { var: format }</li>
 </ul>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
  <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
  <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
  <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
  <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+ <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -665,7 +675,7 @@ but you can run this way too; get the objects display them yourself and/or write
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>batch</strong> &#8211; bool</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)">bool</a></td>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True = return dict([LOG, LST]. False = display LST to screen.</td>
 </tr>
@@ -685,7 +695,7 @@ but you can run this way too; get the objects display them yourself and/or write
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string of the return type</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)">str</a></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
 </tr>
 </tbody>
 </table>
@@ -796,12 +806,14 @@ HTML(results[&#8216;LST&#8217;])</dd>
 <li>drop are strings or list of strings.</li>
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
+<li>format is a string or dictionary { var: format }</li>
 </ul>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
  <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
  <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
  <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
  <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+ <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -824,7 +836,7 @@ HTML(results[&#8216;LST&#8217;])</dd>
 <dl class="class">
 <dt id="saspy.SASdata">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASdata</code><span class="sig-paren">(</span><em>sassession</em>, <em>libref</em>, <em>table</em>, <em>results=''</em>, <em>dsopts={}</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <dl class="method">
 <dt id="saspy.SASdata.assessModel">
 <code class="descname">assessModel</code><span class="sig-paren">(</span><em>target: str</em>, <em>prediction: str</em>, <em>nominal: bool = True</em>, <em>event: str = ''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.assessModel" title="Permalink to this definition">¶</a></dt>
@@ -972,7 +984,7 @@ and generates a bar chart.</p>
 
 <dl class="method">
 <dt id="saspy.SASdata.impute">
-<code class="descname">impute</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.impute" title="Permalink to this definition">¶</a></dt>
+<code class="descname">impute</code><span class="sig-paren">(</span><em>vars: dict</em>, <em>replace: bool = False</em>, <em>prefix: str = 'imp_'</em>, <em>out: typing.Union[saspy.sasbase.SASdata</em>, <em>NoneType] = None</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASdata.impute" title="Permalink to this definition">¶</a></dt>
 <dd><p>Imputes missing values for a SASdata object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1307,7 +1319,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <dl class="class">
 <dt id="saspy.SASProcCommons">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASProcCommons</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASProcCommons" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 </dd></dl>
 
 </div>
@@ -1316,7 +1328,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <dl class="class">
 <dt id="saspy.SASresults">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASresults</code><span class="sig-paren">(</span><em>attrs</em>, <em>session</em>, <em>objname</em>, <em>nosub=False</em>, <em>log=''</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASresults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Return results from a SAS Model object</p>
 <dl class="method">
 <dt id="saspy.SASresults.ALL">
@@ -1334,7 +1346,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <dl class="class">
 <dt id="saspy.SASutil">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASutil</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASutil" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>This class is for SAS BASE procedures to be called as python3 objects and use SAS as the computational engine</p>
 <p>This class and all the useful work in this package require a licensed version of SAS.</p>
 <p>To add a new procedure do the following:</p>
@@ -1436,7 +1448,7 @@ Documentation link:
 <dl class="class">
 <dt id="saspy.SASml">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASml</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASml" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>This class is for SAS Enterprise Miner procedures to be called as python3 objects and use SAS as the computational engine</p>
 <p>This class and all the useful work in this package require a licensed version of SAS.</p>
 <p>To add a new procedure do the following:</p>
@@ -1606,7 +1618,7 @@ Documentation link:
 <dl class="class">
 <dt id="saspy.SASstat">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASstat</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASstat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>This class is for SAS/STAT procedures to be called as python3 objects and use SAS as the computational engine</p>
 <p>This class and all the useful work in this package require a licensed version of SAS.</p>
 <p>To add a new procedure do the following:</p>
@@ -1795,11 +1807,9 @@ For more information on the statements see the Documentation link.</p>
 <dd><p>Python method to call the PHREG procedure
 For more information on the statements see the Documentation link.</p>
 <p><code class="docutils literal"><span class="pre">required_set</span> <span class="pre">=</span> <span class="pre">{'model'}</span></code></p>
-<dl class="docutils">
-<dt><a href="#id1"><span class="problematic" id="id2">``</span></a>legal_set = {&#8216;assess&#8217;, &#8216;bayes&#8217;, &#8216;by&#8217;, &#8216;cls&#8217;, &#8216;contrast&#8217;, &#8216;freq&#8217;, &#8216;effect&#8217;, &#8216;estimate&#8217;, </dt>
-<dd>&#8216;hazardratio&#8217;, &#8216;id&#8217;, &#8216;lsmeans&#8217;, &#8216;lsmestimate&#8217;, &#8216;model&#8217;, &#8216;out&#8217;, &#8216;roc&#8217;, 
-&#8216;random&#8217;, &#8216;slice&#8217;, &#8216;store&#8217;, &#8216;strata&#8217;, &#8216;test&#8217;, &#8216;weight&#8217;, &#8216;procopts&#8217;}``</dd>
-</dl>
+<p><code class="docutils literal"><span class="pre">legal_set</span> <span class="pre">=</span> <span class="pre">{'assess',</span> <span class="pre">'bayes',</span> <span class="pre">'by',</span> <span class="pre">'cls',</span> <span class="pre">'contrast',</span> <span class="pre">'freq',</span> <span class="pre">'effect',</span> <span class="pre">'estimate',</span> 
+<span class="pre">'hazardratio',</span> <span class="pre">'id',</span> <span class="pre">'lsmeans',</span> <span class="pre">'lsmestimate',</span> <span class="pre">'model',</span> <span class="pre">'out',</span> <span class="pre">'roc',</span> 
+<span class="pre">'random',</span> <span class="pre">'slice',</span> <span class="pre">'store',</span> <span class="pre">'strata',</span> <span class="pre">'test',</span> <span class="pre">'weight',</span> <span class="pre">'procopts'}</span></code></p>
 <p>cls is an alias for the class statement</p>
 <p>Documentation link:
 <a class="reference external" href="http://go.documentation.sas.com/?docsetId=statug&amp;docsetTarget=statug_phreg_toc.htm&amp;docsetVersion=14.2&amp;locale=en">http://go.documentation.sas.com/?docsetId=statug&amp;docsetTarget=statug_phreg_toc.htm&amp;docsetVersion=14.2&amp;locale=en</a></p>
@@ -1889,7 +1899,7 @@ For more information on the statements see the Documentation link.</p>
 <dl class="class">
 <dt id="saspy.SASets">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASets</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASets" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>This class is for SAS/ETS procedures to be called as python3 objects and use SAS as the computational engine</p>
 <p>This class and all the useful work in this package require a licensed version of SAS.</p>
 <p>To add a new procedure do the following:</p>
@@ -1985,7 +1995,7 @@ For more information on the statements see the Documentation link.</p>
 <dl class="class">
 <dt id="saspy.SASqc">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASqc</code><span class="sig-paren">(</span><em>session</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASqc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>This class is for SAS/QC procedures to be called as python3 objects and use SAS as the computational engine
 This class and all the useful work in this package require a licensed version of SAS.</p>
 <p>To add a new procedure do the following:</p>
@@ -2101,7 +2111,7 @@ This class and all the useful work in this package require a licensed version of
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.4',
+            VERSION:'2.2.9',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

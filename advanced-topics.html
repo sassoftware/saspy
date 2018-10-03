@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced topics &mdash; saspy 2.2.4 documentation</title>
+  <title>Advanced topics &mdash; saspy 2.2.9 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.2.4 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.2.9 documentation" href="index.html"/>
         <link rel="next" title="Contributing new methods" href="adding-procedures.html"/>
         <link rel="prev" title="API Reference" href="api.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.2.4
+                2.2.9
               </div>
             
           
@@ -104,6 +104,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#disconnecting-from-an-iom-session-and-reconnecting-back-to-it">Disconnecting from an IOM session and reconnecting back to it.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">Configuring Grid Option Sets to have saspy run on a specific Queue.</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
@@ -451,6 +452,24 @@ the next thing you submit will reconnect to that same workspace server and run.<
 </pre></div>
 </div>
 </div>
+<div class="section" id="configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">
+<h2>Configuring Grid Option Sets to have saspy run on a specific Queue.<a class="headerlink" href="#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue" title="Permalink to this headline">¶</a></h2>
+<p>Working with Grid Options Sets is documented here (the &#8216;Doc&#8217; referred to below):
+<a class="reference external" href="http://support.sas.com/documentation/cdl/en/gridref/67371/HTML/default/viewer.htm#n1inymfs0b7go2n147xdknz0ygpx.htm">http://support.sas.com/documentation/cdl/en/gridref/67371/HTML/default/viewer.htm#n1inymfs0b7go2n147xdknz0ygpx.htm</a></p>
+<p>There is also a SASPy issue with details on this here:
+<a class="reference external" href="https://github.com/sassoftware/saspy/issues/82">https://github.com/sassoftware/saspy/issues/82</a></p>
+<p>This is specific to the IOM Access Method, as that is how saspy connects to the SAS Grid with this functionality.
+The Appname that saspy connects as is &#8216;SASPy&#8217;; as in APPNAME=SASPy</p>
+<p>There are 2 steps to setting this up. The first is to define the SASPy Application in metadata and set it as Grid Capable.
+That part in the doc (link referenced above) is at the bottom, named &#8216;Specifying That an Application Is Grid Capable&#8217;.</p>
+<p>The second is to select and configure that SASPy App in the Grid Options Set Mapping Wizard; the first part of the doc.</p>
+<p>1) in the &#8216;Folders&#8217; view in SMC (like in the picture in the doc link), there&#8217;s a list of applications. The doc has the SAS Addin for Microsoft Office selected.
+If you right click on Applications, you can selct &#8216;New&#8217;-&gt;&#8217;Folder.</p>
+<p>2) Do that and set the name of the new folder to SASPy. Then right click and select Properties - just like in the picture in the doc.
+Then add a Keyword-&gt; &#8216;isGridCapable&#8217; and save it. Just like the picture in the doc.</p>
+<p>After creating the SASPy folder (application), and setting it to grid capable, when you go back in to the grid options mapping wizard (the first part
+of the document referenced above), SASPy should now be available to choose and you can set this up as you want.</p>
+</div>
 </div>
 
 
@@ -497,7 +516,7 @@ the next thing you submit will reconnect to that same workspace server and run.<
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.2.4',
+            VERSION:'2.2.9',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
