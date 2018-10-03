@@ -5,26 +5,27 @@ import pandas as pd
 from saspy.tests.util import Utilities
 
 class TestSASstat(unittest.TestCase):
-    def setUp(self):
-        # Use the first entry in the configuration list
-        self.sas = saspy.SASsession() #cfgname=saspy.SAScfg.SAS_config_names[0])
-        self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
-        self.util = Utilities(self.sas)
+    @classmethod    
+    def setUpClass(cls):
+        cls.sas = saspy.SASsession() 
+        #cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
+        util = Utilities(cls.sas)
         procNeeded=['reg', 'mixed', 'hpsplit', 'hplogistic', 'hpreg', 'glm', 'logistic', 'tpspline',
                     'hplogistic', 'hpreg', 'phreg', 'ttest', 'factor']
-        if not self.util.procFound(procNeeded):
-            self.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
+        if not util.procFound(procNeeded):
+            clsself.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
-    def tearDown(self):
-        if self.sas:
-           self.sas._endsas()
+    @classmethod    
+    def tearDownClass(cls):
+        if cls.sas:
+           cls.sas._endsas()
 
     def defineData(self):
         self.sas.submit("""
                         data Myeloma;
-   input Time VStatus LogBUN HGB Platelet Age LogWBC Frac
+        input Time VStatus LogBUN HGB Platelet Age LogWBC Frac
              LogPBM Protein SCalc;
-       label Time='Survival Time'
+        label Time='Survival Time'
              VStatus='0=Alive 1=Dead';
        datalines;
      1.25  1  2.2175   9.4  1  67  3.6628  1  1.9542  12  10

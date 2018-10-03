@@ -4,18 +4,19 @@ import saspy
 from saspy.tests.util import Utilities
 
 class TestSASets(unittest.TestCase):
-    def setUp(self):
-        # Use the first entry in the configuration list
-        self.sas = saspy.SASsession() #cfgname=saspy.SAScfg.SAS_config_names[0])
-        self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
-        self.util = Utilities()
+    @classmethod    
+    def setUpClass(cls):
+        cls.sas = saspy.SASsession() 
+        #cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
+        util = Utilities()
         procNeeded=['arima']
-        if not self.util.procFound(procNeeded):
-            self.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
+        if not util.procFound(procNeeded):
+            cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
-    def tearDown(self):
-        if self.sas:
-            self.sas._endsas()
+    @classmethod    
+    def tearDownClass(cls):
+        if cls.sas:
+            cls.sas._endsas()
 
     def test_smokeTimeseries(self):
         # Basic model returns objects
