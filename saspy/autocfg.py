@@ -25,8 +25,7 @@ cpW  =  "SASJARPATH\\sas.svc.connection.jar"
 cpW += ";SASJARPATH\\log4j.jar"
 cpW += ";SASJARPATH\\sas.security.sspi.jar"
 cpW += ";SASJARPATH\\sas.core.jar"
-#cpW += ";SASPYJARPATH\\java\\saspyiom.jar"
-cpW += ";"+__file__.replace("sascfg_personal.py" ,"java\\saspyiom.jar")
+cpW += ";SASPYJARPATH\\java\\saspyiom.jar"
 
 autogen_winlocal = {'java'      : 'java',
                     'encoding'  : 'windows-1252',
@@ -62,7 +61,7 @@ os.environ["PATH"] += ';'+r'SSPIPATH'
    
    if sjp:
       cfg = cfg.replace("SASJARPATH", sjp)
-      #cfg = cfg.replace("SASPYJARPATH", __file__.replace('\\autocfg.py',''))
+      cfg = cfg.replace("SASPYJARPATH", __file__.replace('\\autocfg.py',''))
    else:
       return("Couldn't find the SAS Jar path.\n")
    
