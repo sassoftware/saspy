@@ -130,7 +130,10 @@ saspy will always try to import sascfg_personal.py first, and only if that fails
 import sascfg.py.
 
 So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
-file. Then you won't have to worry about sascfg.py getting clobbered when you pull or upgrade.
+file. Then you won't have to worry about sascfg.py getting clobbered when you pull or upgrade. Note that
+the sascfg.py file has examples of all of the various kinds of connections you could use. You don't need
+all of that in your _personal version; only the parts you need for your situation. The next section
+explains the minimum parts you would need.
 
 Also, everything in this doc applies to the _personal version; it's the same, just a version of the file
 that will be used if it exists instead of the original one, but it won't get overwritten.
@@ -164,12 +167,13 @@ There are three main parts to this configuration file.
 
 In reverse order, the configuration definitions are Python dictionaries. Each dictionary 
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
+These values are defined in the following sections.
 
 SAS_config_options has two options. The first option (lock_down) restricts (or allows) an end
 users' ability to override settings in the configuration definitions by passing them as parameters
 on the ``SASsession()``. Each of the keys in the configuration definition can be passed in at
 run time on the SASsession(). If lock_down is set to True, any keys defined in the configuration
-definition cannot be specified in SASsession(), Keys that are not specified in the Config Def, can be
+definition cannot be overridden in SASsession(), Keys that are not specified in the Config Def, can be
 specified at run time on the SASsession(). If set to False, any config def key can be specified 
 on the SASsession(). 
 
@@ -203,7 +207,7 @@ because SAS on Windows platforms does not support line-mode style connections
 (through stdin, stdout, stderr). This connection method is for a local 
 connection to SAS that is installed on the same host as Python.
 
-There are only three keys for this configuration definition dictionary:
+There are only four keys for this configuration definition dictionary:
 
 saspath - 
     (Required) Path to SAS startup script
@@ -245,7 +249,7 @@ with Unix only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
 SSH configured between the two systems. Google it, it's not that difficult.
 
-In addition to the three keys for STDIO, there are two more keys to configure:
+In addition to the four keys for STDIO, there are two more keys to configure:
 
 ssh - 
     (Required) The ssh command to run (Linux execv requires a fully qualified
@@ -426,9 +430,10 @@ appserver -
     first one in the list of app servers it supports.
 sspi -
     New in 2.17, there is support for IWA (Integrated Windows Authentication) from a Windows client to remote IOM server.
+    This is only for when your Workspace server is configured to use IWA as the authentication method, which is not the default.
     This is simply a boolean, so to use it you specify 'sspi' : True. Also, to use this, you must have the path to the
     spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
-    See the second paragraph under Local IOM for more on this.
+    See the second paragraph under Local IOM for more on the spiauth.dll file.
 autoexec -
     This is a string of SAS code that will be submitted upon establishing a connection.
     You can use this to preassign libraries you always want available, or whatever you want.

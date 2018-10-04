@@ -1010,33 +1010,39 @@ class SASsession():
 
 
 class SASdata:
+    """
+    **Overview**
+
+    The SASdata object is a reference to a SAS Data Set or View. It is used to access data that exists in the SAS session.
+    You create a SASdata object by using the sasdata() method of the SASsession object.
+
+    Parms for the sasdata() method of the SASsession object are:
+
+    :param table: [Required] the name of the SAS Data Set or View
+    :param libref: [Defaults to WORK] the libref for the SAS Data Set or View.
+    :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+    :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs, format):
+
+        - where is a string
+        - keep are strings or list of strings.
+        - drop are strings or list of strings.
+        - obs is a numbers - either string or int
+        - first obs is a numbers - either string or int
+        - format is a string or dictionary { var: format }
+
+        .. code-block:: python
+
+                         {'where'    : 'msrp < 20000 and make = "Ford"',
+                          'keep'     : 'msrp enginesize Cylinders Horsepower Weight',
+                          'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'],
+                          'obs'      :  10,
+                          'firstobs' : '12'
+                          'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                         }
+
+    """
+
     def __init__(self, sassession, libref, table, results='', dsopts={}):
-        """
-
-        :param sassession:
-        :param table: the name of the SAS Data Set
-        :param libref: the libref for the SAS Data Set.
-        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
-        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
-
-            - where is a string
-            - keep are strings or list of strings.
-            - drop are strings or list of strings.
-            - obs is a numbers - either string or int
-            - first obs is a numbers - either string or int
-            - format is a string or dictionary { var: format }
-
-            .. code-block:: python
-
-                             {'where'    : 'msrp < 20000 and make = "Ford"',
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight',
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'],
-                              'obs'      :  10,
-                              'firstobs' : '12'
-                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
-                             }
-        end comment
-        """
         self.sas = sassession
         self.logger = logging.getLogger(__name__)
 
