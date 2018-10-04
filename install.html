@@ -291,7 +291,10 @@ This file doesn&#8217;t exist in the repo, so it will never be overwritten when 
 saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
 import sascfg.py.</p>
 <p>So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
-file. Then you won&#8217;t have to worry about sascfg.py getting clobbered when you pull or upgrade.</p>
+file. Then you won&#8217;t have to worry about sascfg.py getting clobbered when you pull or upgrade. Note that
+the sascfg.py file has examples of all of the various kinds of connections you could use. You don&#8217;t need
+all of that in your _personal version; only the parts you need for your situation. The next section
+explains the minimum parts you would need.</p>
 <p>Also, everything in this doc applies to the _personal version; it&#8217;s the same, just a version of the file
 that will be used if it exists instead of the original one, but it won&#8217;t get overwritten.</p>
 <p>Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
@@ -319,12 +322,13 @@ but more definitively by submitting the following:</p>
 </ol>
 </div></blockquote>
 <p>In reverse order, the configuration definitions are Python dictionaries. Each dictionary
-has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.</p>
+has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
+These values are defined in the following sections.</p>
 <p>SAS_config_options has two options. The first option (lock_down) restricts (or allows) an end
 users&#8217; ability to override settings in the configuration definitions by passing them as parameters
 on the <code class="docutils literal"><span class="pre">SASsession()</span></code>. Each of the keys in the configuration definition can be passed in at
 run time on the SASsession(). If lock_down is set to True, any keys defined in the configuration
-definition cannot be specified in SASsession(), Keys that are not specified in the Config Def, can be
+definition cannot be overridden in SASsession(), Keys that are not specified in the Config Def, can be
 specified at run time on the SASsession(). If set to False, any config def key can be specified
 on the SASsession().</p>
 <p>The second (verbose) controls the printing of some debug type messages.</p>
@@ -350,7 +354,7 @@ For example, if you had SAS installed on your Linux system, your sascfg_personal
 because SAS on Windows platforms does not support line-mode style connections
 (through stdin, stdout, stderr). This connection method is for a local
 connection to SAS that is installed on the same host as Python.</p>
-<p>There are only three keys for this configuration definition dictionary:</p>
+<p>There are only four keys for this configuration definition dictionary:</p>
 <dl class="docutils">
 <dt>saspath -</dt>
 <dd>(Required) Path to SAS startup script</dd>
@@ -387,7 +391,7 @@ keys in the configuration definition.</p>
 with Unix only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
 SSH configured between the two systems. Google it, it&#8217;s not that difficult.</p>
-<p>In addition to the three keys for STDIO, there are two more keys to configure:</p>
+<p>In addition to the four keys for STDIO, there are two more keys to configure:</p>
 <dl class="docutils">
 <dt>ssh -</dt>
 <dd>(Required) The ssh command to run (Linux execv requires a fully qualified
@@ -546,9 +550,10 @@ that you want to connect to, i.e.: &#8216;SASApp - Workspace Server&#8217;. With
 first one in the list of app servers it supports.</dd>
 <dt>sspi -</dt>
 <dd>New in 2.17, there is support for IWA (Integrated Windows Authentication) from a Windows client to remote IOM server.
+This is only for when your Workspace server is configured to use IWA as the authentication method, which is not the default.
 This is simply a boolean, so to use it you specify &#8216;sspi&#8217; : True. Also, to use this, you must have the path to the
 spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
-See the second paragraph under Local IOM for more on this.</dd>
+See the second paragraph under Local IOM for more on the spiauth.dll file.</dd>
 <dt>autoexec -</dt>
 <dd>This is a string of SAS code that will be submitted upon establishing a connection.
 You can use this to preassign libraries you always want available, or whatever you want.</dd>

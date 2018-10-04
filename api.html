@@ -837,6 +837,42 @@ HTML(results[&#8216;LST&#8217;])</dd>
 <dt id="saspy.SASdata">
 <em class="property">class </em><code class="descclassname">saspy.</code><code class="descname">SASdata</code><span class="sig-paren">(</span><em>sassession</em>, <em>libref</em>, <em>table</em>, <em>results=''</em>, <em>dsopts={}</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p><strong>Overview</strong></p>
+<p>The SASdata object is a reference to a SAS Data Set or View. It is used to access data that exists in the SAS session.
+You create a SASdata object by using the sasdata() method of the SASsession object.</p>
+<p>Parms for the sasdata() method of the SASsession object are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>table</strong> &#8211; [Required] the name of the SAS Data Set or View</li>
+<li><strong>libref</strong> &#8211; [Defaults to WORK] the libref for the SAS Data Set or View.</li>
+<li><strong>results</strong> &#8211; format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</li>
+<li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs, format):</p>
+<ul>
+<li>where is a string</li>
+<li>keep are strings or list of strings.</li>
+<li>drop are strings or list of strings.</li>
+<li>obs is a numbers - either string or int</li>
+<li>first obs is a numbers - either string or int</li>
+<li>format is a string or dictionary { var: format }</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">],</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span><span class="p">,</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+ <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="saspy.SASdata.assessModel">
 <code class="descname">assessModel</code><span class="sig-paren">(</span><em>target: str</em>, <em>prediction: str</em>, <em>nominal: bool = True</em>, <em>event: str = ''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASdata.assessModel" title="Permalink to this definition">¶</a></dt>
