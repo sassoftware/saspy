@@ -208,6 +208,9 @@ the macro variable name, and providing the python variable continaing the value.
     py_var = some_value
     sas.symput(sas_macro_var, py_var)
 
+For a much better set of examples and use cases with these two methods, check out the notebook in saspy-examples:
+https://github.com/sassoftware/saspy-examples/blob/master/SAS_contrib/Using_SYMGET_and_SYMPUT.ipynb
+
 
 
 ******************************************************************************
