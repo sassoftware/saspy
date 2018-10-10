@@ -149,9 +149,9 @@ cpW  =  "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploy
 cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar"
 cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar"
 cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar"
-
-# Add the saspyiom.jar path
-# Use the version of saspyiom.jar that installed with SASPy.
+# cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
+# Default to the version of saspyiom.jar that's installed with SASPy, rather than the
+# hard-coded path commented above.
 saspyiom = __file__.replace("saspy.cfg", "java\\saspyiom.jar")
 cpW += ";" + saspyiom
 
