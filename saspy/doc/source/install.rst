@@ -306,6 +306,7 @@ Windows.
 
 The IOM connection method requires the following:
 
+* Java 7 or higher installed on your Client machine (where you're running SASPy)
 * The SAS Java IOM Client (just the jars listed below; these can be copied to your client system from wherever your SAS install is)
 * Setting the CLASSPATH to access the SAS Java IOM Client JAR files.
 * Setting the CLASSPATH to include the the saspyiom.jar file.
