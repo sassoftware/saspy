@@ -45,6 +45,7 @@ class SASconfigSTDIO:
       self.saspath  = cfg.get('saspath', '')
       self.options  = cfg.get('options', [])
       self.ssh      = cfg.get('ssh', '')
+      self.identity = cfg.get('identity', None)
       self.tunnel   = cfg.get('tunnel', None)
       self.port     = cfg.get('port', None)
       self.host     = cfg.get('host', '')
@@ -96,6 +97,13 @@ class SASconfigSTDIO:
          else:
             self.ssh = inssh
 
+      inident = kwargs.get('identity', None)
+      if inident is not None:
+         if lock:
+            print("Parameter 'identity' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.identity = inident
+      
       intunnel = kwargs.get('tunnel', None)
       if intunnel is not None:
          if lock:
@@ -180,15 +188,18 @@ class SASsessionSTDIO():
       if sascfg.ssh:
          pgm    = sascfg.ssh
          parms  = [pgm]
-         parms += ["-t", sascfg.host]
+         parms += ["-t"]
 
+         if sascfg.identity:
+            parms += ["-i", sascfg.identity]
+         
          if sascfg.port:
             parms += ["-p", str(sascfg.port)]
          
          if sascfg.tunnel:
             parms += ["-R", '%d:localhost:%d' % (sascfg.tunnel,sascfg.tunnel)]
 
-         parms += [sascfg.saspath]
+         parms += [sascfg.host, sascfg.saspath]
 
          if sascfg.output.lower() == 'html':
             print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg.py).
