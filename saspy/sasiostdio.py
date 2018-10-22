@@ -290,12 +290,12 @@ Will use HTML5 for this SASsession.""")
             os.execv(pgm, parms)
          except OSError as e:
             print("The OS Error was:\n"+e.strerror+'\n')
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+            print("SAS Connection failed. No connection established. Double check your settings in sascfg.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
             os._exit(-6)
          except:
-            print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
+            print("Subprocess failed to start. Double check your settings in sascfg.py file.\n")
             os._exit(-6)
 
       self.pid    = pidpty[0]
@@ -313,14 +313,14 @@ Will use HTML5 for this SASsession.""")
          print("stdout from subprocess is:\n"+lst.decode()) 
          
       if self.pid is None:
-         print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+         print("SAS Connection failed. No connection established. Double check your settings in sascfg.py file.\n")
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
          print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
          return None
       else:
          self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
          if self.pid is None:
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+            print("SAS Connection failed. No connection established. Double check your settings in sascfg.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
             return None

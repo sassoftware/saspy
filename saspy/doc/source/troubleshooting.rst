@@ -55,7 +55,7 @@ When I try to run I get the following:
     >>> import saspy
     >>> sas = saspy.SASsession()
 
-    SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
+    SAS Connection failed. No connection established. Double check your settings in sascfg.py file.
     
     Attempted to run program /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8 with the following parameters:
     ['/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8', '-nodms', '-stdio', '-terminal', '-nosyntaxcheck', '-pagesize', 'MAX', '']
@@ -122,7 +122,7 @@ problem there might be.
 
     >>> import saspy
     >>> sas = saspy.SASsession(cfgname='ssh')
-    SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
+    SAS Connection failed. No connection established. Double check your settings in sascfg.py file.
     
     Attempted to run program /usr/bin/ssh with the following parameters:['/usr/bin/ssh', '-t', 'tom64-2', '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
                                                                          '-fullstimer', '-nodms', '-stdio', '-terminal', '-nosyntaxcheck', '-pagesize', 'MAX', '']
@@ -282,7 +282,7 @@ To demonstate the error for a missing JAR file, let's comment out one of the IOM
     Error: A JNI error has occurred, please check your installation and try again
     Exception in thread "main" 
     
-    Subprocess failed to start. Double check you settings in sascfg.py file.
+    Subprocess failed to start. Double check your settings in sascfg.py file.
     
     Attempted to run program java with the following parameters:['java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
@@ -389,7 +389,7 @@ There are a few obvious misconfigurations that can happen here.
 
     The application could not log on to the server "Linux-1:333". No server is available at that port on that machine.
     SAS process has terminated unexpectedly. Pid State= (11195, 64000)
-    SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
+    SAS Connection failed. No connection established. Double check your settings in sascfg.py file.
     
     Attempted to run program /usr/bin/java with the following parameters:['/usr/bin/java', '-classpath', '/jars/sas.svc.connection.jar:/jars/log4j.jar:/jars/sas.security.sspi.jar:/jars/sas.core,jar:
     /jars/saspyiom.jar', 'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '45757', '-stdoutport', '57809', '-stderrport', '33153', '-iomhost', 'Linux-1', '-iomport', '333', '-user', 'user', '']
@@ -406,7 +406,7 @@ There are a few obvious misconfigurations that can happen here.
 
     The application could not log on to the server "Linux-1:8591". The user ID "wrong_user" or the password is incorrect.
     SAS process has terminated unexpectedly. Pid State= (11449, 64000)
-    SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
+    SAS Connection failed. No connection established. Double check your settings in sascfg.py file.
     
     Attempted to run program /usr/bin/java with the following parameters:['/usr/bin/java', '-classpath', '/jars/sas.svc.connection.jar:/jars/log4j.jar:/jars/sas.security.sspi.jar:/jars/sas.core,jar:
     /jars/saspyiom.jar', 'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '49660', '-stdoutport', '46794', '-stderrport', '51907', '-iomhost', 'Linux-1', '-iomport', '8591', '-user', 'wrong_user', '']
@@ -424,7 +424,7 @@ There are a few obvious misconfigurations that can happen here.
     
     The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.
     SAS process has terminated unexpectedly. RC from wait was: 4294967290
-    SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
+    SAS Connection failed. No connection established. Double check your settings in sascfg.py file.
     
     Attempted to run program java with the following parameters:['java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
@@ -442,7 +442,7 @@ There are a few obvious misconfigurations that can happen here.
     >>> sas = saspy.SASsession()
     The application could not find a command to launch a SAS Workspace Server.
     SAS process has terminated unexpectedly. RC from wait was: 4294967290
-    SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
+    SAS Connection failed. No connection established. Double check your settings in sascfg.py file.
     
     Attempted to run program java with the following parameters:['java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
@@ -470,7 +470,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
     >>> sas = saspy.SASsession()
     The application could not log on to the server. The server process did not start.
     SAS process has terminated unexpectedly. RC from wait was: 4294967290
-    SAS Connection failed. No connection established. Double check you settings in sascfg.py file.
+    SAS Connection failed. No connection established. Double check your settings in sascfg.py file.
     
     Attempted to run program java with the following parameters:['java', '-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd=C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\SAS.EXE -config C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\sasv9.cfg -objectserver 
     -nologo -noinal -noprngetlist', '-classpath', 

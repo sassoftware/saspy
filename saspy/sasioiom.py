@@ -331,7 +331,7 @@ Will use HTML5 for this SASsession.""")
             pid = self.pid.pid
          except OSError as e:
             print("The OS Error was:\n"+e.strerror+'\n')
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+            print("SAS Connection failed. No connection established. Double check your settings in sascfg.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
             return None
@@ -384,7 +384,7 @@ Will use HTML5 for this SASsession.""")
                os.execv(pgm, parms)
             except OSError as e:
                print("The OS Error was:\n"+e.strerror+'\n')
-               print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+               print("SAS Connection failed. No connection established. Double check your settings in sascfg.py file.\n")
                print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
                print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
                os._exit(-6)
@@ -397,7 +397,7 @@ Will use HTML5 for this SASsession.""")
             error += self.pid.stdout.read(4096).decode()
             print("Java Error:\n"+error)
 
-            print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
+            print("Subprocess failed to start. Double check your settings in sascfg.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
             self.pid = None
@@ -422,7 +422,7 @@ Will use HTML5 for this SASsession.""")
             error  = self.stderr.read1(4096).decode()+'\n'
             error += self.stdout.read1(4096).decode()
             print("Java Error:\n"+error)
-            print("SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check you settings in sascfg.py file.\n")
+            print("SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check your settings in sascfg.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
             self.pid = None
@@ -452,7 +452,7 @@ Will use HTML5 for this SASsession.""")
 
       if self.pid is None:
          print(ll['LOG'])
-         print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+         print("SAS Connection failed. No connection established. Double check your settings in sascfg.py file.\n")
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
          if zero:
             print("Be sure the path to sspiauth.dll is in your System PATH"+"\n")
