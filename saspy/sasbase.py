@@ -17,7 +17,7 @@
 #
 # This module is designed to connect to SAS from python, providing a natural python style interface.
 # it provides base functionality, data access and processing, and includes analytics and ODS results.
-# There is a configuration file named sascfg.py in the saspy package used to configure connections
+# There is a configuration file named sascfg_personal.py in the saspy package used to configure connections
 # to SAS. Currently supported methods are STDIO, connecting to a local (same machine) Linux SAS using
 # stdio methods (fork, exec, and pipes). The is also support for running STDIO over SSH, which can 
 # connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interrupt
@@ -210,7 +210,7 @@ class SASsession():
     **Overview**
 
     The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-    Most of these parameters will be configured in the sascfg.py configuration file.
+    Most of these parameters will be configured in the sascfg_personal.py configuration file.
 
     Common parms for all access methods are:
 
@@ -226,8 +226,8 @@ class SASsession():
 
     **STDIO**
 
-    :param saspath: overrides saspath Dict entry of cfgname in sascfg.py file
-    :param options: overrides options Dict entry of cfgname in sascfg.py file
+    :param saspath: overrides saspath Dict entry of cfgname in sascfg_personal.py file
+    :param options: overrides options Dict entry of cfgname in sascfg_personal.py file
     :param encoding: This is the python encoding value that matches the SAS session encoding
 
     **STDIO over SSH**
