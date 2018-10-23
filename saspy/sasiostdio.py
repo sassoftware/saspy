@@ -164,10 +164,10 @@ class SASconfigSTDIO:
 class SASsessionSTDIO():
    '''
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-   cfgname - value in SAS_config_names List of the sascfg.py file
+   cfgname - value in SAS_config_names List of the sascfg_personal.py file
    kernel  - None - internal use when running the SAS_kernel notebook
-   saspath - overrides saspath Dict entry of cfgname in sascfg.py file
-   options - overrides options Dict entry of cfgname in sascfg.py file
+   saspath - overrides saspath Dict entry of cfgname in sascfg_personal.py file
+   options - overrides options Dict entry of cfgname in sascfg_personal.py file
    encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
 
    and for running STDIO over passwordless ssh
@@ -216,8 +216,8 @@ class SASsessionSTDIO():
          parms += [sascfg.host, sascfg.saspath]
 
          if sascfg.output.lower() == 'html':
-            print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg.py).
-Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the default sascfg.py.
+            print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg_personal.py).
+Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the default sascfg_personal.py.
 Will use HTML5 for this SASsession.""")
             sascfg.output = 'html5'
       else:
@@ -304,12 +304,12 @@ Will use HTML5 for this SASsession.""")
             os.execv(pgm, parms)
          except OSError as e:
             print("The OS Error was:\n"+e.strerror+'\n')
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+            print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
             os._exit(-6)
          except:
-            print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
+            print("Subprocess failed to start. Double check your settings in sascfg_personal.py file.\n")
             os._exit(-6)
 
       self.pid    = pidpty[0]
@@ -327,14 +327,14 @@ Will use HTML5 for this SASsession.""")
          print("stdout from subprocess is:\n"+lst.decode()) 
          
       if self.pid is None:
-         print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+         print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
          print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
          return None
       else:
          self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
          if self.pid is None:
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+            print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
             return None
