@@ -156,7 +156,7 @@ but more definitively by submitting the following:
 
         
 sascfg_personal.py (saspy_personal.py) details
-=====================================
+==============================================
 There are three main parts to this configuration file.
 
         1) SAS_config_names
