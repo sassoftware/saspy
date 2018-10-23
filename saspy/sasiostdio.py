@@ -145,6 +145,20 @@ class SASconfigSTDIO:
 
       self._prompt = session._sb.sascfg._prompt
 
+      self.hostip = socks.gethostname()
+      try:
+         x  = subprocess.Popen(('nslookup', self.hostip), stdout=subprocess.PIPE)
+         z  = x.stdout.read()
+         ip = z.rpartition(b'Address:')[2].strip().decode()
+         try:
+            socks.gethostbyaddr(ip)
+            self.hostip = ip
+         except:
+            pass
+         x.terminate()
+      except:
+         pass
+
       return
 
 class SASsessionSTDIO():
@@ -1061,7 +1075,7 @@ Will use HTML5 for this SASsession.""")
 
       if self.sascfg.ssh:
          if not self.sascfg.tunnel:
-            host = socks.gethostname()
+            host = self.sascfg.hostip #socks.gethostname()
          else:
             host = 'localhost'
       else:
@@ -1260,7 +1274,7 @@ Will use HTML5 for this SASsession.""")
             return None
          
          if not self.sascfg.tunnel:
-            host = socks.gethostname()
+            host = self.sascfg.hostip  #socks.gethostname()
          else:
             host = 'localhost'
          code  = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v encoding='utf-8';\n"
