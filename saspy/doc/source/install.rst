@@ -23,10 +23,10 @@ or, for a given branch (put the name of the branch after @)::
 
     pip install git+https://git@github.com/sassoftware/saspy.git@branchname
 
-To use this module after installation, you need to edit the sascfg_personal.py file to 
+To use this module after installation, you need to edit the sascfg.py file to 
 configure it to be able to connect and start a SAS session. Note, you should 
-actually copy sascfg_personal.py to sascfg_personal.py and edit sascfg_personal.py.
-This way your edit's won't be overridden if a new sascfg_personal.py is pulled.
+actually copy sascfg.py to sascfg_personal.py and edit sascfg_personal.py.
+This way your edit's won't be overridden if a new sascfg.py is pulled.
 Follow the instructions in the next section.
 
 * If you run into any problems, see :doc:`troubleshooting`.
@@ -61,25 +61,23 @@ The current set of connection methods are as follows:
   Server on any supported SAS platform.
 
 Though there are several connection methods available, a single configuration file
-is used to enable all the connection methods. The file contains instructions and
+can be used to enable all the connection methods. The sample config file contains instructions and
 examples, but this section goes into more detail to explain how to configure each
 type of connection.
 
-Depending upon how you did your installation, the sascfg_personal.py file may be in different 
+Depending upon how you did your installation, the sample sascfg.py file may be in different 
 locations on the file system:
 
 * In a regular pip install, it is under the site-packages directory in the Python 
   installation. 
-* If you cloned the repo or downloaded and extraced the repo and then installed, 
-  it may use the sascfg_personal.py file from that location and not copy it to site-packages.
+* If you cloned the repo or downloaded and extraced the repo to some directory and then installed, 
+  it will be in that directory and maybe also copied to site-packages.
  
-First, make sure that you update the sascfg_personal.py file that Python uses. If you are 
-familiar with pip and Git, then you probably know where to look. If you are not
-familiar with those tools, then there is a very simple way to determine the location
-that Python is using to get at this module.
+If you are not sure where to look, then there is a very simple way to determine the location
+of the sascfg.py file.
 
 After installing, start Python and ``import saspy``. Then, simply submit 
-``saspy.SAScfg``. Python will show you where it found the module. Edit that one.
+``saspy.SAScfg``. Python will show you where it found the module.
 
 .. code-block:: ipython3
 
@@ -90,7 +88,7 @@ After installing, start Python and ``import saspy``. Then, simply submit
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
     >>> saspy.SAScfg
-    <module 'saspy.sascfg' from 'E:\\metis-master\\saspy_pip\\saspy\\sascfg_personal.py'>
+    <module 'saspy.sascfg' from 'C:\\ProgramData\\Anaconda3\\lib\\site-packages\\saspy\\sascfg.py'>
     >>>
 
     # this is an example of a repo install on Linux:
@@ -101,7 +99,7 @@ After installing, start Python and ``import saspy``. Then, simply submit
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
     >>> saspy.SAScfg
-    <module 'saspy.sascfg' from '/opt/tom/gitlab/metis/saspy_pip/saspy/sascfg_personal.py'>
+    <module 'saspy.sascfg' from '/opt/tom/github/saspy/saspy/sascfg.py'>
     >>>
     
     # this is an example of a PyPi install on Linux into site-packages:
@@ -112,26 +110,26 @@ After installing, start Python and ``import saspy``. Then, simply submit
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
     >>> saspy.SAScfg
-    <module 'saspy.sascfg' from '/usr/lib/python3.5/site-packages/saspy/sascfg_personal.py'>
+    <module 'saspy.sascfg' from '/usr/lib/python3.5/site-packages/saspy/sascfg.py'>
     >>>
     
 
 sascfg_personal.py
 ==================
 
-Since the saspy.cfg file is in the saspy repo, as an example configuration file, it can be updated
-on occasion and when you do an upgrade it will pull down the repo sascfg_personal.py and replace the one
-you've configured for your site. That means you would need to keep a copy elsewhere and then replace
-the new one with your copy after upgrading or pulling, if yours was replaced. 
+Originally, sascfg.py was the config file saspy used. But, since the saspy.cfg file is in the saspy repo, it can be updated
+on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
+you've in your instalation. If you used that file for your configuration, then you would need to keep
+a copy elsewhere and then replace the new one with your copy after upgrading or pulling, if yours was replaced. 
 
-There is a simple solution to this. Your configurations can be in a file named sascfg_personal.py.
+There is a simple solution to this. Your configurations can (should) be in a file named sascfg_personal.py.
 This file doesn't exist in the repo, so it will never be overwritten when you upgrade or pull.
 saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
-import sascfg_personal.py.
+import sascfg.py.
 
-So copy sascfg_personal.py to sascfg_personal.py and put all of your specific configuration into the _personal
-file. Then you won't have to worry about sascfg_personal.py getting clobbered when you pull or upgrade. Note that
-the sascfg_personal.py file has examples of all of the various kinds of connections you could use. You don't need
+So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
+file. Then you won't have to worry about sascfg.py getting clobbered when you pull or upgrade. Note that
+the sascfg.py file has examples of all of the various kinds of connections you could use. You don't need
 all of that in your _personal version; only the parts you need for your situation. The next section
 explains the minimum parts you would need.
 
@@ -183,10 +181,12 @@ SAS_config_names is the list of configuration definition names to make available
 end user at connection time. Any configuration definitions that are not listed in 
 SAS_config_names are simply inaccessible by an end user. You can add several configuration
 definitions in the file but not make them available by simply excluding the names from 
-the list.
+the list. Also note that these names can be anything you want. The names of the example
+configuration definitions we chosen to be self-documenting. There nothing special about 'winlocal',
+it could be named Bob. But then it wouldn't be obvious that it's for a WINdows install running a LOCAL copy of SAS.
 
 
-So, your sascfg_personal.py file only need a few things in it; not everything in the example sascfg_personal.py file.
+So, your sascfg_personal.py file only need a few things in it; not everything in the example sascfg.py file.
 For example, if you had SAS installed on your Linux system, your sascfg_personal.py file may simply be the following:
 
 .. code-block:: ipython3

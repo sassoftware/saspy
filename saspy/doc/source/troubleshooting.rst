@@ -25,8 +25,9 @@ happen trying to start up a connection to SAS. Each access method has its own se
 little help and explaination here, you can probably diagnose and correct any issue you might have.
 
 Problems in this category will be when using the saspy.SASsession() method to connect to a SAS session.
-The very first thing to look at is your sascfg_personal.py file (in the installation directory). This is where the
-configurations definition are. The file itself has documentation and so does :doc:`install`.
+The very first thing to look at is your sascfg_personal.py file (based off the examples in sascfg.py in 
+the installation directory). This is where the configurations definition are. The sample file itself has 
+documentation and so does :doc:`install`.
 
 
 Common diagnostics
@@ -183,8 +184,7 @@ Here an example of the first case, a bad path to the Java command. This example 
     The OS Error was:
     The system cannot find the file specified
     
-    SAS Connection failed. No connection established. Double check your settings 
-    in sascfg_personal.py file.
+    SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
     
     Attempted to run program c:\java with the following parameters:['c:\\java', 
     '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;
@@ -479,7 +479,8 @@ The work around for this is to use the 'javaparms' option on the configuration d
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar;
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__pxx__sp0__1\\deploywiz\\sas.core.jar;
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
-    'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                  
+    'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
+ 
 
     Be sure the path to sspiauth.dll is in your System PATH
     

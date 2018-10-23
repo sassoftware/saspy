@@ -17,7 +17,7 @@
 #
 # This module is designed to connect to SAS from python, providing a natural python style interface.
 # it provides base functionality, data access and processing, and includes analytics and ODS results.
-# There is a configuration file named sascfg_personal.py in the saspy package used to configure connections
+# There is a sample configuration file named sascfg in the saspy package showing how to configure connections
 # to SAS. Currently supported methods are STDIO, connecting to a local (same machine) Linux SAS using
 # stdio methods (fork, exec, and pipes). The is also support for running STDIO over SSH, which can 
 # connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interrupt

@@ -217,7 +217,7 @@ class SASsessionSTDIO():
 
          if sascfg.output.lower() == 'html':
             print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg_personal.py).
-Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the default sascfg_personal.py.
+Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the sample sascfg.py.
 Will use HTML5 for this SASsession.""")
             sascfg.output = 'html5'
       else:
