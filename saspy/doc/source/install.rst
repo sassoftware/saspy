@@ -23,10 +23,10 @@ or, for a given branch (put the name of the branch after @)::
 
     pip install git+https://git@github.com/sassoftware/saspy.git@branchname
 
-To use this module after installation, you need to edit the sascfg.py file to 
+To use this module after installation, you need to edit the sascfg_personal.py file to 
 configure it to be able to connect and start a SAS session. Note, you should 
-actually copy sascfg.py to sascfg_personal.py and edit sascfg_personal.py.
-This way your edit's won't be overridden if a new sascfg.py is pulled.
+actually copy sascfg_personal.py to sascfg_personal.py and edit sascfg_personal.py.
+This way your edit's won't be overridden if a new sascfg_personal.py is pulled.
 Follow the instructions in the next section.
 
 * If you run into any problems, see :doc:`troubleshooting`.
@@ -65,15 +65,15 @@ is used to enable all the connection methods. The file contains instructions and
 examples, but this section goes into more detail to explain how to configure each
 type of connection.
 
-Depending upon how you did your installation, the sascfg.py file may be in different 
+Depending upon how you did your installation, the sascfg_personal.py file may be in different 
 locations on the file system:
 
 * In a regular pip install, it is under the site-packages directory in the Python 
   installation. 
 * If you cloned the repo or downloaded and extraced the repo and then installed, 
-  it may use the sascfg.py file from that location and not copy it to site-packages.
+  it may use the sascfg_personal.py file from that location and not copy it to site-packages.
  
-First, make sure that you update the sascfg.py file that Python uses. If you are 
+First, make sure that you update the sascfg_personal.py file that Python uses. If you are 
 familiar with pip and Git, then you probably know where to look. If you are not
 familiar with those tools, then there is a very simple way to determine the location
 that Python is using to get at this module.
@@ -90,7 +90,7 @@ After installing, start Python and ``import saspy``. Then, simply submit
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
     >>> saspy.SAScfg
-    <module 'saspy.sascfg' from 'E:\\metis-master\\saspy_pip\\saspy\\sascfg.py'>
+    <module 'saspy.sascfg' from 'E:\\metis-master\\saspy_pip\\saspy\\sascfg_personal.py'>
     >>>
 
     # this is an example of a repo install on Linux:
@@ -101,7 +101,7 @@ After installing, start Python and ``import saspy``. Then, simply submit
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
     >>> saspy.SAScfg
-    <module 'saspy.sascfg' from '/opt/tom/gitlab/metis/saspy_pip/saspy/sascfg.py'>
+    <module 'saspy.sascfg' from '/opt/tom/gitlab/metis/saspy_pip/saspy/sascfg_personal.py'>
     >>>
     
     # this is an example of a PyPi install on Linux into site-packages:
@@ -112,7 +112,7 @@ After installing, start Python and ``import saspy``. Then, simply submit
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
     >>> saspy.SAScfg
-    <module 'saspy.sascfg' from '/usr/lib/python3.5/site-packages/saspy/sascfg.py'>
+    <module 'saspy.sascfg' from '/usr/lib/python3.5/site-packages/saspy/sascfg_personal.py'>
     >>>
     
 
@@ -120,18 +120,18 @@ sascfg_personal.py
 ==================
 
 Since the saspy.cfg file is in the saspy repo, as an example configuration file, it can be updated
-on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
+on occasion and when you do an upgrade it will pull down the repo sascfg_personal.py and replace the one
 you've configured for your site. That means you would need to keep a copy elsewhere and then replace
 the new one with your copy after upgrading or pulling, if yours was replaced. 
 
 There is a simple solution to this. Your configurations can be in a file named sascfg_personal.py.
 This file doesn't exist in the repo, so it will never be overwritten when you upgrade or pull.
 saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
-import sascfg.py.
+import sascfg_personal.py.
 
-So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
-file. Then you won't have to worry about sascfg.py getting clobbered when you pull or upgrade. Note that
-the sascfg.py file has examples of all of the various kinds of connections you could use. You don't need
+So copy sascfg_personal.py to sascfg_personal.py and put all of your specific configuration into the _personal
+file. Then you won't have to worry about sascfg_personal.py getting clobbered when you pull or upgrade. Note that
+the sascfg_personal.py file has examples of all of the various kinds of connections you could use. You don't need
 all of that in your _personal version; only the parts you need for your situation. The next section
 explains the minimum parts you would need.
 
@@ -157,7 +157,7 @@ but more definitively by submitting the following:
     sys.path
 
         
-sascfg.py (saspy_personal.py) details
+sascfg_personal.py (saspy_personal.py) details
 =====================================
 There are three main parts to this configuration file.
 
@@ -186,7 +186,7 @@ definitions in the file but not make them available by simply excluding the name
 the list.
 
 
-So, your sascfg_personal.py file only need a few things in it; not everything in the example sascfg.py file.
+So, your sascfg_personal.py file only need a few things in it; not everything in the example sascfg_personal.py file.
 For example, if you had SAS installed on your Linux system, your sascfg_personal.py file may simply be the following:
 
 .. code-block:: ipython3
@@ -317,7 +317,7 @@ explanation before we get to further details. There are four (4) JAR files that 
 required for the Java IOM Client. The JAR files are available from your existing SAS
 installation.  There is one JAR file that is provided with this package: 
 saspyiom.jar. These five JAR files must be provided (fully qualified paths) in a 
-CLASSPATH environment variable. This is done in a very simple way in the sascfg.py 
+CLASSPATH environment variable. This is done in a very simple way in the sascfg_personal.py 
 file, like so:
 
 ::
