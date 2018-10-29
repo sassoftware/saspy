@@ -149,7 +149,11 @@ cpW  =  "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploy
 cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar"
 cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar"
 cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar"
-cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
+# cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
+# Default to the version of saspyiom.jar that's installed with SASPy, rather than the
+# hard-coded path commented above.
+saspyiom = __file__.replace("saspy.cfg", "java\\saspyiom.jar")
+cpW += ";" + saspyiom
 
 # And, if you've configured IOM to use Encryption, you need these client side jars.
 #cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904300.0.0.20150204190000_v940m3\\sas.rutil.jar"

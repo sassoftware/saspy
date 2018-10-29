@@ -28,10 +28,10 @@ See :doc:`getting-started` for programming examples.
 Dependencies
 ************
 
-- Python3.X or higher.
+- Python3.4 or higher.
 - SAS 9.4 or higher. SAS Viya 3.1 or higher is also supported.
-- An integrated object method (IOM) connection (one of four connection methods)
-  requires Java on the client and four JAR files from your SAS installation.
+- To use the integrated object method (IOM) access method (one of four connection methods)
+  requires Java 7 or higher on the client and four (7 w/ encryption enabled) JAR files from your SAS installation.
 
 You can connect to SAS on any platform that is supported for the specified SAS
 releases.

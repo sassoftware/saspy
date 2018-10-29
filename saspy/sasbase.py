@@ -17,7 +17,7 @@
 #
 # This module is designed to connect to SAS from python, providing a natural python style interface.
 # it provides base functionality, data access and processing, and includes analytics and ODS results.
-# There is a configuration file named sascfg.py in the saspy package used to configure connections
+# There is a sample configuration file named sascfg in the saspy package showing how to configure connections
 # to SAS. Currently supported methods are STDIO, connecting to a local (same machine) Linux SAS using
 # stdio methods (fork, exec, and pipes). The is also support for running STDIO over SSH, which can 
 # connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interrupt
@@ -127,6 +127,9 @@ class SASconfig:
         except:
             self.cfgopts = {}
 
+        # in lock down mode, don't allow runtime overrides of option values from the config file.
+        lock = self.cfgopts.get('lock_down', True)
+
         # GET Config names
         configs = getattr(SAScfg, "SAS_config_names")
 
@@ -157,11 +160,19 @@ class SASconfig:
         self.name = cfgname
         cfg = getattr(SAScfg, cfgname)
 
-        ip           = cfg.get('ip', '')
-        ssh          = cfg.get('ssh', '')
-        path         = cfg.get('saspath', '')
-        java         = cfg.get('java', '')
-        self.results = cfg.get('results', None)
+        ip            = cfg.get('ip', '')
+        ssh           = cfg.get('ssh', '')
+        path          = cfg.get('saspath', '')
+        java          = cfg.get('java', '')
+        self.results  = cfg.get('results', None)
+        self.autoexec = cfg.get('autoexec', None)
+
+        inautoexec = kwargs.get('autoexec', None)   
+        if inautoexec:
+           if lock and self.autoexec:
+             print("Parameter 'autoexec' passed to SAS_session was ignored due to configuration restriction.")
+           else:
+              self.autoexec = inautoexec
 
         if len(java) > 0:
             self.mode = 'IOM'
@@ -200,13 +211,15 @@ class SASsession():
     **Overview**
 
     The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-    Most of these parameters will be configured in the sascfg.py configuration file.
+    Most of these parameters will be configured in the sascfg_personal.py configuration file.
 
     Common parms for all access methods are:
 
-    :param cfgname: value in SAS_config_names List of the sascfg.py file
+    :param cfgname: the Configuration Definition to use - value in SAS_config_names List in the sascfg_personal.py file
+    :param cfgfile: fully qualified file name of your sascfg_personal.py file, if it's not in the python search path
     :param kernel: None - internal use when running the SAS_kernel notebook
     :param results: Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
+    :param autoexec: A string of SAS code that will be submitted upon establishing a connection
     :return: 'SASsession'
     :rtype: 'SASsession'
 
@@ -214,8 +227,8 @@ class SASsession():
 
     **STDIO**
 
-    :param saspath: overrides saspath Dict entry of cfgname in sascfg.py file
-    :param options: overrides options Dict entry of cfgname in sascfg.py file
+    :param saspath: overrides saspath Dict entry of cfgname in sascfg_personal.py file
+    :param options: overrides options Dict entry of cfgname in sascfg_personal.py file
     :param encoding: This is the python encoding value that matches the SAS session encoding
 
     **STDIO over SSH**
@@ -276,8 +289,8 @@ class SASsession():
 
         try:
            if self._io:
-             ll = self.submit('libname work list;')
-             self.workpath = ll['LOG'].partition('Physical Name=')[2].strip().partition('\n')[0].strip()
+             ll = self.submit('%put WORKpath=%sysfunc(pathname(work));')
+             self.workpath = ll['LOG'].rpartition('WORKpath=')[2].strip().partition('\n')[0].strip()
              win = self.workpath.count('\\')
              lnx = self.workpath.count('/')
              if (win > lnx):
@@ -288,6 +301,9 @@ class SASsession():
              self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
              ll = self.submit('proc options option=encoding;run;')
              self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
+
+             if self.sascfg.autoexec:
+                ll = self.submit(self.sascfg.autoexec)
 
         except (AttributeError):
            self._io = None
@@ -548,6 +564,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -556,6 +573,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
 
         :return: SASdata object
@@ -648,6 +666,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -656,6 +675,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
         :return: SAS log
         """
@@ -718,6 +738,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -726,6 +747,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
         :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
         :param kwargs: dictionary
@@ -747,6 +769,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -755,6 +778,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
         :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
@@ -778,6 +802,7 @@ class SASsession():
             - drop are strings or list of strings.
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
 
             .. code-block:: python
 
@@ -786,6 +811,7 @@ class SASsession():
                               'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
                               'obs'      :  10
                               'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
 
         :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
@@ -998,31 +1024,39 @@ class SASsession():
 
 
 class SASdata:
+    """
+    **Overview**
+
+    The SASdata object is a reference to a SAS Data Set or View. It is used to access data that exists in the SAS session.
+    You create a SASdata object by using the sasdata() method of the SASsession object.
+
+    Parms for the sasdata() method of the SASsession object are:
+
+    :param table: [Required] the name of the SAS Data Set or View
+    :param libref: [Defaults to WORK] the libref for the SAS Data Set or View.
+    :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+    :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs, format):
+
+        - where is a string
+        - keep are strings or list of strings.
+        - drop are strings or list of strings.
+        - obs is a numbers - either string or int
+        - first obs is a numbers - either string or int
+        - format is a string or dictionary { var: format }
+
+        .. code-block:: python
+
+                         {'where'    : 'msrp < 20000 and make = "Ford"',
+                          'keep'     : 'msrp enginesize Cylinders Horsepower Weight',
+                          'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'],
+                          'obs'      :  10,
+                          'firstobs' : '12'
+                          'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                         }
+
+    """
+
     def __init__(self, sassession, libref, table, results='', dsopts={}):
-        """
-
-        :param sassession:
-        :param table: the name of the SAS Data Set
-        :param libref: the libref for the SAS Data Set.
-        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
-        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
-
-            - where is a string
-            - keep are strings or list of strings.
-            - drop are strings or list of strings.
-            - obs is a numbers - either string or int
-            - first obs is a numbers - either string or int
-
-            .. code-block:: python
-
-                             {'where'    : 'msrp < 20000 and make = "Ford"',
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight',
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'],
-                              'obs'      :  10,
-                              'firstobs' : '12'
-                             }
-        end comment
-        """
         self.sas = sassession
         self.logger = logging.getLogger(__name__)
 
@@ -1557,7 +1591,7 @@ class SASdata:
                else:
                   return ll
 
-    def impute(self, vars: dict, replace: bool = False, prefix: str = 'imp_', out: 'SASData' = None) -> 'SASdata':
+    def impute(self, vars: dict, replace: bool = False, prefix: str = 'imp_', out: 'SASdata' = None) -> 'SASdata':
         """
         Imputes missing values for a SASdata object.
 

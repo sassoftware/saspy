@@ -42,10 +42,10 @@ Start a SAS session
 ===================
 In the following code we start a SAS session named ``sas`` using the default 
 configuration. Each SAS session is a connection to a separate SAS instance.
-The cfgname parameter specifies the configuration definition (in sascfg.py) 
+The cfgname parameter specifies the configuration definition (in sascfg_personal.py) 
 to use for the connection to SAS.
 
-If sascfg.py has only one connection definition, then you do not need to 
+If sascfg_personal.py has only one connection definition, then you do not need to 
 specify the cfgname parameter. If the file has more than one connection
 definition and you do not specify the one to use with cfgname, you are 
 prompted for the connection to use. 

@@ -330,8 +330,8 @@ class SASstat:
         ``required_set = {'model'}``
 
         ``legal_set = {'assess', 'bayes', 'by', 'cls', 'contrast', 'freq', 'effect', 'estimate', 
-                     'hazardratio', 'id', 'lsmeans', 'lsmestimate', 'model', 'out', 'roc', 
-                     'random', 'slice', 'store', 'strata', 'test', 'weight', 'procopts'}``
+        'hazardratio', 'id', 'lsmeans', 'lsmestimate', 'model', 'out', 'roc', 
+        'random', 'slice', 'store', 'strata', 'test', 'weight', 'procopts'}``
 
         cls is an alias for the class statement
 

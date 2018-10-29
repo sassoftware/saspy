@@ -45,6 +45,7 @@ class SASconfigSTDIO:
       self.saspath  = cfg.get('saspath', '')
       self.options  = cfg.get('options', [])
       self.ssh      = cfg.get('ssh', '')
+      self.identity = cfg.get('identity', None)
       self.tunnel   = cfg.get('tunnel', None)
       self.port     = cfg.get('port', None)
       self.host     = cfg.get('host', '')
@@ -96,6 +97,13 @@ class SASconfigSTDIO:
          else:
             self.ssh = inssh
 
+      inident = kwargs.get('identity', None)
+      if inident is not None:
+         if lock:
+            print("Parameter 'identity' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.identity = inident
+      
       intunnel = kwargs.get('tunnel', None)
       if intunnel is not None:
          if lock:
@@ -137,15 +145,29 @@ class SASconfigSTDIO:
 
       self._prompt = session._sb.sascfg._prompt
 
+      self.hostip = socks.gethostname()
+      try:
+         x  = subprocess.Popen(('nslookup', self.hostip), stdout=subprocess.PIPE)
+         z  = x.stdout.read()
+         ip = z.rpartition(b'Address:')[2].strip().decode()
+         try:
+            socks.gethostbyaddr(ip)
+            self.hostip = ip
+         except:
+            pass
+         x.terminate()
+      except:
+         pass
+
       return
 
 class SASsessionSTDIO():
    '''
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-   cfgname - value in SAS_config_names List of the sascfg.py file
+   cfgname - value in SAS_config_names List of the sascfg_personal.py file
    kernel  - None - internal use when running the SAS_kernel notebook
-   saspath - overrides saspath Dict entry of cfgname in sascfg.py file
-   options - overrides options Dict entry of cfgname in sascfg.py file
+   saspath - overrides saspath Dict entry of cfgname in sascfg_personal.py file
+   options - overrides options Dict entry of cfgname in sascfg_personal.py file
    encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
 
    and for running STDIO over passwordless ssh
@@ -180,19 +202,22 @@ class SASsessionSTDIO():
       if sascfg.ssh:
          pgm    = sascfg.ssh
          parms  = [pgm]
-         parms += ["-t", sascfg.host]
+         parms += ["-t"]
 
+         if sascfg.identity:
+            parms += ["-i", sascfg.identity]
+         
          if sascfg.port:
             parms += ["-p", str(sascfg.port)]
          
          if sascfg.tunnel:
             parms += ["-R", '%d:localhost:%d' % (sascfg.tunnel,sascfg.tunnel)]
 
-         parms += [sascfg.saspath]
+         parms += [sascfg.host, sascfg.saspath]
 
          if sascfg.output.lower() == 'html':
-            print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg.py).
-Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the default sascfg.py.
+            print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg_personal.py).
+Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the sample sascfg.py.
 Will use HTML5 for this SASsession.""")
             sascfg.output = 'html5'
       else:
@@ -279,12 +304,12 @@ Will use HTML5 for this SASsession.""")
             os.execv(pgm, parms)
          except OSError as e:
             print("The OS Error was:\n"+e.strerror+'\n')
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+            print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
             os._exit(-6)
          except:
-            print("Subprocess failed to start. Double check you settings in sascfg.py file.\n")
+            print("Subprocess failed to start. Double check your settings in sascfg_personal.py file.\n")
             os._exit(-6)
 
       self.pid    = pidpty[0]
@@ -302,14 +327,14 @@ Will use HTML5 for this SASsession.""")
          print("stdout from subprocess is:\n"+lst.decode()) 
          
       if self.pid is None:
-         print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+         print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
          print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
          print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
          return None
       else:
          self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
          if self.pid is None:
-            print("SAS Connection failed. No connection established. Double check you settings in sascfg.py file.\n")
+            print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
             return None
@@ -576,7 +601,7 @@ Will use HTML5 for this SASsession.""")
                         pass
                      self.pid = None
                      return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
-                                 str(rc)+'\n'+logf, LST='')
+                                 str(rc)+'\n'+logf.decode(self.sascfg.encoding, errors='replace'), LST='')
                  if bail:
                      eof -= 1
                  if eof < 0:
@@ -634,10 +659,17 @@ Will use HTML5 for this SASsession.""")
              self.stdin.flush()
 
       if ods:
-         lstf = lstf.decode(errors='replace')
+         try:
+            lstf = lstf.decode()
+         except UnicodeDecodeError:
+            try:
+               lstf = lstf.decode(self.sascfg.encoding)
+            except UnicodeDecodeError:
+               lstf = lstf.decode(errors='replace')
       else:
          lstf = lstf.decode(self.sascfg.encoding, errors='replace')
-      logf    = logf.decode(self.sascfg.encoding, errors='replace')
+
+      logf = logf.decode(self.sascfg.encoding, errors='replace')
 
       trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 100:
@@ -825,6 +857,10 @@ Will use HTML5 for this SASsession.""")
       if len(libref):
          code += libref+"."
       code += table+"');\n"
+      code += "v = exist('"
+      if len(libref):
+         code += libref+"."
+      code += table+"', 'VIEW');\n if e or v then e = 1;\n"
       code += "te='TABLE_EXISTS='; put te e;run;"
 
       ll = self.submit(code, "text")
@@ -1039,7 +1075,7 @@ Will use HTML5 for this SASsession.""")
 
       if self.sascfg.ssh:
          if not self.sascfg.tunnel:
-            host = socks.gethostname()
+            host = self.sascfg.hostip #socks.gethostname()
          else:
             host = 'localhost'
       else:
@@ -1238,7 +1274,7 @@ Will use HTML5 for this SASsession.""")
             return None
          
          if not self.sascfg.tunnel:
-            host = socks.gethostname()
+            host = self.sascfg.hostip  #socks.gethostname()
          else:
             host = 'localhost'
          code  = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v encoding='utf-8';\n"

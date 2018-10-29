@@ -61,25 +61,23 @@ The current set of connection methods are as follows:
   Server on any supported SAS platform.
 
 Though there are several connection methods available, a single configuration file
-is used to enable all the connection methods. The file contains instructions and
+can be used to enable all the connection methods. The sample config file contains instructions and
 examples, but this section goes into more detail to explain how to configure each
 type of connection.
 
-Depending upon how you did your installation, the sascfg.py file may be in different 
+Depending upon how you did your installation, the sample sascfg.py file may be in different 
 locations on the file system:
 
 * In a regular pip install, it is under the site-packages directory in the Python 
   installation. 
-* If you cloned the repo or downloaded and extraced the repo and then installed, 
-  it may use the sascfg.py file from that location and not copy it to site-packages.
+* If you cloned the repo or downloaded and extraced the repo to some directory and then installed, 
+  it will be in that directory and maybe also copied to site-packages.
  
-First, make sure that you update the sascfg.py file that Python uses. If you are 
-familiar with pip and Git, then you probably know where to look. If you are not
-familiar with those tools, then there is a very simple way to determine the location
-that Python is using to get at this module.
+If you are not sure where to look, then there is a very simple way to determine the location
+of the sascfg.py file.
 
 After installing, start Python and ``import saspy``. Then, simply submit 
-``saspy.SAScfg``. Python will show you where it found the module. Edit that one.
+``saspy.SAScfg``. Python will show you where it found the module.
 
 .. code-block:: ipython3
 
@@ -90,7 +88,7 @@ After installing, start Python and ``import saspy``. Then, simply submit
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
     >>> saspy.SAScfg
-    <module 'saspy.sascfg' from 'E:\\metis-master\\saspy_pip\\saspy\\sascfg.py'>
+    <module 'saspy.sascfg' from 'C:\\ProgramData\\Anaconda3\\lib\\site-packages\\saspy\\sascfg.py'>
     >>>
 
     # this is an example of a repo install on Linux:
@@ -101,7 +99,7 @@ After installing, start Python and ``import saspy``. Then, simply submit
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
     >>> saspy.SAScfg
-    <module 'saspy.sascfg' from '/opt/tom/gitlab/metis/saspy_pip/saspy/sascfg.py'>
+    <module 'saspy.sascfg' from '/opt/tom/github/saspy/saspy/sascfg.py'>
     >>>
     
     # this is an example of a PyPi install on Linux into site-packages:
@@ -119,25 +117,37 @@ After installing, start Python and ``import saspy``. Then, simply submit
 sascfg_personal.py
 ==================
 
-Since the saspy.cfg file is in the saspy repo, as an example configuration file, it can be updated
+Originally, sascfg.py was the config file saspy used. But, since the saspy.cfg file is in the saspy repo, it can be updated
 on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
-you've configured for your site. That means you would need to keep a copy elsewhere and then replace
-the new one with your copy after upgrading or pulling, if yours was replaced. 
+you've in your instalation. If you used that file for your configuration, then you would need to keep
+a copy elsewhere and then replace the new one with your copy after upgrading or pulling, if yours was replaced. 
 
-There is a simple solution to this. Your configurations can be in a file named sascfg_personal.py.
+There is a simple solution to this. Your configurations can (should) be in a file named sascfg_personal.py.
 This file doesn't exist in the repo, so it will never be overwritten when you upgrade or pull.
 saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
 import sascfg.py.
 
 So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
-file. Then you won't have to worry about sascfg.py getting clobbered when you pull or upgrade.
+file. Then you won't have to worry about sascfg.py getting clobbered when you pull or upgrade. Note that
+the sascfg.py file has examples of all of the various kinds of connections you could use. You don't need
+all of that in your _personal version; only the parts you need for your situation. The next section
+explains the minimum parts you would need.
 
 Also, everything in this doc applies to the _personal version; it's the same, just a version of the file
 that will be used if it exists instead of the original one, but it won't get overwritten.
 
 Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
-al long as that location is in the python search path. The python search path can be found by looking
-at the PYTHONPATH environment variable (if it's set), but more definitively by submitting the following:
+al long as that location is accessible to python. If the path is in the python search path, then your good.
+If it is not in the python search path, you can use the cfgfile= parameter in your SASsession() invocation to 
+specify it:
+
+.. code-block:: ipython3
+
+    sas = SASsession(cfgfile='/some/path/to/your/config/sascfg_personal.py')
+
+
+The python search path can be found by looking at the PYTHONPATH environment variable (if it's set), 
+but more definitively by submitting the following:
 
 .. code-block:: ipython3
 
@@ -145,8 +155,8 @@ at the PYTHONPATH environment variable (if it's set), but more definitively by s
     sys.path
 
         
-sascfg.py (saspy_personal.py) details
-=====================================
+sascfg_personal.py (saspy_personal.py) details
+==============================================
 There are three main parts to this configuration file.
 
         1) SAS_config_names
@@ -155,12 +165,13 @@ There are three main parts to this configuration file.
 
 In reverse order, the configuration definitions are Python dictionaries. Each dictionary 
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
+These values are defined in the following sections.
 
 SAS_config_options has two options. The first option (lock_down) restricts (or allows) an end
 users' ability to override settings in the configuration definitions by passing them as parameters
 on the ``SASsession()``. Each of the keys in the configuration definition can be passed in at
 run time on the SASsession(). If lock_down is set to True, any keys defined in the configuration
-definition cannot be specified in SASsession(), Keys that are not specified in the Config Def, can be
+definition cannot be overridden in SASsession(), Keys that are not specified in the Config Def, can be
 specified at run time on the SASsession(). If set to False, any config def key can be specified 
 on the SASsession(). 
 
@@ -170,7 +181,23 @@ SAS_config_names is the list of configuration definition names to make available
 end user at connection time. Any configuration definitions that are not listed in 
 SAS_config_names are simply inaccessible by an end user. You can add several configuration
 definitions in the file but not make them available by simply excluding the names from 
-the list.
+the list. Also note that these names can be anything you want. The names of the example
+configuration definitions we chosen to be self-documenting. There nothing special about 'winlocal',
+it could be named Bob. But then it wouldn't be obvious that it's for a WINdows install running a LOCAL copy of SAS.
+
+
+So, your sascfg_personal.py file only need a few things in it; not everything in the example sascfg.py file.
+For example, if you had SAS installed on your Linux system, your sascfg_personal.py file may simply be the following:
+
+.. code-block:: ipython3
+
+    SAS_config_names   = ['mycfg']
+    SAS_config_options = {'lock_down': False,
+                          'verbose'  : True
+                         }
+    mycfg              = {'saspath'  : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
+                         }
+
 
 
 STDIO
@@ -180,13 +207,15 @@ because SAS on Windows platforms does not support line-mode style connections
 (through stdin, stdout, stderr). This connection method is for a local 
 connection to SAS that is installed on the same host as Python.
 
-There are only three keys for this configuration definition dictionary:
+There are only four keys for this configuration definition dictionary:
 
 saspath - 
     (Required) Path to SAS startup script
+
 options -
     SAS options to include in the start up command line. These **must** be a
     Python list.
+
 encoding -
     This is the Python encoding value that matches the SAS session encoding
     of the SAS session to which you are connecting. The Python encoding 
@@ -196,6 +225,10 @@ encoding -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and
     windows-1252, respectively. 
+
+autoexec -
+    This is a string of SAS code that will be submitted upon establishing a connection.
+    You can use this to preassign libraries you always want available, or whatever you want.
 
 
 .. code-block:: ipython3
@@ -216,7 +249,7 @@ with Unix only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
 SSH configured between the two systems. Google it, it's not that difficult.
 
-In addition to the three keys for STDIO, there are two more keys to configure:
+In addition to the four keys for STDIO, there are two more keys to configure:
 
 ssh - 
     (Required) The ssh command to run (Linux execv requires a fully qualified
@@ -273,6 +306,7 @@ Windows.
 
 The IOM connection method requires the following:
 
+* Java 7 or higher installed on your Client machine (where you're running SASPy)
 * The SAS Java IOM Client (just the jars listed below; these can be copied to your client system from wherever your SAS install is)
 * Setting the CLASSPATH to access the SAS Java IOM Client JAR files.
 * Setting the CLASSPATH to include the the saspyiom.jar file.
@@ -283,7 +317,7 @@ explanation before we get to further details. There are four (4) JAR files that 
 required for the Java IOM Client. The JAR files are available from your existing SAS
 installation.  There is one JAR file that is provided with this package: 
 saspyiom.jar. These five JAR files must be provided (fully qualified paths) in a 
-CLASSPATH environment variable. This is done in a very simple way in the sascfg.py 
+CLASSPATH environment variable. This is done in a very simple way in the sascfg_personal.py 
 file, like so:
 
 ::
@@ -397,9 +431,14 @@ appserver -
     first one in the list of app servers it supports.
 sspi -
     New in 2.17, there is support for IWA (Integrated Windows Authentication) from a Windows client to remote IOM server.
+    This is only for when your Workspace server is configured to use IWA as the authentication method, which is not the default.
     This is simply a boolean, so to use it you specify 'sspi' : True. Also, to use this, you must have the path to the
     spiauth.dll file in your System Path variable, just like is required for Local IOM connections.
-    See the second paragraph under Local IOM for more on this.
+    See the second paragraph under Local IOM for more on the spiauth.dll file.
+autoexec -
+    This is a string of SAS code that will be submitted upon establishing a connection.
+    You can use this to preassign libraries you always want available, or whatever you want.
+
 javaparms -
     The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
     does allows for a way to specify them if something was needed.
@@ -498,6 +537,10 @@ encoding  -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and 
     windows-1252, respectively. 
+autoexec -
+    This is a string of SAS code that will be submitted upon establishing a connection.
+    You can use this to preassign libraries you always want available, or whatever you want.
+
 javaparms -
     The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
     does allows for a way to specify them if something was needed.
