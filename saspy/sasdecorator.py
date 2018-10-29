@@ -50,14 +50,40 @@ class procDecorator:
         return decorator
 
     def doc_convert(ls):
+        generic_terms = ['procopts', 'stmtpassthrough']
         ls_list = list(ls)
         doc_list = []
-        for i in ls_list:
+        doc_markup = []
+        for i in [j for j in ls_list if j not in generic_terms]:
+            doc_mstr = ''.join([':parm ', i, ': The {} variable can only be a string type.'.format(i)])
             doc_str = ': str = None,'
+
             if i.lower() in ['target', 'input']:
+                doc_mstr = ''.join([':parm ', i,
+                                    ': The {} variable can be a string, list or dict type. It refers to the dependent, y, or label variable.'.format(
+                                        i)])
                 doc_str = ': [str, list, dict] = None,'
             if i.lower() == 'score':
                 doc_str = ": [str, bool, 'SASdata' ] = True,"
+            if i.lower() in ['cls']:
+                doc_mstr = ''.join([':parm ', i,
+                                    ': The {} variable can be a string or list type. It refers to the categorical, or nominal variables.'.format(
+                                        i)])
+                doc_str = ': [str, list] = None,'
+
             doc_list.append(''.join([i, doc_str, '\n']))
+            doc_markup.append(''.join([doc_mstr, '\n']))
         doc_list.sort()
-        return ''.join(doc_list)
+        doc_markup.sort()
+        # add procopts and stmtpassthrough last for each proc
+        for j in generic_terms:
+            doc_list.append(''.join([j, doc_str, '\n']))
+            doc_mstr = ''.join([':parm ', j,
+                                ': The {} variable is a generic option available for advanced use. It can only be a string type.'.format(
+                                    j)])
+            doc_markup.append(''.join([doc_mstr, '\n']))
+
+        doc_list.insert(0, ''.join(["data: 'SASData' = None,", '\n']))
+        doc_markup.insert(0, ''.join([':param data: SASData object This parameter is required', '\n']))
+        doc_markup.append(''.join([':return: SAS Result Object', '\n']))
+        return (''.join(doc_list), ''.join(doc_markup))
