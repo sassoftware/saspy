@@ -15,12 +15,10 @@
 #
 
 import logging
-import sys
-import warnings
 from saspy.sasproccommons import SASProcCommons
 from saspy.sasresults import SASresults
 from saspy.sasdecorator import procDecorator
-from pdb import set_trace as bp
+# from pdb import set_trace as bp
 
 
 class SASstat:
@@ -58,40 +56,61 @@ class SASstat:
 
     @procDecorator.proc_decorator({})
     def hpsplit(self, data: 'SASData' = None,
-                target: [str, list, dict] = None,
+                cls: [str, list] = None,
+                code: str = None,
+                grow: str = None,
+                id: str = None,
                 input: [str, list, dict] = None,
-                partition: [str, dict] = 'Rolevar',
-                score: [str, bool, 'SASdata' ] = True,
+                model: str = None,
+                out: str = None,
+                partition: str = None,
+                performance: str = None,
+                prune: str = None,
+                rules: str = None,
+                target: [str, list, dict] = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPSPLIT procedure
-        For more information on the statements see the Documentation link.
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
 
-        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}``
-
-
         :param data: SASData object This parameter is required
-        :param target: The target can be a string, list or dict type. It refers to the dependent, y, or label variable.
-        :param input:   The input can be a string, list or dict type. It refers to the independent or X variables.
-        :param partition:
-        :param score:
-        :return: SAS result object
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm code: The code variable can only be a string type.
+        :parm grow: The grow variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm model: The model variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm partition: The partition variable can only be a string type.
+        :parm performance: The performance variable can only be a string type.
+        :parm prune: The prune variable can only be a string type.
+        :parm rules: The rules variable can only be a string type.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
+
     @procDecorator.proc_decorator({'model'})
     def reg(self, data: 'SASData' = None,
-            model: str = None,
+            add: str = None,
             by: str = None,
+            code: str = None,
             id: str = None,
-            var: [str, list] = None,
             lsmeans: str = None,
+            model: str = None,
+            out: str = None,
             random: str = None,
             repeated: str = None,
             slice: str = None,
             test: str = None,
+            var: str = None,
             weight: str = None,
-            score: [bool, 'SASdata'] = True,
+            procopts: str = None,
+            stmtpassthrough: str = None,
             **kwargs: dict) -> 'SASresults':
         """
         Python method to call the REG procedure
@@ -100,36 +119,42 @@ class SASstat:
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm
 
-        :param data:
-        :param model:
-        :param by:
-        :param id:
-        :param var:
-        :param lsmeans:
-        :param random:
-        :param repeated:
-        :param slice:
-        :param test:
-        :param weight: takes a single variable
-        :param score:
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm add: The add variable can only be a string type.
+        :parm by: The by variable can only be a string type.
+        :parm code: The code variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm lsmeans: The lsmeans variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm random: The random variable can only be a string type.
+        :parm repeated: The repeated variable can only be a string type.
+        :parm slice: The slice variable can only be a string type.
+        :parm test: The test variable can only be a string type.
+        :parm var: The var variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
 
     @procDecorator.proc_decorator({'model'})
     def mixed(self, data: 'SASData' = None,
-              model: str = None,
               by: str = None,
-              cls: str = None,
-              id: str = None,
+              cls: [str, list] = None,
+              code: str = None,
               contrast: str = None,
               estimate: str = None,
+              id: str = None,
               lsmeans: str = None,
+              model: str = None,
+              out: str = None,
               random: str = None,
               repeated: str = None,
               slice: str = None,
               weight: str = None,
-              score: [bool, 'SASdata'] = True,
+              procopts: str = None,
+              stmtpassthrough: str = None,
               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the MIXED procedure
@@ -140,39 +165,45 @@ class SASstat:
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm
 
-        :param data:
-        :param model:
-        :param by:
-        :param cls:
-        :param id:
-        :param contrast:
-        :param estimate:
-        :param lsmeans:
-        :param random:
-        :param repeated:
-        :param slice:
-        :param weight:
-        :param score:
-        :param kwargs:
-        :return:
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm code: The code variable can only be a string type.
+        :parm contrast: The contrast variable can only be a string type.
+        :parm estimate: The estimate variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm lsmeans: The lsmeans variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm random: The random variable can only be a string type.
+        :parm repeated: The repeated variable can only be a string type.
+        :parm slice: The slice variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+
         """
     @procDecorator.proc_decorator({'model'})
     def glm(self, data: 'SASData' = None,
-            model: str = None,
             absorb: str = None,
             by: str = None,
-            cls: str = None,
-            id: str = None,
-            freq: str = None,
+            cls: [str, list] = None,
             contrast: str = None,
             estimate: str = None,
+            freq: str = None,
+            id: str = None,
             lsmeans: str = None,
+            manova: str = None,
+            means: str = None,
+            model: str = None,
+            out: str = None,
             random: str = None,
             repeated: str = None,
-            manova: str = None,
             test: str = None,
             weight: str = None,
-            score: [bool, 'SASdata'] = True,
+            procopts: str = None,
+            stmtpassthrough: str = None,
             **kwargs: dict) -> 'SASresults':
         """
         Python method to call the GLM procedure
@@ -184,215 +215,303 @@ class SASstat:
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_toc.htm
 
-        :param data:
-        :param model:
-        :param absorb:
-        :param by:
-        :param cls:
-        :param id:
-        :param freq:
-        :param contrast:
-        :param estimate:
-        :param lsmeans:
-        :param random:
-        :param repeated:
-        :param manova:
-        :param test:
-        :param weight:
-        :param score:
-        :param kwargs:
-        :return:
+        :param data: SASData object This parameter is required
+        :parm absorb: The absorb variable can only be a string type.
+        :parm by: The by variable can only be a string type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm contrast: The contrast variable can only be a string type.
+        :parm estimate: The estimate variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm lsmeans: The lsmeans variable can only be a string type.
+        :parm manova: The manova variable can only be a string type.
+        :parm means: The means variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm random: The random variable can only be a string type.
+        :parm repeated: The repeated variable can only be a string type.
+        :parm test: The test variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-    def logistic(self, **kwargs: dict) -> 'SASresults':
+
+    @procDecorator.proc_decorator({'model'})
+    def logistic(self, data: 'SASData' = None,
+                by: str = None,
+                cls: [str, list] = None,
+                contrast: str = None,
+                effect: str = None,
+                effectplot: str = None,
+                estimate: str = None,
+                exact: str = None,
+                freq: str = None,
+                lsmeans: str = None,
+                oddsratio: str = None,
+                out: str = None,
+                roc: str = None,
+                score: [str, bool, 'SASdata' ] = True,
+                slice: str = None,
+                store: str = None,
+                strata: str = None,
+                units: str = None,
+                weight: str = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the LOGISTIC procedure
 
         For more information on the statements see the Documentation link.
-
-        ``required_set={'model'}``
-
-        ``legal_set= {'by', 'cls', 'contrast', 'effect', 'effectplot', 'estimate', 'exact', 'freq',
-        'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice', 'store', 'strata', 'units', 'weight'}``
-
-        cls is an alias for the class statement
-
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_logistic_toc.htm
 
         The PROC LOGISTIC and MODEL statements are required.
-        The CLASS and EFFECT statements (if specified) must
-        precede the MODEL statement, and the CONTRAST, EXACT,
-        and ROC statements (if specified) must follow the MODEL
-        statement.
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm absorb: The absorb variable can only be a string type.
+        :parm by: The by variable can only be a string type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm contrast: The contrast variable can only be a string type.
+        :parm estimate: The estimate variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm lsmeans: The lsmeans variable can only be a string type.
+        :parm manova: The manova variable can only be a string type.
+        :parm means: The means variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm random: The random variable can only be a string type.
+        :parm repeated: The repeated variable can only be a string type.
+        :parm test: The test variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+
         """
-        required_set = {'model'}
-        legal_set = {'by', 'cls', 'contrast', 'effect', 'effectplot', 'estimate',
-                     'exact', 'freq', 'lsmeans', 'oddsratio', 'out', 'roc', 'score', 'slice',
-                     'store', 'strata', 'units', 'weight', 'procopts'}
 
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "LOGISTIC", required_set, legal_set, **kwargs)
-
-    def tpspline(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'model'})
+    def tpspline(self, data: 'SASData' = None,
+                by: str = None,
+                freq: str = None,
+                id: str = None,
+                model: str = None,
+                output: str = None,
+                score: [str, bool, 'SASdata' ] = True,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TPSPLINE procedure
-
-        For more information on the statements see the Documentation link.
-
-        ``required_set = {'model'}``
-
-        ``legal_set = {'by', 'freq', 'id', 'model', 'output', 'score', 'procopts'}``
-
-        cls is an alias for the class statement
-
         Documentation link:
         http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_tpspline_toc.htm
 
-        :param kwargs: dict
-        :return: SAS result object
-        """
-        required_set = {'model'}
-        legal_set = {'by', 'freq', 'id', 'model', 'output', 'score', 'procopts'}
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm output: The output variable can only be a string type.
+        :parm score: The score variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
 
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "TPSPLINE", required_set, legal_set, **kwargs)
+        """
 
     @procDecorator.proc_decorator({'model'})
-    def hplogistic(self, data,
-                   model: str = None,
-                   by: str = None,
-                   cls : str = None,
-                   code : str = None,
-                   freq : str = None,
-                   id : str = None,
-                   out : str = None,
-                   partition: [str, bool, dict] = True,
-                   score: str = None,
-                   selection: str = 'stepwise',
-                   weight: str = None,
-                   **kwargs: dict) -> 'SASresults':
+    def hplogistic(self, data: 'SASData' = None,
+                by: str = None,
+                cls: [str, list] = None,
+                code: str = None,
+                freq: str = None,
+                id: str = None,
+                model: str = None,
+                out: str = None,
+                partition: str = None,
+                score: [str, bool, 'SASdata' ] = True,
+                selection: str = None,
+                weight: str = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPLOGISTIC procedure
 
         For more information on the statements see the Documentation link.
         https://support.sas.com/documentation/onlinedoc/stat/141/hplogistic.pdf
 
-        :param data: SAS data object
-        :param model: model statment target and input can also be submitted and they will be converted
-        :param by:
-        :param cls:
-        :param code:
-        :param freq:
-        :param id:
-        :param out:
-        :param partition: supports both types of partition statements ['fraction', 'rolevar']
-        :param score:
-        :param selection:
-        :param weight:
-        :param kwargs:
-        :return:
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm code: The code variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm partition: The partition variable can only be a string type.
+        :parm score: The score variable can only be a string type.
+        :parm selection: The selection variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
 
-    def hpreg(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'model'})
+    def hpreg(self, data: 'SASData' = None,
+            by: str = None,
+            cls: [str, list] = None,
+            code: str = None,
+            freq: str = None,
+            id: str = None,
+            model: str = None,
+            out: str = None,
+            partition: str = None,
+            performance: str = None,
+            score: [str, bool, 'SASdata' ] = True,
+            selection: str = None,
+            weight: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPREG procedure
-        For more information on the statements see the Documentation link.
-
-        ``required_set={'model'}``
-
-        ``legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
-        'partition', 'performance', 'score', 'selection', 'weight'}``
-
-        cls is an alias for the class statement
 
         Documentation link:
         https://support.sas.com/documentation/onlinedoc/stat/141/hpreg.pdf
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm code: The code variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm partition: The partition variable can only be a string type.
+        :parm performance: The performance variable can only be a string type.
+        :parm score: The score variable can only be a string type.
+        :parm selection: The selection variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {'model'}
-        legal_set = {'by', 'cls', 'code', 'freq', 'id', 'model', 'out',
-                     'partition', 'performance', 'score', 'selection', 'weight'}
 
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        kwargs['ODSGraphics']=False
-        return SASProcCommons._run_proc(self, "HPREG", required_set, legal_set, **kwargs)
-
-    def phreg(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'model'})
+    def phreg(self, data: 'SASData' = None,
+            assess: str = None,
+            bayes: str = None,
+            by: str = None,
+            cls: [str, list] = None,
+            contrast: str = None,
+            effect: str = None,
+            estimate: str = None,
+            freq: str = None,
+            hazardratio: str = None,
+            id: str = None,
+            lsmeans: str = None,
+            lsmestimate: str = None,
+            model: str = None,
+            out: str = None,
+            random: str = None,
+            roc: str = None,
+            slice: str = None,
+            store: str = None,
+            strata: str = None,
+            test: str = None,
+            weight: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
         """
         Python method to call the PHREG procedure
-        For more information on the statements see the Documentation link.
-
-        ``required_set = {'model'}``
-
-        ``legal_set = {'assess', 'bayes', 'by', 'cls', 'contrast', 'freq', 'effect', 'estimate', 
-        'hazardratio', 'id', 'lsmeans', 'lsmestimate', 'model', 'out', 'roc', 
-        'random', 'slice', 'store', 'strata', 'test', 'weight', 'procopts'}``
-
-        cls is an alias for the class statement
-
         Documentation link:
         http://go.documentation.sas.com/?docsetId=statug&docsetTarget=statug_phreg_toc.htm&docsetVersion=14.2&locale=en
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm assess: The assess variable can only be a string type.
+        :parm bayes: The bayes variable can only be a string type.
+        :parm by: The by variable can only be a string type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm contrast: The contrast variable can only be a string type.
+        :parm effect: The effect variable can only be a string type.
+        :parm estimate: The estimate variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm hazardratio: The hazardratio variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm lsmeans: The lsmeans variable can only be a string type.
+        :parm lsmestimate: The lsmestimate variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm random: The random variable can only be a string type.
+        :parm roc: The roc variable can only be a string type.
+        :parm slice: The slice variable can only be a string type.
+        :parm store: The store variable can only be a string type.
+        :parm strata: The strata variable can only be a string type.
+        :parm test: The test variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {'model'}
-        legal_set = {'assess', 'bayes', 'by', 'cls', 'contrast', 'freq', 'effect', 'estimate',
-                     'hazardratio', 'id', 'lsmeans', 'lsmestimate', 'model', 'out', 'roc',
-                     'random', 'slice', 'store', 'strata', 'test', 'weight', 'procopts'}
 
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        kwargs['ODSGraphics']=True
-        return SASProcCommons._run_proc(self, "PHREG", required_set, legal_set, **kwargs)
-
-    def ttest(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({})
+    def ttest(self, data: 'SASData' = None,
+            by: str = None,
+            cls: [str, list] = None,
+            freq: str = None,
+            paired: str = None,
+            var: str = None,
+            weight: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
         """
-        Python method to call the PHREG procedure
-        For more information on the statements see the Documentation link.
-
-        ``required_set = {}``
-
-        ``legal_set = {'by', 'cls', 'freq', 'paired', 'var', 'weight', 'procopts'}``
-
-        cls is an alias for the class statement
-
+        Python method to call the TTEST procedure
         Documentation link:
         http://go.documentation.sas.com/?docsetId=statug&docsetVersion=14.2&docsetTarget=statug_ttest_overview.htm&locale=en
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm freq: The freq variable can only be a string type.
+        :parm paired: The paired variable can only be a string type.
+        :parm var: The var variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = {'by', 'cls', 'freq', 'paired', 'var', 'weight', 'procopts'}
 
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        kwargs['ODSGraphics']=True
-        return SASProcCommons._run_proc(self, "TTEST", required_set, legal_set, **kwargs)
-
-    def factor(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({})
+    def factor(self, data: 'SASData' = None,
+            by: str = None,
+            cls: [str, list] = None,
+            freq: str = None,
+            paired: str = None,
+            var: str = None,
+            weight: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
         """
-        Python method to call the PHREG procedure
-        For more information on the statements see the Documentation link.
-
-        ``required_set = {}``
-
-        ``legal_set = {'by', 'cls', 'freq', 'paired', 'var', 'weight', 'procopts'}``
-
+        Python method to call the FACTOR procedure
         Documentation link:
         http://go.documentation.sas.com/?docsetId=statug&docsetVersion=14.2&docsetTarget=statug_factor_overview.htm&locale=en
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm freq: The freq variable can only be a string type.
+        :parm paired: The paired variable can only be a string type.
+        :parm var: The var variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = {'by', 'freq', 'priors', 'pathdiagram', 'partial', 'var', 'weight', 'procopts'}
-
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        kwargs['ODSGraphics']=True
-        return SASProcCommons._run_proc(self, "FACTOR", required_set, legal_set, **kwargs)
 
