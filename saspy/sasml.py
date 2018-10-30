@@ -14,7 +14,8 @@
 #  limitations under the License.
 #
 import logging
-from saspy.sasproccommons import SASProcCommons
+
+from saspy.sasdecorator import procDecorator
 from saspy.sasresults import SASresults
 
 
@@ -40,6 +41,7 @@ class SASml:
     #. Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py
     #. Write at least one test to exercise the procedures and include it in the appropriate testing file
     """
+
     def __init__(self, session, *args, **kwargs):
         """
         Submit an initial set of macros to prepare the SAS system
@@ -51,122 +53,180 @@ class SASml:
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def forest(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'input', 'target'})
+    def hpforest(self, data: 'SASData' = None,
+                 freq: str = None,
+                 id: str = None,
+                 input: [str, list, dict] = None,
+                 save: str = None,
+                 score: [str, bool, 'SASdata'] = True,
+                 target: [str, list, dict] = None,
+                 procopts: str = None,
+                 stmtpassthrough: str = None,
+                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPFOREST procedure
-
-        ``required_set = {'input', 'target'}``
-
-        ``legal_set = {'freq', 'input', 'id',
-        'target', 'save', 'score'}``
-
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm save: The save variable can only be a string type.
+        :parm score: The score variable can only be a string type.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {'input', 'target'}
-        legal_set = {'freq', 'input', 'id', 'target', 'save', 'score', 'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPFOREST", required_set, legal_set, **kwargs)
 
-    def hp4score(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({})
+    def hp4score(self, data: 'SASData' = None,
+                 id: str = None,
+                 importance: str = None,
+                 performance: str = None,
+                 score: [str, bool, 'SASdata'] = True,
+                 procopts: str = None,
+                 stmtpassthrough: str = None,
+                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HP4SCORE procedure
-
-        ``required_set = {}``
-
-        ``legal_set = {'id', 'importance', 'performance', 'score', 'procopts'}``
-
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm id: The id variable can only be a string type.
+        :parm importance: The importance variable can only be a string type.
+        :parm performance: The performance variable can only be a string type.
+        :parm score: The score variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = {'id', 'importance', 'performance', 'score', 'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HP4SCORE", required_set, legal_set, **kwargs)
 
-    def cluster(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'input'})
+    def hpcluster(self, data: 'SASData' = None,
+                  freq: str = None,
+                  id: str = None,
+                  input: [str, list, dict] = None,
+                  score: [str, bool, 'SASdata'] = True,
+                  procopts: str = None,
+                  stmtpassthrough: str = None,
+                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPCLUS procedure
-
-        ``required_set = {'input'}``
-
-        ``legal_set= {'freq', 'input', 'id', 'score'}``
-
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm score: The score variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {'input'}
-        legal_set = {'freq', 'input', 'id', 'score', 'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPCLUS", required_set, legal_set, **kwargs)
 
-    def neural(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'input', 'target', 'train'})
+    def hpneural(self, data: 'SASData' = None,
+                 architecture: str = None,
+                 code: str = None,
+                 hidden: str = None,
+                 id: str = None,
+                 input: [str, list, dict] = None,
+                 partition: str = None,
+                 score: [str, bool, 'SASdata'] = True,
+                 target: [str, list, dict] = None,
+                 train: str = None,
+                 procopts: str = None,
+                 stmtpassthrough: str = None,
+                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPNEURAL procedure
-
-        ``required_set = {'input', 'target', 'train'}``
-
-        ``legal_set = {'architecture', 'code', 'hidden', 'id', 'input',
-        'partition', 'score', 'target', 'train', 'procopts'}``
-
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm architecture: The architecture variable can only be a string type.
+        :parm code: The code variable can only be a string type.
+        :parm hidden: The hidden variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm partition: The partition variable can only be a string type.
+        :parm score: The score variable can only be a string type.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm train: The train variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {'input', 'target', 'train'}
-        legal_set = {'architecture', 'code', 'hidden', 'id', 'input',
-                     'partition', 'score', 'target', 'train',
-                     'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPNEURAL", required_set, legal_set, **kwargs)
 
-    def treeboost(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'input', 'target'})
+    def treeboost(self, data: 'SASData' = None,
+                  assess: str = None,
+                  code: str = None,
+                  freq: str = None,
+                  importance: str = None,
+                  input: [str, list, dict] = None,
+                  performance: str = None,
+                  save: str = None,
+                  score: [str, bool, 'SASdata'] = True,
+                  subseries: str = None,
+                  target: [str, list, dict] = None,
+                  procopts: str = None,
+                  stmtpassthrough: str = None,
+                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TREEBOOST procedure
-
-        ``required_set = {'input', 'target'}``
-
-        ``legal_set = {'assess', 'code', 'freq', 'importance', 'input', 'performance',
-        'target', 'save', 'score', 'subseries', 'procopts'}``
-
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm assess: The assess variable can only be a string type.
+        :parm code: The code variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm importance: The importance variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm performance: The performance variable can only be a string type.
+        :parm save: The save variable can only be a string type.
+        :parm score: The score variable can only be a string type.
+        :parm subseries: The subseries variable can only be a string type.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {'input', 'target'}
-        legal_set = {'assess', 'code', 'freq', 'importance', 'input', 'performance', 'target', 'save', 'score',
-                     'subseries', 'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "TREEBOOST", required_set, legal_set, **kwargs)
 
-    def hpbnet(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'input', 'target'})
+    def hpbnet(self, data: 'SASData' = None,
+               code: str = None,
+               freq: str = None,
+               id: str = None,
+               input: [str, list, dict] = None,
+               output: str = None,
+               partition: str = None,
+               performance: str = None,
+               target: [str, list, dict] = None,
+               procopts: str = None,
+               stmtpassthrough: str = None,
+               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPBNET procedure
-
-        ``required_set = {'input', 'target'}``
-
-        ``legal_set = {'id', 'code', 'freq', 'partition', 'input', 'performance', 'target', 'output', 'procopts'}``
-
         Documentation link:
         http://go.documentation.sas.com/?docsetId=emhpprcref&docsetVersion=14.2&docsetTarget=emhpprcref_hpbnet_toc.htm&locale=en
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm code: The code variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm output: The output variable can only be a string type.
+        :parm partition: The partition variable can only be a string type.
+        :parm performance: The performance variable can only be a string type.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {'input', 'target'}
-        legal_set = {'id', 'code', 'freq', 'partition', 'input', 'performance', 'target', 'output', 'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPBNET", required_set, legal_set, **kwargs)
