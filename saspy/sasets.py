@@ -14,7 +14,6 @@
 #  limitations under the License.
 #
 import logging
-from saspy.sasproccommons import SASProcCommons
 from saspy.sasresults import SASresults
 from saspy.sasdecorator import procDecorator
 
@@ -51,109 +50,200 @@ class SASets:
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def timeseries(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'id'})
+    def timeseries(self, data: 'SASData' = None,
+                by: str = None,
+                corr: str = None,
+                crosscorr: str = None,
+                crossvar: str = None,
+                decomp: str = None,
+                id: str = None,
+                out: str = None,
+                season: str = None,
+                trend: str = None,
+                var: str = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMESERIES procedure
-
-        ``required_set={'id'}``
-
-        ``legal_set={ 'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out'}``
-
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm
+
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm corr: The corr variable can only be a string type.
+        :parm crosscorr: The crosscorr variable can only be a string type.
+        :parm crossvar: The crossvar variable can only be a string type.
+        :parm decomp: The decomp variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm season: The season variable can only be a string type.
+        :parm trend: The trend variable can only be a string type.
+        :parm var: The var variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {'id'}
-        legal_set = {'by', 'corr', 'crosscorr', 'decomp', 'id', 'season', 'trend', 'var', 'crossvar', 'out', 'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "TIMESERIES", required_set, legal_set, **kwargs)
 
     @procDecorator.proc_decorator({'identify'})
     def arima(self, data: 'SASData' = None,
-              by: str = None,
-              identify: str = None,
-              estimate: str = None,
-              outlier: str = None,
-              forecast : str = None,
-              out: str = None,
-              **kwargs: dict) -> 'SASresults':
+            by: str = None,
+            estimate: str = None,
+            forecast: str = None,
+            identify: str = None,
+            out: str = None,
+            outlier: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
         """
         Python method to call the ARIMA procedure
-
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
 
-
-        :param data:
-        :param by:
-        :param identify:
-        :param estimate:
-        :param outlier:
-        :param forecast:
-        :param out:
-        :param kwargs:
-        :return:
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm estimate: The estimate variable can only be a string type.
+        :parm forecast: The forecast variable can only be a string type.
+        :parm identify: The identify variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm outlier: The outlier variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
 
-    def ucm(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({'model'})
+    def ucm(self,  data: 'SASData' = None,
+            autoreg: str = None,
+            blockseason: str = None,
+            by: str = None,
+            cycle: str = None,
+            deplag: str = None,
+            estimate: str = None,
+            forecast: str = None,
+            id: str = None,
+            irregular: str = None,
+            level: str = None,
+            model: str = None,
+            nloptions: str = None,
+            out: str = None,
+            outlier: str = None,
+            performance: str = None,
+            randomreg: str = None,
+            season: str = None,
+            slope: str = None,
+            splinereg: str = None,
+            splineseason: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
         """
         Python method to call the UCM procedure
-
-        ``required_set={'model'}``
-
-        ``legal_set= {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular',
-        'level', 'model', 'nloptions', 'performance', 'out', 'outlier', 'randomreg', 'season', 'slope',
-        'splinereg', 'splineseason'}``
-
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm
-        """
-        required_set = {'model'}
-        legal_set = {'autoreg', 'blockseason', 'by', 'cycle', 'deplag', 'estimate', 'forecast', 'id', 'irregular'
-                                                                                                      'level', 'model',
-                     'nloptions', 'performance', 'out', 'outlier', 'randomreg', 'season', 'slope'
-                                                                                          'splinereg', 'splineseason',
-                     'procopts'}
-        return SASProcCommons._run_proc(self, "UCM", required_set, legal_set, **kwargs)
 
-    def esm(self, **kwargs: dict) -> 'SASresults':
+        :param data: SASData object This parameter is required
+        :parm autoreg: The autoreg variable can only be a string type.
+        :parm blockseason: The blockseason variable can only be a string type.
+        :parm by: The by variable can only be a string type.
+        :parm cycle: The cycle variable can only be a string type.
+        :parm deplag: The deplag variable can only be a string type.
+        :parm estimate: The estimate variable can only be a string type.
+        :parm forecast: The forecast variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm irregular: The irregular variable can only be a string type.
+        :parm level: The level variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm nloptions: The nloptions variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm outlier: The outlier variable can only be a string type.
+        :parm performance: The performance variable can only be a string type.
+        :parm randomreg: The randomreg variable can only be a string type.
+        :parm season: The season variable can only be a string type.
+        :parm slope: The slope variable can only be a string type.
+        :parm splinereg: The splinereg variable can only be a string type.
+        :parm splineseason: The splineseason variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        """
+
+    @procDecorator.proc_decorator({})
+    def esm(self,  data: 'SASData' = None,
+            by: str = None,
+            forecast: str = None,
+            id: str = None,
+            out: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
         """
         Python method to call the ESM procedure
+        Documentation link:
+        http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm
 
-        ``required_set = {}``
-
-        ``legal_set = { 'by', 'id', 'forecast', 'out'}``
-
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm forecast: The forecast variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = {'by', 'id', 'forecast', 'out', 'procopts'}
-        return SASProcCommons._run_proc(self, "ESM", required_set, legal_set, **kwargs)
 
-    def timeid(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({})
+    def timeid(self, data: 'SASData' = None,
+            by: str = None,
+            id: str = None,
+            out: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMEID procedure
+        Documentation link:
+        http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm
 
-        ``required_set = {}``
-
-        ``legal_set = { 'by', 'id', 'out'}``
-
-        Documentation link: http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = {'by', 'id', 'out', 'procopts'}
-        return SASProcCommons._run_proc(self, "TIMEID", required_set, legal_set, **kwargs)
 
-    def timedata(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({})
+    def timedata(self, data: 'SASData' = None,
+                by: str = None,
+                fcmport: str = None,
+                id: str = None,
+                out: str = None,
+                outarrays: str = None,
+                outscalars: str = None,
+                prog_stmts: str = None,
+                var: str = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMEDATA procedure
-
-        ``required_set = {}``
-
-        ``legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts'}``
-
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm
+
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm fcmport: The fcmport variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm outarrays: The outarrays variable can only be a string type.
+        :parm outscalars: The outscalars variable can only be a string type.
+        :parm prog_stmts: The prog_stmts variable can only be a string type.
+        :parm var: The var variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = {'by', 'id', 'fcmport', 'out', 'outarrays', 'outscalars', 'var', 'prog_stmts', 'procopts'}
-        return SASProcCommons._run_proc(self, "TIMEDATA", required_set, legal_set, **kwargs)
