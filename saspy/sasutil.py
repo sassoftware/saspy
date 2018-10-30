@@ -14,7 +14,6 @@
 #  limitations under the License.
 #
 import logging
-from saspy.sasproccommons import SASProcCommons
 from saspy.sasresults import SASresults
 
 
@@ -57,67 +56,100 @@ class SASutil:
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    def hpimpute(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({})
+    def hpimpute(self, data: 'SASData' = None,
+                code: str = None,
+                freq: str = None,
+                id: str = None,
+                impute: str = None,
+                input: [str, list, dict] = None,
+                performance: str = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPIMPUTE procedure
-
-        ``required_set = {'impute'}``
-
-        ``legal_set = {'input', 'impute', 'performance', 'id', 'freq', 'code', 'procopts'}``
-
-        For more information on the statements see the Documentation link.
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm code: The code variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm impute: The impute variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm performance: The performance variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {'impute'}
-        legal_set = {'input', 'impute', 'performance', 'id', 'freq', 'code',
-                     'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPIMPUTE", required_set, legal_set, **kwargs)
 
-    def hpbin(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({})
+    def hpbin(self, data: 'SASData' = None,
+            cls: [str, list] = None,
+            code: str = None,
+            grow: str = None,
+            id: str = None,
+            model: str = None,
+            out: str = None,
+            partition: str = None,
+            performance: str = None,
+            prune: str = None,
+            rules: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPBIN procedure
-
-        ``required_set = {}``
-
-        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out', 'partition', 'performance', 'prune', 'rules'}``
-
-        cls is an alias for the class statement
-        For more information on the statements see the Documentation link.
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm code: The code variable can only be a string type.
+        :parm grow: The grow variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm out: The out variable can only be a string type.
+        :parm partition: The partition variable can only be a string type.
+        :parm performance: The performance variable can only be a string type.
+        :parm prune: The prune variable can only be a string type.
+        :parm rules: The rules variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = {'code', 'id', 'performance', 'target', 'input', 'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPBIN", required_set, legal_set, **kwargs)
 
-
-    def hpsample(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({})
+    def hpsample(self, data: 'SASData' = None,
+                cls: [str, list] = None,
+                code: str = None,
+                grow: str = None,
+                id: str = None,
+                model: str = None,
+                outpartition: str = None,
+                performance: str = None,
+                prune: str = None,
+                rules: str = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPSAMPLE procedure
-
-        ``required_set = {}``
-
-        ``legal_set= {'cls', 'code', 'grow', 'id', 'model', 'out'
-        'partition', 'performance', 'prune', 'rules'}``
-
-        cls is an alias for the class statement
-        For more information on the statements see the Documentation link.
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
 
-        :param kwargs: dict
-        :return: SAS result object
+        :param data: SASData object This parameter is required
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm code: The code variable can only be a string type.
+        :parm grow: The grow variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm outpartition: The outpartition variable can only be a string type.
+        :parm performance: The performance variable can only be a string type.
+        :parm prune: The prune variable can only be a string type.
+        :parm rules: The rules variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = { 'class', 'performance', 'target', 'var', 'procopts'}
-        logging.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "HPSAMPLE", required_set, legal_set, **kwargs)
