@@ -50,7 +50,7 @@ class SASstat:
         self.sasproduct = 'stat'
         # create logging
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.WARN)
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
@@ -74,7 +74,7 @@ class SASstat:
         """
         Python method to call the HPSPLIT procedure
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=stathpug&docsetTarget=stathpug_hpsplit_syntax.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
@@ -114,10 +114,8 @@ class SASstat:
             **kwargs: dict) -> 'SASresults':
         """
         Python method to call the REG procedure
-
-        For more information on the statements see the Documentation link.
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_reg_syntax.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_reg_syntax.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm add: The add variable can only be a string type.
@@ -158,12 +156,8 @@ class SASstat:
               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the MIXED procedure
-
-        cls is an alias for the class statement
-        For more information on the statements see the Documentation link.
-
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_mixed_toc.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_mixed_syntax.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm by: The by variable can only be a string type.
@@ -207,13 +201,8 @@ class SASstat:
             **kwargs: dict) -> 'SASresults':
         """
         Python method to call the GLM procedure
-
-        For more information on the statements see the Documentation link.
-
-        cls is an alias for the class statement
-
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_toc.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_glm_syntax.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm absorb: The absorb variable can only be a string type.
@@ -262,12 +251,8 @@ class SASstat:
                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the LOGISTIC procedure
-
-        For more information on the statements see the Documentation link.
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_logistic_toc.htm
-
-        The PROC LOGISTIC and MODEL statements are required.
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_logistic_syntax.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm absorb: The absorb variable can only be a string type.
@@ -306,7 +291,7 @@ class SASstat:
         """
         Python method to call the TPSPLINE procedure
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_tpspline_toc.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_tpspline_syntax.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm by: The by variable can only be a string type.
@@ -339,9 +324,8 @@ class SASstat:
                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPLOGISTIC procedure
-
         For more information on the statements see the Documentation link.
-        https://support.sas.com/documentation/onlinedoc/stat/141/hplogistic.pdf
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=stathpug&docsetTarget=stathpug_hplogistic_toc.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm by: The by variable can only be a string type.
@@ -381,7 +365,7 @@ class SASstat:
         Python method to call the HPREG procedure
 
         Documentation link:
-        https://support.sas.com/documentation/onlinedoc/stat/141/hpreg.pdf
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=stathpug&docsetTarget=stathpug_hpreg_toc.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm by: The by variable can only be a string type.
@@ -430,7 +414,7 @@ class SASstat:
         """
         Python method to call the PHREG procedure
         Documentation link:
-        http://go.documentation.sas.com/?docsetId=statug&docsetTarget=statug_phreg_toc.htm&docsetVersion=14.2&locale=en
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_phreg_syntax.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm assess: The assess variable can only be a string type.
@@ -473,7 +457,7 @@ class SASstat:
         """
         Python method to call the TTEST procedure
         Documentation link:
-        http://go.documentation.sas.com/?docsetId=statug&docsetVersion=14.2&docsetTarget=statug_ttest_overview.htm&locale=en
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_ttest_toc.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm by: The by variable can only be a string type.
@@ -501,7 +485,7 @@ class SASstat:
         """
         Python method to call the FACTOR procedure
         Documentation link:
-        http://go.documentation.sas.com/?docsetId=statug&docsetVersion=14.2&docsetTarget=statug_factor_overview.htm&locale=en
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_factor_syntax.htm&locale=en
 
         :param data: SASData object This parameter is required
         :parm by: The by variable can only be a string type.
