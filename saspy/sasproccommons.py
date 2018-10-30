@@ -215,6 +215,9 @@ class SASProcCommons:
             self.logger.debug("effect statement,length: %s,%s", args['effect'], len(args['effect']))
             code += "effect %s;\n" % (args['effect'])
         # estimate moved
+        if 'ewmachart' in args:
+            self.logger.debug("ewmachart statement,length: %s,%s", args['ewmachart'], len(args['ewmachart']))
+            code += "ewmachart %s;\n" % (args['ewmachart'])
         if 'fcmport' in args:
             self.logger.debug("fcmport statement,length: %s,%s", args['fcmport'], len(args['fcmport']))
             code += "fcmport %s;\n" % (args['fcmport'])
@@ -354,6 +357,9 @@ class SASProcCommons:
         if 'test' in args:
             self.logger.debug("test statement,length: %s,%s", args['test'], len(args['test']))
             code += "test %s;\n" % (args['test'])
+        if 'machart' in args:
+            self.logger.debug("machart statement,length: %s,%s", args['machart'], len(args['machart']))
+            code += "machart %s;\n" % (args['machart'])
         if 'manova' in args:
             self.logger.debug("manova statement,length: %s,%s", args['manova'], len(args['manova']))
             code += "manova %s;\n" % (args['manova'])
@@ -620,10 +626,56 @@ class SASProcCommons:
 
                 varlist = ' '.join('{}={}'.format(key, val) for key, val in args['out'].items())
                 code += "output out=%s %s;\n" % (outstr, varlist)
-
         if 'xchart' in args:
             self.logger.debug("xchart statement,length: %s,%s", args['xchart'], len(args['xchart']))
             code += "xchart %s;\n" % (args['xchart'])
+        if 'boxchart' in args:
+            self.logger.debug('boxchart statement,length: %s,%s', args['boxchart'], len(args['boxchart']))
+            code += 'boxchart %s;\n' % (args['boxchart'])
+
+        if 'cchart' in args:
+            self.logger.debug('cchart statement,length: %s,%s', args['cchart'], len(args['cchart']))
+            code += 'cchart %s;\n' % (args['cchart'])
+
+        if 'irchart' in args:
+            self.logger.debug('irchart statement,length: %s,%s', args['irchart'], len(args['irchart']))
+            code += 'irchart %s;\n' % (args['irchart'])
+
+        if 'mchart' in args:
+            self.logger.debug('mchart statement,length: %s,%s', args['mchart'], len(args['mchart']))
+            code += 'mchart %s;\n' % (args['mchart'])
+
+        if 'mrchart' in args:
+            self.logger.debug('mrchart statement,length: %s,%s', args['mrchart'], len(args['mrchart']))
+            code += 'mrchart %s;\n' % (args['mrchart'])
+
+        if 'npchart' in args:
+            self.logger.debug('npchart statement,length: %s,%s', args['npchart'], len(args['npchart']))
+            code += 'npchart %s;\n' % (args['npchart'])
+
+        if 'pchart' in args:
+            self.logger.debug('pchart statement,length: %s,%s', args['pchart'], len(args['pchart']))
+            code += 'pchart %s;\n' % (args['pchart'])
+
+        if 'rchart' in args:
+            self.logger.debug('rchart statement,length: %s,%s', args['rchart'], len(args['rchart']))
+            code += 'rchart %s;\n' % (args['rchart'])
+
+        if 'schart' in args:
+            self.logger.debug('schart statement,length: %s,%s', args['schart'], len(args['schart']))
+            code += 'schart %s;\n' % (args['schart'])
+
+        if 'uchart' in args:
+            self.logger.debug('uchart statement,length: %s,%s', args['uchart'], len(args['uchart']))
+            code += 'uchart %s;\n' % (args['uchart'])
+
+        if 'xrchart' in args:
+            self.logger.debug('xrchart statement,length: %s,%s', args['xrchart'], len(args['xrchart']))
+            code += 'xrchart %s;\n' % (args['xrchart'])
+
+        if 'xschart' in args:
+            self.logger.debug('xschart statement,length: %s,%s', args['xschart'], len(args['xschart']))
+            code += 'xschart %s;\n' % (args['xschart'])
         if 'score' in args:
             if isinstance(args['score'], str):
                 code += "score %s;\n" % args['score']
@@ -662,6 +714,8 @@ class SASProcCommons:
 
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
+        if self.logger.level == 10:
+            print("Proc code submission: " + str(code))
         self.logger.debug("Proc code submission: " + str(code))
         return code
 
@@ -947,12 +1001,11 @@ class SASProcCommons:
         objtype = procname.lower()
         if {'model'}.intersection(required_set) and 'target' in kwargs.keys() and 'model' not in kwargs.keys():
             kwargs = SASProcCommons._processNominals(self, kwargs, data)
-            tcls_str = ''
-            icls_str = ''
             t_str, tcls_str = SASProcCommons._target_stmt(self, kwargs['target'])
             i_str, icls_str = SASProcCommons._input_stmt(self, kwargs['input'])
             kwargs['model'] = str(t_str + ' = ' + i_str)
-            kwargs['cls'] = str(tcls_str + " " + icls_str)
+            if len(icls_str) > 0:
+                kwargs['cls'] = str(tcls_str + " " + icls_str)
             legal_set.add('cls')
             drop_target = kwargs.pop('target', None)
             drop_input  = kwargs.pop('input', None)

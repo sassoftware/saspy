@@ -15,8 +15,8 @@
 #
 
 import logging
-from saspy.sasproccommons import SASProcCommons
 from saspy.sasresults import SASresults
+from saspy.sasdecorator import procDecorator
 
 
 class SASqc:
@@ -50,63 +50,130 @@ class SASqc:
         self.logger.setLevel(logging.WARN)
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
-    
-    def cusum(self, **kwargs: dict) -> 'SASresults':
+
+    @procDecorator.proc_decorator({})
+    def cusum(self, data: 'SASData' = None,
+            by: str = None,
+            inset: str = None,
+            xchart: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
         """
         Python method to call the CUSUM procedure
-
-        ``required_set = {}``
-
-        ``legal_set = {'by','xchart'}``
-
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_cusum_sect001.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_cusum_toc.htm&locale=en
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm inset: The inset variable can only be a string type.
+        :parm xchart: The xchart variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = {'by', 'xchart', 'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "CUSUM", required_set, legal_set, **kwargs)
 
-    def macontrol(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({})
+    def macontrol(self, data: 'SASData' = None,
+                ewmachart: str = None,
+                machart: str = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the MACONTROL procedure
-
-        ``required_set = {}``
-
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_macontrol_toc.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_macontrol_toc.htm&locale=en
+
+        :param data: SASData object This parameter is required
+        :parm ewmachart: The ewmachart variable can only be a string type.
+        :parm machart: The machart variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = {'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "MACONTROL", required_set, legal_set, **kwargs)
 
-    def capability(self, **kwargs: dict) -> 'SASresults':
+    @procDecorator.proc_decorator({})
+    def capability(self, data: 'SASData' = None,
+                by: str = None,
+                cdfplot: str = None,
+                comphist: str = None,
+                freq: str = None,
+                histogram: str = None,
+                id: str = None,
+                inset: str = None,
+                intervals: str = None,
+                output: str = None,
+                ppplot: str = None,
+                probplot: str = None,
+                qqplot: str = None,
+                spec: str = None,
+                weight: str = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
         """
-        Python method to call the CUSUM procedure
-        ``required_set = {}``
-
-        ``legal_set = {'cdfplot', 'comphist', 'histogram', 'inset', 'intervals', 'output', 'ppplot', 'probplot',
-        'qqplot', 'freq', 'weight', 'id', 'by', 'spec'}``
-
+        Python method to call the CAPABILITY procedure
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_capability_sect001.htm
-        """
-        required_set = {}
-        legal_set = {'cdfplot', 'comphist', 'histogram', 'inset', 'intervals', 'output', 'ppplot', 'probplot',
-                     'qqplot', 'freq', 'weight', 'id', 'by', 'spec', 'out', 'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "CAPABILITY", required_set, legal_set, **kwargs)
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_capability_sect001.htm&locale=en
 
-    def shewhart(self, **kwargs: dict) -> 'SASresults':
+        :param data: SASData object This parameter is required
+        :parm by: The by variable can only be a string type.
+        :parm cdfplot: The cdfplot variable can only be a string type.
+        :parm comphist: The comphist variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm histogram: The histogram variable can only be a string type.
+        :parm id: The id variable can only be a string type.
+        :parm inset: The inset variable can only be a string type.
+        :parm intervals: The intervals variable can only be a string type.
+        :parm output: The output variable can only be a string type.
+        :parm ppplot: The ppplot variable can only be a string type.
+        :parm probplot: The probplot variable can only be a string type.
+        :parm qqplot: The qqplot variable can only be a string type.
+        :parm spec: The spec variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        """
+
+    @procDecorator.proc_decorator({})
+    def shewhart(self, data: 'SASData' = None,
+                boxchart: str = None,
+                cchart: str = None,
+                irchart: str = None,
+                mchart: str = None,
+                mrchart: str = None,
+                npchart: str = None,
+                pchart: str = None,
+                rchart: str = None,
+                schart: str = None,
+                uchart: str = None,
+                xrchart: str = None,
+                xschart: str = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the SHEWHART procedure
-
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/qcug/68161/HTML/default/viewer.htm#qcug_shewhart_toc.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_shewhart_toc.htm&locale=en
+
+        :param data: SASData object This parameter is required
+        :parm boxchart: The boxchart variable can only be a string type.
+        :parm cchart: The cchart variable can only be a string type.
+        :parm irchart: The irchart variable can only be a string type.
+        :parm mchart: The mchart variable can only be a string type.
+        :parm mrchart: The mrchart variable can only be a string type.
+        :parm npchart: The npchart variable can only be a string type.
+        :parm pchart: The pchart variable can only be a string type.
+        :parm rchart: The rchart variable can only be a string type.
+        :parm schart: The schart variable can only be a string type.
+        :parm uchart: The uchart variable can only be a string type.
+        :parm xrchart: The xrchart variable can only be a string type.
+        :parm xschart: The xschart variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
         """
-        required_set = {}
-        legal_set = {'procopts'}
-        self.logger.debug("kwargs type: " + str(type(kwargs)))
-        return SASProcCommons._run_proc(self, "SHEWHART", required_set, legal_set, **kwargs)
+
 
