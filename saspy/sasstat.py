@@ -15,9 +15,9 @@
 #
 
 import logging
-from saspy.sasproccommons import SASProcCommons
-from saspy.sasresults import SASresults
 from saspy.sasdecorator import procDecorator
+from saspy.sasresults import SASresults
+
 # from pdb import set_trace as bp
 
 
@@ -43,6 +43,7 @@ class SASstat:
     #. Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py
     #. Write at least one test to exercise the procedures and include it in the appropriate testing file
     """
+
     def __init__(self, session, *args, **kwargs):
         """
         Submit an initial set of macros to prepare the SAS system
@@ -178,6 +179,7 @@ class SASstat:
         :return: SAS Result Object
 
         """
+
     @procDecorator.proc_decorator({'model'})
     def glm(self, data: 'SASData' = None,
             absorb: str = None,
@@ -228,27 +230,27 @@ class SASstat:
 
     @procDecorator.proc_decorator({'model'})
     def logistic(self, data: 'SASData' = None,
-                by: str = None,
-                cls: [str, list] = None,
-                contrast: str = None,
-                effect: str = None,
-                effectplot: str = None,
-                estimate: str = None,
-                exact: str = None,
-                freq: str = None,
-                lsmeans: str = None,
-                oddsratio: str = None,
-                out: str = None,
-                roc: str = None,
-                score: [str, bool, 'SASdata' ] = True,
-                slice: str = None,
-                store: str = None,
-                strata: str = None,
-                units: str = None,
-                weight: str = None,
-                procopts: str = None,
-                stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                 by: str = None,
+                 cls: [str, list] = None,
+                 contrast: str = None,
+                 effect: str = None,
+                 effectplot: str = None,
+                 estimate: str = None,
+                 exact: str = None,
+                 freq: str = None,
+                 lsmeans: str = None,
+                 oddsratio: str = None,
+                 out: str = None,
+                 roc: str = None,
+                 score: [str, bool, 'SASdata'] = True,
+                 slice: str = None,
+                 store: str = None,
+                 strata: str = None,
+                 units: str = None,
+                 weight: str = None,
+                 procopts: str = None,
+                 stmtpassthrough: str = None,
+                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the LOGISTIC procedure
         Documentation link:
@@ -279,15 +281,15 @@ class SASstat:
 
     @procDecorator.proc_decorator({'model'})
     def tpspline(self, data: 'SASData' = None,
-                by: str = None,
-                freq: str = None,
-                id: str = None,
-                model: str = None,
-                output: str = None,
-                score: [str, bool, 'SASdata' ] = True,
-                procopts: str = None,
-                stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                 by: str = None,
+                 freq: str = None,
+                 id: str = None,
+                 model: str = None,
+                 output: str = None,
+                 score: [str, bool, 'SASdata'] = True,
+                 procopts: str = None,
+                 stmtpassthrough: str = None,
+                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TPSPLINE procedure
         Documentation link:
@@ -308,20 +310,20 @@ class SASstat:
 
     @procDecorator.proc_decorator({'model'})
     def hplogistic(self, data: 'SASData' = None,
-                by: str = None,
-                cls: [str, list] = None,
-                code: str = None,
-                freq: str = None,
-                id: str = None,
-                model: str = None,
-                out: str = None,
-                partition: str = None,
-                score: [str, bool, 'SASdata' ] = True,
-                selection: str = None,
-                weight: str = None,
-                procopts: str = None,
-                stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                   by: str = None,
+                   cls: [str, list] = None,
+                   code: str = None,
+                   freq: str = None,
+                   id: str = None,
+                   model: str = None,
+                   out: str = None,
+                   partition: str = None,
+                   score: [str, bool, 'SASdata'] = True,
+                   selection: str = None,
+                   weight: str = None,
+                   procopts: str = None,
+                   stmtpassthrough: str = None,
+                   **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPLOGISTIC procedure
         For more information on the statements see the Documentation link.
@@ -346,21 +348,21 @@ class SASstat:
 
     @procDecorator.proc_decorator({'model'})
     def hpreg(self, data: 'SASData' = None,
-            by: str = None,
-            cls: [str, list] = None,
-            code: str = None,
-            freq: str = None,
-            id: str = None,
-            model: str = None,
-            out: str = None,
-            partition: str = None,
-            performance: str = None,
-            score: [str, bool, 'SASdata' ] = True,
-            selection: str = None,
-            weight: str = None,
-            procopts: str = None,
-            stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+              by: str = None,
+              cls: [str, list] = None,
+              code: str = None,
+              freq: str = None,
+              id: str = None,
+              model: str = None,
+              out: str = None,
+              partition: str = None,
+              performance: str = None,
+              score: [str, bool, 'SASdata'] = True,
+              selection: str = None,
+              weight: str = None,
+              procopts: str = None,
+              stmtpassthrough: str = None,
+              **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPREG procedure
 
@@ -387,30 +389,30 @@ class SASstat:
 
     @procDecorator.proc_decorator({'model'})
     def phreg(self, data: 'SASData' = None,
-            assess: str = None,
-            bayes: str = None,
-            by: str = None,
-            cls: [str, list] = None,
-            contrast: str = None,
-            effect: str = None,
-            estimate: str = None,
-            freq: str = None,
-            hazardratio: str = None,
-            id: str = None,
-            lsmeans: str = None,
-            lsmestimate: str = None,
-            model: str = None,
-            out: str = None,
-            random: str = None,
-            roc: str = None,
-            slice: str = None,
-            store: str = None,
-            strata: str = None,
-            test: str = None,
-            weight: str = None,
-            procopts: str = None,
-            stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+              assess: str = None,
+              bayes: str = None,
+              by: str = None,
+              cls: [str, list] = None,
+              contrast: str = None,
+              effect: str = None,
+              estimate: str = None,
+              freq: str = None,
+              hazardratio: str = None,
+              id: str = None,
+              lsmeans: str = None,
+              lsmestimate: str = None,
+              model: str = None,
+              out: str = None,
+              random: str = None,
+              roc: str = None,
+              slice: str = None,
+              store: str = None,
+              strata: str = None,
+              test: str = None,
+              weight: str = None,
+              procopts: str = None,
+              stmtpassthrough: str = None,
+              **kwargs: dict) -> 'SASresults':
         """
         Python method to call the PHREG procedure
         Documentation link:
@@ -445,15 +447,15 @@ class SASstat:
 
     @procDecorator.proc_decorator({})
     def ttest(self, data: 'SASData' = None,
-            by: str = None,
-            cls: [str, list] = None,
-            freq: str = None,
-            paired: str = None,
-            var: str = None,
-            weight: str = None,
-            procopts: str = None,
-            stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+              by: str = None,
+              cls: [str, list] = None,
+              freq: str = None,
+              paired: str = None,
+              var: str = None,
+              weight: str = None,
+              procopts: str = None,
+              stmtpassthrough: str = None,
+              **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TTEST procedure
         Documentation link:
@@ -473,15 +475,15 @@ class SASstat:
 
     @procDecorator.proc_decorator({})
     def factor(self, data: 'SASData' = None,
-            by: str = None,
-            cls: [str, list] = None,
-            freq: str = None,
-            paired: str = None,
-            var: str = None,
-            weight: str = None,
-            procopts: str = None,
-            stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+               by: str = None,
+               cls: [str, list] = None,
+               freq: str = None,
+               paired: str = None,
+               var: str = None,
+               weight: str = None,
+               procopts: str = None,
+               stmtpassthrough: str = None,
+               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the FACTOR procedure
         Documentation link:
@@ -498,4 +500,3 @@ class SASstat:
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
         """
-

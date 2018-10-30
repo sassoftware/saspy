@@ -14,8 +14,9 @@
 #  limitations under the License.
 #
 import logging
-from saspy.sasresults import SASresults
+
 from saspy.sasdecorator import procDecorator
+from saspy.sasresults import SASresults
 
 
 class SASets:
@@ -40,6 +41,7 @@ class SASets:
     #. Verify that all the statements in the required and legal sets are listed in _makeProcCallMacro method of sasproccommons.py
     #. Write at least one test to exercise the procedures and include it in the appropriate testing file
     """
+
     def __init__(self, session, *args, **kwargs):
         """Submit an initial set of macros to prepare the SAS system"""
         self.sasproduct = "ets"
@@ -52,19 +54,19 @@ class SASets:
 
     @procDecorator.proc_decorator({'id'})
     def timeseries(self, data: 'SASData' = None,
-                by: str = None,
-                corr: str = None,
-                crosscorr: str = None,
-                crossvar: str = None,
-                decomp: str = None,
-                id: str = None,
-                out: str = None,
-                season: str = None,
-                trend: str = None,
-                var: str = None,
-                procopts: str = None,
-                stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                   by: str = None,
+                   corr: str = None,
+                   crosscorr: str = None,
+                   crossvar: str = None,
+                   decomp: str = None,
+                   id: str = None,
+                   out: str = None,
+                   season: str = None,
+                   trend: str = None,
+                   var: str = None,
+                   procopts: str = None,
+                   stmtpassthrough: str = None,
+                   **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMESERIES procedure
         Documentation link:
@@ -88,15 +90,15 @@ class SASets:
 
     @procDecorator.proc_decorator({'identify'})
     def arima(self, data: 'SASData' = None,
-            by: str = None,
-            estimate: str = None,
-            forecast: str = None,
-            identify: str = None,
-            out: str = None,
-            outlier: str = None,
-            procopts: str = None,
-            stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+              by: str = None,
+              estimate: str = None,
+              forecast: str = None,
+              identify: str = None,
+              out: str = None,
+              outlier: str = None,
+              procopts: str = None,
+              stmtpassthrough: str = None,
+              **kwargs: dict) -> 'SASresults':
         """
         Python method to call the ARIMA procedure
         Documentation link:
@@ -115,7 +117,7 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def ucm(self,  data: 'SASData' = None,
+    def ucm(self, data: 'SASData' = None,
             autoreg: str = None,
             blockseason: str = None,
             by: str = None,
@@ -171,7 +173,7 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def esm(self,  data: 'SASData' = None,
+    def esm(self, data: 'SASData' = None,
             by: str = None,
             forecast: str = None,
             id: str = None,
@@ -196,12 +198,12 @@ class SASets:
 
     @procDecorator.proc_decorator({})
     def timeid(self, data: 'SASData' = None,
-            by: str = None,
-            id: str = None,
-            out: str = None,
-            procopts: str = None,
-            stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+               by: str = None,
+               id: str = None,
+               out: str = None,
+               procopts: str = None,
+               stmtpassthrough: str = None,
+               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMEID procedure
         Documentation link:
@@ -218,17 +220,17 @@ class SASets:
 
     @procDecorator.proc_decorator({})
     def timedata(self, data: 'SASData' = None,
-                by: str = None,
-                fcmport: str = None,
-                id: str = None,
-                out: str = None,
-                outarrays: str = None,
-                outscalars: str = None,
-                prog_stmts: str = None,
-                var: str = None,
-                procopts: str = None,
-                stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                 by: str = None,
+                 fcmport: str = None,
+                 id: str = None,
+                 out: str = None,
+                 outarrays: str = None,
+                 outscalars: str = None,
+                 prog_stmts: str = None,
+                 var: str = None,
+                 procopts: str = None,
+                 stmtpassthrough: str = None,
+                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMEDATA procedure
         Documentation link:

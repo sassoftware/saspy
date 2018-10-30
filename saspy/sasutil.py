@@ -14,6 +14,8 @@
 #  limitations under the License.
 #
 import logging
+
+from saspy.sasdecorator import procDecorator
 from saspy.sasresults import SASresults
 
 
@@ -58,15 +60,15 @@ class SASutil:
 
     @procDecorator.proc_decorator({})
     def hpimpute(self, data: 'SASData' = None,
-                code: str = None,
-                freq: str = None,
-                id: str = None,
-                impute: str = None,
-                input: [str, list, dict] = None,
-                performance: str = None,
-                procopts: str = None,
-                stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                 code: str = None,
+                 freq: str = None,
+                 id: str = None,
+                 impute: str = None,
+                 input: [str, list, dict] = None,
+                 performance: str = None,
+                 procopts: str = None,
+                 stmtpassthrough: str = None,
+                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPIMPUTE procedure
         Documentation link:
@@ -86,19 +88,19 @@ class SASutil:
 
     @procDecorator.proc_decorator({})
     def hpbin(self, data: 'SASData' = None,
-            cls: [str, list] = None,
-            code: str = None,
-            grow: str = None,
-            id: str = None,
-            model: str = None,
-            out: str = None,
-            partition: str = None,
-            performance: str = None,
-            prune: str = None,
-            rules: str = None,
-            procopts: str = None,
-            stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+              cls: [str, list] = None,
+              code: str = None,
+              grow: str = None,
+              id: str = None,
+              model: str = None,
+              out: str = None,
+              partition: str = None,
+              performance: str = None,
+              prune: str = None,
+              rules: str = None,
+              procopts: str = None,
+              stmtpassthrough: str = None,
+              **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPBIN procedure
         Documentation link:
@@ -122,18 +124,18 @@ class SASutil:
 
     @procDecorator.proc_decorator({})
     def hpsample(self, data: 'SASData' = None,
-                cls: [str, list] = None,
-                code: str = None,
-                grow: str = None,
-                id: str = None,
-                model: str = None,
-                outpartition: str = None,
-                performance: str = None,
-                prune: str = None,
-                rules: str = None,
-                procopts: str = None,
-                stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                 cls: [str, list] = None,
+                 code: str = None,
+                 grow: str = None,
+                 id: str = None,
+                 model: str = None,
+                 outpartition: str = None,
+                 performance: str = None,
+                 prune: str = None,
+                 rules: str = None,
+                 procopts: str = None,
+                 stmtpassthrough: str = None,
+                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPSAMPLE procedure
         Documentation link:

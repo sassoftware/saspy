@@ -15,8 +15,9 @@
 #
 
 import logging
-from saspy.sasresults import SASresults
+
 from saspy.sasdecorator import procDecorator
+from saspy.sasresults import SASresults
 
 
 class SASqc:
@@ -53,12 +54,12 @@ class SASqc:
 
     @procDecorator.proc_decorator({})
     def cusum(self, data: 'SASData' = None,
-            by: str = None,
-            inset: str = None,
-            xchart: str = None,
-            procopts: str = None,
-            stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+              by: str = None,
+              inset: str = None,
+              xchart: str = None,
+              procopts: str = None,
+              stmtpassthrough: str = None,
+              **kwargs: dict) -> 'SASresults':
         """
         Python method to call the CUSUM procedure
         Documentation link:
@@ -74,11 +75,11 @@ class SASqc:
 
     @procDecorator.proc_decorator({})
     def macontrol(self, data: 'SASData' = None,
-                ewmachart: str = None,
-                machart: str = None,
-                procopts: str = None,
-                stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                  ewmachart: str = None,
+                  machart: str = None,
+                  procopts: str = None,
+                  stmtpassthrough: str = None,
+                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the MACONTROL procedure
         Documentation link:
@@ -94,23 +95,23 @@ class SASqc:
 
     @procDecorator.proc_decorator({})
     def capability(self, data: 'SASData' = None,
-                by: str = None,
-                cdfplot: str = None,
-                comphist: str = None,
-                freq: str = None,
-                histogram: str = None,
-                id: str = None,
-                inset: str = None,
-                intervals: str = None,
-                output: str = None,
-                ppplot: str = None,
-                probplot: str = None,
-                qqplot: str = None,
-                spec: str = None,
-                weight: str = None,
-                procopts: str = None,
-                stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                   by: str = None,
+                   cdfplot: str = None,
+                   comphist: str = None,
+                   freq: str = None,
+                   histogram: str = None,
+                   id: str = None,
+                   inset: str = None,
+                   intervals: str = None,
+                   output: str = None,
+                   ppplot: str = None,
+                   probplot: str = None,
+                   qqplot: str = None,
+                   spec: str = None,
+                   weight: str = None,
+                   procopts: str = None,
+                   stmtpassthrough: str = None,
+                   **kwargs: dict) -> 'SASresults':
         """
         Python method to call the CAPABILITY procedure
         Documentation link:
@@ -138,21 +139,21 @@ class SASqc:
 
     @procDecorator.proc_decorator({})
     def shewhart(self, data: 'SASData' = None,
-                boxchart: str = None,
-                cchart: str = None,
-                irchart: str = None,
-                mchart: str = None,
-                mrchart: str = None,
-                npchart: str = None,
-                pchart: str = None,
-                rchart: str = None,
-                schart: str = None,
-                uchart: str = None,
-                xrchart: str = None,
-                xschart: str = None,
-                procopts: str = None,
-                stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                 boxchart: str = None,
+                 cchart: str = None,
+                 irchart: str = None,
+                 mchart: str = None,
+                 mrchart: str = None,
+                 npchart: str = None,
+                 pchart: str = None,
+                 rchart: str = None,
+                 schart: str = None,
+                 uchart: str = None,
+                 xrchart: str = None,
+                 xschart: str = None,
+                 procopts: str = None,
+                 stmtpassthrough: str = None,
+                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the SHEWHART procedure
         Documentation link:
@@ -175,5 +176,3 @@ class SASqc:
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
         """
-
-
