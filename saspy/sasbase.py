@@ -264,6 +264,7 @@ class SASsession():
         self.workpath           = ''
         self.sasver             = ''
         self.sascei             = ''
+        self.SASpid             = None
         self.HTML_Style         = "HTMLBlue"
         self.sas_date_fmts      = sas_date_fmts
         self.sas_time_fmts      = sas_time_fmts
@@ -287,7 +288,7 @@ class SASsession():
         '''
 
         try:
-           if self._io:
+           if self._io.pid:
              ll = self.submit('%put WORKpath=%sysfunc(pathname(work));')
              self.workpath = ll['LOG'].rpartition('WORKpath=')[2].strip().partition('\n')[0].strip()
              win = self.workpath.count('\\')
@@ -300,6 +301,8 @@ class SASsession():
              self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
              ll = self.submit('proc options option=encoding;run;')
              self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
+
+             self.SASpid = self.symget("SYSJOBID")
 
              if self.sascfg.autoexec:
                 ll = self.submit(self.sascfg.autoexec)
@@ -326,6 +329,8 @@ class SASsession():
         x += "Results               = %s\n" % self.results     
         x += "SAS Session Encoding  = %s\n" % self.sascei     
         x += "Python Encoding value = %s\n" % self._io.sascfg.encoding     
+        x += "SAS process Pid value = %s\n" % self.SASpid
+        x += "\n"
         return(x)                 
 
     def __del__(self):
