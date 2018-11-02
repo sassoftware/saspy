@@ -317,7 +317,11 @@ class SASsession():
         :return: output
         """
         if self._io is None:
-           return "This SASsession object is not valid\n"
+           pyenc = ''
+           if self.sascfg.cfgopts.get('verbose', True):
+              print("This SASsession object is not valid\n")
+        else:
+           pyenc = self._io.sascfg.encoding     
 
         x  = "Access Method         = %s\n" % self.sascfg.mode
         x += "SAS Config name       = %s\n" % self.sascfg.name
@@ -328,7 +332,7 @@ class SASsession():
         x += "Batch                 = %s\n" % str(self.batch)    
         x += "Results               = %s\n" % self.results     
         x += "SAS Session Encoding  = %s\n" % self.sascei     
-        x += "Python Encoding value = %s\n" % self._io.sascfg.encoding     
+        x += "Python Encoding value = %s\n" % pyenc
         x += "SAS process Pid value = %s\n" % self.SASpid
         x += "\n"
         return(x)                 
