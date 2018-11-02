@@ -1009,6 +1009,54 @@ class SASsession():
         return res
 
 
+    def SYSINFO(self):
+        """
+        This method returns the SAS Automatic Macro Variable SYSINFO which
+        contains return codes provided by some SAS procedures.
+        """
+        return self.symget("SYSINFO")
+
+
+    def SYSERR(self):
+        """
+        This method returns the SAS Automatic Macro Variable SYSERR which
+        contains a return code status set by some SAS procedures and the DATA step.
+        """
+        return self.symget("SYSERR")
+
+
+    def SYSERRORTEXT(self):
+        """
+        This method returns the SAS Automatic Macro Variable SYSERRORTEXT which
+        is the text of the last error message generated in the SAS log.
+        """
+        return self.symget("SYSERRORTEXT")
+
+
+    def SYSWARNINGTEXT(self):
+        """
+        This method returns the SAS Automatic Macro Variable SYSWARNINGTEXT which
+        is the text of the last warning message generated in the SAS log.
+        """
+        return self.symget("SYSWARNINGTEXT")
+
+
+    def SYSFILRC(self):
+        """
+        This method returns the SAS Automatic Macro Variable SYSFILRC which
+        identifies whether or not the last FILENAME statement executed correctly.
+        """
+        return self.symget("SYSFILRC")
+
+
+    def SYSLIBRC(self):
+        """
+        This method returns the SAS Automatic Macro Variable SYSLIBRC which
+        reports whether the last LIBNAME statement executed correctly.
+        """
+        return self.symget("SYSLIBRC")
+
+
 class SASdata:
     """
     **Overview**
