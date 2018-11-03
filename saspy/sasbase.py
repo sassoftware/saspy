@@ -38,10 +38,12 @@
 
 import os
 import sys
+import datetime
 import getpass
 import tempfile
 
 from saspy.sasioiom      import SASsessionIOM
+from saspy.sasiocom      import SASSessionCOM
 from saspy.sasets        import SASets
 from saspy.sasexceptions import SASIONotSupportedError, SASConfigNotValidError
 from saspy.sasml         import SASml
@@ -160,6 +162,7 @@ class SASconfig:
         ssh           = cfg.get('ssh')
         path          = cfg.get('saspath')
         java          = cfg.get('java')
+        class_id      = cfg.get('class_id')
         self.display  = cfg.get('display',  '')
         self.results  = cfg.get('results')
         self.autoexec = cfg.get('autoexec')
@@ -199,6 +202,8 @@ class SASconfig:
             self.mode = 'SSH'
         elif path is not None:
             self.mode = 'STDIO'
+        elif class_id is not None:
+            self.mode = 'COM'
         else:
             raise SASConfigNotValidError(cfgname)
 
@@ -279,7 +284,22 @@ class SASsession():
     :param sspi: Boolean for using IWA to connect to a workspace server configured to use IWA
     :param javaparms: for specifying java command line options if necessary
 
+    **COM**
+
+    and for IOM IO via COM
+
+    :param host: Resolvable host name or IP of the server
+    :param port: Server port
+    :param class_id: IOM workspace server class identifier
+    :param provider: IOM provider
+    :param encoding: This is the python encoding value that matches the SAS
+                     session encoding of the IOM server
+    :param user: User
+    :param pw: Password
+
     """
+    # SAS Epoch: 1960-01-01
+    SAS_EPOCH = datetime.datetime(1960, 1, 1)
 
     # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
     def __init__(self, **kwargs):
@@ -314,6 +334,8 @@ class SASsession():
                 raise SASIONotSupportedError(self.sascfg.mode, alts=['IOM'])
         elif self.sascfg.mode == 'IOM':
             self._io = SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
+        elif self.sascfg.mode == 'COM':
+            self._io = SASSessionCOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
         sysvars = """options nosource;
             %put WORKPATH=%sysfunc(pathname(work));
@@ -1123,6 +1145,27 @@ class SASsession():
                         else:
                             optstr += 'NO; '
         return optstr
+
+    def _tablepath(self, table: str, libref: str=None) -> str:
+        """
+        Define a sas dataset path based on a table name and optional libref
+        name. Will return a two-level or one-level path string based on the
+        provided arguments. One-level names are of this form: `table`, while
+        two-level names are of this form: `libref.table`. If libref is not
+        defined, SAS will implicitly define the library to WORK or USER. The
+        USER library needs to have been defined previously in SAS, otherwise
+        WORK is the default option. If the `libref` parameter is any value
+        that evaluates to `False`, the one-level path is returned.
+        :param table [str]: SAS data set name.
+        :option libref [str]: Optional library name.
+        :return [str]:
+        """
+        if not libref:
+            path = table
+        else:
+            path = '{}.{}'.format(libref, table)
+
+        return path
 
     def symput(self, name, value):
         """

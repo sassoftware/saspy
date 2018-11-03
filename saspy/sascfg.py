@@ -32,7 +32,7 @@
 # specify options=''. This way it's specified so it can't be overridden, even though you don't have any
 # specific value you want applied.
 # 
-#SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http']
+#SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http', 'iomcom']
 #
 
 SAS_config_names=['default']
@@ -189,3 +189,29 @@ winiomIWA  = {'java'    : 'java',
             'sspi'      : True
             }
 
+
+# For Remote and Local IOM access methods using COM interface
+# These configuration definitions are for connecting over IOM using COM. This
+# access method is for Windows clients connecting to remote hosts. Local
+# SAS instances may also be supported.
+#
+# This access method does not require a Java dependency.
+#
+# Valid Keys:
+#   host        - [REQUIRED] Resolvable SAS server dns name.
+#   port        - [REQUIRED] SAS workspace server port. Generally 8591 on
+#                 standard installations.
+#   class_id    - [REQUIRED] IOM workspace server class identifier. Use
+#                 `PROC IOMOPERATE` to identify the correct value.
+#   provider    - [REQUIRED] IOM provider. "sas.iomprovider" is recommended.
+#   encoding    - This is the python encoding value that matches the SAS
+#                 session encoding of the IOM server.
+#   user        - SAS user
+#   pw          - SAS password
+
+iomcom = {
+    'host': 'mynode.mycompany.org',
+    'port': 8591,
+    'class_id': '440196d4-90f0-11d0-9f41-00a024bb830c',
+    'provider': 'sas.iomprovider',
+    'encoding': 'windows-1252'}
