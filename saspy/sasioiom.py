@@ -681,7 +681,7 @@ Will use HTML5 for this SASsession.""")
 
       return
 
-   def submit(self, code: str, results: str ="html", prompt: dict ={}) -> dict:
+   def submit(self, code: str, results: str ="html", prompt: dict = None) -> dict:
       '''
       This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
       code    - the SAS statements you want to execute
@@ -706,6 +706,8 @@ Will use HTML5 for this SASsession.""")
             print(results['LOG'])
             HTML(results['LST'])
       '''
+      prompt = prompt if prompt is not None else {}
+
       #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsopen  = b"ods listing close;ods "+self.sascfg.output.encode()+ \
                  b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style.encode()+ \
@@ -1038,7 +1040,7 @@ Will use HTML5 for this SASsession.""")
 
       return exists
    
-   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict ={}) -> '<SASdata object>':
+   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict = None) -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
@@ -1046,6 +1048,8 @@ Will use HTML5 for this SASsession.""")
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
       '''
+      opts = opts if opts is not None else {}
+
       code  = "filename x "
 
       if file.lower().startswith("http"):
@@ -1062,7 +1066,7 @@ Will use HTML5 for this SASsession.""")
       else:
          ll = self.submit(code, "text")
    
-   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict ={}, opts: dict ={}) -> 'The LOG showing the results of the step':
+   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict = None, opts: dict = None) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CSV format.
       file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
@@ -1071,6 +1075,9 @@ Will use HTML5 for this SASsession.""")
       dsopts  - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
       opts    - a dictionary containing any of the following Proc Export options(delimiter, putnames)
       '''
+      dsopts = dsopts if dsopts is not None else {}
+      opts = opts if opts is not None else {}
+
       code  = "options nosource;\n"
       code += "filename x \""+file+"\";\n"
       code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
@@ -1159,7 +1166,7 @@ Will use HTML5 for this SASsession.""")
       ll = self.submit("", 'text')
       return
    
-   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -1167,6 +1174,7 @@ Will use HTML5 for this SASsession.""")
       rowsep  - the row seperator character to use; defaults to '\n'
       colsep  - the column seperator character to use; defaults to '\t'
       '''
+      dsopts = dsopts if dsopts is not None else {}
 
       method = kwargs.pop('method', None)
       if method and method.lower() == 'csv':
@@ -1361,7 +1369,7 @@ Will use HTML5 for this SASsession.""")
 
       return df
 
-   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict ={}, tempfile: str=None, tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, tempfile: str=None, tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -1370,6 +1378,7 @@ Will use HTML5 for this SASsession.""")
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       '''
+      dsopts = dsopts if dsopts is not None else {}
 
       logf     = ''
       lstf     = ''
