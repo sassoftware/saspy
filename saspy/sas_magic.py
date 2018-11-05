@@ -13,12 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from __future__ import print_function
 from IPython.display import HTML
 import IPython.core.magic as ipym
 import re
 from saspy.SASLogLexer import SASLogStyle, SASLogLexer
-from saspy import SASsession
+from saspy.sasbase import SASsession
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
 

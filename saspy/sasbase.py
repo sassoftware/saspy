@@ -39,9 +39,18 @@
 import os
 import sys
 import re
-import logging
 import getpass
 import tempfile
+import logging
+from saspy.sasioiom import SASsessionIOM
+from saspy.sasets import SASets
+from saspy.sasml import SASml
+from saspy.sasqc import SASqc
+from saspy.sasresults import SASresults
+from saspy.sasstat import SASstat
+from saspy.sasutil import SASutil
+from saspy.sasViyaML import SASViyaML
+from saspy.sastabulate import Tabulate
 
 try:
    import pandas as pd
@@ -49,28 +58,9 @@ except ImportError:
    pass
 
 try:
-   import saspy.sascfg_personal as SAScfg
-except ImportError:
-   try:
-      import sascfg_personal as SAScfg
-   except ImportError:
-      import saspy.sascfg as SAScfg
-
-try:
     import saspy.sasiostdio as sasiostdio
 except:
     pass
-
-import saspy.sasioiom   as sasioiom
-#import saspy.sasiohttp  as sasiohttp
-from saspy.sasstat import *
-from saspy.sasets import *
-from saspy.sasml import *
-from saspy.sasqc import *
-from saspy.sasutil import *
-from saspy.sasViyaML import *
-from saspy.sasresults import *
-from saspy.sastabulate import Tabulate
 
 try:
     from IPython.display import HTML
@@ -253,7 +243,7 @@ class SASsession():
     """
 
     # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
-    def __init__(self, **kwargs) -> 'SASsession':
+    def __init__(self, **kwargs):
         self._loaded_macros     = False
         self._obj_cnt           = 0
         self.nosub              = False
@@ -281,7 +271,7 @@ class SASsession():
                 print(
                     "Cannot use STDIO I/O module on Windows. No SASsession established. Choose an IOM SASconfig definition")
         elif self.sascfg.mode == 'IOM':
-            self._io = sasioiom.SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
+            self._io = SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
         '''
         elif self.sascfg.mode == 'HTTP':
             self._io = sasiohttp.SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)

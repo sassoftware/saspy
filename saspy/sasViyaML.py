@@ -16,6 +16,7 @@
 import logging
 
 from saspy.sasdecorator import procDecorator
+from saspy.sasresults import SASresults
 
 
 class SASViyaML:
@@ -62,7 +63,7 @@ class SASViyaML:
                 target: [str, list, dict] = None,
                 procopts: str = None,
                 stmtpassthrough: str = None,
-                **kwargs: dict) -> object:
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the FACTMAC procedure
         Documentation link:
@@ -92,7 +93,7 @@ class SASViyaML:
                 output: str = None,
                 procopts: str = None,
                 stmtpassthrough: str = None,
-                **kwargs: dict) -> object:
+                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the FASTKNN procedure
         Documentation link:
@@ -273,7 +274,7 @@ class SASViyaML:
                   target: [str, list, dict] = None,
                   procopts: str = None,
                   stmtpassthrough: str = None,
-                  **kwargs: dict) -> object:
+                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the SVMACHINE procedure
         Documentation link:

@@ -14,10 +14,10 @@
 #  limitations under the License.
 #
 import logging
-import re
 import warnings
+import re
 
-# from .sasbase import SASdata
+# from saspy.sasbase import SASdata
 from saspy.sasresults import SASresults
 
 
@@ -721,7 +721,7 @@ class SASProcCommons:
                 self.logger.debug('savestate statement,length: %s,%s', args['savestate'], len(args['savestate']))
                 code += 'savestate %s;\n' % (args['savestate'])
             # TODO test if savestate is a SASData Object
-            elif isinstance(args['savestate'], saspy.sasbase.SASdata):
+            elif isinstance(args['savestate'], SASdata):
                 code += 'savestate rstore={}.{};\n'.format(args['savestate'].libref, args['savestate'].table)
         # passthrough facility for procedures with special circumstances
         if 'stmtpassthrough' in args:

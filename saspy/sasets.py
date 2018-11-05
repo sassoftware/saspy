@@ -17,6 +17,7 @@ import logging
 
 from saspy.sasdecorator import procDecorator
 from saspy.sasresults import SASresults
+# from saspy.sasbase import SASdata
 
 
 class SASets:
@@ -53,7 +54,7 @@ class SASets:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({'id'})
-    def timeseries(self, data: 'SASData' = None,
+    def timeseries(self, data: 'SASdata' = None,
                    by: str = None,
                    corr: str = None,
                    crosscorr: str = None,
@@ -72,7 +73,7 @@ class SASets:
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm by: The by variable can only be a string type.
         :parm corr: The corr variable can only be a string type.
         :parm crosscorr: The crosscorr variable can only be a string type.
@@ -89,7 +90,7 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({'identify'})
-    def arima(self, data: 'SASData' = None,
+    def arima(self, data: 'SASdata' = None,
               by: str = None,
               estimate: str = None,
               forecast: str = None,
@@ -104,7 +105,7 @@ class SASets:
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm by: The by variable can only be a string type.
         :parm estimate: The estimate variable can only be a string type.
         :parm forecast: The forecast variable can only be a string type.
@@ -117,7 +118,7 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def ucm(self, data: 'SASData' = None,
+    def ucm(self, data: 'SASdata' = None,
             autoreg: str = None,
             blockseason: str = None,
             by: str = None,
@@ -146,7 +147,7 @@ class SASets:
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm autoreg: The autoreg variable can only be a string type.
         :parm blockseason: The blockseason variable can only be a string type.
         :parm by: The by variable can only be a string type.
@@ -173,7 +174,7 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def esm(self, data: 'SASData' = None,
+    def esm(self, data: 'SASdata' = None,
             by: str = None,
             forecast: str = None,
             id: str = None,
@@ -186,7 +187,7 @@ class SASets:
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm by: The by variable can only be a string type.
         :parm forecast: The forecast variable can only be a string type.
         :parm id: The id variable can only be a string type.
@@ -197,7 +198,7 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def timeid(self, data: 'SASData' = None,
+    def timeid(self, data: 'SASdata' = None,
                by: str = None,
                id: str = None,
                out: str = None,
@@ -209,7 +210,7 @@ class SASets:
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm by: The by variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm out: The out variable can only be a string type.
@@ -219,7 +220,7 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def timedata(self, data: 'SASData' = None,
+    def timedata(self, data: 'SASdata' = None,
                  by: str = None,
                  fcmport: str = None,
                  id: str = None,
@@ -236,7 +237,7 @@ class SASets:
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm by: The by variable can only be a string type.
         :parm fcmport: The fcmport variable can only be a string type.
         :parm id: The id variable can only be a string type.

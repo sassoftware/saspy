@@ -17,7 +17,7 @@
 import logging
 import warnings
 from functools import wraps
-from .sasproccommons import SASProcCommons
+from saspy.sasproccommons import SASProcCommons
 
 
 class procDecorator:
