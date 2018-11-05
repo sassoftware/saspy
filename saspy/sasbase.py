@@ -350,6 +350,7 @@ class SASsession():
         return self._io._startsas()
 
     def _endsas(self):
+        self.SASpid = None
         return self._io._endsas()
 
     def _getlog(self, **kwargs):
