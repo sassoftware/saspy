@@ -643,7 +643,7 @@ class SASsession():
         :param opts: a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
         :return: SASdata object
         """
-        prompt = prompt if prompt is not None else {}
+        opts = opts if opts is not None else {}
 
         if results == '':
             results = self.results
