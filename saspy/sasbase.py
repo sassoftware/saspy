@@ -370,7 +370,7 @@ class SASsession():
 
         return self._io._asubmit(code, results)
 
-    def submit(self, code: str, results: str = '', prompt: dict = []) -> dict:
+    def submit(self, code: str, results: str = '', prompt: dict = None) -> dict:
         '''
         This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
 
@@ -402,6 +402,8 @@ class SASsession():
         '''
         if self.nosub:
             return dict(LOG=code, LST='')
+
+        prompt = prompt if prompt is not None else {}
 
         if results == '':
             if self.results.upper() == 'PANDAS':
@@ -545,7 +547,7 @@ class SASsession():
         self._io._asubmit(code.decode(), results='text')
         os.close(fd)
 
-    def sasdata(self, table: str, libref: str = '', results: str = '', dsopts: dict = {}) -> 'SASdata':
+    def sasdata(self, table: str, libref: str = '', results: str = '', dsopts: dict = None) -> 'SASdata':
         """
         Method to define an existing SAS dataset so that it can be accessed via SASPy
 
@@ -573,6 +575,8 @@ class SASsession():
 
         :return: SASdata object
         """
+        dsopts = dsopts if dsopts is not None else {}
+
         if results == '':
             results = self.results
         sd = SASdata(self, libref, table, results, dsopts)
@@ -583,7 +587,7 @@ class SASsession():
         return sd
 
     def saslib(self, libref: str, engine: str = ' ', path: str = '',
-               options: str = ' ', prompt: dict = []) -> str:
+               options: str = ' ', prompt: dict = None) -> str:
         """
 
         :param libref:  the libref to be assigned
@@ -592,6 +596,8 @@ class SASsession():
         :param options: other engine or engine supervisor options
         :return: SAS log
         """
+        prompt = prompt if prompt is not None else {}
+
         code = "libname " + libref + " " + engine + " "
         if len(path) > 0:
             code += " '" + path + "' "
@@ -627,7 +633,7 @@ class SASsession():
             else:
                 print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0])
 
-    def read_csv(self, file: str, table: str = '_csv', libref: str = '', results: str = '', opts: dict ={}) -> 'SASdata':
+    def read_csv(self, file: str, table: str = '_csv', libref: str = '', results: str = '', opts: dict = None) -> 'SASdata':
         """
         :param file: either the OS filesystem path of the file, or HTTP://... for a url accessible file
         :param table: the name of the SAS Data Set to create
@@ -636,6 +642,8 @@ class SASsession():
         :param opts: a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
         :return: SASdata object
         """
+        prompt = prompt if prompt is not None else {}
+
         if results == '':
             results = self.results
 
@@ -647,7 +655,7 @@ class SASsession():
             return None
 
     def write_csv(self, file: str, table: str, libref: str = '',
-                  dsopts: dict = {}, opts: dict ={}) -> str:
+                  dsopts: dict = None, opts: dict = None) -> str:
         """
 
         :param file: the OS filesystem path of the file to be created (exported from the SAS Data Set)
@@ -674,6 +682,9 @@ class SASsession():
                              }
         :return: SAS log
         """
+        dsopts = dsopts if dsopts is not None else {}
+        opts = opts if opts is not None else {}
+
         log = self._io.write_csv(file, table, libref, self.nosub, dsopts, opts)
         if not self.batch:
             print(log)
@@ -719,7 +730,7 @@ class SASsession():
         else:
             return None
 
-    def sd2df(self, table: str, libref: str = '', dsopts: dict = {}, method: str = 'MEMORY', **kwargs) -> 'pd.DataFrame':
+    def sd2df(self, table: str, libref: str = '', dsopts: dict = None, method: str = 'MEMORY', **kwargs) -> 'pd.DataFrame':
         """
         This is an alias for 'sasdata2dataframe'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -748,9 +759,11 @@ class SASsession():
         :param kwargs: dictionary
         :return: Pandas data frame
         """
+        dsopts = dsopts if dsopts is not None else {}
+
         return self.sasdata2dataframe(table, libref, dsopts, method, **kwargs)
 
-    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = {}, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
+    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
         """
         This is an alias for 'sasdata2dataframe' specifying method='CSV'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -780,9 +793,11 @@ class SASsession():
         :param kwargs: dictionary
         :return: Pandas data frame
         """
+        dsopts = dsopts if dsopts is not None else {}
+
         return self.sasdata2dataframe(table, libref, dsopts, method='CSV', tempfile=tempfile, tempkeep=tempkeep, **kwargs)
 
-    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {}, method: str = 'MEMORY',
+    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None, method: str = 'MEMORY',
                           **kwargs) -> 'pd.DataFrame':
         """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -813,6 +828,7 @@ class SASsession():
         :param kwargs: dictionary
         :return: Pandas data frame
         """
+        dsopts = dsopts if dsopts is not None else {}
 
         if self.exist(table, libref) == 0:
             print('The SAS Data Set ' + libref + '.' + table + ' does not exist')
@@ -1944,13 +1960,14 @@ class SASdata:
         obj1 = SASProcCommons._objectmethods(self, objname)
         return SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
 
-    def to_csv(self, file: str, opts: dict ={}) -> str:
+    def to_csv(self, file: str, opts: dict = None) -> str:
         """
         This method will export a SAS Data Set to a file in CSV format.
 
         :param file: the OS filesystem path of the file to be created (exported from this SAS Data Set)
         :return:
         """
+        opts = opts if opts is not None else {}
         ll = self._is_valid()
         if ll:
             if not self.sas.batch:
