@@ -62,10 +62,10 @@ class Codegen(object):
     @property
     def debug(self):
         if isinstance(self._args, str):
-            return "{0} statement,length: {1},{2}".format(
+            return "{0} statement,length: {1},{2}\n".format(
                 self._key, self._args, len(self._args))
         elif isinstance(self._args, (list, tuple)):
-            return "list:{}".format(self._args)
+            return "list:{}\n".format(self._args)
 
     @classmethod
     def new(cls, key, args):
@@ -133,6 +133,7 @@ class SASProcCommons:
             outmeth = 'out'
             plot = ''
         self.logger.debug("product caller: " + self.sasproduct.lower())
+        debug_code= ''
         code = "%macro proccall(d);\n"
         # resolve issues withe Proc options, out= and plots=
         # The procopts statement should be in every procedure as a way to pass arbitrary options to the procedures
@@ -446,7 +447,8 @@ class SASProcCommons:
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
         if self.logger.level == 10:
-            print("Proc code submission: " + str(code))
+            print("Proc code submission:\n " + str(code))
+            print("\n\n\n" + debug_code)
         return code
 
     def _objectmethods(self, obj: str, *args) -> list:

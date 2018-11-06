@@ -15,9 +15,13 @@
 #
 
 import logging
-from saspy.sasdecorator import procDecorator
-from saspy.sasresults import SASresults
-#from saspy.sasbase import SASdata
+from typing import TYPE_CHECKING
+from saspy.sasproccommons import procDecorator
+
+if TYPE_CHECKING:
+    from saspy.sasresults import SASresults
+    from saspy.sasdata import SASdata
+
 
 # from pdb import set_trace as bp
 
@@ -52,7 +56,7 @@ class SASstat:
         self.sasproduct = 'stat'
         # create logging
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.WARN)
+        self.logger.setLevel(logging.DEBUG)
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 

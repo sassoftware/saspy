@@ -7,6 +7,7 @@ except ImportError:
 from collections import ChainMap 
 from saspy.sasresults import SASresults
 from saspy.sasproccommons import SASProcCommons
+
 try:
     from IPython.display import HTML
     from IPython.display import display as DISPLAY
