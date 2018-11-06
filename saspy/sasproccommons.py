@@ -17,11 +17,59 @@ import logging
 import warnings
 import re
 
-# from saspy.sasbase import SASdata
+from functools import wraps
+from saspy.sasdata import SASdata
 from saspy.sasresults import SASresults
-
-
 # from pdb import set_trace as bp
+
+class Codegen(object):
+    """
+    Class to generate code for submission to the SAS system.
+    """
+    def __init__(self, key, args):
+        self._key = key
+        self._args = args
+
+    @property
+    def key(self):
+        return self._key
+
+    @property
+    def codestmt(self):
+        args = self._args
+        if self._key in ['freq', 'weight'] and len(args.split()) > 1:
+            raise SyntaxError('ERROR in code submission. {} can only have one variable and you submitted: {}'.format(self._key, args))
+        if isinstance(self._args, (list, tuple)):
+            args = " ".join(self._args)
+            if len(self._args) < 1:
+                raise SyntaxError("The {} list has no members".format(self._key))
+
+        elif isinstance(self._args, bool):
+            if self._args == False:
+                return ''
+            if self._key in ['level', 'estimate', 'irregular', 'slope', 'autotune']:
+                args = ''
+            elif self._key == 'partition':
+                return "partition fraction(test=0 validation=.30 seed=9878);\n"
+        elif isinstance(self._args, dict):
+            pass
+
+        if self._key == 'stmtpassthrough':
+            return "{0} ;\n".format(args)
+
+        return "{0} {1};\n".format(self._key, args)
+
+    @property
+    def debug(self):
+        if isinstance(self._args, str):
+            return "{0} statement,length: {1},{2}".format(
+                self._key, self._args, len(self._args))
+        elif isinstance(self._args, (list, tuple)):
+            return "list:{}".format(self._args)
+
+    @classmethod
+    def new(cls, key, args):
+        return cls(key, args)
 
 
 class SASProcCommons:
@@ -110,12 +158,13 @@ class SASProcCommons:
         # satisfy the order needs of the statements for the procedures
         # as an example...
         # http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
-        if 'absorb' in args:
-            self.logger.debug("absorb statement,length: %s,%s", args['absorb'], len(args['absorb']))
-            code += "absorb %s;\n" % (args['absorb'])
-        if 'add' in args:
-            self.logger.debug("add statement,length: %s,%s", args['add'], len(args['add']))
-            code += "add %s;\n" % (args['add'])
+
+        for key, value in args.items():
+            gen = Codegen.new(key, value)
+            code += gen.codestmt
+            if gen.debug is not None:
+                debug_code += gen.debug
+
         # only three valid values logistic, mlp, mlp direct
         if 'architecture' in args:
             self.logger.debug("architecture statement,length: %s,%s", args['architecture'], len(args['architecture']))
@@ -132,12 +181,6 @@ class SASProcCommons:
                     print("ERROR in code submission. ARCHITECTURE can only have one of these")
                     print("values -- ['logistic', 'mlp', 'mlp direct'] you submitted: %s", args['architecture'])
 
-        if 'assess' in args:
-            self.logger.debug("assess statement,length: %s,%s", args['assess'], len(args['assess']))
-            code += "assess %s;\n" % (args['assess'])
-        if 'autoreg' in args:
-            self.logger.debug("autoreg statement,length: %s,%s", args['autoreg'], len(args['autoreg']))
-            code += "autoreg %s;\n" % (args['autoreg'])
         if 'autotune' in args:
             if isinstance(args['autotune'], bool):
                 if args['autotune'] == True:
@@ -171,93 +214,11 @@ class SASProcCommons:
             else:
                 raise SyntaxError("AUTOTUNE is in an unknown format: %s" % str(args['input']))
 
-        if 'bayes' in args:
-            self.logger.debug("bayes statement,length: %s,%s", args['bayes'], len(args['bayes']))
-            code += "bayes %s;\n" % (args['bayes'])
-        if 'blockseason' in args:
-            self.logger.debug("blockseason statement,length: %s,%s", args['blockseason'], len(args['blockseason']))
-            code += "blockseason %s;\n" % (args['blockseason'])
-        if 'by' in args:
-            self.logger.debug("by statement,length: %s,%s", args['by'], len(args['by']))
-            code += "by %s;\n" % (args['by'])
-        if 'cdfplot' in args:
-            self.logger.debug("cdfplot statement,length: %s,%s", args['cdfplot'], len(args['cdfplot']))
-            code += "cdfplot %s;\n" % (args['cdfplot'])
-        if 'cls' in args:
-            if isinstance(args['cls'], str):
-                self.logger.debug("class statement,length: %s,%s", args['cls'], len(args['cls']))
-                code += "class %s;\n" % (args['cls'])
-            elif isinstance(args['cls'], list):
-                code += "class %s;\n" % (' '.join(args['cls']))
         if 'code' in args:
             self.logger.debug("code statement,length: %s,%s", args['code'], len(args['code']))
             code += "code file='%s';\n" % (args['code'])
         # The save statement is used by few procs but it doesn't have a consistent pattern
         # Here we case it correctly or throw an error.
-        if 'comphist' in args:
-            self.logger.debug("comphistogram statement,length: %s,%s", args['comphist'], len(args['comphist']))
-            code += "comphist %s;\n" % (args['comphist'])
-        # contrast moved
-        if 'corr' in args:
-            self.logger.debug("corr statement,length: %s,%s", args['corr'], len(args['corr']))
-            code += "corr %s;\n" % (args['corr'])
-        if 'crosscorr' in args:
-            self.logger.debug("crosscorr statement,length: %s,%s", args['crosscorr'], len(args['crosscorr']))
-            code += "crosscorr %s;\n" % (args['crosscorr'])
-        if 'crossvar' in args:
-            self.logger.debug("crossvar statement,length: %s,%s", args['crossvar'], len(args['crossvar']))
-            code += "crossvar %s;\n" % (args['crossvar'])
-        if 'cycle' in args:
-            self.logger.debug("cycle statement,length: %s,%s", args['cycle'], len(args['cycle']))
-            code += "cycle %s;\n" % (args['cycle'])
-        if 'decomp' in args:
-            self.logger.debug("decomp statement,length: %s,%s", args['decomp'], len(args['decomp']))
-            code += "decomp %s;\n" % (args['decomp'])
-        if 'deplag' in args:
-            self.logger.debug("deplag statement,length: %s,%s", args['deplag'], len(args['deplag']))
-            code += "deplag %s;\n" % (args['deplag'])
-        if 'effect' in args:
-            self.logger.debug("effect statement,length: %s,%s", args['effect'], len(args['effect']))
-            code += "effect %s;\n" % (args['effect'])
-        # estimate moved
-        if 'ewmachart' in args:
-            self.logger.debug("ewmachart statement,length: %s,%s", args['ewmachart'], len(args['ewmachart']))
-            code += "ewmachart %s;\n" % (args['ewmachart'])
-        if 'fcmport' in args:
-            self.logger.debug("fcmport statement,length: %s,%s", args['fcmport'], len(args['fcmport']))
-            code += "fcmport %s;\n" % (args['fcmport'])
-        if 'freq' in args:
-            # add check to make sure it is only one variable
-            self.logger.debug("freq statement,length: %s,%s", args['freq'], len(args['freq']))
-            # check to make sure it is only one variable
-            if len(args['freq'].split()) == 1:
-                code += "freq %s;\n" % (args['freq'])
-            else:
-                raise SyntaxError("ERROR in code submission. FREQ can only have one variable and you submitted: %s",
-                                  args['freq'])
-        if 'forecast' in args:
-            self.logger.debug("forecast statement,length: %s,%s", args['forecast'], len(args['forecast']))
-            code += "forecast %s;\n" % (args['forecast'])
-        # handle a string or list of strings
-        if 'hidden' in args:
-            if isinstance(args['hidden'], (str, int)):
-                self.logger.debug("hidden statement,length: %s,%s", str(args['hidden']), len(str(args['hidden'])))
-                code += "hidden %s;\n" % (str(args['hidden']))
-            else:
-                for item in args['hidden']:
-                    code += "hidden %s;\n" % item
-        if 'id' in args:
-            self.logger.debug("id statement,length: %s,%s", args['id'], len(args['id']))
-            code += "id %s;\n" % (args['id'])
-        if 'histogram' in args:
-            self.logger.debug("histogram statement,length: %s,%s", args['histogram'], len(args['histogram']))
-            code += "histogram %s;\n" % (args['histogram'])
-        if 'hazardratio' in args:
-            self.logger.debug("hazardratio statement,length: %s,%s", args['hazardratio'], len(args['hazardratio']))
-            code += "hazardratio %s;\n" % (args['id'])
-        if 'identify' in args:
-            self.logger.debug("identify statement,length: %s,%s", args['identify'], len(args['identify']))
-            code += "identify %s;\n" % (args['identify'])
         if 'impute' in args:
             self.logger.debug("impute statement,length: %s,%s", args['impute'], len(args['impute']))
             if not (isinstance(args['impute'], dict) or isinstance(args['impute'], str)):
@@ -313,150 +274,10 @@ class SASProcCommons:
                     raise SyntaxError("The input list has no members")
             else:
                 raise SyntaxError("INPUT is in an unknown format: %s" % str(args['input']))
-        if 'inset' in args:
-            self.logger.debug("inset statement,length: %s,%s", args['inset'], len(args['inset']))
-            code += "inset %s;\n" % (args['inset'])
-        if 'intervals' in args:
-            self.logger.debug("intervals statement,length: %s,%s", args['intervals'], len(args['intervals']))
-            code += "intervals %s;\n" % (args['intervals'])
-        if 'irregular' in args:
-            if isinstance(args['irregular'], str):
-                self.logger.debug("irregular statement,length: %s,%s", args['irregular'], len(args['irregular']))
-                code += "irregular %s;\n" % (args['irregular'])
-            elif isinstance(args['irregular'], bool) and args['irregular']:
-                code += "irregular;\n"
-            else:
-                raise SyntaxError("irregular is in an unknown format: %s" % str(args['irregular']))
-        if 'level' in args:
-            if isinstance(args['level'], str):
-                self.logger.debug("level statement,length: %s,%s", args['level'], len(args['level']))
-                code += "level %s;\n" % (args['level'])
-            elif isinstance(args['level'], bool) and args['level']:
-                code += "level;\n"
-            else:
-                raise SyntaxError("level is in an unknown format: %s" % str(args['level']))
-        # lsmeans moved
-        # manova moved
-        # means moved
-        if 'model' in args:
-            self.logger.debug("model statement,length: %s,%s", args['model'], len(args['model']))
-            code += "model %s;\n" % (args['model'])
-        if 'contrast' in args:
-            self.logger.debug("contrast statement,length: %s,%s", args['contrast'], len(args['contrast']))
-            code += "contrast %s;\n" % (args['contrast'])
-        if 'estimate' in args:
-            if isinstance(args['estimate'], str):
-                self.logger.debug("estimate statement,length: %s,%s", args['estimate'], len(args['estimate']))
-                code += "estimate %s;\n" % (args['estimate'])
-            elif isinstance(args['estimate'], bool) and args['estimate']:
-                code += "estimate;\n"
-            else:
-                raise SyntaxError("estimate is in an unknown format: %s" % str(args['estimate']))
-        if 'lsmeans' in args:
-            self.logger.debug("lsmeans statement,length: %s,%s", args['lsmeans'], len(args['lsmeans']))
-            code += "lsmeans %s;\n" % (args['lsmeans'])
-        if 'lsmestimate' in args:
-            self.logger.debug("lsmestimate statement,length: %s,%s", args['lsmestimate'], len(args['lsmestimate']))
-            code += "lsmestimate %s;\n" % (args['lsmestimate'])
-        if 'test' in args:
-            self.logger.debug("test statement,length: %s,%s", args['test'], len(args['test']))
-            code += "test %s;\n" % (args['test'])
-        if 'machart' in args:
-            self.logger.debug("machart statement,length: %s,%s", args['machart'], len(args['machart']))
-            code += "machart %s;\n" % (args['machart'])
-        if 'manova' in args:
-            self.logger.debug("manova statement,length: %s,%s", args['manova'], len(args['manova']))
-            code += "manova %s;\n" % (args['manova'])
-        if 'means' in args:
-            self.logger.debug("means statement,length: %s,%s", args['means'], len(args['means']))
-            code += "means %s;\n" % (args['means'])
-        if 'nloptions' in args:
-            self.logger.debug("nloptions statement,length: %s,%s", args['nloptions'], len(args['nloptions']))
-            code += "nloptions %s;\n" % (args['nloptions'])
-        if 'oddsratio' in args:
-            self.logger.debug("oddsratio statement,length: %s,%s", args['oddsratio'], len(args['oddsratio']))
-            code += "oddsratio %s;\n" % (args['oddsratio'])
-        if 'optimization' in args:
-            self.logger.debug("optimization statement,length: %s,%s", args['optimization'], len(args['optimization']))
-            code += "optimization %s;\n" % (args['optimization'])
-        if 'outarrays' in args:
-            self.logger.debug("outarrays statement,length: %s,%s", args['outarrays'], len(args['outarrays']))
-            code += "outarrays %s;\n" % (args['outarrays'])
-        if 'outscalars' in args:
-            self.logger.debug("outscalars statement,length: %s,%s", args['outscalars'], len(args['outscalars']))
-            code += "outscalars %s;\n" % (args['outscalars'])
-        if 'outlier' in args:
-            self.logger.debug("outlier statement,length: %s,%s", args['outlier'], len(args['outlier']))
-            code += "outlier %s;\n" % (args['outlier'])
-        if 'paired' in args:
-            if isinstance(args['paired'], str):
-                self.logger.debug("paired statement,length: %s,%s", args['paired'], len(args['paired']))
-                code += "paired %s;\n" % (args['paired'])
-            elif isinstance(args['paired'], list):
-                if len(args['paired']) == 1:
-                    code += "paired %s;\n" % str(args['paired'][0])
-                elif len(args['paired']) > 1:
-                    code += "paired %s;\n" % " ".join(args['paired'])
-                else:
-                    raise SyntaxError("The paired list has no members")
-            else:
-                raise SyntaxError("paired is in an unknown format: %s" % str(args['paired']))
-        if 'parms' in args:
-            self.logger.debug("parms statement,length: %s,%s", args['parms'], len(args['parms']))
-            code += "parms %s;\n" % (args['parms'])
-        if 'partial' in args:
-            self.logger.debug("partial statement,length: %s,%s", args['partial'], len(args['partial']))
-            code += "partial %s;\n" % (args['partial'])
-        if 'pathdiagram' in args:
-            self.logger.debug("pathdiagram statement,length: %s,%s", args['pathdiagram'], len(args['pathdiagram']))
-            code += "pathdiagram %s;\n" % (args['pathdiagram'])
-        if 'performance' in args:
-            self.logger.debug("performance statement,length: %s,%s", args['performance'], len(args['performance']))
-            code += "performance %s;\n" % (args['performance'])
-        if 'ppplot' in args:
-            self.logger.debug("ppplot statement,length: %s,%s", args['ppplot'], len(args['ppplot']))
-            code += "ppplot %s;\n" % (args['ppplot'])
         if 'prior' in args:
             # TODO: check that distribution is in the list
             self.logger.debug("prior statement,length: %s,%s", args['prior'], len(args['prior']))
             code += "prior %s;\n" % (args['prior'])
-        if 'priors' in args:
-            if isinstance(args['priors'], str):
-                self.logger.debug("priors statement,length: %s,%s", args['priors'], len(args['priors']))
-                code += "priors %s;\n" % (args['priors'])
-            elif isinstance(args['priors'], list):
-                if len(args['priors']) == 1:
-                    code += "priors %s;\n" % str(args['priors'][0])
-                elif len(args['priors']) > 1:
-                    code += "priors %s;\n" % " ".join(args['priors'])
-                else:
-                    raise SyntaxError("The priors list has no members")
-            else:
-                raise SyntaxError("priors is in an unknown format: %s" % str(args['priors']))
-        if 'prog_stmts' in args:
-            self.logger.debug("prog_stmts statement,length: %s,%s", args['prog_stmts'], len(args['prog_stmts']))
-            code += " %s;\n" % (args['prog_stmts'])
-        if 'probplot' in args:
-            self.logger.debug("probplot statement,length: %s,%s", args['probplot'], len(args['probplot']))
-            code += "probplot %s;\n" % (args['probplot'])
-        if 'qqplot' in args:
-            self.logger.debug("qqplot statement,length: %s,%s", args['qqplot'], len(args['qqplot']))
-            code += "qqplot %s;\n" % (args['qqplot'])
-        if 'random' in args:
-            self.logger.debug("random statement,length: %s,%s", args['random'], len(args['random']))
-            code += "random %s;\n" % (args['random'])
-        if 'randomreg' in args:
-            self.logger.debug("randomreg statement,length: %s,%s", args['randomreg'], len(args['randomreg']))
-            code += "randomreg %s;\n" % (args['randomreg'])
-        if 'repeated' in args:
-            self.logger.debug("repeated statement,length: %s,%s", args['repeated'], len(args['repeated']))
-            code += "repeated %s;\n" % (args['repeated'])
-        if 'roc' in args:
-            self.logger.debug("roc statement,length: %s,%s", args['roc'], len(args['roc']))
-            code += "roc %s;\n" % (args['roc'])
-        if 'season' in args:
-            self.logger.debug("season statement,length: %s,%s", args['season'], len(args['season']))
-            code += "season %s;\n" % (args['season'])
         if 'selection' in args:
             if isinstance(args['selection'], str):
                 if args['selection'].lower().strip() in ['none', 'forward', 'backward', 'stepwise', 'forwardswap',
@@ -476,35 +297,6 @@ class SASProcCommons:
                         dstr = 'details = %s' % d
                     code += "selection method=%s (%s)  %s;" % (
                     m, ' '.join('{}={}'.format(key, val) for key, val in args['selection'].items()), dstr)
-        if 'slope' in args:
-            if isinstance(args['slope'], str):
-                self.logger.debug("slope statement,length: %s,%s", args['slope'], len(args['slope']))
-                code += "slope %s;\n" % (args['slope'])
-            elif isinstance(args['slope'], bool) and args['slope']:
-                code += "slope;\n"
-            else:
-                raise SyntaxError("slope is in an unknown format: %s" % str(args['slope']))
-        if 'splinereg' in args:
-            self.logger.debug("splinereg statement,length: %s,%s", args['splinereg'], len(args['splinereg']))
-            code += "splinereg %s;\n" % (args['splinereg'])
-        if 'splineseason' in args:
-            self.logger.debug("splineseason statement,length: %s,%s", args['splineseason'], len(args['splineseason']))
-            code += "splineseason %s;\n" % (args['splineseason'])
-        if 'store' in args:
-            self.logger.debug("store statement,length: %s,%s", args['store'], len(args['store']))
-            code += "store %s;\n" % (args['store'])
-        if 'trend' in args:
-            self.logger.debug("trend statement,length: %s,%s", args['trend'], len(args['trend']))
-            code += "trend %s;\n" % (args['trend'])
-        if 'slice' in args:
-            self.logger.debug("slice statement,length: %s,%s", args['slice'], len(args['slice']))
-            code += "slice %s;\n" % (args['slice'])
-        if 'spec' in args:
-            self.logger.debug("spec statement,length: %s,%s", args['spec'], len(args['spec']))
-            code += "spec %s;\n" % (args['spec'])
-        if 'strata' in args:
-            self.logger.debug("strata statement,length: %s,%s", args['strata'], len(args['strata']))
-            code += "strata %s;\n" % (args['strata'])
         if 'target' in args:
             self.logger.debug("target statement,length: %s,%s", args['target'], len(args['target']))
             # make sure target is a single variable extra split to account for level= option
@@ -578,29 +370,6 @@ class SASProcCommons:
                 self.logger.debug("train statement,length: %s,%s", args['train'], len(args['train']))
                 code += "train %s;\n" % (args['train'])
         # test moved
-        if 'var' in args:
-            if isinstance(args['var'], str):
-                code += "var %s;\n" % (args['var'])
-            elif isinstance(args['var'], list):
-                code += "var %s;\n" % (' '.join(args['var']))
-
-        if 'weight' in args:
-            self.logger.debug("weight statement,length: %s,%s", args['weight'], len(args['weight']))
-            # check to make sure it is only one variable
-            if len(args['weight'].split()) == 1:
-                code += "weight %s;\n" % (args['weight'])
-            else:
-                raise SyntaxError("ERROR in code submission. WEIGHT can only have one variable and you submitted: %s",
-                                  args['weight'])
-        if 'grow' in args:
-            self.logger.debug("grow statement,length: %s,%s", args['grow'], len(args['grow']))
-            code += "grow %s;\n" % (args['grow'])
-        if 'prune' in args:
-            self.logger.debug("prune statement,length: %s,%s", args['prune'], len(args['prune']))
-            code += "prune %s;\n" % (args['prune'])
-        if 'rules' in args:
-            self.logger.debug("rules statement,length: %s,%s", args['rules'], len(args['rules']))
-            code += "rules %s;\n" % (args['rules'])
         if 'partition' in args:
             if isinstance(args['partition'], str):
                 self.logger.debug("partition statement,length: %s,%s", args['partition'], len(args['partition']))
@@ -635,56 +404,6 @@ class SASProcCommons:
 
                 varlist = ' '.join('{}={}'.format(key, val) for key, val in args['out'].items())
                 code += "output out=%s %s;\n" % (outstr, varlist)
-        if 'xchart' in args:
-            self.logger.debug("xchart statement,length: %s,%s", args['xchart'], len(args['xchart']))
-            code += "xchart %s;\n" % (args['xchart'])
-        if 'boxchart' in args:
-            self.logger.debug('boxchart statement,length: %s,%s', args['boxchart'], len(args['boxchart']))
-            code += 'boxchart %s;\n' % (args['boxchart'])
-
-        if 'cchart' in args:
-            self.logger.debug('cchart statement,length: %s,%s', args['cchart'], len(args['cchart']))
-            code += 'cchart %s;\n' % (args['cchart'])
-
-        if 'irchart' in args:
-            self.logger.debug('irchart statement,length: %s,%s', args['irchart'], len(args['irchart']))
-            code += 'irchart %s;\n' % (args['irchart'])
-
-        if 'mchart' in args:
-            self.logger.debug('mchart statement,length: %s,%s', args['mchart'], len(args['mchart']))
-            code += 'mchart %s;\n' % (args['mchart'])
-
-        if 'mrchart' in args:
-            self.logger.debug('mrchart statement,length: %s,%s', args['mrchart'], len(args['mrchart']))
-            code += 'mrchart %s;\n' % (args['mrchart'])
-
-        if 'npchart' in args:
-            self.logger.debug('npchart statement,length: %s,%s', args['npchart'], len(args['npchart']))
-            code += 'npchart %s;\n' % (args['npchart'])
-
-        if 'pchart' in args:
-            self.logger.debug('pchart statement,length: %s,%s', args['pchart'], len(args['pchart']))
-            code += 'pchart %s;\n' % (args['pchart'])
-
-        if 'rchart' in args:
-            self.logger.debug('rchart statement,length: %s,%s', args['rchart'], len(args['rchart']))
-            code += 'rchart %s;\n' % (args['rchart'])
-
-        if 'schart' in args:
-            self.logger.debug('schart statement,length: %s,%s', args['schart'], len(args['schart']))
-            code += 'schart %s;\n' % (args['schart'])
-
-        if 'uchart' in args:
-            self.logger.debug('uchart statement,length: %s,%s', args['uchart'], len(args['uchart']))
-            code += 'uchart %s;\n' % (args['uchart'])
-
-        if 'xrchart' in args:
-            self.logger.debug('xrchart statement,length: %s,%s', args['xrchart'], len(args['xrchart']))
-            code += 'xrchart %s;\n' % (args['xrchart'])
-
-        if 'xschart' in args:
-            self.logger.debug('xschart statement,length: %s,%s', args['xschart'], len(args['xschart']))
-            code += 'xschart %s;\n' % (args['xschart'])
         if 'score' in args:
             if isinstance(args['score'], str):
                 code += "score %s;\n" % args['score']
@@ -724,14 +443,10 @@ class SASProcCommons:
             elif isinstance(args['savestate'], SASdata):
                 code += 'savestate rstore={}.{};\n'.format(args['savestate'].libref, args['savestate'].table)
         # passthrough facility for procedures with special circumstances
-        if 'stmtpassthrough' in args:
-            code += str(args['stmtpassthrough'])
-
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
         if self.logger.level == 10:
             print("Proc code submission: " + str(code))
-        self.logger.debug("Proc code submission: " + str(code))
         return code
 
     def _objectmethods(self, obj: str, *args) -> list:
@@ -1102,3 +817,71 @@ class SASProcCommons:
                     "The following {} statements are invalid and will be ignored:\n{}".format(len(extraSet), extraSet))
         self.logger.debug("stmt: {}".format(stmt))
         return stmt
+
+class procDecorator:
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
+        if sys.version_info[0] < 3 or (sys.version_info[0] >= 3 and sys.version_info[1] < 4):
+            warnings.warn('Python 3.4+ is required to get correct tab complete and docstring '
+                          'information for methods')
+
+    def proc_decorator(req_set):
+        """
+        Decorator that provides the wrapped function with an attribute 'actual_kwargs'
+        containing just those keyword arguments actually passed in to the function.
+        """
+
+        def decorator(func):
+            @wraps(func)
+            def inner(self, *args, **kwargs):
+                inner.proc_decorator = kwargs
+                self.logger.debug("processing proc:{}".format(func.__name__))
+                self.logger.debug(req_set)
+                self.logger.debug("kwargs type: " + str(type(kwargs)))
+                if func.__name__.lower() in ['hplogistic', 'hpreg']:
+                    kwargs['ODSGraphics'] = kwargs.get('ODSGraphics', False)
+                legal_set = set(kwargs.keys())
+                self.logger.debug(legal_set)
+                return SASProcCommons._run_proc(self, func.__name__.lower(), req_set, legal_set, **kwargs)
+            return inner
+        return decorator
+
+    def doc_convert(ls):
+        generic_terms = ['procopts', 'stmtpassthrough']
+        ls_list = list(ls)
+        doc_list = []
+        doc_markup = []
+        for i in [j for j in ls_list if j not in generic_terms]:
+            doc_mstr = ''.join([':parm ', i, ': The {} variable can only be a string type.'.format(i)])
+            doc_str = ': str = None,'
+
+            if i.lower() in ['target', 'input']:
+                doc_mstr = ''.join([':parm ', i,
+                                    ': The {} variable can be a string, list or dict type. It refers to the dependent, y, or label variable.'.format(
+                                        i)])
+                doc_str = ': [str, list, dict] = None,'
+            if i.lower() == 'score':
+                doc_str = ": [str, bool, 'SASdata' ] = True,"
+            if i.lower() in ['cls']:
+                doc_mstr = ''.join([':parm ', i,
+                                    ': The {} variable can be a string or list type. It refers to the categorical, or nominal variables.'.format(
+                                        i)])
+                doc_str = ': [str, list] = None,'
+
+            doc_list.append(''.join([i, doc_str, '\n']))
+            doc_markup.append(''.join([doc_mstr, '\n']))
+        doc_list.sort()
+        doc_markup.sort()
+        # add procopts and stmtpassthrough last for each proc
+        for j in generic_terms:
+            doc_list.append(''.join([j, doc_str, '\n']))
+            doc_mstr = ''.join([':parm ', j,
+                                ': The {} variable is a generic option available for advanced use. It can only be a string type.'.format(
+                                    j)])
+            doc_markup.append(''.join([doc_mstr, '\n']))
+
+        doc_list.insert(0, ''.join(["data: 'SASData' = None,", '\n']))
+        doc_markup.insert(0, ''.join([':param data: SASData object This parameter is required', '\n']))
+        doc_markup.append(''.join([':return: SAS Result Object', '\n']))
+        return (''.join(doc_list), ''.join(doc_markup))
