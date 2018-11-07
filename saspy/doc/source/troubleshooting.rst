@@ -155,6 +155,47 @@ So, running that command can tell me what the problem is.
     user@Linux-2's password:
     Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password).
 
+To diagnose ssh further, you can ad -v (-vv, -vvv) to the command line to see more diagnostic information.
+For instance, everything seems set up correctly but after running ssh it just says 'Connection closed by 10.17.12.14'   
+
+
+.. code-block:: ipython3
+
+    Linux-1> /usr/bin/ssh -t Linux-2 /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en -fullstimer -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX
+    Connection closed by 10.17.12.14
+    
+    adding in -v[v[v]] can show that in this case, I just didn't have permission to get to this host via any authentication method
+
+    Linux-1> /usr/bin/ssh -vvv -t Linux-2 /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en -fullstimer -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX
+    [lot's of output removed. just showing some of it here]
+    debug1: Host 'Linux-2' is known and matches the RSA host key.
+    debug1: Found key in /usr/home/.ssh/known_hosts:480
+    debug1: ssh_rsa_verify: signature correct
+    debug1: SSH2_MSG_NEWKEYS sent
+    debug1: expecting SSH2_MSG_NEWKEYS
+    debug1: SSH2_MSG_NEWKEYS received
+    debug1: SSH2_MSG_SERVICE_REQUEST sent
+    debug1: SSH2_MSG_SERVICE_ACCEPT received
+    debug1: Authentications that can continue: publickey,gssapi-keyex,gssapi-with-mic,password
+    debug1: Next authentication method: gssapi-keyex
+    debug1: No valid Key exchange context
+    debug1: Next authentication method: gssapi-with-mic
+    debug1: Unspecified GSS failure.  Minor code may provide more information
+    Credentials cache file '/tmp/krb5cc_894' not found
+    
+    debug1: Unspecified GSS failure.  Minor code may provide more information
+    Credentials cache file '/tmp/krb5cc_894' not found
+    
+    debug1: Next authentication method: publickey
+    debug1: Trying private key: /usr/home/.ssh/identity
+    debug1: Offering public key: /usr/home/.ssh/id_rsa
+    debug1: Server accepts key: pkalg ssh-rsa blen 277
+    debug1: read PEM private key done: type RSA
+    Connection closed by 10.17.12.14
+    
+
+    As you can see, it tried multiple authentication methods, and although I have keys set up and the
+    host is known, I just don't have a valid key for that system.
 
 
 IOM
@@ -480,6 +521,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__pxx__sp0__1\\deploywiz\\sas.core.jar;
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
+
  
 
     Be sure the path to sspiauth.dll is in your System PATH
