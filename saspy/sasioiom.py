@@ -194,6 +194,12 @@ class SASsessionIOM():
    omrpw     - pw for user for IOM access
    encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
    classpath - classpath to IOM client jars and saspyiom client jar.
+   autoexec  - This is a string of SAS code that will be submitted upon establishing a connection. 
+   authkey   - Key value for finding credentials in .authfile
+   timeout   - Timeout value for establishing connection to workspace server
+   appserver - Appserver name of the workspace server to connect to
+   sspi      - Boolean for using IWA to connect to a workspace server configured to use IWA
+   javaparms - for specifying java commandline options if necessary
    '''
    def __init__(self, **kwargs):
       self.pid    = None

@@ -211,6 +211,9 @@ class SASsession():
 
     The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
     Most of these parameters will be configured in the sascfg_personal.py configuration file.
+    All of these parameters are documented more thoroughly in the configuration section of the saspy doc:
+    https://sassoftware.github.io/saspy/install.html#configuration 
+    These are generally defined in the sascfg_personal.py file as opposed to being specified on the SASsession() invocation.
 
     Common parms for all access methods are:
 
@@ -218,6 +221,7 @@ class SASsession():
     :param cfgfile: fully qualified file name of your sascfg_personal.py file, if it's not in the python search path
     :param kernel: None - internal use when running the SAS_kernel notebook
     :param results: Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
+    :param lrecl: An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
     :param autoexec: A string of SAS code that will be submitted upon establishing a connection
     :return: 'SASsession'
     :rtype: 'SASsession'
@@ -236,6 +240,10 @@ class SASsession():
 
     :param ssh: full path of the ssh command; /usr/bin/ssh for instance
     :param host: host name of the remote machine
+    :param identity: (Optional) path to a .ppk identity file to be used on the ssh -i parameter
+
+    :param port: (Optional) The ssh port of the remote machine normally 22 (equivalent to invoking ssh with the -p option)
+    :param tunnel: (Optional) Certain methods of saspy require opening a local port and accepting data streamed from the SAS instance.
 
     **IOM**
 
@@ -248,6 +256,11 @@ class SASsession():
     :param omrpw: pw for user for remote IOM access
     :param encoding: This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
     :param classpath: classpath to IOM client jars and saspyiom client jar.
+    :param authkey: Key value for finding credentials in .authfile
+    :param timeout: Timeout value for establishing connection to workspace server
+    :param appserver: Appserver name of the workspace server to connect to
+    :param sspi: Boolean for using IWA to connect to a workspace server configured to use IWA
+    :param javaparms: for specifying java command line options if necessary
 
     """
 
@@ -1081,6 +1094,74 @@ class SASsession():
         reports whether the last LIBNAME statement executed correctly.
         """
         return self.symget("SYSLIBRC")
+
+
+    def dirlist(self, path):
+        """
+        This method returns the directory list for the path specified where SAS is running
+        """
+
+        code = """
+        data _null_;
+         spd = '"""+path+"""';
+         rc  = filename('saspydir', spd);
+         did = dopen('saspydir');
+
+         if did > 0 then
+            do;
+               memcount = dnum(did);
+               put 'MEMCOUNT=' memcount;
+               do while (memcount > 0);
+                  name = dread(did, memcount);
+                  memcount = memcount - 1;
+        
+                  qname = spd || '"""+os.sep+"""' || name; 
+        
+                  rc = filename('saspydq', qname);
+                  dq = dopen('saspydq');
+                  if dq NE 0 then
+                     do;
+                        dname = strip(name) || '"""+os.sep+"""';
+                        put 'DIR=' dname;
+                        rc = dclose(dq);
+                     end;
+                  else
+                     put 'FILE=' name;
+               end;
+        
+           put 'MEMEND';
+           rc = dclose(did);
+           end;
+         else
+            do;
+               put 'MEMCOUNT=0';
+               put 'MEMEND';
+           end;
+        
+         rc = filename('saspydq');
+         rc = filename('saspydir');
+        run;
+        """
+
+        ll = self.submit(code, results='text')
+
+        dirlist = []
+
+        l2 = ll['LOG'].rpartition("MEMCOUNT=")[2].partition("\n")
+        memcount = int(l2[0])
+
+        l3 = l2[2].rpartition("MEMEND")[0]
+
+        for row in l3.split(sep='\n'):
+           i = row.partition('=')
+           if i[0] in ['FILE', 'DIR']:
+              dirlist.append(i[2])
+      
+        if memcount != len(dirlist):
+           print("Some problem parsing list. Should be "+str(memcount)+" entries but got "+str(len(dirlist))+" instead.")
+
+        return dirlist
+
 
 
 class SASdata:

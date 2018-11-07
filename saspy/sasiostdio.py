@@ -164,15 +164,17 @@ class SASconfigSTDIO:
 class SASsessionSTDIO():
    '''
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-   cfgname - value in SAS_config_names List of the sascfg_personal.py file
-   kernel  - None - internal use when running the SAS_kernel notebook
-   saspath - overrides saspath Dict entry of cfgname in sascfg_personal.py file
-   options - overrides options Dict entry of cfgname in sascfg_personal.py file
-   encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
-
-   and for running STDIO over passwordless ssh
-   ssh     - full path of the ssh command; /usr/bin/ssh for instance
-   host    - host name of the remote machine
+   cfgname  - value in SAS_config_names List of the sascfg_personal.py file
+   kernel   - None - internal use when running the SAS_kernel notebook
+   saspath  - overrides saspath Dict entry of cfgname in sascfg_personal.py file
+   options  - overrides options Dict entry of cfgname in sascfg_personal.py file
+   encoding - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
+   autoexec - This is a string of SAS code that will be submitted upon establishing a connection. 
+   ssh      - full path of the ssh command; /usr/bin/ssh for instance
+   host     - host name of the remote machine
+   identity - path to an .ppk identity file to be used with the ssh -i option
+   port     - (Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the -p option)
+   tunnel   - (Optional: integer) Certain methods of saspy require opening a local port and accepting data streamed from the SAS instance.
    '''
    #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, saspath :str ='', options: list =[]) -> '<SASsession object>':
    def __init__(self, **kwargs):
