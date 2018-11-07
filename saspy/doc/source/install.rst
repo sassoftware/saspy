@@ -230,6 +230,8 @@ autoexec -
     This is a string of SAS code that will be submitted upon establishing a connection.
     You can use this to preassign libraries you always want available, or whatever you want.
 
+lrecl -
+    An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 .. code-block:: ipython3
 
@@ -258,7 +260,7 @@ diagnostics about how ssh is trying to authenticate. Something like the followin
 
 /usr/bin/ssh -vvv hostname.to.connect.to 
 
-In addition to the four keys for STDIO, there are two more keys to configure:
+In addition to the keys for STDIO, there are two more keys to configure:
 
 ssh - 
     (Required) The ssh command to run (Linux execv requires a fully qualified
@@ -456,6 +458,9 @@ javaparms -
     The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
     does allows for a way to specify them if something was needed.
 
+lrecl -
+    An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
+
 
 .. code-block:: ipython3
 
@@ -558,6 +563,8 @@ javaparms -
     The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
     does allows for a way to specify them if something was needed.
 
+lrecl -
+    An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 .. code-block:: ipython3
 
