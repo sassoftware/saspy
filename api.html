@@ -193,7 +193,10 @@
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p><strong>Overview</strong></p>
 <p>The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
-Most of these parameters will be configured in the sascfg_personal.py configuration file.</p>
+Most of these parameters will be configured in the sascfg_personal.py configuration file.
+All of these parameters are documented more thoroughly in the configuration section of the saspy doc:
+<a class="reference external" href="https://sassoftware.github.io/saspy/install.html#configuration">https://sassoftware.github.io/saspy/install.html#configuration</a> 
+These are generally defined in the sascfg_personal.py file as opposed to being specified on the SASsession() invocation.</p>
 <p>Common parms for all access methods are:</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -204,6 +207,7 @@ Most of these parameters will be configured in the sascfg_personal.py configurat
 <li><strong>cfgfile</strong> &#8211; fully qualified file name of your sascfg_personal.py file, if it&#8217;s not in the python search path</li>
 <li><strong>kernel</strong> &#8211; None - internal use when running the SAS_kernel notebook</li>
 <li><strong>results</strong> &#8211; Type of tabular results to return. default is &#8216;Pandas&#8217;, other options are &#8216;HTML or &#8216;TEXT&#8217;</li>
+<li><strong>lrecl</strong> &#8211; An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</li>
 <li><strong>autoexec</strong> &#8211; A string of SAS code that will be submitted upon establishing a connection</li>
 </ul>
 </td>
@@ -240,6 +244,9 @@ Most of these parameters will be configured in the sascfg_personal.py configurat
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>ssh</strong> &#8211; full path of the ssh command; /usr/bin/ssh for instance</li>
 <li><strong>host</strong> &#8211; host name of the remote machine</li>
+<li><strong>identity</strong> &#8211; (Optional) path to a .ppk identity file to be used on the ssh -i parameter</li>
+<li><strong>port</strong> &#8211; (Optional) The ssh port of the remote machine normally 22 (equivalent to invoking ssh with the -p option)</li>
+<li><strong>tunnel</strong> &#8211; (Optional) Certain methods of saspy require opening a local port and accepting data streamed from the SAS instance.</li>
 </ul>
 </td>
 </tr>
@@ -259,11 +266,58 @@ Most of these parameters will be configured in the sascfg_personal.py configurat
 <li><strong>omrpw</strong> &#8211; pw for user for remote IOM access</li>
 <li><strong>encoding</strong> &#8211; This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to</li>
 <li><strong>classpath</strong> &#8211; classpath to IOM client jars and saspyiom client jar.</li>
+<li><strong>authkey</strong> &#8211; Key value for finding credentials in .authfile</li>
+<li><strong>timeout</strong> &#8211; Timeout value for establishing connection to workspace server</li>
+<li><strong>appserver</strong> &#8211; Appserver name of the workspace server to connect to</li>
+<li><strong>sspi</strong> &#8211; Boolean for using IWA to connect to a workspace server configured to use IWA</li>
+<li><strong>javaparms</strong> &#8211; for specifying java command line options if necessary</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="saspy.SASsession.SYSERR">
+<code class="descname">SYSERR</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.SYSERR" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the SAS Automatic Macro Variable SYSERR which
+contains a return code status set by some SAS procedures and the DATA step.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.SYSERRORTEXT">
+<code class="descname">SYSERRORTEXT</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.SYSERRORTEXT" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the SAS Automatic Macro Variable SYSERRORTEXT which
+is the text of the last error message generated in the SAS log.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.SYSFILRC">
+<code class="descname">SYSFILRC</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.SYSFILRC" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the SAS Automatic Macro Variable SYSFILRC which
+identifies whether or not the last FILENAME statement executed correctly.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.SYSINFO">
+<code class="descname">SYSINFO</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.SYSINFO" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the SAS Automatic Macro Variable SYSINFO which
+contains return codes provided by some SAS procedures.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.SYSLIBRC">
+<code class="descname">SYSLIBRC</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.SYSLIBRC" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the SAS Automatic Macro Variable SYSLIBRC which
+reports whether the last LIBNAME statement executed correctly.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.SYSWARNINGTEXT">
+<code class="descname">SYSWARNINGTEXT</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.SYSWARNINGTEXT" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the SAS Automatic Macro Variable SYSWARNINGTEXT which
+is the text of the last warning message generated in the SAS log.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="saspy.SASsession.dataframe2sasdata">
 <code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
@@ -329,6 +383,12 @@ Most of these parameters will be configured in the sascfg_personal.py configurat
 </dd></dl>
 
 <dl class="method">
+<dt id="saspy.SASsession.dirlist">
+<code class="descname">dirlist</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.dirlist" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the directory list for the path specified where SAS is running</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASsession.disconnect">
 <code class="descname">disconnect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.disconnect" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method disconnects an IOM session to allow for reconnecting when switching networks
@@ -361,7 +421,7 @@ See the Advanced topics section of the doc for details</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.read_csv">
-<code class="descname">read_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str = '_csv'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>opts: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.read_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descname">read_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str = '_csv'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>opts: dict = None</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.read_csv" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -384,7 +444,7 @@ See the Advanced topics section of the doc for details</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.sasdata">
-<code class="descname">sasdata</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>dsopts: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.sasdata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sasdata</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>dsopts: dict = None</em><span class="sig-paren">)</span> &#x2192; saspy.sasbase.SASdata<a class="headerlink" href="#saspy.SASsession.sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to define an existing SAS dataset so that it can be accessed via SASPy</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -425,7 +485,7 @@ See the Advanced topics section of the doc for details</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.sasdata2dataframe">
-<code class="descname">sasdata2dataframe</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>method: str = 'MEMORY'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sasdata2dataframe" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sasdata2dataframe</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>method: str = 'MEMORY'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sasdata2dataframe" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
 SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -476,7 +536,7 @@ See the sasets.py module.
 
 <dl class="method">
 <dt id="saspy.SASsession.saslib">
-<code class="descname">saslib</code><span class="sig-paren">(</span><em>libref: str</em>, <em>engine: str = ' '</em>, <em>path: str = ''</em>, <em>options: str = ' '</em>, <em>prompt: dict = []</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.saslib" title="Permalink to this definition">¶</a></dt>
+<code class="descname">saslib</code><span class="sig-paren">(</span><em>libref: str</em>, <em>engine: str = ' '</em>, <em>path: str = ''</em>, <em>options: str = ' '</em>, <em>prompt: dict = None</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.saslib" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -572,7 +632,7 @@ See the sasutil.py module.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.sd2df">
-<code class="descname">sd2df</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>method: str = 'MEMORY'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sd2df</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>method: str = 'MEMORY'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;sasdata2dataframe&#8217;. Why type all that?
 SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -615,7 +675,7 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 
 <dl class="method">
 <dt id="saspy.SASsession.sd2df_CSV">
-<code class="descname">sd2df_CSV</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_CSV" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sd2df_CSV</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_CSV" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;sasdata2dataframe&#8217; specifying method=&#8217;CSV&#8217;. Why type all that?
 SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -703,7 +763,7 @@ but you can run this way too; get the objects display them yourself and/or write
 
 <dl class="method">
 <dt id="saspy.SASsession.submit">
-<code class="descname">submit</code><span class="sig-paren">(</span><em>code: str</em>, <em>results: str = ''</em>, <em>prompt: dict = []</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#saspy.SASsession.submit" title="Permalink to this definition">¶</a></dt>
+<code class="descname">submit</code><span class="sig-paren">(</span><em>code: str</em>, <em>results: str = ''</em>, <em>prompt: dict = None</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#saspy.SASsession.submit" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.</p>
 <ul>
 <li><p class="first">code    - the SAS statements you want to execute</p>
@@ -789,7 +849,7 @@ HTML(results[&#8216;LST&#8217;])</dd>
 
 <dl class="method">
 <dt id="saspy.SASsession.write_csv">
-<code class="descname">write_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = {}</em>, <em>opts: dict = {}</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.write_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descname">write_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>opts: dict = None</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.write_csv" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1230,7 +1290,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 
 <dl class="method">
 <dt id="saspy.SASdata.to_csv">
-<code class="descname">to_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>opts: dict = {}</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASdata.to_csv" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>opts: dict = None</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASdata.to_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method will export a SAS Data Set to a file in CSV format.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />

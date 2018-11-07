@@ -391,6 +391,13 @@ keys in the configuration definition.</p>
 with Unix only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
 SSH configured between the two systems. Google it, it&#8217;s not that difficult.</p>
+<p>If you don&#8217;t already have this set up, you need to generate rsa keys. Starting
+after version 2.2.9, you can specify an identity file (.pem file) instead by
+providing the file path on the identity key. Either of these provide passwordless access.
+If you have any trouble with this, you will find that adding -vvv to the command saspy
+trys to run (run that yourself from a shell with -vvv added) will provide significant
+diagnostics about how ssh is trying to authenticate. Something like the following:</p>
+<p>/usr/bin/ssh -vvv hostname.to.connect.to</p>
 <p>In addition to the four keys for STDIO, there are two more keys to configure:</p>
 <dl class="docutils">
 <dt>ssh -</dt>
@@ -412,9 +419,11 @@ Enter the fully qualified path.)</dd>
 <p class="last">The <code class="docutils literal"><span class="pre">'ssh'</span></code> key is the trigger to use the STDIO over SSH connection
 method.</p>
 </div>
-<p>To accomodate alternative SSH configurations, you may also provide one or both of the
+<p>To accomodate alternative SSH configurations, you may also provide any of the
 following optional keys:</p>
 <dl class="docutils">
+<dt>identity -</dt>
+<dd>(Optional: string) The path to the identity file to use. A .pem file.</dd>
 <dt>port -</dt>
 <dd>(Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the <code class="docutils literal"><span class="pre">-p</span></code> option)</dd>
 <dt>tunnel -</dt>
@@ -426,6 +435,7 @@ due to a firewall or other security configuration, you may pass a local port num
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">ssh</span>      <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span> <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
             <span class="s1">&#39;ssh&#39;</span>     <span class="p">:</span> <span class="s1">&#39;/usr/bin/ssh&#39;</span><span class="p">,</span>
             <span class="s1">&#39;host&#39;</span>    <span class="p">:</span> <span class="s1">&#39;remote.linux.host&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;identity&#39;</span><span class="p">:</span> <span class="s1">&#39;/usr/home/.ssh/alt_id.pem&#39;</span><span class="p">,</span>
             <span class="s1">&#39;port&#39;</span>    <span class="p">:</span> <span class="mi">9922</span><span class="p">,</span>
             <span class="s1">&#39;tunnel&#39;</span>  <span class="p">:</span> <span class="mi">9911</span>
            <span class="p">}</span>
