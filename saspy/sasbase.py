@@ -1100,6 +1100,12 @@ class SASsession():
         """
         This method returns the directory list for the path specified where SAS is running
         """
+        host = self.symget('SYSSCP')
+
+        if host == 'WIN':
+           sep = '\\'
+        else:
+           sep = '/'
 
         code = """
         data _null_;
@@ -1115,13 +1121,13 @@ class SASsession():
                   name = dread(did, memcount);
                   memcount = memcount - 1;
         
-                  qname = spd || '"""+os.sep+"""' || name; 
+                  qname = spd || '"""+sep+"""' || name; 
         
                   rc = filename('saspydq', qname);
                   dq = dopen('saspydq');
                   if dq NE 0 then
                      do;
-                        dname = strip(name) || '"""+os.sep+"""';
+                        dname = strip(name) || '"""+sep+"""';
                         put 'DIR=' dname;
                         rc = dclose(dq);
                      end;
