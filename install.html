@@ -372,6 +372,8 @@ windows-1252, respectively.</dd>
 <dt>autoexec -</dt>
 <dd>This is a string of SAS code that will be submitted upon establishing a connection.
 You can use this to preassign libraries you always want available, or whatever you want.</dd>
+<dt>lrecl -</dt>
+<dd>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
             <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">,</span> <span class="s2">&quot;-autoexec&quot;</span><span class="p">,</span> <span class="s2">&quot;/user/tom/autoexec&quot;</span><span class="p">]</span>
@@ -398,7 +400,7 @@ If you have any trouble with this, you will find that adding -vvv to the command
 trys to run (run that yourself from a shell with -vvv added) will provide significant
 diagnostics about how ssh is trying to authenticate. Something like the following:</p>
 <p>/usr/bin/ssh -vvv hostname.to.connect.to</p>
-<p>In addition to the four keys for STDIO, there are two more keys to configure:</p>
+<p>In addition to the keys for STDIO, there are two more keys to configure:</p>
 <dl class="docutils">
 <dt>ssh -</dt>
 <dd>(Required) The ssh command to run (Linux execv requires a fully qualified
@@ -571,6 +573,8 @@ You can use this to preassign libraries you always want available, or whatever y
 <dt>javaparms -</dt>
 <dd>The javaparms option allows you to specify Java command line options. These aren&#8217;t generally needed, but this
 does allows for a way to specify them if something was needed.</dd>
+<dt>lrecl -</dt>
+<dd>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Unix client class path</span>
 <span class="n">cpL</span>  <span class="o">=</span>  <span class="s2">&quot;/whever/I/put/these/jars/sas.svc.connection.jar&quot;</span>
@@ -666,6 +670,8 @@ You can use this to preassign libraries you always want available, or whatever y
 <dt>javaparms -</dt>
 <dd>The javaparms option allows you to specify Java command line options. These aren&#8217;t generally needed, but this
 does allows for a way to specify them if something was needed.</dd>
+<dt>lrecl -</dt>
+<dd>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Windows client class path</span>
 <span class="n">cpW</span>  <span class="o">=</span>  <span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.svc.connection.jar&quot;</span>
