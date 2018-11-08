@@ -193,7 +193,7 @@ class SASsessionSTDIO():
    def __del__(self):
       if self.pid:
          self._endsas()
-      self.pid = None
+      self._sb.SASpid = None
 
    def _logcnt(self, next=True):
        if next == True:
@@ -325,6 +325,7 @@ Will use HTML5 for this SASsession.""")
       rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
       if rc != None:
          self.pid = None
+         self._sb.SASpid = None
          lst = self.stdout.read1(4096)
          print("stdout from subprocess is:\n"+lst.decode()) 
          
@@ -346,13 +347,13 @@ Will use HTML5 for this SASsession.""")
       return self.pid
 
    def _endsas(self):
-      rc = 0
+      rc  = 0
+      ret = None
       if self.pid:
          code = ";*\';*\";*/;\n;quit;endsas;"
          self._getlog(wait=1)
          self._asubmit(code,'text')
          sleep(1)
-         ret = None
          try:
             rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
          except (subprocess.TimeoutExpired):
@@ -363,6 +364,7 @@ Will use HTML5 for this SASsession.""")
          if self.sascfg.verbose:
             print("SAS Connection terminated. Subprocess id was "+str(self.pid))
          self.pid = None
+         self._sb.SASpid = None
       return ret
 
    def _getlog(self, wait=5, jobid=None):
@@ -385,10 +387,12 @@ Will use HTML5 for this SASsession.""")
       self._log += x
 
       if self.pid == None:
+         self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
       rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
       if rc != None:
          self.pid = None
+         self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       return x
@@ -423,10 +427,12 @@ Will use HTML5 for this SASsession.""")
                sleep(0.5)
 
       if self.pid == None:
+         self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
       rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
       if rc != None:
          self.pid = None
+         self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       if eof:
@@ -457,10 +463,12 @@ Will use HTML5 for this SASsession.""")
       lst = f2[0]
 
       if self.pid == None:
+         self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
       rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
       if rc != None:
          self.pid = None
+         self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       return lst.replace(chr(12), '\n')
@@ -540,12 +548,14 @@ Will use HTML5 for this SASsession.""")
       pcodeo   = ''
 
       if self.pid == None:
+         self._sb.SASpid = None
          print("No SAS process attached. SAS process has terminated unexpectedly.")
          return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
 
       rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
       if rc != None:
          self.pid = None
+         self._sb.SASpid = None
          return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
 
       # to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
@@ -604,6 +614,7 @@ Will use HTML5 for this SASsession.""")
                      except:
                         pass
                      self.pid = None
+                     self._sb.SASpid = None
                      return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
                                  str(rc)+'\n'+logf.decode(self.sascfg.encoding, errors='replace'), LST='')
                  if bail:
@@ -640,6 +651,7 @@ Will use HTML5 for this SASsession.""")
              rc = 0
              rc = os.waitpid(self.pid, 0)
              self.pid = None
+             self._sb.SASpid = None
              log = logf.partition(logcodeo)[0]+b'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc).encode()+b'\n'+logf
              return dict(LOG=log.encode(), LST='')
 
@@ -698,6 +710,7 @@ Will use HTML5 for this SASsession.""")
         bc    = False
 
         if self.pid is None:
+            self._sb.SASpid = None
             return dict(LOG=b"No SAS process attached. SAS process has terminated unexpectedly.", LST=b'', ABORT=True)
 
         if self.sascfg.ssh:
@@ -718,6 +731,7 @@ Will use HTML5 for this SASsession.""")
             rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
             if rc is not None:
                 self.pid = None
+                self._sb.SASpid = None
                 outrc = str(rc)
                 return dict(LOG=b'SAS process has terminated unexpectedly. Pid State= '+outrc.encode(), LST=b'',ABORT=True)
 
