@@ -14,9 +14,12 @@
 #  limitations under the License.
 #
 import logging
+from typing import TYPE_CHECKING
+from saspy.sasproccommons import procDecorator
 
-from saspy.sasdecorator import procDecorator
-from saspy.sasresults import SASresults
+if TYPE_CHECKING:
+    from saspy.sasresults import SASresults
+    from saspy.sasbase import SASdata
 
 
 class SASViyaML:
@@ -51,7 +54,7 @@ class SASViyaML:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def factmac(self, data: 'SASData' = None,
+    def factmac(self, data: 'SASdata' = None,
                 autotune: str = None,
                 code: str = None,
                 display: str = None,
@@ -69,7 +72,7 @@ class SASViyaML:
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_factmac_syntax.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm display: The display variable can only be a string type.
@@ -85,7 +88,7 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input'})
-    def fastknn(self, data: 'SASData' = None,
+    def fastknn(self, data: 'SASdata' = None,
                 display: str = None,
                 displayout: str = None,
                 id: str = None,
@@ -99,7 +102,7 @@ class SASViyaML:
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_fastknn_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm display: The display variable can only be a string type.
         :parm displayout: The displayout variable can only be a string type.
         :parm id: The id variable can only be a string type.
@@ -111,7 +114,7 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def forest(self, data: 'SASData' = None,
+    def forest(self, data: 'SASdata' = None,
                autotune: str = None,
                code: str = None,
                crossvalidation: str = None,
@@ -132,7 +135,7 @@ class SASViyaML:
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_forest_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm crossvalidation: The crossvalidation variable can only be a string type.
@@ -151,7 +154,7 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def gradboost(self, data: 'SASData' = None,
+    def gradboost(self, data: 'SASdata' = None,
                   autotune: str = None,
                   code: str = None,
                   crossvalidation: str = None,
@@ -172,7 +175,7 @@ class SASViyaML:
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_gradboost_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm crossvalidation: The crossvalidation variable can only be a string type.
@@ -191,7 +194,7 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input', 'target', 'train'})
-    def nnet(self, data: 'SASData' = None,
+    def nnet(self, data: 'SASdata' = None,
              architecture: str = None,
              autotune: str = None,
              code: str = None,
@@ -212,7 +215,7 @@ class SASViyaML:
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_nnet_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm architecture: The architecture variable can only be a string type.
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
@@ -231,7 +234,7 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input'})
-    def svdd(self, data: 'SASData' = None,
+    def svdd(self, data: 'SASdata' = None,
              code: str = None,
              id: str = None,
              input: [str, list, dict] = None,
@@ -247,7 +250,7 @@ class SASViyaML:
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_svdd_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm code: The code variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
@@ -261,7 +264,7 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input'})
-    def svmachine(self, data: 'SASData' = None,
+    def svmachine(self, data: 'SASdata' = None,
                   autotune: str = None,
                   code: str = None,
                   id: str = None,
@@ -280,7 +283,7 @@ class SASViyaML:
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_svmachine_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASData object This parameter is required
+        :param data: SASdata object This parameter is required
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm id: The id variable can only be a string type.

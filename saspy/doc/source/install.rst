@@ -230,6 +230,8 @@ autoexec -
     This is a string of SAS code that will be submitted upon establishing a connection.
     You can use this to preassign libraries you always want available, or whatever you want.
 
+lrecl -
+    An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 .. code-block:: ipython3
 
@@ -249,7 +251,16 @@ with Unix only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
 SSH configured between the two systems. Google it, it's not that difficult.
 
-In addition to the four keys for STDIO, there are two more keys to configure:
+If you don't already have this set up, you need to generate rsa keys. Starting
+after version 2.2.9, you can specify an identity file (.pem file) instead by
+providing the file path on the identity key. Either of these provide passwordless access.
+If you have any trouble with this, you will find that adding -vvv to the command saspy
+trys to run (run that yourself from a shell with -vvv added) will provide significant
+diagnostics about how ssh is trying to authenticate. Something like the following:
+
+/usr/bin/ssh -vvv hostname.to.connect.to 
+
+In addition to the keys for STDIO, there are two more keys to configure:
 
 ssh - 
     (Required) The ssh command to run (Linux execv requires a fully qualified
@@ -270,8 +281,11 @@ host -
 .. note:: The ``'ssh'`` key is the trigger to use the STDIO over SSH connection
           method.
 
-To accomodate alternative SSH configurations, you may also provide one or both of the 
+To accomodate alternative SSH configurations, you may also provide any of the 
 following optional keys:
+
+identity -
+    (Optional: string) The path to the identity file to use. A .pem file.
 
 port -
     (Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the ``-p`` option)
@@ -287,6 +301,7 @@ tunnel -
     ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
                 'ssh'     : '/usr/bin/ssh',
                 'host'    : 'remote.linux.host',
+                'identity': '/usr/home/.ssh/alt_id.pem',
                 'port'    : 9922,
                 'tunnel'  : 9911
                }
@@ -443,6 +458,9 @@ javaparms -
     The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
     does allows for a way to specify them if something was needed.
 
+lrecl -
+    An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
+
 
 .. code-block:: ipython3
 
@@ -545,6 +563,8 @@ javaparms -
     The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
     does allows for a way to specify them if something was needed.
 
+lrecl -
+    An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 .. code-block:: ipython3
 

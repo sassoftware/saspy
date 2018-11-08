@@ -20,7 +20,7 @@ from saspy.sasproccommons import procDecorator
 
 if TYPE_CHECKING:
     from saspy.sasresults import SASresults
-    from saspy.sasdata import SASdata
+    from saspy.sasbase import SASdata
 
 
 class SASqc:
