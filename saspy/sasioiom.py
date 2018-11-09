@@ -188,12 +188,28 @@ class SASsessionIOM():
     """
     The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
 
-   autoexec  - This is a string of SAS code that will be submitted upon establishing a connection. 
-   authkey   - Key value for finding credentials in .authfile
-   timeout   - Timeout value for establishing connection to workspace server
-   appserver - Appserver name of the workspace server to connect to
-   sspi      - Boolean for using IWA to connect to a workspace server configured to use IWA
-   javaparms - for specifying java commandline options if necessary
+    cfgname   - value in SAS_config_names List of the sascfg_personal.py file
+    kernel    - None - internal use when running the SAS_kernel notebook
+    java      - the path to the java executable to use
+    iomhost   - for remote IOM case, not local Windows] the resolvable host name, or ip to the IOM server to connect to
+    iomport   - for remote IOM case, not local Windows] the port IOM is listening on
+    omruser   - user id for IOM access
+    omrpw     - pw for user for IOM access
+    encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
+    classpath - classpath to IOM client jars and saspyiom client jar.
+    autoexec  - This is a string of SAS code that will be submitted upon establishing a connection.
+    authkey   - Key value for finding credentials in .authfile
+    timeout   - Timeout value for establishing connection to workspace server
+    appserver - Appserver name of the workspace server to connect to
+    sspi      - Boolean for using IWA to connect to a workspace server configured to use IWA
+    javaparms - for specifying java commandline options if necessary
+    """
+
+    def __init__(self, **kwargs):
+        self.pid = None
+        self.stdin = None
+        self.stderr = None
+        self.stdout = None
 
         self._sb = kwargs.get('sb', None)
         self.sascfg = SASconfigIOM(self, **kwargs)
@@ -206,7 +222,7 @@ class SASsessionIOM():
     def __del__(self):
         if self.pid:
             self._endsas()
-        self.pid = None
+        self._sb.SASpid = None
 
     def _logcnt(self, next=True):
         if next == True:
@@ -519,11 +535,15 @@ Will use HTML5 for this SASsession.""")
         return
 
     def _asubmit(self, code, results="html"):
-        # as this is an _ method, it's not really to be used. Of note is that if this is used and if what it submitted generates
-        # anything to the lst, then unless _getlst[txt] is called, then next submit will happen to get the lst this wrote, plus
-        # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
-        # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
-        # unnecessary read in submit as this can't happen in the current code.
+        """
+        as this is an '_' method, it's not really to be used. Of note is that if this is used and if what it submitted generates
+        anything to the lst, then unless _getlst[txt] is called, then next submit will happen to get the lst this wrote, plus
+        what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
+        expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
+        unnecessary read in submit as this can't happen in the current code.
+
+        :param code: str
+        """
 
         odsopen = b"ods listing close;ods " + self.sascfg.output.encode() + \
                   b" (id=saspy_internal) file=" + self._tomods1 + b" options(bitmap_mode='inline') device=svg style=" + self._sb.HTML_Style.encode() + \
@@ -547,7 +567,7 @@ Will use HTML5 for this SASsession.""")
 
         return
 
-    def submit(self, code: str, results: str = "html", prompt: dict = {}) -> [dict, str]:
+    def submit(self, code: str, results: str = "html", prompt: dict = None) -> dict:
         '''
         This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
         code    - the SAS statements you want to execute
@@ -564,14 +584,16 @@ Will use HTML5 for this SASsession.""")
                      """ ,
                      prompt = {'user': False, 'pw': True, 'dsname': False}
                      )
-  
+
         Returns - a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is 'results' (HTML or TEXT)
-  
+
         NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()
         i.e,: results = sas.submit("data a; x=1; run; proc print;run')
               print(results['LOG'])
               HTML(results['LST'])
         '''
+        prompt = prompt if prompt is not None else {}
+
         # odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
         odsopen = b"ods listing close;ods " + self.sascfg.output.encode() + \
                   b" (id=saspy_internal) file=" + self._tomods1 + b" options(bitmap_mode='inline') device=svg style=" + self._sb.HTML_Style.encode() + \
@@ -594,6 +616,7 @@ Will use HTML5 for this SASsession.""")
         pgm = b''
 
         if self.pid == None:
+            self._sb.SASpid = None
             print("No SAS process attached. SAS process has terminated unexpectedly.")
             return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
 
@@ -601,17 +624,20 @@ Will use HTML5 for this SASsession.""")
             try:
                 rc = self.pid.wait(0)
                 self.pid = None
+                self._sb.SASpid = None
                 return dict(LOG='SAS process has terminated unexpectedly. RC from wait was: ' + str(rc), LST='')
             except:
                 pass
         else:
             if self.pid == None:
+                self._sb.SASpid = None
                 return "No SAS process attached. SAS process has terminated unexpectedly."
             # rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
             rc = os.waitpid(self.pid, os.WNOHANG)
             # if rc != None:
             if rc[1]:
                 self.pid = None
+                self._sb.SASpid = None
                 return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' + str(rc), LST='')
 
         # to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
@@ -622,7 +648,6 @@ Will use HTML5 for this SASsession.""")
         if results.upper() != "HTML":
             ods = False
 
-<<<<<<<
         if len(prompt):
             pcodei += 'options nosource nonotes;\n'
             pcodeo += 'options nosource nonotes;\n'
@@ -643,17 +668,6 @@ Will use HTML5 for this SASsession.""")
                     pcodeiv += '%let ' + key + '=' + var + ';\n'
             pcodei += 'options source notes;\n'
             pcodeo += 'options source notes;\n'
-=======
-   def submit(self, code: str, results: str ="html", prompt: dict = None) -> dict:
-      '''
-      This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
-      code    - the SAS statements you want to execute
-      results - format of results, HTML is default, TEXT is the alternative
-      prompt  - dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete
-                The keys are the names of the macro variables and the boolean flag is to either hide what you type and delete
-                the macros, or show what you type and keep the macros (they will still be available later)
-                for example (what you type for pw will not be displayed, user and dsname will):
->>>>>>>
 
         if ods:
             pgm += odsopen
@@ -661,38 +675,8 @@ Will use HTML5 for this SASsession.""")
         pgm += mj + b'\n' + pcodei.encode() + pcodeiv.encode()
         pgm += code.encode() + b'\n' + pcodeo.encode() + b'\n' + mj
 
-<<<<<<<
         if ods:
             pgm += odsclose
-=======
-      NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()
-      i.e,: results = sas.submit("data a; x=1; run; proc print;run')
-            print(results['LOG'])
-            HTML(results['LST'])
-      '''
-      prompt = prompt if prompt is not None else {}
-
-      #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
-      odsopen  = b"ods listing close;ods "+self.sascfg.output.encode()+ \
-                 b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style.encode()+ \
-                 b"; ods graphics on / outputfmt=png;\n"
-      odsclose = b"ods "+self.sascfg.output.encode()+b" (id=saspy_internal) close;ods listing;\n"
-      ods      = True;
-      mj       = b";*\';*\";*/;"
-      lstf     = b''
-      logf     = b''
-      bail     = False
-      eof      = 5
-      bc       = False
-      done     = False
-      logn     = self._logcnt()
-      logcodei = "%put E3969440A681A24088859985" + logn + ";"
-      logcodeo = b"\nE3969440A681A24088859985" + logn.encode()
-      pcodei   = ''
-      pcodeiv  = ''
-      pcodeo   = ''
-      pgm      = b''
->>>>>>>
 
         pgm += b'\n' + logcodei.encode() + b'\n'
         self.stdin[0].send(pgm + b'tom says EOL=' + logcodeo + b'\n')
@@ -704,7 +688,10 @@ Will use HTML5 for this SASsession.""")
                         try:
                             rc = self.pid.wait(0)
                             self.pid = None
-                            log = logf.partition(logcodeo)[0] + b'\nSAS process has terminated unexpectedly. RC from wait was: ' + str(rc).encode()
+                            self._sb.SASpid = None
+                            log = logf.partition(logcodeo)[
+                                      0] + b'\nSAS process has terminated unexpectedly. RC from wait was: ' + str(
+                                rc).encode()
                             return dict(LOG=log.decode(errors='replace'), LST='')
                         except:
                             pass
@@ -714,7 +701,9 @@ Will use HTML5 for this SASsession.""")
                         # if rc is not None:
                         if rc[1]:
                             self.pid = None
-                            log = logf.partition(logcodeo)[0] + b'\nSAS process has terminated unexpectedly. Pid State= ' + str(rc).encode()
+                            self._sb.SASpid = None
+                            log = logf.partition(logcodeo)[
+                                      0] + b'\nSAS process has terminated unexpectedly. Pid State= ' + str(rc).encode()
                             return dict(LOG=log.decode(errors='replace'), LST='')
 
                     if bail:
@@ -761,6 +750,7 @@ Will use HTML5 for this SASsession.""")
                     rc = os.waitpid(self.pid, 0)
 
                 self.pid = None
+                self._sb.SASpid = None
                 log = logf.partition(logcodeo)[
                           0] + b'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= ' + str(
                     rc).encode()
@@ -817,6 +807,7 @@ Will use HTML5 for this SASsession.""")
         bc = False
 
         if self.pid is None:
+            self._sb.SASpid = None
             return dict(LOG=b"No SAS process attached. SAS process has terminated unexpectedly.", LST=b'', ABORT=True)
 
         if True:
@@ -837,6 +828,7 @@ Will use HTML5 for this SASsession.""")
             sleep(.25)
 
         self.pid = None
+        self._sb.SASpid = None
         return dict(LOG=b"SAS process terminated", LST=b'', ABORT=True)
 
     def saslog(self):
@@ -891,7 +883,7 @@ Will use HTML5 for this SASsession.""")
         return exists
 
     def read_csv(self, file: str, table: str, libref: str = "", nosub: bool = False,
-                 opts: dict = {}) -> '<SASdata object>':
+                 opts: dict = None) -> '<SASdata object>':
         """
         This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
         file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
@@ -899,6 +891,8 @@ Will use HTML5 for this SASsession.""")
         libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
         """
+        opts = opts if opts is not None else {}
+
         code = "filename x "
 
         if file.lower().startswith("http"):
@@ -915,8 +909,8 @@ Will use HTML5 for this SASsession.""")
         else:
             ll = self.submit(code, "text")
 
-    def write_csv(self, file: str, table: str, libref: str = "", nosub: bool = False, dsopts: dict = {},
-                  opts: dict = {}) -> 'The LOG showing the results of the step':
+    def write_csv(self, file: str, table: str, libref: str = "", nosub: bool = False, dsopts: dict = None,
+                  opts: dict = None) -> 'The LOG showing the results of the step':
         """
         This method will export a SAS Data Set to a file in CSV format.
         file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
@@ -925,6 +919,9 @@ Will use HTML5 for this SASsession.""")
         dsopts  - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
         opts    - a dictionary containing any of the following Proc Export options(delimiter, putnames)
         """
+        dsopts = dsopts if dsopts is not None else {}
+        opts = opts if opts is not None else {}
+
         code = "options nosource;\n"
         code += "filename x \"" + file + "\";\n"
         code += "proc export data=" + libref + "." + table + self._sb._dsopts(dsopts) + " outfile=x dbms=csv replace; "
@@ -975,7 +972,6 @@ Will use HTML5 for this SASsession.""")
                     else:
                         dts.append('N')
 
-<<<<<<<
         code = "data "
         if len(libref):
             code += libref + "."
@@ -986,21 +982,6 @@ Will use HTML5 for this SASsession.""")
             code += "format " + format + ";\n"
         code += "infile datalines delimiter='03'x DSD STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput " + input + ";\ndatalines4;"
         self._asubmit(code, "text")
-=======
-      return exists
-   
-   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict = None) -> '<SASdata object>':
-      '''
-      This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
-      file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
-      table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-      opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
-      '''
-      opts = opts if opts is not None else {}
-
-      code  = "filename x "
->>>>>>>
 
         code = ""
         for row in df.itertuples(index=False):
@@ -1026,42 +1007,11 @@ Will use HTML5 for this SASsession.""")
                 self._asubmit(code, "text")
                 code = ""
 
-<<<<<<<
         self._asubmit(code + ";;;;\nrun;", "text")
         ll = self.submit("", 'text')
         return
-=======
-      code += "\""+file+"\";\n"
-      code += "proc import datafile=x out="
-      if len(libref):
-         code += libref+"."
-      code += table+" dbms=csv replace; "+self._sb._impopts(opts)+" run;"
-   
-      if nosub:
-         print(code)
-      else:
-         ll = self.submit(code, "text")
-   
-   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict = None, opts: dict = None) -> 'The LOG showing the results of the step':
-      '''
-      This method will export a SAS Data Set to a file in CSV format.
-      file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
-      table   - the name of the SAS Data Set you want to export to a CSV file
-      libref  - the libref for the SAS Data Set.
-      dsopts  - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
-      opts    - a dictionary containing any of the following Proc Export options(delimiter, putnames)
-      '''
-      dsopts = dsopts if dsopts is not None else {}
-      opts = opts if opts is not None else {}
 
-      code  = "options nosource;\n"
-      code += "filename x \""+file+"\";\n"
-      code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
-      code += self._sb._expopts(opts)+" run\n;"
-      code += "options source;\n"
->>>>>>>
-
-    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = {}, rowsep: str = '\x01',
+    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None, rowsep: str = '\x01',
                           colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
         """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -1070,6 +1020,7 @@ Will use HTML5 for this SASsession.""")
         rowsep  - the row seperator character to use; defaults to '\n'
         colsep  - the column seperator character to use; defaults to '\t'
         """
+        dsopts = dsopts if dsopts is not None else {}
 
         method = kwargs.pop('method', None)
         if method and method.lower() == 'csv':
@@ -1097,23 +1048,7 @@ Will use HTML5 for this SASsession.""")
         code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
         code += "run;"
 
-<<<<<<<
         ll = self.submit(code, "text")
-=======
-      self._asubmit(code+";;;;\nrun;", "text")
-      ll = self.submit("", 'text')
-      return
-   
-   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
-      '''
-      This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-      table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
-      libref  - the libref for the SAS Data Set.
-      rowsep  - the row seperator character to use; defaults to '\n'
-      colsep  - the column seperator character to use; defaults to '\t'
-      '''
-      dsopts = dsopts if dsopts is not None else {}
->>>>>>>
 
         l2 = ll['LOG'].rpartition("LRECL= ")
         l2 = l2[2].partition("\n")
@@ -1193,6 +1128,7 @@ Will use HTML5 for this SASsession.""")
                     try:
                         rc = self.pid.wait(0)
                         self.pid = None
+                        self._sb.SASpid = None
                         print('\nSAS process has terminated unexpectedly. RC from wait was: ' + str(rc))
                         return None
                     except:
@@ -1201,6 +1137,7 @@ Will use HTML5 for this SASsession.""")
                     rc = os.waitpid(self.pid, os.WNOHANG)
                     if rc[1]:
                         self.pid = None
+                        self._sb.SASpid = None
                         print('\nSAS process has terminated unexpectedly. RC from wait was: ' + str(rc))
                         return None
 
@@ -1282,7 +1219,17 @@ Will use HTML5 for this SASsession.""")
 
         return df
 
-      dsopts = dsopts if dsopts is not None else {}
+    def sasdata2dataframeCSV(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None,
+                             tempkeep: bool = False, **kwargs) -> '<Pandas Data Frame object>':
+        """
+        This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
+        table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
+        libref   - the libref for the SAS Data Set.
+        dsopts   - data set options for the input SAS Data Set
+        tempfile - file to use to store CSV, else temporary file will be used.
+        tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        """
+        dsopts = dsopts if dsopts is not None else {}
 
         logf = ''
         lstf = ''
@@ -1413,6 +1360,7 @@ Will use HTML5 for this SASsession.""")
                         try:
                             rc = self.pid.wait(0)
                             self.pid = None
+                            self._sb.SASpid = None
                             print('\nSAS process has terminated unexpectedly. RC from wait was: ' + str(rc))
                             return None
                         except:
@@ -1421,6 +1369,7 @@ Will use HTML5 for this SASsession.""")
                         rc = os.waitpid(self.pid, os.WNOHANG)
                         if rc[1]:
                             self.pid = None
+                            self._sb.SASpid = None
                             print('\nSAS process has terminated unexpectedly. RC from wait was: ' + str(rc))
                             return None
 
@@ -1475,7 +1424,7 @@ Will use HTML5 for this SASsession.""")
                 if len(lst) > 0:
                     lstf += lst
                     if lstf.count(lstcodeo) >= 1:
-                        done = True;
+                        done = True
 
                 try:
                     log = self.stderr[0].recv(4096).decode(errors='replace')
@@ -1486,7 +1435,7 @@ Will use HTML5 for this SASsession.""")
                 if len(log) > 0:
                     logf += log
                     if logf.count(logcodeo) >= 1:
-                        bail = True;
+                        bail = True
                         self._log += logf
 
                 if done and bail:

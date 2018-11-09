@@ -38,8 +38,10 @@
 
 import os
 import sys
+import re
 import getpass
 import tempfile
+import logging
 from saspy.sasioiom import SASsessionIOM
 from saspy.sasets import SASets
 from saspy.sasml import SASml
@@ -47,7 +49,7 @@ from saspy.sasqc import SASqc
 from saspy.sasstat import SASstat
 from saspy.sasutil import SASutil
 from saspy.sasViyaML import SASViyaML
-from saspy.sasdata import SASdata
+from saspy.sastabulate import Tabulate
 
 try:
     import pandas as pd
@@ -283,10 +285,6 @@ class SASsession():
                     "Cannot use STDIO I/O module on Windows. No SASsession established. Choose an IOM SASconfig definition")
         elif self.sascfg.mode == 'IOM':
             self._io = SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
-        '''
-        elif self.sascfg.mode == 'HTTP':
-            self._io = sasiohttp.SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
-        '''
 
         try:
             if self._io.pid:
