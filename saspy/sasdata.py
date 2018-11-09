@@ -1,11 +1,3 @@
-import re
-import logging
-from saspy.sasresults import SASresults
-try:
-   import pandas as pd
-except ImportError:
-    pass
-
 class SASdata:
     """
     **Overview**

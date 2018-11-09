@@ -16,7 +16,7 @@
 
 import logging
 from typing import TYPE_CHECKING
-from saspy.sasproccommons import procDecorator
+from saspy.sasdecorator import procDecorator
 
 if TYPE_CHECKING:
     from saspy.sasresults import SASresults

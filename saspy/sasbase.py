@@ -50,7 +50,6 @@ from saspy.sasstat import SASstat
 from saspy.sasutil import SASutil
 from saspy.sasViyaML import SASViyaML
 from saspy.sastabulate import Tabulate
-
 try:
     import pandas as pd
 except ImportError:
@@ -1236,8 +1235,8 @@ class SASdata:
 
         print(key)
         print(type(key))
-        # print(kwargs.keys())
-        # print(kwargs.items())
+        #print(kwargs.keys())
+        #print(kwargs.items())
 
     def __repr__(self):
         """
@@ -1245,11 +1244,11 @@ class SASdata:
 
         :return: output
         """
-        x = "Libref  = %s\n" % self.libref
+        x  = "Libref  = %s\n" % self.libref
         x += "Table   = %s\n" % self.table
         x += "Dsopts  = %s\n" % str(self.dsopts)
         x += "Results = %s\n" % self.results
-        return (x)
+        return(x)
 
     def set_results(self, results: str):
         """
@@ -1304,7 +1303,7 @@ class SASdata:
             for t in tablename:
                 # strip leading '_' from names and capitalize for dictionary labels
                 if self.sas.exist(t, libref):
-                    pd[t.replace('_', '').capitalize()] = self.sas._io.sasdata2dataframe(t, libref)
+                   pd[t.replace('_', '').capitalize()] = self.sas._io.sasdata2dataframe(t, libref)
                 self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, t))
         else:
             raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))
@@ -1528,8 +1527,7 @@ class SASdata:
                 split_code += "\t%s.%s%s_score(drop=_Partind_ _cvfold:)\n" % (out_libref, out_table, j)
             split_code += ';\n \tset %s.%s;\n' % (out_libref, out_table)
             for z in range(1, k + 1):
-                split_code += "\tif _cvfold%s = 1 or _partind_ = 1 then output %s.%s%s_train;\n" % (
-                z, out_libref, out_table, z)
+                split_code += "\tif _cvfold%s = 1 or _partind_ = 1 then output %s.%s%s_train;\n" % (z, out_libref, out_table, z)
                 split_code += "\telse output %s.%s%s_score;\n" % (out_libref, out_table, z)
             split_code += 'run;'
         runcode = True
@@ -1554,9 +1552,8 @@ class SASdata:
                             self.sas.sasdata(out_table + str(k) + "_score", out_libref, dsopts=self._dsopts()))
 
                 for j in range(1, k + 1):
-                    outTableList.append(
-                        (self.sas.sasdata(out_table + str(j) + "_train", out_libref, dsopts=self._dsopts()),
-                         self.sas.sasdata(out_table + str(j) + "_score", out_libref, dsopts=self._dsopts())))
+                    outTableList.append((self.sas.sasdata(out_table + str(j) + "_train", out_libref, dsopts=self._dsopts()),
+                                               self.sas.sasdata(out_table + str(j) + "_score", out_libref, dsopts=self._dsopts())))
                 return outTableList
             if out:
                 if not isinstance(out, str):
@@ -1615,8 +1612,7 @@ class SASdata:
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "proc contents data=%s.%s %s ;ods output Variables=work._variables ;run;" % (
-            self.libref, self.table, self._dsopts())
+            code = "proc contents data=%s.%s %s ;ods output Variables=work._variables ;run;" % (self.libref, self.table, self._dsopts())
             pd = self._returnPD(code, '_variables')
             pd['Type'] = pd['Type'].str.rstrip()
             return pd
@@ -1718,19 +1714,19 @@ class SASdata:
             return self._returnPD(code, '_summary')
         else:
             if self.HTML:
-                if not ll:
-                    ll = self.sas._io.submit(code)
-                if not self.sas.batch:
-                    DISPLAY(HTML(ll['LST']))
-                else:
-                    return ll
+               if not ll:
+                  ll = self.sas._io.submit(code)
+               if not self.sas.batch:
+                  DISPLAY(HTML(ll['LST']))
+               else:
+                  return ll
             else:
-                if not ll:
-                    ll = self.sas._io.submit(code, "text")
-                if not self.sas.batch:
-                    print(ll['LST'])
-                else:
-                    return ll
+               if not ll:
+                  ll = self.sas._io.submit(code, "text")
+               if not self.sas.batch:
+                  print(ll['LST'])
+               else:
+                  return ll
 
     def impute(self, vars: dict, replace: bool = False, prefix: str = 'imp_', out: 'SASdata' = None) -> 'SASdata':
         """
@@ -1789,13 +1785,13 @@ class SASdata:
         sql = "proc sql;\n  select\n"
         sqlsel = ' %s(%s),\n'
         sqlinto = ' into\n'
-        if len(out_libref) > 0:
+        if len(out_libref)>0 :
             ds1 = "data " + out_libref + "." + out_table + "; set " + self.libref + "." + self.table + self._dsopts() + ";\n"
         else:
             ds1 = "data " + out_table + "; set " + self.libref + "." + self.table + self._dsopts() + ";\n"
         dsmiss = 'if missing({0}) then {1} = {2};\n'
         if replace:
-            dsmiss = prefix + '{1} = {0}; if missing({0}) then %s{1} = {2};\n' % prefix
+            dsmiss = prefix+'{1} = {0}; if missing({0}) then %s{1} = {2};\n' % prefix
 
         modesql = ''
         modeq = "proc sql outobs=1;\n  select %s, count(*) as freq into :imp_mode_%s, :imp_mode_freq\n"
@@ -1822,8 +1818,7 @@ class SASdata:
                         ds1 += dsmiss.format(v, v, '(&imp_min_' + v + '.' + ' + ' + '&imp_max_' + v + '.' + ') / 2')
                     elif key.lower() == 'random':
                         # random * (max - min) + min
-                        ds1 += dsmiss.format(v, v,
-                                             '(&imp_max_' + v + '.' + ' - ' + '&imp_min_' + v + '.' + ') * ranuni(0)' + '+ &imp_min_' + v + '.')
+                        ds1 += dsmiss.format(v, v, '(&imp_max_' + v + '.' + ' - ' + '&imp_min_' + v + '.' + ') * ranuni(0)' + '+ &imp_min_' + v + '.')
                     else:
                         raise SyntaxError("This should not happen!!!!")
             else:
@@ -1831,15 +1826,14 @@ class SASdata:
                     sql += sqlsel % (key, v)
                     sqlinto += ' :imp_' + v + ',\n'
                     if key.lower == 'mode':
-                        modesql += modeq % (v, v, self.libref + "." + self.table + self._dsopts(), v, v, v)
+                        modesql += modeq % (v, v, self.libref + "." + self.table + self._dsopts() , v, v, v)
                     if varListType.get(v.upper()) == "N":
                         ds1 += dsmiss.format(v, v, '&imp_' + v + '.')
                     else:
                         ds1 += dsmiss.format(v, v, '"&imp_' + v + '."')
 
         if len(sql) > 20:
-            sql = sql.rstrip(', \n') + '\n' + sqlinto.rstrip(
-                ', \n') + '\n  from ' + self.libref + '.' + self.table + self._dsopts() + ';\nquit;\n'
+            sql = sql.rstrip(', \n') + '\n' + sqlinto.rstrip(', \n') + '\n  from ' + self.libref + '.' + self.table + self._dsopts() + ';\nquit;\n'
         else:
             sql = ''
         ds1 += 'run;\n'
@@ -1992,7 +1986,7 @@ class SASdata:
         code += rename_char.format(binstats)
         if nominal:
             # TODO: add graphics code here to return to the SAS results object
-            graphics = """
+            graphics ="""
             ODS PROCLABEL='ERRORPLOT' ;
             proc sgplot data={0};
                 title "Error and Correct rate by Depth";
@@ -2021,10 +2015,20 @@ class SASdata:
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
 
-        # code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
-        # code += "run; quit; %mend;\n"
+        #code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
+        #code += "run; quit; %mend;\n"
 
         # Debug block
+
+        #debug={'name': name,
+        #       'score_table': score_table,
+        #       'target': target,
+        #       'var': var,
+        #       'nominals': nominals,
+        #       'level': level,
+        #       'binstats': binstats,
+        #       'out':out}
+        #print(debug.items())
 
         if self.sas.nosub:
             print(code)
@@ -2034,14 +2038,13 @@ class SASdata:
         obj1 = SASProcCommons._objectmethods(self, objname)
         return SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
 
-    def to_csv(self, file: str, opts: dict = None) -> str:
+    def to_csv(self, file: str, opts: dict ={}) -> str:
         """
         This method will export a SAS Data Set to a file in CSV format.
 
         :param file: the OS filesystem path of the file to be created (exported from this SAS Data Set)
         :return:
         """
-        opts = opts if opts is not None else {}
         ll = self._is_valid()
         if ll:
             if not self.sas.batch:
@@ -2069,15 +2072,15 @@ class SASdata:
         codestr = code
         code = "data %s.%s%s;" % (outLibref, outTable, self._dsopts())
         code += "set %s.%s%s;" % (self.libref, self.table, self._dsopts())
-        if len(file) > 0:
+        if len(file)>0:
             code += '%%include "%s";' % file
         else:
-            code += "%s;" % codestr
+            code += "%s;" %codestr
         code += "run;"
 
         if self.sas.nosub:
             print(code)
-            return
+            return None
 
         ll = self._is_valid()
         if not ll:
@@ -2115,7 +2118,7 @@ class SASdata:
         else:
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
 
-    def to_df_CSV(self, tempfile: str = None, tempkeep: bool = False, **kwargs) -> 'pd.DataFrame':
+    def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame via CSV file
 
@@ -2126,6 +2129,49 @@ class SASdata:
         :rtype: 'pd.DataFrame'
         """
         return self.to_df(method='CSV', tempfile=tempfile, tempkeep=tempkeep, **kwargs)
+
+    def to_json(self, pretty: bool = False, sastag: bool = False, **kwargs) -> str:
+        """
+        Export this SAS Data Set to a JSON Object
+        PROC JSON documentation: http://go.documentation.sas.com/?docsetId=proc&docsetVersion=9.4&docsetTarget=p06hstivs0b3hsn1cb4zclxukkut.htm&locale=en
+
+        :param pretty: boolean False return JSON on one line True returns formatted JSON
+        :param sastag: include SAS meta tags
+        :param kwargs:
+        :return: JSON str
+        """
+        code = "filename file1 temp;"
+        code += "proc json out=file1"
+        if pretty:
+            code += " pretty "
+        if not sastag:
+            code += " nosastags "
+        code +=";\n export %s.%s %s;\n run;" % (self.libref, self.table, self._dsopts())
+
+        if self.sas.nosub:
+            print(code)
+            return None
+
+        ll = self._is_valid()
+        runcode = True
+        if ll:
+            runcode = False
+        if runcode:
+            ll = self.sas.submit(code, "text")
+            elog = []
+            fpath=''
+            for line in ll['LOG'].splitlines():
+                if line.startswith('JSONFilePath:'):
+                    fpath = line[14:]
+                if line.startswith('ERROR'):
+                    elog.append(line)
+            if len(elog):
+                raise RuntimeError("\n".join(elog))
+            if len(fpath):
+                with open(fpath, 'r') as myfile:
+                    json_str = myfile.read()
+                return json_str
+
 
     def heatmap(self, x: str, y: str, options: str = '', title: str = '',
                 label: str = '') -> object:
@@ -2301,7 +2347,7 @@ class SASdata:
             y = [y]
 
         for i in range(num):
-            code += "\tseries x=" + x + " y=" + y[i] + ";\n"
+            code += "\tseries x=" + x + " y=" + str(y[i]) + ";\n"
 
         code += 'run;\n' + 'title;'
 

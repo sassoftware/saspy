@@ -15,7 +15,7 @@
 #
 import logging
 from typing import TYPE_CHECKING
-from saspy.sasproccommons import procDecorator
+from saspy.sasdecorator import procDecorator
 
 if TYPE_CHECKING:
     from saspy.sasresults import SASresults
@@ -53,7 +53,7 @@ class SASml:
         self.sasproduct = "em"
         # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.WARN)
+        self.logger.setLevel(logging.DEBUG)
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
