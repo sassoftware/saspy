@@ -1,3 +1,22 @@
+#
+# Copyright SAS Institute
+#
+#  Licensed under the Apache License, Version 2.0 (the License);
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+
+import logging
+import re
+
 class SASdata:
     """
     **Overview**
@@ -31,7 +50,7 @@ class SASdata:
 
     """
 
-    def __init__(self, sassession, libref, table, results='', dsopts={}):
+    def __init__(self, sassession, libref, table, results='', dsopts: dict=None):
         self.sas = sassession
         self.logger = logging.getLogger(__name__)
 
@@ -67,14 +86,11 @@ class SASdata:
         self.table = table
         self.dsopts = dsopts
         self.results = results
-        self.tabulate = Tabulate(sassession, self)
+        #self.tabulate = Tabulate(sassession, self)
 
     def __getitem__(self, key):
-
         print(key)
         print(type(key))
-        #print(kwargs.keys())
-        #print(kwargs.items())
 
     def __repr__(self):
         """
@@ -149,9 +165,9 @@ class SASdata:
         return pd
 
     def _dsopts(self):
-        '''
+        """
         This method builds out data set options clause for this SASdata object: '(where= , keeep=, obs=, ...)'
-        '''
+        """
         return self.sas._dsopts(self.dsopts)
 
     def where(self, where: str) -> 'SASdata':

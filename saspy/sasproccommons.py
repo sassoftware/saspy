@@ -25,7 +25,7 @@ class Codegen(object):
     """
     Class to generate code for submission to the SAS system.
     """
-    def __init__(self, key, args):
+    def __init__(self, key, args, **kwargs):
         self._key = key
         self._args = args
 
@@ -37,6 +37,8 @@ class Codegen(object):
     def codestmt(self):
         args = self._args
         key = self._key
+        if self._key in ['code', 'save'] and isinstance(self._args, str):
+            args = "file = {}".format(args)
         if self._key in ['selection'] and isinstance(self._args, str):
             if self._args.lower().strip() in ['none', 'forward', 'backward', 'stepwise', 'forwardswap','lar', 'lasso']:
                 if len(self._args.split()) == 1:
@@ -57,6 +59,9 @@ class Codegen(object):
                 args = ''
             elif self._key == 'partition':
                 return "partition fraction(test=0 validation=.30 seed=9878);\n"
+            elif self._key in ['save']:
+                return "{0} {2}={1}.{2} {3}={1}.{3} {4}={1}.{4} {5}={1}.{5} {6}={1}.{6} "\
+                    .format(self._key, self.objname, "fit", "importance", "model", "nodestats", "rules" )
 
         elif isinstance(self._args, dict):
             try:
@@ -100,17 +105,41 @@ class Codegen(object):
                         return "selection method={} ({})  {}\n;".format(m, ' '.join('{}={}'.format(key, val) for key, val in self._args.items()), dstr)
                 if self._key.casefold() == 'train' and all(k in self._args for k in ("numtries", "maxiter")):
                     return "train numtries={} maxiter={};\n".format(self._args['numtries'], self._args['maxiter'])
+
+                if self._key.casefold() == 'out' and not len(self.outmeth):
+                    return "output out={}.{}\n;".format(self._args.libref, self._args.table)
+
+                if self._key.casefold() == 'save' and self.objtype == 'treeboost':
+                    return '{} %s ;\n'.format(self._key) % ' '.join('{} = {}'.format(key, val) for key, val in self._args.items())
+                if self._key.casefold() == 'impute':
+                    usedVars = []
+                    tup_code = ''
+                    contantValues = self._args.pop('value', None)
+                    if contantValues is not None:
+                        if not all(isinstance(x, tuple) for x in contantValues):
+                            raise SyntaxError("The elements in the 'value' key must be tuples")
+                        for t in contantValues:
+                            tup_code += "impute %s / value = %s;\n" % (t[0], t[1])
+                            usedVars.append(t[0])
+                    meth_code = ''
+                    for key, values in self._args.items():
+                        for v in values:
+                            meth_code += 'impute %s / method = %s;\n' % (v, key)
+                            usedVars.append(v)
+                    return '\ninput ' + ' '.join(list(set(usedVars))) + ';\n' + tup_code + meth_code + 'run;'
+
                 print("KeyError: Proper keys not found for {} dictionary: {}".format(self._key, args))
 
         elif isinstance(self._args, SASdata):
-            bp()
-            if key == 'score':
+            if self._key == 'score':
                 if self.objtype.casefold() == 'hp4score':
-                    pass
+                    return "score out={}.{}\n;".format(self._args.libref, self._args.table)
                 elif self.objtype.casefold() == 'tpspline':
-                    pass
-                bp()
-                return "score out={}.{}\n;".format(self._args['libref'], self._args['table'])
+                    return "score data={0}.{1} out={2}.{3}\n;".format(self.data.libref, self.data.table, self._args.libref, self._args.table)
+                return "score out={}.{}\n;".format(self._args.libref, self._args.table)
+
+            elif self._key == 'savestate':
+                return "{} rstore = {}.{}\n;".format(key, self._args.libref, self._args.table )
 
         if self._key == 'stmtpassthrough':
             return "{0} ;\n".format(args)
@@ -155,7 +184,7 @@ class SASProcCommons:
         else:
             raise SyntaxError("log is not a string but type:%s" % (str(type(log))))
 
-    def _makeProcCallMacro(self, objtype: str, objname: str, data: object = None, args: dict = None) -> str:
+    def _makeProcCallMacro(self, objtype: str, objname: str, data: SASdata = None, args: dict = None) -> str:
         """
         This method generates the SAS code from the python objects and included data and arguments.
         The list of args in this method is largely alphabetical but there are exceptions in order to
@@ -222,110 +251,13 @@ class SASProcCommons:
         for key, value in args.items():
             gen = Codegen.new(key, value)
             gen.objtype = objtype
+            gen.data = data
+            gen.outmeth = outmeth
+            gen.objname = objname
             code += gen.codestmt
             if gen.debug is not None:
                 debug_code += gen.debug
 
-        if 'code' in args:
-            self.logger.debug("code statement,length: %s,%s", args['code'], len(args['code']))
-            code += "code file='%s';\n" % (args['code'])
-        # The save statement is used by few procs but it doesn't have a consistent pattern
-        # Here we case it correctly or throw an error.
-        if 'impute' in args:
-            self.logger.debug("impute statement,length: %s,%s", args['impute'], len(args['impute']))
-            if not (isinstance(args['impute'], dict) or isinstance(args['impute'], str)):
-                raise SyntaxError("IMPUTE must be a dictionary: %s" % str(type(args['impute'])))
-            if isinstance(args['impute'], dict):
-                usedVars = []
-                tup_code = ''
-                contantValues = args['impute'].pop('value', None)
-                if contantValues is not None:
-                    if not all(isinstance(x, tuple) for x in contantValues):
-                        raise SyntaxError("The elements in the 'value' key must be tuples")
-                    for t in contantValues:
-                        tup_code += "impute %s / value = %s;\n" % (t[0], t[1])
-                        usedVars.append(t[0])
-                meth_code = ''
-                for key, values in args['impute'].items():
-                    for v in values:
-                        meth_code += 'impute %s / method = %s;\n' % (v, key)
-                        usedVars.append(v)
-                code += '\ninput ' + ' '.join(list(set(usedVars))) + ';\n' + tup_code + meth_code + 'run;'
-            elif isinstance(args['impute'], str):
-                code += "impute %s;\n" % (args['impute'])
-
-        if 'selection' in args:
-            if isinstance(args['selection'], dict):
-                if bool(args['selection']):  # is the dictionary empty
-                    m = args['selection'].pop('method', '')
-                    me = args['selection'].pop('maxeffects', None)
-                    if me is not None:
-                        if int(me) > 0 and m != 'backward':
-                            args['selection']['maxeffects'] = me
-                    d = args['selection'].pop('details', '')
-                    dstr = ''
-                    if len(d) > 0:
-                        dstr = 'details = %s' % d
-                    code += "selection method=%s (%s)  %s;" % (m, ' '.join('{}={}'.format(key, val) for key, val in args['selection'].items()), dstr)
-        if 'out' in args and not len(outmeth):
-            if not isinstance(args['out'], dict):
-                outds = args['out']
-                outstr = outds.libref + '.' + outds.table
-                code += "output out=%s;\n" % outstr
-            else:
-                t = args['out'].pop("table", None)
-                l = args['out'].pop("libref", None)
-                d = args['out'].pop("data", None)
-                if t and l:
-                    outstr = l + '.' + t
-                elif d:
-                    outstr = d.libref + '.' + d.table
-                else:
-                    raise SyntaxError(
-                        "OUT statement is not in a recognized form either {'libname':'foo', 'table':'bar'} or {'data':'sasdataobject'}  %s" % str(
-                            objtype))
-
-                varlist = ' '.join('{}={}'.format(key, val) for key, val in args['out'].items())
-                code += "output out=%s %s;\n" % (outstr, varlist)
-        """
-        if 'score' in args:
-            else:
-                scoreds = args['score']
-                if objtype.upper() == 'HP4SCORE':
-                    f = scoreds.get('file')
-                    d = scoreds.get('out')
-                    o = d.libref + '.' + d.table
-                    code += "score file='" + f + "' out=" + o + ";\n"
-                elif objtype.upper() == 'TPSPLINE':
-                    code += "score data=%s.%s out=%s.%s;\n" % (data.libref, data.table, scoreds.libref, scoreds.table)
-                else:
-                    code += "score out=%s.%s;\n" % (scoreds.libref, scoreds.table)
-        """
-        # save statement must be after input and target for TREEBOOST
-        if 'save' in args:
-            if objtype == 'hpforest':
-                code += "save file='%s';\n" % (args['save'])
-            elif objtype == 'treeboost':
-                if isinstance(args['save'], bool):
-                    libref = objname
-                    code += 'save fit=%s.%s importance=%s.%s model=%s.%s nodestats=%s.%s rules=%s.%s;\n' % \
-                            (libref, "fit", libref, "importance", libref, "model",
-                             libref, "nodestats", libref, "rules")
-                elif isinstance(args['save'], dict):
-                    code += 'save %s ;' % ' '.join('{} = {}'.format(key, val) for key, val in args['save'].items())
-                else:
-                    raise SyntaxError('SAVE statement object type is not recognized,'
-                                      'must be a bool or dict. You provided: %s' % str(type(save)))
-            else:
-                raise SyntaxError('SAVE statement is not recognized for this procedure: %s' % str(objtype))
-        if 'savestate' in args:
-            if isinstance(args['savestate'], str):
-                self.logger.debug('savestate statement,length: %s,%s', args['savestate'], len(args['savestate']))
-                code += 'savestate %s;\n' % (args['savestate'])
-            # TODO test if savestate is a SASData Object
-            elif isinstance(args['savestate'], SASdata):
-                code += 'savestate rstore={}.{};\n'.format(args['savestate'].libref, args['savestate'].table)
-        # passthrough facility for procedures with special circumstances
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
         if self.logger.level == 10:
