@@ -534,17 +534,149 @@ Will use HTML5 for this SASsession.""")
 
         return
 
+    """
+    def _getlog(self, wait=5, jobid=None):
+       logf   = b''
+       quit   = wait * 2
+       logn   = self._logcnt(False)
+       code1  = "%put E3969440A681A24088859985"+logn+";\nE3969440A681A24088859985"+logn
+ 
+       while True:
+          try:
+             log =  self.stderr[0].recv(4096)
+          except (BlockingIOError):
+             log = b''
+ 
+          if len(log) > 0:
+             logf += log
+          else:
+             quit -= 1
+             if quit < 0 or len(logf) > 0:
+                break
+             sleep(0.5)
+ 
+       x = logf.decode(errors='replace').replace(code1, " ")
+       self._log += x
+ 
+       if os.name == 'nt':
+          try:
+             rc = self.pid.wait(0)
+             self.pid = None
+             return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+          except:
+             pass
+       else:
+          if self.pid == None:
+             return "No SAS process attached. SAS process has terminated unexpectedly."
+          rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+          if rc != None:
+             self.pid = None
+             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
+ 
+       return x
+ 
+    def _getlst(self, wait=5, jobid=None):
+       lstf = b''
+       quit = wait * 2
+       eof = 0
+       bof = False
+       lenf = 0
+ 
+       while True:
+          try:
+             lst = self.stdout[0].recv(4096)
+          except (BlockingIOError):
+             lst = b''
+ 
+          if len(lst) > 0:
+             lstf += lst
+ 
+             if ((not bof) and lst.count(b"<!DOCTYPE html>", 0, 20) > 0):
+                bof = True
+          else:
+             lenf = len(lstf)
+ 
+             if (lenf > 15):
+                eof = lstf.count(b"</html>", (lenf - 15), lenf)
+ 
+             if (eof > 0):
+                   break
+ 
+             if not bof:
+                quit -= 1
+                if quit < 0:
+                   break
+                sleep(0.5)
+ 
+       if os.name == 'nt':
+          try:
+             rc = self.pid.wait(0)
+             self.pid = None
+             return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+          except:
+             pass
+       else:
+          if self.pid == None:
+             return "No SAS process attached. SAS process has terminated unexpectedly."
+          rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+          if rc != None:
+             self.pid = None
+             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
+ 
+       return lstf.decode(errors='replace')
+ 
+    def _getlsttxt(self, wait=5, jobid=None):
+       f2 = [None]
+       lstf = b''
+       quit = wait * 2
+       eof = 0
+       self._asubmit("data _null_;file print;put 'Tom was here';run;", "text")
+ 
+       while True:
+          try:
+             lst = self.stdout[0].recv(4096)
+          except (BlockingIOError):
+             lst = b''
+ 
+          if len(lst) > 0:
+             lstf += lst
+ 
+             lenf = len(lstf)
+             eof = lstf.find(b"Tom was here", lenf - 25, lenf)
+ 
+             if (eof != -1):
+                final = lstf.partition(b"Tom was here")
+                f2 = final[0].decode(errors='replace').rpartition(chr(12))
+                break
+ 
+       lst = f2[0]
+ 
+       if os.name == 'nt':
+          try:
+             rc = self.pid.wait(0)
+             self.pid = None
+             return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+          except:
+             pass
+       else:
+          if self.pid == None:
+             return "No SAS process attached. SAS process has terminated unexpectedly."
+          rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+          if rc != None:
+             self.pid = None
+             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
+ 
+       return lst.replace(chr(12), '\n')
+    """
+
     def _asubmit(self, code, results="html"):
         """
-        as this is an '_' method, it's not really to be used. Of note is that if this is used and if what it submitted generates
+        as this is an _ method, it's not really to be used. Of note is that if this is used and if what it submitted generates
         anything to the lst, then unless _getlst[txt] is called, then next submit will happen to get the lst this wrote, plus
         what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
         expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
         unnecessary read in submit as this can't happen in the current code.
-
-        :param code: str
         """
-
         odsopen = b"ods listing close;ods " + self.sascfg.output.encode() + \
                   b" (id=saspy_internal) file=" + self._tomods1 + b" options(bitmap_mode='inline') device=svg style=" + self._sb.HTML_Style.encode() + \
                   b"; ods graphics on / outputfmt=png;\n"
@@ -831,6 +963,60 @@ Will use HTML5 for this SASsession.""")
         self._sb.SASpid = None
         return dict(LOG=b"SAS process terminated", LST=b'', ABORT=True)
 
+        """
+        while True:
+            rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+            if rc is not None:
+                self.pid = None
+                self._sb.SASpid = None
+                outrc = str(rc)
+                return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+outrc, LST='', ABORT=True)
+
+            lst = self.stdout.read1(4096).decode(errors='replace')
+            lstf += lst
+            if len(lst) > 0:
+                lsts = lst.rpartition('Select:')
+                if lsts[0] != '' and lsts[1] != '':
+                    found = True
+                    query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
+                    print('Processing interrupt\nAttn handler Query is\n\n' + query)
+                    response = self.sascfg._prompt("Please enter your Response: ")
+                    self.stdin[0].send(response.encode() + b'\n')
+                    if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
+                       bc = True
+                       break
+                else:
+                    lsts = lst.rpartition('Press')
+                    if lsts[0] != '' and lsts[1] != '':
+                        query = lsts[1] + lsts[2].rsplit('\n?')[0] + '\n'
+                        print('Secondary Query is:\n\n' + query)
+                        response = self.sascfg._prompt("Please enter your Response: ")
+                        self.stdin[0].send(response.encode() + b'\n')
+                        if (response == 'N' or response == 'n') and query.count("N to continue") >= 1:
+                           bc = True
+                           break
+                    else:
+                        #print("******************No 'Select' or 'Press' found in lst=")
+                        pass
+            else:
+                log = self.stderr[0].recv(4096).decode(errors='replace')
+                logf += log
+                self._log += log
+
+                if log.count(eos) >= 1:
+                    print("******************Found end of step. No interrupt processed")
+                    found = True
+
+                if found:
+                    break
+
+            sleep(.25)
+
+        lstr = lstf
+        logr = logf
+        return dict(LOG=logr, LST=lstr, BC=bc)
+        """
+
     def saslog(self):
         """
         this method is used to get the current, full contents of the SASLOG
@@ -880,7 +1066,7 @@ Will use HTML5 for this SASsession.""")
         l2 = l2[2].partition("\n")
         exists = int(l2[0])
 
-        return exists
+        return bool(exists)
 
     def read_csv(self, file: str, table: str, libref: str = "", nosub: bool = False,
                  opts: dict = None) -> '<SASdata object>':
@@ -1424,7 +1610,7 @@ Will use HTML5 for this SASsession.""")
                 if len(lst) > 0:
                     lstf += lst
                     if lstf.count(lstcodeo) >= 1:
-                        done = True
+                        done = True;
 
                 try:
                     log = self.stderr[0].recv(4096).decode(errors='replace')
@@ -1435,7 +1621,7 @@ Will use HTML5 for this SASsession.""")
                 if len(log) > 0:
                     logf += log
                     if logf.count(logcodeo) >= 1:
-                        bail = True
+                        bail = True;
                         self._log += logf
 
                 if done and bail:
