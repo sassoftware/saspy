@@ -56,7 +56,7 @@ class SASstat:
         self.sasproduct = 'stat'
         # create logging
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.WARN)
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 

@@ -16,6 +16,7 @@
 
 import logging
 import re
+from saspy.sastabulate import Tabulate
 
 class SASdata:
     """
@@ -86,7 +87,7 @@ class SASdata:
         self.table = table
         self.dsopts = dsopts
         self.results = results
-        #self.tabulate = Tabulate(sassession, self)
+        self.tabulate = Tabulate(sassession, self)
 
     def __getitem__(self, key):
         print(key)

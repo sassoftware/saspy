@@ -41,6 +41,7 @@ import sys
 import getpass
 import tempfile
 from saspy.sasioiom import SASsessionIOM
+from saspy.sasiostdio import SASsessionSTDIO
 from saspy.sasets import SASets
 from saspy.sasml import SASml
 from saspy.sasqc import SASqc
@@ -276,7 +277,7 @@ class SASsession():
 
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
             if os.name != 'nt':
-                self._io = sasiostdio.SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
+                self._io = SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
             else:
                 print(
                     "Cannot use STDIO I/O module on Windows. No SASsession established. Choose an IOM SASconfig definition")
