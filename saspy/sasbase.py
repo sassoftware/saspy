@@ -301,27 +301,27 @@ class SASsession():
         '''
 
         try:
-           if self._io.pid:
-             ll = self.submit('%put WORKpath=%sysfunc(pathname(work));')
-             self.workpath = ll['LOG'].rpartition('WORKpath=')[2].strip().partition('\n')[0].strip()
-             win = self.workpath.count('\\')
-             lnx = self.workpath.count('/')
-             if (win > lnx):
-                self.workpath += '\\'
-             else:
-                self.workpath += '/'
-             ll = self.submit('%put SYSV=&sysvlong4;')
-             self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
-             ll = self.submit('proc options option=encoding;run;')
-             self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
+            if self._io.pid:
+                ll = self.submit('%put WORKpath=%sysfunc(pathname(work));')
+                self.workpath = ll['LOG'].rpartition('WORKpath=')[2].strip().partition('\n')[0].strip()
+                win = self.workpath.count('\\')
+                lnx = self.workpath.count('/')
+                if (win > lnx):
+                    self.workpath += '\\'
+                else:
+                    self.workpath += '/'
+                ll = self.submit('%put SYSV=&sysvlong4;')
+                self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
+                ll = self.submit('proc options option=encoding;run;')
+                self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
 
-             self.SASpid = self.symget("SYSJOBID")
+                self.SASpid = self.symget("SYSJOBID")
 
-             if self.sascfg.autoexec:
-                ll = self.submit(self.sascfg.autoexec)
+                if self.sascfg.autoexec:
+                    ll = self.submit(self.sascfg.autoexec)
 
         except (AttributeError):
-           self._io = None
+            self._io = None
 
     def __repr__(self):
         """
