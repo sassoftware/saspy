@@ -291,8 +291,9 @@ class SASsession():
             if os.name != 'nt':
                 self._io = sasiostdio.SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
             else:
-                print(
-                    "Cannot use STDIO I/O module on Windows. No SASsession established. Choose an IOM SASconfig definition")
+                print("Cannot use STDIO I/O module on Windows. No " \
+                    "SASsession established. Choose an IOM SASconfig " \
+                    "definition")
         elif self.sascfg.mode == 'IOM':
             self._io = sasioiom.SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
         '''
@@ -301,54 +302,59 @@ class SASsession():
         '''
 
         try:
-           if self._io.pid:
-             ll = self.submit('%put WORKpath=%sysfunc(pathname(work));')
-             self.workpath = ll['LOG'].rpartition('WORKpath=')[2].strip().partition('\n')[0].strip()
-             win = self.workpath.count('\\')
-             lnx = self.workpath.count('/')
-             if (win > lnx):
-                self.workpath += '\\'
-             else:
-                self.workpath += '/'
-             ll = self.submit('%put SYSV=&sysvlong4;')
-             self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
-             ll = self.submit('proc options option=encoding;run;')
-             self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
+            if self._io.pid:
+                sysvars = """
+                    options nosource nonotes nonumber;
 
-             self.SASpid = self.symget("SYSJOBID")
+                    %put WORKPATH=%sysfunc(pathname(work));
+                    %put ENCODING=&SYSENCODING;
+                    %put SYSVLONG=&SYSVLONG4;
+                    %put SYSJOBID=&SYSJOBID;
 
-             if self.sascfg.autoexec:
-                ll = self.submit(self.sascfg.autoexec)
+                    options source notes number;
+                """
+                res = self.submit(sysvars)['LOG']
+
+                # Take everything after the options statement
+                vlist = res.split('options nosource nonotes nonumber;\n')[1].split('\n')
+
+                self.workpath = vlist[0].split('=')[1]
+                self.sascei = vlist[1].split('=')[1]
+                self.sasver = vlist[2].split('=')[1]
+                self.SASpid = vlist[3].split('=')[1]
+
+                if self.sascfg.autoexec:
+                    self.submit(self.sascfg.autoexec)
 
         except (AttributeError):
-           self._io = None
+            self._io = None
 
     def __repr__(self):
         """
-        display info about this object ...
-
-        :return: output
+        Display info about this object
+        :return [str]:
         """
         if self._io is None:
            pyenc = ''
            if self.sascfg.cfgopts.get('verbose', True):
               print("This SASsession object is not valid\n")
         else:
-           pyenc = self._io.sascfg.encoding     
+           pyenc = self._io.sascfg.encoding
 
         x  = "Access Method         = %s\n" % self.sascfg.mode
         x += "SAS Config name       = %s\n" % self.sascfg.name
-        x += "WORK Path             = %s\n" % self.workpath    
-        x += "SAS Version           = %s\n" % self.sasver        
+        x += "WORK Path             = %s\n" % self.workpath
+        x += "SAS Version           = %s\n" % self.sasver
         x += "SASPy Version         = %s\n" % sys.modules['saspy'].__version__
-        x += "Teach me SAS          = %s\n" % str(self.nosub)  
-        x += "Batch                 = %s\n" % str(self.batch)    
-        x += "Results               = %s\n" % self.results     
-        x += "SAS Session Encoding  = %s\n" % self.sascei     
+        x += "Teach me SAS          = %s\n" % str(self.nosub)
+        x += "Batch                 = %s\n" % str(self.batch)
+        x += "Results               = %s\n" % self.results
+        x += "SAS Session Encoding  = %s\n" % self.sascei
         x += "Python Encoding value = %s\n" % pyenc
         x += "SAS process Pid value = %s\n" % self.SASpid
         x += "\n"
-        return(x)                 
+
+        return x
 
     def __del__(self):
         if self._io:
