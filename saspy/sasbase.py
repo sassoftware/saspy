@@ -310,6 +310,7 @@ class SASsession():
                     %put ENCODING=&SYSENCODING;
                     %put SYSVLONG=&SYSVLONG4;
                     %put SYSJOBID=&SYSJOBID;
+                    %put SYSSCP=&SYSSCP;
 
                     options source notes number;
                 """
@@ -319,9 +320,16 @@ class SASsession():
                 vlist = res.split('options nosource nonotes nonumber;\n')[1].split('\n')
 
                 self.workpath = vlist[0].split('=')[1]
-                self.sascei = vlist[1].split('=')[1]
-                self.sasver = vlist[2].split('=')[1]
-                self.SASpid = vlist[3].split('=')[1]
+                self.sascei   = vlist[1].split('=')[1]
+                self.sasver   = vlist[2].split('=')[1]
+                self.SASpid   = vlist[3].split('=')[1]
+                self.hostsep  = vlist[4].split('=')[1]
+
+                if self.hostsep == 'WIN':
+                   self.hostsep = '\\'
+                else:
+                   self.hostsep = '/'
+                self.workpath = self.workpath+self.hostsep 
 
                 if self.sascfg.autoexec:
                     self.submit(self.sascfg.autoexec)
@@ -1106,13 +1114,6 @@ class SASsession():
         """
         This method returns the directory list for the path specified where SAS is running
         """
-        host = self.symget('SYSSCP')
-
-        if host == 'WIN':
-           sep = '\\'
-        else:
-           sep = '/'
-
         code = """
         data _null_;
          spd = '"""+path+"""';
@@ -1127,13 +1128,13 @@ class SASsession():
                   name = dread(did, memcount);
                   memcount = memcount - 1;
         
-                  qname = spd || '"""+sep+"""' || name; 
+                  qname = spd || '"""+self.hostsep+"""' || name; 
         
                   rc = filename('saspydq', qname);
                   dq = dopen('saspydq');
                   if dq NE 0 then
                      do;
-                        dname = strip(name) || '"""+sep+"""';
+                        dname = strip(name) || '"""+self.hostsep+"""';
                         put 'DIR=' dname;
                         rc = dclose(dq);
                      end;
