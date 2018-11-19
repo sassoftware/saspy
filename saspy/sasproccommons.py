@@ -17,6 +17,7 @@ import logging
 import warnings
 import re
 
+from collections import OrderedDict
 from saspy.sasdata import SASdata
 from saspy.sasresults import SASresults
 from pdb import set_trace as bp
@@ -248,7 +249,19 @@ class SASProcCommons:
         # as an example...
         # http://support.sas.com/documentation/cdl/en/statug/68162/HTML/default/viewer.htm#statug_glm_syntax.htm#statug.glm.glmpostable
 
-        for key, value in args.items():
+        uoargs = {}
+        orderedargs = {}
+        keyorder = ['by', 'input', 'target', 'cls', 'model', 'output']
+        for k, v in args.items():
+            if k in keyorder:
+                orderedargs[k] = v
+            else:
+                uoargs[k] = v
+        orderedargs = OrderedDict(sorted(orderedargs.items(), key=lambda i: keyorder.index(i[0])))
+        for k, v in uoargs.items():
+            orderedargs[k] = v
+            orderedargs.move_to_end(k)
+        for key, value in orderedargs.items():
             gen = Codegen.new(key, value)
             gen.objtype = objtype
             gen.data = data
