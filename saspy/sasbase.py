@@ -279,46 +279,59 @@ class SASsession():
             if os.name != 'nt':
                 self._io = SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
             else:
-                print(
-                    "Cannot use STDIO I/O module on Windows. No SASsession established. Choose an IOM SASconfig definition")
+                print("Cannot use STDIO I/O module on Windows. No " \
+                    "SASsession established. Choose an IOM SASconfig " \
+                    "definition")
         elif self.sascfg.mode == 'IOM':
             self._io = SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
         try:
             if self._io.pid:
-                ll = self.submit('%put WORKpath=%sysfunc(pathname(work));')
-                self.workpath = ll['LOG'].rpartition('WORKpath=')[2].strip().partition('\n')[0].strip()
-                win = self.workpath.count('\\')
-                lnx = self.workpath.count('/')
-                if (win > lnx):
-                    self.workpath += '\\'
-                else:
-                    self.workpath += '/'
-                ll = self.submit('%put SYSV=&sysvlong4;')
-                self.sasver = ll['LOG'].rpartition('SYSV=')[2].partition('\n')[0].strip()
-                ll = self.submit('proc options option=encoding;run;')
-                self.sascei = ll['LOG'].rpartition('ENCODING=')[2].partition(' ')[0].strip()
+                sysvars = """
+                    options nosource nonotes nonumber;
 
-                self.SASpid = self.symget("SYSJOBID")
+                    %put WORKPATH=%sysfunc(pathname(work));
+                    %put ENCODING=&SYSENCODING;
+                    %put SYSVLONG=&SYSVLONG4;
+                    %put SYSJOBID=&SYSJOBID;
+                    %put SYSSCP=&SYSSCP;
+
+                    options source notes number;
+                """
+                res = self.submit(sysvars)['LOG']
+
+                # Take everything after the options statement
+                vlist = res.split('options nosource nonotes nonumber;\n')[1].split('\n')
+
+                self.workpath = vlist[0].split('=')[1]
+                self.sascei   = vlist[1].split('=')[1]
+                self.sasver   = vlist[2].split('=')[1]
+                self.SASpid   = vlist[3].split('=')[1]
+                self.hostsep  = vlist[4].split('=')[1]
+
+                if self.hostsep == 'WIN':
+                   self.hostsep = '\\'
+                else:
+                   self.hostsep = '/'
+                self.workpath = self.workpath+self.hostsep 
 
                 if self.sascfg.autoexec:
-                    ll = self.submit(self.sascfg.autoexec)
+                    self.submit(self.sascfg.autoexec)
 
         except (AttributeError):
             self._io = None
 
     def __repr__(self):
         """
-        display info about this object ...
-
-        :return: output
+        Display info about this object
+        :return [str]:
         """
         if self._io is None:
             pyenc = ''
             if self.sascfg.cfgopts.get('verbose', True):
                 print("This SASsession object is not valid\n")
         else:
-            pyenc = self._io.sascfg.encoding
+           pyenc = self._io.sascfg.encoding
 
         x = "Access Method         = %s\n" % self.sascfg.mode
         x += "SAS Config name       = %s\n" % self.sascfg.name
@@ -332,7 +345,8 @@ class SASsession():
         x += "Python Encoding value = %s\n" % pyenc
         x += "SAS process Pid value = %s\n" % self.SASpid
         x += "\n"
-        return (x)
+
+        return x
 
     def __del__(self):
         if self._io:
@@ -1086,13 +1100,6 @@ class SASsession():
         """
         This method returns the directory list for the path specified where SAS is running
         """
-        host = self.symget('SYSSCP')
-
-        if host == 'WIN':
-            sep = '\\'
-        else:
-            sep = '/'
-
         code = """
         data _null_;
          spd = '""" + path + """';
@@ -1107,13 +1114,13 @@ class SASsession():
                   name = dread(did, memcount);
                   memcount = memcount - 1;
         
-                  qname = spd || '""" + sep + """' || name; 
+                  qname = spd || '"""+self.hostsep+"""' || name; 
         
                   rc = filename('saspydq', qname);
                   dq = dopen('saspydq');
                   if dq NE 0 then
                      do;
-                        dname = strip(name) || '""" + sep + """';
+                        dname = strip(name) || '"""+self.hostsep+"""';
                         put 'DIR=' dname;
                         rc = dclose(dq);
                      end;
