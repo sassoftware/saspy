@@ -7,7 +7,7 @@ from pdb import set_trace as bp
 class procDecorator:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.WARN)
         if sys.version_info[0] < 3 or (sys.version_info[0] >= 3 and sys.version_info[1] < 4):
             warnings.warn('Python 3.4+ is required to get correct tab complete and docstring '
                           'information for methods')
