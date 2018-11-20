@@ -53,7 +53,7 @@ class SASml:
         self.sasproduct = "em"
         # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
+        self.logger.setLevel(logging.WARN)
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
@@ -76,10 +76,10 @@ class SASml:
         :param data: SASdata object This parameter is required
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
-        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
         :parm save: The save variable can only be a string type.
         :parm score: The score variable can only be a string type.
-        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
@@ -97,7 +97,7 @@ class SASml:
         """
         Python method to call the HP4SCORE procedure
         Documentation link:
-        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+        https://go.documentation.sas.com/?docsetId=emhpprcref&docsetTarget=emhpprcref_hp4score_toc.htm&docsetVersion=14.2&locale=en
 
         :param data: SASdata object This parameter is required
         :parm id: The id variable can only be a string type.
@@ -112,7 +112,7 @@ class SASml:
     @procDecorator.proc_decorator({'input'})
     def hpcluster(self, data: 'SASdata' = None,
                   freq: str = None,
-                  id: str = None,
+                  id: [str, list] = None,
                   input: [str, list, dict] = None,
                   score: [str, bool, 'SASdata'] = True,
                   procopts: str = None,
@@ -121,12 +121,12 @@ class SASml:
         """
         Python method to call the HPCLUS procedure
         Documentation link:
-        https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
+        https://go.documentation.sas.com/?docsetId=emhpprcref&docsetTarget=emhpprcref_hpclus_toc.htm&docsetVersion=14.2&locale=en
 
         :param data: SASdata object This parameter is required
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
-        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
         :parm score: The score variable can only be a string type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
@@ -137,13 +137,13 @@ class SASml:
     def hpneural(self, data: 'SASdata' = None,
                  architecture: str = None,
                  code: str = None,
-                 hidden: str = None,
+                 hidden: [str, int] = None,
                  id: str = None,
                  input: [str, list, dict] = None,
                  partition: str = None,
                  score: [str, bool, 'SASdata'] = True,
                  target: [str, list, dict] = None,
-                 train: str = None,
+                 train: [str, dict] = None,
                  procopts: str = None,
                  stmtpassthrough: str = None,
                  **kwargs: dict) -> 'SASresults':
@@ -155,13 +155,13 @@ class SASml:
         :param data: SASdata object This parameter is required
         :parm architecture: The architecture variable can only be a string type.
         :parm code: The code variable can only be a string type.
-        :parm hidden: The hidden variable can only be a string type.
+        :parm hidden: The hidden variable can only be a string type. This statement is required if there is a Train statement and the architecture is not logistic.
         :parm id: The id variable can only be a string type.
-        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
         :parm partition: The partition variable can only be a string type.
         :parm score: The score variable can only be a string type.
-        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
-        :parm train: The train variable can only be a string type.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
+        :parm train: The train variable can only be a string type. This parameter is required
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
@@ -192,12 +192,12 @@ class SASml:
         :parm code: The code variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
         :parm importance: The importance variable can only be a string type.
-        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
         :parm performance: The performance variable can only be a string type.
         :parm save: The save variable can only be a string type.
         :parm score: The score variable can only be a string type.
         :parm subseries: The subseries variable can only be a string type.
-        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
@@ -225,11 +225,11 @@ class SASml:
         :parm code: The code variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
-        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
         :parm output: The output variable can only be a string type.
         :parm partition: The partition variable can only be a string type.
         :parm performance: The performance variable can only be a string type.
-        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
