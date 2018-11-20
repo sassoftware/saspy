@@ -2,6 +2,7 @@ import unittest
 import saspy
 
 from saspy.tests.util import Utilities
+from saspy.sasresults import SASresults
 
 class TestSASstat(unittest.TestCase):
     @classmethod    
@@ -149,7 +150,7 @@ class TestSASstat(unittest.TestCase):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         b = stat.reg(data=tr, model='weight=height')
-        self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
+        self.assertIsInstance(b, saspy.sasresults.SASresults, msg="correct return type")
 
     def regResult2(self):
         stat = self.sas.sasstat()
