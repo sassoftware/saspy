@@ -20,7 +20,7 @@ import re
 from collections import OrderedDict
 from saspy.sasdata import SASdata
 from saspy.sasresults import SASresults
-from pdb import set_trace as bp
+# from pdb import set_trace as bp
 
 class Codegen(object):
     """
@@ -39,7 +39,7 @@ class Codegen(object):
         args = self._args
         key = self._key
         if self._key in ['code', 'save'] and isinstance(self._args, str):
-            args = "file = {}".format(args)
+            args = "file = '{}'".format(args)
         if self._key in ['selection'] and isinstance(self._args, str):
             if self._args.lower().strip() in ['none', 'forward', 'backward', 'stepwise', 'forwardswap','lar', 'lasso']:
                 if len(self._args.split()) == 1:
@@ -61,7 +61,7 @@ class Codegen(object):
             elif self._key == 'partition':
                 return "partition fraction(test=0 validation=.30 seed=9878);\n"
             elif self._key in ['save']:
-                return "{0} {2}={1}.{2} {3}={1}.{3} {4}={1}.{4} {5}={1}.{5} {6}={1}.{6} "\
+                return "{0} {2}={1}.{2} {3}={1}.{3} {4}={1}.{4} {5}={1}.{5} {6}={1}.{6};\n"\
                     .format(self._key, self.objname, "fit", "importance", "model", "nodestats", "rules" )
 
         elif isinstance(self._args, dict):
