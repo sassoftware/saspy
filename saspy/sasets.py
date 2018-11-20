@@ -63,7 +63,7 @@ class SASets:
                    crossvar: str = None,
                    decomp: str = None,
                    id: str = None,
-                   out: str = None,
+                   out: [str, 'SASdata'] = None,
                    season: str = None,
                    trend: str = None,
                    var: str = None,
@@ -82,7 +82,7 @@ class SASets:
         :parm crossvar: The crossvar variable can only be a string type.
         :parm decomp: The decomp variable can only be a string type.
         :parm id: The id variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string or SASdata type.
         :parm season: The season variable can only be a string type.
         :parm trend: The trend variable can only be a string type.
         :parm var: The var variable can only be a string type.
@@ -97,7 +97,7 @@ class SASets:
               estimate: str = None,
               forecast: str = None,
               identify: str = None,
-              out: str = None,
+              out: [str, 'SASdata'] = None,
               outlier: str = None,
               procopts: str = None,
               stmtpassthrough: str = None,
@@ -112,7 +112,7 @@ class SASets:
         :parm estimate: The estimate variable can only be a string type.
         :parm forecast: The forecast variable can only be a string type.
         :parm identify: The identify variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string or SASdata type.
         :parm outlier: The outlier variable can only be a string type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
@@ -126,19 +126,19 @@ class SASets:
             by: str = None,
             cycle: str = None,
             deplag: str = None,
-            estimate: str = None,
+            estimate: [str, bool] = None,
             forecast: str = None,
             id: str = None,
-            irregular: str = None,
-            level: str = None,
+            irregular: [str, bool] = None,
+            level: [str, bool] = None,
             model: str = None,
             nloptions: str = None,
-            out: str = None,
+            out: [str, 'SASdata'] = None,
             outlier: str = None,
             performance: str = None,
             randomreg: str = None,
             season: str = None,
-            slope: str = None,
+            slope: [str, bool] = None,
             splinereg: str = None,
             splineseason: str = None,
             procopts: str = None,
@@ -155,19 +155,19 @@ class SASets:
         :parm by: The by variable can only be a string type.
         :parm cycle: The cycle variable can only be a string type.
         :parm deplag: The deplag variable can only be a string type.
-        :parm estimate: The estimate variable can only be a string type.
+        :parm estimate: The estimate variable can be a string or boolean type.
         :parm forecast: The forecast variable can only be a string type.
         :parm id: The id variable can only be a string type.
-        :parm irregular: The irregular variable can only be a string type.
-        :parm level: The level variable can only be a string type.
+        :parm irregular: The irregular variable can be a string or boolean type.
+        :parm level: The level variable can be a string or boolean type.
         :parm model: The model variable can only be a string type.
         :parm nloptions: The nloptions variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string or SASdata type.
         :parm outlier: The outlier variable can only be a string type.
         :parm performance: The performance variable can only be a string type.
         :parm randomreg: The randomreg variable can only be a string type.
         :parm season: The season variable can only be a string type.
-        :parm slope: The slope variable can only be a string type.
+        :parm slope: The slope variable can be a string or boolean type.
         :parm splinereg: The splinereg variable can only be a string type.
         :parm splineseason: The splineseason variable can only be a string type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
@@ -180,7 +180,7 @@ class SASets:
             by: str = None,
             forecast: str = None,
             id: str = None,
-            out: str = None,
+            out: [str, 'SASdata'] = None,
             procopts: str = None,
             stmtpassthrough: str = None,
             **kwargs: dict) -> 'SASresults':
@@ -193,7 +193,7 @@ class SASets:
         :parm by: The by variable can only be a string type.
         :parm forecast: The forecast variable can only be a string type.
         :parm id: The id variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string or SASdata type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
@@ -203,7 +203,7 @@ class SASets:
     def timeid(self, data: 'SASdata' = None,
                by: str = None,
                id: str = None,
-               out: str = None,
+               out: [str, 'SASdata'] = None,
                procopts: str = None,
                stmtpassthrough: str = None,
                **kwargs: dict) -> 'SASresults':
@@ -215,7 +215,7 @@ class SASets:
         :param data: SASdata object This parameter is required
         :parm by: The by variable can only be a string type.
         :parm id: The id variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string or SASdata type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
@@ -226,7 +226,7 @@ class SASets:
                  by: str = None,
                  fcmport: str = None,
                  id: str = None,
-                 out: str = None,
+                 out: [str, 'SASdata'] = None,
                  outarrays: str = None,
                  outscalars: str = None,
                  prog_stmts: str = None,
@@ -243,7 +243,7 @@ class SASets:
         :parm by: The by variable can only be a string type.
         :parm fcmport: The fcmport variable can only be a string type.
         :parm id: The id variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string or SASdata type.
         :parm outarrays: The outarrays variable can only be a string type.
         :parm outscalars: The outscalars variable can only be a string type.
         :parm prog_stmts: The prog_stmts variable can only be a string type.
