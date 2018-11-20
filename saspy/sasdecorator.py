@@ -21,15 +21,18 @@ class procDecorator:
         def decorator(func):
             @wraps(func)
             def inner(self, *args, **kwargs):
+                proc = func.__name__.lower()
                 inner.proc_decorator = kwargs
                 self.logger.debug("processing proc:{}".format(func.__name__))
                 self.logger.debug(req_set)
                 self.logger.debug("kwargs type: " + str(type(kwargs)))
-                if func.__name__.lower() in ['hplogistic', 'hpreg']:
+                if proc in ['hplogistic', 'hpreg']:
                     kwargs['ODSGraphics'] = kwargs.get('ODSGraphics', False)
+                if proc == 'hpcluster':
+                    proc = 'hpclus'
                 legal_set = set(kwargs.keys())
                 self.logger.debug(legal_set)
-                return SASProcCommons._run_proc(self, func.__name__.lower(), req_set, legal_set, **kwargs)
+                return SASProcCommons._run_proc(self, proc, req_set, legal_set, **kwargs)
             return inner
         return decorator
 
@@ -54,6 +57,8 @@ class procDecorator:
                                     ': The {} variable can be a string or list type. It refers to the categorical, or nominal variables.'.format(
                                         i)])
                 doc_str = ': [str, list] = None,'
+            if i.lower() in ['level', 'irregular', 'slope', 'estimate' ]:
+                doc_str = ": [str, bool] = True,"
 
             doc_list.append(''.join([i, doc_str, '\n']))
             doc_markup.append(''.join([doc_mstr, '\n']))
