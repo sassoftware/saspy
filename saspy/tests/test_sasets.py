@@ -77,6 +77,34 @@ class TestSASets(unittest.TestCase):
                          msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), str(b)))
 
+    def test_smokeUCM2(self):
+        # Basic model returns objects
+        ets = self.sas.sasets()
+        self.sas.submit("""
+                data work.seriesG;
+                    set sashelp.air;
+                    logair = log( air );
+                run;
+                """)
+        air = self.sas.sasdata('seriesG', 'work')
+        b = ets.ucm(data=air, id = 'date interval=month', model='logair',
+                    irregular='',
+                    level=True,
+                    slope=True,
+                    season='length=12 type=trig print=smooth',
+                    estimate='',
+                    forecast='lead=24 print=decomp')
+        a = ['ANNUALSEASONPLOT', 'COMPONENTSIGNIFICANCE', 'CONVERGENCESTATUS', 'CUSUMPLOT', 'CUSUMSQPLOT',
+             'DATASET', 'ERRORPLOT', 'ERRORWHITENOISELOGPROBPLOT', 'ESTIMATIONSPAN',
+             'FILTEREDALLEXCEPTIRREGPLOT', 'FILTEREDALLEXCEPTIRREGVARPLOT', 'FILTEREDSEASONPLOT', 'FITSTATISTICS',
+             'FITSUMMARY', 'FORECASTS', 'FORECASTSONLYPLOT', 'FORECASTSPAN', 'FORECASTSPLOT', 'INITIALPARAMETERS',
+             'LOG', 'MODELPLOT', 'OUTLIERSUMMARY', 'PANELRESIDUALPLOT', 'PARAMETERESTIMATES', 'RESIDUALLOESSPLOT',
+             'SEASONDESCRIPTION', 'SMOOTHEDALLEXCEPTIRREG', 'SMOOTHEDALLEXCEPTIRREGPLOT', 'SMOOTHEDALLEXCEPTIRREGVARPLOT',
+             'SMOOTHEDSEASON', 'SMOOTHEDSEASONPLOT']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
+
     def test_UCM2(self):
         # Basic model returns objects
         ets = self.sas.sasets()
@@ -212,7 +240,7 @@ class TestSASets(unittest.TestCase):
         air = self.sas.sasdata('air', 'sashelp')
         outAir = self.sas.sasdata('air')
         ets.arima(data=air, identify='var=air(1,12)', out=outAir)
-        self.assertIsInstance(outAir, saspy.SASdata, msg="out= dataset not created properly")
+        self.assertIsInstance(outAir, saspy.sasdata.SASdata, msg="out= dataset not created properly")
 
     def test_overridePlot(self):
         # Test that user can override plot options
