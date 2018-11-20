@@ -132,6 +132,8 @@ class Codegen(object):
                 print("KeyError: Proper keys not found for {} dictionary: {}".format(self._key, args))
 
         elif isinstance(self._args, SASdata):
+            key = "{} =".format(self._key)
+            args = "{}.{}".format(self._args.libref, self._args.table)
             if self._key == 'score':
                 if self.objtype.casefold() == 'hp4score':
                     return "score out={}.{}\n;".format(self._args.libref, self._args.table)
@@ -142,7 +144,7 @@ class Codegen(object):
             elif self._key == 'savestate':
                 return "{} rstore = {}.{}\n;".format(key, self._args.libref, self._args.table )
 
-        if self._key == 'stmtpassthrough':
+        if self._key in ['stmtpassthrough', 'prog_stmts']:
             return "{0} ;\n".format(args)
         if self._key =='cls':
             key = 'class'
@@ -200,7 +202,8 @@ class SASProcCommons:
         """
         plot = ''
         outmeth = ''
-        procopts = ''
+        procopts = args.pop('procopts', '')
+        outds = args.pop('out', None)
         # Set ODS graphic generation to True by default
         ODSGraphics = args.get('ODSGraphics', True)
 
@@ -226,15 +229,11 @@ class SASProcCommons:
         code = "%macro proccall(d);\n"
         # resolve issues withe Proc options, out= and plots=
         # The procopts statement should be in every procedure as a way to pass arbitrary options to the procedures
-        if 'procopts' in args:
-            self.logger.debug("procopts statement,length: %s,%s", args['procopts'], len(args['procopts']))
-            procopts = args['procopts']
         if 'outmeth' in args:
             outmeth = args['outmeth']
         if 'plot' in args:
             plot = args['plot']
-        if len(outmeth) and 'out' in args:
-            outds = args['out']
+        if len(outmeth) and not outds == None:
             outstr = outds.libref + '.' + outds.table
             code += "proc %s data=%s.%s%s %s %s=%s %s ;\n" % (
                 objtype, data.libref, data.table, data._dsopts(), plot, outmeth, outstr, procopts)
