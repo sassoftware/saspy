@@ -143,9 +143,7 @@ class SASdata:
         :param kwargs:
         :return: Pandas Data Frame
         """
-        libref = 'work'
-        if 'libref' in kwargs:
-            libref = kwargs['libref']
+        libref = kwargs.get('libref','work')
         ll = self.sas._io.submit(code)
         check, errorMsg = self._checkLogForError(ll['LOG'])
         if not check:
