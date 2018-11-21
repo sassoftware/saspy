@@ -16,20 +16,23 @@
 import fcntl
 import os
 import signal
+import socket as socks
 import subprocess
 import tempfile as tf
 from time import sleep
-import socket as socks
+
 
 try:
-   import pandas as pd
-   import numpy  as np
+    import pandas as pd
+    import numpy  as np
+    import fcntl
 except ImportError:
    pass
 try:
    from IPython.display import HTML
 except ImportError:
-   pass
+    pass
+
 
 class SASconfigSTDIO:
    '''
