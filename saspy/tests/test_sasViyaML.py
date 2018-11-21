@@ -44,7 +44,10 @@ class TestSASViyaML(unittest.TestCase):
     def testNnetSmoke1(self):
         ml = self.sas.sasviyaml()
         dt = self.sas.sasdata("class", "sashelp")
-        out1 = ml.nnet(data=dt, target='height', input={'interval': 'weight', "nominal": 'sex'})
+        out1 = ml.nnet(data=dt, target='height',
+                       input={'interval': 'weight', "nominal": 'sex'},
+                       train={'numtries': 3, 'maxiter': 300},
+                       hidden=5)
         self.assertFalse('ERROR_LOG' in out1.__dir__(), msg=u"nnet had errors in the log")
 
     def testSvddSmoke1(self):

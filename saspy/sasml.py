@@ -161,7 +161,7 @@ class SASml:
         :parm partition: The partition variable can only be a string type.
         :parm score: The score variable can only be a string type.
         :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
-        :parm train: The train variable can only be a string type. This parameter is required
+        :parm train: The train variable can be a string or dict type. This parameter is required
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object

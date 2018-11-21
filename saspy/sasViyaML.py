@@ -199,13 +199,13 @@ class SASViyaML:
              autotune: str = None,
              code: str = None,
              crossvalidation: str = None,
-             hidden: str = None,
+             hidden: [str, int] = None,
              input: [str, list, dict] = None,
              optimization: str = None,
              output: str = None,
              partition: str = None,
              target: [str, list, dict] = None,
-             train: str = None,
+             train: [str, dict] = None,
              weight: str = None,
              procopts: str = None,
              stmtpassthrough: str = None,
@@ -220,13 +220,13 @@ class SASViyaML:
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm crossvalidation: The crossvalidation variable can only be a string type.
-        :parm hidden: The hidden variable can only be a string type.
+        :parm hidden: The hidden variable can only be a string type. This statement is required if there is a Train statement and the architecture is not logistic.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
         :parm optimization: The optimization variable can only be a string type.
         :parm output: The output variable can only be a string type.
         :parm partition: The partition variable can only be a string type.
         :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
-        :parm train: The train variable can only be a string type.
+        :parm train: The train variable can be a string or dict type. This parameter is required
         :parm weight: The weight variable can only be a string type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
