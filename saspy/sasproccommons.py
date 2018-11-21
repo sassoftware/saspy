@@ -104,8 +104,10 @@ class Codegen(object):
                         if len(d) > 0:
                             dstr = 'details = %s' % d
                         return "selection method={} ({})  {}\n;".format(m, ' '.join('{}={}'.format(key, val) for key, val in self._args.items()), dstr)
-                if self._key.casefold() == 'train' and all(k in self._args for k in ("numtries", "maxiter")):
+                if self.objtype.lower() == 'hpneural' and self._key.casefold() == 'train' and all(k in self._args for k in ("numtries", "maxiter")):
                     return "train numtries={} maxiter={};\n".format(self._args['numtries'], self._args['maxiter'])
+                if self.objtype.lower() == 'nnet' and self._key.casefold() == 'train':
+                    return "{0} {1};\n".format(self._key, ' '.join('{}={}'.format(key, val) for key, val in self._args.items()))
 
                 if self._key.casefold() == 'out' and not len(self.outmeth):
                     return "output out={}.{}\n;".format(self._args.libref, self._args.table)
@@ -140,10 +142,10 @@ class Codegen(object):
                 elif self.objtype.casefold() == 'tpspline':
                     return "score data={0}.{1} out={2}.{3}\n;".format(self.data.libref, self.data.table, self._args.libref, self._args.table)
                 return "score out={}.{}\n;".format(self._args.libref, self._args.table)
-
             elif self._key == 'savestate':
-                return "{} rstore = {}.{}\n;".format(key, self._args.libref, self._args.table )
-
+                return "{} rstore = {}.{}\n;".format(key, self._args.libref, self._args.table)
+            elif self._key == 'output' and len(self.outmeth):
+                return "{} out = {};\n".format(self._key, args)
         if self._key in ['stmtpassthrough', 'prog_stmts']:
             return "{0} ;\n".format(args)
         if self._key =='cls':

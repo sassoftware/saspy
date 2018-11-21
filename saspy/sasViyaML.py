@@ -87,7 +87,7 @@ class SASViyaML:
         :return: SAS Result Object
         """
 
-    @procDecorator.proc_decorator({'input'})
+    @procDecorator.proc_decorator({'input', 'id'})
     def fastknn(self, data: 'SASdata' = None,
                 display: str = None,
                 displayout: str = None,
@@ -220,7 +220,7 @@ class SASViyaML:
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm crossvalidation: The crossvalidation variable can only be a string type.
-        :parm hidden: The hidden variable can only be a string type. This statement is required if there is a Train statement and the architecture is not logistic.
+        :parm hidden: The hidden variable can only be a string type. This statement is required if there is a Train statement and the architecture is not GLIM.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
         :parm optimization: The optimization variable can only be a string type.
         :parm output: The output variable can only be a string type.
