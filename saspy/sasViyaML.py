@@ -233,7 +233,7 @@ class SASViyaML:
         :return: SAS Result Object
         """
 
-    @procDecorator.proc_decorator({'input'})
+    @procDecorator.proc_decorator({'input', 'kernel'})
     def svdd(self, data: 'SASdata' = None,
              code: str = None,
              id: str = None,

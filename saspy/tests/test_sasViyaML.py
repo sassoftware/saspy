@@ -29,7 +29,7 @@ class TestSASViyaML(unittest.TestCase):
         # TODO endable test
         self.skipTest("can't find shipped dataset that works")
         viya = self.sas.sasviyaml()
-        dt = self.sas.sasdata("class", "sashelp")
+        dt = self.sas.sasdata("class", "mycas")
         out1 = viya.factmac(data=dt, target='height', input={'interval': 'weight', "nominal": 'sex'})
         self.assertFalse('ERROR_LOG' in out1.__dir__(), msg=u"factmac had errors in the log")
 
@@ -46,28 +46,28 @@ class TestSASViyaML(unittest.TestCase):
         	id=_n_;
         run;
         """)
-        hmeq = sas.sasdata('hmeq','mycas')
+        hmeq = self.sas.sasdata('hmeq','mycas')
         out1 = viya.fastknn(data=hmeq, input={'interval': ['loan', 'mortdue', 'value']},
                             id='id',
                             procopts='query = mycas.query',
-                            output=sas.sasdata('knn_out', 'mycas'))
+                            output=self.sas.sasdata('knn_out', 'mycas'))
         self.assertFalse('ERROR_LOG' in out1.__dir__(), msg=u"fastknn had errors in the log")
 
     def testForestSmoke1(self):
         viya = self.sas.sasviyaml()
-        dt = self.sas.sasdata("class", "sashelp")
+        dt = self.sas.sasdata("class", "mycas")
         out1 = viya.forest(data=dt, target='height', input={'interval': 'weight', "nominal": 'sex'})
         self.assertFalse('ERROR_LOG' in out1.__dir__(), msg=u"forest had errors in the log")
 
     def testGradboostSmoke1(self):
         viya = self.sas.sasviyaml()
-        dt = self.sas.sasdata("class", "sashelp")
+        dt = self.sas.sasdata("class", "mycas")
         out1 = viya.gradboost(data=dt, target='height', input={'interval': 'weight', "nominal": 'sex'})
         self.assertFalse('ERROR_LOG' in out1.__dir__(), msg=u"gradboost had errors in the log")
 
     def testNnetSmoke1(self):
         viya = self.sas.sasviyaml()
-        dt = self.sas.sasdata("class", "sashelp")
+        dt = self.sas.sasdata("class", "mycas")
         out1 = viya.nnet(data=dt, target='height',
                        input={'interval': 'weight', "nominal": 'sex'},
                        train='outmodel=mycas.nnetmodel1',
@@ -80,14 +80,14 @@ class TestSASViyaML(unittest.TestCase):
 
     def testSvddSmoke1(self):
         viya = self.sas.sasviyaml()
-        dt = self.sas.sasdata("class", "sashelp")
-        out1 = viya.svdd(data=dt, input={'interval': 'weight', "nominal": 'sex'})
+        dt = self.sas.sasdata("class", "mycas")
+        out1 = viya.svdd(data=dt, input={'interval': 'weight', "nominal": 'sex'}, kernel = "RBF / bw=2")
         self.assertFalse('ERROR_LOG' in out1.__dir__(), msg=u"svdd had errors in the log")
 
     def testSvmachineSmoke1(self):
         viya = self.sas.sasviyaml()
-        dt = self.sas.sasdata("class", "sashelp")
-        out1 = viya.svmachine(data=dt, target='height', input={'interval': 'weight', "nominal": 'sex'})
+        dt = self.sas.sasdata("class", "mycas")
+        out1 = viya.svmachine(data=dt, target='sex', input={'interval': ['weight', 'height']})
         self.assertFalse('ERROR_LOG' in out1.__dir__(), msg=u"svmachine had errors in the log")
 
 if __name__ == '__main__':
