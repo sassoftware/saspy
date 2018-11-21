@@ -1,13 +1,13 @@
 import unittest
-import saspy
 
+import saspy
 from saspy.tests.util import Utilities
+
 
 class TestSASml(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.sas = saspy.SASsession()
-        # cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
         util = Utilities(cls.sas)
         procNeeded = ['hpforest', 'hp4score', 'hpclus', 'hpneural', 'treeboost', 'hpbnet', 'hpcluster']
         if not util.procFound(procNeeded):
@@ -16,14 +16,14 @@ class TestSASml(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         if cls.sas:
-           cls.sas._endsas()
+            cls.sas._endsas()
 
     def testHPForestSmoke1(self):
         ml = self.sas.sasml()
         dt = self.sas.sasdata("class", "sashelp")
         out1 = ml.hpforest(data=dt, target='height',
-                         input={'interval':'weight', "nominal":'sex'}
-                         )
+                           input={'interval': 'weight', "nominal": 'sex'}
+                           )
         a = ['BASELINE', 'DATAACCESSINFO', 'FITSTATISTICS', 'LOG',
              'MODELINFO', 'NOBS', 'PERFORMANCEINFO', 'VARIABLEIMPORTANCE']
         self.assertEqual(sorted(a), sorted(out1.__dir__()),
@@ -34,12 +34,11 @@ class TestSASml(unittest.TestCase):
         ml = self.sas.sasml()
         dt = self.sas.sasdata("class", "sashelp")
         out1 = ml.hpneural(data=dt, target='height',
-                         input={'interval':'weight', "nominal":'sex'},
-                         train = {'numtries': 3, 'maxiter': 300},
-                         hidden = 5
-                         )
-        a = ['BASELINE', 'DATAACCESSINFO', 'FITSTATISTICS', 'LOG',
-             'MODELINFO', 'NOBS', 'PERFORMANCEINFO', 'VARIABLEIMPORTANCE']
+                           input={'interval': 'weight', "nominal": 'sex'},
+                           train={'numtries': 3, 'maxiter': 300},
+                           hidden=5)
+        a = ['CLASSLEVELS', 'DATAACCESSINFO', 'ERRORSUMMARY', 'FITSTATISTICS', 'ITERATION', 'MODELINFORMATION', 'NOBS',
+             'PERFORMANCEINFO', 'TRAINING', 'LOG']
         self.assertEqual(sorted(a), sorted(out1.__dir__()),
                          msg=u"Simple HPNeural  model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), ' '.join(out1.__dir__())))
@@ -48,10 +47,8 @@ class TestSASml(unittest.TestCase):
         ml = self.sas.sasml()
         dt = self.sas.sasdata("class", "sashelp")
         out1 = ml.treeboost(data=dt, target='height',
-                           input={'interval': 'weight', "nominal": 'sex'}
-                           )
-        a = ['BASELINE', 'DATAACCESSINFO', 'FITSTATISTICS', 'LOG',
-             'MODELINFO', 'NOBS', 'PERFORMANCEINFO', 'VARIABLEIMPORTANCE']
+                            input={'interval': 'weight', "nominal": 'sex'}, save=True)
+        a = ['FIT', 'IMPORTANCE', 'MODEL', 'NODESTATS', 'RULES', 'LOG']
         self.assertEqual(sorted(a), sorted(out1.__dir__()),
                          msg=u"Simple treeboost  model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), ' '.join(out1.__dir__())))
@@ -71,8 +68,6 @@ class TestSASml(unittest.TestCase):
         ml = self.sas.sasml()
         dt = self.sas.sasdata("iris", "sashelp")
         out1 = ml.hpcluster(data=dt,
-                         id = ['PetalWidth', "PetalLength", 'SepalLength', 'SepalWidth'],
-                         input={'interval': ['PetalWidth', "PetalLength", 'SepalLength', 'SepalWidth']})
+                            id=['PetalWidth', "PetalLength", 'SepalLength', 'SepalWidth'],
+                            input={'interval': ['PetalWidth', "PetalLength", 'SepalLength', 'SepalWidth']})
         self.assertFalse('ERROR_LOG' in out1.__dir__(), msg=u"HPCLUSTER had errors in the log")
-
-

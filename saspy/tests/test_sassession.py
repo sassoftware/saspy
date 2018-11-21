@@ -6,7 +6,7 @@ from IPython.utils.tempdir import TemporaryDirectory
 class TestSASsessionObject(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.sas = saspy.SASsession() #cfgname='default')
+        cls.sas = saspy.SASsession()
 
     @classmethod
     def tearDownClass(cls):
@@ -81,21 +81,21 @@ class TestSASsessionObject(unittest.TestCase):
     def test_SASsession_procobjs(self):
         # test stat
         stat = self.sas.sasstat()
-        self.assertIsInstance(stat, saspy.SASstat, msg="stat = self.sas.sasstat() failed")
+        self.assertIsInstance(stat, saspy.sasstat.SASstat, msg="stat = self.sas.sasstat() failed")
 
         # test ets
         ets = self.sas.sasets()
-        self.assertIsInstance(ets, saspy.SASets, msg="ets = self.sas.sasets() failed")
+        self.assertIsInstance(ets, saspy.sasets.SASets, msg="ets = self.sas.sasets() failed")
 
         # test qc
         qc = self.sas.sasqc()
-        self.assertIsInstance(qc, saspy.SASqc, msg="qc = self.sas.sasqc() failed")
+        self.assertIsInstance(qc, saspy.sasqc.SASqc, msg="qc = self.sas.sasqc() failed")
 
         # test ml
         ml = self.sas.sasml()
-        self.assertIsInstance(ml, saspy.SASml, msg="ml = self.sas.sasml() failed")
+        self.assertIsInstance(ml, saspy.sasml.SASml, msg="ml = self.sas.sasml() failed")
 
         # test util
         util = self.sas.sasutil()
-        self.assertIsInstance(util, saspy.SASutil, msg="util = self.sas.sasutil() failed")
+        self.assertIsInstance(util, saspy.sasutil.SASutil, msg="util = self.sas.sasutil() failed")
 

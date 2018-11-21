@@ -175,7 +175,7 @@ class SASml:
                   importance: str = None,
                   input: [str, list, dict] = None,
                   performance: str = None,
-                  save: str = None,
+                  save: [str, bool] = True,
                   score: [str, bool, 'SASdata'] = True,
                   subseries: str = None,
                   target: [str, list, dict] = None,
@@ -194,7 +194,7 @@ class SASml:
         :parm importance: The importance variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
         :parm performance: The performance variable can only be a string type.
-        :parm save: The save variable can only be a string type.
+        :parm save: The save variable can be a string or boolean type. The default is True to create common output datasets
         :parm score: The score variable can only be a string type.
         :parm subseries: The subseries variable can only be a string type.
         :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
