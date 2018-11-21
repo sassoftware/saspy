@@ -7,8 +7,7 @@ import os
 class TestPandasDataFrameIntegration(unittest.TestCase):
     @classmethod    
     def setUpClass(cls):
-        cls.sas = saspy.SASsession() 
-        #cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
+        cls.sas = saspy.SASsession()
 
     @classmethod
     def tearDownClass(cls):

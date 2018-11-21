@@ -16,7 +16,14 @@
 
 import logging
 import re
-from saspy.sastabulate import Tabulate
+import saspy as sp2
+from pdb import set_trace as bp
+
+try:
+    from IPython.display import HTML
+    from IPython.display import display as DISPLAY
+except ImportError:
+    pass
 
 class SASdata:
     """
@@ -87,7 +94,7 @@ class SASdata:
         self.table = table
         self.dsopts = dsopts
         self.results = results
-        self.tabulate = Tabulate(sassession, self)
+        self.tabulate = sp2.Tabulate(sassession, self)
 
     def __getitem__(self, key):
         print(key)
@@ -188,8 +195,7 @@ class SASdata:
         :param obs: the number of rows of the table that you want to display. The default is 5
         :return:
         """
-
-        topts = dict(self.dsopts)
+        topts = dict(self.dsopts) if self.dsopts is not None else {}
         topts['obs'] = obs
         code = "proc print data=" + self.libref + '.' + self.table + self.sas._dsopts(topts) + ";run;"
 
@@ -868,36 +874,22 @@ class SASdata:
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
 
-        #code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
-        #code += "run; quit; %mend;\n"
-
-        # Debug block
-
-        #debug={'name': name,
-        #       'score_table': score_table,
-        #       'target': target,
-        #       'var': var,
-        #       'nominals': nominals,
-        #       'level': level,
-        #       'binstats': binstats,
-        #       'out':out}
-        #print(debug.items())
-
         if self.sas.nosub:
             print(code)
             return
 
         ll = self.sas.submit(code, 'text')
-        obj1 = SASProcCommons._objectmethods(self, objname)
-        return SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
+        obj1 = sp2.SASProcCommons._objectmethods(self, objname)
+        return sp2.SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
 
-    def to_csv(self, file: str, opts: dict ={}) -> str:
+    def to_csv(self, file: str, opts: dict = None) -> str:
         """
         This method will export a SAS Data Set to a file in CSV format.
 
         :param file: the OS filesystem path of the file to be created (exported from this SAS Data Set)
         :return:
         """
+        opts = opts if opts is not None else {}
         ll = self._is_valid()
         if ll:
             if not self.sas.batch:
