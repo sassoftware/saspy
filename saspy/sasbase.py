@@ -939,7 +939,7 @@ class SASsession():
                 if len(fmat) > 0:
                     opts += ';\n\t' + fmat
             elif len(fmat) > 0:
-                opts = ';' + fmat
+                opts = ';\n\t' + fmat
         return opts
 
 
@@ -1717,7 +1717,10 @@ class SASdata:
 
         :return:
         """
-        code = "proc means data=" + self.libref + '.' + self.table + self._dsopts() + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;run;"
+        dsopts = self._dsopts().partition(';\n\tformat')
+
+        code  = "proc means data=" + self.libref + '.' + self.table + dsopts[0] + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;"
+        code += dsopts[1]+dsopts[2]+"run;"
 
         if self.sas.nosub:
             print(code)
@@ -1726,8 +1729,8 @@ class SASdata:
         ll = self._is_valid()
 
         if self.results.upper() == 'PANDAS':
-            code = "proc means data=%s.%s %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; ods output Summary=work._summary; run;" % (
-                self.libref, self.table, self._dsopts())
+            code = "proc means data=%s.%s %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; %s ods output Summary=work._summary; run;" % (
+                self.libref, self.table, dsopts[0], dsopts[1]+dsopts[2])
             return self._returnPD(code, '_summary')
         else:
             if self.HTML:
