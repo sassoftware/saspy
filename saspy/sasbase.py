@@ -304,26 +304,24 @@ class SASsession():
         try:
             if self._io.pid:
                 sysvars = """
-                    options nosource nonotes nonumber;
-
                     %put WORKPATH=%sysfunc(pathname(work));
                     %put ENCODING=&SYSENCODING;
                     %put SYSVLONG=&SYSVLONG4;
                     %put SYSJOBID=&SYSJOBID;
                     %put SYSSCP=&SYSSCP;
-
-                    options source notes number;
                 """
                 res = self.submit(sysvars)['LOG']
 
-                # Take everything after the options statement
-                vlist = res.split('options nosource nonotes nonumber;\n')[1].split('\n')
-
-                self.workpath = vlist[0].split('=')[1]
-                self.sascei   = vlist[1].split('=')[1]
-                self.sasver   = vlist[2].split('=')[1]
-                self.SASpid   = vlist[3].split('=')[1]
-                self.hostsep  = vlist[4].split('=')[1]
+                vlist         = res.rpartition('SYSSCP=')
+                self.hostsep  = vlist[2].partition('\n')[0]
+                vlist         = res.rpartition('SYSJOBID=')
+                self.SASpid   = vlist[2].partition('\n')[0]
+                vlist         = res.rpartition('SYSVLONG=')
+                self.sasver   = vlist[2].partition('\n')[0]
+                vlist         = res.rpartition('ENCODING=')
+                self.sascei   = vlist[2].partition('\n')[0]
+                vlist         = res.rpartition('WORKPATH=')
+                self.workpath = vlist[2].partition('\n')[0]
 
                 if self.hostsep == 'WIN':
                    self.hostsep = '\\'
