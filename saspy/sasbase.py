@@ -938,7 +938,7 @@ class SASsession():
                 if len(fmat) > 0:
                     opts += ';\n\t' + fmat
             elif len(fmat) > 0:
-                opts = ';' + fmat
+                opts = ';\n\t' + fmat
         return opts
 
     def _impopts(self, opts):
