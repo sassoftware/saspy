@@ -36,12 +36,24 @@ class procDecorator:
             return inner
         return decorator
 
-    def doc_convert(ls):
+    def doc_convert(ls, proc: str = '') -> dict:
+        """
+        The `doc_convert` method takes two arguments: a list of the valid statements and the proc name.
+        It returns a dictionary with two keys, method_stmt and markup_stmt.
+        These outputs can be copied into the appropriate product file.
+
+        :param proc: str
+        :return: dict with two keys  method_stmt and markup_stmt
+        """
+
         generic_terms = ['procopts', 'stmtpassthrough']
-        ls_list = list(ls)
+        assert isinstance(ls, set)
+        ls_list = [x.lower() for x in ls]
         doc_list = []
         doc_markup = []
         for i in [j for j in ls_list if j not in generic_terms]:
+            if i.lower() == 'class':
+                i = 'cls'
             doc_mstr = ''.join([':parm ', i, ': The {} variable can only be a string type.'.format(i)])
             doc_str = ': str = None,'
 
@@ -56,6 +68,9 @@ class procDecorator:
                 doc_mstr = ''.join([':parm ', i,
                                     ': The {} variable can be a string or list type. It refers to the categorical, or nominal variables.'.format(
                                         i)])
+                doc_str = ': [str, list] = None,'
+            if i.lower() in ['id', 'by']:
+                doc_mstr = ''.join([':parm ', i, ': The {} variable can be a string or list type. '.format(i)])
                 doc_str = ': [str, list] = None,'
             if i.lower() in ['level', 'irregular', 'slope', 'estimate' ]:
                 doc_str = ": [str, bool] = True,"
@@ -72,7 +87,15 @@ class procDecorator:
                                     j)])
             doc_markup.append(''.join([doc_mstr, '\n']))
 
-        doc_list.insert(0, ''.join(["data: 'SASData' = None,", '\n']))
-        doc_markup.insert(0, ''.join([':param data: SASData object This parameter is required', '\n']))
+        doc_markup.insert(0, ''.join([':param data: SASdata object This parameter is required', '\n']))
+        first_line = ''.join(["data: 'SASdata' = None,", '\n'])
+        if len(proc):
+            first_line = ''.join(["def {}(self, data: 'SASdata' = None,".format(proc), '\n'])
+            doc_markup.insert(0, ''.join(['Python method to call the {} procedure'.format(proc.upper()),
+                                          '\n', 'Documentation link:', '\n\n']))
+        doc_list.insert(0, first_line)
+        doc_list.append("**kwargs: dict) -> 'SASresults':")
+
         doc_markup.append(''.join([':return: SAS Result Object', '\n']))
-        return (''.join(doc_list), ''.join(doc_markup))
+
+        return {'method_stmt' : ''.join(doc_list), 'markup_stmt' : ''.join(doc_markup)}

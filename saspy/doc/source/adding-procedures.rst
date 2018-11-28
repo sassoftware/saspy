@@ -28,24 +28,49 @@ Process
 
 To add a new procedure follow these steps:
 
-#. Create a new method for the procedure.
-#. Create the set of required statements. If there are no required statements 
-   then create an empty set {}.
-#. Create the legal set of statements. This can often be obtained from the 
-   documentation for the procedure. procopts should always be included in the 
-   legal set to permit flexibility in calling the procedure.
-#. Create the doc string with the following parts at a minimum:
+#. Identify the product of the procedure (SAS/STAT, SAS/ETS, SAS Enterprise Miner, etc).
+#. Find the corresponding file in saspy sasstat.py, sasets.py, sasml.py, etc.
+#. Create a set of valid statements. Here is an example:
 
-    - Procedure name
-    - Required set
-    - Legal set
-    - Link to the procedure documentation
+    .. code-block::
 
-#. Add the return call for the method using an existing procedure as an example.
-#. Verify that all the statements in the required and legal sets are listed in 
-   _makeProcCallMacro method of sasproccommons.py.
-#. Write at least one test to exercise the procedures and include it in the 
+        lset = {'ARIMA', 'BY', 'ID', 'MACURVES', 'MONTHLY', 'OUTPUT', 'VAR'}
+
+    The case and order of the items will be formated.
+#. Call the `doc_convert` method to generate then method call as well as the docstring markup
+
+    .. code-block::
+
+        import saspy
+        print(saspy.sasdecorator.procDecorator.doc_convert(lset, 'x11')['method_stmt'])
+        print(saspy.sasdecorator.procDecorator.doc_convert(lset, 'x11')['markup_stmt'])
+
+
+    The `doc_convert` method takes two arguments: a list of the valid statements and the proc name. It returns a dictionary with two keys, method_stmt and markup_stmt. These outputs can be copied into the appropriate product file.
+
+#. Add the proc decorator to the new method.
+    The decorator should be on the line above the method declaration.
+    The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list `{}` should be passed.
+    Here are two examples one with no required arguments:
+
+    .. code-block::
+
+        @procDecorator.proc_decorator({})
+        def esm(self, data: 'SASdata' = None, ...
+
+    And one with required arguments:
+
+    .. code-block::
+
+        @procDecorator.proc_decorator({'model'})
+        def mixed(self, data: 'SASdata' = None, ...
+
+#. Add a link to the SAS documentation plus any additional details will be helpful to users
+
+#. Write at least one test to exercise the procedures and include it in the
    appropriate testing file.
+
+If you have questions, please open an issue in the GitHub repo and the maintainers will be happy to help.
 
 .. Example
 .. =======
