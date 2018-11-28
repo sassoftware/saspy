@@ -17,7 +17,6 @@
 import logging
 import re
 import saspy as sp2
-from pdb import set_trace as bp
 
 try:
     from IPython.display import HTML
@@ -91,9 +90,9 @@ class SASdata:
             if self.sas.sascfg.mode == 'HTTP':
                 self.libref = 'WORK'
 
-        self.table = table
-        self.dsopts = dsopts
-        self.results = results
+        self.table    = table
+        self.dsopts   = dsopts if dsopts is not None else {}
+        self.results  = results
         self.tabulate = sp2.Tabulate(sassession, self)
 
     def __getitem__(self, key):
@@ -195,7 +194,7 @@ class SASdata:
         :param obs: the number of rows of the table that you want to display. The default is 5
         :return:
         """
-        topts = dict(self.dsopts) if self.dsopts is not None else {}
+        topts = dict(self.dsopts)
         topts['obs'] = obs
         code = "proc print data=" + self.libref + '.' + self.table + self.sas._dsopts(topts) + ";run;"
 
@@ -436,7 +435,7 @@ class SASdata:
 
         ll = self._is_valid()
         if self.results.upper() == 'PANDAS':
-            code = "proc contents data=%s.%s %s ;" % (self.libref, self.table, self._dsopts())
+            code  = "proc contents data=%s.%s %s ;" % (self.libref, self.table, self._dsopts())
             code += "ods output Attributes=work._attributes;"
             code += "ods output EngineHost=work._EngineHost;"
             code += "ods output Variables=work._Variables;"
@@ -560,9 +559,9 @@ class SASdata:
         :return:
         """
         dsopts = self._dsopts().partition(';\n\tformat')
-        code = "proc means data=" + self.libref + '.' + self.table + dsopts[0] + \
-               " stackodsoutput n nmiss median mean std min p25 p50 p75 max;"
-        code += dsopts[1] + dsopts[2] + "run;"
+
+        code  = "proc means data=" + self.libref + '.' + self.table + dsopts[0] + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;"
+        code += dsopts[1]+dsopts[2]+"run;"
 
         if self.sas.nosub:
             print(code)
@@ -571,8 +570,8 @@ class SASdata:
         ll = self._is_valid()
 
         if self.results.upper() == 'PANDAS':
-            code = "proc means data=%s.%s %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; %s ods output Summary=work._summary; run;" % \
-                   (self.libref, self.table, dsopts[0], dsopts[1] + dsopts[2])
+            code = "proc means data=%s.%s %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; %s ods output Summary=work._summary; run;" % (
+                self.libref, self.table, dsopts[0], dsopts[1]+dsopts[2])
             return self._returnPD(code, '_summary')
         else:
             if self.HTML:

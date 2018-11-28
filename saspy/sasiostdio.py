@@ -13,17 +13,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+import fcntl
 import os
 import signal
-import socket as socks
 import subprocess
 import tempfile as tf
 from time import sleep
+import socket as socks
 
 try:
     import pandas as pd
     import numpy  as np
-    import fcntl
 except ImportError:
     pass
 try:
@@ -490,17 +490,13 @@ Will use HTML5 for this SASsession.""")
         what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
         expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
         unnecessary read in submit as this can't happen in the current code.
-        :param code: str
-        :param results: str default is HTML
-        :return: dict
         """
-
 
         odsopen = b"ods listing close;ods " + self.sascfg.output.encode() + \
                   b" (id=saspy_internal) file=stdout options(bitmap_mode='inline') device=svg style=" + self._sb.HTML_Style.encode() + \
                   b"; ods graphics on / outputfmt=png;\n"
         odsclose = b"ods " + self.sascfg.output.encode() + b" (id=saspy_internal) close;ods listing;\n"
-        ods = True
+        ods = True;
 
         if results.upper() != "HTML":
             ods = False
@@ -1034,7 +1030,7 @@ Will use HTML5 for this SASsession.""")
                 if col < (ncols - 1):
                     card += chr(3)
             self.stdin.write(card.encode(self.sascfg.encoding) + b'\n')
-        # self._asubmit(card, "text")
+            # self._asubmit(card, "text")
 
         self._asubmit(";;;;run;", "text")
 
@@ -1428,7 +1424,11 @@ Will use HTML5 for this SASsession.""")
 
 if __name__ == "__main__":
     startsas()
+
     submit(sys.argv[1], "text")
+
     print(_getlog())
     print(_getlsttxt())
+
     endsas()
+

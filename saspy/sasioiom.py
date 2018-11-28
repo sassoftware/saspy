@@ -15,10 +15,10 @@
 #
 
 import os
-import socket as socks
 import subprocess
-import tempfile as tf
 from time import sleep
+import socket as socks
+import tempfile as tf
 
 try:
     import pandas as pd
@@ -771,12 +771,12 @@ Will use HTML5 for this SASsession.""")
                 self.pid = None
                 self._sb.SASpid = None
                 return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' + str(rc), LST='')
-
-        # to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
-        # removing this and adding comment in _asubmit to use _getlst[txt] so this will never be necessary; delete later
-        # while(len(self.stdout.read1(4096)) > 0):
-        #   continue
-
+        """
+        to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
+        removing this and adding comment in _asubmit to use _getlst[txt] so this will never be necessary; delete later
+        while(len(self.stdout.read1(4096)) > 0):
+          continue
+        """
         if results.upper() != "HTML":
             ods = False
 
@@ -1019,7 +1019,7 @@ Will use HTML5 for this SASsession.""")
 
     def saslog(self):
         """
-        this method is used to get the current, full contents of the SASLOG
+        This method is used to get the current, full contents of the SASLOG
         """
         return self._log
 
@@ -1651,3 +1651,4 @@ if __name__ == "__main__":
     print(_getlsttxt())
 
     endsas()
+
