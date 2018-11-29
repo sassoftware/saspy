@@ -41,7 +41,10 @@ class Codegen(object):
         if self._key in ['code', 'save'] and isinstance(self._args, str):
             args = "file = '{}'".format(args)
         if self._key in ['output', 'out'] and isinstance(self._args, str):
-            return "output out= {};\n".format(args)
+            if bool(re.match(r'(\bout\W*=+)',args, flags=re.IGNORECASE)):
+                return "output {};\n".format(args)
+            else:
+                return "output out= {};\n".format(args)
         if self._key in ['selection'] and isinstance(self._args, str):
             if self._args.lower().strip() in ['none', 'forward', 'backward', 'stepwise', 'forwardswap','lar', 'lasso']:
                 if len(self._args.split()) == 1:
