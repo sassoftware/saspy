@@ -212,20 +212,22 @@ class SASProcCommons:
         # The different SAS products vary slightly in plotting and out methods.
         # this block sets the options correctly for plotting and output statements
         if self.sasproduct.lower() == 'stat' and not ('ODSGraphics' in args.keys() or ODSGraphics == False):
-            outmeth = ''
+            #outmeth = ''
             plot = 'plot=all'
         if self.sasproduct.lower() == 'qc':
-            outmeth = ''
-            plot = ''
+            #outmeth = ''
+            #plot = ''
+            pass
         if self.sasproduct.lower() == 'ets' and not ('ODSGraphics' in args.keys() or ODSGraphics == False):
             outmeth = 'out'
             plot = 'plot=all'
         if self.sasproduct.lower() == 'em':
-            outmeth = ''
-            plot = ''
+            #outmeth = ''
+            #plot = ''
+            pass
         if self.sasproduct.lower() == 'vddml':
             outmeth = 'out'
-            plot = ''
+            #plot = ''
         self.logger.debug("product caller: " + self.sasproduct.lower())
         debug_code= ''
         code = "%macro proccall(d);\n"
@@ -242,6 +244,8 @@ class SASProcCommons:
         else:
             code += "proc %s data=%s.%s%s %s %s ;\n" % (
             objtype, data.libref, data.table, data._dsopts(), plot, procopts)
+            if outds is not None:
+                args['output'] = outds
         self.logger.debug("args value: " + str(args))
         self.logger.debug("args type: " + str(type(args)))
 
