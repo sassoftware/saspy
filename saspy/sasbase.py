@@ -19,7 +19,7 @@
 # it provides base functionality, data access and processing, and includes analytics and ODS results.
 # There is a sample configuration file named sascfg in the saspy package showing how to configure connections
 # to SAS. Currently supported methods are STDIO, connecting to a local (same machine) Linux SAS using
-# stdio methods (fork, exec, and pipes). The is also support for running STDIO over SSH, which can 
+# stdio methods (fork, exec, and pipes). The is also support for running STDIO over SSH, which can
 # connect to a remote linux SAS via passwordless ssh. The ssh method cannot currently support interrupt
 # handling, as the local STDIO method can. An interrupt on this method can only terminate the SAS process;
 # you'll be prompted to terminate or wait for completion. The third method is HTTP, which can connect
@@ -41,14 +41,14 @@ import sys
 import getpass
 import tempfile
 
-from saspy.sasioiom import SASsessionIOM
-from saspy.sasets import SASets
-from saspy.sasml import SASml
-from saspy.sasqc import SASqc
-from saspy.sasstat import SASstat
-from saspy.sasutil import SASutil
+from saspy.sasioiom  import SASsessionIOM
+from saspy.sasets    import SASets
+from saspy.sasml     import SASml
+from saspy.sasqc     import SASqc
+from saspy.sasstat   import SASstat
+from saspy.sasutil   import SASutil
 from saspy.sasViyaML import SASViyaML
-from saspy.sasdata import SASdata
+from saspy.sasdata   import SASdata
 
 try:
     import pandas as pd
@@ -56,12 +56,12 @@ except ImportError:
     pass
 
 try:
-    import saspy.sascfg_personal as SAScfg
+   import saspy.sascfg_personal as SAScfg
 except ImportError:
-    try:
-        import sascfg_personal as SAScfg
-    except ImportError:
-        import saspy.sascfg as SAScfg
+   try:
+      import sascfg_personal as SAScfg
+   except ImportError:
+      import saspy.sascfg as SAScfg
 
 if os.name != 'nt':
     from saspy.sasiostdio import SASsessionSTDIO
@@ -80,9 +80,9 @@ class SASconfig:
 
     def __init__(self, **kwargs):
         self._kernel = kwargs.get('kernel', None)
-        self.valid = True
-        self.mode = ''
-        configs = []
+        self.valid   = True
+        self.mode    = ''
+        configs      = []
 
         cfgfile = kwargs.get('cfgfile', None)
         if cfgfile:
@@ -154,11 +154,11 @@ class SASconfig:
         self.name = cfgname
         cfg = getattr(SAScfg, cfgname)
 
-        ip = cfg.get('ip', '')
-        ssh = cfg.get('ssh', '')
-        path = cfg.get('saspath', '')
-        java = cfg.get('java', '')
-        self.results = cfg.get('results', None)
+        ip            = cfg.get('ip', '')
+        ssh           = cfg.get('ssh', '')
+        path          = cfg.get('saspath', '')
+        java          = cfg.get('java', '')
+        self.results  = cfg.get('results', None)
         self.autoexec = cfg.get('autoexec', None)
 
         inautoexec = kwargs.get('autoexec', None)
@@ -168,14 +168,14 @@ class SASconfig:
             else:
                 self.autoexec = inautoexec
 
-        if len(java) > 0:
-            self.mode = 'IOM'
-        elif len(ip) > 0:
-            self.mode = 'HTTP'
-        elif len(ssh) > 0:
-            self.mode = 'SSH'
+        if len(java)   > 0:
+            self.mode  = 'IOM'
+        elif len(ip)   > 0:
+            self.mode  = 'HTTP'
+        elif len(ssh)  > 0:
+            self.mode  = 'SSH'
         elif len(path) > 0:
-            self.mode = 'STDIO'
+            self.mode  = 'STDIO'
         else:
             print("Configuration Definition " + cfgname + " is not valid. Failed to create a SASsession.")
             self.valid = False
@@ -261,21 +261,21 @@ class SASsession():
 
     # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
     def __init__(self, **kwargs):
-        self._loaded_macros = False
-        self._obj_cnt = 0
-        self.nosub = False
-        self.sascfg = SASconfig(**kwargs)
-        self.batch = False
-        self.results = kwargs.get('results', self.sascfg.results)
+        self._loaded_macros    = False
+        self._obj_cnt          = 0
+        self.nosub             = False
+        self.sascfg            = SASconfig(**kwargs)
+        self.batch             = False
+        self.results           = kwargs.get('results', self.sascfg.results)
         if not self.results:
-            self.results = 'Pandas'
-        self.workpath = ''
-        self.sasver = ''
-        self.sascei = ''
-        self.SASpid = None
-        self.HTML_Style = "HTMLBlue"
-        self.sas_date_fmts = sas_date_fmts
-        self.sas_time_fmts = sas_time_fmts
+            self.results       = 'Pandas'
+        self.workpath          = ''
+        self.sasver            = ''
+        self.sascei            = ''
+        self.SASpid            = None
+        self.HTML_Style        = "HTMLBlue"
+        self.sas_date_fmts     = sas_date_fmts
+        self.sas_time_fmts     = sas_time_fmts
         self.sas_datetime_fmts = sas_datetime_fmts
 
         if not self.sascfg.valid:
@@ -287,34 +287,31 @@ class SASsession():
                 self._io = SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
             else:
                 print("Cannot use STDIO I/O module on Windows. No "
-                      "SASsession established. Choose an IOM SASconfig "
-                      "definition")
+                    "SASsession established. Choose an IOM SASconfig " 
+                    "definition")
         elif self.sascfg.mode == 'IOM':
             self._io = SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
         try:
             if self._io.pid:
                 sysvars = """
-                    options nosource nonotes nonumber;
-
                     %put WORKPATH=%sysfunc(pathname(work));
                     %put ENCODING=&SYSENCODING;
                     %put SYSVLONG=&SYSVLONG4;
                     %put SYSJOBID=&SYSJOBID;
                     %put SYSSCP=&SYSSCP;
-
-                    options source notes number;
                 """
                 res = self.submit(sysvars)['LOG']
-
-                # Take everything after the options statement
-                vlist = res.split('options nosource nonotes nonumber;\n')[1].split('\n')
-
-                self.workpath = vlist[0].split('=')[1]
-                self.sascei = vlist[1].split('=')[1]
-                self.sasver = vlist[2].split('=')[1]
-                self.SASpid = vlist[3].split('=')[1]
-                self.hostsep = vlist[4].split('=')[1]
+                vlist         = res.rpartition('SYSSCP=')
+                self.hostsep  = vlist[2].partition('\n')[0]
+                vlist         = res.rpartition('SYSJOBID=')
+                self.SASpid   = vlist[2].partition('\n')[0]
+                vlist         = res.rpartition('SYSVLONG=')
+                self.sasver   = vlist[2].partition('\n')[0]
+                vlist         = res.rpartition('ENCODING=')
+                self.sascei   = vlist[2].partition('\n')[0]
+                vlist         = res.rpartition('WORKPATH=')
+                self.workpath = vlist[2].partition('\n')[0]
 
                 if self.hostsep == 'WIN':
                     self.hostsep = '\\'
@@ -338,9 +335,9 @@ class SASsession():
             if self.sascfg.cfgopts.get('verbose', True):
                 print("This SASsession object is not valid\n")
         else:
-            pyenc = self._io.sascfg.encoding
+           pyenc = self._io.sascfg.encoding
 
-        x = "Access Method         = %s\n" % self.sascfg.mode
+        x  = "Access Method         = %s\n" % self.sascfg.mode
         x += "SAS Config name       = %s\n" % self.sascfg.name
         x += "WORK Path             = %s\n" % self.workpath
         x += "SAS Version           = %s\n" % self.sasver
@@ -1121,13 +1118,13 @@ class SASsession():
                   name = dread(did, memcount);
                   memcount = memcount - 1;
 
-                  qname = spd || '""" + self.hostsep + """' || name; 
+                  qname = spd || '"""+self.hostsep+"""' || name;
 
                   rc = filename('saspydq', qname);
                   dq = dopen('saspydq');
                   if dq NE 0 then
                      do;
-                        dname = strip(name) || '""" + self.hostsep + """';
+                        dname = strip(name) || '"""+self.hostsep+"""';
                         put 'DIR=' dname;
                         rc = dclose(dq);
                      end;
@@ -1169,7 +1166,6 @@ class SASsession():
 
         return dirlist
 
-
 if __name__ == "__main__":
     startsas()
 
@@ -1198,10 +1194,8 @@ sas_date_fmts = (
     'FRSDFDN', 'FRSDFDWN', 'FRSDFMN', 'FRSDFMY', 'FRSDFMY', 'FRSDFWDX', 'FRSDFWKX', 'HUNDFDD', 'HUNDFDE', 'HUNDFDE',
     'HUNDFDN', 'HUNDFDWN', 'HUNDFMN', 'HUNDFMY', 'HUNDFMY', 'HUNDFWDX', 'HUNDFWKX', 'IS8601DA', 'IS8601DA', 'ITADFDD',
     'ITADFDE', 'ITADFDE', 'ITADFDN', 'ITADFDWN', 'ITADFMN', 'ITADFMY', 'ITADFMY', 'ITADFWDX', 'ITADFWKX', 'JDATEMD',
-    'JDATEMDW', 'JDATEMNW', 'JDATEMON', 'JDATEQRW', 'JDATEQTR', 'JDATESEM', 'JDATESMW', 'JDATEWK', 'JDATEYDW',
-    'JDATEYM',
-    'JDATEYMD', 'JDATEYMD', 'JDATEYMW', 'JNENGO', 'JNENGO', 'JNENGOW', 'JULDATE', 'JULDAY', 'JULIAN', 'JULIAN',
-    'MACDFDD',
+    'JDATEMDW', 'JDATEMNW', 'JDATEMON', 'JDATEQRW', 'JDATEQTR', 'JDATESEM', 'JDATESMW', 'JDATEWK', 'JDATEYDW', 'JDATEYM',
+    'JDATEYMD', 'JDATEYMD', 'JDATEYMW', 'JNENGO', 'JNENGO', 'JNENGOW', 'JULDATE', 'JULDAY', 'JULIAN', 'JULIAN', 'MACDFDD',
     'MACDFDE', 'MACDFDE', 'MACDFDN', 'MACDFDWN', 'MACDFMN', 'MACDFMY', 'MACDFMY', 'MACDFWDX', 'MACDFWKX', 'MINGUO',
     'MINGUO', 'MMDDYY', 'MMDDYY', 'MMDDYYB', 'MMDDYYC', 'MMDDYYD', 'MMDDYYN', 'MMDDYYP', 'MMDDYYS', 'MMYY', 'MMYYC',
     'MMYYD', 'MMYYN', 'MMYYP', 'MMYYS', 'MONNAME', 'MONTH', 'MONYY', 'MONYY', 'ND8601DA', 'NENGO', 'NENGO', 'NLDATE',
@@ -1215,10 +1209,8 @@ sas_date_fmts = (
     'RUSDFMY', 'RUSDFMY', 'RUSDFWDX', 'RUSDFWKX', 'SLODFDD', 'SLODFDE', 'SLODFDE', 'SLODFDN', 'SLODFDWN', 'SLODFMN',
     'SLODFMY', 'SLODFMY', 'SLODFWDX', 'SLODFWKX', 'SVEDFDD', 'SVEDFDE', 'SVEDFDE', 'SVEDFDN', 'SVEDFDWN', 'SVEDFMN',
     'SVEDFMY', 'SVEDFMY', 'SVEDFWDX', 'SVEDFWKX', 'WEEKDATE', 'WEEKDATX', 'WEEKDAY', 'WEEKU', 'WEEKU', 'WEEKV', 'WEEKV',
-    'WEEKW', 'WEEKW', 'WORDDATE', 'WORDDATX', 'XYYMMDD', 'XYYMMDD', 'YEAR', 'YYMM', 'YYMMC', 'YYMMD', 'YYMMDD',
-    'YYMMDD',
-    'YYMMDDB', 'YYMMDDC', 'YYMMDDD', 'YYMMDDN', 'YYMMDDP', 'YYMMDDS', 'YYMMN', 'YYMMN', 'YYMMP', 'YYMMS', 'YYMON',
-    'YYQ',
+    'WEEKW', 'WEEKW', 'WORDDATE', 'WORDDATX', 'XYYMMDD', 'XYYMMDD', 'YEAR', 'YYMM', 'YYMMC', 'YYMMD', 'YYMMDD', 'YYMMDD',
+    'YYMMDDB', 'YYMMDDC', 'YYMMDDD', 'YYMMDDN', 'YYMMDDP', 'YYMMDDS', 'YYMMN', 'YYMMN', 'YYMMP', 'YYMMS', 'YYMON', 'YYQ',
     'YYQ', 'YYQC', 'YYQD', 'YYQN', 'YYQP', 'YYQR', 'YYQRC', 'YYQRD', 'YYQRN', 'YYQRP', 'YYQRS', 'YYQS', 'YYQZ', 'YYQZ',
     'YYWEEKU', 'YYWEEKV', 'YYWEEKW',
 )
@@ -1239,8 +1231,7 @@ sas_datetime_fmts = (
     'IS8601DN', 'IS8601DT', 'IS8601DT', 'IS8601DZ', 'IS8601DZ', 'ITADFDT', 'ITADFDT', 'JDATEYT', 'JDATEYTW', 'JNENGOT',
     'JNENGOTW', 'MACDFDT', 'MACDFDT', 'MDYAMPM', 'MDYAMPM', 'ND8601DN', 'ND8601DT', 'ND8601DZ', 'NLDATM', 'NLDATM',
     'NLDATMAP', 'NLDATMAP', 'NLDATMDT', 'NLDATML', 'NLDATMM', 'NLDATMMD', 'NLDATMMDL', 'NLDATMMDM', 'NLDATMMDS',
-    'NLDATMMN', 'NLDATMS', 'NLDATMTM', 'NLDATMTZ', 'NLDATMW', 'NLDATMW', 'NLDATMWN', 'NLDATMWZ', 'NLDATMYM',
-    'NLDATMYML',
+    'NLDATMMN', 'NLDATMS', 'NLDATMTM', 'NLDATMTZ', 'NLDATMW', 'NLDATMW', 'NLDATMWN', 'NLDATMWZ', 'NLDATMYM', 'NLDATMYML',
     'NLDATMYMM', 'NLDATMYMS', 'NLDATMYQ', 'NLDATMYQL', 'NLDATMYQM', 'NLDATMYQS', 'NLDATMYR', 'NLDATMYW', 'NLDATMZ',
     'NLDDFDT', 'NLDDFDT', 'NORDFDT', 'NORDFDT', 'POLDFDT', 'POLDFDT', 'PTGDFDT', 'PTGDFDT', 'RUSDFDT', 'RUSDFDT',
     'SLODFDT', 'SLODFDT', 'SVEDFDT', 'SVEDFDT', 'TWMDY', 'YMDDTTM',
