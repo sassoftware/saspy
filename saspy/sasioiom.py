@@ -36,9 +36,9 @@ except ImportError:
    pass
 
 class SASconfigIOM:
-   '''
+   """
    This object is not intended to be used directly. Instantiate a SASsession object instead
-   '''
+   """
    def __init__(self, session, **kwargs):
       self._kernel  = kwargs.get('kernel', None)
 
@@ -101,7 +101,7 @@ class SASconfigIOM:
          if lock and self.timeout:
             print("Parameter 'timeout' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.timeout = intout   
+            self.timeout = intout
 
       inport = kwargs.get('iomport', None)
       if inport:
@@ -143,14 +143,14 @@ class SASconfigIOM:
          if lock and len(self.authkey):
             print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.authkey = inak   
+            self.authkey = inak
 
       inapp = kwargs.get('appserver', '')
       if len(inapp) > 0:
          if lock and len(self.apserver):
             print("Parameter 'appserver' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.appserver = inapp   
+            self.appserver = inapp
 
       inencoding = kwargs.get('encoding', '')
       if len(inencoding) > 0:
@@ -182,7 +182,7 @@ class SASconfigIOM:
       return
 
 class SASsessionIOM():
-   '''
+   """
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
 
    cfgname   - value in SAS_config_names List of the sascfg_personal.py file
@@ -194,13 +194,13 @@ class SASsessionIOM():
    omrpw     - pw for user for IOM access
    encoding  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
    classpath - classpath to IOM client jars and saspyiom client jar.
-   autoexec  - This is a string of SAS code that will be submitted upon establishing a connection. 
+   autoexec  - This is a string of SAS code that will be submitted upon establishing a connection.
    authkey   - Key value for finding credentials in .authfile
    timeout   - Timeout value for establishing connection to workspace server
    appserver - Appserver name of the workspace server to connect to
    sspi      - Boolean for using IWA to connect to a workspace server configured to use IWA
    javaparms - for specifying java commandline options if necessary
-   '''
+   """
    def __init__(self, **kwargs):
       self.pid    = None
       self.stdin  = None
@@ -269,14 +269,14 @@ Will use HTML5 for this SASsession.""")
             pw    = self.sascfg.omrpw
             found = False
             if self.sascfg.authkey:
-               if os.name == 'nt': 
+               if os.name == 'nt':
                   pwf = os.path.expanduser('~')+os.sep+'_authinfo'
                else:
                   pwf = os.path.expanduser('~')+os.sep+'.authinfo'
                try:
                   fid = open(pwf, mode='r')
                   for line in fid:
-                     if line.startswith(self.sascfg.authkey): 
+                     if line.startswith(self.sascfg.authkey):
                         user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
                         pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
                         found = True
@@ -286,10 +286,10 @@ Will use HTML5 for this SASsession.""")
                   pass
                except:
                   pass
-   
+
                if not found:
                   print('Did not find key '+self.sascfg.authkey+' in authinfo file:'+pwf+'\n')
-   
+
             while len(user) == 0:
                user = self.sascfg._prompt("Please enter the IOM user id: ")
                if user is None:
@@ -314,9 +314,9 @@ Will use HTML5 for this SASsession.""")
       if self.sascfg.appserver:
          parms += ["-appname", "'"+self.sascfg.appserver+"'"]
       if not zero:
-         parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]     
+         parms += ["-iomhost", self.sascfg.iomhost, "-iomport", str(self.sascfg.iomport)]
          if not self.sascfg.sspi:
-            parms += ["-user", user]     
+            parms += ["-user", user]
          else:
             parms += ["-spn"]
       else:
@@ -349,8 +349,8 @@ Will use HTML5 for this SASsession.""")
 
          pin  = os.pipe()
          pout = os.pipe()
-         perr = os.pipe() 
-      
+         perr = os.pipe()
+
          try:
             pidpty = os.forkpty()
          except:
@@ -521,7 +521,7 @@ Will use HTML5 for this SASsession.""")
 
 
 
-   '''
+   """
    def _getlog(self, wait=5, jobid=None):
       logf   = b''
       quit   = wait * 2
@@ -541,7 +541,7 @@ Will use HTML5 for this SASsession.""")
             if quit < 0 or len(logf) > 0:
                break
             sleep(0.5)
-   
+
       x = logf.decode(errors='replace').replace(code1, " ")
       self._log += x
 
@@ -609,9 +609,9 @@ Will use HTML5 for this SASsession.""")
          if rc != None:
             self.pid = None
             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
- 
+
       return lstf.decode(errors='replace')
-   
+
    def _getlsttxt(self, wait=5, jobid=None):
       f2 = [None]
       lstf = b''
@@ -654,7 +654,7 @@ Will use HTML5 for this SASsession.""")
             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       return lst.replace(chr(12), '\n')
-   '''
+   """
 
 
 
@@ -663,7 +663,7 @@ Will use HTML5 for this SASsession.""")
       # anything to the lst, then unless _getlst[txt] is called, then next submit will happen to get the lst this wrote, plus
       # what it generates. If the two are not of the same type (html, text) it could be problematic, beyond not being what was
       # expected in the first place. __flushlst__() used to be used, but was never needed. Adding this note and removing the
-      # unnecessary read in submit as this can't happen in the current code. 
+      # unnecessary read in submit as this can't happen in the current code.
 
       odsopen  = b"ods listing close;ods "+self.sascfg.output.encode()+ \
                  b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style.encode()+ \
@@ -677,9 +677,9 @@ Will use HTML5 for this SASsession.""")
 
       if (ods):
          pgm += odsopen
-   
+
       pgm += code.encode()+b'\n'+b'tom says EOL=ASYNCH                          \n'
-   
+
       if (ods):
          pgm += odsclose
 
@@ -776,7 +776,7 @@ Will use HTML5 for this SASsession.""")
             while not gotit:
                var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
                if var is None:
-                  raise KeyboardInterrupt 
+                  raise KeyboardInterrupt
                if len(var) > 0:
                   gotit = True
                else:
@@ -791,10 +791,10 @@ Will use HTML5 for this SASsession.""")
 
       if ods:
          pgm += odsopen
-   
+
       pgm += mj+b'\n'+pcodei.encode()+pcodeiv.encode()
       pgm += code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj
-   
+
       if ods:
          pgm += odsclose
 
@@ -809,7 +809,7 @@ Will use HTML5 for this SASsession.""")
                        rc = self.pid.wait(0)
                        self.pid = None
                        self._sb.SASpid = None
-                       log = logf.partition(logcodeo)[0]+b'\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc).encode() 
+                       log = logf.partition(logcodeo)[0]+b'\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc).encode()
                        return dict(LOG=log.decode(errors='replace'), LST='')
                     except:
                        pass
@@ -949,7 +949,7 @@ Will use HTML5 for this SASsession.""")
 
 
 
-        '''
+        """
         while True:
             rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
             if rc is not None:
@@ -1001,26 +1001,26 @@ Will use HTML5 for this SASsession.""")
         lstr = lstf
         logr = logf
         return dict(LOG=logr, LST=lstr, BC=bc)
-        '''
+        """
 
    def saslog(self):
-      '''
+      """
       this method is used to get the current, full contents of the SASLOG
-      '''
+      """
       return self._log
 
 
    def disconnect(self):
-      '''
+      """
       This method disconnects an IOM session to allow for reconnecting when switching networks
-      '''
+      """
 
       pgm = b'\n'+b'tom says EOL=DISCONNECT                      \n'
       self.stdin[0].send(pgm)
 
       while True:
          try:
-            log = self.stderr[0].recv(4096).decode(errors='replace') 
+            log = self.stderr[0].recv(4096).decode(errors='replace')
          except (BlockingIOError):
             log = b''
 
@@ -1032,12 +1032,12 @@ Will use HTML5 for this SASsession.""")
 
 
    def exist(self, table: str, libref: str ="") -> bool:
-      '''
+      """
       table  - the name of the SAS Data Set
       libref - the libref for the Data Set, defaults to WORK, or USER if assigned
 
       Returns True it the Data Set exists and False if it does not
-      '''
+      """
       code  = "data _null_; e = exist('"
       if len(libref):
          code += libref+"."
@@ -1054,16 +1054,16 @@ Will use HTML5 for this SASsession.""")
       l2 = l2[2].partition("\n")
       exists = int(l2[0])
 
-      return exists
-   
+      return bool(exists)
+
    def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict = None) -> '<SASdata object>':
-      '''
+      """
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
       file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
-      '''
+      """
       opts = opts if opts is not None else {}
 
       code  = "filename x "
@@ -1076,21 +1076,21 @@ Will use HTML5 for this SASsession.""")
       if len(libref):
          code += libref+"."
       code += table+" dbms=csv replace; "+self._sb._impopts(opts)+" run;"
-   
+
       if nosub:
          print(code)
       else:
          ll = self.submit(code, "text")
-   
+
    def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict = None, opts: dict = None) -> 'The LOG showing the results of the step':
-      '''
+      """
       This method will export a SAS Data Set to a file in CSV format.
       file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
       table   - the name of the SAS Data Set you want to export to a CSV file
       libref  - the libref for the SAS Data Set.
       dsopts  - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
       opts    - a dictionary containing any of the following Proc Export options(delimiter, putnames)
-      '''
+      """
       dsopts = dsopts if dsopts is not None else {}
       opts = opts if opts is not None else {}
 
@@ -1107,12 +1107,12 @@ Will use HTML5 for this SASsession.""")
          return ll['LOG']
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="", keep_outer_quotes: bool=False):
-      '''
+      """
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-      '''
+      """
       input  = ""
       card   = ""
       format = ""
@@ -1140,7 +1140,7 @@ Will use HTML5 for this SASsession.""")
                length += " '"+str(df.columns[name])+"'n 8"
                if df.dtypes[df.columns[name]] == 'bool':
                   dts.append('B')
-               else:   
+               else:
                   dts.append('N')
 
       code = "data "
@@ -1181,15 +1181,15 @@ Will use HTML5 for this SASsession.""")
       self._asubmit(code+";;;;\nrun;", "text")
       ll = self.submit("", 'text')
       return
-   
+
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
-      '''
+      """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref  - the libref for the SAS Data Set.
       rowsep  - the row seperator character to use; defaults to '\n'
       colsep  - the column seperator character to use; defaults to '\t'
-      '''
+      """
       dsopts = dsopts if dsopts is not None else {}
 
       method = kwargs.pop('method', None)
@@ -1235,7 +1235,7 @@ Will use HTML5 for this SASsession.""")
       l2 = l2[2].partition("\n")
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
-   
+
       topts             = dict(dsopts)
       topts['obs']      = 1
       topts['firstobs'] = ''
@@ -1257,7 +1257,7 @@ Will use HTML5 for this SASsession.""")
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
       code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file "+self._tomods1.decode()+" dlm="+cdelim+" termstr=NL; put "
-      
+
       for i in range(nvars):
          code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
@@ -1278,7 +1278,7 @@ Will use HTML5 for this SASsession.""")
       ll = self._asubmit(code, 'text')
 
       self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode()+b'\n')
-             
+
 
       BOM   = "\ufeff".encode()
       done  = False
@@ -1327,16 +1327,16 @@ Will use HTML5 for this SASsession.""")
                 datar += data
                 data   = datar.rpartition(colsep.encode()+rowsep.encode()+b'\n')
                 datap  = data[0]+data[1]
-                datar  = data[2] 
+                datar  = data[2]
 
                 datap = datap.decode(self.sascfg.encoding, errors='replace')
                 for i in datap.split(sep=colsep+rowsep+'\n'):
                    if i != '':
                       r.append(tuple(i.split(sep=colsep)))
 
-                if len(r) > trows:   
+                if len(r) > trows:
                    tdf = pd.DataFrame.from_records(r, columns=varlist)
-                   
+
                    for i in range(nvars):
                       if vartype[i] == 'N':
                          if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
@@ -1347,7 +1347,7 @@ Will use HTML5 for this SASsession.""")
                                tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
                       else:
                          tdf[varlist[i]].replace(' ', np.NaN, True)
-                   
+
                    if df is not None:
                       df = df.append(tdf, ignore_index=True)
                    else:
@@ -1356,7 +1356,7 @@ Will use HTML5 for this SASsession.""")
              else:
                 sleep(0.1)
                 try:
-                   log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace') 
+                   log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
                 except (BlockingIOError):
                    log = b''
 
@@ -1365,10 +1365,10 @@ Will use HTML5 for this SASsession.""")
                    if logf.count(logcodeo) >= 1:
                       bail = True
          done = True
-      
-      if len(r) > 0:   
+
+      if len(r) > 0:
          tdf = pd.DataFrame.from_records(r, columns=varlist)
-         
+
          for i in range(nvars):
             if vartype[i] == 'N':
                if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
@@ -1379,7 +1379,7 @@ Will use HTML5 for this SASsession.""")
                      tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
             else:
                tdf[varlist[i]].replace(' ', np.NaN, True)
-         
+
          if df is not None:
             df = df.append(tdf, ignore_index=True)
          else:
@@ -1388,14 +1388,14 @@ Will use HTML5 for this SASsession.""")
       return df
 
    def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, tempfile: str=None, tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
-      '''
+      """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref   - the libref for the SAS Data Set.
       dsopts   - data set options for the input SAS Data Set
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
-      '''
+      """
       dsopts = dsopts if dsopts is not None else {}
 
       logf     = ''
@@ -1414,7 +1414,7 @@ Will use HTML5 for this SASsession.""")
 
       if tempfile is None:
          tmpdir = tf.TemporaryDirectory()
-         tmpcsv = tmpdir.name+os.sep+"tomodsx" 
+         tmpcsv = tmpdir.name+os.sep+"tomodsx"
       else:
          tmpcsv  = tempfile
 
@@ -1447,7 +1447,7 @@ Will use HTML5 for this SASsession.""")
       l2 = l2[2].partition("\n")
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
-   
+
       topts             = dict(dsopts)
       topts['obs']      = 1
       topts['firstobs'] = ''
@@ -1466,7 +1466,7 @@ Will use HTML5 for this SASsession.""")
       del varcat[nvars]
 
       code = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
-            
+
       for i in range(nvars):
          if vartype[i] == 'N':
             code += "'"+varlist[i]+"'n "
@@ -1546,13 +1546,13 @@ Will use HTML5 for this SASsession.""")
                        datar += data
                        data   = datar.rpartition(b'\n')
                        datap  = data[0]+data[1]
-                       datar  = data[2] 
+                       datar  = data[2]
 
                        if datap.count(lstcodeo.encode()) >= 1:
                           done  = True
                           datar = datap.rpartition(logcodeo.encode())
                           datap = datar[0]
-                          
+
                        csv.write(datap.decode(self.sascfg.encoding, errors='replace').encode())
                        if bail and done:
                           break
@@ -1563,7 +1563,7 @@ Will use HTML5 for this SASsession.""")
                           break
                        sleep(0.1)
                        try:
-                          log = self.stderr[0].recv(4096).decode(errors='replace') 
+                          log = self.stderr[0].recv(4096).decode(errors='replace')
                        except (BlockingIOError):
                           log = b''
 
@@ -1591,7 +1591,7 @@ Will use HTML5 for this SASsession.""")
                   done = True;
 
             try:
-               log = self.stderr[0].recv(4096).decode(errors='replace') 
+               log = self.stderr[0].recv(4096).decode(errors='replace')
             except (BlockingIOError):
                sleep(0.1)
                log = b''
@@ -1601,7 +1601,7 @@ Will use HTML5 for this SASsession.""")
                if logf.count(logcodeo) >= 1:
                   bail = True;
                   self._log += logf
-                  
+
             if done and bail:
                break
 
@@ -1628,4 +1628,3 @@ if __name__ == "__main__":
     print(_getlsttxt())
 
     endsas()
-

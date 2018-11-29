@@ -13,17 +13,17 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from saspy.sasbase        import *
-from saspy.sasstat        import *
-from saspy.sasets         import *
-from saspy.sasml          import *
-from saspy.sasqc          import *
-from saspy.sasresults     import *
-from saspy.sasutil        import *
-from saspy.sastabulate    import *
-from saspy.sasproccommons import *
-from saspy.SASLogLexer    import *
-from saspy.version        import __version__
+
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from saspy.version import __version__
+from saspy.sasbase import SASsession, SASconfig
+from saspy.sasdata import SASdata
+from saspy.sasproccommons import SASProcCommons
+from saspy.sastabulate import Tabulate
+from saspy.sasresults import SASresults
 
 def isnotebook():
     try:
@@ -38,5 +38,5 @@ def isnotebook():
         return False      # Probably standard Python interpreter
 
 if isnotebook():
-	from .sas_magic import SASMagic
-	get_ipython().register_magics(SASMagic)
+    from saspy.sas_magic import SASMagic
+    get_ipython().register_magics(SASMagic)

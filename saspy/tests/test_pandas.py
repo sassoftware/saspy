@@ -1,14 +1,13 @@
 import unittest
 import saspy
-import pandas
+import pandas as pd
 import tempfile
 import os
 
 class TestPandasDataFrameIntegration(unittest.TestCase):
     @classmethod    
     def setUpClass(cls):
-        cls.sas = saspy.SASsession() 
-        #cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
+        cls.sas = saspy.SASsession()
 
     @classmethod
     def tearDownClass(cls):
@@ -28,13 +27,15 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
                              run;
                              ''')
         td = self.sas.sasdata('testdata', results='text')
-        self.assertIsInstance(td, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
+        self.assertIsInstance(td, saspy.sasdata.SASdata, msg="cars = sas.sasdata(...) failed")
 
     def test_Pandas_sd2df(self):
-        #test sas data to data frame
+        """
+        test sas data to data frame
+        """
         td = self.sas.sasdata('testdata', results='text')
         df = td.to_df()
-        self.assertIsInstance(df, pandas.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        self.assertIsInstance(df, pd.core.frame.DataFrame, msg="df = td.to_df(...) failed")
         result = df.head()
         expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
         rows = result.to_string().splitlines()
@@ -48,7 +49,7 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         td = self.sas.sasdata('testdata', results='text')
         df = td.to_df()
         td2 = self.sas.df2sd(df, 'td2', results='text')
-        self.assertIsInstance(td2, saspy.SASdata, msg="td2 = sas.df2sd((...) failed")
+        self.assertIsInstance(td2, saspy.sasdata.SASdata, msg="td2 = sas.df2sd((...) failed")
         ll = td2.head()
         expected = ['1', '1966-01-03T00:00:00.000000', '1966-01-03T13:30:59.000123']
         rows = ll['LST'].splitlines()
@@ -61,7 +62,7 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         #test sas data to data frame
         td = self.sas.sasdata('testdata', results='text')
         df = td.to_df_CSV()
-        self.assertIsInstance(df, pandas.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        self.assertIsInstance(df, pd.core.frame.DataFrame, msg="df = td.to_df(...) failed")
         result = df.head()
         expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
         rows = result.to_string().splitlines()
@@ -78,7 +79,7 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         tmpcsv = tmpdir.name+os.sep+"tomodsx" 
 
         df = td.to_df_CSV(tempfile=tmpcsv)
-        self.assertIsInstance(df, pandas.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        self.assertIsInstance(df, pd.core.frame.DataFrame, msg="df = td.to_df(...) failed")
         result = df.head()
         expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
         rows = result.to_string().splitlines()
@@ -96,7 +97,7 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         tmpcsv = tmpdir.name+os.sep+"tomodsx" 
 
         df = td.to_df_CSV(tempfile=tmpcsv, tempkeep=True)
-        self.assertIsInstance(df, pandas.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        self.assertIsInstance(df, pd.core.frame.DataFrame, msg="df = td.to_df(...) failed")
         result = df.head()
         expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
         rows = result.to_string().splitlines()
@@ -115,7 +116,7 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         tmpcsv = tmpdir.name+os.sep+"tomodsx" 
 
         df = td.to_df_CSV(tempfile=tmpcsv, tempkeep=False)
-        self.assertIsInstance(df, pandas.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        self.assertIsInstance(df, pd.core.frame.DataFrame, msg="df = td.to_df(...) failed")
         result = df.head()
         expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
         rows = result.to_string().splitlines()

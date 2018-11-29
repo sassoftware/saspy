@@ -3,7 +3,7 @@ import saspy
 class Utilities:
     def __init__(self, session = None):
         if session is None:
-            self.sas = saspy.SASsession(cfgname=saspy.SAScfg.SAS_config_names[0])
+            self.sas = saspy.SASsession(cfgname=saspy.SASsession().sascfg.SAScfg.SAS_config_names[0])
         else:
             self.sas = session
 

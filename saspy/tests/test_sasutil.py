@@ -4,16 +4,24 @@ from saspy.tests.util import Utilities
 
 
 class TestSASutil(unittest.TestCase):
-    def setUp(self):
-        # Use the first entry in the configuration list
-        self.sas = saspy.SASsession(cfgname=saspy.SAScfg.SAS_config_names[0])
-        self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
-        self.util = Utilities(self.sas)
+    @classmethod
+    def setUpClass(cls):
+        cls.sas = saspy.SASsession()
+        util = Utilities()
         procNeeded = ['hpimpute', 'hpbin', 'hpsample']
-        if not self.util.procFound(procNeeded):
-            self.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
+        if not util.procFound(procNeeded):
+            cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
-    def tearDown(self):
-        if self.sas:
-            self.sas._endsas()
+    @classmethod
+    def tearDownClass(cls):
+        if cls.sas:
+            cls.sas._endsas()
+
+    def test_hpimputeSmoke(self):
+        util = self.sas.sasutil()
+        d = self.sas.sasdata("cars", 'sashelp')
+        out1 = util.hpimpute(data=d, )
+        #test sasdata method
+        cars = self.sas.sasdata('cars', libref='sashelp', results='text')
+        self.assertIsInstance(cars, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
 
