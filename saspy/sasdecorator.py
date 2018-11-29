@@ -59,15 +59,17 @@ class procDecorator:
 
             if i.lower() in ['target', 'input']:
                 doc_mstr = ''.join([':parm ', i,
-                                    ': The {} variable can be a string, list or dict type. It refers to the dependent, y, or label variable.'.format(
-                                        i)])
+                                    ': The {} variable can be a string, list or dict type. It refers to the dependent, y, or label variable.'.format(i)])
                 doc_str = ': [str, list, dict] = None,'
             if i.lower() == 'score':
                 doc_str = ": [str, bool, 'SASdata' ] = True,"
+            if i.lower() in ['output','out']:
+                doc_str = ": [str, bool, 'SASdata' ] = None,"
+                doc_mstr = ''.join([':parm ', i,
+                                    ': The {} variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".'.format(i)])
             if i.lower() in ['cls']:
                 doc_mstr = ''.join([':parm ', i,
-                                    ': The {} variable can be a string or list type. It refers to the categorical, or nominal variables.'.format(
-                                        i)])
+                                    ': The {} variable can be a string or list type. It refers to the categorical, or nominal variables.'.format(i)])
                 doc_str = ': [str, list] = None,'
             if i.lower() in ['id', 'by']:
                 doc_mstr = ''.join([':parm ', i, ': The {} variable can be a string or list type. '.format(i)])
@@ -83,8 +85,7 @@ class procDecorator:
         for j in generic_terms:
             doc_list.append(''.join([j, doc_str, '\n']))
             doc_mstr = ''.join([':parm ', j,
-                                ': The {} variable is a generic option available for advanced use. It can only be a string type.'.format(
-                                    j)])
+                                ': The {} variable is a generic option available for advanced use. It can only be a string type.'.format(j)])
             doc_markup.append(''.join([doc_mstr, '\n']))
 
         doc_markup.insert(0, ''.join([':param data: SASdata object This parameter is required', '\n']))

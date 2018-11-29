@@ -124,7 +124,7 @@ class SASutil:
               grow: str = None,
               id: str = None,
               model: str = None,
-              out: str = None,
+              out: [str, bool, 'SASdata'] = None,
               partition: str = None,
               performance: str = None,
               prune: str = None,
@@ -143,7 +143,7 @@ class SASutil:
         :parm grow: The grow variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm model: The model variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm partition: The partition variable can only be a string type.
         :parm performance: The performance variable can only be a string type.
         :parm prune: The prune variable can only be a string type.

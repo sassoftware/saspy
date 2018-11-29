@@ -90,7 +90,7 @@ class SASViyaML:
                 displayout: str = None,
                 id: str = None,
                 input: [str, list, dict] = None,
-                output: str = None,
+                output: [str, bool, 'SASdata'] = None,
                 savestate: str = None,
                 target: [str, list, dict] = None,
                 procopts: str = None,
@@ -108,7 +108,7 @@ class SASViyaML:
         :parm displayout: The displayout variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
-        :parm output: The output variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm savestate: The savestate variable can only be a string type.
         :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
@@ -122,7 +122,7 @@ class SASViyaML:
                 displayout: str = None,
                 id: str = None,
                 input: [str, list, dict] = None,
-                output: str = None,
+                output: [str, bool, 'SASdata'] = None,
                 procopts: str = None,
                 stmtpassthrough: str = None,
                 **kwargs: dict) -> 'SASresults':
@@ -136,7 +136,7 @@ class SASViyaML:
         :parm displayout: The displayout variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
-        :parm output: The output variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
@@ -150,7 +150,7 @@ class SASViyaML:
                grow: str = None,
                id: str = None,
                input: [str, list, dict] = None,
-               output: str = None,
+               output: [str, bool, 'SASdata'] = None,
                partition: str = None,
                savestate: str = None,
                target: [str, list, dict] = None,
@@ -171,7 +171,7 @@ class SASViyaML:
         :parm grow: The grow variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
-        :parm output: The output variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm partition: The partition variable can only be a string type.
         :parm savestate: The savestate variable can only be a string type.
         :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
@@ -189,7 +189,7 @@ class SASViyaML:
                   crossvalidation: str = None,
                   id: str = None,
                   input: [str, list, dict] = None,
-                  output: str = None,
+                  output: [str, bool, 'SASdata'] = None,
                   partition: str = None,
                   savestate: str = None,
                   target: [str, list, dict] = None,
@@ -210,7 +210,7 @@ class SASViyaML:
         :parm crossvalidation: The crossvalidation variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
-        :parm output: The output variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm partition: The partition variable can only be a string type.
         :parm savestate: The savestate variable can only be a string type.
         :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
@@ -231,7 +231,7 @@ class SASViyaML:
              hidden: [str, int] = None,
              input: [str, list, dict] = None,
              optimization: str = None,
-             output: str = None,
+             output: [str, bool, 'SASdata'] = None,
              partition: str = None,
              target: [str, list, dict] = None,
              train: [str, dict] = None,
@@ -252,7 +252,7 @@ class SASViyaML:
         :parm hidden: The hidden variable can only be a string type. This statement is required if there is a Train statement and the architecture is not GLIM.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
         :parm optimization: The optimization variable can only be a string type.
-        :parm output: The output variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm partition: The partition variable can only be a string type.
         :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
         :parm train: The train variable can be a string or dict type. This parameter is required
@@ -299,7 +299,7 @@ class SASViyaML:
                   id: str = None,
                   input: [str, list, dict] = None,
                   kernel: str = None,
-                  output: str = None,
+                  output: [str, bool, 'SASdata'] = None,
                   partition: str = None,
                   savestate: str = None,
                   solver: str = None,
@@ -318,7 +318,7 @@ class SASViyaML:
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
         :parm kernel: The kernel variable can only be a string type.
-        :parm output: The output variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm partition: The partition variable can only be a string type.
         :parm savestate: The savestate variable can only be a string type.
         :parm solver: The solver variable can only be a string type.

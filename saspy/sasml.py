@@ -237,7 +237,7 @@ class SASml:
                freq: str = None,
                id: str = None,
                input: [str, list, dict] = None,
-               output: str = None,
+               output: [str, bool, 'SASdata'] = None,
                partition: str = None,
                performance: str = None,
                target: [str, list, dict] = None,
@@ -254,7 +254,7 @@ class SASml:
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
-        :parm output: The output variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm partition: The partition variable can only be a string type.
         :parm performance: The performance variable can only be a string type.
         :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required

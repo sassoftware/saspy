@@ -134,7 +134,7 @@ class SASqc:
                    id: str = None,
                    inset: str = None,
                    intervals: str = None,
-                   output: str = None,
+                   output: [str, bool, 'SASdata'] = None,
                    ppplot: str = None,
                    probplot: str = None,
                    qqplot: str = None,
@@ -157,7 +157,7 @@ class SASqc:
         :parm id: The id variable can only be a string type.
         :parm inset: The inset variable can only be a string type.
         :parm intervals: The intervals variable can only be a string type.
-        :parm output: The output variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm ppplot: The ppplot variable can only be a string type.
         :parm probplot: The probplot variable can only be a string type.
         :parm qqplot: The qqplot variable can only be a string type.

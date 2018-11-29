@@ -96,7 +96,7 @@ class SASstat:
                 id: str = None,
                 input: [str, list, dict] = None,
                 model: str = None,
-                out: str = None,
+                out: [str, bool, 'SASdata'] = None,
                 partition: str = None,
                 performance: str = None,
                 prune: str = None,
@@ -117,7 +117,7 @@ class SASstat:
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
         :parm model: The model variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm partition: The partition variable can only be a string type.
         :parm performance: The performance variable can only be a string type.
         :parm prune: The prune variable can only be a string type.
@@ -136,7 +136,7 @@ class SASstat:
             id: str = None,
             lsmeans: str = None,
             model: str = None,
-            out: str = None,
+            out: [str, bool, 'SASdata'] = None,
             random: str = None,
             repeated: str = None,
             slice: str = None,
@@ -158,7 +158,7 @@ class SASstat:
         :parm id: The id variable can only be a string type.
         :parm lsmeans: The lsmeans variable can only be a string type.
         :parm model: The model variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm random: The random variable can only be a string type.
         :parm repeated: The repeated variable can only be a string type.
         :parm slice: The slice variable can only be a string type.
@@ -180,7 +180,7 @@ class SASstat:
               id: str = None,
               lsmeans: str = None,
               model: str = None,
-              out: str = None,
+              out: [str, bool, 'SASdata'] = None,
               random: str = None,
               repeated: str = None,
               slice: str = None,
@@ -202,7 +202,7 @@ class SASstat:
         :parm id: The id variable can only be a string type.
         :parm lsmeans: The lsmeans variable can only be a string type.
         :parm model: The model variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm random: The random variable can only be a string type.
         :parm repeated: The repeated variable can only be a string type.
         :parm slice: The slice variable can only be a string type.
@@ -226,7 +226,7 @@ class SASstat:
             manova: str = None,
             means: str = None,
             model: str = None,
-            out: str = None,
+            out: [str, bool, 'SASdata'] = None,
             random: str = None,
             repeated: str = None,
             test: str = None,
@@ -251,7 +251,7 @@ class SASstat:
         :parm manova: The manova variable can only be a string type.
         :parm means: The means variable can only be a string type.
         :parm model: The model variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm random: The random variable can only be a string type.
         :parm repeated: The repeated variable can only be a string type.
         :parm test: The test variable can only be a string type.
@@ -273,7 +273,7 @@ class SASstat:
                  freq: str = None,
                  lsmeans: str = None,
                  oddsratio: str = None,
-                 out: str = None,
+                 out: [str, bool, 'SASdata'] = None,
                  roc: str = None,
                  score: [str, bool, 'SASdata'] = True,
                  slice: str = None,
@@ -301,7 +301,7 @@ class SASstat:
         :parm manova: The manova variable can only be a string type.
         :parm means: The means variable can only be a string type.
         :parm model: The model variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm random: The random variable can only be a string type.
         :parm repeated: The repeated variable can only be a string type.
         :parm test: The test variable can only be a string type.
@@ -318,7 +318,7 @@ class SASstat:
                  freq: str = None,
                  id: str = None,
                  model: str = None,
-                 output: str = None,
+                 output: [str, bool, 'SASdata'] = None,
                  score: [str, bool, 'SASdata'] = True,
                  procopts: str = None,
                  stmtpassthrough: str = None,
@@ -333,7 +333,7 @@ class SASstat:
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm model: The model variable can only be a string type.
-        :parm output: The output variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm score: The score variable can only be a string type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
@@ -349,7 +349,7 @@ class SASstat:
                    freq: str = None,
                    id: str = None,
                    model: str = None,
-                   out: str = None,
+                   out: [str, bool, 'SASdata'] = None,
                    partition: str = None,
                    score: [str, bool, 'SASdata'] = True,
                    selection: str = None,
@@ -369,7 +369,7 @@ class SASstat:
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm model: The model variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm partition: The partition variable can only be a string type.
         :parm score: The score variable can only be a string type.
         :parm selection: The selection variable can only be a string type.
@@ -387,7 +387,7 @@ class SASstat:
               freq: str = None,
               id: str = None,
               model: str = None,
-              out: str = None,
+              out: [str, bool, 'SASdata'] = None,
               partition: str = None,
               performance: str = None,
               score: [str, bool, 'SASdata'] = True,
@@ -409,7 +409,7 @@ class SASstat:
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm model: The model variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm partition: The partition variable can only be a string type.
         :parm performance: The performance variable can only be a string type.
         :parm score: The score variable can only be a string type.
@@ -435,7 +435,7 @@ class SASstat:
               lsmeans: str = None,
               lsmestimate: str = None,
               model: str = None,
-              out: str = None,
+              out: [str, bool, 'SASdata'] = None,
               random: str = None,
               roc: str = None,
               slice: str = None,
@@ -465,7 +465,7 @@ class SASstat:
         :parm lsmeans: The lsmeans variable can only be a string type.
         :parm lsmestimate: The lsmestimate variable can only be a string type.
         :parm model: The model variable can only be a string type.
-        :parm out: The out variable can only be a string type.
+        :parm out: The out variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
         :parm random: The random variable can only be a string type.
         :parm roc: The roc variable can only be a string type.
         :parm slice: The slice variable can only be a string type.

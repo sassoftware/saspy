@@ -40,6 +40,8 @@ class Codegen(object):
         key = self._key
         if self._key in ['code', 'save'] and isinstance(self._args, str):
             args = "file = '{}'".format(args)
+        if self._key in ['output', 'out'] and isinstance(self._args, str):
+            return "output out= {};\n".format(args)
         if self._key in ['selection'] and isinstance(self._args, str):
             if self._args.lower().strip() in ['none', 'forward', 'backward', 'stepwise', 'forwardswap','lar', 'lasso']:
                 if len(self._args.split()) == 1:
@@ -63,6 +65,8 @@ class Codegen(object):
             elif self._key in ['save']:
                 return "{0} {2}={1}.{2} {3}={1}.{3} {4}={1}.{4} {5}={1}.{5} {6}={1}.{6};\n"\
                     .format(self._key, self.objname, "fit", "importance", "model", "nodestats", "rules" )
+            elif self._key in ['out', 'output']:
+                return "output out={}.{};\n".format(self.objname, '_output')
 
         elif isinstance(self._args, dict):
             try:
@@ -108,7 +112,6 @@ class Codegen(object):
                     return "train numtries={} maxiter={};\n".format(self._args['numtries'], self._args['maxiter'])
                 if self.objtype.lower() == 'nnet' and self._key.casefold() == 'train':
                     return "{0} {1};\n".format(self._key, ' '.join('{}={}'.format(key, val) for key, val in self._args.items()))
-
                 if self._key.casefold() == 'out' and not len(self.outmeth):
                     return "output out={}.{}\n;".format(self._args.libref, self._args.table)
 
@@ -136,6 +139,8 @@ class Codegen(object):
         elif isinstance(self._args, SASdata):
             key = "{} =".format(self._key)
             args = "{}.{}".format(self._args.libref, self._args.table)
+            if self._key in ['out','output']:
+                return 'output out={}.{}\n;'.format(self._args.libref, self._args.table)
             if self._key == 'score':
                 if self.objtype.casefold() == 'hp4score':
                     return "score out={}.{}\n;".format(self._args.libref, self._args.table)
