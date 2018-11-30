@@ -16,6 +16,7 @@
 import logging
 from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
+import saspy.sasdata as d
 
 if TYPE_CHECKING:
     from saspy.sasresults import SASresults
@@ -32,14 +33,14 @@ class SASutil:
     #. Find the corresponding file in saspy sasstat.py, sasets.py, sasml.py, etc.
     #. Create a set of valid statements. Here is an example:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             lset = {'ARIMA', 'BY', 'ID', 'MACURVES', 'MONTHLY', 'OUTPUT', 'VAR'}
 
         The case and order of the items will be formated.
     #. Call the `doc_convert` method to generate then method call as well as the docstring markup
 
-        .. code-block::
+        .. code-block:: ipython3
 
             import saspy
             print(saspy.sasdecorator.procDecorator.doc_convert(lset, 'x11')['method_stmt'])
@@ -53,14 +54,14 @@ class SASutil:
         The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list `{}` should be passed.
         Here are two examples one with no required arguments:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             @procDecorator.proc_decorator({})
             def esm(self, data: 'SASdata' = None, ...
 
         And one with required arguments:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             @procDecorator.proc_decorator({'model'})
             def mixed(self, data: 'SASdata' = None, ...
@@ -90,7 +91,7 @@ class SASutil:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({})
-    def hpimpute(self, data: 'SASdata' = None,
+    def hpimpute(self, data: d.SASdata = None,
                  code: str = None,
                  freq: str = None,
                  id: str = None,
