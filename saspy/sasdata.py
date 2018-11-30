@@ -20,6 +20,11 @@ import saspy as sp2
 import pandas as pd
 
 try:
+    import pandas as pd
+except ImportError:
+    pass
+
+try:
     from IPython.display import HTML
     from IPython.display import display as DISPLAY
 except ImportError:
