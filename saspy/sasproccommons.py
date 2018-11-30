@@ -197,7 +197,7 @@ class SASProcCommons:
         else:
             raise SyntaxError("log is not a string but type:%s" % (str(type(log))))
 
-    def _makeProcCallMacro(self, objtype: str, objname: str, data: SASdata = None, args: dict = None) -> str:
+    def _makeProcCallMacro(self, objtype: str, objname: str, data: 'SASdata' = None, args: dict = None) -> str:
         """
         This method generates the SAS code from the python objects and included data and arguments.
         The list of args in this method is largely alphabetical but there are exceptions in order to

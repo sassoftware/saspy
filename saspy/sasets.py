@@ -100,10 +100,11 @@ class SASets:
                    **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMESERIES procedure
+
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeseries_syntax.htm
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm corr: The corr variable can only be a string type.
         :parm crosscorr: The crosscorr variable can only be a string type.
@@ -132,10 +133,11 @@ class SASets:
               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the ARIMA procedure
+
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_arima_syntax.htm
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm estimate: The estimate variable can only be a string type.
         :parm forecast: The forecast variable can only be a string type.
@@ -174,10 +176,11 @@ class SASets:
             **kwargs: dict) -> 'SASresults':
         """
         Python method to call the UCM procedure
+
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_ucm_syntax.htm
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm autoreg: The autoreg variable can only be a string type.
         :parm blockseason: The blockseason variable can only be a string type.
         :parm by: The by variable can only be a string type.
@@ -214,10 +217,11 @@ class SASets:
             **kwargs: dict) -> 'SASresults':
         """
         Python method to call the ESM procedure
+
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_esm_syntax.htm
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm forecast: The forecast variable can only be a string type.
         :parm id: The id variable can only be a string type.
@@ -237,10 +241,11 @@ class SASets:
                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMEID procedure
+
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timeid_syntax.htm
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm out: The out variable can be a string or SASdata type.
@@ -264,10 +269,11 @@ class SASets:
                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TIMEDATA procedure
+
         Documentation link:
         http://support.sas.com/documentation/cdl//en/etsug/68148/HTML/default/viewer.htm#etsug_timedata_syntax.htm
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm fcmport: The fcmport variable can only be a string type.
         :parm id: The id variable can only be a string type.

@@ -93,9 +93,10 @@ class SASqc:
               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the CUSUM procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_cusum_toc.htm&locale=en
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm inset: The inset variable can only be a string type.
         :parm xchart: The xchart variable can only be a string type.
@@ -113,10 +114,11 @@ class SASqc:
                   **kwargs: dict) -> 'SASresults':
         """
         Python method to call the MACONTROL procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_macontrol_toc.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm ewmachart: The ewmachart variable can only be a string type.
         :parm machart: The machart variable can only be a string type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
@@ -145,10 +147,11 @@ class SASqc:
                    **kwargs: dict) -> 'SASresults':
         """
         Python method to call the CAPABILITY procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_capability_sect001.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm cdfplot: The cdfplot variable can only be a string type.
         :parm comphist: The comphist variable can only be a string type.
@@ -187,10 +190,11 @@ class SASqc:
                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the SHEWHART procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_shewhart_toc.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm boxchart: The boxchart variable can only be a string type.
         :parm cchart: The cchart variable can only be a string type.
         :parm irchart: The irchart variable can only be a string type.

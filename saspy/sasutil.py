@@ -16,7 +16,6 @@
 import logging
 from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
-import saspy.sasdata as d
 
 if TYPE_CHECKING:
     from saspy.sasresults import SASresults
@@ -91,7 +90,7 @@ class SASutil:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({})
-    def hpimpute(self, data: d.SASdata = None,
+    def hpimpute(self, data: 'SASdata' = None,
                  code: str = None,
                  freq: str = None,
                  id: str = None,
@@ -103,10 +102,11 @@ class SASutil:
                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPIMPUTE procedure
+
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm code: The code variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
@@ -135,10 +135,11 @@ class SASutil:
               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPBIN procedure
+
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
         :parm grow: The grow variable can only be a string type.
@@ -170,10 +171,11 @@ class SASutil:
                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPSAMPLE procedure
+
         Documentation link:
         http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
         :parm grow: The grow variable can only be a string type.
