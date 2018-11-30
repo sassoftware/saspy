@@ -74,3 +74,10 @@ Quality Control
 .. autoclass:: saspy.sasqc.SASqc
     :members:
 
+
+SAS Viya VDMML
+~~~~~~~~~~~~~~~
+
+.. autoclass:: saspy.sasViyaML.SASViyaML
+    :members:
+
