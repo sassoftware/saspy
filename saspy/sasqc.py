@@ -32,14 +32,14 @@ class SASqc:
     #. Find the corresponding file in saspy sasstat.py, sasets.py, sasml.py, etc.
     #. Create a set of valid statements. Here is an example:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             lset = {'ARIMA', 'BY', 'ID', 'MACURVES', 'MONTHLY', 'OUTPUT', 'VAR'}
 
         The case and order of the items will be formated.
     #. Call the `doc_convert` method to generate then method call as well as the docstring markup
 
-        .. code-block::
+        .. code-block:: ipython3
 
             import saspy
             print(saspy.sasdecorator.procDecorator.doc_convert(lset, 'x11')['method_stmt'])
@@ -53,14 +53,14 @@ class SASqc:
         The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list `{}` should be passed.
         Here are two examples one with no required arguments:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             @procDecorator.proc_decorator({})
             def esm(self, data: 'SASdata' = None, ...
 
         And one with required arguments:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             @procDecorator.proc_decorator({'model'})
             def mixed(self, data: 'SASdata' = None, ...
@@ -93,9 +93,10 @@ class SASqc:
               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the CUSUM procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_cusum_toc.htm&locale=en
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm inset: The inset variable can only be a string type.
         :parm xchart: The xchart variable can only be a string type.
@@ -113,10 +114,11 @@ class SASqc:
                   **kwargs: dict) -> 'SASresults':
         """
         Python method to call the MACONTROL procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_macontrol_toc.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm ewmachart: The ewmachart variable can only be a string type.
         :parm machart: The machart variable can only be a string type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
@@ -145,10 +147,11 @@ class SASqc:
                    **kwargs: dict) -> 'SASresults':
         """
         Python method to call the CAPABILITY procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_capability_sect001.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm cdfplot: The cdfplot variable can only be a string type.
         :parm comphist: The comphist variable can only be a string type.
@@ -187,10 +190,11 @@ class SASqc:
                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the SHEWHART procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_shewhart_toc.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm boxchart: The boxchart variable can only be a string type.
         :parm cchart: The cchart variable can only be a string type.
         :parm irchart: The irchart variable can only be a string type.

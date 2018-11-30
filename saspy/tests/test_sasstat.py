@@ -2,13 +2,11 @@ import unittest
 import saspy
 
 from saspy.tests.util import Utilities
-from saspy.sasresults import SASresults
 
 class TestSASstat(unittest.TestCase):
     @classmethod    
     def setUpClass(cls):
-        cls.sas = saspy.SASsession() 
-        #cls.assertIsInstance(cls.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
+        cls.sas = saspy.SASsession()
         util = Utilities(cls.sas)
         procNeeded=['reg', 'mixed', 'hpsplit', 'hplogistic', 'hpreg', 'glm', 'logistic', 'tpspline',
                     'hplogistic', 'hpreg', 'phreg', 'ttest', 'factor']
@@ -201,12 +199,7 @@ class TestSASstat(unittest.TestCase):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         b = stat.logistic(data=tr, model='sex=height weight')
-        a = ['ASSOCIATION', 'CONVERGENCESTATUS', 'DFBETASPLOT', 'DPCPLOT', 'EFFECTPLOT', 'FITSTATISTICS',
-             'GLOBALTESTS', 'INFLUENCEPLOTS', 'LEVERAGEPLOTS', 'LOG', 'MODELINFO', 'NOBS', 'ODDSRATIOS',
-             'ORPLOT', 'PARAMETERESTIMATES', 'PHATPLOTS', 'RESPONSEPROFILE', 'ROCCURVE']
-        self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
-                             str(a), str(b)))
+        self.assertFalse('ERROR_LOG' in b.__dir__(), msg=u"logistic had errors in the log")
 
     def test_smokeTpspline(self):
         # Basic model returns objects
@@ -273,11 +266,7 @@ class TestSASstat(unittest.TestCase):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         b = stat.hplogistic(data=tr, model='sex=height weight')
-        a = ['CONVERGENCESTATUS', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'GLOBALTESTS', 'ITERHISTORY',
-             'LOG', 'MODELINFO', 'NOBS', 'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'RESPONSEPROFILE']
-        self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
-                             str(a), str(b)))
+        self.assertFalse('ERROR_LOG' in b.__dir__(), msg=u"hplogistic had errors in the log")
 
     def test_smokeHPReg(self):
         # Basic model returns objects

@@ -36,14 +36,14 @@ class SASstat:
     #. Find the corresponding file in saspy sasstat.py, sasets.py, sasml.py, etc.
     #. Create a set of valid statements. Here is an example:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             lset = {'ARIMA', 'BY', 'ID', 'MACURVES', 'MONTHLY', 'OUTPUT', 'VAR'}
 
         The case and order of the items will be formated.
     #. Call the `doc_convert` method to generate then method call as well as the docstring markup
 
-        .. code-block::
+        .. code-block:: ipython3
 
             import saspy
             print(saspy.sasdecorator.procDecorator.doc_convert(lset, 'x11')['method_stmt'])
@@ -57,14 +57,14 @@ class SASstat:
         The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list `{}` should be passed.
         Here are two examples one with no required arguments:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             @procDecorator.proc_decorator({})
             def esm(self, data: 'SASdata' = None, ...
 
         And one with required arguments:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             @procDecorator.proc_decorator({'model'})
             def mixed(self, data: 'SASdata' = None, ...
@@ -107,10 +107,11 @@ class SASstat:
                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPSPLIT procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=stathpug&docsetTarget=stathpug_hpsplit_syntax.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
         :parm grow: The grow variable can only be a string type.
@@ -148,10 +149,11 @@ class SASstat:
             **kwargs: dict) -> 'SASresults':
         """
         Python method to call the REG procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_reg_syntax.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm add: The add variable can only be a string type.
         :parm by: The by variable can only be a string type.
         :parm code: The code variable can only be a string type.
@@ -190,10 +192,11 @@ class SASstat:
               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the MIXED procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_mixed_syntax.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
@@ -236,10 +239,11 @@ class SASstat:
             **kwargs: dict) -> 'SASresults':
         """
         Python method to call the GLM procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_glm_syntax.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm absorb: The absorb variable can only be a string type.
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
@@ -286,10 +290,11 @@ class SASstat:
                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the LOGISTIC procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_logistic_syntax.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm absorb: The absorb variable can only be a string type.
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
@@ -325,10 +330,11 @@ class SASstat:
                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TPSPLINE procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_tpspline_syntax.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
@@ -359,10 +365,11 @@ class SASstat:
                    **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPLOGISTIC procedure
-        For more information on the statements see the Documentation link.
+
+        Documentation link.
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=stathpug&docsetTarget=stathpug_hplogistic_toc.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
@@ -402,7 +409,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=stathpug&docsetTarget=stathpug_hpreg_toc.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
@@ -448,10 +455,11 @@ class SASstat:
               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the PHREG procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_phreg_syntax.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm assess: The assess variable can only be a string type.
         :parm bayes: The bayes variable can only be a string type.
         :parm by: The by variable can only be a string type.
@@ -491,10 +499,11 @@ class SASstat:
               **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TTEST procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_ttest_toc.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm freq: The freq variable can only be a string type.
@@ -519,10 +528,11 @@ class SASstat:
                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the FACTOR procedure
+
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_factor_syntax.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm freq: The freq variable can only be a string type.

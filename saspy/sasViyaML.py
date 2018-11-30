@@ -30,14 +30,14 @@ class SASViyaML:
     #. Find the corresponding file in saspy sasstat.py, sasets.py, sasml.py, etc.
     #. Create a set of valid statements. Here is an example:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             lset = {'ARIMA', 'BY', 'ID', 'MACURVES', 'MONTHLY', 'OUTPUT', 'VAR'}
 
         The case and order of the items will be formated.
     #. Call the `doc_convert` method to generate then method call as well as the docstring markup
 
-        .. code-block::
+        .. code-block:: ipython3
 
             import saspy
             print(saspy.sasdecorator.procDecorator.doc_convert(lset, 'x11')['method_stmt'])
@@ -51,14 +51,14 @@ class SASViyaML:
         The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list `{}` should be passed.
         Here are two examples one with no required arguments:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             @procDecorator.proc_decorator({})
             def esm(self, data: 'SASdata' = None, ...
 
         And one with required arguments:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             @procDecorator.proc_decorator({'model'})
             def mixed(self, data: 'SASdata' = None, ...
@@ -98,10 +98,11 @@ class SASViyaML:
                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the FACTMAC procedure
+
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_factmac_syntax.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm display: The display variable can only be a string type.
@@ -128,10 +129,11 @@ class SASViyaML:
                 **kwargs: dict) -> 'SASresults':
         """
         Python method to call the FASTKNN procedure
+
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_fastknn_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm display: The display variable can only be a string type.
         :parm displayout: The displayout variable can only be a string type.
         :parm id: The id variable can only be a string type.
@@ -161,10 +163,11 @@ class SASViyaML:
                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the FOREST procedure
+
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_forest_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm crossvalidation: The crossvalidation variable can only be a string type.
@@ -201,10 +204,11 @@ class SASViyaML:
                   **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPCLUS procedure
+
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_gradboost_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm crossvalidation: The crossvalidation variable can only be a string type.
@@ -241,10 +245,11 @@ class SASViyaML:
              **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPNEURAL procedure
+
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_nnet_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm architecture: The architecture variable can only be a string type.
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
@@ -276,10 +281,11 @@ class SASViyaML:
              **kwargs: dict) -> 'SASresults':
         """
         Python method to call the SVDD procedure
+
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_svdd_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm code: The code variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
@@ -309,10 +315,11 @@ class SASViyaML:
                   **kwargs: dict) -> 'SASresults':
         """
         Python method to call the SVMACHINE procedure
+
         Documentation link:
         https://go.documentation.sas.com/?docsetId=casml&docsetTarget=casml_svmachine_toc.htm&docsetVersion=8.3&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm autotune: The autotune variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm id: The id variable can only be a string type.

@@ -23,19 +23,19 @@ SAS Session Object
 SAS Data Object
 ---------------
 
-.. autoclass:: SASdata
+.. autoclass:: saspy.sasdata.SASdata
     :members:
 
 Procedure Syntax Statements
 ---------------------------
 
-.. autoclass:: SASProcCommons
+.. autoclass:: saspy.sasproccommons.SASProcCommons
     :members:
 
 
 SAS Results
 -----------
-.. autoclass:: SASresults
+.. autoclass:: saspy.sasresults.SASresults
     :members:
 
 SAS Procedures
@@ -44,33 +44,40 @@ SAS Procedures
 Utility
 ~~~~~~~
 
-.. autoclass:: SASutil
+.. autoclass:: saspy.sasutil.SASutil
     :members:
 
 
 Machine Learning (SAS Enterprise Miner)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: SASml
+.. autoclass:: saspy.sasml.SASml
     :members:
 
-.. autosummary:: SASml
+.. autosummary:: saspy.sasml.SASml
 
 Statistics
 ~~~~~~~~~~
 
-.. autoclass:: SASstat
+.. autoclass:: saspy.sasstat.SASstat
     :members:
 
 Econometic and Time Series
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: SASets
+.. autoclass:: saspy.sasets.SASets
     :members:
 
 Quality Control
 ~~~~~~~~~~~~~~~
 
-.. autoclass:: SASqc
+.. autoclass:: saspy.sasqc.SASqc
+    :members:
+
+
+SAS Viya VDMML
+~~~~~~~~~~~~~~~
+
+.. autoclass:: saspy.sasViyaML.SASViyaML
     :members:
 

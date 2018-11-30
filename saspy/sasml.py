@@ -33,14 +33,14 @@ class SASml:
     #. Find the corresponding file in saspy sasstat.py, sasets.py, sasml.py, etc.
     #. Create a set of valid statements. Here is an example:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             lset = {'ARIMA', 'BY', 'ID', 'MACURVES', 'MONTHLY', 'OUTPUT', 'VAR'}
 
         The case and order of the items will be formated.
     #. Call the `doc_convert` method to generate then method call as well as the docstring markup
 
-        .. code-block::
+        .. code-block:: ipython3
 
             import saspy
             print(saspy.sasdecorator.procDecorator.doc_convert(lset, 'x11')['method_stmt'])
@@ -54,14 +54,14 @@ class SASml:
         The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list `{}` should be passed.
         Here are two examples one with no required arguments:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             @procDecorator.proc_decorator({})
             def esm(self, data: 'SASdata' = None, ...
 
         And one with required arguments:
 
-        .. code-block::
+        .. code-block:: ipython3
 
             @procDecorator.proc_decorator({'model'})
             def mixed(self, data: 'SASdata' = None, ...
@@ -98,10 +98,11 @@ class SASml:
                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPFOREST procedure
+
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
@@ -124,10 +125,11 @@ class SASml:
                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HP4SCORE procedure
+
         Documentation link:
         https://go.documentation.sas.com/?docsetId=emhpprcref&docsetTarget=emhpprcref_hp4score_toc.htm&docsetVersion=14.2&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm id: The id variable can only be a string type.
         :parm importance: The importance variable can only be a string type.
         :parm performance: The performance variable can only be a string type.
@@ -148,10 +150,11 @@ class SASml:
                   **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPCLUS procedure
+
         Documentation link:
         https://go.documentation.sas.com/?docsetId=emhpprcref&docsetTarget=emhpprcref_hpclus_toc.htm&docsetVersion=14.2&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
@@ -177,10 +180,11 @@ class SASml:
                  **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPNEURAL procedure
+
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm architecture: The architecture variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm hidden: The hidden variable can only be a string type. This statement is required if there is a Train statement and the architecture is not logistic.
@@ -212,10 +216,11 @@ class SASml:
                   **kwargs: dict) -> 'SASresults':
         """
         Python method to call the TREEBOOST procedure
+
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm assess: The assess variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
@@ -246,10 +251,11 @@ class SASml:
                **kwargs: dict) -> 'SASresults':
         """
         Python method to call the HPBNET procedure
+
         Documentation link:
         http://go.documentation.sas.com/?docsetId=emhpprcref&docsetVersion=14.2&docsetTarget=emhpprcref_hpbnet_toc.htm&locale=en
 
-        :param data: SASdata object This parameter is required
+        :param data: SASdata object. This parameter is required
         :parm code: The code variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
