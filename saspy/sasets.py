@@ -286,3 +286,212 @@ class SASets:
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
         """
+
+    @procDecorator.proc_decorator({})
+    def x11(self, data: 'SASdata' = None,
+            arima: str = None,
+            by: [str, list] = None,
+            id: [str, list] = None,
+            macurves: str = None,
+            monthly: str = None,
+            output: [str, bool, 'SASdata'] = None,
+            pdweights: str = None,
+            quarterly: str = None,
+            sspan: str = None,
+            tables: str = None,
+            var: str = None,
+            procopts: [str, list] = None,
+            stmtpassthrough: [str, list] = None,
+            **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the X11 procedure
+
+        Documentation link:
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=etsug&docsetTarget=etsug_x11_syntax.htm&locale=en
+
+        Either the MONTHLY or QUARTERLY statement must be specified, depending on the type of time series data you have.
+        The PDWEIGHTS and MACURVES statements can be used only with the MONTHLY statement. The TABLES statement controls
+        the printing of tables, while the OUTPUT statement controls the creation of the OUT= data set.
+
+        :param data: SASdata object. This parameter is required
+        :parm arima: The arima variable can only be a string type.
+        :parm by: The by variable can be a string or list type.
+        :parm id: The id variable can be a string or list type.
+        :parm macurves: The macurves variable can only be a string type.
+        :parm monthly: The monthly variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
+        :parm pdweights: The pdweights variable can only be a string type.
+        :parm quarterly: The quarterly variable can only be a string type.
+        :parm sspan: The sspan variable can only be a string type.
+        :parm tables: The tables variable can only be a string type.
+        :parm var: The var variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        """
+
+    @procDecorator.proc_decorator({})
+    def x12(self, data: 'SASdata' = None,
+            adjust: str = None,
+            arima: str = None,
+            automdl: str = None,
+            by: [str, list] = None,
+            check: str = None,
+            estimate: [str, bool] = True,
+            event: str = None,
+            forecast: str = None,
+            id: [str, list] = None,
+            identify: str = None,
+            input: [str, list, dict] = None,
+            outlier: str = None,
+            output: [str, bool, 'SASdata'] = None,
+            pickmdl: str = None,
+            regression: str = None,
+            seatsdecomp: str = None,
+            tables: str = None,
+            transform: str = None,
+            userdefined: str = None,
+            var: str = None,
+            x11: str = None,
+            procopts: str = None,
+            stmtpassthrough: str = None,
+            **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the X12 procedure
+
+        Documentation link:
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=etsug&docsetTarget=etsug_x12_toc.htm&locale=en
+
+        :param data: SASdata object. This parameter is required
+        :parm adjust: The adjust variable can only be a string type.
+        :parm arima: The arima variable can only be a string type.
+        :parm automdl: The automdl variable can only be a string type.
+        :parm by: The by variable can be a string or list type.
+        :parm check: The check variable can only be a string type.
+        :parm estimate: The estimate variable can only be a string type.
+        :parm event: The event variable can only be a string type.
+        :parm forecast: The forecast variable can only be a string type.
+        :parm id: The id variable can be a string or list type.
+        :parm identify: The identify variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm outlier: The outlier variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
+        :parm pickmdl: The pickmdl variable can only be a string type.
+        :parm regression: The regression variable can only be a string type.
+        :parm seatsdecomp: The seatsdecomp variable can only be a string type.
+        :parm tables: The tables variable can only be a string type.
+        :parm transform: The transform variable can only be a string type.
+        :parm userdefined: The userdefined variable can only be a string type.
+        :parm var: The var variable can only be a string type.
+        :parm x11: The x11 variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        """
+
+    @procDecorator.proc_decorator({})
+    def varmax(self, data: 'SASdata' = None,
+               bound: str = None,
+               by: [str, list] = None,
+               causal: str = None,
+               cointeg: str = None,
+               condfore: str = None,
+               garch: str = None,
+               id: [str, list] = None,
+               initial: str = None,
+               model: str = None,
+               nloptions: str = None,
+               output: [str, bool, 'SASdata'] = None,
+               restrict: str = None,
+               test: str = None,
+               procopts: str = None,
+               stmtpassthrough: str = None,
+               **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the VARMAX procedure
+
+        Documentation link:
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=etsug&docsetTarget=etsug_varmax_syntax.htm&locale=en
+
+        :param data: SASdata object. This parameter is required
+        :parm adjust: The adjust variable can only be a string type.
+        :parm arima: The arima variable can only be a string type.
+        :parm automdl: The automdl variable can only be a string type.
+        :parm by: The by variable can be a string or list type.
+        :parm check: The check variable can only be a string type.
+        :parm estimate: The estimate variable can only be a string type.
+        :parm event: The event variable can only be a string type.
+        :parm forecast: The forecast variable can only be a string type.
+        :parm id: The id variable can be a string or list type.
+        :parm identify: The identify variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm outlier: The outlier variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
+        :parm pickmdl: The pickmdl variable can only be a string type.
+        :parm regression: The regression variable can only be a string type.
+        :parm seatsdecomp: The seatsdecomp variable can only be a string type.
+        :parm tables: The tables variable can only be a string type.
+        :parm transform: The transform variable can only be a string type.
+        :parm userdefined: The userdefined variable can only be a string type.
+        :parm var: The var variable can only be a string type.
+        :parm x11: The x11 variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        """
+
+    @procDecorator.proc_decorator({})
+    def autoreg(self, data: 'SASdata' = None,
+                by: [str, list] = None,
+                cls: [str, list] = None,
+                hetero: str = None,
+                model: str = None,
+                nloptions: str = None,
+                output: [str, bool, 'SASdata'] = None,
+                restrict: str = None,
+                test: str = None,
+                procopts: str = None,
+                stmtpassthrough: str = None,
+                **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the AUTOREG procedure
+
+        Documentation link:
+
+        :param data: SASdata object. This parameter is required
+        :parm by: The by variable can be a string or list type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm hetero: The hetero variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm nloptions: The nloptions variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
+        :parm restrict: The restrict variable can only be a string type.
+        :parm test: The test variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        """
+
+
+    @procDecorator.proc_decorator({})
+    def expand(self, data: 'SASdata' = None,
+               by: [str, list] = None,
+               convert: str = None,
+               id: [str, list] = None,
+               procopts: str = None,
+               stmtpassthrough: str = None,
+               **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the EXPAND procedure
+
+        Documentation link:
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=etsug&docsetTarget=etsug_expand_syntax.htm&locale=en
+
+        :param data: SASdata object. This parameter is required
+        :parm by: The by variable can be a string or list type.
+        :parm convert: The convert variable can only be a string type.
+        :parm id: The id variable can be a string or list type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        """

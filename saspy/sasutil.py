@@ -104,7 +104,7 @@ class SASutil:
         Python method to call the HPIMPUTE procedure
 
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=prochp&docsetTarget=prochp_hpimpute_toc.htm&locale=en
 
         :param data: SASdata object. This parameter is required
         :parm code: The code variable can only be a string type.
@@ -120,36 +120,28 @@ class SASutil:
 
     @procDecorator.proc_decorator({})
     def hpbin(self, data: 'SASdata' = None,
-              cls: [str, list] = None,
               code: str = None,
-              grow: str = None,
-              id: str = None,
-              model: str = None,
-              out: [str, bool, 'SASdata'] = None,
-              partition: str = None,
+              freq: str = None,
+              id: [str, list] = None,
+              input: [str, list, dict] = None,
               performance: str = None,
-              prune: str = None,
-              rules: str = None,
+              target: [str, list, dict] = None,
               procopts: str = None,
               stmtpassthrough: str = None,
               **kwargs: dict) -> 'SASresults':
         """
-        Python method to call the HPBIN procedure
+        Python method to call the HPBIN procedure.
 
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=prochp&docsetTarget=prochp_hpbin_syntax.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
-        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :param data: SASdata object. This parameter is required.
         :parm code: The code variable can only be a string type.
-        :parm grow: The grow variable can only be a string type.
-        :parm id: The id variable can only be a string type.
-        :parm model: The model variable can only be a string type.
-        :parm out: The out variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
-        :parm partition: The partition variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can be a string or list type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
         :parm performance: The performance variable can only be a string type.
-        :parm prune: The prune variable can only be a string type.
-        :parm rules: The rules variable can only be a string type.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
@@ -158,33 +150,72 @@ class SASutil:
     @procDecorator.proc_decorator({})
     def hpsample(self, data: 'SASdata' = None,
                  cls: [str, list] = None,
-                 code: str = None,
-                 grow: str = None,
-                 id: str = None,
-                 model: str = None,
-                 outpartition: str = None,
                  performance: str = None,
-                 prune: str = None,
-                 rules: str = None,
-                 procopts: str = None,
-                 stmtpassthrough: str = None,
+                 target: [str, list, dict] = None,
+                 var: str = None,
+                 procopts: [str, list, dict] = None,
+                 stmtpassthrough: [str, list, dict] = None,
                  **kwargs: dict) -> 'SASresults':
         """
-        Python method to call the HPSAMPLE procedure
+        Python method to call the HPSAMPLE procedure.
 
         Documentation link:
-        http://support.sas.com/documentation/cdl/en/stathpug/68163/HTML/default/viewer.htm#stathpug_hpsplit_syntax.htm
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=prochp&docsetTarget=prochp_hpsample_toc.htm&locale=en
+
+        :param data: SASdata object. This parameter is required.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm performance: The performance variable can only be a string type.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm var: The var variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        """
+
+    @procDecorator.proc_decorator({})
+    def univariate(self, data: 'SASdata' = None,
+                   by: [str, list] = None,
+                   cdfplot: str = None,
+                   cls: [str, list] = None,
+                   freq: str = None,
+                   histogram: str = None,
+                   id: [str, list] = None,
+                   inset: str = None,
+                   output: [str, bool, 'SASdata'] = None,
+                   ppplot: str = None,
+                   probplot: str = None,
+                   qqplot: str = None,
+                   var: str = None,
+                   weight: str = None,
+                   procopts: str = None,
+                   stmtpassthrough: str = None,
+                   **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the UNIVARIATE procedure
+
+        Documentation link:
+        https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=procstat&docsetTarget=procstat_univariate_syntax.htm&locale=en
+
+        The PROC UNIVARIATE statement invokes the procedure. The VAR statement specifies the numeric variables to be analyzed, and it is required if the OUTPUT statement is used to save summary statistics in an output data set. If you do not use the VAR statement, all numeric variables in the data set are analyzed. The plot statements (CDFPLOT, HISTOGRAM, PPPLOT, PROBPLOT, and QQPLOT) create graphical displays, and the INSET statement enhances these displays by adding a table of summary statistics directly on the graph. You can specify one or more of each of the plot statements, the INSET statement, and the OUTPUT statement. If you use a VAR statement, the variables listed in a plot statement must be a subset of the variables listed in the VAR statement.
+
+        You can specify a BY statement to obtain separate analyses for each BY group. The FREQ statement specifies a variable whose values provide the frequency for each observation. The ID statement specifies one or more variables to identify the extreme observations. The WEIGHT statement specifies a variable whose values are used to weight certain statistics.
+
+        You can use a CLASS statement to specify one or two variables that group the data into classification levels. The analysis is carried out for each combination of levels in the input data set, or within each BY group if you also specify a BY statement. You can use the CLASS statement with plot statements to create comparative displays, in which each cell contains a plot for one combination of classification levels.
 
         :param data: SASdata object. This parameter is required
+        :parm by: The by variable can be a string or list type.
+        :parm cdfplot: The cdfplot variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
-        :parm code: The code variable can only be a string type.
-        :parm grow: The grow variable can only be a string type.
-        :parm id: The id variable can only be a string type.
-        :parm model: The model variable can only be a string type.
-        :parm outpartition: The outpartition variable can only be a string type.
-        :parm performance: The performance variable can only be a string type.
-        :parm prune: The prune variable can only be a string type.
-        :parm rules: The rules variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm histogram: The histogram variable can only be a string type.
+        :parm id: The id variable can be a string or list type.
+        :parm inset: The inset variable can only be a string type.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
+        :parm ppplot: The ppplot variable can only be a string type.
+        :parm probplot: The probplot variable can only be a string type.
+        :parm qqplot: The qqplot variable can only be a string type.
+        :parm var: The var variable can only be a string type.
+        :parm weight: The weight variable can only be a string type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
