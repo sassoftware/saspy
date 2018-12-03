@@ -41,10 +41,12 @@ class Codegen(object):
         if self._key in ['code', 'save'] and isinstance(self._args, str):
             args = "file = '{}'".format(args)
         if self._key in ['output', 'out'] and isinstance(self._args, str):
-            if bool(re.match(r'(\bout\W*=+)',args, flags=re.IGNORECASE)):
-                return "output {};\n".format(args)
-            else:
-                return "output out= {};\n".format(args)
+            if not len(self.outmeth):
+                if bool(re.match(r'(\bout\W*=+)',args, flags=re.IGNORECASE)):
+                    return "output {};\n".format(args)
+                else:
+                    return "output out= {};\n".format(args)
+            return args
         if self._key in ['selection'] and isinstance(self._args, str):
             if self._args.lower().strip() in ['none', 'forward', 'backward', 'stepwise', 'forwardswap','lar', 'lasso']:
                 if len(self._args.split()) == 1:
@@ -69,7 +71,9 @@ class Codegen(object):
                 return "{0} {2}={1}.{2} {3}={1}.{3} {4}={1}.{4} {5}={1}.{5} {6}={1}.{6};\n"\
                     .format(self._key, self.objname, "fit", "importance", "model", "nodestats", "rules" )
             elif self._key in ['out', 'output']:
-                return "output out={}.{};\n".format(self.objname, '_output')
+                if not len(self.outmeth):
+                    return "output out={}.{};\n".format(self.objname, '_output')
+                return '{}.{}'.format(self.objname, '_output')
 
         elif isinstance(self._args, dict):
             try:
@@ -152,8 +156,10 @@ class Codegen(object):
                 return "score out={}.{}\n;".format(self._args.libref, self._args.table)
             elif self._key == 'savestate':
                 return "{} rstore = {}.{}\n;".format(key, self._args.libref, self._args.table)
-            elif self._key == 'output' and len(self.outmeth):
-                return "{} out = {};\n".format(self._key, args)
+            elif self._key in ['output', 'out']:
+                if len(self.outmeth):
+                    return "{} out = {};\n".format(self._key, args)
+                return "{}.{}".format(self._args.libref, self._args.table)
         if self._key in ['stmtpassthrough', 'prog_stmts']:
             return "{0} ;\n".format(args)
         if self._key =='cls':
@@ -213,29 +219,36 @@ class SASProcCommons:
         plot = ''
         outmeth = ''
         procopts = args.pop('procopts', '')
-        outds = args.pop('out', None)
+
         # Set ODS graphic generation to True by default
         ODSGraphics = args.get('ODSGraphics', True)
 
         # The different SAS products vary slightly in plotting and out methods.
         # this block sets the options correctly for plotting and output statements
         if self.sasproduct.lower() == 'stat' and not ('ODSGraphics' in args.keys() or ODSGraphics == False):
-            #outmeth = ''
             plot = 'plot=all'
         if self.sasproduct.lower() == 'qc':
-            #outmeth = ''
-            #plot = ''
             pass
         if self.sasproduct.lower() == 'ets' and not ('ODSGraphics' in args.keys() or ODSGraphics == False):
             outmeth = 'out'
             plot = 'plot=all'
         if self.sasproduct.lower() == 'em':
-            #outmeth = ''
-            #plot = ''
+
             pass
         if self.sasproduct.lower() == 'vddml':
             outmeth = 'out'
-            #plot = ''
+        if self.sasproduct.lower() == 'util':
+            outmeth = 'out'
+            if objtype.lower() =='univariate' and not ('ODSGraphics' in args.keys() or ODSGraphics == False):
+                plot = 'plot'
+                outmeth = ''
+        outds = args.pop('out', None)
+        if outds == None:
+            outds = args.pop('output', None)
+        outcodegen = Codegen.new('out', outds)
+        outcodegen.outmeth = outmeth
+        outcodegen.objname = objname
+        outstr = outcodegen.codestmt
         self.logger.debug("product caller: " + self.sasproduct.lower())
         debug_code= ''
         code = "%macro proccall(d);\n"
@@ -246,7 +259,7 @@ class SASProcCommons:
         if 'plot' in args:
             plot = args['plot']
         if len(outmeth) and not outds == None:
-            outstr = outds.libref + '.' + outds.table
+            #outstr = outds.libref + '.' + outds.table
             code += "proc %s data=%s.%s%s %s %s=%s %s ;\n" % (
                 objtype, data.libref, data.table, data._dsopts(), plot, outmeth, outstr, procopts)
         else:
