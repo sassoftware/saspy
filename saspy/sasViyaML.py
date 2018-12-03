@@ -35,6 +35,7 @@ class SASViyaML:
             lset = {'ARIMA', 'BY', 'ID', 'MACURVES', 'MONTHLY', 'OUTPUT', 'VAR'}
 
         The case and order of the items will be formated.
+
     #. Call the `doc_convert` method to generate then method call as well as the docstring markup
 
         .. code-block:: ipython3

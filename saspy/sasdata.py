@@ -17,6 +17,7 @@
 import logging
 import re
 import saspy as sp2
+import pandas as pd
 
 try:
     import pandas as pd
