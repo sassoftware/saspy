@@ -60,14 +60,14 @@ class SASstat:
         .. code-block:: ipython3
 
             @procDecorator.proc_decorator({})
-            def esm(self, data: 'SASdata' = None, ...
+            def esm(self, data: ['SASdata', str] = None, ...
 
         And one with required arguments:
 
         .. code-block:: ipython3
 
             @procDecorator.proc_decorator({'model'})
-            def mixed(self, data: 'SASdata' = None, ...
+            def mixed(self, data: ['SASdata', str] = None, ...
 
     #. Add a link to the SAS documentation plus any additional details will be helpful to users
 
@@ -89,7 +89,7 @@ class SASstat:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({})
-    def hpsplit(self, data: 'SASdata' = None,
+    def hpsplit(self, data: ['SASdata', str] = None,
                 cls: [str, list] = None,
                 code: str = None,
                 grow: str = None,
@@ -111,7 +111,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=stathpug&docsetTarget=stathpug_hpsplit_syntax.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
         :parm grow: The grow variable can only be a string type.
@@ -130,7 +130,7 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def reg(self, data: 'SASdata' = None,
+    def reg(self, data: ['SASdata', str] = None,
             add: str = None,
             by: str = None,
             code: str = None,
@@ -153,7 +153,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_reg_syntax.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm add: The add variable can only be a string type.
         :parm by: The by variable can only be a string type.
         :parm code: The code variable can only be a string type.
@@ -173,7 +173,7 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def mixed(self, data: 'SASdata' = None,
+    def mixed(self, data: ['SASdata', str] = None,
               by: str = None,
               cls: [str, list] = None,
               code: str = None,
@@ -196,7 +196,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_mixed_syntax.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
@@ -217,7 +217,7 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def glm(self, data: 'SASdata' = None,
+    def glm(self, data: ['SASdata', str] = None,
             absorb: str = None,
             by: str = None,
             cls: [str, list] = None,
@@ -243,7 +243,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_glm_syntax.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm absorb: The absorb variable can only be a string type.
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
@@ -266,7 +266,7 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def logistic(self, data: 'SASdata' = None,
+    def logistic(self, data: ['SASdata', str] = None,
                  by: str = None,
                  cls: [str, list] = None,
                  contrast: str = None,
@@ -294,7 +294,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_logistic_syntax.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm absorb: The absorb variable can only be a string type.
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
@@ -318,7 +318,7 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def tpspline(self, data: 'SASdata' = None,
+    def tpspline(self, data: ['SASdata', str] = None,
                  by: str = None,
                  freq: str = None,
                  id: str = None,
@@ -334,7 +334,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_tpspline_syntax.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
@@ -348,7 +348,7 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def hplogistic(self, data: 'SASdata' = None,
+    def hplogistic(self, data: ['SASdata', str] = None,
                    by: str = None,
                    cls: [str, list] = None,
                    code: str = None,
@@ -369,7 +369,7 @@ class SASstat:
         Documentation link.
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=stathpug&docsetTarget=stathpug_hplogistic_toc.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
@@ -387,7 +387,7 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def hpreg(self, data: 'SASdata' = None,
+    def hpreg(self, data: ['SASdata', str] = None,
               by: str = None,
               cls: [str, list] = None,
               code: str = None,
@@ -409,7 +409,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=stathpug&docsetTarget=stathpug_hpreg_toc.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
@@ -428,7 +428,7 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def phreg(self, data: 'SASdata' = None,
+    def phreg(self, data: ['SASdata', str] = None,
               assess: str = None,
               bayes: str = None,
               by: str = None,
@@ -459,7 +459,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_phreg_syntax.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm assess: The assess variable can only be a string type.
         :parm bayes: The bayes variable can only be a string type.
         :parm by: The by variable can only be a string type.
@@ -487,7 +487,7 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({})
-    def ttest(self, data: 'SASdata' = None,
+    def ttest(self, data: ['SASdata', str] = None,
               by: str = None,
               cls: [str, list] = None,
               freq: str = None,
@@ -503,7 +503,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_ttest_toc.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm freq: The freq variable can only be a string type.
@@ -516,7 +516,7 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({})
-    def factor(self, data: 'SASdata' = None,
+    def factor(self, data: ['SASdata', str] = None,
                by: str = None,
                cls: [str, list] = None,
                freq: str = None,
@@ -532,7 +532,7 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_factor_syntax.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm freq: The freq variable can only be a string type.

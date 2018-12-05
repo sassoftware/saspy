@@ -56,14 +56,14 @@ class SASutil:
         .. code-block:: ipython3
 
             @procDecorator.proc_decorator({})
-            def esm(self, data: 'SASdata' = None, ...
+            def esm(self, data: ['SASdata', str] = None, ...
 
         And one with required arguments:
 
         .. code-block:: ipython3
 
             @procDecorator.proc_decorator({'model'})
-            def mixed(self, data: 'SASdata' = None, ...
+            def mixed(self, data: ['SASdata', str] = None, ...
 
     #. Add a link to the SAS documentation plus any additional details will be helpful to users
 
@@ -90,7 +90,7 @@ class SASutil:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({})
-    def hpimpute(self, data: 'SASdata' = None,
+    def hpimpute(self, data: ['SASdata', str] = None,
                  code: str = None,
                  freq: str = None,
                  id: str = None,
@@ -106,7 +106,7 @@ class SASutil:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=prochp&docsetTarget=prochp_hpimpute_toc.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm code: The code variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
@@ -119,7 +119,7 @@ class SASutil:
         """
 
     @procDecorator.proc_decorator({})
-    def hpbin(self, data: 'SASdata' = None,
+    def hpbin(self, data: ['SASdata', str] = None,
               code: str = None,
               freq: str = None,
               id: [str, list] = None,
@@ -135,7 +135,7 @@ class SASutil:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=prochp&docsetTarget=prochp_hpbin_syntax.htm&locale=en
 
-        :param data: SASdata object. This parameter is required.
+        :param data: SASdata object or string. This parameter is required..
         :parm code: The code variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can be a string or list type.
@@ -148,7 +148,7 @@ class SASutil:
         """
 
     @procDecorator.proc_decorator({})
-    def hpsample(self, data: 'SASdata' = None,
+    def hpsample(self, data: ['SASdata', str] = None,
                  cls: [str, list] = None,
                  performance: str = None,
                  target: [str, list, dict] = None,
@@ -162,7 +162,7 @@ class SASutil:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=prochp&docsetTarget=prochp_hpsample_toc.htm&locale=en
 
-        :param data: SASdata object. This parameter is required.
+        :param data: SASdata object or string. This parameter is required..
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm performance: The performance variable can only be a string type.
         :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
@@ -173,7 +173,7 @@ class SASutil:
         """
 
     @procDecorator.proc_decorator({})
-    def univariate(self, data: 'SASdata' = None,
+    def univariate(self, data: ['SASdata', str] = None,
                    by: [str, list] = None,
                    cdfplot: str = None,
                    cls: [str, list] = None,
@@ -202,7 +202,7 @@ class SASutil:
 
         You can use a CLASS statement to specify one or two variables that group the data into classification levels. The analysis is carried out for each combination of levels in the input data set, or within each BY group if you also specify a BY statement. You can use the CLASS statement with plot statements to create comparative displays, in which each cell contains a plot for one combination of classification levels.
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can be a string or list type.
         :parm cdfplot: The cdfplot variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.

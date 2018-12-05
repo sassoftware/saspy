@@ -429,6 +429,18 @@ class TestSASstat(unittest.TestCase):
         b = stat.reg(data=tr,  paired="SBPbefore*SBPafter")
         self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
 
+    def strdset1(self):
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        s = stat.reg(data='sashelp.class', model='weight=height')
+        ds = stat.reg(data=tr, model='weight=height')
+        self.assertEqual(s, ds, msg="string sasdata mismatch")
+
+    def strdset2(self):
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("class", "sashelp")
+        s = stat.reg(data='sashelp.class', model='weight=height')
+        self.assertRaises(AssertionError,s, msg="bad dataset fails")
 
 
 

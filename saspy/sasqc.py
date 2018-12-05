@@ -56,14 +56,14 @@ class SASqc:
         .. code-block:: ipython3
 
             @procDecorator.proc_decorator({})
-            def esm(self, data: 'SASdata' = None, ...
+            def esm(self, data: ['SASdata', str] = None, ...
 
         And one with required arguments:
 
         .. code-block:: ipython3
 
             @procDecorator.proc_decorator({'model'})
-            def mixed(self, data: 'SASdata' = None, ...
+            def mixed(self, data: ['SASdata', str] = None, ...
 
     #. Add a link to the SAS documentation plus any additional details will be helpful to users
 
@@ -84,7 +84,7 @@ class SASqc:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({})
-    def cusum(self, data: 'SASdata' = None,
+    def cusum(self, data: ['SASdata', str] = None,
               by: str = None,
               inset: str = None,
               xchart: str = None,
@@ -96,7 +96,7 @@ class SASqc:
 
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_cusum_toc.htm&locale=en
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can only be a string type.
         :parm inset: The inset variable can only be a string type.
         :parm xchart: The xchart variable can only be a string type.
@@ -106,7 +106,7 @@ class SASqc:
         """
 
     @procDecorator.proc_decorator({})
-    def macontrol(self, data: 'SASdata' = None,
+    def macontrol(self, data: ['SASdata', str] = None,
                   ewmachart: str = None,
                   machart: str = None,
                   procopts: str = None,
@@ -118,7 +118,7 @@ class SASqc:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_macontrol_toc.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm ewmachart: The ewmachart variable can only be a string type.
         :parm machart: The machart variable can only be a string type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
@@ -127,7 +127,7 @@ class SASqc:
         """
 
     @procDecorator.proc_decorator({})
-    def capability(self, data: 'SASdata' = None,
+    def capability(self, data: ['SASdata', str] = None,
                    by: str = None,
                    cdfplot: str = None,
                    comphist: str = None,
@@ -151,7 +151,7 @@ class SASqc:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_capability_sect001.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can only be a string type.
         :parm cdfplot: The cdfplot variable can only be a string type.
         :parm comphist: The comphist variable can only be a string type.
@@ -172,7 +172,7 @@ class SASqc:
         """
 
     @procDecorator.proc_decorator({})
-    def shewhart(self, data: 'SASdata' = None,
+    def shewhart(self, data: ['SASdata', str] = None,
                  boxchart: str = None,
                  cchart: str = None,
                  irchart: str = None,
@@ -194,7 +194,7 @@ class SASqc:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=qcug&docsetTarget=qcug_shewhart_toc.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm boxchart: The boxchart variable can only be a string type.
         :parm cchart: The cchart variable can only be a string type.
         :parm irchart: The irchart variable can only be a string type.
