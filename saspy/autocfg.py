@@ -1,107 +1,160 @@
 import os
 import sys
+import subprocess
+from glob import glob
+from saspy import sascfg as ac
 
-def main(argv):
+def main(cfgfile: str = None, SASHome: str = None, java: str = None):
 
-   thispgm  = argv[0]
+    if os.name != 'nt':
+       print('This function will only run on Windows and create a saspy config file for an IOM Local connection')
+       return
+    
+    saspydir = ac.__file__.replace('sascfg.py', '')
+    
+    if not cfgfile:
+       cfgfile = saspydir+'sascfg_personal.py'
 
-   if len(argv) > 1:
-      cfgfile  = argv[1]
-   else:
-      cfgfile = __file__.replace('autocfg.py','sascfg_personal.py')
-   
-   # if the file already exists, don't replace it.
-   if os.path.exists(cfgfile):
-      print("CFGFILE ALREADY EXISTS: "+cfgfile)   
-      return
-   
-   cfg = """
-SAS_config_names=['autogen_winlocal']
-SAS_config_options = {'lock_down': False,
-                      'verbose'  : True
-                     }
+    # if the file already exists, don't replace it.
+    if os.path.exists(cfgfile):
+        print("CFGFILE ALREADY EXISTS: " + cfgfile)
+        return
 
-cpW  =  "SASJARPATH\\sas.svc.connection.jar"
-cpW += ";SASJARPATH\\log4j.jar"
-cpW += ";SASJARPATH\\sas.security.sspi.jar"
-cpW += ";SASJARPATH\\sas.core.jar"
-cpW += ";SASPYJARPATH\\java\\saspyiom.jar"
+    # handles users who could have different versions
+    if not SASHome:
+       SASHome = "C:\\Program Files\\SASHome"
 
-autogen_winlocal = {'java'      : 'java',
-                    'encoding'  : 'windows-1252',
-                    'classpath' : cpW
-                   }
-import os
-os.environ["PATH"] += ';'+r'SSPIPATH'
-"""
-   
-   # these are the jars we need
-   targetsW = ["sas.svc.connection.jar", "log4j.jar",
-               "sas.security.sspi.jar", "sas.core.jar"]
-   
-   # this is the default location on Windows
-   depDir = "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\"
-   
-   # try to get the folders in that location
-   if os.path.isdir(depDir):
-    ls = os.walk(depDir)
-   else:
-    ls = []
-   
-   sjp = None
-   
-   # check each folder for the jars we want (only look in deploywiz folder) 
-   # and remove from targetsW to avoid duplicates
-   for path, _, files in ls:
-       for fname in files:
-           if fname in targetsW:
-               if path.lower().find("deploywiz") > -1:
-                  sjp = path
-                  break
-   
-   if sjp:
-      cfg = cfg.replace("SASJARPATH", sjp)
-      cfg = cfg.replace("SASPYJARPATH", __file__.replace('\\autocfg.py',''))
-   else:
-      return("Couldn't find the SAS Jar path.\n")
-   
-   
-   # lets get sspi
-   targetsW = ["sspiauth.dll"]
-   
-   # this is the default location on Windows
-   depDir = "C:\\Program Files\\SASHome\\SASFoundation\\9.4\\core\\sasext"
-   
-   # try to get the folders in that location
+    if not java:
+       java = 'java'
 
-   if os.path.isdir(depDir):
-    ls = os.walk(depDir)
-   else:
-    ls = []
-   
-   sspi = None
-   
-   # check each folder for the jars we want (only look in deploywiz folder) 
-   # and remove from targetsW to avoid duplicates
-   for path, _, files in ls:
-       for fname in files:
-           if fname in targetsW:
-               sspi = path
+    depDir  = SASHome+"\\SASDeploymentManager\\"
+
+    try:
+        dirList = os.listdir(depDir)
+    except:
+        while True:
+            print("The following SASHome path wasn't found: "+SASHome)
+            SASHome = input("Please enter the path to your SASHome directory " +
+                "(or q to exit): "
+            )
+            if SASHome == 'q':
+               return
+            try:
+               print("Trying "+SASHome)
+               depDir  = SASHome+"\\SASDeploymentManager\\"
+               dirList = os.listdir(depDir)
                break
-   
-   if sspi:
-      cfg = cfg.replace("SSPIPATH", sspi)
-   else:
-      print("Couldn't find the sspiauth.dll path. You'll need to find that and add it to your system PATH variable.\n")
-      cfg = cfg = cfg.rsplit('os.environ[')[0]
-   
-   cfg = cfg.replace("\\", "\\\\")
-   
-   fd = open(cfgfile, 'w')
-   fd.write(cfg)
-   fd.close()
+            except:
+               continue
+            
+    # prompts the user to enter the version of SAS they want to use if more
+    # than one are detected
+    if len(dirList) == 1:
+        depDir += "{}\\products\\".format(dirList[0])
+        sspi = (
+            SASHome+"\\SASFoundation\\" +
+            "{}\\core\\sasext\\sspiauth.dll".format(dirList[0])
+        )
+    else:
+        while True:
+            print(*os.listdir(depDir))
+            verFolder = input("Enter the SAS deployement you wish to use " +
+                "(or q to exit): "
+            )
+            if verFolder in os.listdir(depDir):
+                depDir += "{}\\products\\".format(verFolder)
+                # creates dll path
+                sspi = (
+                    SASHome+"\\SASFoundation\\" +
+                    "{}\\core\\sasext\\sspiauth.dll".format(verFolder)
+                )
+                break
+            elif verFolder == 'q':
+                return
+            else:
+                print('This is not a valid SAS version for your machine.')
+                continue
 
-   print("Generated configurations file: "+cfgfile+"\n")
-   
+    # Windows commands to find deployement folders
+    p = subprocess.Popen(
+        r'dir "{}deploywiz" /AD /s/b'.format(depDir),
+        stdout=subprocess.PIPE, shell=True
+    )
+
+    # processes command output
+    cmdOut = p.stdout.read().decode('utf-8').split('\r\n')
+    cmdOut.pop()
+
+    # deployement wizard folder
+    depWiz = cmdOut[0]
+
+    # creates a set for the targets with their full path
+    targetsW = set([
+        depWiz + "\\sas.svc.connection.jar", depWiz + "\\log4j.jar",
+        depWiz + "\\sas.security.sspi.jar", depWiz + "\\sas.core.jar"
+    ])
+
+    # creates list out of the set intersection between all jars and targets
+    jarList = list(set(glob("{}\\*.jar".format(depWiz))).intersection(targetsW))
+
+    # creates saspy jar path
+    sasIOM = saspydir+'java\\saspyiom.jar'
+
+    # there are 4 required jars, if not all 4 are located the program will stop
+    if len(jarList) < len(targetsW):
+        print(
+            "The creation process could not be completed becasue not all "
+            "required jar files exist on this system."
+        )
+        return
+    # if all jars are detected cfg will be built
+    else:
+        cfg = ('SAS_config_names=["autogen_winlocal"]\n\n' +
+            'SAS_config_options = {\n\t"lock_down": False,' +
+            '\n\t"verbose"  : True\n\t}' +
+            '\n\ncpW  =  "{}"'.format(jarList[0]) +
+            '\ncpW += ";{}"'.format(jarList[1]) +
+            '\ncpW += ";{}"'.format(jarList[2]) +
+            '\ncpW += ";{}"'.format(jarList[3])
+        )
+
+    # determines if saspy jar exists and if so appends it to cfg
+    if os.path.isfile(sasIOM):
+        cfg += '\ncpW += ";{}"'.format(sasIOM)
+    # if it does not exist cfg will be written with the option to add it
+    else:
+        print(
+            "The saspyiom.jar file could not be located, you will need to "
+            "locate this file and add it to the cpW where labeled SASPYJAR"
+        )
+        cfg += '\ncpW += ";{}"'.format('SASPYJAR')
+
+    # adds required config info to cfg
+    cfg += (
+        '\n\nautogen_winlocal = ' +
+        '{\n\t"java"      : "'+java+'",\n\t"encoding"  : "windows-1252",' +
+        '\n\t"classpath" : cpW\n\t}'
+    )
+
+    # if dll exists
+    if os.path.isfile(sspi):
+        cfg += '\n\nimport os\nos.environ["PATH"] += ";{}"'.format(sspi)
+    else:
+        print(
+            "Couldn't find the sspiauth.dll path. You'll need to find that and "
+            "add it to your system PATH variable.\n"
+        )
+
+    cfg = cfg.replace('\\', '\\\\')
+
+    fd = open(cfgfile, 'w')
+    fd.write(cfg)
+    fd.close()
+
+    print("Generated configurations file: " + cfgfile + "\n")
+
 if __name__ == "__main__":
-   main(sys.argv)
+    for i in range(len(sys.argv)):
+       if sys.argv[i] == 'None':
+          sys.argv[i] =   None
+    main(*sys.argv[1:])
