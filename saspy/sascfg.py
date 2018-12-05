@@ -14,6 +14,9 @@
 #  limitations under the License.
 #
 
+# THIS IS AN EXAMPLE CONFIG FILE. PLEASE CREATE YOUR OWN sascfg_personal.py FILE USWING THE APPROPRIATE TEMPLATES FROM BELOW
+# SEE THE CONFIGURATION DOC AT https://sassoftware.github.io/saspy/install.html#configuration
+
 
 # Configuration Names for SAS - python List
 # This is the list of allowed configuration definitions that can be used. The definition are defined below.
@@ -109,6 +112,8 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # to build out a classpath variable and assign that to the 'classpath' option in the configuration definition. The IOM client jars are delivered as part
 # of a Base SAS install, so should be available in any SAS install. The saspyiom.jar is available in the saspy repo/install. 
 #
+# NONE OF THE PATHS IN THESE EAMPLES ARE RIGHT FOR YOUT INSTALL. YOU HAVE TO CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION 
+#
 # valid keys are:
 # 'java'      - [REQUIRED] the path to the java executable to use
 # 'iomhost'   - [REQUIRED for remote IOM case, Don't specify to use a local Windows Session] the resolvable host name, or ip to the IOM server to connect to
@@ -122,7 +127,7 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # 'sspi'      - boolean. use IWA instead of user/pw to connect to the IOM workspace server
 
 
-# build out a local classpath variable to use below for Linux clients
+# build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION 
 cpL  =  "/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.svc.connection.jar"
 cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/log4j.jar"
 cpL += ":/opt/sasinside/SASHome/SASDeploymentManager/9.4/products/deploywiz__94400__prt__xx__sp0__1/deploywiz/sas.security.sspi.jar"
@@ -144,16 +149,12 @@ iomwin   = {'java'      : '/usr/bin/java',
             }
 
          
-# build out a local classpath variable to use below for Windows clients
+# build out a local classpath variable to use below for Windows clients   CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION 
 cpW  =  "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar"
 cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar"
 cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar"
 cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar"
-# cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
-# Default to the version of saspyiom.jar that's installed with SASPy, rather than the
-# hard-coded path commented above.
-saspyiom = __file__.replace("sascfg.py", "java\\saspyiom.jar")
-cpW += ";" + saspyiom
+cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
 
 # And, if you've configured IOM to use Encryption, you need these client side jars.
 #cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904300.0.0.20150204190000_v940m3\\sas.rutil.jar"
