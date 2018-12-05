@@ -1157,9 +1157,9 @@ class SASsession():
                      put 'FILE=' name;
                end;
 
-           put 'MEMEND';
-           rc = dclose(did);
-           end;
+            put 'MEMEND';
+            rc = dclose(did);
+            end;
          else
             do;
                put 'MEMCOUNT=0';
@@ -1279,16 +1279,18 @@ class SASsession():
               length infoname infoval $60;
               drop rc fid infonum i close;
               fid=fopen('filerefx');
-              infonum=foptnum(fid);
-              do i=1 to infonum;
-                 infoname=foptname(fid, i);
-                 infoval=finfo(fid, infoname);
-                 output;
-              end;
+              if fid then
+                 do;
+                    infonum=foptnum(fid);
+                    do i=1 to infonum;
+                       infoname=foptname(fid, i);
+                       infoval=finfo(fid, infoname);
+                       output;
+                    end;
+                 end;
               close=fclose(fid);
               rc = filename('filerefx');
            run;
-           filename filerefx clear;
            """.replace('filerefx', fileref)
    
            ll  = self.submit(code, results='text')
@@ -1306,15 +1308,15 @@ class SASsession():
            put 'INFOSTART';
            fid=fopen('filerefx');
            if fid then
-             do;
-              infonum=foptnum(fid);
-              do i=1 to infonum;
-                 infoname=foptname(fid, i);
-                 infoval=finfo(fid, infoname);
-                 put 'INFONAME=' infoname;
-                 put 'INFOVAL=' infoval;
-              end;
-             end; 
+              do;
+                 infonum=foptnum(fid);
+                 do i=1 to infonum;
+                    infoname=foptname(fid, i);
+                    infoval=finfo(fid, infoname);
+                    put 'INFONAME=' infoname;
+                    put 'INFOVAL=' infoval;
+                 end;
+              end; 
            put 'INFOEND';
            close=fclose(fid);
            rc = filename('filerefx');
