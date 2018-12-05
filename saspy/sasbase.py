@@ -1166,9 +1166,12 @@ class SASsession():
 
         return dirlist
 
-    def list_tables(self, libref):
+
+    def list_tables(self, libref, results: str = 'list'):
         """
-        This method returns a dataframe containing the list of members in the library of memtype data or view
+        This method returns a list of tuples containing MEMNAME, MEMTYPE of members in the library of memtype data or view
+
+        If you would like a Pandas dataframe returned instead of a list, specify results='pandas'
         """
         ll = self.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+"));")
 
@@ -1189,13 +1192,121 @@ class SASsession():
         quit;
         """.replace('librefx', libref)
 
-        ll1 = self.submit(code, results='text')
+        ll  = self.submit(code, results='text')
 
-        res = self.sd2df('_saspy_lib_list', 'work')
+        if results != 'list':
+           res = self.sd2df('_saspy_lib_list', 'work')
+           if res is None:
+              res = pd.DataFrame.from_records([], ['MEMNAME', 'MEMTYPE'])
+           return res
+           
+        code = """
+        data _null_;
+           set work._saspy_lib_list end=last curobs=first;
+           if first EQ 1 then
+              put 'MEMSTART';
+           put 'MEMNAME=' memname;
+           put 'MEMTYPE=' memtype;
+           if last then
+              put 'MEMEND';
+        run;
+        """
 
-        if res is None:
-           res = pd.DataFrame.from_records([], ['MEMNAME', 'MEMTYPE'])
- 
+        ll  = self.submit(code, results='text')
+
+        res = []
+        log = ll['LOG'].rpartition('MEMEND')[0].rpartition('MEMSTART')
+                                                                                  
+        for i in range(log[2].count('MEMNAME')):                                    
+           log = log[2].partition('MEMNAME=')[2].partition('\n')                    
+           key = log[0]                                                           
+           log = log[2].partition('MEMTYPE=')[2].partition('\n')                     
+           val = log[0]                                                           
+           res.append(tuple((key, val)))                                                         
+                                                                                  
+        return res
+
+
+    def file_info(self, filepath,  results: str = 'dict', fileref: str = '_spfinfo'):
+        """
+        This method returns a dictionaty containing the file attributes for the file name provided
+
+        If you would like a Pandas dataframe returned instead of a dictionary, specify results='pandas'
+        """
+
+        code  = "filename "+fileref+" '"+filepath+"';\n"
+        code += "%put FILEREF_EXISTS=%sysfunc(fexist("+fileref+"));"
+
+        ll = self.submit(code)
+
+        exists = ll['LOG'].rsplit('FILEREF_EXISTS=')[2].split('\n')[0]
+
+        if exists != '1':
+           print('The filepath provided does not exist')
+           ll = self.submit("filename "+fileref+" clear;")
+           return None
+
+        if results != 'dict':
+           code="""
+           proc delete data=work._SASPY_FILE_INFO;run;
+           data work._SASPY_FILE_INFO;
+              length infoname infoval $60;
+              drop rc fid infonum i close;
+              fid=fopen('filerefx');
+              infonum=foptnum(fid);
+              do i=1 to infonum;
+                 infoname=foptname(fid, i);
+                 infoval=finfo(fid, infoname);
+                 output;
+              end;
+              close=fclose(fid);
+              rc = filename('filerefx');
+           run;
+           filename filerefx clear;
+           """.replace('filerefx', fileref)
+   
+           ll  = self.submit(code, results='text')
+   
+           res = self.sd2df('_SASPY_FILE_INFO', 'work')
+           if res is None:
+              res = pd.DataFrame.from_records([], ['infoname', 'infoval'])
+           return res
+
+
+        code="""
+        data _null_;
+           length infoname infoval $60;
+           drop rc fid infonum i close;
+           put 'INFOSTART';
+           fid=fopen('filerefx');
+           if fid then
+             do;
+              infonum=foptnum(fid);
+              do i=1 to infonum;
+                 infoname=foptname(fid, i);
+                 infoval=finfo(fid, infoname);
+                 put 'INFONAME=' infoname;
+                 put 'INFOVAL=' infoval;
+              end;
+             end; 
+           put 'INFOEND';
+           close=fclose(fid);
+           rc = filename('filerefx');
+        run;
+        """.replace('filerefx', fileref)
+
+        ll  = self.submit(code, results='text')
+
+        res = {}
+        log = ll['LOG'].rpartition('INFOEND')[0].rpartition('INFOSTART')
+                                                                                  
+        for i in range(log[2].count('INFONAME')):                                    
+           log = log[2].partition('INFONAME=')[2].partition('\n')                    
+           key = log[0]                                                           
+           log = log[2].partition('INFOVAL=')[2].partition('\n')                     
+           val = log[0]                                                           
+           res[key] = val                                                         
+                                                                                  
         return res
 
 if __name__ == "__main__":
