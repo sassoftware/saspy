@@ -56,14 +56,14 @@ To add a new procedure follow these steps:
     .. code-block:: ipython3
 
         @procDecorator.proc_decorator({})
-        def esm(self, data: 'SASdata' = None, ...
+        def esm(self, data: ['SASdata', str] = None, ...
 
     And one with required arguments:
 
     .. code-block:: ipython3
 
         @procDecorator.proc_decorator({'model'})
-        def mixed(self, data: 'SASdata' = None, ...
+        def mixed(self, data: ['SASdata', str] = None, ...
 
 #. Add a link to the SAS documentation plus any additional details will be helpful to users
 

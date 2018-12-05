@@ -57,14 +57,14 @@ class SASml:
         .. code-block:: ipython3
 
             @procDecorator.proc_decorator({})
-            def esm(self, data: 'SASdata' = None, ...
+            def esm(self, data: ['SASdata', str] = None, ...
 
         And one with required arguments:
 
         .. code-block:: ipython3
 
             @procDecorator.proc_decorator({'model'})
-            def mixed(self, data: 'SASdata' = None, ...
+            def mixed(self, data: ['SASdata', str] = None, ...
 
     #. Add a link to the SAS documentation plus any additional details will be helpful to users
 
@@ -86,7 +86,7 @@ class SASml:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def hpforest(self, data: 'SASdata' = None,
+    def hpforest(self, data: ['SASdata', str] = None,
                  freq: str = None,
                  id: str = None,
                  input: [str, list, dict] = None,
@@ -102,7 +102,7 @@ class SASml:
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
@@ -115,7 +115,7 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({})
-    def hp4score(self, data: 'SASdata' = None,
+    def hp4score(self, data: ['SASdata', str] = None,
                  id: str = None,
                  importance: str = None,
                  performance: str = None,
@@ -129,7 +129,7 @@ class SASml:
         Documentation link:
         https://go.documentation.sas.com/?docsetId=emhpprcref&docsetTarget=emhpprcref_hp4score_toc.htm&docsetVersion=14.2&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm id: The id variable can only be a string type.
         :parm importance: The importance variable can only be a string type.
         :parm performance: The performance variable can only be a string type.
@@ -140,7 +140,7 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({'input'})
-    def hpcluster(self, data: 'SASdata' = None,
+    def hpcluster(self, data: ['SASdata', str] = None,
                   freq: str = None,
                   id: [str, list] = None,
                   input: [str, list, dict] = None,
@@ -154,7 +154,7 @@ class SASml:
         Documentation link:
         https://go.documentation.sas.com/?docsetId=emhpprcref&docsetTarget=emhpprcref_hpclus_toc.htm&docsetVersion=14.2&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable. This parameter is required
@@ -165,7 +165,7 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({'input', 'target', 'train'})
-    def hpneural(self, data: 'SASdata' = None,
+    def hpneural(self, data: ['SASdata', str] = None,
                  architecture: str = None,
                  code: str = None,
                  hidden: [str, int] = None,
@@ -184,7 +184,7 @@ class SASml:
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm architecture: The architecture variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm hidden: The hidden variable can only be a string type. This statement is required if there is a Train statement and the architecture is not logistic.
@@ -200,7 +200,7 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def treeboost(self, data: 'SASdata' = None,
+    def treeboost(self, data: ['SASdata', str] = None,
                   assess: str = None,
                   code: str = None,
                   freq: str = None,
@@ -220,7 +220,7 @@ class SASml:
         Documentation link:
         https://support.sas.com/documentation/solutions/miner/emhp/14.1/emhpprcref.pdf
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm assess: The assess variable can only be a string type.
         :parm code: The code variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
@@ -237,7 +237,7 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def hpbnet(self, data: 'SASdata' = None,
+    def hpbnet(self, data: ['SASdata', str] = None,
                code: str = None,
                freq: str = None,
                id: str = None,
@@ -255,7 +255,7 @@ class SASml:
         Documentation link:
         http://go.documentation.sas.com/?docsetId=emhpprcref&docsetVersion=14.2&docsetTarget=emhpprcref_hpbnet_toc.htm&locale=en
 
-        :param data: SASdata object. This parameter is required
+        :param data: SASdata object or string. This parameter is required.
         :parm code: The code variable can only be a string type.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.

@@ -88,10 +88,10 @@ class procDecorator:
                                 ': The {} variable is a generic option available for advanced use. It can only be a string type.'.format(j)])
             doc_markup.append(''.join([doc_mstr, '\n']))
 
-        doc_markup.insert(0, ''.join([':param data: SASdata object. This parameter is required.', '\n']))
-        first_line = ''.join(["data: 'SASdata' = None,", '\n'])
+        doc_markup.insert(0, ''.join([':param data: SASdata object or string. This parameter is required..', '\n']))
+        first_line = ''.join(["data: ['SASdata', str] = None,", '\n'])
         if len(proc):
-            first_line = ''.join(["def {}(self, data: 'SASdata' = None,".format(proc), '\n'])
+            first_line = ''.join(["def {}(self, data: ['SASdata', str] = None,".format(proc), '\n'])
             doc_markup.insert(0, ''.join(['Python method to call the {} procedure.\n'.format(proc.upper()),
                                           '\n', 'Documentation link:', '\n\n']))
         doc_list.insert(0, first_line)

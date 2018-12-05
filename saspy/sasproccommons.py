@@ -203,7 +203,7 @@ class SASProcCommons:
         else:
             raise SyntaxError("log is not a string but type:%s" % (str(type(log))))
 
-    def _makeProcCallMacro(self, objtype: str, objname: str, data: 'SASdata' = None, args: dict = None) -> str:
+    def _makeProcCallMacro(self, objtype: str, objname: str, data: ['SASdata', str] = None, args: dict = None) -> str:
         """
         This method generates the SAS code from the python objects and included data and arguments.
         The list of args in this method is largely alphabetical but there are exceptions in order to
@@ -219,7 +219,6 @@ class SASProcCommons:
         plot = ''
         outmeth = ''
         procopts = args.pop('procopts', '')
-
         # Set ODS graphic generation to True by default
         ODSGraphics = args.get('ODSGraphics', True)
 
@@ -580,6 +579,18 @@ class SASProcCommons:
         :return: sas result object
         """
         data = kwargs.pop('data', None)
+        if isinstance(data, str):
+            tempdata = data
+            try:
+                table = tempdata.split('.')[-1]
+                lib = tempdata.split('.')[-2]
+            except IndexError:
+                lib = ''
+            # check that the table exists
+            assert self.sas.exist(table, lib), "The dataset does not exist. Check your spelling and/or libname assignment."
+            data = self.sas.sasdata(table, lib)
+        assert isinstance(data, SASdata), "Data must be a sasdata object. Wrong type or string conversion failed."
+
         if required_set is None:
             required_set = {}
         objtype = procname.lower()
