@@ -1100,10 +1100,35 @@ class SASsession():
         """
         return self.symget("SYSLIBRC")
 
+    def assigned_librefs(self):
+        """
+        This method returns the list of currently assigned librefs
+        """
+
+        code = """
+        %put STARTLIBREFS;
+        libname _all_ list;
+        %put ENDIBREFS;
+
+        """
+
+        ll = self.submit(code, results='text')
+
+        librefs = []
+        log = ll['LOG'].rpartition('ENDIBREFS')[0].rpartition('STARTLIBREFS')
+                                                                                  
+        for i in range(log[2].count('NOTE: ')):                                    
+           log = log[2].partition('NOTE: ')[2].partition('=')[2].partition('\n')                    
+           librefs.append(log[0].strip())                                                         
+                                                                                  
+        return librefs
+
+
     def dirlist(self, path):
         """
         This method returns the directory list for the path specified where SAS is running
         """
+
         code = """
         data _null_;
          spd = '""" + path + """';
@@ -1173,6 +1198,7 @@ class SASsession():
 
         If you would like a Pandas dataframe returned instead of a list, specify results='pandas'
         """
+
         ll = self.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+"));")
 
         exists = ll['LOG'].rsplit('LIBREF_EXISTS=')[2].split('\n')[0]
