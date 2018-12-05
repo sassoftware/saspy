@@ -1166,6 +1166,38 @@ class SASsession():
 
         return dirlist
 
+    def list_tables(self, libref):
+        """
+        This method returns a dataframe containing the list of members in the library of memtype data or view
+        """
+        ll = self.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+"));")
+
+        exists = ll['LOG'].rsplit('LIBREF_EXISTS=')[2].split('\n')[0]
+
+        if exists != '0':
+           print('Libref provided is not assigned')
+           return None
+
+        code = """
+        proc datasets dd=librefx nodetails nolist noprint;
+           contents memtype=(data view) nodetails 
+              dir out=work._saspy_lib_list(keep=memname memtype) data=_all_ noprint;
+        run;
+        
+        proc sql;
+           create table work._saspy_lib_list as select distinct * from work._saspy_lib_list;
+        quit;
+        """.replace('librefx', libref)
+
+        ll1 = self.submit(code, results='text')
+
+        res = self.sd2df('_saspy_lib_list', 'work')
+
+        if res is None:
+           res = pd.DataFrame.from_records([], ['MEMNAME', 'MEMTYPE'])
+ 
+        return res
+
 if __name__ == "__main__":
     startsas()
 
