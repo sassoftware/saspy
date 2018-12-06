@@ -14,7 +14,7 @@
 #  limitations under the License.
 #
 
-# THIS IS AN EXAMPLE CONFIG FILE. PLEASE CREATE YOUR OWN sascfg_personal.py FILE USWING THE APPROPRIATE TEMPLATES FROM BELOW
+# THIS IS AN EXAMPLE CONFIG FILE. PLEASE CREATE YOUR OWN sascfg_personal.py FILE USING THE APPROPRIATE TEMPLATES FROM BELOW
 # SEE THE CONFIGURATION DOC AT https://sassoftware.github.io/saspy/install.html#configuration
 
 
