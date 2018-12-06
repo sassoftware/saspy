@@ -542,6 +542,21 @@ the directory--do not include the file itself. For example:
 
     C:\Program Files\SASHome\SASFoundation\9.4\core\sasext 
 
+
+Starting in version 2.4.1, there is a autocfg.py batch script available in saspy that
+you can use to generate the sascfg_personal.py file for a Windows Local connection.
+This script can also be run interactively. You can tell it the path/name of the file
+you want it to create, tell it where your SASHome install directory it (if not in the default location).
+And where to find java.exe, if java isn't already in your path to be found.
+
+The default takes no parameters and creates sascfg_personal.py in the saspy install directory
+to be used immediately. That assumes SAS in installed in the default location and the java command can be found.
+
+See the example notebook that shows the various ways to use this script in the saspy-examples
+github site: https://github.com/sassoftware/saspy-examples/blob/master/SAS_contrib/autocfg.ipynb
+
+
+
 java      - 
     (Required) The path to the Java executable to use. 
 classpath - 
