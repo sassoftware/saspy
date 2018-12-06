@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Contributing new methods &mdash; saspy 2.4.0 documentation</title>
+  <title>Contributing new methods &mdash; saspy 2.4.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.4.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.4.1 documentation" href="index.html"/>
         <link rel="next" title="Troubleshooting" href="troubleshooting.html"/>
         <link rel="prev" title="Advanced topics" href="advanced-topics.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.4.0
+                2.4.1
               </div>
             
           
@@ -209,12 +209,12 @@ minutes for subsequent methods.</p>
 The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list <cite>{}</cite> should be passed.
 Here are two examples one with no required arguments:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({})</span>
-<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 <p>And one with required arguments:</p>
 <div class="last highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({</span><span class="s1">&#39;model&#39;</span><span class="p">})</span>
-<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 </dd>
@@ -253,7 +253,7 @@ appropriate testing file.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017 SAS Institute Inc. All Rights Reserved..
+        &copy; Copyright 2018 SAS Institute Inc. All Rights Reserved..
 
     </p>
   </div>
@@ -275,7 +275,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.4.0',
+            VERSION:'2.4.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

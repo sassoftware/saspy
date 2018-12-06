@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 2.4.0 documentation</title>
+  <title>API Reference &mdash; saspy 2.4.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.4.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.4.1 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.4.0
+                2.4.1
               </div>
             
           
@@ -320,6 +320,12 @@ is the text of the last warning message generated in the SAS log.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="saspy.SASsession.assigned_librefs">
+<code class="descname">assigned_librefs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.assigned_librefs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns the list of currently assigned librefs</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASsession.dataframe2sasdata">
 <code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
@@ -418,6 +424,20 @@ See the Advanced topics section of the doc for details</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.file_info">
+<code class="descname">file_info</code><span class="sig-paren">(</span><em>filepath</em>, <em>results: str = 'dict'</em>, <em>fileref: str = '_spfinfo'</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.file_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns a dictionaty containing the file attributes for the file name provided</p>
+<p>If you would like a Pandas dataframe returned instead of a dictionary, specify results=&#8217;pandas&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.list_tables">
+<code class="descname">list_tables</code><span class="sig-paren">(</span><em>libref</em>, <em>results: str = 'list'</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.list_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method returns a list of tuples containing MEMNAME, MEMTYPE of members in the library of memtype data or view</p>
+<p>If you would like a Pandas dataframe returned instead of a list, specify results=&#8217;pandas&#8217;</p>
 </dd></dl>
 
 <dl class="method">
@@ -1513,12 +1533,12 @@ PROC JSON documentation: <a class="reference external" href="http://go.documenta
 The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list <cite>{}</cite> should be passed.
 Here are two examples one with no required arguments:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({})</span>
-<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 <p>And one with required arguments:</p>
 <div class="last highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({</span><span class="s1">&#39;model&#39;</span><span class="p">})</span>
-<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 </dd>
@@ -1541,7 +1561,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required..</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm code:</th><td class="field-body">The code variable can only be a string type.</td>
 </tr>
@@ -1577,7 +1597,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm code:</th><td class="field-body">The code variable can only be a string type.</td>
 </tr>
@@ -1613,7 +1633,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required..</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm cls:</th><td class="field-body">The cls variable can be a string or list type. It refers to the categorical, or nominal variables.</td>
 </tr>
@@ -1648,7 +1668,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can be a string or list type.</td>
 </tr>
@@ -1727,12 +1747,12 @@ appropriate testing file.</p>
 The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list <cite>{}</cite> should be passed.
 Here are two examples one with no required arguments:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({})</span>
-<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 <p>And one with required arguments:</p>
 <div class="last highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({</span><span class="s1">&#39;model&#39;</span><span class="p">})</span>
-<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 </dd>
@@ -1755,7 +1775,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm id:</th><td class="field-body">The id variable can only be a string type.</td>
 </tr>
@@ -1788,7 +1808,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm code:</th><td class="field-body">The code variable can only be a string type.</td>
 </tr>
@@ -1828,7 +1848,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm freq:</th><td class="field-body">The freq variable can only be a string type.</td>
 </tr>
@@ -1859,7 +1879,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm freq:</th><td class="field-body">The freq variable can only be a string type.</td>
 </tr>
@@ -1894,7 +1914,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Parm architecture:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body">The architecture variable can only be a string type.</td>
@@ -1936,7 +1956,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm assess:</th><td class="field-body">The assess variable can only be a string type.</td>
 </tr>
@@ -2022,12 +2042,12 @@ appropriate testing file.</p>
 The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list <cite>{}</cite> should be passed.
 Here are two examples one with no required arguments:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({})</span>
-<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 <p>And one with required arguments:</p>
 <div class="last highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({</span><span class="s1">&#39;model&#39;</span><span class="p">})</span>
-<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 </dd>
@@ -2050,7 +2070,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2085,7 +2105,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm absorb:</th><td class="field-body">The absorb variable can only be a string type.</td>
 </tr>
@@ -2140,7 +2160,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2185,7 +2205,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2233,7 +2253,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm cls:</th><td class="field-body">The cls variable can be a string or list type. It refers to the categorical, or nominal variables.</td>
 </tr>
@@ -2281,7 +2301,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm absorb:</th><td class="field-body">The absorb variable can only be a string type.</td>
 </tr>
@@ -2336,7 +2356,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2385,7 +2405,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm assess:</th><td class="field-body">The assess variable can only be a string type.</td>
 </tr>
@@ -2452,7 +2472,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm add:</th><td class="field-body">The add variable can only be a string type.</td>
 </tr>
@@ -2501,7 +2521,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2536,7 +2556,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2601,12 +2621,12 @@ appropriate testing file.</p>
 The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list <cite>{}</cite> should be passed.
 Here are two examples one with no required arguments:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({})</span>
-<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 <p>And one with required arguments:</p>
 <div class="last highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({</span><span class="s1">&#39;model&#39;</span><span class="p">})</span>
-<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 </dd>
@@ -2629,7 +2649,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2663,7 +2683,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can be a string or list type.</td>
 </tr>
@@ -2702,7 +2722,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2733,7 +2753,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can be a string or list type.</td>
 </tr>
@@ -2762,7 +2782,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2803,7 +2823,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2832,7 +2852,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -2875,7 +2895,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm autoreg:</th><td class="field-body">The autoreg variable can only be a string type.</td>
 </tr>
@@ -2941,7 +2961,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm adjust:</th><td class="field-body">The adjust variable can only be a string type.</td>
 </tr>
@@ -3012,7 +3032,7 @@ the printing of tables, while the OUTPUT statement controls the creation of the 
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm arima:</th><td class="field-body">The arima variable can only be a string type.</td>
 </tr>
@@ -3057,7 +3077,7 @@ the printing of tables, while the OUTPUT statement controls the creation of the 
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm adjust:</th><td class="field-body">The adjust variable can only be a string type.</td>
 </tr>
@@ -3155,12 +3175,12 @@ This class and all the useful work in this package require a licensed version of
 The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list <cite>{}</cite> should be passed.
 Here are two examples one with no required arguments:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({})</span>
-<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 <p>And one with required arguments:</p>
 <div class="last highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({</span><span class="s1">&#39;model&#39;</span><span class="p">})</span>
-<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 </dd>
@@ -3183,7 +3203,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm by:</th><td class="field-body">The by variable can only be a string type.</td>
 </tr>
@@ -3230,7 +3250,7 @@ appropriate testing file.</p>
 <dd><p>Python method to call the CUSUM procedure</p>
 <p>Documentation link:
 <a class="reference external" href="https://go.documentation.sas.com/?cdcId=pgmsascdc&amp;cdcVersion=9.4_3.4&amp;docsetId=qcug&amp;docsetTarget=qcug_cusum_toc.htm&amp;locale=en">https://go.documentation.sas.com/?cdcId=pgmsascdc&amp;cdcVersion=9.4_3.4&amp;docsetId=qcug&amp;docsetTarget=qcug_cusum_toc.htm&amp;locale=en</a>
-:param data: SASdata object. This parameter is required
+:param data: SASdata object or string. This parameter is required.
 :parm by: The by variable can only be a string type.
 :parm inset: The inset variable can only be a string type.
 :parm xchart: The xchart variable can only be a string type.
@@ -3249,7 +3269,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm ewmachart:</th><td class="field-body">The ewmachart variable can only be a string type.</td>
 </tr>
@@ -3276,7 +3296,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm boxchart:</th><td class="field-body">The boxchart variable can only be a string type.</td>
 </tr>
@@ -3350,12 +3370,12 @@ This class and all the useful work in this package require a licensed version of
 The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list <cite>{}</cite> should be passed.
 Here are two examples one with no required arguments:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({})</span>
-<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 <p>And one with required arguments:</p>
 <div class="last highlight-ipython3"><div class="highlight"><pre><span></span><span class="nd">@procDecorator.proc_decorator</span><span class="p">({</span><span class="s1">&#39;model&#39;</span><span class="p">})</span>
-<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SASdata&#39;</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 </dd>
@@ -3378,7 +3398,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm autotune:</th><td class="field-body">The autotune variable can only be a string type.</td>
 </tr>
@@ -3420,7 +3440,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm display:</th><td class="field-body">The display variable can only be a string type.</td>
 </tr>
@@ -3454,7 +3474,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm autotune:</th><td class="field-body">The autotune variable can only be a string type.</td>
 </tr>
@@ -3502,7 +3522,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm autotune:</th><td class="field-body">The autotune variable can only be a string type.</td>
 </tr>
@@ -3551,7 +3571,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name" colspan="2">Parm architecture:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body">The architecture variable can only be a string type.</td>
@@ -3601,7 +3621,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm code:</th><td class="field-body">The code variable can only be a string type.</td>
 </tr>
@@ -3638,7 +3658,7 @@ appropriate testing file.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object. This parameter is required</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; SASdata object or string. This parameter is required.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Parm autotune:</th><td class="field-body">The autotune variable can only be a string type.</td>
 </tr>
@@ -3699,7 +3719,7 @@ appropriate testing file.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017 SAS Institute Inc. All Rights Reserved..
+        &copy; Copyright 2018 SAS Institute Inc. All Rights Reserved..
 
     </p>
   </div>
@@ -3721,7 +3741,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.4.0',
+            VERSION:'2.4.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

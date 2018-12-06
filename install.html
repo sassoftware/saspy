@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 2.4.0 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.4.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.4.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.4.1 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.4.0
+                2.4.1
               </div>
             
           
@@ -651,6 +651,15 @@ the directory&#8211;do not include the file itself. For example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">:</span>\<span class="n">Program</span> <span class="n">Files</span>\<span class="n">SASHome</span>\<span class="n">SASFoundation</span>\<span class="mf">9.4</span>\<span class="n">core</span>\<span class="n">sasext</span>
 </pre></div>
 </div>
+<p>Starting in version 2.4.1, there is a autocfg.py batch script available in saspy that
+you can use to generate the sascfg_personal.py file for a Windows Local connection.
+This script can also be run interactively. You can tell it the path/name of the file
+you want it to create, tell it where your SASHome install directory it (if not in the default location).
+And where to find java.exe, if java isn&#8217;t already in your path to be found.</p>
+<p>The default takes no parameters and creates sascfg_personal.py in the saspy install directory
+to be used immediately. That assumes SAS in installed in the default location and the java command can be found.</p>
+<p>See the example notebook that shows the various ways to use this script in the saspy-examples
+github site: <a class="reference external" href="https://github.com/sassoftware/saspy-examples/blob/master/SAS_contrib/autocfg.ipynb">https://github.com/sassoftware/saspy-examples/blob/master/SAS_contrib/autocfg.ipynb</a></p>
 <dl class="docutils">
 <dt>java      -</dt>
 <dd>(Required) The path to the Java executable to use.</dd>
@@ -749,7 +758,7 @@ install other non-standard python modules.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017 SAS Institute Inc. All Rights Reserved..
+        &copy; Copyright 2018 SAS Institute Inc. All Rights Reserved..
 
     </p>
   </div>
@@ -771,7 +780,7 @@ install other non-standard python modules.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.4.0',
+            VERSION:'2.4.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
