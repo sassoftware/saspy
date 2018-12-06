@@ -1106,19 +1106,26 @@ class SASsession():
         """
 
         code = """
-        %put STARTLIBREFS;
-        libname _all_ list;
-        %put ENDIBREFS;
-
+        data _null_; retain libref; retain cobs 1; 
+           set sashelp.vlibnam end=last;
+           if cobs EQ 1 then
+              put "LIBREFSSTART";
+           cobs = 2;
+           if libref NE libname then
+              put "LIBREF=" libname;
+           libref = libname;
+           if last then
+              put "LIBREFSEND";
+        run;
         """
 
         ll = self.submit(code, results='text')
 
         librefs = []
-        log = ll['LOG'].rpartition('ENDIBREFS')[0].rpartition('STARTLIBREFS')
+        log = ll['LOG'].rpartition('LIBREFSEND')[0].rpartition('LIBREFSSTART')
                                                                                   
-        for i in range(log[2].count('NOTE: ')):                                    
-           log = log[2].partition('NOTE: ')[2].partition('=')[2].partition('\n')                    
+        for i in range(log[2].count('LIBREF=')):                                    
+           log = log[2].partition('LIBREF=')[2].partition('\n')                    
            librefs.append(log[0].strip())                                                         
                                                                                   
         return librefs
