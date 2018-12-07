@@ -391,7 +391,7 @@ class SASsession():
         This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
 
         - code    - the SAS statements you want to execute
-        - results - format of results, 'HTML' and 'TEXT' are the alternatives
+        - results - format of results. 'HTML' by default, alternatively 'TEXT'
         - prompt  - dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete
                     the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
                     or show what you type and keep the macros (they will still be available later).
