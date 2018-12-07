@@ -25,7 +25,19 @@ The rest of this section demonstrates how to use this module with a simple examp
 The example uses `Kaggle Resources Analytics 
 <https://www.kaggle.com/ludobenistant/hr-analytics>`_ data.
 
+We now have a saspy-examples gityhub repo:
+https://github.com/sassoftware/saspy-examples
+
+There are a number of example Jupyter notebooks there, some contributed by SAS
+and others by users. If you have one you'd like to contribute, please open a pull request.
+
+The saspy_example_github.ipynb notebook is a perfect one to look though first,
+as it walks you through the various capabilities of saspy. You can even download it, and
+then upload it into your Jupyter and run it. It uses SASHELP tables, so it should run
+on your system already. You can edit it and play around with it directly on your system.
+The direct link to it is: https://github.com/sassoftware/saspy-examples/blob/master/SAS_contrib/saspy_example_github.ipynb
  
+
 Initial import
 ==============
 It is assumed you have already done the :doc:`installation and configuration <install>`.
