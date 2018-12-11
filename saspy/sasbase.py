@@ -1119,7 +1119,11 @@ class SASsession():
         run;
         """
 
-        ll = self.submit(code, results='text')
+        if self.nosub:
+            print(code)
+            return None
+        else:
+           ll = self.submit(code, results='text')
 
         librefs = []
         log = ll['LOG'].rpartition('LIBREFSEND')[0].rpartition('LIBREFSSTART')
@@ -1178,7 +1182,11 @@ class SASsession():
         run;
         """
 
-        ll = self.submit(code, results='text')
+        if self.nosub:
+            print(code)
+            return None
+        else:
+           ll = self.submit(code, results='text')
 
         dirlist = []
 
@@ -1206,13 +1214,14 @@ class SASsession():
         If you would like a Pandas dataframe returned instead of a list, specify results='pandas'
         """
 
-        ll = self.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+"));")
+        if not self.nosub:
+           ll = self.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+"));")
 
-        exists = ll['LOG'].rsplit('LIBREF_EXISTS=')[2].split('\n')[0]
+           exists = ll['LOG'].rsplit('LIBREF_EXISTS=')[2].split('\n')[0]
 
-        if exists != '0':
-           print('Libref provided is not assigned')
-           return None
+           if exists != '0':
+              print('Libref provided is not assigned')
+              return None
 
         code = """
         proc datasets dd=librefx nodetails nolist noprint;
@@ -1225,7 +1234,11 @@ class SASsession():
         quit;
         """.replace('librefx', libref)
 
-        ll  = self.submit(code, results='text')
+        if self.nosub:
+            print(code)
+            return None
+        else:
+           ll  = self.submit(code, results='text')
 
         if results != 'list':
            res = self.sd2df('_saspy_lib_list', 'work')
@@ -1267,17 +1280,18 @@ class SASsession():
         If you would like a Pandas dataframe returned instead of a dictionary, specify results='pandas'
         """
 
-        code  = "filename "+fileref+" '"+filepath+"';\n"
-        code += "%put FILEREF_EXISTS=%sysfunc(fexist("+fileref+"));"
-
-        ll = self.submit(code)
-
-        exists = ll['LOG'].rsplit('FILEREF_EXISTS=')[2].split('\n')[0]
-
-        if exists != '1':
-           print('The filepath provided does not exist')
-           ll = self.submit("filename "+fileref+" clear;")
-           return None
+        if not self.nosub:
+           code  = "filename "+fileref+" '"+filepath+"';\n"
+           code += "%put FILEREF_EXISTS=%sysfunc(fexist("+fileref+"));"
+   
+           ll = self.submit(code)
+   
+           exists = ll['LOG'].rsplit('FILEREF_EXISTS=')[2].split('\n')[0]
+   
+           if exists != '1':
+              print('The filepath provided does not exist')
+              ll = self.submit("filename "+fileref+" clear;")
+              return None
 
         if results != 'dict':
            code="""
@@ -1300,7 +1314,11 @@ class SASsession():
            run;
            """.replace('filerefx', fileref)
    
-           ll  = self.submit(code, results='text')
+           if self.nosub:
+               print(code)
+               return None
+           else:
+              ll  = self.submit(code, results='text')
    
            res = self.sd2df('_SASPY_FILE_INFO', 'work')
            if res is None:
@@ -1330,7 +1348,11 @@ class SASsession():
         run;
         """.replace('filerefx', fileref)
 
-        ll  = self.submit(code, results='text')
+        if self.nosub:
+            print(code)
+            return None
+        else:
+           ll  = self.submit(code, results='text')
 
         res = {}
         log = ll['LOG'].rpartition('INFOEND')[0].rpartition('INFOSTART')
