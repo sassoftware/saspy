@@ -1283,7 +1283,7 @@ class SASsession():
            code="""
            proc delete data=work._SASPY_FILE_INFO;run;
            data work._SASPY_FILE_INFO;
-              length infoname infoval $60;
+              length infoname infoval $256;
               drop rc fid infonum i close;
               fid=fopen('filerefx');
               if fid then
@@ -1310,7 +1310,7 @@ class SASsession():
 
         code="""
         data _null_;
-           length infoname infoval $60;
+           length infoname infoval $256;
            drop rc fid infonum i close;
            put 'INFOSTART';
            fid=fopen('filerefx');

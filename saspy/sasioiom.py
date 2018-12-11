@@ -454,7 +454,7 @@ Will use HTML5 for this SASsession.""")
             pw += '\n'
             self.stdin[0].send(pw.encode())
 
-      ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
+      ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max linesize=max nosyntaxcheck; ods graphics on;", "text")
 
       if self.pid is None:
          print(ll['LOG'])
