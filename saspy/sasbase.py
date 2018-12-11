@@ -1275,7 +1275,7 @@ class SASsession():
 
     def file_info(self, filepath,  results: str = 'dict', fileref: str = '_spfinfo'):
         """
-        This method returns a dictionaty containing the file attributes for the file name provided
+        This method returns a dictionary containing the file attributes for the file name provided
 
         If you would like a Pandas dataframe returned instead of a dictionary, specify results='pandas'
         """
