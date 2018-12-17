@@ -1106,12 +1106,17 @@ Will use HTML5 for this SASsession.""")
          ll = self.submit(code, "text")
          return ll['LOG']
 
-   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', libref: str ="", keep_outer_quotes: bool=False):
+   def _getbytelen(self, x):
+      return len(x.encode(self.sascfg.encoding))
+
+   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', 
+                         libref: str ="", keep_outer_quotes: bool=False):
       """
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+      keep_outer_quotes - for character columns, have SAS keep any outer quotes instead of stripping them off.
       """
       input  = ""
       card   = ""
@@ -1123,7 +1128,7 @@ Will use HTML5 for this SASsession.""")
       for name in range(ncols):
          input += "'"+str(df.columns[name])+"'n "
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
-            col_l = df[df.columns[name]].astype(str).map(len, 'ignore').max()
+            col_l = df[df.columns[name]].astype(str).apply(self._getbytelen).max()
             if col_l == 0:
                col_l = 8
             length += " '"+str(df.columns[name])+"'n $"+str(col_l)
