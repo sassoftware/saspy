@@ -649,17 +649,24 @@ class SASsession():
         """
         code = "proc datasets"
         if libref:
-            code += " dd=" + libref
+           code += " dd=" + libref
         code += "; quit;"
 
         if self.nosub:
-            print(code)
+           print(code)
         else:
-            ll = self._io.submit(code, "text")
-            if self.batch:
-                return ll['LOG'].rsplit(";*\';*\";*/;\n")[0]
-            else:
-                print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0])
+           if self.results.lower() == 'html':
+              ll = self._io.submit(code, "html")
+              if not self.batch:
+                 DISPLAY(HTML(ll['LST']))
+              else:
+                 return ll
+           else:
+              ll = self._io.submit(code, "text")
+              if self.batch:
+                 return ll['LOG'].rsplit(";*\';*\";*/;\n")[0]
+              else:
+                 print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0])
 
     def read_csv(self, file: str, table: str = '_csv', libref: str = '', results: str = '',
                  opts: dict = None) -> 'SASdata':
