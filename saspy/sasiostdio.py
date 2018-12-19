@@ -939,6 +939,66 @@ Will use HTML5 for this SASsession.""")
          ll = self.submit(code, "text")
          return ll['LOG']
 
+   def upload(self, localfile: str, remotefile: str, overwrite: bool = True):
+      """
+      This method uploads a local file to the SAS servers file system.
+      localfile  - path to the local file 
+      remotefile - path to remote file to create or overwrite
+      """
+      try:
+         fd = open(localfile, 'rb')
+      except OSError as e:
+         print("File "+str(localfile)+" could not be opened. Error was: "+str(e))
+         return None
+
+      code = """
+         filename out '"""+remotefile+"""' recfm=F encoding=binary lrecl=1;
+         data _null_;
+         file out; 
+         infile datalines;
+         input;
+         lin = length(_infile_);
+         outdata = inputc(_infile_, '$hex.', lin);
+         lout = lin/2;
+         put outdata $varying80. lout; 
+         datalines4;"""
+
+      self._asubmit(code, "text")
+
+      while True:
+         buf = fd.read1(40)
+         if len(buf):
+            buf2 = ''
+            for i in range(len(buf)):
+               buf2 += '%02x' % buf[i]
+            buf3 = buf2.encode()+b'\n'
+            self.stdin.write(buf3)
+         else:
+            break
+
+      self._asubmit(";;;;", "text")
+      ll = self.submit("run;", 'text')
+      fd.close()
+
+      return
+ 
+   def download(self, localfile: str, remotefile: str, overwrite: bool = True):
+      """
+      This method uploads a local file to the SAS servers file system.
+      localfile  - path to the local file 
+      remotefile - path to remote file to create or overwrite
+      """
+      try:
+         fd = open(localfile, 'wb')
+      except OSError as e:
+         print("File "+str(localfile)+" could not be opened. Error was: "+str(e))
+         return None
+
+                  
+      fd.close()
+
+      return
+ 
    def _getbytelen(self, x):
       return len(x.encode(self.sascfg.encoding))
 
@@ -1016,8 +1076,8 @@ Will use HTML5 for this SASsession.""")
          self.stdin.write(card.encode(self.sascfg.encoding)+b'\n')
          #self._asubmit(card, "text")
 
-      self._asubmit(";;;;\nrun;", "text")
-      ll = self.submit("", 'text')
+      self._asubmit(";;;;", "text")
+      ll = self.submit("run;", 'text')
       return
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
