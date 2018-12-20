@@ -939,7 +939,7 @@ Will use HTML5 for this SASsession.""")
          ll = self.submit(code, "text")
          return ll['LOG']
 
-   def upload(self, localfile: str, remotefile: str, overwrite: bool = True):
+   def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = ''):
       """
       This method uploads a local file to the SAS servers file system.
       localfile  - path to the local file 
@@ -952,7 +952,7 @@ Will use HTML5 for this SASsession.""")
          return None
 
       code = """
-         filename out '"""+remotefile+"""' recfm=F encoding=binary lrecl=1;
+         filename out '"""+remotefile+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
          data _null_;
          file out; 
          infile datalines;
