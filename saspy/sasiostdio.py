@@ -944,6 +944,8 @@ Will use HTML5 for this SASsession.""")
       This method uploads a local file to the SAS servers file system.
       localfile  - path to the local file 
       remotefile - path to remote file to create or overwrite
+      overwrite  - overwrite the output file if it exists?
+      permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
       """
       try:
          fd = open(localfile, 'rb')
@@ -952,9 +954,9 @@ Will use HTML5 for this SASsession.""")
          return None
 
       code = """
-         filename out '"""+remotefile+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
+         filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
          data _null_;
-         file out; 
+         file saspydir; 
          infile datalines;
          input;
          lin = length(_infile_);
@@ -963,18 +965,28 @@ Will use HTML5 for this SASsession.""")
          put outdata $varying80. lout; 
          datalines4;"""
 
-      self._asubmit(code, "text")
+      buf = fd.read1(40)
+      if len(buf):
+         self._asubmit(code, "text")
+      else:
+         code = """
+            filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
+            data _null_;
+            fid = fopen('saspydir', 'O');
+            if fid then
+               rc = fclose(fid);
+            run;\n"""
 
-      while True:
+         ll = self.submit(code, 'text')
+         fd.close()
+         return ll['LOG']
+
+      while len(buf):
+         buf2 = ''
+         for i in range(len(buf)):
+            buf2 += '%02x' % buf[i]
+         self.stdin.write(buf2.encode()+b'\n')
          buf = fd.read1(40)
-         if len(buf):
-            buf2 = ''
-            for i in range(len(buf)):
-               buf2 += '%02x' % buf[i]
-            buf3 = buf2.encode()+b'\n'
-            self.stdin.write(buf3)
-         else:
-            break
 
       self._asubmit(";;;;", "text")
       ll = self.submit("run;", 'text')
@@ -984,20 +996,12 @@ Will use HTML5 for this SASsession.""")
  
    def download(self, localfile: str, remotefile: str, overwrite: bool = True):
       """
-      This method uploads a local file to the SAS servers file system.
-      localfile  - path to the local file 
-      remotefile - path to remote file to create or overwrite
+      This method downloads a remote file from the SAS servers file system.
+      localfile  - path to the local file to create or overwrite
+      remotefile - path to remote file
+      overwrite  - overwrite the output file if it exists?
       """
-      try:
-         fd = open(localfile, 'wb')
-      except OSError as e:
-         print("File "+str(localfile)+" could not be opened. Error was: "+str(e))
-         return None
-
-                  
-      fd.close()
-
-      return 
+      return
  
    def _getbytelen(self, x):
       return len(x.encode(self.sascfg.encoding))
