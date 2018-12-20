@@ -727,6 +727,20 @@ class SASsession():
         else:
             return log
 
+    def upload(self, localfile: str, remotefile: str, overwrite: bool = True):
+        """
+        This method uploads a local file to the SAS servers file system.
+        localfile  - path to the local file 
+        remotefile - path to remote file to create or overwrite
+        """
+        if self.nosub:
+            print("too complicated to show the code, read the source :), sorry.")
+            return None
+        else:
+            log = self._io.upload(localfile, remotefile, overwrite)
+
+        return log
+
     def df2sd(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
               results: str = '', keep_outer_quotes: bool = False) -> 'SASdata':
         """

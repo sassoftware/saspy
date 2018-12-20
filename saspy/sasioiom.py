@@ -1147,7 +1147,7 @@ Will use HTML5 for this SASsession.""")
       ll = self.submit("run;", 'text')
       fd.close()
 
-      return
+      return ll['LOG']
  
    def download(self, localfile: str, remotefile: str, overwrite: bool = True):
       """
@@ -1164,7 +1164,7 @@ Will use HTML5 for this SASsession.""")
 
       fd.close()
 
-      return
+      return 
  
    def _getbytelen(self, x):
       return len(x.encode(self.sascfg.encoding))
