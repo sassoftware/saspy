@@ -753,6 +753,11 @@ class SASsession():
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :return: SASdata object
         """
+        if libref != '':
+           if libref.upper() not in self.assigned_librefs():
+              print("The libref specified is not assigned in this SAS Session.")
+              return None
+
         if results == '':
             results = self.results
         if self.nosub:
