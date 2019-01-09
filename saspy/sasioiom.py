@@ -1177,15 +1177,15 @@ Will use HTML5 for this SASsession.""")
       logcodeb = logcodeo.encode()
 
       try:
-         fd = open(localfile, 'wb', buffering=0)
+         fd = open(localfile, 'wb')
       except OSError as e:
          print("File "+str(localfile)+" could not be opened. Error was: "+str(e))
          return None
 
       code = """
-         filename saspydir '"""+remotefile+"""' encoding=binary;
+         filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=1024;
          data _null_;
-         file """+self._tomods1.decode()+""" encoding=binary; 
+         file """+self._tomods1.decode()+""" recfm=n; 
          infile saspydir;
          input;
          put _infile_;
