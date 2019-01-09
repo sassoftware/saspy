@@ -942,7 +942,7 @@ Will use HTML5 for this SASsession.""")
    def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = ''):
       """
       This method uploads a local file to the SAS servers file system.
-      localfile  - path to the local file 
+      localfile  - path to the local file to upload 
       remotefile - path to remote file to create or overwrite
       overwrite  - overwrite the output file if it exists?
       permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
@@ -989,19 +989,95 @@ Will use HTML5 for this SASsession.""")
          buf = fd.read1(40)
 
       self._asubmit(";;;;", "text")
-      ll = self.submit("run;", 'text')
+      ll = self.submit("run;\nfilename saspydir;", 'text')
+      fd.flush()
       fd.close()
 
       return ll['LOG']
  
-   def download(self, localfile: str, remotefile: str, overwrite: bool = True):
+   def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
       This method downloads a remote file from the SAS servers file system.
       localfile  - path to the local file to create or overwrite
-      remotefile - path to remote file
+      remotefile - path to remote file tp dpwnload
       overwrite  - overwrite the output file if it exists?
       """
-      return
+      try:
+         fd = open(localfile, 'wb')
+      except OSError as e:
+         print("File "+str(localfile)+" could not be opened. Error was: "+str(e))
+         return None
+
+      port =  kwargs.get('port', 0)
+
+      if port==0 and self.sascfg.tunnel:
+         # we are using a tunnel; default to that port
+         port = self.sascfg.tunnel
+
+      try:
+         sock = socks.socket()
+         if self.sascfg.tunnel:
+            sock.bind(('localhost', port))
+         else:
+            sock.bind(('', port))
+         port = sock.getsockname()[1]
+      except OSError:
+         print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
+         return None
+
+      if self.sascfg.ssh:
+         if not self.sascfg.tunnel:
+            host = self.sascfg.hostip #socks.gethostname()
+         else:
+            host = 'localhost'
+      else:
+         host = ''
+
+      code = """
+         filename sock socket '"""+host+""":"""+str(port)+"""' encoding=binary;
+         filename saspydir '"""+remotefile+"""' encoding=binary;
+         data _null_;
+         file sock; 
+         infile saspydir;
+         input;
+         put _infile_;
+         run;\n"""
+
+      sock.listen(1)
+      self._asubmit(code, 'text')
+
+      datar = b''
+
+      newsock = (0,0)
+      try:
+         newsock = sock.accept()
+         while True:
+            data = newsock[0].recv(4096)
+
+            if len(data):
+               datar += data
+            else:
+               break
+      except:
+         print("download was interupted. Trying to return the saslog instead of a data frame.")
+         if newsock[0]:
+            newsock[0].shutdown(socks.SHUT_RDWR)
+            newsock[0].close()
+         sock.close()
+         fd.close()
+         ll = self.submit("filename saspydir;", 'text')
+         return ll['LOG']
+
+      newsock[0].shutdown(socks.SHUT_RDWR)
+      newsock[0].close()
+      sock.close()
+
+      fd.write(datar)
+      fd.flush()
+      fd.close()
+
+      ll = self.submit("filename saspudir;", 'text')
+      return ll['LOG']
  
    def _getbytelen(self, x):
       return len(x.encode(self.sascfg.encoding))

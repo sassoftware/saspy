@@ -1109,7 +1109,7 @@ Will use HTML5 for this SASsession.""")
    def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = ''):
       """
       This method uploads a local file to the SAS servers file system.
-      localfile  - path to the local file 
+      localfile  - path to the local file to upload 
       remotefile - path to remote file to create or overwrite
       overwrite  - overwrite the output file if it exists?
       permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
@@ -1157,19 +1157,101 @@ Will use HTML5 for this SASsession.""")
          buf = fd.read1(40)
 
       self._asubmit(";;;;", "text")
-      ll = self.submit("run;", 'text')
+      ll = self.submit("run;\nfilename saspydir;", 'text')
+      fd.flush()
       fd.close()
 
       return ll['LOG']
  
-   def download(self, localfile: str, remotefile: str, overwrite: bool = True):
+   def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
       This method downloads a remote file from the SAS servers file system.
       localfile  - path to the local file to create or overwrite
-      remotefile - path to remote file
+      remotefile - path to remote file tp dpwnload
       overwrite  - overwrite the output file if it exists?
       """
-      return
+      logf     = ''
+      logn     = self._logcnt()
+      logcodei = "%put E3969440A681A24088859985" + logn + ";"
+      logcodeo = "\nE3969440A681A24088859985" + logn
+      logcodeb = logcodeo.encode()
+
+      try:
+         fd = open(localfile, 'wb', buffering=0)
+      except OSError as e:
+         print("File "+str(localfile)+" could not be opened. Error was: "+str(e))
+         return None
+
+      code = """
+         filename saspydir '"""+remotefile+"""' encoding=binary;
+         data _null_;
+         file """+self._tomods1.decode()+""" encoding=binary; 
+         infile saspydir;
+         input;
+         put _infile_;
+         run;\nfilename saspydir;\n"""
+
+      ll = self._asubmit(code, "text")
+      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode()+b'\n')
+
+      done  = False
+      datar = b''
+      bail  = False
+
+      while not done:
+         while True:
+             if os.name == 'nt':
+                try:
+                   rc = self.pid.wait(0)
+                   self.pid = None
+                   self._sb.SASpid = None
+                   print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                   return None
+                except:
+                   pass
+             else:
+                rc = os.waitpid(self.pid, os.WNOHANG)
+                if rc[1]:
+                    self.pid = None
+                    self._sb.SASpid = None
+                    print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                    return None
+
+             if bail:
+                if datar.count(logcodeo.encode()) >= 1:
+                   break
+             try:
+                data = self.stdout[0].recv(4096)
+             except (BlockingIOError):
+                data = b''
+
+             if len(data) > 0:
+                datar += data
+             else:
+                sleep(0.1)
+                try:
+                   log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+                except (BlockingIOError):
+                   log = b''
+
+                if len(log) > 0:
+                   logf += log
+                   if logf.count(logcodeo) >= 1:
+                      bail = True
+         done = True
+
+      fd.write(datar.rpartition(logcodeb)[0])
+      fd.flush()
+      fd.close()
+
+      self._log += logf
+      final = logf.partition(logcodei)
+      z = final[0].rpartition(chr(10))
+      prev = '%08d' %  (self._log_cnt - 1)
+      zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
+      logd = zz[2].replace(";*\';*\";*/;", '')
+ 
+      return logd
  
    def _getbytelen(self, x):
       return len(x.encode(self.sascfg.encoding))

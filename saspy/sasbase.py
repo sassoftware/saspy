@@ -743,7 +743,7 @@ class SASsession():
      
         return log
 
-    def download(self, localfile: str, remotefile: str, overwrite: bool = True):
+    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
         """
         This method downloads a remote file from the SAS servers file system.
         localfile  - path to the local file to create or overwrite
@@ -754,7 +754,7 @@ class SASsession():
             print("too complicated to show the code, read the source :), sorry.")
             return None
         else:
-            log = self._io.download(localfile, remotefile, overwrite)
+            log = self._io.download(localfile, remotefile, overwrite, **kwargs)
      
         return log
      
