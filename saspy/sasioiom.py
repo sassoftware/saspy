@@ -1227,6 +1227,9 @@ Will use HTML5 for this SASsession.""")
 
              if len(data) > 0:
                 datar += data
+                if len(datar) > 8300:
+                   fd.write(datar[:8192])
+                   datar = datar[8192:]
              else:
                 sleep(0.1)
                 try:
