@@ -947,14 +947,25 @@ Will use HTML5 for this SASsession.""")
       overwrite  - overwrite the output file if it exists?
       permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
       """
+      valid = self._sb.file_info(remotefile)
+
+      if valid == {}:
+         remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
+      elif valid:
+         if overwrite == False:
+            return {'Success' : False, 
+                    'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
+         else:
+            remf = remotefile
+
       try:
          fd = open(localfile, 'rb')
       except OSError as e:
-         print("File "+str(localfile)+" could not be opened. Error was: "+str(e))
-         return None
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
 
       code = """
-         filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
+         filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
          data _null_;
          file saspydir; 
          infile datalines;
@@ -970,7 +981,7 @@ Will use HTML5 for this SASsession.""")
          self._asubmit(code, "text")
       else:
          code = """
-            filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
+            filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
             data _null_;
             fid = fopen('saspydir', 'O');
             if fid then
@@ -979,7 +990,8 @@ Will use HTML5 for this SASsession.""")
 
          ll = self.submit(code, 'text')
          fd.close()
-         return ll['LOG']
+         return {'Success' : True, 
+                 'LOG'     : ll['LOG']}
 
       while len(buf):
          buf2 = ''
@@ -993,7 +1005,8 @@ Will use HTML5 for this SASsession.""")
       fd.flush()
       fd.close()
 
-      return ll['LOG']
+      return {'Success' : True, 
+              'LOG'     : ll['LOG']}
  
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
@@ -1002,11 +1015,22 @@ Will use HTML5 for this SASsession.""")
       remotefile - path to remote file tp dpwnload
       overwrite  - overwrite the output file if it exists?
       """
+      valid = self._sb.file_info(remotefile)
+
+      if not valid:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(remotefile)+" does not exist."}
+
+      if os.path.isdir(localfile):
+         locf = localfile + os.sep + remotefile.rpartition(self._sb.hostsep)[2]
+      else:
+         locf = localfile
+
       try:
-         fd = open(localfile, 'wb')
+         fd = open(locf, 'wb')
       except OSError as e:
-         print("File "+str(localfile)+" could not be opened. Error was: "+str(e))
-         return None
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(locf)+" could not be opened. Error was: "+str(e)}
 
       port =  kwargs.get('port', 0)
 
@@ -1022,8 +1046,8 @@ Will use HTML5 for this SASsession.""")
             sock.bind(('', port))
          port = sock.getsockname()[1]
       except OSError:
-         print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
-         return None
+         return {'Success' : False, 
+                 'LOG'     : "Error try to open a socket in the sasdata2dataframe method. Call failed."}
 
       if self.sascfg.ssh:
          if not self.sascfg.tunnel:
@@ -1062,14 +1086,14 @@ Will use HTML5 for this SASsession.""")
             else:
                break
       except:
-         print("download was interupted. Trying to return the saslog instead of a data frame.")
          if newsock[0]:
             newsock[0].shutdown(socks.SHUT_RDWR)
             newsock[0].close()
          sock.close()
          fd.close()
          ll = self.submit("filename saspydir;", 'text')
-         return ll['LOG']
+         return {'Success' : False, 
+                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+ll['LOG']}
 
       newsock[0].shutdown(socks.SHUT_RDWR)
       newsock[0].close()
@@ -1080,7 +1104,8 @@ Will use HTML5 for this SASsession.""")
       fd.close()
 
       ll = self.submit("filename saspudir;", 'text')
-      return ll['LOG']
+      return {'Success' : True, 
+              'LOG'     : ll['LOG']}
  
    def _getbytelen(self, x):
       return len(x.encode(self.sascfg.encoding))
