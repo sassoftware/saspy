@@ -1209,7 +1209,7 @@ Will use HTML5 for this SASsession.""")
                  'LOG'     : "File "+str(locf)+" could not be opened. Error was: "+str(e)}
 
       code = """
-         filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=1024;
+         filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=4096;
          data _null_;
          file """+self._tomods1.decode()+""" recfm=n; 
          infile saspydir;

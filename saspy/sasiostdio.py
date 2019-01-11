@@ -1060,10 +1060,10 @@ Will use HTML5 for this SASsession.""")
          host = ''
 
       code = """
-         filename sock socket '"""+host+""":"""+str(port)+"""' encoding=binary;
-         filename saspydir '"""+remotefile+"""' encoding=binary;
+         filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=4096;
+         filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary;
          data _null_;
-         file sock; 
+         file sock;
          infile saspydir;
          input;
          put _infile_;
@@ -1103,7 +1103,6 @@ Will use HTML5 for this SASsession.""")
       newsock[0].close()
       sock.close()
 
-      fd.write(datar)
       fd.flush()
       fd.close()
 
