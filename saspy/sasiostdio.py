@@ -939,7 +939,7 @@ Will use HTML5 for this SASsession.""")
          ll = self.submit(code, "text")
          return ll['LOG']
 
-   def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = ''):
+   def upload_slow(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = ''):
       """
       This method uploads a local file to the SAS servers file system.
       localfile  - path to the local file to upload 
@@ -1004,9 +1004,104 @@ Will use HTML5 for this SASsession.""")
 
       self._asubmit(";;;;", "text")
       ll = self.submit("run;\nfilename saspydir;", 'text')
-      fd.flush()
       fd.close()
 
+      return {'Success' : True, 
+              'LOG'     : ll['LOG']}
+ 
+   def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
+      """
+      This method uploads a local file to the SAS servers file system.
+      localfile  - path to the local file to upload 
+      remotefile - path to remote file to create or overwrite
+      overwrite  - overwrite the output file if it exists?
+      permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
+      """
+      valid = self._sb.file_info(remotefile, quiet = True)
+      
+      if not valid:
+         remf = remotefile
+      else:
+         if valid == {}:
+            remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
+         else:
+            remf = remotefile
+            if overwrite == False:
+               return {'Success' : False, 
+                       'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
+
+      try:
+         fd = open(localfile, 'rb')
+      except OSError as e:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
+
+      port =  kwargs.get('port', 0)
+
+      if port==0 and self.sascfg.tunnel:
+         # we are using a tunnel; default to that port
+         port = self.sascfg.tunnel
+
+      try:
+         sock = socks.socket()
+         if self.sascfg.tunnel:
+            sock.bind(('localhost', port))
+         else:
+            sock.bind(('', port))
+         port = sock.getsockname()[1]
+      except OSError:
+         return {'Success' : False, 
+                 'LOG'     : "Error try to open a socket in the upload method. Call failed."}
+
+      if self.sascfg.ssh:
+         if not self.sascfg.tunnel:
+            host = self.sascfg.hostip #socks.gethostname()
+         else:
+            host = 'localhost'
+      else:
+         host = ''
+
+      code = """
+         filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1;
+         filename sock socket '"""+host+""":"""+str(port)+"""' recfm=F encoding=binary  lrecl=1;
+         data _null_;
+         infile sock; 
+         file saspydir;
+         input;
+         put _infile_;
+         run;\n"""
+
+      sock.listen(1)
+      self._asubmit(code, 'text')
+
+      newsock = (0,0)
+      try:
+         newsock = sock.accept()
+         while True:
+            buf = fd.read1(4096)
+            if len(buf):
+               newsock[0].sendall(buf)
+            else:
+               break
+      except Exception as e:
+         try:
+            if newsock[0]:
+               newsock[0].shutdown(socks.SHUT_RDWR)
+               newsock[0].close()
+         except Exception as e:
+            pass
+         sock.close()
+         fd.close()
+         ll = self.submit("filename saspydir;", 'text')
+         return {'Success' : False, 
+                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+ll['LOG']}
+
+      newsock[0].shutdown(socks.SHUT_RDWR)
+      newsock[0].close()
+      sock.close()
+      fd.close()
+
+      ll = self.submit("filename saspydir;", 'text')
       return {'Success' : True, 
               'LOG'     : ll['LOG']}
  
