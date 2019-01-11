@@ -1311,7 +1311,7 @@ class SASsession():
         return res
 
 
-    def file_info(self, filepath,  results: str = 'dict', fileref: str = '_spfinfo'):
+    def file_info(self, filepath, results: str = 'dict', fileref: str = '_spfinfo', quiet: bool = False):
         """
         This method returns a dictionary containing the file attributes for the file name provided
 
@@ -1327,7 +1327,8 @@ class SASsession():
            exists = ll['LOG'].rsplit('FILEREF_EXISTS=')[2].split('\n')[0]
    
            if exists != '1':
-              print('The filepath provided does not exist')
+              if not quiet:
+                 print('The filepath provided does not exist')
               ll = self.submit("filename "+fileref+" clear;")
               return None
 

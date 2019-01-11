@@ -947,16 +947,18 @@ Will use HTML5 for this SASsession.""")
       overwrite  - overwrite the output file if it exists?
       permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
       """
-      valid = self._sb.file_info(remotefile)
+      valid = self._sb.file_info(remotefile, quiet = True)
 
-      if valid == {}:
-         remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
-      elif valid:
-         if overwrite == False:
-            return {'Success' : False, 
-                    'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
+      if not valid:
+         remf = remotefile
+      else:
+         if valid == {}:
+            remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
          else:
             remf = remotefile
+            if overwrite == False:
+               return {'Success' : False, 
+                       'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
 
       try:
          fd = open(localfile, 'rb')
@@ -1015,7 +1017,7 @@ Will use HTML5 for this SASsession.""")
       remotefile - path to remote file tp dpwnload
       overwrite  - overwrite the output file if it exists?
       """
-      valid = self._sb.file_info(remotefile)
+      valid = self._sb.file_info(remotefile, quiet = True)
 
       if not valid:
          return {'Success' : False, 
@@ -1080,11 +1082,13 @@ Will use HTML5 for this SASsession.""")
 
             if len(data):
                datar += data
+            else:
+               if len(datar):
+                  fd.write(datar)
+               break
             if len(datar) > 8300:
                fd.write(datar[:8192])
                datar = datar[8192:]
-            else:
-               break
       except:
          if newsock[0]:
             newsock[0].shutdown(socks.SHUT_RDWR)
@@ -1103,7 +1107,7 @@ Will use HTML5 for this SASsession.""")
       fd.flush()
       fd.close()
 
-      ll = self.submit("filename saspudir;", 'text')
+      ll = self.submit("filename saspydir;", 'text')
       return {'Success' : True, 
               'LOG'     : ll['LOG']}
  

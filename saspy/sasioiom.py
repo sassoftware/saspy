@@ -1114,16 +1114,18 @@ Will use HTML5 for this SASsession.""")
       overwrite  - overwrite the output file if it exists?
       permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
       """
-      valid = self._sb.file_info(remotefile)
+      valid = self._sb.file_info(remotefile, quiet = True)
 
-      if valid == {}:
-         remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
-      elif valid:
-         if overwrite == False:
-            return {'Success' : False, 
-                    'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
+      if not valid:
+         remf = remotefile
+      else:
+         if valid == {}:
+            remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
          else:
             remf = remotefile
+            if overwrite == False:
+               return {'Success' : False, 
+                       'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
 
       try:
          fd = open(localfile, 'rb')
@@ -1189,7 +1191,7 @@ Will use HTML5 for this SASsession.""")
       logcodeo = "\nE3969440A681A24088859985" + logn
       logcodeb = logcodeo.encode()
 
-      valid = self._sb.file_info(remotefile)
+      valid = self._sb.file_info(remotefile, quiet = True)
 
       if not valid:
          return {'Success' : False, 
