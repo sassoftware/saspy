@@ -1103,7 +1103,7 @@ Will use HTML5 for this SASsession.""")
       fd.flush()
       fd.close()
 
-      ll = self.submit("filename saspudir;", 'text')
+      ll = self.submit("filename saspydir;", 'text')
       return {'Success' : True, 
               'LOG'     : ll['LOG']}
  
