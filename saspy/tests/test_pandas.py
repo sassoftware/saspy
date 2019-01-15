@@ -4,126 +4,166 @@ import pandas as pd
 import tempfile
 import os
 
+
+TEST_DATA = """
+    data testdata;
+        format d1 date. dt1 datetime.;
+
+        d1 = '03Jan1966'd; dt1 = '03Jan1966:13:30:59.000123'dt; output;
+        d1 = '03Jan1967'd; dt1 = '03Jan1966:13:30:59.990123'dt; output;
+        d1 = '03Jan1968'd; dt1 = '03Jan1966:13:30:59'dt;        output;
+        d1 = '03Nov1966'd; dt1 = '03Jan1966:13:30:00.000126'dt; output;
+        d1 = '04Jan1966'd; dt1 = '03Jan1966:13:30:59'dt;        output;
+    run;
+"""
+
+
 class TestPandasDataFrameIntegration(unittest.TestCase):
-    @classmethod    
+    @classmethod
     def setUpClass(cls):
         cls.sas = saspy.SASsession()
+        cls.sas.set_batch(True)
+        cls.sas.submit(TEST_DATA)
+
+        cls.test_data = cls.sas.sasdata('testdata', results='text')
 
     @classmethod
     def tearDownClass(cls):
-        if cls.sas:
-           cls.sas._endsas()
+        cls.sas._endsas()
 
-    def test_Pandas(self):
-        self.sas.set_batch(True)
-
-        ll = self.sas.submit('''
-                             data testdata; format d1 date. dt1 datetime. ;
-                             d1 = '03jan1966'd; dt1='03jan1966:13:30:59.000123'dt; output;
-                             d1 = '03jan1967'd; dt1='03jan1966:13:30:59.990123'dt; output;
-                             d1 = '03jan1968'd; dt1='03jan1966:13:30:59'dt; output;
-                             d1 = '03nov1966'd; dt1='03jan1966:13:30:00.000126'dt; output;
-                             d1 = '04jan1966'd; dt1='03jan1966:13:30:59'dt; output;
-                             run;
-                             ''')
-        td = self.sas.sasdata('testdata', results='text')
-        self.assertIsInstance(td, saspy.sasdata.SASdata, msg="cars = sas.sasdata(...) failed")
-
-    def test_Pandas_sd2df(self):
+    def test_pandas_sd2df_instance(self):
         """
-        test sas data to data frame
+        Test method sasdata2dataframe returns a pandas.DataFrame
         """
-        td = self.sas.sasdata('testdata', results='text')
-        df = td.to_df()
-        self.assertIsInstance(df, pd.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        df = self.test_data.to_df()
+
+        self.assertIsInstance(df, pd.DataFrame)
+
+    def test_pandas_sd2df_values(self):
+        """
+        Test method sasdata2dataframe returns a pandas.DataFrame containing
+        the correct data.
+        """
+        EXPECTED = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
+
+        df = self.test_data.to_df()
         result = df.head()
-        expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
-        rows = result.to_string().splitlines()
-        retrieved = []
-        for i in range(len(rows)):
-           retrieved.append(rows[i].split())
-        self.assertIn(expected, retrieved, msg="df.head() result didn't contain row 1")
 
-    def test_Pandas_df2sd(self):
-        #test data frame to sas data
-        td = self.sas.sasdata('testdata', results='text')
-        df = td.to_df()
+        # FIXME: May be more robust to compare actual data structures.
+        rows = result.to_string().splitlines()
+        retrieved = [x.split() for x in rows]
+
+        self.assertIn(EXPECTED, retrieved, msg="df.head() result didn't contain row 1")
+
+    def test_pandas_df2sd_instance(self):
+        """
+        Test method dataframe2sasdata properly writes.
+        """
+        df = self.test_data.to_df()
         td2 = self.sas.df2sd(df, 'td2', results='text')
-        self.assertIsInstance(td2, saspy.sasdata.SASdata, msg="td2 = sas.df2sd((...) failed")
+
+        self.assertIsInstance(td2, saspy.sasdata.SASdata)
+
+    def test_pandas_df2sd_values(self):
+        """
+        Test method dataframe2sasdata properly writes the correct values.
+        """
+        EXPECTED = ['1', '1966-01-03T00:00:00.000000', '1966-01-03T13:30:59.000123']
+
+        df = self.test_data.to_df()
+        td2 = self.sas.df2sd(df, 'td2', results='text')
         ll = td2.head()
-        expected = ['1', '1966-01-03T00:00:00.000000', '1966-01-03T13:30:59.000123']
+
+        # FIXME: May be more robust to compare actual data structures.
         rows = ll['LST'].splitlines()
-        retrieved = []
-        for i in range(len(rows)):
-           retrieved.append(rows[i].split())
-        self.assertIn(expected, retrieved, msg="td2.head() result didn't contain row 1")
+        retrieved = [x.split() for x in rows]
 
-    def test_Pandas_sd2df_CSV1(self):
-        #test sas data to data frame
-        td = self.sas.sasdata('testdata', results='text')
-        df = td.to_df_CSV()
-        self.assertIsInstance(df, pd.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        self.assertIn(EXPECTED, retrieved, msg="td2.head() result didn't contain row 1")
+
+    def test_pandas_sd2df_csv_instance(self):
+        """
+        Test method sasdata2dataframe using `method=csv` returns a
+        pandas.DataFrame.
+        """
+        df = self.test_data.to_df_CSV()
+        self.assertIsInstance(df, pd.DataFrame)
+
+    def test_pandas_sd2df_csv_values(self):
+        """
+        Test method sasdata2dataframe using `method=csv` returns a
+        pandas.DataFrame containing the correct values.
+        """
+        EXPECTED = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
+
+        df = self.test_data.to_df_CSV()
         result = df.head()
-        expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
+
+        # FIXME: May be more robust to compare actual data structures.
         rows = result.to_string().splitlines()
-        retrieved = []
-        for i in range(len(rows)):
-           retrieved.append(rows[i].split())
-        self.assertIn(expected, retrieved, msg="df.head() result didn't contain row 1")
+        retrieved = [x.split() for x in rows]
 
-    def test_Pandas_sd2df_CSV2(self):
-        #test sas data to data frame
-        td = self.sas.sasdata('testdata', results='text')
+        self.assertIn(EXPECTED, retrieved, msg="df.head() result didn't contain row 1")
 
+    def test_pandas_sd2df_csv_tempfile_instance(self):
+        """
+        Test method sasdata2dataframe using `method=csv` and argument
+        `tempfile=...` returns a pandas.DataFrame.
+        """
         tmpdir = tempfile.TemporaryDirectory()
-        tmpcsv = tmpdir.name+os.sep+"tomodsx" 
+        tmpcsv = os.path.join(tmpdir.name, 'tomodsx')
 
-        df = td.to_df_CSV(tempfile=tmpcsv)
-        self.assertIsInstance(df, pd.core.frame.DataFrame, msg="df = td.to_df(...) failed")
-        result = df.head()
-        expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
-        rows = result.to_string().splitlines()
-        retrieved = []
-        for i in range(len(rows)):
-           retrieved.append(rows[i].split())
-        self.assertIn(expected, retrieved, msg="df.head() result didn't contain row 1")
+        df = self.test_data.to_df_CSV(tempfile=tmpcsv)
+
         tmpdir.cleanup()
 
-    def test_Pandas_sd2df_CSV3(self):
-        #test sas data to data frame
-        td = self.sas.sasdata('testdata', results='text')
+        self.assertIsInstance(df, pd.core.frame.DataFrame)
 
+    def test_pandas_sd2df_csv_tempfile_values(self):
+        """
+        Test method sasdata2dataframe using `method=csv` and argument
+        `tempfile=...` returns a pandas.DataFrame containing the correct
+        values.
+        """
+        EXPECTED = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
         tmpdir = tempfile.TemporaryDirectory()
-        tmpcsv = tmpdir.name+os.sep+"tomodsx" 
+        tmpcsv = os.path.join(tmpdir.name, 'tomodsx.csv')
 
-        df = td.to_df_CSV(tempfile=tmpcsv, tempkeep=True)
-        self.assertIsInstance(df, pd.core.frame.DataFrame, msg="df = td.to_df(...) failed")
+        df = self.test_data.to_df_CSV(tempfile=tmpcsv)
         result = df.head()
-        expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
+
         rows = result.to_string().splitlines()
-        retrieved = []
-        for i in range(len(rows)):
-           retrieved.append(rows[i].split())
-        self.assertIn(expected, retrieved, msg="df.head() result didn't contain row 1")
-        os.remove(tmpcsv)
+        retrieved = [x.split() for x in rows]
+
         tmpdir.cleanup()
 
-    def test_Pandas_sd2df_CSV4(self):
-        #test sas data to data frame
-        td = self.sas.sasdata('testdata', results='text')
+        self.assertIn(EXPECTED, retrieved, msg="df.head() result didn't contain row 1")
 
+    def test_pandas_sd2df_csv_tempfile_tempkeep_true(self):
+        """
+        Test method sasdata2dataframe using `method=csv` and arguments
+        `tempfile=..., tempkeep=True` retains the temporary CSV file in the
+        provided location.
+        """
         tmpdir = tempfile.TemporaryDirectory()
-        tmpcsv = tmpdir.name+os.sep+"tomodsx" 
+        tmpcsv = os.path.join(tmpdir.name, 'tomodsx.csv')
 
-        df = td.to_df_CSV(tempfile=tmpcsv, tempkeep=False)
-        self.assertIsInstance(df, pd.core.frame.DataFrame, msg="df = td.to_df(...) failed")
-        result = df.head()
-        expected = ['0', '1966-01-03', '1966-01-03', '13:30:59.000123']
-        rows = result.to_string().splitlines()
-        retrieved = []
-        for i in range(len(rows)):
-           retrieved.append(rows[i].split())
-        self.assertIn(expected, retrieved, msg="df.head() result didn't contain row 1")
+        df = self.test_data.to_df_CSV(tempfile=tmpcsv, tempkeep=True)
+
+        self.assertTrue(os.path.isfile(tmpcsv))
+
         tmpdir.cleanup()
 
+    def test_pandas_sd2df_csv_tempfile_tempkeep_false(self):
+        """
+        Test method sasdata2dataframe using `method=csv` and arguments
+        `tempfile=..., tempkeep=False` does not retain the temporary CSV file
+        in the provided location.
+        """
+        tmpdir = tempfile.TemporaryDirectory()
+        tmpcsv = os.path.join(tmpdir.name, 'tomodsx.csv')
 
+        df = self.test_data.to_df_CSV(tempfile=tmpcsv, tempkeep=False)
+
+        self.assertFalse(os.path.isfile(tmpcsv))
+
+        tmpdir.cleanup()
