@@ -1229,7 +1229,7 @@ Will use HTML5 for this SASsession.""")
                   sent = 0
                   sent = self.stdout[0].send(buf[blen-send:blen])
                except (BlockingIOError):
-                  print(sent)
+                  pass
                send -= sent
       else:
          code = """
