@@ -727,7 +727,7 @@ class SASsession():
         else:
             return log
 
-    def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = ''):
+    def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
         """
         This method uploads a local file to the SAS servers file system.
         localfile  - path to the local file 
@@ -739,7 +739,7 @@ class SASsession():
             print("too complicated to show the code, read the source :), sorry.")
             return None
         else:
-            log = self._io.upload(localfile, remotefile, overwrite, permission)
+            log = self._io.upload(localfile, remotefile, overwrite, permission, **kwargs)
      
         return log
 

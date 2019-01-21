@@ -1106,7 +1106,7 @@ Will use HTML5 for this SASsession.""")
          ll = self.submit(code, "text")
          return ll['LOG']
 
-   def upload_slow(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = ''):
+   def upload_slow(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
       """
       This method uploads a local file to the SAS servers file system.
       localfile  - path to the local file to upload 
@@ -1177,7 +1177,7 @@ Will use HTML5 for this SASsession.""")
       return {'Success' : True, 
               'LOG'     : ll['LOG']}
  
-   def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = ''):
+   def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
       """
       This method uploads a local file to the SAS servers file system.
       localfile  - path to the local file to upload 
