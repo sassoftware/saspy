@@ -960,7 +960,7 @@ Will use HTML5 for this SASsession.""")
       """
       valid = self._sb.file_info(remotefile, quiet = True)
 
-      if not valid:
+      if valid is None:
          remf = remotefile
       else:
          if valid == {}:
@@ -1030,7 +1030,7 @@ Will use HTML5 for this SASsession.""")
       """
       valid = self._sb.file_info(remotefile, quiet = True)
       
-      if not valid:
+      if valid is None:
          remf = remotefile
       else:
          if valid == {}:
@@ -1126,7 +1126,7 @@ Will use HTML5 for this SASsession.""")
       """
       valid = self._sb.file_info(remotefile, quiet = True)
       
-      if not valid:
+      if valid is None:
          remf = remotefile
       else:
          if valid == {}:
@@ -1233,9 +1233,13 @@ Will use HTML5 for this SASsession.""")
       """
       valid = self._sb.file_info(remotefile, quiet = True)
 
-      if not valid:
+      if valid is None:
          return {'Success' : False, 
                  'LOG'     : "File "+str(remotefile)+" does not exist."}
+
+      if valid == {}:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(remotefile)+" is a directory."}
 
       if os.path.isdir(localfile):
          locf = localfile + os.sep + remotefile.rpartition(self._sb.hostsep)[2]
