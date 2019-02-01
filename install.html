@@ -242,18 +242,21 @@ installation.</li>
 it will be in that directory and maybe also copied to site-packages.</li>
 </ul>
 <p>If you are not sure where to look, then there is a very simple way to determine the location
-of the sascfg.py file.</p>
-<p>After installing, start Python and <code class="docutils literal"><span class="pre">import</span> <span class="pre">saspy</span></code>. Then, simply submit
-<code class="docutils literal"><span class="pre">saspy.SAScfg</span></code>. Python will show you where it found the module.</p>
+of your saspy installation.</p>
+<p>After installing, start Python and <code class="docutils literal"><span class="pre">import</span> <span class="pre">saspy</span></code>. Then, simply submit <code class="docutils literal"><span class="pre">saspy</span></code>.
+Python will show you where it found the module (it will show the __init__.py file in that directory).
+It is the directory that is the module, so the sascfg.py file is in that directory, same as __init__.py.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># this is an example of a repo install on Windows:</span>
 
 <span class="n">C</span><span class="p">:</span>\<span class="o">&gt;</span><span class="n">python</span>
 <span class="n">Python</span> <span class="mf">3.6</span><span class="o">.</span><span class="mi">0</span> <span class="o">|</span><span class="n">Anaconda</span> <span class="n">custom</span> <span class="p">(</span><span class="mi">64</span><span class="o">-</span><span class="n">bit</span><span class="p">)</span><span class="o">|</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Dec</span> <span class="mi">23</span> <span class="mi">2016</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span><span class="mi">57</span><span class="p">:</span><span class="mi">41</span><span class="p">)</span> <span class="p">[</span><span class="n">MSC</span> <span class="n">v</span><span class="o">.</span><span class="mi">1900</span> <span class="mi">64</span> <span class="n">bit</span> <span class="p">(</span><span class="n">AMD64</span><span class="p">)]</span> <span class="n">on</span> <span class="n">win32</span>
 <span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SAScfg</span>
-<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy.sascfg&#39;</span> <span class="kn">from</span> <span class="s1">&#39;C:</span><span class="se">\\</span><span class="s1">ProgramData</span><span class="se">\\</span><span class="s1">Anaconda3</span><span class="se">\\</span><span class="s1">lib</span><span class="se">\\</span><span class="s1">site-packages</span><span class="se">\\</span><span class="s1">saspy</span><span class="se">\\</span><span class="s1">sascfg.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span> <span class="s1">&#39;C:</span><span class="se">\\</span><span class="s1">ProgramData</span><span class="se">\\</span><span class="s1">Anaconda3</span><span class="se">\\</span><span class="s1">lib</span><span class="se">\\</span><span class="s1">site-packages</span><span class="se">\\</span><span class="s1">saspy</span><span class="se">\\</span><span class="s1">__init__.py&#39;</span><span class="o">&gt;</span>
 <span class="o">&gt;&gt;&gt;</span>
+<span class="n">So</span> <span class="n">sascfg</span><span class="o">.</span><span class="n">py</span> <span class="ow">is</span><span class="p">:</span> <span class="n">C</span><span class="p">:</span>\<span class="n">ProgramData</span>\<span class="n">Anaconda3</span>\<span class="n">lib</span>\<span class="n">site</span><span class="o">-</span><span class="n">packages</span>\<span class="n">saspy</span>\<span class="n">sascfg</span><span class="o">.</span><span class="n">py</span>
+
 
 <span class="c1"># this is an example of a repo install on Linux:</span>
 
@@ -262,9 +265,11 @@ of the sascfg.py file.</p>
 <span class="p">[</span><span class="n">GCC</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span> <span class="mi">20120313</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span><span class="o">-</span><span class="mi">16</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
 <span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SAScfg</span>
-<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy.sascfg&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/opt/tom/github/saspy/saspy/sascfg.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/opt/tom/github/saspy/saspy/__init__.py&#39;</span><span class="o">&gt;</span>
 <span class="o">&gt;&gt;&gt;</span>
+<span class="n">So</span> <span class="n">sascfg</span><span class="o">.</span><span class="n">py</span> <span class="ow">is</span><span class="p">:</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sascfg</span><span class="o">.</span><span class="n">py</span>
+
 
 <span class="c1"># this is an example of a PyPi install on Linux into site-packages:</span>
 
@@ -273,9 +278,10 @@ of the sascfg.py file.</p>
 <span class="p">[</span><span class="n">GCC</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span> <span class="mi">20120313</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span><span class="o">-</span><span class="mi">16</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
 <span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SAScfg</span>
-<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy.sascfg&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/usr/lib/python3.5/site-packages/saspy/sascfg.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/usr/lib/python3.5/site-packages/saspy/__init__.py&#39;</span><span class="o">&gt;</span>
 <span class="o">&gt;&gt;&gt;</span>
+<span class="n">So</span> <span class="n">sascfg</span><span class="o">.</span><span class="n">py</span> <span class="ow">is</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">5</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sascfg</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <div class="section" id="sascfg-personal-py">
@@ -296,10 +302,15 @@ explains the minimum parts you would need.</p>
 <p>Also, everything in this doc applies to the _personal version; it&#8217;s the same, just a version of the file
 that will be used if it exists instead of the original one, but it won&#8217;t get overwritten.</p>
 <p>Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
-al long as that location is accessible to python. If the path is in the python search path, then your good.
-If it is not in the python search path, you can use the cfgfile= parameter in your SASsession() invocation to
-specify it:</p>
-<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">sas</span> <span class="o">=</span> <span class="n">SASsession</span><span class="p">(</span><span class="n">cfgfile</span><span class="o">=</span><span class="s1">&#39;/some/path/to/your/config/sascfg_personal.py&#39;</span><span class="p">)</span>
+as long as that location is accessible to python. If the path is in the python search path, then your good.
+That includes being in the repo directory, of course, which is the most convenient (that&#8217;s where I have it!).</p>
+<p>If it is in the repo or another path that python will find it, you can just create a session as follows:</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>If, however, it is not in the python search path, you can use the cfgfile= parameter in your SASsession() invocation to
+specify its location:</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgfile</span><span class="o">=</span><span class="s1">&#39;/some/path/to/your/config/sascfg_personal.py&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The python search path can be found by looking at the PYTHONPATH environment variable (if it&#8217;s set),
@@ -469,7 +480,8 @@ installation.  There is one JAR file that is provided with this package:
 saspyiom.jar. These five JAR files must be provided (fully qualified paths) in a
 CLASSPATH environment variable. This is done in a very simple way in the sascfg_personal.py
 file, like so:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cp</span>  <span class="o">=</span>  <span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.svc.connection.jar&quot;</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION</span>
+<span class="n">cp</span>  <span class="o">=</span>  <span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.svc.connection.jar&quot;</span>
 <span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">log4j.jar&quot;</span>
 <span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.security.sspi.jar&quot;</span>
 <span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.core.jar&quot;</span>
@@ -683,6 +695,7 @@ does allows for a way to specify them if something was needed.</dd>
 <dd>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Windows client class path</span>
+<span class="c1"># build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION</span>
 <span class="n">cpW</span>  <span class="o">=</span>  <span class="s2">&quot;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.svc.connection.jar&quot;</span>
 <span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">log4j.jar&quot;</span>
 <span class="n">cpW</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASDeploymentManager</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">products</span><span class="se">\\</span><span class="s2">deploywiz__94472__prt__xx__sp0__1</span><span class="se">\\</span><span class="s2">deploywiz</span><span class="se">\\</span><span class="s2">sas.security.sspi.jar&quot;</span>
