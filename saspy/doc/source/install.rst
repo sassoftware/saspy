@@ -74,10 +74,11 @@ locations on the file system:
   it will be in that directory and maybe also copied to site-packages.
  
 If you are not sure where to look, then there is a very simple way to determine the location
-of the sascfg.py file.
+of your saspy installation.
 
-After installing, start Python and ``import saspy``. Then, simply submit 
-``saspy.SAScfg``. Python will show you where it found the module.
+After installing, start Python and ``import saspy``. Then, simply submit ``saspy``. 
+Python will show you where it found the module (it will show the __init__.py file in that directory).
+It is the directory that is the module, so the sascfg.py file is in that directory, same as __init__.py.
 
 .. code-block:: ipython3
 
@@ -87,9 +88,11 @@ After installing, start Python and ``import saspy``. Then, simply submit
     Python 3.6.0 |Anaconda custom (64-bit)| (default, Dec 23 2016, 11:57:41) [MSC v.1900 64 bit (AMD64)] on win32
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
-    >>> saspy.SAScfg
-    <module 'saspy.sascfg' from 'C:\\ProgramData\\Anaconda3\\lib\\site-packages\\saspy\\sascfg.py'>
+    >>> saspy
+    <module 'saspy' from 'C:\\ProgramData\\Anaconda3\\lib\\site-packages\\saspy\\__init__.py'>
     >>>
+    So sascfg.py is: C:\ProgramData\Anaconda3\lib\site-packages\saspy\sascfg.py 
+
 
     # this is an example of a repo install on Linux:
 
@@ -98,10 +101,12 @@ After installing, start Python and ``import saspy``. Then, simply submit
     [GCC 4.4.7 20120313 (Red Hat 4.4.7-16)] on linux
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
-    >>> saspy.SAScfg
-    <module 'saspy.sascfg' from '/opt/tom/github/saspy/saspy/sascfg.py'>
+    >>> saspy
+    <module 'saspy' from '/opt/tom/github/saspy/saspy/__init__.py'>
     >>>
-    
+    So sascfg.py is: /opt/tom/github/saspy/saspy/sascfg.py
+
+
     # this is an example of a PyPi install on Linux into site-packages:
 
     Linux-1> python3.5
@@ -109,10 +114,11 @@ After installing, start Python and ``import saspy``. Then, simply submit
     [GCC 4.4.7 20120313 (Red Hat 4.4.7-16)] on linux
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import saspy
-    >>> saspy.SAScfg
-    <module 'saspy.sascfg' from '/usr/lib/python3.5/site-packages/saspy/sascfg.py'>
+    >>> saspy
+    <module 'saspy' from '/usr/lib/python3.5/site-packages/saspy/__init__.py'>
     >>>
-    
+    So sascfg.py is: /usr/lib/python3.5/site-packages/saspy/sascfg.py
+
 
 sascfg_personal.py
 ==================
@@ -137,13 +143,22 @@ Also, everything in this doc applies to the _personal version; it's the same, ju
 that will be used if it exists instead of the original one, but it won't get overwritten.
 
 Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
-al long as that location is accessible to python. If the path is in the python search path, then your good.
-If it is not in the python search path, you can use the cfgfile= parameter in your SASsession() invocation to 
-specify it:
+as long as that location is accessible to python. If the path is in the python search path, then your good.
+That includes being in the repo directory, of course, which is the most convenient (that's where I have it!).
+
+If it is in the repo or another path that python will find it, you can just create a session as follows:
 
 .. code-block:: ipython3
 
-    sas = SASsession(cfgfile='/some/path/to/your/config/sascfg_personal.py')
+    sas = saspy.SASsession()
+
+
+If, however, it is not in the python search path, you can use the cfgfile= parameter in your SASsession() invocation to 
+specify its location:
+
+.. code-block:: ipython3
+
+    sas = saspy.SASsession(cfgfile='/some/path/to/your/config/sascfg_personal.py')
 
 
 The python search path can be found by looking at the PYTHONPATH environment variable (if it's set), 
@@ -337,6 +352,7 @@ file, like so:
 
 ::
 
+    # build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION
     cp  =  "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar"
     cp += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar"
     cp += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar"
@@ -584,6 +600,7 @@ lrecl -
 .. code-block:: ipython3
 
     # Windows client class path
+    # build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION
     cpW  =  "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar"
     cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar"
     cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar"
