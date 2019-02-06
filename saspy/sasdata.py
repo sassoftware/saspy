@@ -288,6 +288,29 @@ class SASdata:
                 else:
                     return ll
 
+    def obs(self):
+        """
+        return the number of observations for your SASdata object
+        """
+        code = "proc sql;select count(*) format best32. into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;quit;"
+
+        if self.sas.nosub:
+            print(code)
+            return
+
+        le = self._is_valid()
+        if not le:
+            ll = self.sas.submit(code, "text")
+
+            lastobs = ll['LOG'].rpartition("lastobs=")
+            lastobs = lastobs[2].partition(" tom")
+            lastobs = int(lastobs[0])
+        else:
+            print("The SASdata object is not valid. The table doesn't exist in this SAS session at this time.")
+            lastobs = None
+
+        return lastobs
+
     def partition(self, var: str = '', fraction: float = .7, seed: int = 9878, kfold: int = 1,
                   out: 'SASdata' = None, singleOut: bool = True) -> object:
         """
