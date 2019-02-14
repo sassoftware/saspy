@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 2.4.1 documentation</title>
+  <title>Installation and configuration &mdash; saspy 2.4.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.4.1 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.4.2 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.4.1
+                2.4.2
               </div>
             
           
@@ -443,20 +443,36 @@ following optional keys:</p>
 <dt>port -</dt>
 <dd>(Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the <code class="docutils literal"><span class="pre">-p</span></code> option)</dd>
 <dt>tunnel -</dt>
-<dd>(Optional: integer) Certain methods of saspy require opening a local port and accepting data
-streamed from the SAS instance. If the remote SAS server would not be able to reach ports on your client machine
-due to a firewall or other security configuration, you may pass a local port number to be reverse tunneled
-(using the <code class="docutils literal"><span class="pre">-R</span></code> ssh option) so that the remote SAS server can connect using this port.</dd>
+<dd>(Optional: integer) Certain methods of saspy require opening a local port and accepting a connection and data
+streamed from the SAS instance to saspy. If the remote SAS server would not be able to reach ports on your client machine
+due to a firewall or other security configuration, you may pass a port number to used for SAS to connect to on
+the remote side, which will be forwarded to the local side (using the <code class="docutils literal"><span class="pre">-R</span></code> ssh option) so that the remote SAS
+server can connect using this port.</dd>
 </dl>
-<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">ssh</span>      <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span> <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;ssh&#39;</span>     <span class="p">:</span> <span class="s1">&#39;/usr/bin/ssh&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;host&#39;</span>    <span class="p">:</span> <span class="s1">&#39;remote.linux.host&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;identity&#39;</span><span class="p">:</span> <span class="s1">&#39;/usr/home/.ssh/alt_id.pem&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;port&#39;</span>    <span class="p">:</span> <span class="mi">9922</span><span class="p">,</span>
-            <span class="s1">&#39;tunnel&#39;</span>  <span class="p">:</span> <span class="mi">9911</span>
-           <span class="p">}</span>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
+<dl class="docutils">
+<dt>rtunnel -</dt>
+<dd><p class="first">(Optional: integer) Certain methods of saspy require opening a remote port and allowing a connection to be made and
+data streamed to the SAS server from saspy; the Reverse of the tunnel case. In these cases, saspy needs to provide
+a port for the SAS server to use to accept a connection so data can be streamed to the SAs server.
+This is simply the reverse of the tunnel case, where SAS creates the socket and saspy connects. This will use
+the <code class="docutils literal"><span class="pre">-L</span></code> ssh option so that the saspy can connect to the remote SAS server on this port.</p>
+<dl class="last docutils">
+<dt>ssh      = {&#8216;saspath&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">&#8216;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#8217;,</span></dt>
+<dd><blockquote class="first">
+<div>&#8216;ssh&#8217;     : &#8216;/usr/bin/ssh&#8217;,
+&#8216;host&#8217;    : &#8216;remote.linux.host&#8217;,
+&#8216;identity&#8217;: &#8216;/usr/home/.ssh/alt_id.pem&#8217;,
+&#8216;port&#8217;    : 9922,
+&#8216;tunnel&#8217;  : 9911
+&#8216;rtunnel&#8217; : 9912</div></blockquote>
+<p class="last">}</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </div>
 <div class="section" id="iom">
 <h3>IOM<a class="headerlink" href="#iom" title="Permalink to this headline">¶</a></h3>
@@ -803,7 +819,7 @@ install other non-standard python modules.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.4.1',
+            VERSION:'2.4.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

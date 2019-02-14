@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 2.4.1 documentation</title>
+  <title>API Reference &mdash; saspy 2.4.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 2.4.1 documentation" href="index.html"/>
+    <link rel="top" title="saspy 2.4.2 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                2.4.1
+                2.4.2
               </div>
             
           
@@ -403,6 +403,15 @@ See the Advanced topics section of the doc for details</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="saspy.SASsession.download">
+<code class="descname">download</code><span class="sig-paren">(</span><em>localfile: str</em>, <em>remotefile: str</em>, <em>overwrite: bool = True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.download" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method downloads a remote file from the SAS servers file system.
+localfile  - path to the local file to create or overwrite
+remotefile - path to remote file
+overwrite  - overwrite the output file if it exists?</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASsession.exist">
 <code class="descname">exist</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#saspy.SASsession.exist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does the SAS data set currently exist</p>
@@ -428,7 +437,7 @@ See the Advanced topics section of the doc for details</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.file_info">
-<code class="descname">file_info</code><span class="sig-paren">(</span><em>filepath</em>, <em>results: str = 'dict'</em>, <em>fileref: str = '_spfinfo'</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.file_info" title="Permalink to this definition">¶</a></dt>
+<code class="descname">file_info</code><span class="sig-paren">(</span><em>filepath</em>, <em>results: str = 'dict'</em>, <em>fileref: str = '_spfinfo'</em>, <em>quiet: bool = False</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.file_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method returns a dictionary containing the file attributes for the file name provided</p>
 <p>If you would like a Pandas dataframe returned instead of a dictionary, specify results=&#8217;pandas&#8217;</p>
 </dd></dl>
@@ -881,6 +890,16 @@ HTML(results[&#8216;LST&#8217;])</dd>
 <dt>nosub - bool. True means don&#8217;t submit the code, print it out so I can see what the SAS code would be.</dt>
 <dd>False means run normally - submit the code.</dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.upload">
+<code class="descname">upload</code><span class="sig-paren">(</span><em>localfile: str</em>, <em>remotefile: str</em>, <em>overwrite: bool = True</em>, <em>permission: str = ''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method uploads a local file to the SAS servers file system.
+localfile  - path to the local file 
+remotefile - path to remote file to create or overwrite
+overwrite  - overwrite the output file if it exists?
+permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax</p>
 </dd></dl>
 
 <dl class="method">
@@ -3747,7 +3766,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'2.4.1',
+            VERSION:'2.4.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
