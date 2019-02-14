@@ -309,12 +309,20 @@ port -
     (Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the ``-p`` option)
 
 tunnel -
-    (Optional: integer) Certain methods of saspy require opening a local port and accepting data 
-    streamed from the SAS instance. If the remote SAS server would not be able to reach ports on your client machine 
-    due to a firewall or other security configuration, you may pass a local port number to be reverse tunneled 
-    (using the ``-R`` ssh option) so that the remote SAS server can connect using this port.
+    (Optional: integer) Certain methods of saspy require opening a local port and accepting a connection and data 
+    streamed from the SAS instance to saspy. If the remote SAS server would not be able to reach ports on your client machine 
+    due to a firewall or other security configuration, you may pass a port number to used for SAS to connect to on
+    the remote side, which will be forwarded to the local side (using the ``-R`` ssh option) so that the remote SAS
+    server can connect using this port.
 
 .. code-block:: ipython3
+rtunnel -
+    (Optional: integer) Certain methods of saspy require opening a remote port and allowing a connection to be made and 
+    data streamed to the SAS server from saspy; the Reverse of the tunnel case. In these cases, saspy needs to provide
+    a port for the SAS server to use to accept a connection so data can be streamed to the SAs server.
+    This is simply the reverse of the tunnel case, where SAS creates the socket and saspy connects. This will use
+    the ``-L`` ssh option so that the saspy can connect to the remote SAS server on this port.
+
 
     ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
                 'ssh'     : '/usr/bin/ssh',
@@ -322,6 +330,7 @@ tunnel -
                 'identity': '/usr/home/.ssh/alt_id.pem',
                 'port'    : 9922,
                 'tunnel'  : 9911
+                'rtunnel' : 9912
                }
 
 
