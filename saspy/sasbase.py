@@ -757,6 +757,37 @@ class SASsession():
         else:
             return log
 
+    def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
+        """
+        This method uploads a local file to the SAS servers file system.
+        localfile  - path to the local file 
+        remotefile - path to remote file to create or overwrite
+        overwrite  - overwrite the output file if it exists?
+        permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
+        """
+        if self.nosub:
+            print("too complicated to show the code, read the source :), sorry.")
+            return None
+        else:
+            log = self._io.upload(localfile, remotefile, overwrite, permission, **kwargs)
+     
+        return log
+
+    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
+        """
+        This method downloads a remote file from the SAS servers file system.
+        localfile  - path to the local file to create or overwrite
+        remotefile - path to remote file
+        overwrite  - overwrite the output file if it exists?
+        """
+        if self.nosub:
+            print("too complicated to show the code, read the source :), sorry.")
+            return None
+        else:
+            log = self._io.download(localfile, remotefile, overwrite, **kwargs)
+     
+        return log
+     
     def df2sd(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
               results: str = '', keep_outer_quotes: bool = False) -> 'SASdata':
         """
@@ -1315,7 +1346,7 @@ class SASsession():
         return res
 
 
-    def file_info(self, filepath,  results: str = 'dict', fileref: str = '_spfinfo'):
+    def file_info(self, filepath, results: str = 'dict', fileref: str = '_spfinfo', quiet: bool = False):
         """
         This method returns a dictionary containing the file attributes for the file name provided
 
@@ -1331,7 +1362,8 @@ class SASsession():
            exists = ll['LOG'].rsplit('FILEREF_EXISTS=')[2].split('\n')[0]
    
            if exists != '1':
-              print('The filepath provided does not exist')
+              if not quiet:
+                 print('The filepath provided does not exist')
               ll = self.submit("filename "+fileref+" clear;")
               return None
 

@@ -1120,6 +1120,255 @@ Will use HTML5 for this SASsession.""")
          ll = self.submit(code, "text")
          return ll['LOG']
 
+   def upload_slow(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
+      """
+      This method uploads a local file to the SAS servers file system.
+      localfile  - path to the local file to upload 
+      remotefile - path to remote file to create or overwrite
+      overwrite  - overwrite the output file if it exists?
+      permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
+      """
+      valid = self._sb.file_info(remotefile, quiet = True)
+
+      if valid is None:
+         remf = remotefile
+      else:
+         if valid == {}:
+            remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
+         else:
+            remf = remotefile
+            if overwrite == False:
+               return {'Success' : False, 
+                       'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
+
+      try:
+         fd = open(localfile, 'rb')
+      except OSError as e:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
+
+      code = """
+         filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
+         data _null_;
+         file saspydir; 
+         infile datalines;
+         input;
+         if _infile_ = '' then delete;
+         lin = length(_infile_);
+         outdata = inputc(_infile_, '$hex.', lin);
+         lout = lin/2;
+         put outdata $varying80. lout; 
+         datalines4;"""
+
+      buf = fd.read1(40)
+      if len(buf):
+         self._asubmit(code, "text")
+      else:
+         code = """
+            filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
+            data _null_;
+            fid = fopen('saspydir', 'O');
+            if fid then
+               rc = fclose(fid);
+            run;\n"""
+
+         ll = self.submit(code, 'text')
+         fd.close()
+         return {'Success' : True, 
+                 'LOG'     : ll['LOG']}
+
+      while len(buf):
+         buf2 = ''
+         for i in range(len(buf)):
+            buf2 += '%02x' % buf[i]
+         ll = self._asubmit(buf2, 'text')
+         buf = fd.read1(40)
+
+      self._asubmit(";;;;", "text")
+      ll = self.submit("run;\nfilename saspydir;", 'text')
+      fd.close()
+
+      return {'Success' : True, 
+              'LOG'     : ll['LOG']}
+ 
+   def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
+      """
+      This method uploads a local file to the SAS servers file system.
+      localfile  - path to the local file to upload 
+      remotefile - path to remote file to create or overwrite
+      overwrite  - overwrite the output file if it exists?
+      permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
+      """
+      valid = self._sb.file_info(remotefile, quiet = True)
+
+      if valid is None:
+         remf = remotefile
+      else:
+         if valid == {}:
+            remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
+         else:
+            remf = remotefile
+            if overwrite == False:
+               return {'Success' : False, 
+                       'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
+
+      try:
+         fd = open(localfile, 'rb')
+      except OSError as e:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
+
+      fsize = os.path.getsize(localfile)
+
+      if fsize > 0:
+         code = """
+            data _null_;
+            infile """+self._tomods1.decode()+""" recfm=F encoding=binary lrecl=4096;
+            file  '"""+remf+"""'                  recfm=N permission='"""+permission+"""';
+            input;
+            put _infile_; 
+            run;"""
+
+         self.stdin[0].send(str(fsize).encode()+b'tom says EOL=UPLOAD                          \n')
+
+         while True:
+            buf  = fd.read1(4096)
+            sent = 0
+            send = len(buf)
+            blen = send
+            if blen == 0:
+               break
+            while send:
+               try:
+                  sent = 0
+                  sent = self.stdout[0].send(buf[blen-send:blen])
+               except (BlockingIOError):
+                  pass
+               send -= sent
+      else:
+         code = """
+            filename _spdld '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
+            data _null_;
+            fid = fopen('_spdld', 'O');
+            if fid then
+               rc = fclose(fid);
+            run;
+            filename _spdld;"""
+
+      ll = self.submit(code, 'text')
+      fd.close()
+
+      return {'Success' : True, 
+              'LOG'     : ll['LOG']}
+ 
+   def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
+      """
+      This method downloads a remote file from the SAS servers file system.
+      localfile  - path to the local file to create or overwrite
+      remotefile - path to remote file tp dpwnload
+      overwrite  - overwrite the output file if it exists?
+      """
+      logf     = ''
+      logn     = self._logcnt()
+      logcodei = "%put E3969440A681A24088859985" + logn + ";"
+      logcodeo = "\nE3969440A681A24088859985" + logn
+      logcodeb = logcodeo.encode()
+
+      valid = self._sb.file_info(remotefile, quiet = True)
+
+      if valid is None:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(remotefile)+" does not exist."}
+
+      if valid == {}:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(remotefile)+" is a directory."}
+
+      if os.path.isdir(localfile):
+         locf = localfile + os.sep + remotefile.rpartition(self._sb.hostsep)[2]
+      else:
+         locf = localfile
+
+      try:
+         fd = open(locf, 'wb')
+      except OSError as e:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(locf)+" could not be opened. Error was: "+str(e)}
+
+      code = """
+         data _null_;
+         infile '"""+remotefile+"""'         recfm=F encoding=binary lrecl=4096;
+         file """+self._tomods1.decode()+""" recfm=N; 
+         input;
+         put _infile_;
+         run;\n"""
+
+      ll = self._asubmit(code, "text")
+      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
+
+      done  = False
+      datar = b''
+      bail  = False
+
+      while not done:
+         while True:
+             if os.name == 'nt':
+                try:
+                   rc = self.pid.wait(0)
+                   self.pid = None
+                   self._sb.SASpid = None
+                   return {'Success' : False, 
+                           'LOG'     : "SAS process has terminated unexpectedly. RC from wait was: "+str(rc)}
+                except:
+                   pass
+             else:
+                rc = os.waitpid(self.pid, os.WNOHANG)
+                if rc[1]:
+                    self.pid = None
+                    self._sb.SASpid = None
+                    return {'Success' : False, 
+                            'LOG'     : "SAS process has terminated unexpectedly. RC from wait was: "+str(rc)}
+
+             if bail:
+                if datar.count(logcodeb) >= 1:
+                   break
+             try:
+                data = self.stdout[0].recv(4096)
+             except (BlockingIOError):
+                data = b''
+
+             if len(data) > 0:
+                datar += data
+                if len(datar) > 8300:
+                   fd.write(datar[:8192])
+                   datar = datar[8192:]
+             else:
+                sleep(0.1)
+                try:
+                   log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+                except (BlockingIOError):
+                   log = b''
+
+                if len(log) > 0:
+                   logf += log
+                   if logf.count(logcodeo) >= 1:
+                      bail = True
+         done = True
+
+      fd.write(datar.rpartition(logcodeb)[0])
+      fd.flush()
+      fd.close()
+
+      self._log += logf
+      final = logf.partition(logcodei)
+      z = final[0].rpartition(chr(10))
+      prev = '%08d' %  (self._log_cnt - 1)
+      zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
+      logd = zz[2].replace(";*\';*\";*/;", '')
+ 
+      return {'Success' : True, 
+              'LOG'     : logd}
+ 
    def _getbytelen(self, x):
       return len(x.encode(self.sascfg.encoding))
 
@@ -1197,8 +1446,8 @@ Will use HTML5 for this SASsession.""")
             self._asubmit(code, "text")
             code = ""
 
-      self._asubmit(code+";;;;\nrun;", "text")
-      ll = self.submit("", 'text')
+      self._asubmit(code+";;;;", "text")
+      ll = self.submit("run;", 'text')
       return
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
@@ -1219,6 +1468,7 @@ Will use HTML5 for this SASsession.""")
       logn     = self._logcnt()
       logcodei = "%put E3969440A681A24088859985" + logn + ";"
       logcodeo = "\nE3969440A681A24088859985" + logn
+      logcodeb =  logcodeo.encode()
 
       if libref:
          tabname = libref+"."+table
@@ -1296,7 +1546,7 @@ Will use HTML5 for this SASsession.""")
 
       ll = self._asubmit(code, 'text')
 
-      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode()+b'\n')
+      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
 
 
       BOM   = "\ufeff".encode()
@@ -1330,7 +1580,7 @@ Will use HTML5 for this SASsession.""")
                     return None
 
              if bail:
-                if datar.count(logcodeo.encode()) >= 1:
+                if datar.count(logcodeb) >= 1:
                    break
              try:
                 data = self.stdout[0].recv(4096)

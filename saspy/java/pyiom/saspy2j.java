@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -112,6 +113,7 @@ public class saspy2j
       int slen    = 0;
       int idx     = 0;
       int nargs   = args.length;
+      long flen   = 0;
 
       String addr = "";
       String log  = "";
@@ -125,6 +127,7 @@ public class saspy2j
 
       OctetSeqHolder odsdata = new OctetSeqHolder();
       char[]         in      = new char[4097];
+      byte[]         out     = new byte[4097];
 
       for (int x = 0; x < nargs; x++)
          {
@@ -169,6 +172,7 @@ public class saspy2j
          }
 
       OutputStream odsout = sout.getOutputStream();
+      InputStream  odsin  = sout.getInputStream();
 
       inp  = new BufferedReader(new InputStreamReader(  sin.getInputStream(),  "UTF-8"));
       outp = new BufferedWriter(new OutputStreamWriter(sout.getOutputStream(), "UTF-8"));
@@ -219,7 +223,68 @@ public class saspy2j
                   {
                   eol = pgm.substring(idx + 13, idx + 13 + 33);
 
-                  if (eol.contains("ASYNCH"))
+                  if (eol.contains("UPLOAD"))
+                     {
+                     flen = Long.valueOf(pgm.substring(0, idx));
+                     pgm  = pgm.substring(idx + 13 + 33);
+               
+                     bstr = null;
+                     try
+                        {
+                        bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForWriting);
+                        }
+                     catch (org.omg.CORBA.COMM_FAILURE e)
+                        {
+                        if (reconnect)
+                           {
+                           connect(true, false, false);
+                           bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForWriting);
+                           }
+                        }
+                     catch (GenericError e)
+                        {}
+               
+                     if (! (bstr == null))
+                        {
+                        while (flen > 0)
+                           {
+                           try
+                              {
+                              slen = odsin.read(out, 0, 4096);
+                              if (slen > 0)
+                                 {
+                                 flen -= slen;
+                                 bstr.Write(java.util.Arrays.copyOfRange(out, 0, slen));
+                                 }
+                              }
+                           catch (org.omg.CORBA.COMM_FAILURE e)
+                              {
+                              if (reconnect)
+                                 {
+                                 ods = true;
+                                 connect(true, true, false);
+                                 bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForWriting);
+                                 bstr.Write(odsdata.value);
+                                 }
+                              else
+                                 {
+                                 String msg = "We failed in Submit\n"+e.getMessage();
+                                 errp.write(msg);
+                                 errp.flush();
+                                 System.out.print(msg);
+                                 e.printStackTrace();
+                                 throw new IOException();
+                                 }
+                              }
+                           catch (Exception e)
+                              {
+                              slen = 0; 
+                              }
+                           }
+                        bstr.Close();
+                        }
+                     }
+                  else if (eol.contains("ASYNCH"))
                      {
                      try
                         {
