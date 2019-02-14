@@ -271,6 +271,7 @@ class SASsession():
             self.results       = 'Pandas'
         self.workpath          = ''
         self.sasver            = ''
+        self.version           = sys.modules['saspy'].__version__
         self.sascei            = ''
         self.SASpid            = None
         self.HTML_Style        = "HTMLBlue"
@@ -301,7 +302,12 @@ class SASsession():
                     %put SYSJOBID=&SYSJOBID;
                     %put SYSSCP=&SYSSCP;
                 """
-                res = self.submit(sysvars)['LOG']
+                enc = self._io.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
+                if enc == '':
+                   self._io.sascfg.encoding = 'utf-8'
+                res = self.submit(sysvars, "text")['LOG']
+                self._io.sascfg.encoding = enc
+
                 vlist         = res.rpartition('SYSSCP=')
                 self.hostsep  = vlist[2].partition('\n')[0]
                 vlist         = res.rpartition('SYSJOBID=')
@@ -312,6 +318,30 @@ class SASsession():
                 self.sascei   = vlist[2].partition('\n')[0]
                 vlist         = res.rpartition('WORKPATH=')
                 self.workpath = vlist[2].partition('\n')[0]
+
+                # validate encoding
+                pyenc = sas_encoding_mapping[self.sascei]
+                if pyenc is not None:
+                   if self._io.sascfg.encoding != '':
+                      if self._io.sascfg.encoding.lower() not in pyenc:
+                         print("The encoding value provided doesn't match the SAS session encoding.")
+                         print("SAS encoding is "+self.sascei+". Specified encoding is "+self._io.sascfg.encoding+".")
+                         print("Using encoding "+pyenc[0]+" instead to avoid transcoding problems.")
+                         self._io.sascfg.encoding = pyenc[0]
+                         print("You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.")
+                         print("""If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it""")
+                   else:
+                      self._io.sascfg.encoding = pyenc[0]
+                      if self._io.sascfg.verbose:
+                         print("No encoding value provided. Will try to determine the correct encoding.")
+                         print("Setting encoding to "+pyenc[0]+" based upon the SAS session encoding value of "+self.sascei+".")
+                else:
+                   print("The SAS session encoding for this session ("+self.sasce+") doesn't have a known Python equivalent encoding.")
+                   if self._io.sascfg.encoding == '':
+                      self._io.sascfg.encoding  = 'utf-8'
+                      print("Proceeding using the default encoding of 'utf-8', though you may encounter transcoding problems.")
+                   else:
+                      print("Proceeding using the specified encoding of "+self._io.sascfg.encoding+", though you may encounter transcoding problems.")
 
                 if self.hostsep == 'WIN':
                     self.hostsep = '\\'
@@ -341,7 +371,7 @@ class SASsession():
         x += "SAS Config name       = %s\n" % self.sascfg.name
         x += "WORK Path             = %s\n" % self.workpath
         x += "SAS Version           = %s\n" % self.sasver
-        x += "SASPy Version         = %s\n" % sys.modules['saspy'].__version__
+        x += "SASPy Version         = %s\n" % self.version
         x += "Teach me SAS          = %s\n" % str(self.nosub)
         x += "Batch                 = %s\n" % str(self.batch)
         x += "Results               = %s\n" % self.results
@@ -354,8 +384,7 @@ class SASsession():
 
     def __del__(self):
         if self._io:
-            if self._io:
-                return self._io.__del__()
+           return self._io.__del__()
 
     def _objcnt(self):
         self._obj_cnt += 1
@@ -366,7 +395,8 @@ class SASsession():
 
     def _endsas(self):
         self.SASpid = None
-        return self._io._endsas()
+        if self._io:
+           return self._io._endsas()
 
     def _getlog(self, **kwargs):
         return self._io._getlog(**kwargs)
@@ -1448,3 +1478,172 @@ sas_datetime_fmts = (
     'NLDDFDT', 'NLDDFDT', 'NORDFDT', 'NORDFDT', 'POLDFDT', 'POLDFDT', 'PTGDFDT', 'PTGDFDT', 'RUSDFDT', 'RUSDFDT',
     'SLODFDT', 'SLODFDT', 'SVEDFDT', 'SVEDFDT', 'TWMDY', 'YMDDTTM',
 )
+
+sas_encoding_mapping = {
+'arabic':['iso8859_6', 'iso-8859-6', 'arabic'],
+'big5':['big5', 'big5-tw', 'csbig5'],
+'cyrillic':['iso8859_5', 'iso-8859-5', 'cyrillic'],
+'ebcdic037':['cp037', 'ibm037', 'ibm039'],
+'ebcdic273':['cp273', '273', 'ibm273', 'csibm273'],
+'ebcdic500':['cp500', 'ebcdic-cp-be', 'ebcdic-cp-ch', 'ibm500'],
+'euc-cn':['gb2312', 'chinese', 'csiso58gb231280', 'euc-cn', 'euccn', 'eucgb2312-cn', 'gb2312-1980', 'gb2312-80', 'iso-ir-58'],
+'euc-jp':['euc_jis_2004', 'jisx0213', 'eucjis2004'],
+'euc-kr':['euc_kr', 'euckr', 'korean', 'ksc5601', 'ks_c-5601', 'ks_c-5601-1987', 'ksx1001', 'ks_x-1001'],
+'greek':['iso8859_7', 'iso-8859-7', 'greek', 'greek8'],
+'hebrew':['iso8859_8', 'iso-8859-8', 'hebrew'],
+'ibm-949':['cp949', '949', 'ms949', 'uhc'],
+'kz1048':['kz1048', 'kz_1048', 'strk1048_2002', 'rk1048'],
+'latin10':['iso8859_16', 'iso-8859-16', 'latin10', 'l10'],
+'latin1':['latin_1', 'iso-8859-1', 'iso8859-1', '8859', 'cp819', 'latin', 'latin1', 'l1'],
+'latin2':['iso8859_2', 'iso-8859-2', 'latin2', 'l2'],
+'latin3':['iso8859_3', 'iso-8859-3', 'latin3', 'l3'],
+'latin4':['iso8859_4', 'iso-8859-4', 'latin4', 'l4'],
+'latin5':['iso8859_9', 'iso-8859-9', 'latin5', 'l5'],
+'latin6':['iso8859_10', 'iso-8859-10', 'latin6', 'l6'],
+'latin7':['iso8859_13', 'iso-8859-13', 'latin7', 'l7'],
+'latin8':['iso8859_14', 'iso-8859-14', 'latin8', 'l8'],
+'latin9':['iso8859_15', 'iso-8859-15', 'latin9', 'l9'],
+'ms-932':['cp932', '932', 'ms932', 'mskanji', 'ms-kanji'],
+'msdos737':['cp737'],
+'msdos775':['cp775', 'ibm775'],
+'open_ed-1026':['cp1026', 'ibm1026'],
+'open_ed-1140':['cp1140', 'ibm1140'],
+'open_ed-424':['cp424', 'ebcdic-cp-he', 'ibm424'],
+'open_ed-875':['cp875'],
+'pcoem437':['cp437', '437', 'ibm437'],
+'pcoem850':['cp850', '850', 'ibm850'],
+'pcoem852':['cp852', '852', 'ibm852'],
+'pcoem857':['cp857', '857', 'ibm857'],
+'pcoem858':['cp858', '858', 'ibm858'],
+'pcoem860':['cp860', '860', 'ibm860'],
+'pcoem862':['cp862', '862', 'ibm862'],
+'pcoem863':['cp863'],
+'pcoem864':['cp864', 'ibm864'],
+'pcoem865':['cp865', '865', 'ibm865'],
+'pcoem866':['cp866', '866', 'ibm866'],
+'pcoem869':['cp869', '869', 'cp-gr', 'ibm869'],
+'pcoem874':['cp874'],
+'shift-jis':['shift_jis', 'csshiftjis', 'shiftjis', 'sjis', 's_jis'],
+'thai':['iso8859_11', 'so-8859-11', 'thai'],
+'us-ascii':['ascii', '646', 'us-ascii'],
+'utf-8':['utf_8', 'u8', 'utf', 'utf8'],
+'warabic':['cp1256', 'windows-1256'],
+'wbaltic':['cp1257', 'windows-1257'],
+'wcyrillic':['cp1251', 'windows-1251'],
+'wgreek':['cp1253', 'windows-1253'],
+'whebrew':['cp1255', 'windows-1255'],
+'wlatin1':['cp1252', 'windows-1252'],
+'wlatin2':['cp1250', 'windows-1250'],
+'wturkish':['cp1254', 'windows-1254'],
+'wvietnamese':['cp1258', 'windows-1258'],
+'any':None,
+'dec-cn':None,
+'dec-jp':None,
+'dec-tw':None,
+'ebcdic1025':None,
+'ebcdic1026':None,
+'ebcdic1047':None,
+'ebcdic1112':None,
+'ebcdic1122':None,
+'ebcdic1130':None,
+'ebcdic1137':None,
+'ebcdic1140':None,
+'ebcdic1141':None,
+'ebcdic1142':None,
+'ebcdic1143':None,
+'ebcdic1144':None,
+'ebcdic1145':None,
+'ebcdic1146':None,
+'ebcdic1147':None,
+'ebcdic1148':None,
+'ebcdic1149':None,
+'ebcdic1153':None,
+'ebcdic1154':None,
+'ebcdic1155':None,
+'ebcdic1156':None,
+'ebcdic1157':None,
+'ebcdic1158':None,
+'ebcdic1160':None,
+'ebcdic1164':None,
+'ebcdic275':None,
+'ebcdic277':None,
+'ebcdic278':None,
+'ebcdic280':None,
+'ebcdic284':None,
+'ebcdic285':None,
+'ebcdic297':None,
+'ebcdic424':None,
+'ebcdic425':None,
+'ebcdic838':None,
+'ebcdic870':None,
+'ebcdic875':None,
+'ebcdic905':None,
+'ebcdic924':None,
+'ebcdic-any':None,
+'euc-tw':None,
+'hp15-tw':None,
+'ibm-930':None,
+'ibm-933':None,
+'ibm-935':None,
+'ibm-937':None,
+'ibm-939e':None,
+'ibm-939':None,
+'ibm-942':None,
+'ibm-950':None,
+'ms-936':None,
+'ms-949':None,
+'ms-950':None,
+'msdos720':None,
+'open_ed-037':None,
+'open_ed-1025':None,
+'open_ed-1047':None,
+'open_ed-1112':None,
+'open_ed-1122':None,
+'open_ed-1130':None,
+'open_ed-1137':None,
+'open_ed-1141':None,
+'open_ed-1142':None,
+'open_ed-1143':None,
+'open_ed-1144':None,
+'open_ed-1145':None,
+'open_ed-1146':None,
+'open_ed-1147':None,
+'open_ed-1148':None,
+'open_ed-1149':None,
+'open_ed-1153':None,
+'open_ed-1154':None,
+'open_ed-1155':None,
+'open_ed-1156':None,
+'open_ed-1157':None,
+'open_ed-1158':None,
+'open_ed-1160':None,
+'open_ed-1164':None,
+'open_ed-1166':None,
+'open_ed-273':None,
+'open_ed-275':None,
+'open_ed-277':None,
+'open_ed-278':None,
+'open_ed-280':None,
+'open_ed-284':None,
+'open_ed-285':None,
+'open_ed-297':None,
+'open_ed-425':None,
+'open_ed-500':None,
+'open_ed-838':None,
+'open_ed-870':None,
+'open_ed-905':None,
+'open_ed-924':None,
+'open_ed-930':None,
+'open_ed-933':None,
+'open_ed-935':None,
+'open_ed-937':None,
+'open_ed-939e':None,
+'open_ed-939':None,
+'pc1098':None,
+'pciscii806':None,
+'pcoem1129':None,
+'pcoem921':None,
+'pcoem922':None,
+'roman8':None
+}
+

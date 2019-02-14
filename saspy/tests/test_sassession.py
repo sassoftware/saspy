@@ -54,7 +54,7 @@ class TestSASsessionObject(unittest.TestCase):
         rows = ll['LST'].splitlines()
         retrieved = []
         for i in range(len(rows)):
-           retrieved.append(rows[i].split())
+           retrieved.append(rows[i].split()[:9])
         self.assertIn(expected, retrieved, msg="csvcars.head() result didn't contain row 1")
         
     def test_SASsession_datasets(self):

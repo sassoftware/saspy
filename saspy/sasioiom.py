@@ -19,6 +19,7 @@ import subprocess
 from time import sleep
 import socket as socks
 import tempfile as tf
+import codecs
 
 try:
    import pandas as pd
@@ -152,14 +153,22 @@ class SASconfigIOM:
          else:
             self.appserver = inapp
 
-      inencoding = kwargs.get('encoding', '')
-      if len(inencoding) > 0:
+      inencoding = kwargs.get('encoding', 'NoOverride')
+      if inencoding != 'NoOverride':
          if lock and len(self.encoding):
             print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.encoding = inencoding
       if not self.encoding:
-         self.encoding = 'utf-8'
+         self.encoding = ''    # 'utf-8'
+
+      if self.encoding != '':
+         try:
+            coinfo = codecs.lookup(self.encoding)
+         except LookupError:
+            print("The encoding provided ("+self.encoding+") doesn't exist in this Python session. Setting it to ''.")
+            print("The correct encoding will attempt to be determined based upon the SAS session encoding.")
+            self.encoding = ''
 
       injparms = kwargs.get('javaparms', '')
       if len(injparms) > 0:
@@ -219,6 +228,7 @@ class SASsessionIOM():
       if self.pid:
          self._endsas()
       self._sb.SASpid = None
+      return
 
    def _logcnt(self, next=True):
        if next == True:
@@ -454,7 +464,11 @@ Will use HTML5 for this SASsession.""")
             pw += '\n'
             self.stdin[0].send(pw.encode())
 
+      enc = self.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
+      if enc == '':
+         self.sascfg.encoding = 'utf-8'
       ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max linesize=max nosyntaxcheck; ods graphics on;", "text")
+      self.sascfg.encoding = enc
 
       if self.pid is None:
          print(ll['LOG'])

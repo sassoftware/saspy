@@ -115,8 +115,8 @@ class TestSASdataObject(unittest.TestCase):
         cars.set_results('PANDAS')
         ll = cars.describe()
         self.assertIsInstance(ll, pd.DataFrame, msg='ll is not a dataframe')
-        expected = ['MSRP', '428', '0', '27635', '32775', '19432', '10280', '20330', '27635', '39215', '192465']
-        self.assertEqual(['%.0f' % elem for elem in list(ll.iloc[0].dropna())[1:]], expected[1:],
+        expected = ['MSRP', '.', 428, 0, 27635, 32774, 19431, 10280, 20329, 27635, 39215, 192465]
+        self.assertEqual([int(elem) for elem in list(ll.iloc[0].dropna())[2:]], expected[2:],
                          msg="cars.describe() result didn't contain expected result")
         self.assertEqual(expected[0],list(ll.iloc[0].dropna())[0],
                          msg="cars.describe() result didn't contain expected result")

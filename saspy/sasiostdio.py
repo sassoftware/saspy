@@ -20,6 +20,7 @@ import subprocess
 import tempfile as tf
 from time import sleep
 import socket as socks
+import codecs
 
 try:
    import pandas as pd
@@ -125,14 +126,22 @@ class SASconfigSTDIO:
          else:
             self.host = inhost
 
-      inencoding = kwargs.get('encoding', '')
-      if len(inencoding) > 0:
+      inencoding = kwargs.get('encoding', 'NoOverride')
+      if inencoding !='NoOverride':
          if lock and len(self.encoding):
             print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.encoding = inencoding
       if not self.encoding:
-         self.encoding = 'utf-8'
+         self.encoding = ''    # 'utf-8'
+
+      if self.encoding != '':
+         try:
+            coinfo = codecs.lookup(self.encoding)
+         except LookupError:
+            print("The encoding provided ("+self.encoding+") doesn't exist in this Python session. Setting it to ''.")
+            print("The correct encoding will attempt to be determined based upon the SAS session encoding.")
+            self.encoding = ''
 
       inlrecl = kwargs.get('lrecl', None)
       if inlrecl:
@@ -194,6 +203,7 @@ class SASsessionSTDIO():
       if self.pid:
          self._endsas()
       self._sb.SASpid = None
+      return
 
    def _logcnt(self, next=True):
        if next == True:
@@ -335,7 +345,11 @@ Will use HTML5 for this SASsession.""")
          print("Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:\n"+s+"\n")
          return None
       else:
+         enc = self.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
+         if enc == '':
+            self.sascfg.encoding = 'utf-8'
          self.submit("options svgtitle='svgtitle'; options validvarname=any linesize=max; ods graphics on;", "text")
+         self.sascfg.encoding = enc
          if self.pid is None:
             print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
@@ -352,15 +366,17 @@ Will use HTML5 for this SASsession.""")
       if self.pid:
          code = ";*\';*\";*/;\n;quit;endsas;"
          self._getlog(wait=1)
-         self._asubmit(code,'text')
+         if self.pid:
+            self._asubmit(code,'text')
          sleep(1)
-         try:
-            rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-         except (subprocess.TimeoutExpired):
-            if self.sascfg.verbose:
-               print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
-               ret = rc
-            os.kill(self.pid, signal.SIGKILL)
+         if self.pid:
+            try:
+               rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+            except (subprocess.TimeoutExpired):
+               if self.sascfg.verbose:
+                  print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+                  ret = rc
+               os.kill(self.pid, signal.SIGKILL)
          if self.sascfg.verbose:
             print("SAS Connection terminated. Subprocess id was "+str(self.pid))
          self.pid = None
@@ -372,6 +388,12 @@ Will use HTML5 for this SASsession.""")
       quit   = wait * 2
       logn   = self._logcnt(False)
       code1  = "%put E3969440A681A24088859985"+logn+";\nE3969440A681A24088859985"+logn
+
+      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+      if rc != None:
+         self.pid = None
+         self._sb.SASpid = None
+         return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       while True:
          log = self.stderr.read1(4096)

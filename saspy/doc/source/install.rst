@@ -232,6 +232,9 @@ options -
     Python list.
 
 encoding -
+    NOTE: as of saspy V2.4.2, you no longer need to set the encoding. SASpy
+    will determine the SAS session encoding and map that to the Python encoding for you.
+
     This is the Python encoding value that matches the SAS session encoding
     of the SAS session to which you are connecting. The Python encoding 
     values can be found at `encodings-and-unicode <https://docs.python.org/
@@ -324,15 +327,17 @@ tunnel -
 
 IOM
 ===
-This connection method opens many connectivity options. This method enables you to use
-`SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__
+This connection method opens many connectivity options. This method enables you to 
+connect to any Workspace server on any supported platform. 
+
+You can also use `SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__
 to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
 Manager to control the distribution of connections to the various grid nodes
 and integrates all the monitoring and administration that SAS Grid Manager provides.
 
-The IOM connection method also enables you to connect to SAS on Windows platforms.
-The connection can be to a local SAS installation or a remote IOM server running on 
-Windows.
+The IOM connection method also enables you to connect to SAS from Windows (STDIO was Linux only).
+The connection can be to a local SAS installation or a remote IOM Workspace server running
+on any supported platform.
 
 The IOM connection method requires the following:
 
@@ -448,6 +453,9 @@ omrpw  -
     (**Strongly discouraged**) A password is required but if this field is left
     blank, the user is **prompted** for a password at runtime, unless it's found in the authinfo file.
 encoding  -
+    NOTE: as of saspy V2.4.2, you no longer need to set the encoding. SASpy
+    will determine the SAS session encoding and map that to the Python encoding for you.
+
     This is the Python encoding value that matches the SAS session encoding of 
     the IOM server to which you are connecting. The Python encoding values can be 
     found at `encodings-and-unicode <https://docs.python.org/3.5/
@@ -578,6 +586,9 @@ java      -
 classpath - 
     (Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar.
 encoding  -
+    NOTE: as of saspy V2.4.2, you no longer need to set the encoding. SASpy
+    will determine the SAS session encoding and map that to the Python encoding for you.
+
     This is the Python encoding value that matches the SAS session encoding of 
     the IOM server to which you are connecting. The Python encoding values can be 
     found at `encodings-and-unicode <https://docs.python.org/3.5/
