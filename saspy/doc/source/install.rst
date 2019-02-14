@@ -315,7 +315,6 @@ tunnel -
     the remote side, which will be forwarded to the local side (using the ``-R`` ssh option) so that the remote SAS
     server can connect using this port.
 
-.. code-block:: ipython3
 rtunnel -
     (Optional: integer) Certain methods of saspy require opening a remote port and allowing a connection to be made and 
     data streamed to the SAS server from saspy; the Reverse of the tunnel case. In these cases, saspy needs to provide
@@ -323,6 +322,8 @@ rtunnel -
     This is simply the reverse of the tunnel case, where SAS creates the socket and saspy connects. This will use
     the ``-L`` ssh option so that the saspy can connect to the remote SAS server on this port.
 
+
+.. code-block:: ipython3
 
     ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
                 'ssh'     : '/usr/bin/ssh',
