@@ -405,10 +405,23 @@ See the Advanced topics section of the doc for details</p>
 <dl class="method">
 <dt id="saspy.SASsession.download">
 <code class="descname">download</code><span class="sig-paren">(</span><em>localfile: str</em>, <em>remotefile: str</em>, <em>overwrite: bool = True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.download" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method downloads a remote file from the SAS servers file system.
-localfile  - path to the local file to create or overwrite
-remotefile - path to remote file
-overwrite  - overwrite the output file if it exists?</p>
+<dd><p>This method downloads a remote file from the SAS servers file system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>localfile</strong> &#8211; path to the local file to create or overwrite</li>
+<li><strong>remotefile</strong> &#8211; path to remote file</li>
+<li><strong>overwrite</strong> &#8211; overwrite the output file if it exists?</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SAS Log</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -895,11 +908,24 @@ HTML(results[&#8216;LST&#8217;])</dd>
 <dl class="method">
 <dt id="saspy.SASsession.upload">
 <code class="descname">upload</code><span class="sig-paren">(</span><em>localfile: str</em>, <em>remotefile: str</em>, <em>overwrite: bool = True</em>, <em>permission: str = ''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.upload" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method uploads a local file to the SAS servers file system.
-localfile  - path to the local file 
-remotefile - path to remote file to create or overwrite
-overwrite  - overwrite the output file if it exists?
-permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax</p>
+<dd><p>This method uploads a local file to the SAS servers file system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>localfile</strong> &#8211; path to the local file</li>
+<li><strong>remotefile</strong> &#8211; path to remote file to create or overwrite</li>
+<li><strong>overwrite</strong> &#8211; overwrite the output file if it exists?</li>
+<li><strong>permission</strong> &#8211; permissions to set on the new file. See SAS Filename Statement Doc for syntax</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SAS Log</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
