@@ -760,10 +760,12 @@ class SASsession():
     def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
         """
         This method uploads a local file to the SAS servers file system.
-        localfile  - path to the local file 
-        remotefile - path to remote file to create or overwrite
-        overwrite  - overwrite the output file if it exists?
-        permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
+
+        :param localfile: path to the local file 
+        :param remotefile: path to remote file to create or overwrite
+        :param overwrite: overwrite the output file if it exists?
+        :param permission: permissions to set on the new file. See SAS Filename Statement Doc for syntax
+        :return: SAS Log
         """
         if self.nosub:
             print("too complicated to show the code, read the source :), sorry.")
@@ -776,9 +778,11 @@ class SASsession():
     def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
         """
         This method downloads a remote file from the SAS servers file system.
-        localfile  - path to the local file to create or overwrite
-        remotefile - path to remote file
-        overwrite  - overwrite the output file if it exists?
+
+        :param localfile: path to the local file to create or overwrite
+        :param remotefile: path to remote file
+        :param overwrite: overwrite the output file if it exists?
+        :return: SAS Log
         """
         if self.nosub:
             print("too complicated to show the code, read the source :), sorry.")
