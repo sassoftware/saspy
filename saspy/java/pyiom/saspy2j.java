@@ -83,6 +83,7 @@ public class saspy2j
    static IFileService        filesvc = null;
    static ILibref             libref  = null;
    static IFileref            fileref = null;
+   static IFileref            upfref  = null;
    static IDataService        datasvc = null;
    static IBinaryStream       bstr    = null;
    static BridgeServer        server  = null;
@@ -231,14 +232,16 @@ public class saspy2j
                      bstr = null;
                      try
                         {
-                        bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForWriting);
+                        upfref  = filesvc.UseFileref("_sp_updn");
+                        bstr = upfref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForWriting);
                         }
                      catch (org.omg.CORBA.COMM_FAILURE e)
                         {
                         if (reconnect)
                            {
                            connect(true, false, false);
-                           bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForWriting);
+                           upfref  = filesvc.UseFileref("_sp_updn");
+                           bstr = upfref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForWriting);
                            }
                         }
                      catch (GenericError e)
@@ -265,6 +268,73 @@ public class saspy2j
                                  connect(true, true, false);
                                  bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForWriting);
                                  bstr.Write(odsdata.value);
+                                 }
+                              else
+                                 {
+                                 String msg = "We failed in Submit\n"+e.getMessage();
+                                 errp.write(msg);
+                                 errp.flush();
+                                 System.out.print(msg);
+                                 e.printStackTrace();
+                                 throw new IOException();
+                                 }
+                              }
+                           catch (Exception e)
+                              {
+                              slen = 0; 
+                              }
+                           }
+                        bstr.Close();
+                        }
+                     }
+                  else if (eol.contains("DNLOAD"))
+                     {
+                     pgm  = pgm.substring(idx + 13 + 33);
+               
+                     bstr = null;
+                     try
+                        {
+                        upfref  = filesvc.UseFileref("_sp_updn");
+                        bstr = upfref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
+                        }
+                     catch (org.omg.CORBA.COMM_FAILURE e)
+                        {
+                        if (reconnect)
+                           {
+                           connect(true, false, false);
+                           upfref  = filesvc.UseFileref("_sp_updn");
+                           bstr = upfref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
+                           }
+                        }
+                     catch (GenericError e)
+                        {}
+
+                     blen = 0;
+                     slen = 1;
+
+                     if (! (bstr == null))
+                        {
+                        while (slen > 0)
+                           {
+                           try
+                              {
+                              bstr.Read(9999999, odsdata);
+                              slen = odsdata.value.length;
+                              if (slen > 0)
+                                 {
+                                 blen += slen;
+                                 odsout.write(odsdata.value);
+                                 odsout.flush();
+                                 }
+                              }
+                           catch (org.omg.CORBA.COMM_FAILURE e)
+                              {
+                              if (reconnect)
+                                 {
+                                 ods = true;
+                                 connect(true, true, false);
+                                 bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
+                                 bstr.Read(blen, odsdata);
                                  }
                               else
                                  {

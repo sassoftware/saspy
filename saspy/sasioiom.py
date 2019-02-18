@@ -1221,13 +1221,8 @@ Will use HTML5 for this SASsession.""")
       fsize = os.path.getsize(localfile)
 
       if fsize > 0:
-         code = """
-            data _null_;
-            infile """+self._tomods1.decode()+""" recfm=F encoding=binary lrecl=4096;
-            file  '"""+remf+"""'                  recfm=N permission='"""+permission+"""';
-            input;
-            put _infile_; 
-            run;"""
+         code = "filename _sp_updn '"+remf+"' recfm=N permission='"+permission+"';"
+         ll = self.submit(code, 'text')
 
          self.stdin[0].send(str(fsize).encode()+b'tom says EOL=UPLOAD                          \n')
 
@@ -1245,21 +1240,24 @@ Will use HTML5 for this SASsession.""")
                except (BlockingIOError):
                   pass
                send -= sent
+               
+         code = "filename _sp_updn;"
       else:
          code = """
-            filename _spdld '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
+            filename _sp_updn '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
             data _null_;
-            fid = fopen('_spdld', 'O');
+            fid = fopen('_sp_updn', 'O');
             if fid then
                rc = fclose(fid);
             run;
-            filename _spdld;"""
+            filename _sp_updn;
+            """
 
-      ll = self.submit(code, 'text')
+      ll2 = self.submit(code, 'text')
       fd.close()
 
       return {'Success' : True, 
-              'LOG'     : ll['LOG']}
+              'LOG'     : ll['LOG']+ll2['LOG']}
  
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
@@ -1295,20 +1293,16 @@ Will use HTML5 for this SASsession.""")
          return {'Success' : False, 
                  'LOG'     : "File "+str(locf)+" could not be opened. Error was: "+str(e)}
 
-      code = """
-         data _null_;
-         infile '"""+remotefile+"""'         recfm=F encoding=binary lrecl=4096;
-         file """+self._tomods1.decode()+""" recfm=N; 
-         input;
-         put _infile_;
-         run;\n"""
+      code = "filename _sp_updn '"+remotefile+"' recfm=F encoding=binary lrecl=4096";
 
-      ll = self._asubmit(code, "text")
+      ll = self.submit(code, "text")
+      self.stdin[0].send(b'tom says EOL=DNLOAD                          \n')
       self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
 
       done  = False
       datar = b''
       bail  = False
+      logf  = ll['LOG']
 
       while not done:
          while True:
@@ -1365,7 +1359,10 @@ Will use HTML5 for this SASsession.""")
       prev = '%08d' %  (self._log_cnt - 1)
       zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
       logd = zz[2].replace(";*\';*\";*/;", '')
- 
+
+      ll = self.submit("filename _sp_updn;", 'text')
+      logd += ll['LOG']
+      
       return {'Success' : True, 
               'LOG'     : logd}
  
