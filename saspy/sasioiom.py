@@ -1223,6 +1223,7 @@ Will use HTML5 for this SASsession.""")
       if fsize > 0:
          code = "filename _sp_updn '"+remf+"' recfm=N permission='"+permission+"';"
          ll = self.submit(code, 'text')
+         log1 = ll['LOG']
 
          self.stdin[0].send(str(fsize).encode()+b'tom says EOL=UPLOAD                          \n')
 
@@ -1243,6 +1244,7 @@ Will use HTML5 for this SASsession.""")
                
          code = "filename _sp_updn;"
       else:
+         log1 = ''
          code = """
             filename _sp_updn '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
             data _null_;
@@ -1257,7 +1259,7 @@ Will use HTML5 for this SASsession.""")
       fd.close()
 
       return {'Success' : True, 
-              'LOG'     : ll['LOG']+ll2['LOG']}
+              'LOG'     : log1+ll2['LOG']}
  
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
@@ -1296,13 +1298,14 @@ Will use HTML5 for this SASsession.""")
       code = "filename _sp_updn '"+remotefile+"' recfm=F encoding=binary lrecl=4096";
 
       ll = self.submit(code, "text")
+      logf  = ll['LOG']
+
       self.stdin[0].send(b'tom says EOL=DNLOAD                          \n')
       self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
 
       done  = False
       datar = b''
       bail  = False
-      logf  = ll['LOG']
 
       while not done:
          while True:
