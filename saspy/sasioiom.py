@@ -1228,7 +1228,7 @@ Will use HTML5 for this SASsession.""")
          self.stdin[0].send(str(fsize).encode()+b'tom says EOL=UPLOAD                          \n')
 
          while True:
-            buf  = fd.read1(4096)
+            buf  = fd.read1(32768)
             sent = 0
             send = len(buf)
             blen = send
@@ -1291,9 +1291,12 @@ Will use HTML5 for this SASsession.""")
 
       try:
          fd = open(locf, 'wb')
+         fd.write(b'write can fail even if open worked, as it turns out')
+         fd.close()
+         fd = open(locf, 'wb')
       except OSError as e:
          return {'Success' : False, 
-                 'LOG'     : "File "+str(locf)+" could not be opened. Error was: "+str(e)}
+                 'LOG'     : "File "+str(locf)+" could not be opened or written to. Error was: "+str(e)}
 
       code = "filename _sp_updn '"+remotefile+"' recfm=F encoding=binary lrecl=4096";
 

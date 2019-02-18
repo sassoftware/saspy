@@ -128,7 +128,7 @@ public class saspy2j
 
       OctetSeqHolder odsdata = new OctetSeqHolder();
       char[]         in      = new char[4097];
-      byte[]         out     = new byte[4097];
+      byte[]         out     = new byte[32768];
 
       for (int x = 0; x < nargs; x++)
          {
@@ -253,7 +253,7 @@ public class saspy2j
                            {
                            try
                               {
-                              slen = odsin.read(out, 0, 4096);
+                              slen = odsin.read(out, 0, 32768);
                               if (slen > 0)
                                  {
                                  flen -= slen;
