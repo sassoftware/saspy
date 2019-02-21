@@ -51,9 +51,9 @@ from saspy.sasViyaML import SASViyaML
 from saspy.sasdata   import SASdata
 
 try:
-    import pandas as pd
+   import pandas as pd
 except ImportError:
-    pass
+   pass
 
 try:
    import saspy.sascfg_personal as SAScfg
@@ -64,14 +64,20 @@ except ImportError:
       import saspy.sascfg as SAScfg
 
 if os.name != 'nt':
-    from saspy.sasiostdio import SASsessionSTDIO
+   from saspy.sasiostdio import SASsessionSTDIO
 
 try:
-    from IPython.display import HTML
-    from IPython.display import display as DISPLAY
+   from IPython.display import HTML
+   from IPython.display import display as DISPLAY
 except ImportError:
-    pass
+   def DISPLAY(x): print(x)
+   def HTML(x):    return "IPython didn't import. Can't render HTML"
 
+def zepDISPLAY(x):
+   print(x)
+
+def zepHTML(x):
+   return("%html "+x)
 
 class SASconfig:
     """
@@ -154,12 +160,20 @@ class SASconfig:
         self.name = cfgname
         cfg = getattr(SAScfg, cfgname)
 
-        ip            = cfg.get('ip', '')
-        ssh           = cfg.get('ssh', '')
-        path          = cfg.get('saspath', '')
-        java          = cfg.get('java', '')
-        self.results  = cfg.get('results', None)
+        ip            = cfg.get('ip',       '')
+        ssh           = cfg.get('ssh',      '')
+        path          = cfg.get('saspath',  '')
+        java          = cfg.get('java',     '')
+        self.zep      = cfg.get('zeppelin', False)
+        self.results  = cfg.get('results',  None)
         self.autoexec = cfg.get('autoexec', None)
+
+        if self.zep:
+           self.DISPLAY = zepDISPLAY
+           self.HTML    = zepHTML
+        else:
+           self.DISPLAY = DISPLAY
+           self.HTML    = HTML
 
         inautoexec = kwargs.get('autoexec', None)
         if inautoexec:
@@ -278,6 +292,8 @@ class SASsession():
         self.sas_date_fmts     = sas_date_fmts
         self.sas_time_fmts     = sas_time_fmts
         self.sas_datetime_fmts = sas_datetime_fmts
+        self.DISPLAY           = self.sascfg.DISPLAY
+        self.HTML              = self.sascfg.HTML
 
         if not self.sascfg.valid:
             self._io = None
@@ -442,6 +458,8 @@ class SASsession():
 
         NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()
 
+        In Zeppelin, the html LST results can be displayed via print(ll['LST']) as they already have the "%html " prepended.
+
         i.e,: results = sas.submit("data a; x=1; run; proc print;run')
                       print(results['LOG'])
                       HTML(results['LST'])
@@ -457,7 +475,13 @@ class SASsession():
             else:
                 results = self.results
 
-        return self._io.submit(code, results, prompt)
+        ll = self._io.submit(code, results, prompt)
+
+        if results.upper == 'HTML':
+           if self.sascfg.zep: 
+              ll['LST'] = self.HTML(ll['LST'])
+
+        return ll
 
     def saslog(self) -> str:
         """
@@ -688,7 +712,7 @@ class SASsession():
            if self.results.lower() == 'html':
               ll = self._io.submit(code, "html")
               if not self.batch:
-                 DISPLAY(HTML(ll['LST']))
+                 self.DISPLAY(self.HTML(ll['LST']))
               else:
                  return ll
            else:

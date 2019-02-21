@@ -5,11 +5,6 @@ try:
     import pandas as pd
 except ImportError:
     pass
-try:
-    from IPython.display import HTML
-    from IPython.display import display as DISPLAY
-except ImportError:
-    pass
 
 from collections import ChainMap
 import saspy as sp
@@ -315,7 +310,7 @@ class Tabulate:
                 ll = self.sas._io.submit(code)
                 self.data.HTML = html
             if not self.sas.batch:
-                DISPLAY(HTML(ll['LST']))
+                self.sas.DISPLAY(self.sas.HTML(ll['LST']))
                 check, errorMsg = self.data._checkLogForError(ll['LOG'])
                 if not check:
                     raise ValueError("Internal code execution failed: " + errorMsg)

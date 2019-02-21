@@ -20,11 +20,8 @@ from pygments import highlight
 
 try:
     import pandas as pd
-    from IPython import display as dis
-    from IPython.core.display import HTML
 except ImportError:
     pass
-
 
 class SASresults(object):
     """Return results from a SAS Model object"""
@@ -46,14 +43,21 @@ class SASresults(object):
         """Overload dir method to return the attributes"""
         return self._names
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr, all=False):
         if attr.startswith('_'):
             return getattr(self, attr)
         if attr.upper() == 'LOG' or attr.upper() == 'ERROR_LOG':
-            if not self.sas.batch:
-                return HTML(self._colorLog(self._log))
+            if self.sas.sascfg.zep:
+               if not self.sas.batch:
+                   self.sas.DISPLAY(self.sas.HTML(self._colorLog(self._log)))
+               else:
+                   print(self._log)
             else:
-                return self._log
+               if not self.sas.batch:
+                   return HTML(self._colorLog(self._log))
+               else:
+                   return self._log
+
         if attr.upper() in self._names:
             data = self._go_run_code(attr)
         else:
@@ -68,7 +72,11 @@ class SASresults(object):
            if isinstance(data, pd.DataFrame):
                return data
            else:
-               return HTML('<h1>' + attr + '</h1>' + data['LST'])
+               if self.sas.sascfg.zep:
+                   self.sas.DISPLAY(self.sas.HTML('<h1>' + attr + '</h1>' + data['LST']))
+                   return None
+               else:
+                   return data
         else:
            return data
 
@@ -107,7 +115,10 @@ class SASresults(object):
         if not self.sas.batch:
            for i in self._names:
                if i.upper()!='LOG':
-                   dis.display(self.__getattr__(i))
+                   x = self.__getattr__(i)
+                   if isinstance(x, pd.DataFrame):
+                      print("%text "+i+"\n"+str(x)+"\n")
+           return None
         else:
            ret = []
            for i in self._names:

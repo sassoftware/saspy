@@ -23,12 +23,6 @@ try:
 except ImportError:
     pass
 
-try:
-    from IPython.display import HTML
-    from IPython.display import display as DISPLAY
-except ImportError:
-    pass
-
 class SASdata:
     """
     **Overview**
@@ -71,9 +65,7 @@ class SASdata:
 
         failed = 0
         if results.upper() == "HTML":
-            try:
-                from IPython.display import HTML
-            except:
+            if self.sas.HTML('') == "IPython didn't import. Can't render HTML":
                 failed = 1
 
             if failed and not self.sas.batch:
@@ -216,7 +208,7 @@ class SASdata:
                 if not ll:
                     ll = self.sas._io.submit(code)
                 if not self.sas.batch:
-                    DISPLAY(HTML(ll['LST']))
+                    self.sas.DISPLAY(self.sas.HTML(ll['LST']))
                 else:
                     return ll
             else:
@@ -274,7 +266,7 @@ class SASdata:
                 else:
                     ll = le
                 if not self.sas.batch:
-                    DISPLAY(HTML(ll['LST']))
+                    self.sas.DISPLAY(self.sas.HTML(ll['LST']))
                 else:
                     return ll
             else:
@@ -476,7 +468,7 @@ class SASdata:
                 if not ll:
                     ll = self.sas._io.submit(code)
                 if not self.sas.batch:
-                    DISPLAY(HTML(ll['LST']))
+                    self.sas.DISPLAY(self.sas.HTML(ll['LST']))
                 else:
                     return ll
             else:
@@ -509,7 +501,7 @@ class SASdata:
                 if not ll:
                     ll = self.sas._io.submit(code)
                 if not self.sas.batch:
-                    DISPLAY(HTML(ll['LST']))
+                    self.sas.DISPLAY(self.sas.HTML(ll['LST']))
                 else:
                     return ll
             else:
@@ -606,7 +598,7 @@ class SASdata:
                if not ll:
                   ll = self.sas._io.submit(code)
                if not self.sas.batch:
-                  DISPLAY(HTML(ll['LST']))
+                  self.sas.DISPLAY(self.sas.HTML(ll['LST']))
                else:
                   return ll
             else:
@@ -964,7 +956,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            DISPLAY(HTML(ll['LST']))
+            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
         else:
             return ll
 
@@ -1084,7 +1076,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            DISPLAY(HTML(ll['LST']))
+            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
         else:
             return ll
 
@@ -1118,7 +1110,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            DISPLAY(HTML(ll['LST']))
+            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
         else:
             return ll
 
@@ -1156,7 +1148,7 @@ class SASdata:
                 if not ll:
                     ll = self.sas._io.submit(code)
                 if not self.sas.batch:
-                    DISPLAY(HTML(ll['LST']))
+                    self.sas.DISPLAY(self.sas.HTML(ll['LST']))
                 else:
                     return ll
             else:
@@ -1197,7 +1189,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            DISPLAY(HTML(ll['LST']))
+            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
         else:
             return ll
 
@@ -1237,7 +1229,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            DISPLAY(HTML(ll['LST']))
+            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
         else:
             return ll
 
@@ -1277,6 +1269,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            DISPLAY(HTML(ll['LST']))
+            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
         else:
             return ll
+
