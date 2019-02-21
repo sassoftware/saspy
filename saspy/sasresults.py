@@ -52,9 +52,10 @@ class SASresults(object):
                    self.sas.DISPLAY(self.sas.HTML(self._colorLog(self._log)))
                else:
                    print(self._log)
+               return
             else:
                if not self.sas.batch:
-                   return HTML(self._colorLog(self._log))
+                   return self.sas.HTML(self._colorLog(self._log))
                else:
                    return self._log
 
@@ -72,11 +73,7 @@ class SASresults(object):
            if isinstance(data, pd.DataFrame):
                return data
            else:
-               if self.sas.sascfg.zep:
-                   self.sas.DISPLAY(self.sas.HTML('<h1>' + attr + '</h1>' + data['LST']))
-                   return None
-               else:
-                   return data
+               self.sas.DISPLAY(self.sas.HTML('<h1>' + attr + '</h1>' + data['LST']))
         else:
            return data
 
@@ -117,8 +114,10 @@ class SASresults(object):
                if i.upper()!='LOG':
                    x = self.__getattr__(i)
                    if isinstance(x, pd.DataFrame):
-                      print("%text "+i+"\n"+str(x)+"\n")
-           return None
+                      if not self.sas.sascfg.zep:
+                         self.sas.DISPLAY(x)
+                      else:
+                         print("%text "+i+"\n"+str(x)+"\n")
         else:
            ret = []
            for i in self._names:
