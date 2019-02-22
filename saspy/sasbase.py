@@ -477,7 +477,7 @@ class SASsession():
 
         ll = self._io.submit(code, results, prompt)
 
-        if results.upper == 'HTML':
+        if results.upper() == 'HTML':
            if self.sascfg.zep: 
               ll['LST'] = self.HTML(ll['LST'])
 
