@@ -47,7 +47,7 @@ class SASresults(object):
         if attr.startswith('_'):
             return getattr(self, attr)
         if attr.upper() == 'LOG' or attr.upper() == 'ERROR_LOG':
-            if self.sas.sascfg.zep:
+            if self.sas.sascfg.display.lower() == 'zeppelin':
                if not self.sas.batch:
                    self.sas.DISPLAY(self.sas.HTML(self._colorLog(self._log)))
                else:
@@ -114,10 +114,10 @@ class SASresults(object):
                if i.upper()!='LOG':
                    x = self.__getattr__(i)
                    if isinstance(x, pd.DataFrame):
-                      if not self.sas.sascfg.zep:
-                         self.sas.DISPLAY(x)
-                      else:
+                      if self.sas.sascfg.display.lower() == 'zeppelin':
                          print("%text "+i+"\n"+str(x)+"\n")
+                      else:
+                         self.sas.DISPLAY(x)
         else:
            ret = []
            for i in self._names:

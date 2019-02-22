@@ -164,11 +164,24 @@ class SASconfig:
         ssh           = cfg.get('ssh',      '')
         path          = cfg.get('saspath',  '')
         java          = cfg.get('java',     '')
-        self.zep      = cfg.get('zeppelin', False)
+        self.display  = cfg.get('display',  '')
         self.results  = cfg.get('results',  None)
         self.autoexec = cfg.get('autoexec', None)
 
-        if self.zep:
+        indisplay = kwargs.get('display', '')
+        if len(indisplay) > 0:
+           if lock and len(self.display):
+              print("Parameter 'display' passed to SAS_session was ignored due to configuration restriction.")
+           else:
+              self.display = indisplay
+        if self.display == '':
+           self.display = 'jupyter'
+        else:
+           if self.display.lower() not in ['zeppelin', 'jupyter']:
+              print("Invalid value specified for 'display'. Using the default of 'jupyter'")
+              self.display = 'jupyter'
+
+        if self.display.lower() == 'zeppelin':
            self.DISPLAY = zepDISPLAY
            self.HTML    = zepHTML
         else:
@@ -458,7 +471,7 @@ class SASsession():
 
         NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()
 
-        In Zeppelin, the html LST results can be displayed via print(ll['LST']) as they already have the "%html " prepended.
+        In Zeppelin, the html LST results can be displayed via print("%html "+ ll['LST']) to diplay as HTML.
 
         i.e,: results = sas.submit("data a; x=1; run; proc print;run')
                       print(results['LOG'])

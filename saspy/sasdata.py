@@ -65,7 +65,9 @@ class SASdata:
 
         failed = 0
         if results.upper() == "HTML":
-            if self.sas.HTML('') == "IPython didn't import. Can't render HTML":
+            try:
+                from IPython.display import HTML
+            except:
                 failed = 1
 
             if failed and not self.sas.batch:
