@@ -480,20 +480,30 @@ are the usual IOM errors and what to do about them.
 
 There are a few obvious misconfigurations that can happen here.
 
-   1) The 'iomhost' or 'iomport' you've specified aren't right, or the server isn't up and available to be connected to::
-      The application could not log on to the server "host:port". No server is available at that port on that machine.
+1) The 'iomhost' or 'iomport' you've specified aren't right, or the server isn't up and available to be connected to.
 
-   2) Your credentials were specifed wrong, or you don't have permission to connect (maybe it's the wrong App Serever?)::
-      The application could not log on to the server "host:port". The user ID "wrong_user" or the password is incorrect.
+   The error would be like::
+   The application could not log on to the server "host:port". No server is available at that port on that machine.
 
-   3) for Windows Local connection, you don't have the path to the sspiauth.dll in yout System Path variable::
-      The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.
+2) Your credentials were specifed wrong, or you don't have permission to connect (maybe it's the wrong App Serever?).
 
-   4) for Windows Local connection, the registry doesn't have the right path to the SAS start up command::
-      The application could not find a command to launch a SAS Workspace Server.
+   The error would be like::
+   The application could not log on to the server "host:port". The user ID "wrong_user" or the password is incorrect.
 
-   5) for Windows Local connection, the start up command in the registry isn't formated just right. Blanks, quotes, other::
-      The application could not log on to the server. The server process did not start.
+3) for Windows Local connection, you don't have the path to the sspiauth.dll in yout System Path variable.
+
+   The error would be like::
+   The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.
+
+4) for Windows Local connection, the registry doesn't have the right path to the SAS start up command.
+
+   The error would be like::
+   The application could not find a command to launch a SAS Workspace Server.
+
+5) for Windows Local connection, the start up command in the registry isn't formated just right. Blanks, quotes, other.
+
+   The error would be like::
+   The application could not log on to the server. The server process did not start.
 
 
 Here are examples of each of the above problems:
@@ -598,6 +608,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__pxx__sp0__1\\deploywiz\\sas.core.jar;
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
+
 
 
     Be sure the path to sspiauth.dll is in your System PATH
