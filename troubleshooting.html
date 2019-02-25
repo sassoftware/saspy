@@ -352,7 +352,7 @@ There are basically two possibilities where something can go wrong: Java or IOM.
 <div><ol class="arabic simple">
 <li>Java isn&#8217;t installed or configured right, or you don&#8217;t have the right Java command for &#8216;java&#8217; in your configuration definition.</li>
 <li>You don&#8217;t have your classpath right, or don&#8217;t have the right JAR files.</li>
-<li>An IOM specific issue like hosy/port aren&#8217;t right, user.pw or Windows path issues</li>
+<li>An IOM specific issue like host/port aren&#8217;t right, user/pw or Windows path issues</li>
 </ol>
 </div></blockquote>
 <div class="section" id="java-problems">
@@ -404,6 +404,7 @@ The second case has a valid classpath, but is missing one of the IOM jars. The t
 Caused by: java.lang.NoClassDefFoundError: org/omg/CORBA/UserException</li>
 <li>Java Error:
 java.lang.NoClassDefFoundError: com/sas/services/connection/ConnectionFactoryException</li>
+<li>The &#8216;correct&#8217; error when your classpath is ok</li>
 </ol>
 <ol class="arabic simple">
 <li>Just what a bad classpath might look like:</li>
@@ -514,10 +515,13 @@ java.lang.NoClassDefFoundError: com/sas/services/connection/ConnectionFactoryExc
         <span class="o">...</span> <span class="mi">19</span> <span class="n">more</span>
 </pre></div>
 </div>
-<p>2) The problem with versions 9 Java, not having CORBA available. Version 11 Java doesn&#8217;t even ship CORBA, so the Java IOM client won&#8217;t yet work with that version:
-The IOM group is currently investigating a solution to this.</p>
+<ol class="arabic simple" start="2">
+<li>The problem with versions 9 Java, not having CORBA available. Version 11 Java doesn&#8217;t even ship CORBA, so the Java IOM client won&#8217;t yet work with that version:
+The IOM group is currently investigating a solution to this.</li>
+</ol>
 <p>A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
-This can be resolved by adding it back in, using the &#8216;javaparms&#8217; key of your configuration definition as shown below.</p>
+This can be resolved by adding it back in, using the &#8216;javaparms&#8217; key of your configuration definition as shown below.
+Version 11 Java doesn&#8217;t even ship CORBA, so the Java IOM client won&#8217;t yet work with that version. The IOM group is currently investigating a solution to this.</p>
 <p>If you see an error like this:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">Using</span> <span class="n">SAS</span> <span class="n">Config</span> <span class="n">named</span><span class="p">:</span> <span class="n">winiomwin</span>
 <span class="n">Java</span> <span class="n">Error</span><span class="p">:</span>
@@ -557,9 +561,12 @@ The NoClassDefFounfError is the clue here, referring to a com/sas/... class that
 <span class="ne">Exception</span> <span class="ow">in</span> <span class="n">thread</span> <span class="s2">&quot;main&quot;</span>
 </pre></div>
 </div>
+<ol class="arabic simple" start="4">
+<li>When you run the java command yourself and the classpath is ok, you still get an error.</li>
+</ol>
 <p>If you run the Java command and you see an error similar to the following, about a socket connection failure, that suggests that your CLASSPATH is correct
 and that the problem might be connecting to the IOM server. That error shows that java came up and is running code from saspyiom.jar. It is trying to connect
-back to the python process, which isn&#8217;t running, thus the connection error. But it means, at least, saspyiom.jar was found.</p>
+back to the python process, which isn&#8217;t running, thus the connection error. But it means, at least, saspyiom.jar was found and the other SAS jars too.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">ConnectException</span><span class="p">:</span> <span class="n">Connection</span> <span class="n">refused</span>
         <span class="n">at</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">PlainSocketImpl</span><span class="o">.</span><span class="n">socketConnect</span><span class="p">(</span><span class="n">Native</span> <span class="n">Method</span><span class="p">)</span>
         <span class="n">at</span> <span class="n">java</span><span class="o">.</span><span class="n">net</span><span class="o">.</span><span class="n">AbstractPlainSocketImpl</span><span class="o">.</span><span class="n">doConnect</span><span class="p">(</span><span class="n">AbstractPlainSocketImpl</span><span class="o">.</span><span class="n">java</span><span class="p">:</span><span class="mi">350</span><span class="p">)</span>
@@ -584,20 +591,15 @@ are the usual IOM errors and what to do about them.</p>
 <p>There are a few obvious misconfigurations that can happen here.</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>The &#8216;iomhost&#8217; or &#8216;iomport&#8217; you&#8217;ve specified aren&#8217;t right, or the server isn&#8217;t up and available to be connected to.
-The error would look like:
+<li>The &#8216;iomhost&#8217; or &#8216;iomport&#8217; you&#8217;ve specified aren&#8217;t right, or the server isn&#8217;t up and available to be connected to::
 The application could not log on to the server &#8220;host:port&#8221;. No server is available at that port on that machine.</li>
-<li>Your credentials were specifed wrong, or you don&#8217;t have permission to connect (maybe it&#8217;s the wrong App Serever?).
-The error would look like:
+<li>Your credentials were specifed wrong, or you don&#8217;t have permission to connect (maybe it&#8217;s the wrong App Serever?)::
 The application could not log on to the server &#8220;host:port&#8221;. The user ID &#8220;wrong_user&#8221; or the password is incorrect.</li>
-<li>for Windows Local connection, you don&#8217;t have the path to the sspiauth.dll in yout System Path variable.
-The error would look like:
+<li>for Windows Local connection, you don&#8217;t have the path to the sspiauth.dll in yout System Path variable::
 The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.</li>
-<li>for Windows Local connection, the registry doesn&#8217;t have the right path to the SAS start up command.
-The error would look like:
+<li>for Windows Local connection, the registry doesn&#8217;t have the right path to the SAS start up command::
 The application could not find a command to launch a SAS Workspace Server.</li>
-<li>for Windows Local connection, the start up command in the registry isn&#8217;t formated just right. Blanks, quotes, ...
-The error would look like:
+<li>for Windows Local connection, the start up command in the registry isn&#8217;t formated just right. Blanks, quotes, other::
 The application could not log on to the server. The server process did not start.</li>
 </ol>
 </div></blockquote>
@@ -688,6 +690,7 @@ The work around for this is to use the &#8216;javaparms&#8217; option on the con
 <span class="n">C</span><span class="p">:</span>\\<span class="n">Program</span> <span class="n">Files</span>\\<span class="n">SASHome</span>\\<span class="n">SASDeploymentManager</span>\\<span class="mf">9.4</span>\\<span class="n">products</span>\\<span class="n">deploywiz__94485__pxx__sp0__1</span>\\<span class="n">deploywiz</span>\\<span class="n">sas</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">jar</span><span class="p">;</span>
 <span class="n">C</span><span class="p">:</span>\\<span class="n">ProgramData</span>\\<span class="n">Anaconda3</span>\\<span class="n">Lib</span>\\<span class="n">site</span><span class="o">-</span><span class="n">packages</span>\\<span class="n">saspy</span>\\<span class="n">java</span>\\<span class="n">saspyiom</span><span class="o">.</span><span class="n">jar</span><span class="s1">&#39;,</span>
 <span class="s1">&#39;pyiom.saspy2j&#39;</span><span class="p">,</span> <span class="s1">&#39;-host&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="s1">&#39;-stdinport&#39;</span><span class="p">,</span> <span class="s1">&#39;57425&#39;</span><span class="p">,</span> <span class="s1">&#39;-stdoutport&#39;</span><span class="p">,</span> <span class="s1">&#39;57426&#39;</span><span class="p">,</span> <span class="s1">&#39;-stderrport&#39;</span><span class="p">,</span> <span class="s1">&#39;57427&#39;</span><span class="p">,</span> <span class="s1">&#39;-zero&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+
 
 <span class="n">Be</span> <span class="n">sure</span> <span class="n">the</span> <span class="n">path</span> <span class="n">to</span> <span class="n">sspiauth</span><span class="o">.</span><span class="n">dll</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">System</span> <span class="n">PATH</span>
 
