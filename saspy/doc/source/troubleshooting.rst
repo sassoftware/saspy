@@ -209,7 +209,7 @@ There are three things that are likely to be the problem.
 
    1) Java isn't installed or configured right, or you don't have the right Java command for 'java' in your configuration definition.
    2) You don't have your classpath right, or don't have the right JAR files.
-   3) An IOM specific issue like hosy/port aren't right, user.pw or Windows path issues
+   3) An IOM specific issue like host/port aren't right, user/pw or Windows path issues
 
 
 Java problems
@@ -271,7 +271,7 @@ These errors are descibed below:
    Caused by: java.lang.NoClassDefFoundError: org/omg/CORBA/UserException
 3) Java Error:
    java.lang.NoClassDefFoundError: com/sas/services/connection/ConnectionFactoryException
-
+4) The 'correct' error when your classpath is ok
 
 
 1) Just what a bad classpath might look like:
@@ -394,10 +394,11 @@ And if we run that command ourselves... Same error as was reported.
         
 
 2) The problem with versions 9 Java, not having CORBA available. Version 11 Java doesn't even ship CORBA, so the Java IOM client won't yet work with that version:
-The IOM group is currently investigating a solution to this. 
+   The IOM group is currently investigating a solution to this. 
     
 A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
-This can be resolved by adding it back in, using the 'javaparms' key of your configuration definition as shown below.
+This can be resolved by adding it back in, using the 'javaparms' key of your configuration definition as shown below. 
+Version 11 Java doesn't even ship CORBA, so the Java IOM client won't yet work with that version. The IOM group is currently investigating a solution to this. 
 
 If you see an error like this:
 
@@ -448,10 +449,11 @@ The NoClassDefFounfError is the clue here, referring to a com/sas/... class that
     Exception in thread "main"
 
 
+4) When you run the java command yourself and the classpath is ok, you still get an error.
 
 If you run the Java command and you see an error similar to the following, about a socket connection failure, that suggests that your CLASSPATH is correct
 and that the problem might be connecting to the IOM server. That error shows that java came up and is running code from saspyiom.jar. It is trying to connect
-back to the python process, which isn't running, thus the connection error. But it means, at least, saspyiom.jar was found.
+back to the python process, which isn't running, thus the connection error. But it means, at least, saspyiom.jar was found and the other SAS jars too.
 
 .. code-block:: ipython3
 
@@ -479,24 +481,19 @@ are the usual IOM errors and what to do about them.
 
 There are a few obvious misconfigurations that can happen here.
 
-   1) The 'iomhost' or 'iomport' you've specified aren't right, or the server isn't up and available to be connected to.
-      The error would look like:
+   1) The 'iomhost' or 'iomport' you've specified aren't right, or the server isn't up and available to be connected to::
       The application could not log on to the server "host:port". No server is available at that port on that machine.
 
-   2) Your credentials were specifed wrong, or you don't have permission to connect (maybe it's the wrong App Serever?).
-      The error would look like:
+   2) Your credentials were specifed wrong, or you don't have permission to connect (maybe it's the wrong App Serever?)::
       The application could not log on to the server "host:port". The user ID "wrong_user" or the password is incorrect.
 
-   3) for Windows Local connection, you don't have the path to the sspiauth.dll in yout System Path variable.
-      The error would look like:
+   3) for Windows Local connection, you don't have the path to the sspiauth.dll in yout System Path variable::
       The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.
 
-   4) for Windows Local connection, the registry doesn't have the right path to the SAS start up command.
-      The error would look like:
+   4) for Windows Local connection, the registry doesn't have the right path to the SAS start up command::
       The application could not find a command to launch a SAS Workspace Server.
 
-   5) for Windows Local connection, the start up command in the registry isn't formated just right. Blanks, quotes, ...
-      The error would look like:
+   5) for Windows Local connection, the start up command in the registry isn't formated just right. Blanks, quotes, other::
       The application could not log on to the server. The server process did not start.
 
 
@@ -602,6 +599,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__pxx__sp0__1\\deploywiz\\sas.core.jar;
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
+
 
     Be sure the path to sspiauth.dll is in your System PATH
     
