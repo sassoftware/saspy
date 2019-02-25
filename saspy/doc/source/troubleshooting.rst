@@ -393,7 +393,7 @@ And if we run that command ourselves... Same error as was reported.
             ... 19 more
         
 
-2) The problem with versions 9 Java, not having CORBA available. Version 11 Java doesn't even shit CORBA, so the Java IOM client won't yet work with that version:
+2) The problem with versions 9 Java, not having CORBA available. Version 11 Java doesn't even ship CORBA, so the Java IOM client won't yet work with that version:
 The IOM group is currently investigating a solution to this. 
     
 A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
