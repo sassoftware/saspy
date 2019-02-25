@@ -514,7 +514,7 @@ java.lang.NoClassDefFoundError: com/sas/services/connection/ConnectionFactoryExc
         <span class="o">...</span> <span class="mi">19</span> <span class="n">more</span>
 </pre></div>
 </div>
-<p>2) The problem with versions 9 Java, not having CORBA available. Version 11 Java doesn&#8217;t even shit CORBA, so the Java IOM client won&#8217;t yet work with that version:
+<p>2) The problem with versions 9 Java, not having CORBA available. Version 11 Java doesn&#8217;t even ship CORBA, so the Java IOM client won&#8217;t yet work with that version:
 The IOM group is currently investigating a solution to this.</p>
 <p>A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
 This can be resolved by adding it back in, using the &#8216;javaparms&#8217; key of your configuration definition as shown below.</p>
