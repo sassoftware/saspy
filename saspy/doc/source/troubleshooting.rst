@@ -215,12 +215,9 @@ There are three things that are likely to be the problem.
 Java problems
 ^^^^^^^^^^^^^
 
-These errors are descibed below:
+This error is descibed below:
 
 1) The system cannot find the file specified
-2) Error: Could not find or load main class pyiom.saspy2j
-3) Error: Unable to initialize main class pyiom.saspy2j
-   Caused by: java.lang.NoClassDefFoundError: org/omg/CORBA/UserException
 
 
 
@@ -262,11 +259,22 @@ there is no c:\\java command to execute.
     'c:\java' is not recognized as an internal or external command, operable program or batch file.
 
 
-Ckasspath problems
+Classpath problems
 ^^^^^^^^^^^^^^^^^^
+So what about CLASSPATH problems? Here are three cases. The first is just the wrong path, so Java won't be able to find the main class to run.
+The second case has a valid classpath, but is missing one of the IOM jars. The third is a case with EG versions of the jars, not from a SAS 9 install.
 
-So what about CLASSPATH problems? Here are two cases. The first is just the wrong path, so Java won't be able to find the main class to run.
-The second case has a valid classpath, but is missing one of the IOM jars.
+These errors are descibed below:
+
+1) Error: Could not find or load main class pyiom.saspy2j
+2) Error: Unable to initialize main class pyiom.saspy2j
+   Caused by: java.lang.NoClassDefFoundError: org/omg/CORBA/UserException
+3) Java Error:
+   java.lang.NoClassDefFoundError: com/sas/services/connection/ConnectionFactoryException
+
+
+
+1) Just what a bad classpath might look like:
     
 .. code-block:: ipython3
 
@@ -385,6 +393,9 @@ And if we run that command ourselves... Same error as was reported.
             ... 19 more
         
 
+2) The problem with versions 9 Java, not having CORBA available. Version 11 Java doesn't even shit CORBA, so the Java IOM client won't yet work with that version:
+The IOM group is currently investigating a solution to this. 
+    
 A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
 This can be resolved by adding it back in, using the 'javaparms' key of your configuration definition as shown below.
 
@@ -408,6 +419,36 @@ Then you can add CORBA back into the search path via the 'javaparms' key (there 
                 }
 
 
+
+
+3) There can be an issue using some versions of these jars that aren't from a SAS9 instalation. Some EG client jars don't have all the necessary classes in them.
+
+Although I don't have any of those jars to run an actual test for this, I've copied the following traceback from one of the issues where this was reported.
+The NoClassDefFounfError is the clue here, referring to a com/sas/... class that isn't defined.
+
+
+.. code-block:: ipython3
+
+    Java Error:
+    java.lang.NoClassDefFoundError: com/sas/services/connection/ConnectionFactoryException
+    at java.lang.Class.getDeclaredMethods0(Native Method)
+    at java.lang.Class.privateGetDeclaredMethods(Unknown Source)
+    at java.lang.Class.privateGetMethodRecursive(Unknown Source)
+    at java.lang.Class.getMethod0(Unknown Source)
+    at java.lang.Class.getMethod(Unknown Source)
+    at sun.launcher.LauncherHelper.validateMainClass(Unknown Source)
+    at sun.launcher.LauncherHelper.checkAndLoadMain(Unknown Source)
+    Caused by: java.lang.ClassNotFoundException: com.sas.services.connection.ConnectionFactoryException
+    at java.net.URLClassLoader.findClass(Unknown Source)
+    at java.lang.ClassLoader.loadClass(Unknown Source)
+    at sun.misc.Launcher$AppClassLoader.loadClass(Unknown Source)
+    at java.lang.ClassLoader.loadClass(Unknown Source)
+    ... 7 more
+    Error: A JNI error has occurred, please check your installation and try again
+    Exception in thread "main"
+
+
+
 If you run the Java command and you see an error similar to the following, about a socket connection failure, that suggests that your CLASSPATH is correct
 and that the problem might be connecting to the IOM server. That error shows that java came up and is running code from saspyiom.jar. It is trying to connect
 back to the python process, which isn't running, thus the connection error. But it means, at least, saspyiom.jar was found.
@@ -429,7 +470,7 @@ back to the python process, which isn't running, thus the connection error. But 
             at pyiom.saspy2j.main(saspy2j.java:116)
 
 
-IOM specific issues     
+IOM specific errors     
 ^^^^^^^^^^^^^^^^^^^
 
 So if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM. 
