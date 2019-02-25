@@ -588,20 +588,28 @@ back to the python process, which isn&#8217;t running, thus the connection error
 The IOM Error message will be reported, followed by the command that was trying to to run. Below
 are the usual IOM errors and what to do about them.</p>
 <p>There are a few obvious misconfigurations that can happen here.</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li>The &#8216;iomhost&#8217; or &#8216;iomport&#8217; you&#8217;ve specified aren&#8217;t right, or the server isn&#8217;t up and available to be connected to::
-The application could not log on to the server &#8220;host:port&#8221;. No server is available at that port on that machine.</li>
-<li>Your credentials were specifed wrong, or you don&#8217;t have permission to connect (maybe it&#8217;s the wrong App Serever?)::
-The application could not log on to the server &#8220;host:port&#8221;. The user ID &#8220;wrong_user&#8221; or the password is incorrect.</li>
-<li>for Windows Local connection, you don&#8217;t have the path to the sspiauth.dll in yout System Path variable::
-The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.</li>
-<li>for Windows Local connection, the registry doesn&#8217;t have the right path to the SAS start up command::
-The application could not find a command to launch a SAS Workspace Server.</li>
-<li>for Windows Local connection, the start up command in the registry isn&#8217;t formated just right. Blanks, quotes, other::
-The application could not log on to the server. The server process did not start.</li>
+<ol class="arabic">
+<li><p class="first">The &#8216;iomhost&#8217; or &#8216;iomport&#8217; you&#8217;ve specified aren&#8217;t right, or the server isn&#8217;t up and available to be connected to.</p>
+<p>The error would be like::
+The application could not log on to the server &#8220;host:port&#8221;. No server is available at that port on that machine.</p>
+</li>
+<li><p class="first">Your credentials were specifed wrong, or you don&#8217;t have permission to connect (maybe it&#8217;s the wrong App Serever?).</p>
+<p>The error would be like::
+The application could not log on to the server &#8220;host:port&#8221;. The user ID &#8220;wrong_user&#8221; or the password is incorrect.</p>
+</li>
+<li><p class="first">for Windows Local connection, you don&#8217;t have the path to the sspiauth.dll in yout System Path variable.</p>
+<p>The error would be like::
+The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.</p>
+</li>
+<li><p class="first">for Windows Local connection, the registry doesn&#8217;t have the right path to the SAS start up command.</p>
+<p>The error would be like::
+The application could not find a command to launch a SAS Workspace Server.</p>
+</li>
+<li><p class="first">for Windows Local connection, the start up command in the registry isn&#8217;t formated just right. Blanks, quotes, other.</p>
+<p>The error would be like::
+The application could not log on to the server. The server process did not start.</p>
+</li>
 </ol>
-</div></blockquote>
 <p>Here are examples of each of the above problems:</p>
 <ol class="arabic simple">
 <li>The application could not log on to the server &#8220;Linux-1:333&#8221;. No server is available at that port on that machine.</li>
@@ -689,6 +697,7 @@ The work around for this is to use the &#8216;javaparms&#8217; option on the con
 <span class="n">C</span><span class="p">:</span>\\<span class="n">Program</span> <span class="n">Files</span>\\<span class="n">SASHome</span>\\<span class="n">SASDeploymentManager</span>\\<span class="mf">9.4</span>\\<span class="n">products</span>\\<span class="n">deploywiz__94485__pxx__sp0__1</span>\\<span class="n">deploywiz</span>\\<span class="n">sas</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">jar</span><span class="p">;</span>
 <span class="n">C</span><span class="p">:</span>\\<span class="n">ProgramData</span>\\<span class="n">Anaconda3</span>\\<span class="n">Lib</span>\\<span class="n">site</span><span class="o">-</span><span class="n">packages</span>\\<span class="n">saspy</span>\\<span class="n">java</span>\\<span class="n">saspyiom</span><span class="o">.</span><span class="n">jar</span><span class="s1">&#39;,</span>
 <span class="s1">&#39;pyiom.saspy2j&#39;</span><span class="p">,</span> <span class="s1">&#39;-host&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="s1">&#39;-stdinport&#39;</span><span class="p">,</span> <span class="s1">&#39;57425&#39;</span><span class="p">,</span> <span class="s1">&#39;-stdoutport&#39;</span><span class="p">,</span> <span class="s1">&#39;57426&#39;</span><span class="p">,</span> <span class="s1">&#39;-stderrport&#39;</span><span class="p">,</span> <span class="s1">&#39;57427&#39;</span><span class="p">,</span> <span class="s1">&#39;-zero&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+
 
 
 <span class="n">Be</span> <span class="n">sure</span> <span class="n">the</span> <span class="n">path</span> <span class="n">to</span> <span class="n">sspiauth</span><span class="o">.</span><span class="n">dll</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">System</span> <span class="n">PATH</span>
