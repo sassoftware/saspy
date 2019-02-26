@@ -583,10 +583,9 @@ Here are examples of each of the above problems:
     No SAS process attached. SAS process has terminated unexpectedly.
 
 
-
-    If you get this error: The application could not find a command to launch a SAS Workspace Server.
-    There is a workaround you can use. Oh course, having a clean SAS install should keep this from happening, but this error has been reported a couple times.
-    The work around for this is to use the 'javaparms' option on the configuration definition to specify the command manually as follows (use the right path on your system, of course):
+If you get this error: The application could not find a command to launch a SAS Workspace Server.
+There is a workaround you can use. Oh course, having a clean SAS install should keep this from happening, but this error has been reported a couple times.
+The work around for this is to use the 'javaparms' option on the configuration definition to specify the command manually as follows (use the right path on your system, of course):
 
 .. code-block:: ipython3
     
@@ -614,31 +613,29 @@ Here are examples of each of the above problems:
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
 
-
     Be sure the path to sspiauth.dll is in your System PATH
     
     No SAS process attached. SAS process has terminated unexpectedly.
 
 
-
-    If you get this error: The application could not log on to the server. The server process did not start.
-    And you have what seems to be the correct start up command in your registry; key=HKEY_CLASSES_ROOT\CLSID\{440196D4-90F0-11D0-9F41-00A024BB830C}\LocalServer32.
-    It may still not be formatted exactly right regaring quoted paths, or blanks in the paths, or the char8 '~' parts.
-    There is a easy way to have SAS re-register this in the Windows Registry that should clean this up and make it correct.
-    Run your sas.exe (you can do this from a CMD Prompt; may need fully qualified path for sas.exe) with the following option: /regserver
+If you get this error: The application could not log on to the server. The server process did not start.
+And you have what seems to be the correct start up command in your registry; key=HKEY_CLASSES_ROOT\CLSID\{440196D4-90F0-11D0-9F41-00A024BB830C}\LocalServer32.
+It may still not be formatted exactly right regaring quoted paths, or blanks in the paths, or the char8 '~' parts.
+There is a easy way to have SAS re-register this in the Windows Registry that should clean this up and make it correct.
+Run your sas.exe (you can do this from a CMD Prompt; may need fully qualified path for sas.exe) with the following option: /regserver
     
 .. code-block:: ipython3
     
     [C:\...\]sas.exe /regserver
-   
-    If this doesn't fix the issue, you can try the same workaround as #4 above, using the javaparms to specify the command.
-    The best option is to quote all paths in that command. In the error message above, you can see that javaparms was used to specify the command,
-    which failed. If I quote both of the paths in that parameter, then it works.
+
+
+If this doesn't fix the issue, you can try the same workaround as #4 above, using the javaparms to specify the command.
+The best option is to quote all paths in that command. In the error message above, you can see that javaparms was used to specify the command,
+which failed. If I quote both of the paths in that parameter, then it works.
     
 .. code-block:: ipython3
     
     '-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd="C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\SAS.EXE" -config "C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\sasv9.cfg" -objectserver -nologo -noinal -noprngetlist'
-
 
 
 So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn't
