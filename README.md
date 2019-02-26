@@ -38,6 +38,3 @@ Unless required by applicable law or agreed to in writing, software distributed 
 - [Python Website](http://www.python.org/)
 - [SASPy Documentation](https://sassoftware.github.io/saspy/).
 - [SASPy Examples](https://github.com/sassoftware/saspy-examples) 
-
-
-Copyright SAS Institute
