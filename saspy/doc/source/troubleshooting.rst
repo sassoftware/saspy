@@ -475,45 +475,34 @@ IOM specific errors
 ^^^^^^^^^^^^^^^^^^^
 
 So if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM. 
-The IOM Error message will be reported, followed by the command that was trying to to run. Below
+The IOM Error message will be reported, followed by the command that was trying to be run. Below
 are the usual IOM errors and what to do about them. 
 
-There are a few obvious misconfigurations that can happen here.
+There are a few obvious misconfigurations that can happen here, and these are the likely error you may see.
+Scroll down based upon the number to see an example of that error and help on why that may occur and what to do about it.
 
-1) The 'iomhost' or 'iomport' you've specified aren't right, or the server isn't up and available to be connected to.
-   The error would be like:
-
-   **The application could not log on to the server "host:port". No server is available at that port on that machine.**
+1) **The application could not log on to the server "host:port". No server is available at that port on that machine.**
 
 
-2) Your credentials were specifed wrong, or you don't have permission to connect (maybe it's the wrong App Serever?).
-   The error would be like:
-
-   **The application could not log on to the server "host:port". The user ID "wrong_user" or the password is incorrect.**
+2) **The application could not log on to the server "host:port". The user ID "wrong_user" or the password is incorrect.**
 
 
-3) for Windows Local connection, you don't have the path to the sspiauth.dll in yout System Path variable.
-   The error would be like:
-
-   **The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.**
+3) **The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.**
 
 
-4) for Windows Local connection, the registry doesn't have the right path to the SAS start up command.
-   The error would be like:
-
-   **The application could not find a command to launch a SAS Workspace Server.**
+4) **The application could not find a command to launch a SAS Workspace Server.**
 
 
-5) for Windows Local connection, the start up command in the registry isn't formated just right. Blanks, quotes, other.
-   The error would be like:
-
-   **The application could not log on to the server. The server process did not start.**
+5) **The application could not log on to the server. The server process did not start.**
 
 
 Here are examples of each of the above problems:
 
 
 1) The application could not log on to the server "Linux-1:333". No server is available at that port on that machine.
+   For this error, either the 'iomhost' or 'iomport' you've specified aren't right, or the server isn't up and available to be connected to.
+   You may have specified the host or port for the metadata server instead of the host of the object spawner and 
+   port for theworkspace server.
 
 .. code-block:: ipython3
 
@@ -530,6 +519,9 @@ Here are examples of each of the above problems:
     
 
 2) The application could not log on to the server "Linux-1:8591". The user ID "wrong_user" or the password is incorrect.
+   Your credentials were specifed wrong, or you don't have permission to connect. This can also happen when there are more than one
+   App Server and you didn't specify which one to connect to. The object spawner will only try the first one in its list, so it might
+   be trying to connect you to the wrong App Serever.
 
 .. code-block:: ipython3
 
@@ -547,6 +539,8 @@ Here are examples of each of the above problems:
 
 
 3)  The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.
+    For Windows Local connection, you don't have the path to the sspiauth.dll in yout System Path variable. See the configuration doc
+    to see how to specify this: https://sassoftware.github.io/saspy/install.html#local
 
 .. code-block:: ipython3
 
@@ -567,6 +561,7 @@ Here are examples of each of the above problems:
     
     
 4) The application could not find a command to launch a SAS Workspace Server.
+   For Windows Local connection, the registry doesn't have the right path to the SAS start up command. 
 
 .. code-block:: ipython3
 
@@ -596,6 +591,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
 
     
 5) The application could not log on to the server. The server process did not start.
+   For Windows Local connection, the start up command in the registry isn't formated just right. Blanks, quotes, other.
 
 .. code-block:: ipython3
 
@@ -613,12 +609,10 @@ The work around for this is to use the 'javaparms' option on the configuration d
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
 
-
-
-
     Be sure the path to sspiauth.dll is in your System PATH
     
     No SAS process attached. SAS process has terminated unexpectedly.
+
 
 
 If you get this error: The application could not log on to the server. The server process did not start.
