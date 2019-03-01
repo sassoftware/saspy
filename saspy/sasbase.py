@@ -1294,7 +1294,7 @@ class SASsession():
         if not self.nosub:
            ll = self.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+"));")
 
-           exists = ll['LOG'].rsplit('LIBREF_EXISTS=')[2].split('\n')[0]
+           exists = ll['LOG'].rpartition('LIBREF_EXISTS=')[2].split('\n')[0]
 
            if exists != '0':
               print('Libref provided is not assigned')
@@ -1363,7 +1363,7 @@ class SASsession():
    
            ll = self.submit(code)
    
-           exists = ll['LOG'].rsplit('FILEREF_EXISTS=')[2].split('\n')[0]
+           exists = ll['LOG'].rpartition('FILEREF_EXISTS=')[2].split('\n')[0]
    
            if exists != '1':
               if not quiet:
