@@ -1372,7 +1372,12 @@ Will use HTML5 for this SASsession.""")
       for name in range(ncols):
          input += "'"+str(df.columns[name])+"'n "
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
-            col_l = df[df.columns[name]].astype(str).apply(self._getbytelen).max()
+            try:
+               col_l = df[df.columns[name]].astype(str).apply(self._getbytelen).max()
+            except Exception as e:
+               print("Transcoding error encountered.")
+               print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+               return None
             if col_l == 0:
                col_l = 8
             length += " '"+str(df.columns[name])+"'n $"+str(col_l)
@@ -1408,19 +1413,19 @@ Will use HTML5 for this SASsession.""")
          card  = ""
          for col in range(ncols):
             var = str(row[col])
-            #var = str(row[1][col])
-            if dts[col] == 'N' and var == 'nan':
+
+            if   dts[col] == 'N' and var == 'nan':
                var = '.'
-            if dts[col] == 'C' and var == 'nan':
+            elif dts[col] == 'C' and var == 'nan':
                var = ' '
-            if dts[col] == 'B':
+            elif dts[col] == 'B':
                var = str(int(row[col]))
-            if dts[col] == 'D':
+            elif dts[col] == 'D':
                if var == 'nan':
                   var = '.'
                else:
                   var = str(row[col].to_datetime64())[:26]
-                  #var = str(row[1][col].to_datetime64())
+
             card += var
             if col < (ncols-1):
                card += chr(3)
