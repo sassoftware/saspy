@@ -1,6 +1,4 @@
 
-.. Copyright SAS Institute
-
 ******************************
 Installation and configuration
 ******************************
@@ -247,14 +245,24 @@ encoding -
 autoexec -
     This is a string of SAS code that will be submitted upon establishing a connection.
     You can use this to preassign libraries you always want available, or whatever you want.
+    Don't confuse this with the autoexec option of SAS which specifies a sas program file to be run.
+    That is different. This is a string of SAS code saspy will submit after the session is created,
+    which would be after SAS already included any autoexec file if there was one.
 
 lrecl -
     An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
+display -
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'. The default
+    when this is not specified is 'jupyter'. Jupyter uses IPython to render HTML, which is how saspy has 
+    always worked. To support Zeppelin's display method, a different display interface had to be added to saspy.
+    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
+
 .. code-block:: ipython3
 
     default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
-                'options' : ["-fullstimer", "-autoexec", "/user/tom/autoexec"]
+                'options' : ["-fullstimer", "-autoexec", "/user/tom/autoexec.sas"],
+                'autoexec': "libname mylib 'some/library/to/pre-assign';"
                 }
 
 .. note:: The trigger to use the STDIO connection method is the absence of any
@@ -487,6 +495,9 @@ sspi -
 autoexec -
     This is a string of SAS code that will be submitted upon establishing a connection.
     You can use this to preassign libraries you always want available, or whatever you want.
+    Don't confuse this with the autoexec option of SAS which specifies a sas program file to be run.
+    That is different. This is a string of SAS code saspy will submit after the session is created,
+    which would be after SAS already included any autoexec file if there was one.
 
 javaparms -
     The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
@@ -494,6 +505,12 @@ javaparms -
 
 lrecl -
     An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
+
+display -
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'. The default
+    when this is not specified is 'jupyter'. Jupyter uses IPython to render HTML, which is how saspy has 
+    always worked. To support Zeppelin's display method, a different display interface had to be added to saspy.
+    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
 
 
 .. code-block:: ipython3
@@ -610,6 +627,9 @@ encoding  -
 autoexec -
     This is a string of SAS code that will be submitted upon establishing a connection.
     You can use this to preassign libraries you always want available, or whatever you want.
+    Don't confuse this with the autoexec option of SAS which specifies a sas program file to be run.
+    That is different. This is a string of SAS code saspy will submit after the session is created,
+    which would be after SAS already included any autoexec file if there was one.
 
 javaparms -
     The javaparms option allows you to specify Java command line options. These aren't generally needed, but this
@@ -617,6 +637,12 @@ javaparms -
 
 lrecl -
     An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
+
+display -
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'. The default
+    when this is not specified is 'jupyter'. Jupyter uses IPython to render HTML, which is how saspy has 
+    always worked. To support Zeppelin's display method, a different display interface had to be added to saspy.
+    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
 
 .. code-block:: ipython3
 
