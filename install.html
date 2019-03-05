@@ -385,12 +385,21 @@ windows-1252, respectively.</p>
 </dd>
 <dt>autoexec -</dt>
 <dd>This is a string of SAS code that will be submitted upon establishing a connection.
-You can use this to preassign libraries you always want available, or whatever you want.</dd>
+You can use this to preassign libraries you always want available, or whatever you want.
+Don&#8217;t confuse this with the autoexec option of SAS which specifies a sas program file to be run.
+That is different. This is a string of SAS code saspy will submit after the session is created,
+which would be after SAS already included any autoexec file if there was one.</dd>
 <dt>lrecl -</dt>
 <dd>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
+<dt>display -</dt>
+<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;. The default
+when this is not specified is &#8216;jupyter&#8217;. Jupyter uses IPython to render HTML, which is how saspy has
+always worked. To support Zeppelin&#8217;s display method, a different display interface had to be added to saspy.
+If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">,</span> <span class="s2">&quot;-autoexec&quot;</span><span class="p">,</span> <span class="s2">&quot;/user/tom/autoexec&quot;</span><span class="p">]</span>
+            <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">,</span> <span class="s2">&quot;-autoexec&quot;</span><span class="p">,</span> <span class="s2">&quot;/user/tom/autoexec.sas&quot;</span><span class="p">],</span>
+            <span class="s1">&#39;autoexec&#39;</span><span class="p">:</span> <span class="s2">&quot;libname mylib &#39;some/library/to/pre-assign&#39;;&quot;</span>
             <span class="p">}</span>
 </pre></div>
 </div>
@@ -596,12 +605,20 @@ spiauth.dll file in your System Path variable, just like is required for Local I
 See the second paragraph under Local IOM for more on the spiauth.dll file.</dd>
 <dt>autoexec -</dt>
 <dd>This is a string of SAS code that will be submitted upon establishing a connection.
-You can use this to preassign libraries you always want available, or whatever you want.</dd>
+You can use this to preassign libraries you always want available, or whatever you want.
+Don&#8217;t confuse this with the autoexec option of SAS which specifies a sas program file to be run.
+That is different. This is a string of SAS code saspy will submit after the session is created,
+which would be after SAS already included any autoexec file if there was one.</dd>
 <dt>javaparms -</dt>
 <dd>The javaparms option allows you to specify Java command line options. These aren&#8217;t generally needed, but this
 does allows for a way to specify them if something was needed.</dd>
 <dt>lrecl -</dt>
 <dd>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
+<dt>display -</dt>
+<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;. The default
+when this is not specified is &#8216;jupyter&#8217;. Jupyter uses IPython to render HTML, which is how saspy has
+always worked. To support Zeppelin&#8217;s display method, a different display interface had to be added to saspy.
+If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Unix client class path</span>
 <span class="n">cpL</span>  <span class="o">=</span>  <span class="s2">&quot;/whever/I/put/these/jars/sas.svc.connection.jar&quot;</span>
@@ -705,12 +722,20 @@ windows-1252, respectively.</p>
 </dd>
 <dt>autoexec -</dt>
 <dd>This is a string of SAS code that will be submitted upon establishing a connection.
-You can use this to preassign libraries you always want available, or whatever you want.</dd>
+You can use this to preassign libraries you always want available, or whatever you want.
+Don&#8217;t confuse this with the autoexec option of SAS which specifies a sas program file to be run.
+That is different. This is a string of SAS code saspy will submit after the session is created,
+which would be after SAS already included any autoexec file if there was one.</dd>
 <dt>javaparms -</dt>
 <dd>The javaparms option allows you to specify Java command line options. These aren&#8217;t generally needed, but this
 does allows for a way to specify them if something was needed.</dd>
 <dt>lrecl -</dt>
 <dd>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
+<dt>display -</dt>
+<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;. The default
+when this is not specified is &#8216;jupyter&#8217;. Jupyter uses IPython to render HTML, which is how saspy has
+always worked. To support Zeppelin&#8217;s display method, a different display interface had to be added to saspy.
+If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Windows client class path</span>
 <span class="c1"># build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION</span>
