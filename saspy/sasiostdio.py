@@ -1493,21 +1493,27 @@ Will use HTML5 for this SASsession.""")
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
 
-      topts             = dict(dsopts)
-      topts['obs']      = 1
-      topts['firstobs'] = ''
+      nobs = self._sb.sasdata(table, libref).obs()
+      if nobs > 0:
+         topts             = dict(dsopts)
+         topts['obs']      = 1
+         topts['firstobs'] = ''
+        
+         code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
 
-      code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
-      for i in range(nvars):
-         code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "run;\n"
-
-      ll = self.submit(code, "text")
-
-      l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")
-      varcat = l2[2].split("\n", nvars)
-      del varcat[nvars]
+         for i in range(nvars):
+            code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
+         code += "run;\n"
+        
+         ll = self.submit(code, "text")
+        
+         l2 = ll['LOG'].rpartition("FMT_CATS=")
+         l2 = l2[2].partition("\n")
+         varcat = l2[2].split("\n", nvars)
+         del varcat[nvars]
+      else:
+         varcat  = ['']
+         varcat *= nvars
 
       try:
          sock = socks.socket()

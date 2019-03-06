@@ -157,14 +157,14 @@ class SASdata:
         if not check:
             raise ValueError("Internal code execution failed: " + errorMsg)
         if isinstance(tablename, str):
-            pd = self.sas._io.sasdata2dataframe(tablename, libref)
+            pd = self.sas.sasdata2dataframe(tablename, libref)
             self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, tablename))
         elif isinstance(tablename, list):
             pd = dict()
             for t in tablename:
                 # strip leading '_' from names and capitalize for dictionary labels
                 if self.sas.exist(t, libref):
-                   pd[t.replace('_', '').capitalize()] = self.sas._io.sasdata2dataframe(t, libref)
+                   pd[t.replace('_', '').capitalize()] = self.sas.sasdata2dataframe(t, libref)
                 self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, t))
         else:
             raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))

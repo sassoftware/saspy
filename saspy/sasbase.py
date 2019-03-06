@@ -1353,7 +1353,7 @@ class SASsession():
         if results != 'list':
            res = self.sd2df('_saspy_lib_list', 'work')
            if res is None:
-              res = pd.DataFrame.from_records([], ['MEMNAME', 'MEMTYPE'])
+              res = pd.DataFrame.from_records([], columns=['MEMNAME', 'MEMTYPE'])
            return res
            
         code = """
