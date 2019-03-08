@@ -1489,7 +1489,7 @@ Will use HTML5 for this SASsession.""")
       code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
       code += "length var $256;\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
-      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
+      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
       code += "put lr lrecl; put vn nvars; put vl;\n"
       code += "do i = 1 to nvars; var = compress(varname(d, i), '00'x); put var; end;\n"
       code += "put vt;\n"
@@ -1515,27 +1515,23 @@ Will use HTML5 for this SASsession.""")
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
 
-      nobs = self._sb.sasdata(table, libref).obs()
-      if nobs > 0:
-         topts             = dict(dsopts)
-         topts['obs']      = 1
-         topts['firstobs'] = ''
+      topts             = dict(dsopts)
+      topts['obs']      = 0
+      topts['firstobs'] = ''
    
-         code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+      code  = "data work._n_u_l_l_;output;run;\n"
+      code += "data _null_; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
    
-         for i in range(nvars):
-            code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-         code += "run;"
+      for i in range(nvars):
+         code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
+      code += "run;\nproc delete data=work._n_u_l_l_;run;"
    
-         ll = self.submit(code, "text")
+      ll = self.submit(code, "text")
    
-         l2 = ll['LOG'].rpartition("FMT_CATS=")
-         l2 = l2[2].partition("\n")
-         varcat = l2[2].split("\n", nvars)
-         del varcat[nvars]
-      else:
-         varcat  = ['']
-         varcat *= nvars
+      l2 = ll['LOG'].rpartition("FMT_CATS=")
+      l2 = l2[2].partition("\n")
+      varcat = l2[2].split("\n", nvars)
+      del varcat[nvars]
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
@@ -1650,7 +1646,7 @@ Will use HTML5 for this SASsession.""")
                       bail = True
          done = True
 
-      if len(r) > 0:
+      if len(r) > 0 or df is None:
          tdf = pd.DataFrame.from_records(r, columns=varlist)
 
          for i in range(nvars):
@@ -1706,7 +1702,7 @@ Will use HTML5 for this SASsession.""")
       code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
       code += "length var $256;\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
-      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
+      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
       code += "put lr lrecl; put vn nvars; put vl;\n"
       code += "do i = 1 to nvars; var = compress(varname(d, i), '00'x); put var; end;\n"
       code += "put vt;\n"
@@ -1733,14 +1729,15 @@ Will use HTML5 for this SASsession.""")
       del vartype[nvars]
 
       topts             = dict(dsopts)
-      topts['obs']      = 1
+      topts['obs']      = 0
       topts['firstobs'] = ''
 
-      code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+      code  = "data work._n_u_l_l_;output;run;\n"
+      code += "data _null_; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
 
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "run;"
+      code += "run;\nproc delete data=work._n_u_l_l_;run;"
 
       ll = self.submit(code, "text")
 
@@ -1858,10 +1855,8 @@ Will use HTML5 for this SASsession.""")
                 done = True
                 self._log += logf
 
-         #csv.seek(0)
          csv.close()
          df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
-         #csv.close()
       else:
          while True:
             try:

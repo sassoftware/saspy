@@ -1352,8 +1352,6 @@ class SASsession():
 
         if results != 'list':
            res = self.sd2df('_saspy_lib_list', 'work')
-           if res is None:
-              res = pd.DataFrame.from_records([], columns=['MEMNAME', 'MEMTYPE'])
            return res
            
         code = """
@@ -1432,8 +1430,6 @@ class SASsession():
               ll  = self.submit(code, results='text')
    
            res = self.sd2df('_SASPY_FILE_INFO', 'work')
-           if res is None:
-              res = pd.DataFrame.from_records([], ['infoname', 'infoval'])
            return res
 
 

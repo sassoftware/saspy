@@ -1467,7 +1467,7 @@ Will use HTML5 for this SASsession.""")
       code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code += "data _null_; file STDERR;d = open('sasdata2dataframe');\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
-      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
+      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
       code += "put lr lrecl; put vn nvars; put vl;\n"
       code += "do i = 1 to nvars; var = varname(d, i); put var; end;\n"
       code += "put vt;\n"
@@ -1493,27 +1493,23 @@ Will use HTML5 for this SASsession.""")
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
 
-      nobs = self._sb.sasdata(table, libref).obs()
-      if nobs > 0:
-         topts             = dict(dsopts)
-         topts['obs']      = 1
-         topts['firstobs'] = ''
-        
-         code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+      topts             = dict(dsopts)
+      topts['obs']      = 0
+      topts['firstobs'] = ''
+      
+      code  = "data work._n_u_l_l_;output;run;\n"
+      code += "data _null_; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
 
-         for i in range(nvars):
-            code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-         code += "run;\n"
-        
-         ll = self.submit(code, "text")
-        
-         l2 = ll['LOG'].rpartition("FMT_CATS=")
-         l2 = l2[2].partition("\n")
-         varcat = l2[2].split("\n", nvars)
-         del varcat[nvars]
-      else:
-         varcat  = ['']
-         varcat *= nvars
+      for i in range(nvars):
+         code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
+      code += "run;\nproc delete data=work._n_u_l_l_;run;"
+      
+      ll = self.submit(code, "text")
+      
+      l2 = ll['LOG'].rpartition("FMT_CATS=")
+      l2 = l2[2].partition("\n")
+      varcat = l2[2].split("\n", nvars)
+      del varcat[nvars]
 
       try:
          sock = socks.socket()
@@ -1619,7 +1615,7 @@ Will use HTML5 for this SASsession.""")
       newsock[0].close()
       sock.close()
 
-      if len(r) > 0:
+      if len(r) > 0 or df is None:
          tdf = pd.DataFrame.from_records(r, columns=varlist)
 
          for i in range(nvars):
@@ -1674,7 +1670,7 @@ Will use HTML5 for this SASsession.""")
       code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code += "data _null_; file STDERR;d = open('sasdata2dataframe');\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
-      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE='; vf='VARFMT=';\n"
+      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
       code += "put lr lrecl; put vn nvars; put vl;\n"
       code += "do i = 1 to nvars; var = varname(d, i); put var; end;\n"
       code += "put vt;\n"
@@ -1701,13 +1697,15 @@ Will use HTML5 for this SASsession.""")
       del vartype[nvars]
 
       topts             = dict(dsopts)
-      topts['obs']      = 1
+      topts['obs']      = 0
       topts['firstobs'] = ''
 
-      code  = "data _null_; set "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+      code  = "data work._n_u_l_l_;output;run;\n"
+      code += "data _null_; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
+
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "run;\n"
+      code += "run;\nproc delete data=work._n_u_l_l_;run;"
 
       ll = self.submit(code, "text")
 
@@ -1801,10 +1799,8 @@ Will use HTML5 for this SASsession.""")
          sock.close()
          ll = self.submit("", 'text')
 
-         #csv.seek(0)
          csv.close()
          df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
-         #csv.close()
       else:
          ll = self.submit(code, "text")
          df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
