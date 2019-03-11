@@ -138,7 +138,7 @@ def main(cfgfile: str = None, SASHome: str = None, java: str = None):
 
     # if dll exists
     if os.path.isfile(sspi):
-        cfg += '\n\nimport os\nos.environ["PATH"] += ";{}"'.format(sspi)
+        cfg += '\n\nimport os\nos.environ["PATH"] += ";{}"'.format(sspi.rsplit('\\sspiauth.dll')[0])
     else:
         print(
             "Couldn't find the sspiauth.dll path. You'll need to find that and "
