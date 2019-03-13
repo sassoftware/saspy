@@ -41,14 +41,15 @@ import sys
 import getpass
 import tempfile
 
-from saspy.sasioiom  import SASsessionIOM
-from saspy.sasets    import SASets
-from saspy.sasml     import SASml
-from saspy.sasqc     import SASqc
-from saspy.sasstat   import SASstat
-from saspy.sasutil   import SASutil
-from saspy.sasViyaML import SASViyaML
-from saspy.sasdata   import SASdata
+from saspy.sasioiom      import SASsessionIOM
+from saspy.sasets        import SASets
+from saspy.sasexceptions import SASIONotSupportedError
+from saspy.sasml         import SASml
+from saspy.sasqc         import SASqc
+from saspy.sasstat       import SASstat
+from saspy.sasutil       import SASutil
+from saspy.sasViyaML     import SASViyaML
+from saspy.sasdata       import SASdata
 
 try:
    import pandas as pd
@@ -316,73 +317,73 @@ class SASsession():
             if os.name != 'nt':
                 self._io = SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
             else:
-                print("Cannot use STDIO I/O module on Windows. No "
-                    "SASsession established. Choose an IOM SASconfig " 
-                    "definition")
+                raise SASIONotSupportedError(self.sascfg.mode, alts=['IOM'])
         elif self.sascfg.mode == 'IOM':
             self._io = SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
         try:
-            if self._io.pid:
-                sysvars = """options nosource;
-                    %put WORKPATH=%sysfunc(pathname(work));
-                    %put ENDWORKPATH=;
-                    %put ENCODING=&SYSENCODING;
-                    %put SYSVLONG=&SYSVLONG4;
-                    %put SYSJOBID=&SYSJOBID;
-                    %put SYSSCP=&SYSSCP;
-                    options source;
-                """
-                enc = self._io.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
-                if enc == '':
-                   self._io.sascfg.encoding = 'utf_8'
-                res = self.submit(sysvars, "text")['LOG']
-                self._io.sascfg.encoding = enc
+            sysvars = """options nosource;
+                %put WORKPATH=%sysfunc(pathname(work));
+                %put ENDWORKPATH=;
+                %put ENCODING=&SYSENCODING;
+                %put SYSVLONG=&SYSVLONG4;
+                %put SYSJOBID=&SYSJOBID;
+                %put SYSSCP=&SYSSCP;
+                options source;
+            """
+            # Validating encoding is done next, so handle it not being set for
+            # this one call
+            enc = self._io.sascfg.encoding
+            if enc == '':
+               self._io.sascfg.encoding = 'utf_8'
+            res = self.submit(sysvars, "text")['LOG']
+            self._io.sascfg.encoding = enc
 
-                vlist         = res.rpartition('SYSSCP=')
-                self.hostsep  = vlist[2].partition('\n')[0]
-                vlist         = res.rpartition('SYSJOBID=')
-                self.SASpid   = vlist[2].partition('\n')[0]
-                vlist         = res.rpartition('SYSVLONG=')
-                self.sasver   = vlist[2].partition('\n')[0]
-                vlist         = res.rpartition('ENCODING=')
-                self.sascei   = vlist[2].partition('\n')[0]
-                vlist         = res.rpartition('\nENDWORKPATH=')
-                self.workpath = vlist[0].rpartition('WORKPATH=')[2].strip().replace('\n','') 
+            vlist         = res.rpartition('SYSSCP=')
+            self.hostsep  = vlist[2].partition('\n')[0]
+            vlist         = res.rpartition('SYSJOBID=')
+            self.SASpid   = vlist[2].partition('\n')[0]
+            vlist         = res.rpartition('SYSVLONG=')
+            self.sasver   = vlist[2].partition('\n')[0]
+            vlist         = res.rpartition('ENCODING=')
+            self.sascei   = vlist[2].partition('\n')[0]
+            vlist         = res.rpartition('\nENDWORKPATH=')
+            self.workpath = vlist[0].rpartition('WORKPATH=')[2].strip().replace('\n','') 
 
-                # validate encoding
-                pyenc = sas_encoding_mapping[self.sascei]
-                if pyenc is not None:
-                   if self._io.sascfg.encoding != '':
-                      if self._io.sascfg.encoding.lower() not in pyenc:
-                         print("The encoding value provided doesn't match the SAS session encoding.")
-                         print("SAS encoding is "+self.sascei+". Specified encoding is "+self._io.sascfg.encoding+".")
-                         print("Using encoding "+pyenc[0]+" instead to avoid transcoding problems.")
-                         self._io.sascfg.encoding = pyenc[0]
-                         print("You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.")
-                         print("""If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it""")
-                   else:
-                      self._io.sascfg.encoding = pyenc[0]
-                      if self._io.sascfg.verbose:
-                         print("No encoding value provided. Will try to determine the correct encoding.")
-                         print("Setting encoding to "+pyenc[0]+" based upon the SAS session encoding value of "+self.sascei+".")
-                else:
-                   print("The SAS session encoding for this session ("+self.sasce+") doesn't have a known Python equivalent encoding.")
-                   if self._io.sascfg.encoding == '':
-                      self._io.sascfg.encoding  = 'utf_8'
-                      print("Proceeding using the default encoding of 'utf_8', though you may encounter transcoding problems.")
-                   else:
-                      print("Proceeding using the specified encoding of "+self._io.sascfg.encoding+", though you may encounter transcoding problems.")
+            # validate encoding
+            pyenc = sas_encoding_mapping[self.sascei]
+            if pyenc is not None:
+               if self._io.sascfg.encoding != '':
+                  if self._io.sascfg.encoding.lower() not in pyenc:
+                     print("The encoding value provided doesn't match the SAS session encoding.")
+                     print("SAS encoding is "+self.sascei+". Specified encoding is "+self._io.sascfg.encoding+".")
+                     print("Using encoding "+pyenc[0]+" instead to avoid transcoding problems.")
+                     self._io.sascfg.encoding = pyenc[0]
+                     print("You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.")
+                     print("""If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it""")
+               else:
+                  self._io.sascfg.encoding = pyenc[0]
+                  if self._io.sascfg.verbose:
+                     print("No encoding value provided. Will try to determine the correct encoding.")
+                     print("Setting encoding to "+pyenc[0]+" based upon the SAS session encoding value of "+self.sascei+".")
+            else:
+               print("The SAS session encoding for this session ("+self.sasce+") doesn't have a known Python equivalent encoding.")
+               if self._io.sascfg.encoding == '':
+                  self._io.sascfg.encoding  = 'utf-8'
+                  print("Proceeding using the default encoding of 'utf-8', though you may encounter transcoding problems.")
+               else:
+                  print("Proceeding using the specified encoding of "+self._io.sascfg.encoding+", though you may encounter transcoding problems.")
 
-                if self.hostsep == 'WIN':
-                    self.hostsep = '\\'
-                else:
-                    self.hostsep = '/'
-                self.workpath = self.workpath + self.hostsep
+            if self.hostsep == 'WIN':
+                self.hostsep = '\\'
+            else:
+                self.hostsep = '/'
+            self.workpath = self.workpath + self.hostsep
 
-                if self.sascfg.autoexec:
-                    self.submit(self.sascfg.autoexec)
+            if self.sascfg.autoexec:
+                self.submit(self.sascfg.autoexec)
 
+        # FIXME: What causes this AttributeError?
         except (AttributeError):
             self._io = None
 
