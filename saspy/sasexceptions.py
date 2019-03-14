@@ -15,6 +15,15 @@
 #
 
 
+class SASConfigNotValidError(Exception):
+    def __init__(self, defn: str, msg: str=None):
+        self.defn = defn if defn else 'N/A'
+        self.msg = msg
+
+    def __str__(self):
+        return 'Configuration definition {} is not valid. {}'.format(self.defn, self.msg)
+
+
 class SASIONotSupportedError(Exception):
     def __init__(self, method: str, alts: list=None):
         self.method = method

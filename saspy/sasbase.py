@@ -43,7 +43,7 @@ import tempfile
 
 from saspy.sasioiom      import SASsessionIOM
 from saspy.sasets        import SASets
-from saspy.sasexceptions import SASIONotSupportedError
+from saspy.sasexceptions import SASIONotSupportedError, SASConfigNotValidError
 from saspy.sasml         import SASml
 from saspy.sasqc         import SASqc
 from saspy.sasstat       import SASstat
@@ -122,25 +122,20 @@ class SASconfig:
 
         self.SAScfg = SAScfg
 
-        # GET Config options
-        try:
-            self.cfgopts = getattr(SAScfg, "SAS_config_options")
-        except:
-            self.cfgopts = {}
+        # Get Config options. Fallback to empty dict.
+        self.cfgopts = getattr(SAScfg, "SAS_config_options", {})
 
-        # in lock down mode, don't allow runtime overrides of option values from the config file.
+        # In lock down mode, don't allow runtime overrides of option values from the config file.
         lock = self.cfgopts.get('lock_down', True)
 
-        # GET Config names
-        configs = getattr(SAScfg, "SAS_config_names")
+        # Get Config names. Fallback to empty list.
+        configs = getattr(SAScfg, "SAS_config_names", [])
 
         cfgname = kwargs.get('cfgname', '')
 
         if len(cfgname) == 0:
             if len(configs) == 0:
-                print("No SAS Configuration names found in saspy.sascfg")
-                self.valid = False
-                return
+                raise SASConfigNotValidError(cfgname, msg='No SAS_config_names found in saspy.sascfg')
             else:
                 if len(configs) == 1:
                     cfgname = configs[0]
@@ -161,13 +156,13 @@ class SASconfig:
         self.name = cfgname
         cfg = getattr(SAScfg, cfgname)
 
-        ip            = cfg.get('ip',       '')
-        ssh           = cfg.get('ssh',      '')
-        path          = cfg.get('saspath',  '')
-        java          = cfg.get('java',     '')
+        ip            = cfg.get('ip')
+        ssh           = cfg.get('ssh')
+        path          = cfg.get('saspath')
+        java          = cfg.get('java')
         self.display  = cfg.get('display',  '')
-        self.results  = cfg.get('results',  None)
-        self.autoexec = cfg.get('autoexec', None)
+        self.results  = cfg.get('results')
+        self.autoexec = cfg.get('autoexec')
 
         indisplay = kwargs.get('display', '')
         if len(indisplay) > 0:
@@ -196,17 +191,16 @@ class SASconfig:
             else:
                 self.autoexec = inautoexec
 
-        if len(java)   > 0:
-            self.mode  = 'IOM'
-        elif len(ip)   > 0:
-            self.mode  = 'HTTP'
-        elif len(ssh)  > 0:
-            self.mode  = 'SSH'
-        elif len(path) > 0:
-            self.mode  = 'STDIO'
+        if java is not None:
+            self.mode = 'IOM'
+        elif ip is not None:
+            self.mode = 'HTTP'
+        elif ssh is not None:
+            self.mode = 'SSH'
+        elif path is not None:
+            self.mode = 'STDIO'
         else:
-            print("Configuration Definition " + cfgname + " is not valid. Failed to create a SASsession.")
-            self.valid = False
+            raise SASConfigNotValidError(cfgname)
 
     def _prompt(self, prompt, pw=False):
         if self._kernel is None:
@@ -410,7 +404,7 @@ class SASsession():
         return x
 
     def __del__(self):
-        if self._io:
+        if getattr(self, '_io', None) is not None:
            return self._io.__del__()
 
     def _objcnt(self):
