@@ -333,7 +333,7 @@ class SASsession():
                 """
                 enc = self._io.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
                 if enc == '':
-                   self._io.sascfg.encoding = 'utf-8'
+                   self._io.sascfg.encoding = 'utf_8'
                 res = self.submit(sysvars, "text")['LOG']
                 self._io.sascfg.encoding = enc
 
@@ -367,8 +367,8 @@ class SASsession():
                 else:
                    print("The SAS session encoding for this session ("+self.sasce+") doesn't have a known Python equivalent encoding.")
                    if self._io.sascfg.encoding == '':
-                      self._io.sascfg.encoding  = 'utf-8'
-                      print("Proceeding using the default encoding of 'utf-8', though you may encounter transcoding problems.")
+                      self._io.sascfg.encoding  = 'utf_8'
+                      print("Proceeding using the default encoding of 'utf_8', though you may encounter transcoding problems.")
                    else:
                       print("Proceeding using the specified encoding of "+self._io.sascfg.encoding+", though you may encounter transcoding problems.")
 
