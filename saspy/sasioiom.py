@@ -529,10 +529,9 @@ Will use HTML5 for this SASsession.""")
 
          if self.sascfg.verbose:
             print("SAS Connection terminated. Subprocess id was "+str(pid))
-         self.pid = None
-
+         self.pid        = None
+         self._sb.SASpid = None
       return
-
 
 
    """
@@ -1298,7 +1297,7 @@ Will use HTML5 for this SASsession.""")
          return {'Success' : False, 
                  'LOG'     : "File "+str(locf)+" could not be opened or written to. Error was: "+str(e)}
 
-      code = "filename _sp_updn '"+remotefile+"' recfm=F encoding=binary lrecl=4096";
+      code = "filename _sp_updn '"+remotefile+"' recfm=F encoding=binary lrecl=4096;"
 
       ll = self.submit(code, "text")
       logf  = ll['LOG']

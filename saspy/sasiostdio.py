@@ -390,7 +390,7 @@ Will use HTML5 for this SASsession.""")
                os.kill(self.pid, signal.SIGKILL)
          if self.sascfg.verbose:
             print("SAS Connection terminated. Subprocess id was "+str(self.pid))
-         self.pid = None
+         self.pid        = None
          self._sb.SASpid = None
       return ret
 
