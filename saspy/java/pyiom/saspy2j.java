@@ -27,6 +27,7 @@ import com.sas.iom.SAS.StreamOpenMode;
 
 import com.sas.iom.SASIOMCommon.IDisconnect;
 import com.sas.iom.SASIOMCommon.IDisconnectHelper;
+import com.sas.iom.SASIOMCommon.IDisconnectPackage.iomDisableFailed;
 import com.sas.iom.SASIOMCommon.IDisconnectPackage.iomEnableFailed;
 import com.sas.iom.SASIOMCommon.IDisconnectPackage.iomNoReconnectPortsAvailable;
 import com.sas.iom.SASIOMCommon.IDisconnectPackage.iomReconnectDisabled;
@@ -402,38 +403,48 @@ public class saspy2j
                         }
                      catch (org.omg.CORBA.COMM_FAILURE e)
                         {}
-                     cx.close();
+
                      if (reconnect)
                         {
+                        obj1    = cx.getObject();
+                        iDisco1 = IDisconnectHelper.narrow(obj1);
                         try
                            {
-                           server     = (BridgeServer) Server.fromURI(uri);
-                           ad         = server.getDomain();
-
-                           if (appName != "")
-                              server.setServerName(appName.replace("\'", ""));
-                           server.setOption(SASURI.applicationNameKey, "SASPy");
-                           
-                           cxfConfig  = new ManualConnectionFactoryConfiguration(server);
-                           cxfManager = new ConnectionFactoryManager();
-                           cxf        = cxfManager.getFactory(cxfConfig);
-                           
-                           if (spn)
-                              cx = cxf.getConnection(cred);
-                           else
-                              cx = cxf.getConnection(omruser, omrpw, ad);
-
-                           cx.close();
+                           iDisco1.DisableDisconnect();
                            }
-                        catch(ConnectionFactoryException e)
+                        catch (iomDisableFailed e)
                            {
-                           String msg = "We failed reconnecting in ENDSAS. WUWT?\n"+e.getMessage();
-                           System.out.print(msg+"\n");
-                           errp.write(msg+"\n");
-                           errp.flush();
-                           e.printStackTrace();
+                           try
+                              {
+                              cx.close();
+                              server     = (BridgeServer) Server.fromURI(uri);
+                              ad         = server.getDomain();
+                    
+                              if (appName != "")
+                                 server.setServerName(appName.replace("\'", ""));
+                              server.setOption(SASURI.applicationNameKey, "SASPy");
+                              
+                              cxfConfig  = new ManualConnectionFactoryConfiguration(server);
+                              cxfManager = new ConnectionFactoryManager();
+                              cxf        = cxfManager.getFactory(cxfConfig);
+                              
+                              if (spn)
+                                 cx = cxf.getConnection(cred);
+                              else
+                                 cx = cxf.getConnection(omruser, omrpw, ad);
+                              }
+                           catch(ConnectionFactoryException e2)
+                              {
+                              String msg = "We failed reconnecting in ENDSAS. WUWT?\n"+e2.getMessage();
+                              System.out.print(msg+"\n");
+                              errp.write(msg+"\n");
+                              errp.flush();
+                              e2.printStackTrace();
+                              }
                            }
                         }
+
+                     cx.close();
                      sin.close();
                      sout.close();
                      serr.close();
