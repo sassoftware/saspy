@@ -324,12 +324,14 @@ class SASsession():
 
         try:
             if self._io.pid:
-                sysvars = """
+                sysvars = """options nosource;
                     %put WORKPATH=%sysfunc(pathname(work));
+                    %put ENDWORKPATH=;
                     %put ENCODING=&SYSENCODING;
                     %put SYSVLONG=&SYSVLONG4;
                     %put SYSJOBID=&SYSJOBID;
                     %put SYSSCP=&SYSSCP;
+                    options source;
                 """
                 enc = self._io.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
                 if enc == '':
@@ -345,8 +347,8 @@ class SASsession():
                 self.sasver   = vlist[2].partition('\n')[0]
                 vlist         = res.rpartition('ENCODING=')
                 self.sascei   = vlist[2].partition('\n')[0]
-                vlist         = res.rpartition('WORKPATH=')
-                self.workpath = vlist[2].partition('\n')[0]
+                vlist         = res.rpartition('\nENDWORKPATH=')
+                self.workpath = vlist[0].rpartition('WORKPATH=')[2].strip().replace('\n','') 
 
                 # validate encoding
                 pyenc = sas_encoding_mapping[self.sascei]
@@ -421,6 +423,9 @@ class SASsession():
 
     def _startsas(self):
         return self._io._startsas()
+
+    def endsas(self):
+        return self._endsas()
 
     def _endsas(self):
         self.SASpid = None
@@ -1433,7 +1438,7 @@ class SASsession():
            return res
 
 
-        code="""
+        code="""options nosource;
         data _null_;
            length infoname infoval $256;
            drop rc fid infonum i close;
@@ -1447,12 +1452,13 @@ class SASsession():
                     infoval=finfo(fid, infoname);
                     put 'INFONAME=' infoname;
                     put 'INFOVAL=' infoval;
+                    put 'ENDINFOVAL=';
                  end;
               end; 
            put 'INFOEND';
            close=fclose(fid);
            rc = filename('filerefx');
-        run;
+        run; options source;
         """.replace('filerefx', fileref)
 
         if self.nosub:
@@ -1467,8 +1473,8 @@ class SASsession():
         for i in range(log[2].count('INFONAME')):                                    
            log = log[2].partition('INFONAME=')[2].partition('\n')                    
            key = log[0]                                                           
-           log = log[2].partition('INFOVAL=')[2].partition('\n')                     
-           val = log[0]                                                           
+           log = log[2].partition('INFOVAL=')[2].partition('\nENDINFOVAL=')
+           val = log[0].strip().replace('\n','')
            res[key] = val                                                         
                                                                                   
         return res
@@ -1591,7 +1597,7 @@ sas_encoding_mapping = {
 'shift-jis':['shift_jis', 'csshiftjis', 'shiftjis', 'sjis', 's_jis'],
 'thai':['iso8859_11', 'so-8859-11', 'thai'],
 'us-ascii':['ascii', '646', 'us-ascii'],
-'utf-8':['utf_8', 'u8', 'utf', 'utf8'],
+'utf-8':['utf_8', 'u8', 'utf', 'utf8', 'utf-8'],
 'warabic':['cp1256', 'windows-1256'],
 'wbaltic':['cp1257', 'windows-1257'],
 'wcyrillic':['cp1251', 'windows-1251'],
