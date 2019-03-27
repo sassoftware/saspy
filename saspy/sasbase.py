@@ -425,6 +425,9 @@ class SASsession():
         return self._io._startsas()
 
     def endsas(self):
+        """
+        This method terminates the SAS session, shutting down the SAS process.
+        """
         return self._endsas()
 
     def _endsas(self):
