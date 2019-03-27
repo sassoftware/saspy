@@ -425,6 +425,12 @@ See the Advanced topics section of the doc for details</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="saspy.SASsession.endsas">
+<code class="descname">endsas</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.endsas" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method terminates the SAS session, shutting down the SAS process.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASsession.exist">
 <code class="descname">exist</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#saspy.SASsession.exist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does the SAS data set currently exist</p>
@@ -850,6 +856,7 @@ or show what you type and keep the macros (they will still be available later).<
 </li>
 </ul>
 <p>NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()</p>
+<p>In Zeppelin, the html LST results can be displayed via print(&#8220;%html &#8220;+ ll[&#8216;LST&#8217;]) to diplay as HTML.</p>
 <dl class="docutils">
 <dt>i.e,: results = sas.submit(&#8220;data a; x=1; run; proc print;run&#8217;)</dt>
 <dd>print(results[&#8216;LOG&#8217;])
