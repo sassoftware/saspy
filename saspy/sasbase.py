@@ -481,14 +481,10 @@ class SASsession():
 
         In Zeppelin, the html LST results can be displayed via print("%html "+ ll['LST']) to diplay as HTML.
 
-
-        OR, as I've added an HTML method to the SASsession object which does the correct thing for Jupyter and/or Zeppelin
-        you can just use that instead of manually importing IPython's HTML or using Zeppelin's  print(%html ...),
-        that way the same code will work in either notebook.
-
         i.e,: results = sas.submit("data a; x=1; run; proc print;run')
                       print(results['LOG'])
-                      sas.HTML(results['LST'])
+                      HTML(results['LST'])
+
         '''
         if self.nosub:
             return dict(LOG=code, LST='')
