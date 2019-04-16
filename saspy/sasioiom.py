@@ -60,6 +60,7 @@ class SASconfigIOM:
       self.sspi      = cfg.get('sspi', False)
       self.javaparms = cfg.get('javaparms', '')
       self.lrecl     = cfg.get('lrecl', None)
+      self.reconnect = cfg.get('reconnect', True)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -185,6 +186,13 @@ class SASconfigIOM:
             self.lrecl = inlrecl
       if not self.lrecl:
          self.lrecl = 1048576
+
+      inrecon = kwargs.get('reconnect', None)
+      if inrecon:
+         if lock and self.reconnect:
+            print("Parameter 'reconnect' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.reconnect = bool(inrecon)
 
       self._prompt = session._sb.sascfg._prompt
 
@@ -1027,6 +1035,9 @@ Will use HTML5 for this SASsession.""")
       """
       This method disconnects an IOM session to allow for reconnecting when switching networks
       """
+
+      if not self.sascfg.reconnect:
+         return "Disconnecting and then reconnecting to this workspaceserver has been disabled. Did not disconnect"
 
       pgm = b'\n'+b'tom says EOL=DISCONNECT                      \n'
       self.stdin[0].send(pgm)
