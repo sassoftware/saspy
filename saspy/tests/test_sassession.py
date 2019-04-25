@@ -30,24 +30,6 @@ class TestSASsessionObject(unittest.TestCase):
         exists = self.sas.exist('notable', libref='sashelp')
         self.assertFalse(exists)
 
-    # FIXME
-    # Test should be done in test_sasdata.py
-    '''
-    def test_SASsession_sasdata(self):
-        #test sasdata existing
-        cars = self.sas.sasdata('cars', libref='sashelp', results='text')
-        self.assertIsInstance(cars, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
-
-        #test sasdata not existing
-        notable = self.sas.sasdata('notable', results='text')
-        self.assertIsInstance(notable, saspy.SASdata, msg="cars = sas.sasdata(...) failed")
-
-        #test create non-existing table
-        ll = self.sas.submit("data notable;x=1;run;")
-        exists = self.sas.exist('notable')
-        self.assertTrue(exists, msg="exists = self.sas.exist(...) failed")
-    '''
-
     def test_SASsession_csv_read(self):
         """
         Test method read_csv properly imports a csv file
