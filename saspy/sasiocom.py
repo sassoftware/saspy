@@ -372,6 +372,13 @@ class SASSessionCOM(object):
         else:
             listing = self._getlst()
 
+        # Invalid syntax will put the interface in to an error state. Reset
+        # the LanguageService to prevent further errors.
+        # FIXME: In the future, may only want to reset on ERROR. However, this
+        # operation seems pretty lightweight, so calling `_reset()` on all
+        # submits is not a burden.
+        self._reset()
+
         return {'LOG': log, 'LST': listing}
 
     def saslog(self) -> str:
@@ -441,12 +448,13 @@ class SASSessionCOM(object):
 
         return (header, rows)
 
-    def read_csv(self, filepath: str, table: str, libref: str=None, opts: dict=None):
+    def read_csv(self, filepath: str, table: str, libref: str=None, nosub: bool=False, opts: dict=None):
         """
         Submit an import job to the SAS workspace.
         :param filepath [str]: File URI.
         :param table [str]: Table name.
         :option libref [str]: Library name.
+        :option nosob [bool]: Return the SAS code instead of executing it.
         :option opts [dict]: SAS PROC IMPORT options.
         """
         opts = opts if opts is not None else {}
@@ -460,14 +468,18 @@ class SASSessionCOM(object):
             run;
         """.format(filepath, tablepath, self._sb._impopts(opts))
 
-        self.submit(proc_code)
+        if nosub is True:
+            return proc_code
+        else:
+            return self.submit(proc_code, 'text')
 
-    def write_csv(self, filepath: str, table: str, libref: str=None, opts: dict=None, dsopts: dict=None):
+    def write_csv(self, filepath: str, table: str, libref: str=None, nosub: bool=True,  opts: dict=None, dsopts: dict=None):
         """
         Submit an export job to the SAS workspace.
         :param filepath [str]: File URI.
         :param table [str]: Table name.
         :option libref [str]: Library name.
+        :option nosob [bool]: Return the SAS code instead of executing it.
         :option opts [dict]: SAS PROC IMPORT options.
         :option dsopts [dict]: SAS dataset options.
         """
@@ -476,13 +488,16 @@ class SASSessionCOM(object):
         tablepath = self._sb._tablepath(table, libref=libref)
 
         proc_code = """
-            filename csv_file {};
-            proc export dataset={}{} outfile=csv_file dbms=csv replace;
+            filename csv_file "{}";
+            proc export data={} outfile=csv_file dbms=csv replace;
                 {}
             run;
         """.format(filepath, tablepath, self._sb._dsopts(dsopts), self._sb._expopts(opts))
 
-        self.submit(proc_code)
+        if nosub is True:
+            return proc_code
+        else:
+            return self.submit(proc_code, 'text')['LOG']
 
     def dataframe2sasdata(self, df: 'pd.DataFrame', table: str, libref: str=None, keep_outer_quotes: bool=False):
         """
@@ -492,11 +507,8 @@ class SASSessionCOM(object):
         :option libref [str]: Library name. Default work.
         :option keep_outer_quotes [bool]: Not supported.
         """
-        # For whatever reason, ADODB is improperly setting the E8601DT26.6
-        # format. May be an issue with the tired programmer. Use DATETIME20
-        # instead.
-        DATETIME_NAME = 'DATETIME20.'
-        DATETIME_FMT = '%d%b%Y %H:%M:%S'
+        DATETIME_NAME = 'E8601DT26.6'
+        DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%f'
 
         tablepath = self._sb._tablepath(table, libref=libref)
 
