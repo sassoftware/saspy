@@ -240,13 +240,7 @@ class SASSessionCOM(object):
         self.workspace.FileService.DeassignFileref(fobj[0].FilerefName)
 
         if decode is True:
-            # SAS's WLATIN1 doesn't actually exist. It's WINDOWS-1252
-            if self._sb.sascei.upper() == 'WLATIN1':
-                encoding = 'windows-1252'
-            else:
-                encoding = self._sb.sascei
-
-            result = result.decode(encoding, errors='replace')
+            result = result.decode(self.sascfg.encoding, errors='replace')
 
         return result
 
