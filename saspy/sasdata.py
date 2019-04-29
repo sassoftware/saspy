@@ -18,11 +18,6 @@ import logging
 import re
 import saspy as sp2
 
-try:
-    import pandas as pd
-except ImportError:
-    pass
-
 class SASdata:
     """
     **Overview**
@@ -151,25 +146,28 @@ class SASdata:
         :param kwargs:
         :return: Pandas Data Frame
         """
+        if not self.sas.sascfg.pandas:
+           import pandas
+
         libref = kwargs.get('libref','work')
         ll = self.sas._io.submit(code)
         check, errorMsg = self._checkLogForError(ll['LOG'])
         if not check:
             raise ValueError("Internal code execution failed: " + errorMsg)
         if isinstance(tablename, str):
-            pd = self.sas.sasdata2dataframe(tablename, libref)
+            df = self.sas.sasdata2dataframe(tablename, libref)
             self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, tablename))
         elif isinstance(tablename, list):
-            pd = dict()
+            df = dict()
             for t in tablename:
                 # strip leading '_' from names and capitalize for dictionary labels
                 if self.sas.exist(t, libref):
-                   pd[t.replace('_', '').capitalize()] = self.sas.sasdata2dataframe(t, libref)
+                   df[t.replace('_', '').capitalize()] = self.sas.sasdata2dataframe(t, libref)
                 self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, t))
         else:
             raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))
 
-        return pd
+        return df
 
     def _dsopts(self):
         """
@@ -496,9 +494,9 @@ class SASdata:
 
         if self.results.upper() == 'PANDAS':
             code = "proc contents data=%s.%s %s ;ods output Variables=work._variables ;run;" % (self.libref, self.table, self._dsopts())
-            pd = self._returnPD(code, '_variables')
-            pd['Type'] = pd['Type'].str.rstrip()
-            return pd
+            df = self._returnPD(code, '_variables')
+            df['Type'] = df['Type'].str.rstrip()
+            return df
 
         else:
             ll = self._is_valid()
@@ -563,11 +561,11 @@ class SASdata:
         if self.sas.nosub:
             print(info_code.format(self.libref, self.table, self._dsopts()))
             return None
-        info_pd = self._returnPD(info_code.format(self.libref, self.table, self._dsopts()), '_statsInfo')
-        info_pd = info_pd.iloc[:, :]
-        info_pd.index.name = None
-        info_pd.name = None
-        return info_pd
+        df = self._returnPD(info_code.format(self.libref, self.table, self._dsopts()), '_statsInfo')
+        df = df.iloc[:, :]
+        df.index.name = None
+        df.name = None
+        return df
 
     def describe(self):
         """
@@ -988,6 +986,8 @@ class SASdata:
             print(ll['LOG'])
             return None
         else:
+            if not self.sas.sascfg.pandas:
+               import pandas
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
 
     def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':

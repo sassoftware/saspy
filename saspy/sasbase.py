@@ -52,11 +52,6 @@ from saspy.sasViyaML     import SASViyaML
 from saspy.sasdata       import SASdata
 
 try:
-   import pandas as pd
-except ImportError:
-   pass
-
-try:
    import saspy.sascfg_personal as SAScfg
 except ImportError:
    try:
@@ -90,6 +85,12 @@ class SASconfig:
         self.valid   = True
         self.mode    = ''
         configs      = []
+
+        try:
+           import pandas
+           self.pandas  = True
+        except ImportError:
+           self.pandas  = False
 
         cfgfile = kwargs.get('cfgfile', None)
         if cfgfile:
@@ -850,6 +851,9 @@ class SASsession():
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :return: SASdata object
         """
+        if not self.sascfg.pandas:
+           import pandas
+
         if libref != '':
            if libref.upper() not in self.assigned_librefs():
               print("The libref specified is not assigned in this SAS Session.")
@@ -967,6 +971,9 @@ class SASsession():
         :param kwargs: dictionary
         :return: Pandas data frame
         """
+        if not self.sascfg.pandas:
+           import pandas
+
         dsopts = dsopts if dsopts is not None else {}
         if self.exist(table, libref) == 0:
             print('The SAS Data Set ' + libref + '.' + table + ' does not exist')
