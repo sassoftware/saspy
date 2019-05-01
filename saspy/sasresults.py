@@ -17,10 +17,6 @@ from saspy.SASLogLexer import SASLogStyle, SASLogLexer
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
 
-try:
-    import pandas 
-except ImportError:
-    pass
 
 class SASresults(object):
     """Return results from a SAS Model object"""
