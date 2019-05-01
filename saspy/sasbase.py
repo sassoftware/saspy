@@ -88,9 +88,9 @@ class SASconfig:
 
         try:
            import pandas
-           self.pandas  = True
-        except ImportError:
-           self.pandas  = False
+           self.pandas  = None
+        except ImportError as e:
+           self.pandas  = str(e)
 
         cfgfile = kwargs.get('cfgfile', None)
         if cfgfile:
@@ -851,8 +851,8 @@ class SASsession():
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :return: SASdata object
         """
-        if not self.sascfg.pandas:
-           import pandas
+        if self.sascfg.pandas:
+           raise ImportError(self.sascfg.pandas)
 
         if libref != '':
            if libref.upper() not in self.assigned_librefs():
@@ -971,8 +971,8 @@ class SASsession():
         :param kwargs: dictionary
         :return: Pandas data frame
         """
-        if not self.sascfg.pandas:
-           import pandas
+        if self.sascfg.pandas:
+           raise ImportError(self.sascfg.pandas)
 
         dsopts = dsopts if dsopts is not None else {}
         if self.exist(table, libref) == 0:

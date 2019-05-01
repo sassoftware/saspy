@@ -146,8 +146,8 @@ class SASdata:
         :param kwargs:
         :return: Pandas Data Frame
         """
-        if not self.sas.sascfg.pandas:
-           import pandas
+        if self.sas.sascfg.pandas:
+           raise ImportError(self.sas.sascfg.pandas)
 
         libref = kwargs.get('libref','work')
         ll = self.sas._io.submit(code)
@@ -986,8 +986,8 @@ class SASdata:
             print(ll['LOG'])
             return None
         else:
-            if not self.sas.sascfg.pandas:
-               import pandas
+            if self.sas.sascfg.pandas:
+               raise ImportError(self.sas.sascfg.pandas)
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
 
     def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
