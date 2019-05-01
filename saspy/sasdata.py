@@ -147,7 +147,7 @@ class SASdata:
         :return: Pandas Data Frame
         """
         if self.sas.sascfg.pandas:
-           raise ImportError(self.sas.sascfg.pandas)
+           raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
 
         libref = kwargs.get('libref','work')
         ll = self.sas._io.submit(code)
@@ -987,7 +987,7 @@ class SASdata:
             return None
         else:
             if self.sas.sascfg.pandas:
-               raise ImportError(self.sas.sascfg.pandas)
+               raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
 
     def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':

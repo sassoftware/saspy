@@ -89,8 +89,8 @@ class SASconfig:
         try:
            import pandas
            self.pandas  = None
-        except ImportError as e:
-           self.pandas  = str(e)
+        except Exception as e:
+           self.pandas  = e
 
         cfgfile = kwargs.get('cfgfile', None)
         if cfgfile:
@@ -852,7 +852,7 @@ class SASsession():
         :return: SASdata object
         """
         if self.sascfg.pandas:
-           raise ImportError(self.sascfg.pandas)
+           raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
 
         if libref != '':
            if libref.upper() not in self.assigned_librefs():
@@ -972,7 +972,7 @@ class SASsession():
         :return: Pandas data frame
         """
         if self.sascfg.pandas:
-           raise ImportError(self.sascfg.pandas)
+           raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
 
         dsopts = dsopts if dsopts is not None else {}
         if self.exist(table, libref) == 0:
