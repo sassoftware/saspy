@@ -291,7 +291,10 @@ class SASsession():
         self.batch             = False
         self.results           = kwargs.get('results', self.sascfg.results)
         if not self.results:
-            self.results       = 'Pandas'
+           self.results        = 'Pandas'
+        if self.sascfg.pandas and self.results.lower() == 'pandas':
+           self.results        = 'HTML'
+           print('Pandas module not available. Setting results to HTML')
         self.workpath          = ''
         self.sasver            = ''
         self.version           = sys.modules['saspy'].__version__
