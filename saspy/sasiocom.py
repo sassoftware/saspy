@@ -522,21 +522,21 @@ class SASSessionCOM(object):
             if df[name].dtypes.kind in self.PD_NUM_TYPE:
                 # Numeric type
                 definition = "'{}'n num".format(name)
-                formats[name] = lambda x: str(x) if pd.isna(x) is False else 'NULL'
+                formats[name] = lambda x: str(x) if pd.isnull(x) is False else 'NULL'
             elif df[name].dtypes.kind in self.PD_STR_TYPE:
                 # Character type
                 length = df[name].map(len).max()
                 definition = "'{}'n char({})".format(name, length)
-                formats[name] = lambda x: "'{}'".format(x) if pd.isna(x) is False else 'NULL'
+                formats[name] = lambda x: "'{}'".format(x) if pd.isnull(x) is False else 'NULL'
             elif df[name].dtypes.kind in self.PD_DT_TYPE:
                 # Datetime type
                 definition = "'{}'n num informat={} format={}".format(name, DATETIME_NAME, DATETIME_NAME)
-                formats[name] = lambda x: "'{:{}}'DT".format(x, DATETIME_FMT) if pd.isna(x) is False else 'NULL'
+                formats[name] = lambda x: "'{:{}}'DT".format(x, DATETIME_FMT) if pd.isnull(x) is False else 'NULL'
             else:
                 # Default to character type
                 length = df[name].map(str).map(len).max()
                 definition = "'{}'n char({})".format(name, length)
-                formats[name] = lambda x: "'{}'".format(x) if pd.isna(x) is False else 'NULL'
+                formats[name] = lambda x: "'{}'".format(x) if pd.isnull(x) is False else 'NULL'
 
             columns.append(definition)
 
