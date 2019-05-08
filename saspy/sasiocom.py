@@ -365,7 +365,14 @@ class SASSessionCOM(object):
         # Retrieve listing and log
         log = self._getlog()
         if results.lower() == 'html':
-            listing = self._getfile(self._gethtmlfn(), decode=True)
+            # Make the following replacements in HTML listing:
+            #   1. Swap \x0c for \n
+            #   2. Change body class selector
+            #   3. Increase font size
+            listing = self._getfile(self._gethtmlfn(), decode=True) \
+                .replace(chr(12), chr(10)) \
+                .replace('<body class="c body">', '<body class="l body">') \
+                .replace('font-size: x-small;', 'font-size: normal;')
         else:
             listing = self._getlst()
 
@@ -515,21 +522,21 @@ class SASSessionCOM(object):
             if df[name].dtypes.kind in self.PD_NUM_TYPE:
                 # Numeric type
                 definition = "'{}'n num".format(name)
-                formats[name] = str
+                formats[name] = lambda x: str(x) if pd.isna(x) is False else 'NULL'
             elif df[name].dtypes.kind in self.PD_STR_TYPE:
                 # Character type
                 length = df[name].map(len).max()
                 definition = "'{}'n char({})".format(name, length)
-                formats[name] = lambda x: "'{}'".format(x)
+                formats[name] = lambda x: "'{}'".format(x) if pd.isna(x) is False else 'NULL'
             elif df[name].dtypes.kind in self.PD_DT_TYPE:
                 # Datetime type
                 definition = "'{}'n num informat={} format={}".format(name, DATETIME_NAME, DATETIME_NAME)
-                formats[name] = lambda x: "'{:{}}'DT".format(x, DATETIME_FMT)
+                formats[name] = lambda x: "'{:{}}'DT".format(x, DATETIME_FMT) if pd.isna(x) is False else 'NULL'
             else:
                 # Default to character type
                 length = df[name].map(str).map(len).max()
                 definition = "'{}'n char({})".format(name, length)
-                formats[name] = lambda x: "'{}'".format(x)
+                formats[name] = lambda x: "'{}'".format(x) if pd.isna(x) is False else 'NULL'
 
             columns.append(definition)
 
