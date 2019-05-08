@@ -68,6 +68,18 @@ class TestSASIO(unittest.TestCase):
         """
         self.assertTrue(self.is_method(self.io, 'write_csv'))
 
+    def test_sasio_mexist_download(self):
+        """
+        Test that the SAS IO object has a `download` method.
+        """
+        self.assertTrue(self.is_method(self.io, 'download'))
+
+    def test_sasio_mexist_upload(self):
+        """
+        Test that the SAS IO object has an `upload` method.
+        """
+        self.assertTrue(self.is_method(self.io, 'upload'))
+
     def test_sasio_mexist__asubmit(self):
         """
         Test that the SAS IO object has an `_asubmit` method.

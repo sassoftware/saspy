@@ -19,6 +19,7 @@ import csv
 import io
 import numbers
 import platform
+import os
 import sys
 
 if platform.system() == 'Windows':
@@ -139,7 +140,8 @@ class SASSessionCOM(object):
     STATE_OPEN = 1
 
     # FileService StreamOpenMode values
-    STREAM_READONLY = 1
+    STREAM_READ = 1
+    STREAM_WRITE = 2
 
     def __init__(self, **kwargs):
         self.sascfg = SASConfigCOM(**kwargs)
@@ -229,7 +231,7 @@ class SASSessionCOM(object):
         # Use binary stream to support text and image transfers. The binary
         # stream interface does not require a max line length, which allows
         # support of arbitrarily wide tables.
-        stream = fobj[0].OpenBinaryStream(self.STREAM_READONLY)
+        stream = fobj[0].OpenBinaryStream(self.STREAM_READ)
         flushed = stream.Read(buf)
         result = bytes(flushed)
         while flushed:
@@ -641,3 +643,64 @@ class SASSessionCOM(object):
         df = pd.read_csv(io.StringIO(outstring), parse_dates=datecols)
 
         return df
+
+    def upload(self, local: str, remote: str, overwrite: bool=True, permission: str='', **kwargs):
+        """
+        Upload a file to the SAS server.
+        :param local [str]: Local filename.
+        :param remote [str]: Local filename.
+        :option overwrite [bool]: Overwrite the file if it exists.
+        :option permission [str]: See SAS filename statement documentation.
+        """
+        perms = "PERMISSION='{}'".format(permission) if permission else ''
+        valid = self._sb.file_info(remote, quiet=True)
+
+        if valid == {}:
+            # Parameter `remote` references a directory. Default to using the
+            # filename in `local` path.
+            remote_file = remote + self._sb.hostsep + os.path.basename(local)
+        elif valid is not None and overwrite is False:
+            # Parameter `remote` references a file that exists but we cannot
+            # overwrite it.
+            # TODO: Raise exception here instead of returning dict
+            return {'Success': False,
+                'LOG': 'File {} exists and overwrite was set to False. Upload was stopped.'.format(remote)}
+        else:
+            remote_file = remote
+
+        with open(local, 'rb') as f:
+            fobj = self.workspace.FileService.AssignFileref('infile', 'DISK', remote_file, perms, '')
+            stream = fobj[0].OpenBinaryStream(self.STREAM_WRITE)
+
+            stream.Write(f.read())
+            stream.Close()
+            self.workspace.FileService.DeassignFileref(fobj[0].FilerefName)
+
+        return {'Success': True,
+            'LOG': 'File successfully written using FileService.'}
+
+    def download(self, local: str, remote: str, overwrite: bool=True, **kwargs):
+        """
+        Download a file from the SAS server.
+        :param local [str]: Local filename.
+        :param remote [str]: Local filename.
+        :option overwrite [bool]: Overwrite the file if it exists.
+        """
+        valid = self._sb.file_info(remote, quiet=True)
+
+        if valid is None:
+            # Parameter `remote` references an invalid file path.
+            # TODO: Raise exception here instead of returning dict
+            return {'Success': False,
+                'LOG': 'File {} does not exist.'.format(remote)}
+        elif valid == {}:
+            # Parameter `remote` references a directory.
+            # TODO: Raise exception here instead of returning dict
+            return {'Success': False,
+                'LOG': 'File {} is a directory.'.format(remote)}
+
+        with open(local, 'wb') as f:
+            f.write(self._getfile(remote))
+
+        return {'Success': True,
+            'LOG': 'File successfully read using FileService.'}
