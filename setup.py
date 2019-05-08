@@ -36,7 +36,7 @@ setup(name='saspy',
       cmdclass = {},
       package_data = {'': ['*.js', '*.md', '*.yaml', '*.css', '*.rst'], 'saspy': ['*.sas', 'java/*.*', 'java/pyiom/*.*']},
       install_requires = ['pygments', 'ipython>=4.0.0'],
-      extras_require = {':platform_system == "Windows"': ['pypiwin32']},
+      extras_require = {'iomcom': ['pypiwin32']},
       classifiers = [
         'Programming Language :: Python :: 3',
         "Programming Language :: Python :: 3.4",

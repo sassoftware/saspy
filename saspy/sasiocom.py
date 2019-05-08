@@ -18,12 +18,13 @@ import datetime
 import csv
 import io
 import numbers
-import platform
 import os
 import sys
 
-if platform.system() == 'Windows':
+try:
     from win32com.client import dynamic
+except ImportError:
+    pass
 
 try:
     import pandas as pd
