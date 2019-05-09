@@ -24,6 +24,7 @@ from time import sleep
 
 try:
    import pandas as pd
+   import numpy  as np
 except ImportError:
    pass
 
@@ -1177,7 +1178,10 @@ class SASsessionHTTP():
                   else:
                      if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
                         tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce') 
-                                                         
+               else:
+                  tdf[varlist[i]] = tdf[varlist[i]].apply(str.strip)
+                  tdf[varlist[i]].replace('', np.NaN, True)
+                                          
             if df is not None:
                df = df.append(tdf, ignore_index=True)
             else:
@@ -1202,6 +1206,9 @@ class SASsessionHTTP():
                   tdf[varlist[i]] = pd.to_numeric(tdf[varlist[i]], errors='coerce') 
                else:
                   tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='ignore') 
+            else:
+               tdf[varlist[i]] = tdf[varlist[i]].apply(str.strip)
+               tdf[varlist[i]].replace('', np.NaN, True)
 
          if df is not None:
             df = df.append(tdf, ignore_index=True)
