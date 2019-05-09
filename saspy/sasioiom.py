@@ -26,10 +26,7 @@ try:
    import numpy  as np
 except ImportError:
    pass
-try:
-   from IPython.display import HTML
-except ImportError:
-   pass
+
 try:
    import fcntl
    import signal
@@ -1118,8 +1115,8 @@ Will use HTML5 for this SASsession.""")
       dsopts = dsopts if dsopts is not None else {}
       opts = opts if opts is not None else {}
 
-      code  = "options nosource;\n"
-      code += "filename x \""+file+"\";\n"
+      code  = "filename x \""+file+"\";\n"
+      code += "options nosource;\n"
       code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
       code += self._sb._expopts(opts)+" run\n;"
       code += "options source;\n"
@@ -1774,6 +1771,18 @@ Will use HTML5 for this SASsession.""")
       code += ";\n run;\n"
       ll = self.submit(code, "text")
 
+      dts = kwargs.pop('dtype', '')
+      if dts == '':
+         dts = {}
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                  dts[varlist[i]] = 'float'
+               else:
+                  dts[varlist[i]] = 'str'
+            else:
+               dts[varlist[i]] = 'str'
+
       if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
          local   = True
          outname = "_tomodsx"
@@ -1794,18 +1803,6 @@ Will use HTML5 for this SASsession.""")
       done  = False
       bail  = False
       datar = b""
-
-      dts = kwargs.pop('dtype', '')
-      if dts == '':
-         dts = {}
-         for i in range(nvars):
-            if vartype[i] == 'N':
-               if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  dts[varlist[i]] = 'float'
-               else:
-                  dts[varlist[i]] = 'str'
-            else:
-               dts[varlist[i]] = 'str'
 
       if not local:
          csv = open(tmpcsv, mode='wb')

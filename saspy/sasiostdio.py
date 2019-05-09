@@ -27,10 +27,6 @@ try:
    import numpy  as np
 except ImportError:
    pass
-try:
-   from IPython.display import HTML
-except ImportError:
-   pass
 
 class SASconfigSTDIO:
    """
@@ -960,8 +956,8 @@ Will use HTML5 for this SASsession.""")
       dsopts = dsopts if dsopts is not None else {}
       opts = opts if opts is not None else {}
 
-      code  = "options nosource;\n"
-      code += "filename x \""+file+"\";\n"
+      code  = "filename x \""+file+"\";\n"
+      code += "options nosource;\n"
       code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x"
       code += " dbms=csv replace; "+self._sb._expopts(opts)+" run;"
       code += "options source;\n"
