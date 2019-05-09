@@ -147,6 +147,7 @@ class SASSessionCOM(object):
     def __init__(self, **kwargs):
         self.sascfg = SASConfigCOM(**kwargs)
         self._sb = kwargs.get('sb')
+        self._log = ''
 
         self.pid = self._startsas()
 
@@ -216,6 +217,9 @@ class SASSessionCOM(object):
         while flushed:
             flushed = self.workspace.LanguageService.FlushLog(buf)
             result += flushed
+
+        # Store flush result in running log
+        self._log += result
 
         return result
 
@@ -387,11 +391,10 @@ class SASSessionCOM(object):
 
     def saslog(self) -> str:
         """
-        Return the full SAS log. Proxy this call to `self._getlog` to
-        download the most up to date log.
+        Return the full SAS log.
         :return [str]:
         """
-        return self._getlog()
+        return self._log
 
     def exist(self, table: str, libref: str=None) -> bool:
         """
