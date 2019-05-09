@@ -16,12 +16,7 @@
 from saspy.SASLogLexer import SASLogStyle, SASLogLexer
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
-#from pdb import set_trace as bp
 
-try:
-    import pandas as pd
-except ImportError:
-    pass
 
 class SASresults(object):
     """Return results from a SAS Model object"""
@@ -64,16 +59,17 @@ class SASresults(object):
         else:
             if self.nosub:
                 print('This SAS Result object was created in teach_me_SAS mode, so it has no results')
-                return
+                return None
             else:
                 print("Result named "+attr+" not found. Valid results are:"+str(self._names))
-                return
+                return None
 
         if not self.sas.batch:
-           if isinstance(data, pd.DataFrame):
+           if not isinstance(data, dict):
                return data
            else:
                self.sas.DISPLAY(self.sas.HTML('<h1>' + attr + '</h1>' + data['LST']))
+               return None
         else:
            return data
 
@@ -111,9 +107,9 @@ class SASresults(object):
         """
         if not self.sas.batch:
            for i in self._names:
-               if i.upper()!='LOG':
+               if i.upper() != 'LOG' and i.upper() != 'ERROR_LOG':
                    x = self.__getattr__(i)
-                   if isinstance(x, pd.DataFrame):
+                   if x is not None:
                       if self.sas.sascfg.display.lower() == 'zeppelin':
                          print("%text "+i+"\n"+str(x)+"\n")
                       else:
