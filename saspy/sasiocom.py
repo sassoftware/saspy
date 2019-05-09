@@ -525,18 +525,22 @@ class SASSessionCOM(object):
                 formats[name] = lambda x: str(x) if pd.isnull(x) is False else 'NULL'
             elif df[name].dtypes.kind in self.PD_STR_TYPE:
                 # Character type
+                # NOTE: If a character string contains a single `'`, replace
+                #       it with `''`. This is the SAS equivalent to `\'`.
                 length = df[name].map(len).max()
                 definition = "'{}'n char({})".format(name, length)
-                formats[name] = lambda x: "'{}'".format(x) if pd.isnull(x) is False else 'NULL'
+                formats[name] = lambda x: "'{}'".format(x.replace("'", "''")) if pd.isnull(x) is False else 'NULL'
             elif df[name].dtypes.kind in self.PD_DT_TYPE:
                 # Datetime type
                 definition = "'{}'n num informat={} format={}".format(name, DATETIME_NAME, DATETIME_NAME)
                 formats[name] = lambda x: "'{:{}}'DT".format(x, DATETIME_FMT) if pd.isnull(x) is False else 'NULL'
             else:
                 # Default to character type
+                # NOTE: If a character string contains a single `'`, replace
+                #       it with `''`. This is the SAS equivalent to `\'`.
                 length = df[name].map(str).map(len).max()
                 definition = "'{}'n char({})".format(name, length)
-                formats[name] = lambda x: "'{}'".format(x) if pd.isnull(x) is False else 'NULL'
+                formats[name] = lambda x: "'{}'".format(x.replace("'", "''")) if pd.isnull(x) is False else 'NULL'
 
             columns.append(definition)
 
