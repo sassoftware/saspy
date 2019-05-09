@@ -469,11 +469,11 @@ class SASSessionCOM(object):
         tablepath = self._sb._tablepath(table, libref=libref)
 
         proc_code = """
-            filename csv_file {};
+            filename csv_file "{}";
             proc import datafile=csv_file out={} dbms=csv replace;
                 {}
             run;
-        """.format(filepath, tablepath, self._sb._impopts(opts))
+        """.format(filepath.replace('"', '""'), tablepath, self._sb._impopts(opts))
 
         if nosub is True:
             return proc_code
@@ -499,7 +499,7 @@ class SASSessionCOM(object):
             proc export data={} outfile=csv_file dbms=csv replace;
                 {}
             run;
-        """.format(filepath, tablepath, self._sb._dsopts(dsopts), self._sb._expopts(opts))
+        """.format(filepath.replace('"', '""'), tablepath, self._sb._dsopts(dsopts), self._sb._expopts(opts))
 
         if nosub is True:
             return proc_code
@@ -713,8 +713,15 @@ class SASSessionCOM(object):
             # TODO: Raise exception here instead of returning dict
             return {'Success': False,
                 'LOG': 'File {} is a directory.'.format(remote)}
+        
+        if os.path.isdir(local) is True:
+            # Parameter `local` references a directory. Default to using the
+            # filename in `remote` path.
+            local_file = os.path.join(local, remote.rpartition(self._sb.hostsep)[2])
+        else:
+            local_file = local
 
-        with open(local, 'wb') as f:
+        with open(local_file, 'wb') as f:
             f.write(self._getfile(remote))
 
         return {'Success': True,
