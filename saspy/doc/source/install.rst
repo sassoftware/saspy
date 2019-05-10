@@ -773,10 +773,11 @@ display -
 
 .. code-block:: ipython3
 
-    default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
-                'options' : ["-fullstimer", "-autoexec", "/user/tom/autoexec.sas"],
-                'autoexec': "libname mylib 'some/library/to/pre-assign';"
-                }
+    httpsviya = {'ip'      : 'sastpw.rndk8s.openstack.sas.com',
+                 'context' : 'Data Mining compute context'
+                 'authkey' : 'viya_user-pw',
+                 'options' : ["fullstimer", "memsize=1G"]
+                 }
 
 .. note:: Having the ``'ip'`` key is the trigger to use the HTTP access method.
 
