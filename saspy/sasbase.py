@@ -62,6 +62,8 @@ except ImportError:
 if os.name != 'nt':
    from saspy.sasiostdio import SASsessionSTDIO
 
+from saspy.sasiohttp import SASsessionHTTP
+
 try:
    from IPython.display import HTML
    from IPython.display import display as DISPLAY
@@ -318,6 +320,8 @@ class SASsession():
                 raise SASIONotSupportedError(self.sascfg.mode, alts=['IOM'])
         elif self.sascfg.mode == 'IOM':
             self._io = SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
+        elif self.sascfg.mode == 'HTTP':
+            self._io = SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
         sysvars = """options nosource;
             %put WORKPATH=%sysfunc(pathname(work));
