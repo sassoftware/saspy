@@ -348,8 +348,6 @@ rtunnel -
                 'rtunnel' : 9912
                }
 
-.. note:: Having the ``'ssh'`` key is the trigger to use the STDIO over SSH access method.
-
 
 IOM
 ===
@@ -705,13 +703,6 @@ At the time of this writing, the only transcoding I need to do in python for thi
 'cp500' encoding which is part of the default set, so you don't have to install other modules. It's possible this could
 change in the future, but I don't have any expectations of that for now, so using 'cp500' is ok if you don't want to
 install other non-standard python modules. 
-
-
-`IOM`_
-  The integrated object method (IOM) connection method supports SAS on any platform.
-  This method can make a local Windows connection and it is also the way to connect 
-  to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
-  Server on any supported SAS platform.
 
 
 HTTP
