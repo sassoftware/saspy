@@ -58,6 +58,12 @@ The current set of connection methods are as follows:
   to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
   Server on any supported SAS platform.
 
+`HTTP`_
+  This access mehtod uses http[s] to connect to the Compute Service (a micro service) of a Viya
+  instalation. This does not connet to SAS 9.4 via http. The Compute Service will start a
+  Compute Server using the SPRE image of MVA SAS that is installed in the Viya deployment.
+  This is roughly equivalent to a Workspace server via IOM, but in Viya with no SAS 9.4.
+
 Though there are several connection methods available, a single configuration file
 can be used to enable all the connection methods. The sample config file contains instructions and
 examples, but this section goes into more detail to explain how to configure each
@@ -341,6 +347,8 @@ rtunnel -
                 'tunnel'  : 9911
                 'rtunnel' : 9912
                }
+
+.. note:: Having the ``'ssh'`` key is the trigger to use the STDIO over SSH access method.
 
 
 IOM
@@ -697,5 +705,88 @@ At the time of this writing, the only transcoding I need to do in python for thi
 'cp500' encoding which is part of the default set, so you don't have to install other modules. It's possible this could
 change in the future, but I don't have any expectations of that for now, so using 'cp500' is ok if you don't want to
 install other non-standard python modules. 
+
+
+`IOM`_
+  The integrated object method (IOM) connection method supports SAS on any platform.
+  This method can make a local Windows connection and it is also the way to connect 
+  to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
+  Server on any supported SAS platform.
+
+
+HTTP
+=====
+This is the access method for Viya. It does not connect to SAS 9.4. This access method accesses the Compute (micro) Service
+of a SAS Viya deployment. The Compute Service launches Compute Servers, which are MVA SAS sessions found in the SPRE deployment
+of the Viya installation. This is the equivalent of an IOM Workspace server, but in a Viya deployment.
+So, it is still connecting to MVA SAS and all of the methods behave the same as they would with any other saspy access method.
+
+
+There keys for this configuration definition dictionary:
+
+ip - 
+    (Required) The resolvable host name, or IP address to the Viya Compute Service
+port - 
+    (Optional) The port to use to connect to the Compute Service. This will default to either 80 or 443 based upon the ssl key.
+ssl - 
+    (Optional) Boolean identifying whether to use HTTPS (ssl=True) or just HTTP. The default is True and will default to port 443 if
+    the port is not specified. If set to False, it will default to port 80, if the port is not specified.
+    Note that depending upon the version of python, certificate verification may or may not be required, later version are more strict.
+    See the python doc for your version if this is a concern.
+authkey -
+    (Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection.
+user - 
+    (**Discouraged**)  The user ID is required but if this field is left blank,
+    the user is **prompted** for a user ID at runtime, unless it's found in the authinfo file.
+pw  - 
+    (**Strongly discouraged**) A password is required but if this field is left
+    blank, the user is **prompted** for a password at runtime, unless it's found in the authinfo file.
+
+context -
+    (Optional) The Compute Service has different Contexts that you can connect to. Think Appserver in IOM.
+    if you don't provide one here, saspy will query the Service upon connecting and get a list of available Contexts and
+    prompt you for which one to use.
+
+options -
+    (Optional) SAS options to include when connecting. These **must** be a Python list.
+
+encoding -
+    (Optional)
+    NOTE: you no longer need to set the encoding. SASpy
+    will determine the SAS session encoding and map that to the Python encoding for you.
+
+    This is the Python encoding value that matches the SAS session encoding
+    of the SAS session to which you are connecting. The Python encoding 
+    values can be found at `encodings-and-unicode <https://docs.python.org/
+    3.5/library/codecs.html#encodings-and-unicode>`_.
+    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the 
+    default encodings for running SAS in Unicode, on Unix, and on Windows,
+    respectively. Those map to Python encoding values: utf8, latin1, and
+    windows-1252, respectively. 
+
+autoexec -
+    (Optional) This is a string of SAS code that will be submitted upon establishing a connection.
+    You can use this to preassign libraries you always want available, or whatever you want.
+    Don't confuse this with the autoexec option of SAS which specifies a sas program file to be run.
+    That is different. This is a string of SAS code saspy will submit after the session is created,
+    which would be after SAS already included any autoexec file if there was one.
+
+lrecl -
+    (Optional) An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
+
+display -
+    (Optional) This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'. The default
+    when this is not specified is 'jupyter'. Jupyter uses IPython to render HTML, which is how saspy has 
+    always worked. To support Zeppelin's display method, a different display interface had to be added to saspy.
+    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
+
+.. code-block:: ipython3
+
+    default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+                'options' : ["-fullstimer", "-autoexec", "/user/tom/autoexec.sas"],
+                'autoexec': "libname mylib 'some/library/to/pre-assign';"
+                }
+
+.. note:: Having the ``'ip'`` key is the trigger to use the HTTP access method.
 
 
