@@ -196,7 +196,7 @@ class SASconfigHTTP:
             return 
 
       if self.ssl:
-         # HACK, this isn't right; gotta get this working right but no one knows how/why
+         # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifyable
          try:
             self.HTTPConn = hc.HTTPSConnection(self.ip, self.port)
             self._token = self._authenticate(user, pw)

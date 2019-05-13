@@ -1487,6 +1487,13 @@ class SASsession():
                                                                                   
         return res
 
+    def cat(self, path):
+       fd = open(path, 'r')
+       dat = fd.read()
+       fd.close()
+       print(dat)
+
+
 if __name__ == "__main__":
     startsas()
 
