@@ -204,14 +204,14 @@ winiomIWA  = {'java'    : 'java',
 #
              
 httpsviya = {'ip'      : 'sastpw.rndk8s.openstack.sas.com',
-             'context' : 'Data Mining compute context'
+             'context' : 'Data Mining compute context',
              'authkey' : 'viya_user-pw',
              'options' : ["fullstimer", "memsize=1G"]
              }
 
 httpviya = {'ip'      : 'sastpw.rndk8s.openstack.sas.com',
             'ssl'     : False,  # this will use port 80
-            'context' : 'Data Mining compute context'
+            'context' : 'Data Mining compute context',
             'authkey' : 'viya_user-pw',
             'options' : ["fullstimer", "memsize=1G"]
             }
