@@ -436,7 +436,26 @@ class SASsessionHTTP():
       self.pid = self._session.get('id')
 
       self._log = self._getlog()
-          
+
+      # POST Job - Lets see if the server really came up, cuz you can't tell from what happend so far
+      conn = self.sascfg.HTTPConn; conn.connect()
+      jcode = json.dumps('\n')
+      d1 = '{"code":['+jcode+']}'
+      headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json",
+               "Authorization":"Bearer "+self.sascfg._token}
+      conn.request('POST', self._uri_exe, body=d1, headers=headers)
+      req = conn.getresponse()
+      status = req.status
+      resp = req.read()
+      conn.close()
+
+      jobid = json.loads(resp.decode(self.sascfg.encoding))
+      if not jobid or status > 299:
+         print("Compute server had issues starting:\n")
+         for key in jobid:
+            print(key+"="+str(jobid.get(key)))
+         return None
+
       self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
       print("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self.pid)       
 
@@ -683,13 +702,14 @@ class SASsessionHTTP():
                "Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', self._uri_exe, body=d1, headers=headers)
       req = conn.getresponse()
+      status = req.status
       resp = req.read()
       conn.close()
 
       jobid = json.loads(resp.decode(self.sascfg.encoding))
-      if not jobid:
+      if not jobid or status > 299:
          print("Problem submitting job to Compute Service.\n   Status code="+str(jobid.get('httpStatusCode'))+"\n   Message="+jobid.get('message'))
-         return dict(LOG=j, LST='')
+         return dict(LOG=str(jobid), LST='')
 
       for ld in jobid.get('links'):
          if ld.get('method') == 'GET' and ld.get('rel') == 'state':
