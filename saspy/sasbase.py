@@ -54,11 +54,6 @@ from saspy.sasViyaML     import SASViyaML
 from saspy.sasdata       import SASdata
 
 try:
-   import pandas as pd
-except ImportError:
-   pass
-
-try:
    import saspy.sascfg_personal as SAScfg
 except ImportError:
    try:
@@ -68,6 +63,8 @@ except ImportError:
 
 if os.name != 'nt':
    from saspy.sasiostdio import SASsessionSTDIO
+
+from saspy.sasiohttp import SASsessionHTTP
 
 try:
    from IPython.display import HTML
@@ -92,6 +89,12 @@ class SASconfig:
         self.valid   = True
         self.mode    = ''
         configs      = []
+
+        try:
+           import pandas
+           self.pandas  = None
+        except Exception as e:
+           self.pandas  = e
 
         cfgfile = kwargs.get('cfgfile', None)
         if cfgfile:
@@ -310,7 +313,10 @@ class SASsession():
         self.batch             = False
         self.results           = kwargs.get('results', self.sascfg.results)
         if not self.results:
-            self.results       = 'Pandas'
+           self.results        = 'Pandas'
+        if self.sascfg.pandas and self.results.lower() == 'pandas':
+           self.results        = 'HTML'
+           print('Pandas module not available. Setting results to HTML')
         self.workpath          = ''
         self.sasver            = ''
         self.version           = sys.modules['saspy'].__version__
@@ -336,6 +342,8 @@ class SASsession():
             self._io = SASsessionIOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
         elif self.sascfg.mode == 'COM':
             self._io = SASSessionCOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
+        elif self.sascfg.mode == 'HTTP':
+            self._io = SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
         sysvars = """options nosource;
             %put WORKPATH=%sysfunc(pathname(work));
@@ -872,6 +880,9 @@ class SASsession():
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :return: SASdata object
         """
+        if self.sascfg.pandas:
+           raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
+
         if libref != '':
            if libref.upper() not in self.assigned_librefs():
               print("The libref specified is not assigned in this SAS Session.")
@@ -989,6 +1000,9 @@ class SASsession():
         :param kwargs: dictionary
         :return: Pandas data frame
         """
+        if self.sascfg.pandas:
+           raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
+
         dsopts = dsopts if dsopts is not None else {}
         if self.exist(table, libref) == 0:
             print('The SAS Data Set ' + libref + '.' + table + ' does not exist')
@@ -1515,6 +1529,13 @@ class SASsession():
            res[key] = val                                                         
                                                                                   
         return res
+
+    def cat(self, path):
+       fd = open(path, 'r')
+       dat = fd.read()
+       fd.close()
+       print(dat)
+
 
 if __name__ == "__main__":
     startsas()

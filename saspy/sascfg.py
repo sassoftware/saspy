@@ -32,7 +32,7 @@
 # specify options=''. This way it's specified so it can't be overridden, even though you don't have any
 # specific value you want applied.
 # 
-#SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'http', 'iomcom']
+#SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'httpsviya', 'httpviya', 'iomcom']
 #
 
 SAS_config_names=['default']
@@ -215,3 +215,31 @@ iomcom = {
     'class_id': '440196d4-90f0-11d0-9f41-00a024bb830c',
     'provider': 'sas.iomprovider',
     'encoding': 'windows-1252'}
+
+
+# HTTP access method to connect to the Compute Service
+# These need ip addr, other values will be prompted for - python Dict
+# valid keys are:
+# 'ip'      - [REQUIRED] host address 
+# 'port'    - port; the code Defaults this to based upon the 'ssl' key; 443 default else 80
+# 'ssl'     - whether to use HTTPS or just HTTP protocal. Default is True, using ssl and poort 443
+# 'context' - context name defined on the compute service  [PROMTED for at runtime if more than one defined]
+# 'authkey' - identifier for user/password credentials to read from .authinfo file. Eliminates prompting for credentials.
+# 'options' - SAS options to include (no '-' (dashes), just option names and values)
+# 'user'    - not suggested [REQUIRED but PROMTED for at runtime]
+# 'pw'      - really not suggested [REQUIRED but PROMTED for at runtime]
+# 
+#
+             
+httpsviya = {'ip'      : 'sastpw.rndk8s.openstack.sas.com',
+             'context' : 'Data Mining compute context',
+             'authkey' : 'viya_user-pw',
+             'options' : ["fullstimer", "memsize=1G"]
+             }
+
+httpviya = {'ip'      : 'sastpw.rndk8s.openstack.sas.com',
+            'ssl'     : False,  # this will use port 80
+            'context' : 'Data Mining compute context',
+            'authkey' : 'viya_user-pw',
+            'options' : ["fullstimer", "memsize=1G"]
+            }

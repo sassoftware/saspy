@@ -327,6 +327,8 @@ class Tabulate:
             return
 
         elif _output_type == 'Pandas':
+            if self.sas.sascfg.pandas:
+               raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
             return self.to_nested_dataframe(code)
 
     def to_nested_dataframe(self, code):
