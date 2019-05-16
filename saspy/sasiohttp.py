@@ -287,7 +287,7 @@ class SASconfigHTTP:
       # POST AuthToken
       conn = self.HTTPConn; conn.connect()
       d1 = ("grant_type=password&username="+user+"&password="+pw).encode(self.encoding)
-      basic = base64.encodestring("sas.tkmtrb:".encode(self.encoding))
+      basic = base64.encodebytes("sas.tkmtrb:".encode(self.encoding))
       authheader = '%s' % basic.splitlines()[0].decode(self.encoding)
       headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
                "Authorization":"Basic "+authheader}
