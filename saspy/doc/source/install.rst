@@ -724,7 +724,8 @@ ssl -
     the port is not specified. If set to False, it will default to port 80, if the port is not specified.
     Note that depending upon the version of python, certificate verification may or may not be required, later version are more strict.
     See the python doc for your version if this is a concern.
-    Also note the if Viya uses the default self signed certificates it ships with, you will not be able to verify them,
+
+    Also note that if Viya uses the default self signed certificates it ships with, you will not be able to verify them,
     but that can be fine, and you can still use an ssl connection. You can use set 'verify' : False, in your config to
     turn off verification for this case. 
 authkey -
