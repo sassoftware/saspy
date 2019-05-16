@@ -1,7 +1,8 @@
 import unittest
 import saspy
 import os
-from IPython.utils.tempdir import TemporaryDirectory
+import tempfile
+
 
 class TestSASsessionObject(unittest.TestCase):
     @classmethod
@@ -9,9 +10,12 @@ class TestSASsessionObject(unittest.TestCase):
         cls.sas = saspy.SASsession()
         cls.sas.set_batch(True)
 
+        cls.tempdir = tempfile.TemporaryDirectory()
+
     @classmethod
     def tearDownClass(cls):
         cls.sas._endsas()
+        cls.tempdir.cleanup()
 
     def test_sassession(self):
         self.assertIsInstance(self.sas, saspy.SASsession)
@@ -30,17 +34,16 @@ class TestSASsessionObject(unittest.TestCase):
         exists = self.sas.exist('notable', libref='sashelp')
         self.assertFalse(exists)
 
-    def test_SASsession_csv_read(self):
+    def test_sassession_csv_read(self):
         """
         Test method read_csv properly imports a csv file
         """
         EXPECTED = ['1', 'Acura', 'MDX', 'SUV', 'Asia', 'All', '$36,945', '$33,337', '3.5']
 
-        with TemporaryDirectory() as temppath:
-            fname = os.path.join(temppath, 'sas_csv_test.csv')
-            self.sas.write_csv(fname, 'cars', libref='sashelp')
+        fname = os.path.join(self.tempdir.name, 'sas_csv_test.csv')
+        self.sas.write_csv(fname, 'cars', libref='sashelp')
 
-            csvdata = self.sas.read_csv(fname, 'csvcars', results='text')
+        csvdata = self.sas.read_csv(fname, 'csvcars', results='text')
 
         ll = csvdata.head()
 
@@ -53,11 +56,42 @@ class TestSASsessionObject(unittest.TestCase):
         """
         Test method write_csv properly exports a csv file
         """
-        with TemporaryDirectory() as temppath:
-            fname = os.path.join(temppath, 'sas_csv_test.csv')
-            log = self.sas.write_csv(fname, 'cars', libref='sashelp')
+        fname = os.path.join(self.tempdir.name, 'sas_csv_test.csv')
+        log = self.sas.write_csv(fname, 'cars', libref='sashelp')
 
         self.assertNotIn("ERROR", log, msg="sas.write_csv() failed")
+
+    def test_sassession_upload(self):
+        """
+        Test method upload properly uploads a file
+        """
+        local_file = os.path.join(self.tempdir.name, 'simple_csv.csv')
+        remote_file = self.sas.workpath + self.sas.hostsep + 'simple_csv.csv'
+
+        with open(local_file, 'w') as f:
+            f.write("""A,B,C,D\n1,2,3,4\n5,6,7,8""")
+
+        self.sas.upload(local_file, remote_file)
+
+        # `assertTrue` fails on empty dict or None, which is returned
+        # by `file_info`
+        self.assertTrue(self.sas.file_info(remote_file))
+
+    def test_sassession_download(self):
+        """
+        Test method download properly downloads a file
+        """
+        local_file_1 = os.path.join(self.tempdir.name, 'simple_csv.csv')
+        local_file_2 = os.path.join(self.tempdir.name, 'simple_csv_2.csv')
+        remote_file = self.sas.workpath + self.sas.hostsep + 'simple_csv.csv'
+
+        with open(local_file_1, 'w') as f:
+            f.write("""A,B,C,D\n1,2,3,4\n5,6,7,8""")
+
+        self.sas.upload(local_file_1, remote_file)
+        self.sas.download(local_file_2, remote_file)
+
+        self.assertTrue(os.path.exists(local_file_2))
 
     def test_sassession_datasets_work(self):
         """

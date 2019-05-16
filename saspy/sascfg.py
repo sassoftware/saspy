@@ -32,7 +32,7 @@
 # specify options=''. This way it's specified so it can't be overridden, even though you don't have any
 # specific value you want applied.
 # 
-#SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'httpsviya', 'httpviya']
+#SAS_config_names = ['default', 'ssh', 'iomlinux', 'iomwin', 'winlocal', 'winiomlinux', 'winiomwin', 'httpsviya', 'httpviya', 'iomcom']
 #
 
 SAS_config_names=['default']
@@ -189,6 +189,37 @@ winiomIWA  = {'java'    : 'java',
             'sspi'      : True
             }
 
+
+# For Remote and Local IOM access methods using COM interface
+# These configuration definitions are for connecting over IOM using COM. This
+# access method is for Windows clients connecting to remote hosts. Local
+# SAS instances may also be supported.
+#
+# This access method does not require a Java dependency.
+#
+# Valid Keys:
+#   iomhost     - Required for remote connections only. The Resolvable SAS
+#                 server dns name.
+#   iomport     - Required for remote connections only. The SAS workspace
+#                 server port. Generally 8591 on standard remote
+#                 installations. For local connections, 0 is the default.
+#   class_id    - Required for remote connections only. The IOM workspace
+#                 server class identifier. Use `PROC IOMOPERATE` to identify
+#                 the correct value. This option is ignored on local connections.
+#   provider    - [REQUIRED] IOM provider. "sas.iomprovider" is recommended.
+#   encoding    - This is the python encoding value that matches the SAS
+#                 session encoding of the IOM server.
+#   omruser     - SAS user. This option is ignored on local connections.
+#   omrpw       - SAS password. This option is ignored on local connections.
+
+iomcom = {
+    'iomhost': 'mynode.mycompany.org',
+    'iomport': 8591,
+    'class_id': '440196d4-90f0-11d0-9f41-00a024bb830c',
+    'provider': 'sas.iomprovider',
+    'encoding': 'windows-1252'}
+
+
 # HTTP access method to connect to the Compute Service
 # These need ip addr, other values will be prompted for - python Dict
 # valid keys are:
@@ -215,5 +246,3 @@ httpviya = {'ip'      : 'sastpw.rndk8s.openstack.sas.com',
             'authkey' : 'viya_user-pw',
             'options' : ["fullstimer", "memsize=1G"]
             }
-
-

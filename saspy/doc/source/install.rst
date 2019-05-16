@@ -52,12 +52,18 @@ The current set of connection methods are as follows:
   method can connect to SAS that is installed on a remote host, if you have passwordless
   SSH configured for your Linux user account.
 
-`IOM`_
+`IOM using Java`_
   The integrated object method (IOM) connection method supports SAS on any platform.
   This method can make a local Windows connection and it is also the way to connect 
   to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
   Server on any supported SAS platform.
 
+`IOM using COM`_ 
+  This connection method is for Windows clients connecting to a remote SAS 9.4 host. This
+  method takes advantage of the IOM access method, but does not require a Java dependency.
+  SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS Support)
+  is required to install the SAS COM library on your client system.
+    
 `HTTP`_
   This access mehtod uses http[s] to connect to the Compute Service (a micro service) of a Viya
   instalation. This does not connet to SAS 9.4 via http. The Compute Service will start a
@@ -349,8 +355,8 @@ rtunnel -
                }
 
 
-IOM
-===
+IOM using Java
+==============
 This connection method opens many connectivity options. This method enables you to 
 connect to any Workspace server on any supported platform. 
 
@@ -703,6 +709,64 @@ At the time of this writing, the only transcoding I need to do in python for thi
 'cp500' encoding which is part of the default set, so you don't have to install other modules. It's possible this could
 change in the future, but I don't have any expectations of that for now, so using 'cp500' is ok if you don't want to
 install other non-standard python modules. 
+
+
+IOM using COM
+=============
+New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.
+
+SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.
+
+To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define the configuration parameter ``class_id`` with the SAS Workspace GUID. The best way to identify that value is by using ``PROC IOMOPERATE``.
+
+::
+
+    proc iomoperate;
+        list types;
+    run;
+
+::
+
+    SAS Workspace Server 
+        Short type name  : Workspace 
+        Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c
+
+To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored on local connections.
+
+iomhost - 
+    The resolvable host name, or IP address to the IOM object spawner.
+iomport - 
+    The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
+class_id -
+    The IOM workspace server class identfier. Use ``PROC IOMOPERATE`` to identify the correct value for your configuration.
+provider -
+    (Required) The SAS IOM Data Provider is an OLE DB data provider that supports access to SAS data sets that are managed by SAS Integrated Object Model (IOM) servers. The 'sas.iomprovider' provider is recommended.
+omruser - 
+    (**Discouraged**) The user ID is required but if this field is left blank,
+    the user is **prompted** for a user ID at runtime, unless it's found in the authinfo file.
+omrpw  - 
+    (**Strongly discouraged**) A password is required but if this field is left
+    blank, the user is **prompted** for a password at runtime, unless it's found in the authinfo file.
+encoding  -
+    NOTE: as of saspy V2.4.2, you no longer need to set the encoding. SASpy
+    will determine the SAS session encoding and map that to the Python encoding for you.
+
+    This is the Python encoding value that matches the SAS session encoding of 
+    the IOM server to which you are connecting. The Python encoding values can be 
+    found at `encodings-and-unicode <https://docs.python.org/3.5/
+    library/codecs.html#encodings-and-unicode>`_.
+    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the 
+    default encodings for running SAS in Unicode, on Unix, and on Windows,
+    respectively. Those map to Python encoding values: utf8, latin1, and 
+    windows-1252, respectively.
+
+.. code-block:: ipython3
+
+    iomcom = {'iomhost': 'mynode.mycompany.org',
+        'iomport': 8591,
+        'class_id': '440196d4-90f0-11d0-9f41-00a024bb830c',
+        'provider': 'sas.iomprovider',
+        'encoding': 'windows-1252'}
 
 
 HTTP
