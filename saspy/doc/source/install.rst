@@ -720,11 +720,13 @@ SAS Enterprise Guide or SAS Integration Technologies Client (a free download fro
 To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define the configuration parameter ``class_id`` with the SAS Workspace GUID. The best way to identify that value is by using ``PROC IOMOPERATE``.
 
 ::
+
     proc iomoperate;
         list types;
     run;
 
 ::
+
     SAS Workspace Server 
         Short type name  : Workspace 
         Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c
