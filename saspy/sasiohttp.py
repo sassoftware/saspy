@@ -46,6 +46,7 @@ class SASconfigHTTP:
       self.ctx       = {}
       self.options   = cfg.get('options', [])
       self.ssl       = cfg.get('ssl', True)
+      self.verify    = cfg.get('verify', True)
       user           = cfg.get('user', '')
       pw             = cfg.get('pw', '')
       self.encoding  = cfg.get('encoding', '')
@@ -106,6 +107,13 @@ class SASconfigHTTP:
             print("Parameter 'ssl' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.ssl = bool(inssl)
+
+      inver = kwargs.get('verify', None)         
+      if inver is not None:
+         if lock and self.ssl:
+            print("Parameter 'verify' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.verify = bool(inver)
 
       inuser = kwargs.get('user', '')              
       if len(inuser) > 0:
@@ -196,14 +204,19 @@ class SASconfigHTTP:
             return 
 
       if self.ssl:
-         # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifyable
-         try:
-            self.HTTPConn = hc.HTTPSConnection(self.ip, self.port)
-            self._token = self._authenticate(user, pw)
-         except ssl.SSLError as e:
-            print("SSL connection failed, creating an unverified ssl connection. Error was:"+str(e))
+         if self.verify:
+            # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifyable
+            try:
+               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port)
+               self._token = self._authenticate(user, pw)
+            except ssl.SSLError as e:
+               print("SSL connection failed, creating an unverified ssl connection. Error was:"+str(e))
+               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, context=ssl._create_unverified_context())
+               print("You can set 'verify=False' to get rid of this message ")
+               self._token   = self._authenticate(user, pw)
+         else:
             self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, context=ssl._create_unverified_context())
-            self._token   = self._authenticate(user, pw)
+            self._token = self._authenticate(user, pw)
       else:
          self.HTTPConn = hc.HTTPConnection(self.ip, self.port)
          self._token   = self._authenticate(user, pw)
