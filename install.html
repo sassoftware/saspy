@@ -811,7 +811,10 @@ So, it is still connecting to MVA SAS and all of the methods behave the same as 
 <dd>(Optional) Boolean identifying whether to use HTTPS (ssl=True) or just HTTP. The default is True and will default to port 443 if
 the port is not specified. If set to False, it will default to port 80, if the port is not specified.
 Note that depending upon the version of python, certificate verification may or may not be required, later version are more strict.
-See the python doc for your version if this is a concern.</dd>
+See the python doc for your version if this is a concern.
+Also note the if Viya uses the default self signed certificates it ships with, you will not be able to verify them,
+but that can be fine, and you can still use an ssl connection. You can use set &#8216;verify&#8217; : False, in your config to
+turn off verification for this case.</dd>
 <dt>authkey -</dt>
 <dd>(Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection.</dd>
 <dt>user -</dt>
