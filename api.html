@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 3.0.0 documentation</title>
+  <title>API Reference &mdash; saspy 3.1.0 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.0.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.1.0 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.0.0
+                3.1.0
               </div>
             
           
@@ -272,6 +272,26 @@ These are generally defined in the sascfg_personal.py file as opposed to being s
 <li><strong>appserver</strong> &#8211; Appserver name of the workspace server to connect to</li>
 <li><strong>sspi</strong> &#8211; Boolean for using IWA to connect to a workspace server configured to use IWA</li>
 <li><strong>javaparms</strong> &#8211; for specifying java command line options if necessary</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>COM</strong></p>
+<p>and for IOM IO via COM</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>host</strong> &#8211; Resolvable host name or IP of the server</li>
+<li><strong>port</strong> &#8211; Server port</li>
+<li><strong>class_id</strong> &#8211; IOM workspace server class identifier</li>
+<li><strong>provider</strong> &#8211; IOM provider</li>
+<li><strong>encoding</strong> &#8211; This is the python encoding value that matches the SAS
+session encoding of the IOM server</li>
+<li><strong>user</strong> &#8211; User</li>
+<li><strong>pw</strong> &#8211; Password</li>
 </ul>
 </td>
 </tr>
@@ -3799,7 +3819,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.0.0',
+            VERSION:'3.1.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
