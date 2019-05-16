@@ -88,9 +88,12 @@ class SASSessionCOM(object):
     although this is functionality is untested. A slight change may be
     required to the `_startsas` method to support local instances.
     """
-    IOM_PROTOCOL = 2
     SAS_APP = 'SASApp'
     HTML_RESULT_FILE = 'saspy_results.html'
+
+    # SASObjectManager.Protocols Enum values
+    PROTOCOL_COM = 0
+    PROTOCOL_IOM = 2
 
     # SAS Date/Time/Datetime formats
     FMT_DEFAULT_DATE_NAME = 'E8601DA'
@@ -170,10 +173,21 @@ class SASSessionCOM(object):
         self.keeper = dynamic.Dispatch('SASObjectManager.ObjectKeeper')
         self.adodb = dynamic.Dispatch('ADODB.Connection')
 
-        server.MachineDNSName = self.sascfg.host
-        server.Port = self.sascfg.port
-        server.Protocol = self.IOM_PROTOCOL
-        server.ClassIdentifier = self.sascfg.class_id
+        if self.sascfg.host == 'localhost':
+            # Create a local connection. The following is required:
+            #   1. host
+            server.MachineDNSName = self.sascfg.host
+            server.Port = 0
+            server.Protocol = self.PROTOCOL_COM
+        else:
+            # Create a remote connection. The following are required:
+            #   1. host
+            #   2. port
+            #   3. class_id
+            server.MachineDNSName = self.sascfg.host
+            server.Port = self.sascfg.port
+            server.Protocol = self.PROTOCOL_IOM
+            server.ClassIdentifier = self.sascfg.class_id
 
         self.workspace = factory.CreateObjectByServer(self.SAS_APP, True,
             server, self.sascfg.user, self.sascfg.pw)

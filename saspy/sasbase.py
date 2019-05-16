@@ -165,7 +165,7 @@ class SASconfig:
         ssh           = cfg.get('ssh')
         path          = cfg.get('saspath')
         java          = cfg.get('java')
-        class_id      = cfg.get('class_id')
+        provider      = cfg.get('provider')
         self.display  = cfg.get('display',  '')
         self.results  = cfg.get('results')
         self.autoexec = cfg.get('autoexec')
@@ -205,7 +205,7 @@ class SASconfig:
             self.mode = 'SSH'
         elif path is not None:
             self.mode = 'STDIO'
-        elif class_id is not None:
+        elif provider is not None:
             self.mode = 'COM'
         else:
             raise SASConfigNotValidError(cfgname)
