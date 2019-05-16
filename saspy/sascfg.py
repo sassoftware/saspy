@@ -198,14 +198,14 @@ winiomIWA  = {'java'    : 'java',
 # This access method does not require a Java dependency.
 #
 # Valid Keys:
-#   iomhost     - [REQUIRED] Resolvable SAS server dns name. For local
-#                 connections, use `localhost`
+#   iomhost     - Required for remote connections only. The Resolvable SAS
+#                 server dns name.
 #   iomport     - Required for remote connections only. The SAS workspace
 #                 server port. Generally 8591 on standard remote
 #                 installations. For local connections, 0 is the default.
 #   class_id    - Required for remote connections only. The IOM workspace
 #                 server class identifier. Use `PROC IOMOPERATE` to identify
-#                 the correct value.
+#                 the correct value. This option is ignored on local connections.
 #   provider    - [REQUIRED] IOM provider. "sas.iomprovider" is recommended.
 #   encoding    - This is the python encoding value that matches the SAS
 #                 session encoding of the IOM server.

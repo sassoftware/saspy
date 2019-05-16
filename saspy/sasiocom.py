@@ -173,12 +173,14 @@ class SASSessionCOM(object):
         self.keeper = dynamic.Dispatch('SASObjectManager.ObjectKeeper')
         self.adodb = dynamic.Dispatch('ADODB.Connection')
 
-        if self.sascfg.host == 'localhost':
-            # Create a local connection. The following is required:
-            #   1. host
-            server.MachineDNSName = self.sascfg.host
+        if self.sascfg.host is None:
+            # Create a local connection.
+            server.MachineDNSName = '127.0.0.1'
             server.Port = 0
             server.Protocol = self.PROTOCOL_COM
+
+            user = None
+            password = None
         else:
             # Create a remote connection. The following are required:
             #   1. host
@@ -189,8 +191,11 @@ class SASSessionCOM(object):
             server.Protocol = self.PROTOCOL_IOM
             server.ClassIdentifier = self.sascfg.class_id
 
+            user = self.sascfg.user
+            password = self.sascfg.pw
+
         self.workspace = factory.CreateObjectByServer(self.SAS_APP, True,
-            server, self.sascfg.user, self.sascfg.pw)
+            server, user, password)
 
         self.keeper.AddObject(1, 'WorkspaceObject', self.workspace)
         self.adodb.Open('Provider={}; Data Source=iom-id://{}'.format(
