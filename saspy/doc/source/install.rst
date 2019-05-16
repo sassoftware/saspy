@@ -59,8 +59,10 @@ The current set of connection methods are as follows:
   Server on any supported SAS platform.
 
 `IOM using COM`_ 
-  This connection method is for Windows clients connection to a remote SAS 9.4 host. This
+  This connection method is for Windows clients connecting to a remote SAS 9.4 host. This
   method takes advantage of the IOM access method, but does not require a Java dependency.
+  SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS Support)
+  is required to install the SAS COM library on your client system.
     
 `HTTP`_
   This access mehtod uses http[s] to connect to the Compute Service (a micro service) of a Viya
@@ -708,16 +710,31 @@ At the time of this writing, the only transcoding I need to do in python for thi
 change in the future, but I don't have any expectations of that for now, so using 'cp500' is ok if you don't want to
 install other non-standard python modules. 
 
+
 IOM using COM
 =============
-New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency. Connections from windows clients to remote SAS 9.4 hosts are supported.
+New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency. Connections from Windows clients to remote SAS 9.4 hosts are supported.
+
+SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.
+
+To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define the configuration parameter ``class_id`` with the SAS Workspace GUID. The best way to identify that value is by using ``PROC IOMOPERATE``.
+
+::
+    proc iomoperate;
+        list types;
+    run;
+
+::
+    SAS Workspace Server 
+        Short type name  : Workspace 
+        Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c
 
 iomhost - 
     (Required) The resolvable host name, or IP address to the IOM object spawner.
 iomport - 
     (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
 class_id -
-    (Required) The IOM workspace server class identfier. Use PROC IOMOPERATE to identify the correct value for your configuration.
+    (Required) The IOM workspace server class identfier. Use ``PROC IOMOPERATE`` to identify the correct value for your configuration.
 provider -
     (Required) The SAS IOM Data Provider is an OLE DB data provider that supports access to SAS data sets that are managed by SAS Integrated Object Model (IOM) servers. The 'sas.iomprovider' provider is recommended.
 omruser - 
@@ -746,6 +763,7 @@ encoding  -
         'class_id': '440196d4-90f0-11d0-9f41-00a024bb830c',
         'provider': 'sas.iomprovider',
         'encoding': 'windows-1252'}
+
 
 HTTP
 =====
