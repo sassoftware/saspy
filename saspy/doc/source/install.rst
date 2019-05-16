@@ -713,7 +713,7 @@ install other non-standard python modules.
 
 IOM using COM
 =============
-New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency. Connections from Windows clients to remote SAS 9.4 hosts are supported.
+New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.
 
 SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.
 
@@ -731,12 +731,14 @@ To connect to a SAS server, you must define a few attributes: host name, port nu
         Short type name  : Workspace 
         Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c
 
+To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored on local connections.
+
 iomhost - 
-    (Required) The resolvable host name, or IP address to the IOM object spawner.
+    The resolvable host name, or IP address to the IOM object spawner.
 iomport - 
-    (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
+    The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
 class_id -
-    (Required) The IOM workspace server class identfier. Use ``PROC IOMOPERATE`` to identify the correct value for your configuration.
+    The IOM workspace server class identfier. Use ``PROC IOMOPERATE`` to identify the correct value for your configuration.
 provider -
     (Required) The SAS IOM Data Provider is an OLE DB data provider that supports access to SAS data sets that are managed by SAS Integrated Object Model (IOM) servers. The 'sas.iomprovider' provider is recommended.
 omruser - 
