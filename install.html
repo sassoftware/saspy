@@ -805,8 +805,8 @@ install other non-standard python modules.</p>
 <h3>IOM using COM<a class="headerlink" href="#iom-using-com" title="Permalink to this headline">¶</a></h3>
 <p>New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.</p>
 <p>SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.</p>
-<p>To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define
-the configuration parameter <code class="docutils literal"><span class="pre">class_id</span></code> with the SAS Workspace GUID. The best way to identify that value is by using <code class="docutils literal"><span class="pre">PROC</span> <span class="pre">IOMOPERATE</span></code>.</p>
+<p>To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define</p>
+<p>the configuration parameter <code class="docutils literal"><span class="pre">class_id</span></code> with the SAS Workspace GUID. The best way to identify that value is by using <code class="docutils literal"><span class="pre">PROC</span> <span class="pre">IOMOPERATE</span></code>.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proc</span> <span class="n">iomoperate</span><span class="p">;</span>
     <span class="nb">list</span> <span class="n">types</span><span class="p">;</span>
 <span class="n">run</span><span class="p">;</span>
@@ -817,9 +817,10 @@ the configuration parameter <code class="docutils literal"><span class="pre">cla
     <span class="n">Class</span> <span class="n">identifier</span> <span class="p">:</span> <span class="mi">440196</span><span class="n">d4</span><span class="o">-</span><span class="mi">90</span><span class="n">f0</span><span class="o">-</span><span class="mi">11</span><span class="n">d0</span><span class="o">-</span><span class="mi">9</span><span class="n">f41</span><span class="o">-</span><span class="mi">00</span><span class="n">a024bb830c</span>
 </pre></div>
 </div>
+<p>To connect to a local SAS instance, do not specify the <code class="docutils literal"><span class="pre">iomhost</span></code> paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored</p>
+<blockquote>
+<div>on local connections.</div></blockquote>
 <dl class="docutils">
-<dt>To connect to a local SAS instance, do not specify the <code class="docutils literal"><span class="pre">iomhost</span></code> paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored</dt>
-<dd>on local connections.</dd>
 <dt>iomhost -</dt>
 <dd>The resolvable host name, or IP address to the IOM object spawner.</dd>
 <dt>iomport -</dt>
@@ -855,7 +856,13 @@ windows-1252, respectively.</p>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Having the <code class="docutils literal"><span class="pre">'provider'</span></code> key is the trigger to use the HTTP access method.</p>
+<p class="last">Having the <code class="docutils literal"><span class="pre">'provider'</span></code> key is the trigger to use the COM (IOM using COM) access method.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When using the COM access method (<code class="docutils literal"><span class="pre">'provider'</span></code> key specified), the
+absence of the <code class="docutils literal"><span class="pre">'iomhost'</span></code> key is the trigger to use a local Windows
+session instead of remote IOM (it is a different connection type).</p>
 </div>
 </div>
 <div class="section" id="http">
