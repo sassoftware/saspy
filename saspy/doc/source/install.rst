@@ -717,7 +717,8 @@ New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM prov
 
 SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.
 
-To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define the configuration parameter ``class_id`` with the SAS Workspace GUID. The best way to identify that value is by using ``PROC IOMOPERATE``.
+To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define 
+the configuration parameter ``class_id`` with the SAS Workspace GUID. The best way to identify that value is by using ``PROC IOMOPERATE``.
 
 ::
 
@@ -731,7 +732,8 @@ To connect to a SAS server, you must define a few attributes: host name, port nu
         Short type name  : Workspace 
         Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c
 
-To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored on local connections.
+To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored
+ on local connections.
 
 iomhost - 
     The resolvable host name, or IP address to the IOM object spawner.
@@ -768,6 +770,8 @@ encoding  -
         'provider': 'sas.iomprovider',
         'encoding': 'windows-1252'}
 
+.. note:: Having the ``'provider'`` key is the trigger to use the HTTP access method.
+
 
 HTTP
 =====
@@ -777,7 +781,7 @@ of the Viya installation. This is the equivalent of an IOM Workspace server, but
 So, it is still connecting to MVA SAS and all of the methods behave the same as they would with any other saspy access method.
 
 
-There keys for this configuration definition dictionary:
+The keys for this configuration definition dictionary are:
 
 ip - 
     (Required) The resolvable host name, or IP address to the Viya Compute Service
@@ -788,8 +792,8 @@ ssl -
     the port is not specified. If set to False, it will default to port 80, if the port is not specified.
     Note that depending upon the version of python, certificate verification may or may not be required, later version are more strict.
     See the python doc for your version if this is a concern.
-
-    Also note that if Viya uses the default self signed certificates it ships with, you will not be able to verify them,
+verify -
+    (Optional) Also note that if Viya uses the default self signed ssl certificates it ships with, you will not be able to verify them,
     but that can be fine, and you can still use an ssl connection. You can use set 'verify' : False, in your config to
     turn off verification for this case. 
 authkey -
