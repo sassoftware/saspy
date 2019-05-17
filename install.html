@@ -805,7 +805,8 @@ install other non-standard python modules.</p>
 <h3>IOM using COM<a class="headerlink" href="#iom-using-com" title="Permalink to this headline">¶</a></h3>
 <p>New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.</p>
 <p>SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.</p>
-<p>To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define the configuration parameter <code class="docutils literal"><span class="pre">class_id</span></code> with the SAS Workspace GUID. The best way to identify that value is by using <code class="docutils literal"><span class="pre">PROC</span> <span class="pre">IOMOPERATE</span></code>.</p>
+<p>To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define
+the configuration parameter <code class="docutils literal"><span class="pre">class_id</span></code> with the SAS Workspace GUID. The best way to identify that value is by using <code class="docutils literal"><span class="pre">PROC</span> <span class="pre">IOMOPERATE</span></code>.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proc</span> <span class="n">iomoperate</span><span class="p">;</span>
     <span class="nb">list</span> <span class="n">types</span><span class="p">;</span>
 <span class="n">run</span><span class="p">;</span>
@@ -816,8 +817,9 @@ install other non-standard python modules.</p>
     <span class="n">Class</span> <span class="n">identifier</span> <span class="p">:</span> <span class="mi">440196</span><span class="n">d4</span><span class="o">-</span><span class="mi">90</span><span class="n">f0</span><span class="o">-</span><span class="mi">11</span><span class="n">d0</span><span class="o">-</span><span class="mi">9</span><span class="n">f41</span><span class="o">-</span><span class="mi">00</span><span class="n">a024bb830c</span>
 </pre></div>
 </div>
-<p>To connect to a local SAS instance, do not specify the <code class="docutils literal"><span class="pre">iomhost</span></code> paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored on local connections.</p>
 <dl class="docutils">
+<dt>To connect to a local SAS instance, do not specify the <code class="docutils literal"><span class="pre">iomhost</span></code> paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored</dt>
+<dd>on local connections.</dd>
 <dt>iomhost -</dt>
 <dd>The resolvable host name, or IP address to the IOM object spawner.</dd>
 <dt>iomport -</dt>
@@ -851,6 +853,10 @@ windows-1252, respectively.</p>
     <span class="s1">&#39;encoding&#39;</span><span class="p">:</span> <span class="s1">&#39;windows-1252&#39;</span><span class="p">}</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Having the <code class="docutils literal"><span class="pre">'provider'</span></code> key is the trigger to use the HTTP access method.</p>
+</div>
 </div>
 <div class="section" id="http">
 <h3>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h3>
@@ -858,21 +864,21 @@ windows-1252, respectively.</p>
 of a SAS Viya deployment. The Compute Service launches Compute Servers, which are MVA SAS sessions found in the SPRE deployment
 of the Viya installation. This is the equivalent of an IOM Workspace server, but in a Viya deployment.
 So, it is still connecting to MVA SAS and all of the methods behave the same as they would with any other saspy access method.</p>
-<p>There keys for this configuration definition dictionary:</p>
+<p>The keys for this configuration definition dictionary are:</p>
 <dl class="docutils">
 <dt>ip -</dt>
 <dd>(Required) The resolvable host name, or IP address to the Viya Compute Service</dd>
 <dt>port -</dt>
 <dd>(Optional) The port to use to connect to the Compute Service. This will default to either 80 or 443 based upon the ssl key.</dd>
 <dt>ssl -</dt>
-<dd><p class="first">(Optional) Boolean identifying whether to use HTTPS (ssl=True) or just HTTP. The default is True and will default to port 443 if
+<dd>(Optional) Boolean identifying whether to use HTTPS (ssl=True) or just HTTP. The default is True and will default to port 443 if
 the port is not specified. If set to False, it will default to port 80, if the port is not specified.
 Note that depending upon the version of python, certificate verification may or may not be required, later version are more strict.
-See the python doc for your version if this is a concern.</p>
-<p class="last">Also note that if Viya uses the default self signed certificates it ships with, you will not be able to verify them,
+See the python doc for your version if this is a concern.</dd>
+<dt>verify -</dt>
+<dd>(Optional) Also note that if Viya uses the default self signed ssl certificates it ships with, you will not be able to verify them,
 but that can be fine, and you can still use an ssl connection. You can use set &#8216;verify&#8217; : False, in your config to
-turn off verification for this case.</p>
-</dd>
+turn off verification for this case.</dd>
 <dt>authkey -</dt>
 <dd>(Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection.</dd>
 <dt>user -</dt>
