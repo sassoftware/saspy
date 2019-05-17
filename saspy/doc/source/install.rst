@@ -718,6 +718,7 @@ New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM prov
 SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.
 
 To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define 
+
 the configuration parameter ``class_id`` with the SAS Workspace GUID. The best way to identify that value is by using ``PROC IOMOPERATE``.
 
 ::
@@ -733,6 +734,7 @@ the configuration parameter ``class_id`` with the SAS Workspace GUID. The best w
         Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c
 
 To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored
+
  on local connections.
 
 iomhost - 
@@ -770,7 +772,11 @@ encoding  -
         'provider': 'sas.iomprovider',
         'encoding': 'windows-1252'}
 
-.. note:: Having the ``'provider'`` key is the trigger to use the HTTP access method.
+.. note:: Having the ``'provider'`` key is the trigger to use the COM (IOM using COM) access method.
+.. note:: When using the COM access method (``'provider'`` key specified), the 
+         absence of the ``'iomhost'`` key is the trigger to use a local Windows
+         session instead of remote IOM (it is a different connection type).
+
 
 
 HTTP
