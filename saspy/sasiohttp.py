@@ -930,8 +930,6 @@ class SASsessionHTTP():
          status = req.status
          resp   = req.read()
          conn.close()
-         print("status="+str(status))
-         print("resp="+resp.decode())
 
          code = "filename _sp_updn;"
       else:
