@@ -355,7 +355,7 @@ Will use HTML5 for this SASsession.""")
          enc = self.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
          if enc == '':
             self.sascfg.encoding = 'utf-8'
-         self.submit("options svgtitle='svgtitle'; options validvarname=any linesize=max; ods graphics on;", "text")
+         self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
          self.sascfg.encoding = enc
          if self.pid is None:
             print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")

@@ -472,7 +472,7 @@ Will use HTML5 for this SASsession.""")
       enc = self.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
       if enc == '':
          self.sascfg.encoding = 'utf-8'
-      ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max linesize=max nosyntaxcheck; ods graphics on;", "text")
+      ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
       self.sascfg.encoding = enc
 
       if self.pid is None:

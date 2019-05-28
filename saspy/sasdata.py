@@ -1059,9 +1059,9 @@ class SASdata:
         """
         code = "proc sgplot data=%s.%s %s;" % (self.libref, self.table, self._dsopts())
         if len(options):
-            code += "\n\theatmap x=%s y=%s / %s;" % (x, y, options)
+            code += "\n\theatmap x='%s'n y='%s'n / %s;" % (x, y, options)
         else:
-            code += "\n\theatmap x=%s y=%s;" % (x, y)
+            code += "\n\theatmap x='%s'n y='%s'n;" % (x, y)
 
         if len(label) > 0:
             code += " LegendLABEL='" + label + "'"
@@ -1096,13 +1096,13 @@ class SASdata:
         :return:
         """
         code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
-        code += ";\n\thistogram " + var + " / scale=count"
+        code += ";\n\thistogram '" + var + "'n / scale=count"
         if len(label) > 0:
             code += " LegendLABEL='" + label + "'"
         code += ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
-        code += "\tdensity " + var + ';\nrun;\n' + 'title;'
+        code += "\tdensity '" + var + "'n;\nrun;\n" + "title;"
 
         if self.sas.nosub:
             print(code)
@@ -1130,7 +1130,7 @@ class SASdata:
         :return: Data Table
         """
         code = "proc freq data=%s.%s %s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
-        code += "\n\ttables %s / out=tmpFreqOut;" % var
+        code += "\n\ttables '%s'n / out=tmpFreqOut;" % var
         code += "\nrun;"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
@@ -1175,7 +1175,7 @@ class SASdata:
         :return: graphic plot
         """
         code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
-        code += ";\n\tvbar " + var
+        code += ";\n\tvbar '" + var + "'n" 
         if len(label) > 0:
             code += " / LegendLABEL='" + label + "'"
         code += ";\n"
@@ -1219,7 +1219,7 @@ class SASdata:
             y = [y]
 
         for i in range(num):
-            code += "\tseries x=" + x + " y=" + str(y[i]) + ";\n"
+            code += "\tseries x='" + x + "'n y='" + str(y[i]) + "'n;\n"
 
         code += 'run;\n' + 'title;'
 
@@ -1259,7 +1259,7 @@ class SASdata:
             y = [y]
 
         for i in range(num):
-            code += "\tscatter x=" + x + " y=" + y[i] + ";\n"
+            code += "\tscatter x='" + x + "'n y='" + y[i] + "'n;\n"
 
         code += 'run;\n' + 'title;'
 
