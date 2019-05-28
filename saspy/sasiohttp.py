@@ -1360,6 +1360,12 @@ class SASsessionHTTP():
 
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
 
+      if tmpdir:
+         tmpdir.cleanup()
+      else:
+         if not tempkeep:
+            os.remove(tmpcsv)
+
       for i in range(nvars):
          if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
             df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
