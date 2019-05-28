@@ -463,14 +463,13 @@ class TestSASdataObject(unittest.TestCase):
         tr = self.helper_wkclass()
         tr.set_results('pandas')
 
-        with TemporaryDirectory() as temppath:
-            fname = os.path.join(temppath, 'hpreg_code.sas')
-            b = stat.hpreg(data=tr, model='weight=height', code=fname)
-            tr.score(file=os.path.join(temppath, 'hpreg_code.sas'))
-
-            # check that p_weight is in columnInfo
-            # FIXME: Only assert once
-            self.assertTrue('P_Weight' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
+        fname = self.sas.workpath+'hpreg_code.sas'
+        b = stat.hpreg(data=tr, model='weight=height', code=fname)
+        tr.score(file=fname)
+        
+        # check that p_weight is in columnInfo
+        # FIXME: Only assert once
+        self.assertTrue('P_Weight' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
 
         res1 = tr.assessModel(target='weight', prediction='P_weight', nominal=False)
         a = ['ASSESSMENTBINSTATISTICS', 'ASSESSMENTSTATISTICS', 'LOG']
@@ -485,16 +484,15 @@ class TestSASdataObject(unittest.TestCase):
         tr = self.helper_wkclass()
         tr.set_results('pandas')
 
-        with TemporaryDirectory() as temppath:
-            fname = os.path.join(temppath, 'hplogistic_code.sas')
-            b = stat.hplogistic(data=tr, cls= 'sex', model='sex = weight height', code=fname)
-            # This also works with hardcoded strings
-            # b = stat.hplogistic(data=tr, cls='sex', model='sex = weight height', code=r'c:\public\foo.sas')
-            tr.score(file=fname)
+        fname = self.sas.workpath+'hpreg_code.sas'
+        b = stat.hplogistic(data=tr, cls= 'sex', model='sex = weight height', code=fname)
+        # This also works with hardcoded strings
+        # b = stat.hplogistic(data=tr, cls='sex', model='sex = weight height', code=r'c:\public\foo.sas')
+        tr.score(file=fname)
 
-            # check that P_SexF is in columnInfo
-            # FIXME: Only assert once
-            self.assertTrue('P_SexF' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
+        # check that P_SexF is in columnInfo
+        # FIXME: Only assert once
+        self.assertTrue('P_SexF' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
 
         res1 = tr.assessModel(target='sex', prediction='P_SexF', nominal=True, event='F')
         a = ['ASSESSMENTBINSTATISTICS', 'ASSESSMENTSTATISTICS', 'LOG', 'SGPLOT']

@@ -40,7 +40,7 @@ class TestSASsessionObject(unittest.TestCase):
         """
         EXPECTED = ['1', 'Acura', 'MDX', 'SUV', 'Asia', 'All', '$36,945', '$33,337', '3.5']
 
-        fname = os.path.join(self.tempdir.name, 'sas_csv_test.csv')
+        fname = os.path.join(self.sas.workpath, 'sas_csv_test.csv')
         self.sas.write_csv(fname, 'cars', libref='sashelp')
 
         csvdata = self.sas.read_csv(fname, 'csvcars', results='text')
@@ -56,7 +56,7 @@ class TestSASsessionObject(unittest.TestCase):
         """
         Test method write_csv properly exports a csv file
         """
-        fname = os.path.join(self.tempdir.name, 'sas_csv_test.csv')
+        fname = os.path.join(self.sas.workpath, 'sas_csv_test.csv')
         log = self.sas.write_csv(fname, 'cars', libref='sashelp')
 
         self.assertNotIn("ERROR", log, msg="sas.write_csv() failed")
@@ -66,7 +66,7 @@ class TestSASsessionObject(unittest.TestCase):
         Test method upload properly uploads a file
         """
         local_file = os.path.join(self.tempdir.name, 'simple_csv.csv')
-        remote_file = self.sas.workpath + self.sas.hostsep + 'simple_csv.csv'
+        remote_file = self.sas.workpath + 'simple_csv.csv'
 
         with open(local_file, 'w') as f:
             f.write("""A,B,C,D\n1,2,3,4\n5,6,7,8""")
@@ -83,7 +83,7 @@ class TestSASsessionObject(unittest.TestCase):
         """
         local_file_1 = os.path.join(self.tempdir.name, 'simple_csv.csv')
         local_file_2 = os.path.join(self.tempdir.name, 'simple_csv_2.csv')
-        remote_file = self.sas.workpath + self.sas.hostsep + 'simple_csv.csv'
+        remote_file = self.sas.workpath + 'simple_csv.csv'
 
         with open(local_file_1, 'w') as f:
             f.write("""A,B,C,D\n1,2,3,4\n5,6,7,8""")
