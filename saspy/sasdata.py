@@ -1144,7 +1144,7 @@ class SASdata:
         ll = self._is_valid()
         if self.results.upper() == 'PANDAS':
             code = "proc freq data=%s.%s%s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
-            code += "\n\ttables %s / out=tmpFreqOut;" % var
+            code += "\n\ttables '%s'n / out=tmpFreqOut;" % var
             code += "\nrun;"
             code += "\ndata tmpFreqOut; set tmpFreqOut(obs=%s); run;" % n
             return self._returnPD(code, 'tmpFreqOut')
