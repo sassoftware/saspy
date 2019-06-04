@@ -56,7 +56,7 @@ options pagesize=max;
         if _n_=1 then do;
             put "libname _&objname. sasedoc (";
         end;
-        p=cat("'\&objname.", catt(path) , "'");
+        p=cat('"\&objname.', catt(path) , '"');
         put p;
         if last then do;
             put ');';
