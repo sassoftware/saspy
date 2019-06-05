@@ -717,7 +717,7 @@ Will use HTML5 for this SASsession.""")
       logf = logf.decode(self.sascfg.encoding, errors='replace')
 
       trip = lstf.rpartition("/*]]>*/")
-      if len(trip[1]) > 0 and len(trip[2]) < 100:
+      if len(trip[1]) > 0 and len(trip[2]) < 200:
          lstf = ''
 
       self._log += logf
