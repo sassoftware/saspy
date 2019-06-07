@@ -153,10 +153,15 @@ Also, everything in this doc applies to the _personal version; it's the same, ju
 that will be used if it exists instead of the original one, but it won't get overwritten.
 
 Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
-as long as that location is accessible to python. If the path is in the python search path, then your good.
+as long as that location is accessible to python. If the path is in the python search path, then you're good.
 That includes being in the repo directory, of course, which is the most convenient (that's where I have it!).
 
-If it is in the repo or another path that python will find it, you can just create a session as follows:
+**New in 3.1.1**: You can now place a sascfg_personal.py configuration file in your home directory. The following
+path "~/.config/saspy/" will be searched for a sascfg_personal.py file. If none exists, the library will fall
+back through a hierarchy of configuration paths. If the `cfgfile` argument is provided to the session, that argument
+will be used or an exception will be thrown if the config cannot be found.
+
+If the configuration is in the repo or another path that python will find it, you can just create a session as follows:
 
 .. code-block:: ipython3
 
