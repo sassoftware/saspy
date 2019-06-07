@@ -21,7 +21,7 @@ from __future__ import print_function
 from saspy.version import __version__
 from saspy.sasbase import SASsession, SASconfig
 from saspy.sasdata import SASdata
-from saspy.sasexceptions import SASIONotSupportedError, SASConfigNotValidError
+from saspy.sasexceptions import SASIONotSupportedError, SASConfigNotFoundError, SASConfigNotValidError
 from saspy.sasproccommons import SASProcCommons
 from saspy.sastabulate import Tabulate
 from saspy.sasresults import SASresults

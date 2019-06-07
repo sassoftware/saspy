@@ -15,6 +15,14 @@
 #
 
 
+class SASConfigNotFoundError(Exception):
+    def __init__(self, path: str):
+        self.path = path
+
+    def __str__(self):
+        return 'Configuration path {} does not exist.'.format(self.path)
+
+
 class SASConfigNotValidError(Exception):
     def __init__(self, defn: str, msg: str=None):
         self.defn = defn if defn else 'N/A'
