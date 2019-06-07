@@ -1,132 +1,130 @@
+from unittest import mock
 import unittest
-from unittest.mock import patch
 import saspy
+import builtins
+import importlib
+import inspect
+import os
+import shutil
+import sys
+import tempfile
 
-class TestSASconfigObject(unittest.TestCase):
-    @classmethod    
-    def setUpClass(cls):
-        pass
 
+_real_import =  builtins.__import__
+_real_import_module = importlib.import_module
+
+def _patch_import_none(name, globals=None, locals=None, fromlist=(), level=0):
+    """
+    Patch the __import__ function to always raise an exception for any
+    `sascfg_personal` imports
+    """
+    if name in ('saspy.sascfg_personal', 'sascfg_personal'):
+        raise ImportError
+    else:
+        return _real_import(name, globals=globals, locals=locals, fromlist=fromlist, level=level)
+
+def _patch_import_module_none(name, package=None):
+    """
+    Patch the importlib.import_module function to always raise an exception
+    for any `sascfg_personal` imports
+    """
+    if name in ('saspy.sascfg_personal', 'sascfg_personal'):
+        raise ImportError
+    else:
+        return _real_import_module(name, package=package)
+
+def _patch_import_nolocal(name, globals=None, locals=None, fromlist=(), level=0):
+    """
+    Patch the __import__ function to always raise an exception for any
+    local `sascfg_personal` imports
+    """
+    if name in ('sascfg_personal'):
+        raise ImportError
+    else:
+        return _real_import(name, globals=globals, locals=locals, fromlist=fromlist, level=level)
+
+def _patch_import_module_nolocal(name, package=None):
+    """
+    Patch the importlib.import_module function to always raise an exception
+    for any local `sascfg_personal` imports
+    """
+    if name in ('sascfg_personal'):
+        raise ImportError
+    else:
+        return _real_import_module(name, package=package)
+
+
+class TestSASConfig(unittest.TestCase):
     @classmethod
-    def tearDownClass(cls):
-        pass
+    def setUpClass(cls):
+        """
+        Store the install path for the library
+        """
+        home = os.path.expanduser('~/.config/saspy')
+        install = os.path.dirname(inspect.getfile(saspy))
 
-    def setUp(self):
-        pass
+        cls.cfg_global_standard_path = os.path.join(install, 'sascfg.py')
+        cls.cfg_global_personal_path = os.path.join(install, 'sascfg_personal.py')
+        cls.cfg_home_path = os.path.join(home, 'sascfg_personal.py')
 
-    def tearDown(self):
-        pass
+    @mock.patch('builtins.__import__', _patch_import_none)
+    @mock.patch('importlib.import_module', _patch_import_module_none)
+    def test_config_find_config_global_sascfg(self):
+        """
+        Test that the global `sascfg.py` file is read if no other configuration
+        path is satisfied.
+        """
+        importlib.reload(saspy)
+        cfg_manager = saspy.SASconfig()
+        cfg_module = cfg_manager._find_config()
 
-    '''
-    none of this is valid anymore adter reworking the import of sascfg to be in sasbase only
+        cfg_src = inspect.getfile(cfg_module)
 
-    def test_SASconfig(self):
-        # basic mock configuration
-        bare_config = dict(
-            saspath= '/fake/sas/path'
-        )
+        self.assertEqual(cfg_src, self.cfg_global_standard_path)
 
-        with patch.multiple('saspy.sasbase.SAScfg', default=bare_config):
-            sascfg = saspy.sasiostdio.SASconfigSTDIO(sascfgname='default')
+    @mock.patch('builtins.__import__', _patch_import_nolocal)
+    @mock.patch('importlib.import_module', _patch_import_module_nolocal)
+    def test_config_find_config_global_sascfg_personal(self):
+        """
+        Test that the global `sascfg_personal.py` file is read if no other configuration
+        path is satisfied.
+        """
+        importlib.reload(saspy)
+        cfg_manager = saspy.SASconfig()
+        cfg_module = cfg_manager._find_config()
 
-            self.assertEqual(sascfg.saspath, bare_config['saspath'], msg=u'saspath config was not used')
-    
-    def test_SASconfig_arguments(self):
-        # test overrides with and without lock_down set
-        locked = dict(lock_down=True)
-        unlocked = dict(lock_down=False)
+        cfg_src = inspect.getfile(cfg_module)
 
-        unlocked_config = dict(
-            saspath= '/some/fake/path'
-        )
+        self.assertEqual(cfg_src, self.cfg_global_personal_path)
 
-        with patch.multiple('saspy.sasbase.SAScfg', custom=unlocked_config, SAS_config_options=unlocked, create=True):
-            overrides = dict(saspath= '/overridden/sas/path')
-            sascfg = saspy.sasiostdio.SASconfigSTDIO(sascfgname='custom', **overrides)
+    def test_config_find_config_parameter_exists(self):
+        """
+        Test that the config file passed as a parameter to `_find_config`
+        is used.
+        """
+        PATHS = (self.cfg_global_standard_path,
+            self.cfg_global_personal_path,
+            self.cfg_home_path)
 
-            self.assertEqual(
-                sascfg.saspath, 
-                overrides['saspath'], 
-                msg=u'override of config was disallowed with lock_down=False'
-            )
+        tmpdir = tempfile.TemporaryDirectory()
+        tmpcfg = os.path.join(tmpdir.name, 'saspy_test_config.py')
 
-        #test with lock_down enabled, should disallow override
-        locked_config = dict(
-            saspath= '/another/fake/path'
-        )
+        shutil.copy(inspect.getfile(saspy.sascfg), tmpcfg)
 
-        with patch.multiple('saspy.sasbase.SAScfg', custom=locked_config, SAS_config_options=locked, create=True):
-            # prevent print() from logging warning in test console
-            with patch('sys.stdout') as PrintMock:
-                overrides = dict(saspath= '/another/overridden/sas/path')
-                sascfg = saspy.sasiostdio.SASconfigSTDIO(sascfgname='custom', **overrides)
+        cfg_manager = saspy.SASconfig()
+        cfg_module = cfg_manager._find_config(tmpcfg)
 
-                self.assertEqual(
-                    sascfg.saspath, 
-                    locked_config['saspath'], 
-                    msg=u'override of config was allowed with lock_down=True'
-                )
+        cfg_src = inspect.getfile(cfg_module)
 
-    def test_ssh_config(self):
-        # simple ssh mock configuration
-        simple_ssh =dict(
-            saspath= '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
-            ssh= '/bin/ssh',
-            host= 'hostname',
-        )
+        tmpdir.cleanup()
 
-        with patch.multiple('saspy.sasbase.SAScfg', ssh=simple_ssh, SAS_config_names=['ssh'], create=True):
-            sascfg = saspy.sasiostdio.SASconfigSTDIO(sascfgname='ssh')
-            pgm, params = saspy.sasiostdio.SASsessionSTDIO._buildcommand({}, sascfg)
+        self.assertNotIn(cfg_src, PATHS)
 
-            self.assertEqual(pgm, simple_ssh['ssh'], msg=u'ssh config was not used')
-            self.assertNotIn('-R', params, msg=u'ssh tunnel was used though not configured')
-            self.assertNotIn('-p', params, msg=u'ssh alternate port was used though not configured')
-
-        # mock ssh config with additional options
-        ssh_config =dict(
-            saspath= '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
-            ssh= '/bin/ssh-alt',
-            host= 'hostname',
-            port= 9922,
-            tunnel= 9911,
-            encoding= 'latin1'
-        )
-
-        with patch.multiple('saspy.sasbase.SAScfg', ssh=ssh_config, SAS_config_names=['ssh'], create=True):
-            sascfg = saspy.sasiostdio.SASconfigSTDIO(sascfgname='ssh')
-            pgm, params = saspy.sasiostdio.SASsessionSTDIO._buildcommand({}, sascfg)
-            joined = ' '.join(params)
-
-            self.assertEqual(pgm, ssh_config['ssh'], msg=u'ssh config was not used')
-            self.assertIn('-R 9911:localhost:9911', joined, msg=u'ssh tunnel config was not used')
-            self.assertIn('-p 9922', joined, msg=u'ssh port config was not used')
-
-        # test that direct arguments are permitted 
-        with patch.multiple(
-            'saspy.sasbase.SAScfg', ssh=simple_ssh, SAS_config_names=['ssh'], create=True,
-            SAS_config_options=dict(lock_down=False)
-        ):
-            sascfg = saspy.sasiostdio.SASconfigSTDIO(sascfgname='ssh', port=8888, tunnel=9999)
-            pgm, params = saspy.sasiostdio.SASsessionSTDIO._buildcommand({}, sascfg)
-            joined = ' '.join(params)
-
-            self.assertIn('-R 9999:localhost:9999', joined, msg=u'ssh tunnel config argument was not used')
-            self.assertIn('-p 8888', joined, msg=u'ssh port config argument was not used')
-
-        # test that direct argument do not apply in lock_down mode
-        with patch.multiple(
-            'saspy.sasbase.SAScfg', ssh=simple_ssh, SAS_config_names=['ssh'], create=True,
-            SAS_config_options=dict(lock_down=True)
-        ):
-            # prevent print() from logging warning in test console
-            with patch('sys.stdout') as PrintMock:
-                sascfg = saspy.sasiostdio.SASconfigSTDIO(sascfgname='ssh', port=8888, tunnel=9999)
-                pgm, params = saspy.sasiostdio.SASsessionSTDIO._buildcommand({}, sascfg)
-                joined = ' '.join(params)
-
-                self.assertNotIn('-R', params, msg=u'ssh tunnel argument was allowed with lock_down=True')
-                self.assertNotIn('-p', params, msg=u'ssh alternate port argument was allowed with lock_down=True')
-
-    '''
-
+    def test_config_find_config_parameter_noexists(self):
+        """
+        Test that a n invalid config file path passed to `_find_config`
+        raises a SASConfigFileNotFoundError.
+        """
+        with self.assertRaises(saspy.SASConfigNotFoundError):
+            cfg_manager = saspy.SASconfig()
+            cfg_module = cfg_manager._find_config('/not/a/valid/config.py')

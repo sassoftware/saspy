@@ -80,7 +80,8 @@ class TestSASExceptions(unittest.TestCase):
         """
         Remove `sascfgfile` module after test.
         """
-        del sys.modules['sascfgfile']
+        if 'sascfgfile' in sys.modules:
+            del sys.modules['sascfgfile']
 
     @mock.patch('os.name', 'nt')
     def test_raises_SASIONotSupportedError_stdio(self):
@@ -115,3 +116,10 @@ class TestSASExceptions(unittest.TestCase):
         """
         with self.assertRaises(saspy.SASConfigNotValidError):
             sas = saspy.SASsession(cfgfile=self.config_empty)
+
+    def test_raises_SASConfigNotFoundError(self):
+        """
+        Test that an invalid config path raises SASConfigNotFoundError.
+        """
+        with self.assertRaises(saspy.SASConfigNotFoundError):
+            sas = saspy.SASsession(cfgfile='path/to/nowhere.py')
