@@ -496,6 +496,9 @@ Scroll down based upon the number to see an example of that error and help on wh
 5) **The application could not log on to the server. The server process did not start.**
 
 
+6) **The application could not log on to the server "localhost:0".  Integrated Windows authentication failed.**
+
+
 Here are examples of each of the above problems:
 
 
@@ -613,6 +616,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
 
+
     Be sure the path to sspiauth.dll is in your System PATH
     
     No SAS process attached. SAS process has terminated unexpectedly.
@@ -636,6 +640,38 @@ which failed. If I quote both of the paths in that parameter, then it works.
 .. code-block:: ipython3
     
     '-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd="C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\SAS.EXE" -config "C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\sasv9.cfg" -objectserver -nologo -noinal -noprngetlist'
+
+
+6) The application could not log on to the server "localhost:0".  Integrated Windows authentication failed.
+
+   This error implies that your hosts file doesn't have 'localhost' set as an alias for ip 127.0.0.1. Tech Support note
+   55227 (http://support.sas.com/kb/55/227.html) identifies this issue.
+
+.. code-block:: ipython3
+
+
+    >>> sas = saspy.SASsession(cfgname='winlocal')
+
+    We failed in getConnection
+    The application could not log on to the server "localhost:0". Integrated Windows authentication failed.                                                                  
+    SAS process has terminated unexpectedly. RC from wait was: 4294967290
+    SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
+    
+    Attempted to run program java with the following parameters:['java', '-classpath', 
+    'C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94508__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar;
+    C:\\Program Files\\SASHome\\SASDepentManager\\9.4\\products\\deploywiz__94508__prt__xx__sp0__1\\deploywiz\\log4j.jar;
+    C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94508__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar;
+    C:\\Program Files\\SASHome\\SASDeplotManager\\9.4\\products\\deploywiz__94508__prt__xx__sp0__1\\deploywiz\\sas.core.jar;
+    C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar;
+    C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904500.0.0.0816190000_v940m5\\sas.rutil.jar;
+    C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil.nls_904500.0.0.20170816190000_v940m5\\sas.rutil.nls.jar;
+    C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.l_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar',
+    'pyiom.saspy2j', '-host', '127.0.0.1', '-stdinport', '49207', '-stdoutport', '49208', '-stderrport', '49209', '-zero', '-lrecl', '1048576', '']
+
+    Be sure the path to sspiauth.dll is in your System PATH
+
+    No SAS process attached. SAS process has terminated unexpectedly.
+
 
 
 So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn't
