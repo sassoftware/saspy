@@ -14,6 +14,7 @@
 #  limitations under the License.
 #
 
+from saspy.sasexceptions import SASAuthenticationError
 import datetime
 import csv
 import io
@@ -53,6 +54,7 @@ class SASConfigCOM(object):
         self.port = cfg.get('iomport')
         self.user = cfg.get('omruser')
         self.pw = cfg.get('omrpw')
+        self.authkey = cfg.get('authkey')
         self.class_id = cfg.get('class_id')
         self.provider = cfg.get('provider')
         self.encoding = cfg.get('encoding', 'utf-8')
@@ -62,8 +64,47 @@ class SASConfigCOM(object):
         self._lock = opts.get('lock_down', True)
         self._prompt = session.sascfg._prompt
 
+        if self.authkey is not None:
+            self._set_authinfo()
+
         for key, value in filter(lambda x: x[0] not in self.NO_OVERRIDE, kwargs.items()):
             self._try_override(key, value)
+
+    def _set_authinfo(self):
+        """
+        Attempt to set the session user's credentials based on provided
+        key to read from ~/.authinfo file. See .authinfo documentation
+        here: https://documentation.sas.com/api/docsets/authinfo/9.4/content/authinfo.pdf.
+
+        This method supports a subset of the .authinfo spec, in accordance with
+        other IO access methods. This method will only parse `user` and `password`
+        arguments, but does support spaces in values if the value is quoted. Use
+        python's `csv` library to parse these values using a space as the
+        delimiter.
+        """
+        if os.name == 'nt':
+            authfile = os.path.expanduser(os.path.join('~', '_authinfo'))
+        else:
+            authfile = os.path.expanduser(os.path.join('~', '.authinfo'))
+
+        with open(authfile, 'r') as f:
+            reader = csv.reader(f, delimiter=' ')
+
+            # Take first matching line found
+            authline = next(filter(lambda x: x[0] == self.authkey, reader), None)
+
+        if authline is None:
+            raise SASAuthenticationError('Key {} not found in authinfo file: {}'.format(
+                self.authkey, authfile))
+        elif len(authline) < 5:
+            raise SASAuthenticationError('Incomplete authinfo credentials in {}; key: {}'.format(
+                authfile, self.authkey))
+
+        # Override user/pw if previously set
+        # `authline` is in the following format:
+        #   AUTHKEY username USERNAME password PASSWORD
+        self.user = authline[2]
+        self.pw = authline[4]
 
     def _try_override(self, attr, value):
         """
