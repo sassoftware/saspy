@@ -36,11 +36,3 @@ class SASIONotSupportedError(Exception):
             alt_text = ''
 
         return 'Cannot use {} I/O module on Windows. {}'.format(self.method, alt_text)
-
-
-class SASAuthenticationError(Exception):
-    def __init__(self, message: str):
-        self.message = message
-
-    def __str__(self):
-        return message

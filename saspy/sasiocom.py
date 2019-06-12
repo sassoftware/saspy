@@ -14,7 +14,6 @@
 #  limitations under the License.
 #
 
-from saspy.sasexceptions import SASAuthenticationError
 import datetime
 import csv
 import io
@@ -94,17 +93,15 @@ class SASConfigCOM(object):
             authline = next(filter(lambda x: x[0] == self.authkey, reader), None)
 
         if authline is None:
-            raise SASAuthenticationError('Key {} not found in authinfo file: {}'.format(
-                self.authkey, authfile))
+            print('Key {} not found in authinfo file: {}'.format(self.authkey, authfile))
         elif len(authline) < 5:
-            raise SASAuthenticationError('Incomplete authinfo credentials in {}; key: {}'.format(
-                authfile, self.authkey))
-
-        # Override user/pw if previously set
-        # `authline` is in the following format:
-        #   AUTHKEY username USERNAME password PASSWORD
-        self.user = authline[2]
-        self.pw = authline[4]
+            print('Incomplete authinfo credentials in {}; key: {}'.format(authfile, self.authkey))
+        else:
+            # Override user/pw if previously set
+            # `authline` is in the following format:
+            #   AUTHKEY username USERNAME password PASSWORD
+            self.user = authline[2]
+            self.pw = authline[4]
 
     def _try_override(self, attr, value):
         """
@@ -232,8 +229,15 @@ class SASSessionCOM(object):
             server.Protocol = self.PROTOCOL_IOM
             server.ClassIdentifier = self.sascfg.class_id
 
-            user = self.sascfg.user
-            password = self.sascfg.pw
+            if self.sascfg.user is not None:
+                user = self.sascfg.user
+            else:
+                user = self.sascfg._prompt('Username: ')
+
+            if self.sascfg.pw is not None:
+                password = self.sascfg.pw
+            else:
+                password = self.sascfg._prompt('Password: ', pw=True)
 
         self.workspace = factory.CreateObjectByServer(self.SAS_APP, True,
             server, user, password)
