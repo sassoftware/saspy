@@ -89,7 +89,7 @@ class SASConfigCOM(object):
         try:
             with open(authfile, 'r') as f:
                 # Take first matching line found
-                parsed = (shlex.split(x) for x in f.readlines())
+                parsed = (shlex.split(x, posix=False) for x in f.readlines())
                 authline = next(filter(lambda x: x[0] == self.authkey, parsed), None)
 
         except OSError:
