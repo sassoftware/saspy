@@ -19,6 +19,7 @@ import csv
 import io
 import numbers
 import os
+import shlex
 import sys
 
 try:
@@ -78,19 +79,22 @@ class SASConfigCOM(object):
         This method supports a subset of the .authinfo spec, in accordance with
         other IO access methods. This method will only parse `user` and `password`
         arguments, but does support spaces in values if the value is quoted. Use
-        python's `csv` library to parse these values using a space as the
-        delimiter.
+        python's `shlex` library to parse these values.
         """
         if os.name == 'nt':
             authfile = os.path.expanduser(os.path.join('~', '_authinfo'))
         else:
             authfile = os.path.expanduser(os.path.join('~', '.authinfo'))
 
-        with open(authfile, 'r') as f:
-            reader = csv.reader(f, delimiter=' ')
+        try:
+            with open(authfile, 'r') as f:
+                # Take first matching line found
+                parsed = (shlex.split(x) for x in f.readlines())
+                authline = next(filter(lambda x: x[0] == self.authkey, parsed), None)
 
-            # Take first matching line found
-            authline = next(filter(lambda x: x[0] == self.authkey, reader), None)
+        except OSError:
+            print('Error trying to read {}'.format(authfile))
+            authline = None
 
         if authline is None:
             print('Key {} not found in authinfo file: {}'.format(self.authkey, authfile))
