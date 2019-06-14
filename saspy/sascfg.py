@@ -211,6 +211,7 @@ winiomIWA  = {'java'    : 'java',
 #                 session encoding of the IOM server.
 #   omruser     - SAS user. This option is ignored on local connections.
 #   omrpw       - SAS password. This option is ignored on local connections.
+#   authkey     - Identifier for credentials to read from .authinfo file.
 
 iomcom = {
     'iomhost': 'mynode.mycompany.org',
