@@ -300,6 +300,22 @@ class SASsession():
     :param user: User
     :param pw: Password
 
+
+    **Common SASsession attributes**
+
+    The values of the following attributes will be displayed if you submit a SASsession object. 
+    These can be referenced programmatically in you code. For the Booleans, you should use the provided methods to set them, 
+    or change their value. The others you should change NOT for obvious reasons.
+
+    - workpath - string containing the WORK libref?s filesystem path.
+    - sasver - string of the SAS Version for the SAS server connected to
+    - version - string of the saspy version you?re running
+    - nosub - Boolean for current value of the teach_me_SAS() setting. 
+    - batch - Boolean for current value of the set_batch() setting. 
+    - results - Boolean for current value of the set_results() setting. 
+    - sascei - string for the SAS Session Encoding this SAS server is using
+    - SASpid - The SAS processes id, or None if no SAS session connected
+
     """
     # SAS Epoch: 1960-01-01
     SAS_EPOCH = datetime.datetime(1960, 1, 1)
