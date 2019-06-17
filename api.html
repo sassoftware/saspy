@@ -297,6 +297,20 @@ session encoding of the IOM server</li>
 </tr>
 </tbody>
 </table>
+<p><strong>Common SASsession attributes</strong></p>
+<p>The values of the following attributes will be displayed if you submit a SASsession object. 
+These can be referenced programmatically in you code. For the Booleans, you should use the provided methods to set them, 
+or change their value. The others you should change NOT for obvious reasons.</p>
+<ul class="simple">
+<li>workpath - string containing the WORK libref?s filesystem path.</li>
+<li>sasver - string of the SAS Version for the SAS server connected to</li>
+<li>version - string of the saspy version you?re running</li>
+<li>nosub - Boolean for current value of the teach_me_SAS() setting.</li>
+<li>batch - Boolean for current value of the set_batch() setting.</li>
+<li>results - Boolean for current value of the set_results() setting.</li>
+<li>sascei - string for the SAS Session Encoding this SAS server is using</li>
+<li>SASpid - The SAS processes id, or None if no SAS session connected</li>
+</ul>
 <dl class="method">
 <dt id="saspy.SASsession.SYSERR">
 <code class="descname">SYSERR</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.SYSERR" title="Permalink to this definition">¶</a></dt>
