@@ -74,7 +74,38 @@ def zepDISPLAY(x):
 def zepHTML(x):
    return("%html "+x)
 
-class SASconfig:
+def list_configs() -> list:
+    """
+    Find any saspy configuration files on the client and return them to the
+    user in the order they are preferred.
+    :return [list]:
+    """
+    # Insert saspy config folder behind any local configs but ahead of other
+    # configurations on the system.
+    pathlist = list(sys.path)
+    pathlist.insert(1, os.path.expanduser(SASconfig.DOTCONFIG))
+
+    # Return the concetenation of any user defined `sascfg_personal` files,
+    # any system-wide library `saspy.sascfg_personal` files, and the default
+    # `saspy.sascfg` file.
+    configs = []
+    for path in pathlist:
+        loader = importlib.find_loader('sascfg_personal', path=[path])
+        if loader is not None:
+            configs.append(loader.path)
+
+    spec = importlib.util.find_spec('saspy.sascfg_personal')
+    if spec is not None:
+        configs.append(spec.origin)
+
+    spec = importlib.util.find_spec('saspy.sascfg')
+    if spec is not None:
+        configs.append(spec.origin)
+
+    return configs
+
+
+class SASconfig(object):
     """
     This object is not intended to be used directly. Instantiate a SASsession object instead
     """
@@ -226,9 +257,17 @@ class SASconfig:
 
         else:
             # Options 2, 3, 4, 5, 6
-            #
-            # Insert the saspy config folder ahead of the system library
-            # but behind local directory.
+            # If more than one eligible personalized configuration exists on
+            # the system, let the user know which one will be used.
+            configs = [x for x in list_configs() if os.path.basename(x) != 'sascfg.py']
+            if len(configs) > 1:
+                print('Multiple saspy configuration files found. The first ' \
+                    'configuration in the list below was selected:\n* {}\n  {}'.format(
+                        configs[0],
+                        '\n  '.join(configs[1:])))
+
+            # Insert saspy config folder behind any local configs but ahead of other
+            # configurations on the system.
             cfg_path = os.path.expanduser(self.DOTCONFIG)
             sys.path.insert(1, cfg_path)
 
@@ -457,6 +496,7 @@ class SASsession():
 
         x  = "Access Method         = %s\n" % self.sascfg.mode
         x += "SAS Config name       = %s\n" % self.sascfg.name
+        x += "SAS Config file       = %s\n" % self.sascfg.SAScfg
         x += "WORK Path             = %s\n" % self.workpath
         x += "SAS Version           = %s\n" % self.sasver
         x += "SASPy Version         = %s\n" % self.version
