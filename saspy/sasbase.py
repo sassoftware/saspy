@@ -261,7 +261,7 @@ class SASconfig(object):
             # the system, let the user know which one will be used.
             configs = [x for x in list_configs() if os.path.basename(x) != 'sascfg.py']
             if len(configs) > 1:
-                print('Multiple saspy configuration files found. The first ' \
+                print('Multiple personalized saspy configuration files found. The first ' \
                     'configuration in the list below was selected:\n* {}\n  {}'.format(
                         configs[0],
                         '\n  '.join(configs[1:])))
