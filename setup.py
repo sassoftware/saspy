@@ -34,7 +34,7 @@ setup(name='saspy',
       url = 'https://github.com/sassoftware/saspy',
       packages = ['saspy'],
       cmdclass = {},
-      package_data = {'': ['*.js', '*.md', '*.yaml', '*.css', '*.rst'], 'saspy': ['*.sas', 'java/*.*', 'java/pyiom/*.*']},
+      package_data = {'': ['*.js', '*.md', '*.yaml', '*.css', '*.rst'], 'saspy': ['*.sas', 'java/*.*', 'java/pyiom/*.*', 'java/thirdparty/*.*']},
       install_requires = ['pygments', 'ipython>=4.0.0'],
       extras_require = {'iomcom': ['pypiwin32']},
       classifiers = [
