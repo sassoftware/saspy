@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.1.0 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.1.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.1.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.1.1 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.1.0
+                3.1.1
               </div>
             
           
@@ -524,6 +524,15 @@ file, like so:</p>
 <span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASVersionedJarRepository</span><span class="se">\\</span><span class="s2">eclipse</span><span class="se">\\</span><span class="s2">plugins</span><span class="se">\\</span><span class="s2">sas.rutil_904300.0.0.20150204190000_v940m3</span><span class="se">\\</span><span class="s2">sas.rutil.jar&quot;</span>
 <span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASVersionedJarRepository</span><span class="se">\\</span><span class="s2">eclipse</span><span class="se">\\</span><span class="s2">plugins</span><span class="se">\\</span><span class="s2">sas.rutil.nls_904300.0.0.20150204190000_v940m3</span><span class="se">\\</span><span class="s2">sas.rutil.nls.jar&quot;</span>
 <span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASVersionedJarRepository</span><span class="se">\\</span><span class="s2">eclipse</span><span class="se">\\</span><span class="s2">plugins</span><span class="se">\\</span><span class="s2">sastpj.rutil_6.1.0.0_SAS_20121211183517</span><span class="se">\\</span><span class="s2">sastpj.rutil.jar&quot;</span>
+
+
+<span class="c1"># Java 10+ no longer provides CORBA. These jars provide the CORBA support that the IOM client needs. Add these in  to work with</span>
+<span class="c1"># the latest Java releases. These can even be in the classpath for Jave (7 or 8) that don&#39;t need them, with no problem.</span>
+<span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">ProgramData</span><span class="se">\\</span><span class="s2">Anaconda3</span><span class="se">\\</span><span class="s2">Lib</span><span class="se">\\</span><span class="s2">site-packages</span><span class="se">\\</span><span class="s2">saspy</span><span class="se">\\</span><span class="s2">java</span><span class="se">\\</span><span class="s2">thirdparty</span><span class="se">\\</span><span class="s2">glassfish-corba-internal-api.jar&quot;</span>
+<span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">ProgramData</span><span class="se">\\</span><span class="s2">Anaconda3</span><span class="se">\\</span><span class="s2">Lib</span><span class="se">\\</span><span class="s2">site-packages</span><span class="se">\\</span><span class="s2">saspy</span><span class="se">\\</span><span class="s2">java</span><span class="se">\\</span><span class="s2">thirdparty</span><span class="se">\\</span><span class="s2">glassfish-corba-omgapi.jar&quot;</span>
+<span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">ProgramData</span><span class="se">\\</span><span class="s2">Anaconda3</span><span class="se">\\</span><span class="s2">Lib</span><span class="se">\\</span><span class="s2">site-packages</span><span class="se">\\</span><span class="s2">saspy</span><span class="se">\\</span><span class="s2">java</span><span class="se">\\</span><span class="s2">thirdparty</span><span class="se">\\</span><span class="s2">glassfish-corba-orb.jar&quot;</span>
+<span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">ProgramData</span><span class="se">\\</span><span class="s2">Anaconda3</span><span class="se">\\</span><span class="s2">Lib</span><span class="se">\\</span><span class="s2">site-packages</span><span class="se">\\</span><span class="s2">saspy</span><span class="se">\\</span><span class="s2">java</span><span class="se">\\</span><span class="s2">thirdparty</span><span class="se">\\</span><span class="s2">pfl-basic.jar&quot;</span>
+<span class="n">cp</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">ProgramData</span><span class="se">\\</span><span class="s2">Anaconda3</span><span class="se">\\</span><span class="s2">Lib</span><span class="se">\\</span><span class="s2">site-packages</span><span class="se">\\</span><span class="s2">saspy</span><span class="se">\\</span><span class="s2">java</span><span class="se">\\</span><span class="s2">thirdparty</span><span class="se">\\</span><span class="s2">pfl-tf.jar&quot;</span>
 </pre></div>
 </div>
 <p>And then simply refer to the <code class="docutils literal"><span class="pre">cp</span></code> variable in the configuration definition:</p>
@@ -540,9 +549,11 @@ unicode) with a r prefix, like r&#8221;C:\User\sastpw\...&#8221;
 or else you will get an error like this: SyntaxError: (unicode error) &#8216;unicodeescape&#8217; codec can&#8217;t decode
 bytes in position 3-4: truncated UXXXXXXXX escape</p>
 </div>
+<p>This following &#8216;fix&#8217; for Java 9 is not longer needed, and it didn&#8217;t solve Java 10 or 11. See the thirdparty jars above
+to solve the missing CORBA in any of the Java releases.</p>
 <p>It has been reported to me that Java9 no longer includes CORBA in it&#8217;s default search path. CORBA is a requirement for
 the IOM Client. This can easily be added back in using the &#8216;javaparms&#8217; configuration key (defined below), as follows.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s2">&quot;javaparms&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;--add-modules=java.corba&quot;</span><span class="p">],</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="s2">&quot;javaparms&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;--add-modules=java.corba&quot;</span><span class="p">],</span>   <span class="c1"># NO LONGER NEEDED - See &#39;classpath&#39; above for solution</span>
 </pre></div>
 </div>
 <p>The IOM access method now has support for getting the required user/password from an authinfo file in the user&#8217;s home directory
@@ -985,7 +996,7 @@ If you want to run saspy in Zeppelin, set this in your configuration definition:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.1.0',
+            VERSION:'3.1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

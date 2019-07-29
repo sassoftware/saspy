@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Troubleshooting &mdash; saspy 3.1.0 documentation</title>
+  <title>Troubleshooting &mdash; saspy 3.1.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.1.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.1.1 documentation" href="index.html"/>
         <link rel="next" title="License" href="license.html"/>
         <link rel="prev" title="Contributing new methods" href="adding-procedures.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.1.0
+                3.1.1
               </div>
             
           
@@ -518,7 +518,19 @@ java.lang.NoClassDefFoundError: com/sas/services/connection/ConnectionFactoryExc
 <ol class="arabic simple" start="2">
 <li>The problem with versions 9 Java, not having CORBA available.</li>
 </ol>
-<p>A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
+<p>This problem has now been solved in a different way. I&#8217;ll leave the original below for reference, but here is the
+solution to this problem, along with Java 10, 11 ... which was not able to be solved that way as they no longer
+even had CORBA available. As of version 3.1.1, saspy now includes the following 5 jars in the java/thirdparty directory.
+Just add these jars into your classpath (as shown in the onfiguration doc for IOM) and this will work for any Java
+version.</p>
+<p>glassfish-corba-internal-api.jar
+glassfish-corba-omgapi.jar
+glassfish-corba-orb.jar
+NOTICE.md
+pfl-basic.jar
+pfl-tf.jar</p>
+<p>Old answer, no longer the solution:
+A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
 This can be resolved by adding it back in, using the &#8216;javaparms&#8217; key of your configuration definition as shown below.
 Version 11 Java doesn&#8217;t even ship CORBA, so the Java IOM client won&#8217;t yet work with that version. The IOM group is currently investigating a solution to this.</p>
 <p>If you see an error like this:</p>
@@ -701,6 +713,7 @@ The work around for this is to use the &#8216;javaparms&#8217; option on the con
 <span class="s1">&#39;pyiom.saspy2j&#39;</span><span class="p">,</span> <span class="s1">&#39;-host&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="s1">&#39;-stdinport&#39;</span><span class="p">,</span> <span class="s1">&#39;57425&#39;</span><span class="p">,</span> <span class="s1">&#39;-stdoutport&#39;</span><span class="p">,</span> <span class="s1">&#39;57426&#39;</span><span class="p">,</span> <span class="s1">&#39;-stderrport&#39;</span><span class="p">,</span> <span class="s1">&#39;57427&#39;</span><span class="p">,</span> <span class="s1">&#39;-zero&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
 
 
+
 <span class="n">Be</span> <span class="n">sure</span> <span class="n">the</span> <span class="n">path</span> <span class="n">to</span> <span class="n">sspiauth</span><span class="o">.</span><span class="n">dll</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">System</span> <span class="n">PATH</span>
 
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
@@ -865,7 +878,7 @@ following code (assuming your session object is named sas).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.1.0',
+            VERSION:'3.1.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
