@@ -400,6 +400,15 @@ file, like so:
     cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.rutil_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar"
     
 
+    # Java 10+ no longer provides CORBA. These jars provide the CORBA support that the IOM client needs. Add these in  to work with 
+    # the latest Java releases. These can even be in the classpath for Jave (7 or 8) that don't need them, with no problem. 
+    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-internal-api.jar"
+    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-omgapi.jar"
+    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-orb.jar"
+    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\pfl-basic.jar"
+    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\pfl-tf.jar"
+    
+
 And then simply refer to the ``cp`` variable in the configuration definition:
 
 ::
@@ -416,12 +425,17 @@ SAS is installed on, to your client (where python is running), even if one is Un
     or else you will get an error like this: SyntaxError: (unicode error) 'unicodeescape' codec can't decode 
     bytes in position 3-4: truncated \UXXXXXXXX escape 
 
+
+
+This following 'fix' for Java 9 is not longer needed, and it didn't solve Java 10 or 11. See the thirdparty jars above
+to solve the missing CORBA in any of the Java releases.
+
 It has been reported to me that Java9 no longer includes CORBA in it's default search path. CORBA is a requirement for
 the IOM Client. This can easily be added back in using the 'javaparms' configuration key (defined below), as follows.
 
 ::
 
-    "javaparms": ["--add-modules=java.corba"],
+    "javaparms": ["--add-modules=java.corba"],   # NO LONGER NEEDED - See 'classpath' above for solution
   
 
 
@@ -719,6 +733,7 @@ SAS Enterprise Guide or SAS Integration Technologies Client (a free download fro
 
 To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define 
 
+
 the configuration parameter ``class_id`` with the SAS Workspace GUID. The best way to identify that value is by using ``PROC IOMOPERATE``.
 
 ::
@@ -734,6 +749,7 @@ the configuration parameter ``class_id`` with the SAS Workspace GUID. The best w
         Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c
 
 To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored
+
 
  on local connections.
 

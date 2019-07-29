@@ -156,7 +156,14 @@ cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploy
 cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar"
 cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
 
-# And, if you've configured IOM to use Encryption, you need these client side jars.
+# These jars provide CORBA support for Java 10+ which no longer provides CORBA itself.  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION 
+cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-internal-api.jar"
+cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-omgapi.jar"
+cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-orb.jar"
+cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\pfl-basic.jar"
+cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\pfl-tf.jar"
+
+# And, if you've configured IOM to use Encryption, you need these client side jars.  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION 
 #cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904300.0.0.20150204190000_v940m3\\sas.rutil.jar"
 #cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil.nls_904300.0.0.20150204190000_v940m3\\sas.rutil.nls.jar"
 #cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.rutil_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar"

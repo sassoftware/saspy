@@ -394,7 +394,22 @@ And if we run that command ourselves... Same error as was reported.
         
 
 2) The problem with versions 9 Java, not having CORBA available.
-    
+
+This problem has now been solved in a different way. I'll leave the original below for reference, but here is the
+solution to this problem, along with Java 10, 11 ... which was not able to be solved that way as they no longer 
+even had CORBA available. As of version 3.1.1, saspy now includes the following 5 jars in the java/thirdparty directory.
+Just add these jars into your classpath (as shown in the onfiguration doc for IOM) and this will work for any Java
+version.
+
+glassfish-corba-internal-api.jar  
+glassfish-corba-omgapi.jar        
+glassfish-corba-orb.jar           
+NOTICE.md                         
+pfl-basic.jar                     
+pfl-tf.jar                        
+
+
+Old answer, no longer the solution:    
 A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
 This can be resolved by adding it back in, using the 'javaparms' key of your configuration definition as shown below. 
 Version 11 Java doesn't even ship CORBA, so the Java IOM client won't yet work with that version. The IOM group is currently investigating a solution to this. 
@@ -615,6 +630,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__pxx__sp0__1\\deploywiz\\sas.core.jar;
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
+
 
 
     Be sure the path to sspiauth.dll is in your System PATH
