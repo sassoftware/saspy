@@ -731,9 +731,23 @@ New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM prov
 
 SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.
 
+The COM access method requires a Python module that saspy, in general, does not; pypiwin32  If you do not have this already installed before trying to use the COM
+access method, you will likely see an error similar to this when trying to establish a connection. Just install that modules to solve this. 
+
+>>> sas=saspy.SASsession()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/opt/tom/github/saspy/saspy/sasbase.py", line 360, in __init__
+    self._io = SASSessionCOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
+  File "/opt/tom/github/saspy/saspy/sasiocom.py", line 197, in __init__
+    self.pid = self._startsas()
+  File "/opt/tom/github/saspy/saspy/sasiocom.py", line 212, in _startsas
+    factory = dynamic.Dispatch('SASObjectManager.ObjectFactoryMulti2')
+NameError: name 'dynamic' is not defined
+>>>
+
+
 To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define 
-
-
 the configuration parameter ``class_id`` with the SAS Workspace GUID. The best way to identify that value is by using ``PROC IOMOPERATE``.
 
 ::
@@ -749,6 +763,7 @@ the configuration parameter ``class_id`` with the SAS Workspace GUID. The best w
         Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c
 
 To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored
+
 
 
  on local connections.
