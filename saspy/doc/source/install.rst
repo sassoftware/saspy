@@ -374,7 +374,7 @@ The IOM connection method requires the following:
 * Java 7 or higher installed on your Client machine (where you're running SASPy)
 * The SAS Java IOM Client (just the jars listed below; these can be copied to your client system from wherever your SAS install is)
 * Setting the CLASSPATH to access the SAS Java IOM Client JAR files.
-* Setting the CLASSPATH to include the the saspyiom.jar file.
+* Setting the CLASSPATH to include the the saspyiom.jar file (and the thirdparty jars for Java version 9 and higher).
 * Setting the CLASSPATH to include client side encryption jars, if you have encryption configured for your IOM
 
 The ``'classpath'`` key for the configuration definition requires a little additional
@@ -400,8 +400,9 @@ file, like so:
     cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.rutil_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar"
     
 
-    # Java 10+ no longer provides CORBA. These jars provide the CORBA support that the IOM client needs. Add these in  to work with 
-    # the latest Java releases. These can even be in the classpath for Jave (7 or 8) that don't need them, with no problem. 
+    # Java 10+ no longer provides CORBA (9 has it but doesn't load it by default). These jars provide the CORBA support
+    # that the IOM client needs. Add these to the classpath to work with the latest Java releases. 
+    # These can even be in the classpath for Jave (7 or 8) that don't need them, with no problem. 
     cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-internal-api.jar"
     cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-omgapi.jar"
     cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-orb.jar"
@@ -727,7 +728,8 @@ install other non-standard python modules.
 
 IOM using COM
 =============
-New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.
+New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency.
+Connections from Windows clients to local and remote SAS 9.4 hosts are supported.
 
 SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.
 
@@ -748,6 +750,7 @@ NameError: name 'dynamic' is not defined
 
 
 To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define 
+
 the configuration parameter ``class_id`` with the SAS Workspace GUID. The best way to identify that value is by using ``PROC IOMOPERATE``.
 
 ::
@@ -762,11 +765,8 @@ the configuration parameter ``class_id`` with the SAS Workspace GUID. The best w
         Short type name  : Workspace 
         Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c
 
-To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored
-
-
-
- on local connections.
+To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. 
+Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored on local connections.
 
 iomhost - 
     The resolvable host name, or IP address to the IOM object spawner.
@@ -776,6 +776,8 @@ class_id -
     The IOM workspace server class identfier. Use ``PROC IOMOPERATE`` to identify the correct value for your configuration.
 provider -
     (Required) The SAS IOM Data Provider is an OLE DB data provider that supports access to SAS data sets that are managed by SAS Integrated Object Model (IOM) servers. The 'sas.iomprovider' provider is recommended.
+authkey -
+    The keyword that starts a line in the authinfo file containing user and or password for this connection. See the IOM using Java above for more info.
 omruser - 
     (**Discouraged**) The user ID is required but if this field is left blank,
     the user is **prompted** for a user ID at runtime, unless it's found in the authinfo file.
@@ -834,7 +836,7 @@ verify -
     but that can be fine, and you can still use an ssl connection. You can use set 'verify' : False, in your config to
     turn off verification for this case. 
 authkey -
-    (Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection.
+    (Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection. See the IOM using Java above for more info.
 user - 
     (**Discouraged**)  The user ID is required but if this field is left blank,
     the user is **prompted** for a user ID at runtime, unless it's found in the authinfo file.
