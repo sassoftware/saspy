@@ -371,10 +371,12 @@ Will use HTML5 for this SASsession.""")
       rc  = 0
       ret = None
       if self.pid:
-         code = ";*\';*\";*/;\n;quit;endsas;"
+         code = b";*\';*\";*/;\n;quit;endsas;\n"
          self._getlog(wait=1)
          if self.pid:
-            self._asubmit(code,'text')
+            out = self.stdin.write(code)
+            self.stdin.flush()
+            #self._asubmit(code,'text')
          sleep(1)
          if self.pid:
             try:
