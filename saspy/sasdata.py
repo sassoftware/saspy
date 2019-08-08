@@ -796,6 +796,52 @@ class SASdata:
         else:
             return self
 
+    def add_vars(self, vars: dict, out: object = None, **kwargs) -> 'SASLOG':
+        """
+        Copy table to itesf, or to 'out=' table and add any vars if you want
+
+        :param vars: REQUIRED dictionayr of variable names (keys) and assignment statement (values)
+               to maintain variable order use collections.OrderedDict Assignment statements must be valid 
+               SAS assignment expressions.
+        :param out: OPTIONAL takes a SASdata Object you create ahead of time. If not specified, replaces the existing table
+               and the current SAS data object still refers to the replacement table.
+        :param kwargs:
+        :return: SAS Log showing what happened
+
+        :Example:
+
+        #. cars   = sas.sasdata('cars', 'sashelp') 
+        #. wkcars = sas.sasdata('cars') 
+        #. cars.add_vars({'PW_ratio': 'weight / horsepower', 'Overhang' : 'length - wheelbase'}, wkcars)
+        #. wkcars.head()
+        """
+
+        if out is not None:
+           if not isinstance(out, SASdata):
+              print("out= needs to be a SASdata object")
+              return None
+           else:
+              outtab = out.libref + '.' + out.table + out._dsopts() 
+        else:
+           outtab = self.libref + '.' + self.table + self._dsopts() 
+
+        code  = "data "+outtab+"; set " + self.libref + '.' + self.table + self._dsopts() + ";\n"
+        for key in vars.keys():
+           code += key+" = "+vars[key]+";\n"
+        code += "; run;"
+
+        if self.sas.nosub:
+            print(code)
+            return
+
+        ll = self._is_valid()
+        if not ll:
+            ll = self.sas._io.submit(code, "text")
+        if not self.sas.batch:
+            print(ll['LOG'])
+        else:
+            return ll
+
     def assessModel(self, target: str, prediction: str, nominal: bool = True, event: str = '', **kwargs):
         """
         This method will calculate assessment measures using the SAS AA_Model_Eval Macro used for SAS Enterprise Miner.
