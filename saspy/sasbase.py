@@ -1549,10 +1549,72 @@ class SASsession():
         return res
 
     def cat(self, path):
+       """
+       Like Linux 'cat' - open and print the contents of a file
+       """
        fd = open(path, 'r')
        dat = fd.read()
        fd.close()
        print(dat)
+
+
+    def sil(self, life=None, rate=None, amount=None, payment=None, out: object = None, out_summary: object = None) -> 'SAS LST':
+       """
+       Alias for simple_interest_loan
+       """
+       return self.simple_interest_loan(life, rate, amount, payment, out, out_summary)
+      
+    def simple_interest_loan(self, life=None, rate=None, amount=None, payment=None, out: object = None, out_summary: object = None) -> 'SAS LST':
+       """
+       Calculate the amortization schedule of a simple interest load given 3 of the 4 variables
+       You must specify 3 of the for variables, to solve for the 4th.
+
+       :param life:    length of loan in months
+       :param rate:    interest rate as a decimal percent: .03 is 3% apr 
+       :param amount:  amount of loan
+       :param payment: monthly payment amount
+       :return: SAS Log showing the amortization schule calculated for the missing variable
+       """
+       vars = 0
+
+       code  = "proc mortgage"
+       if life is not None:
+          code += " life="+str(life)
+          vars += 1
+       if rate is not None:
+          code += " rate="+str(rate)
+          vars += 1
+       if amount is not None:
+          code += " amount="+str(amount)
+          vars += 1
+       if payment is not None:
+          code += " payment="+str(payment)
+          vars += 1
+       if out is not None:
+          code += " out="+out.libref + '.' + out.table + out._dsopts() 
+       if out_summary is not None:
+          code += " outsum="+out_summary.libref + '.' + out_summary.table + out_summary._dsopts() 
+       code += "; run;"
+
+       if vars != 3:
+          print("Must suply 3 of the 4 variables. Only "+str(vars)+" variables provided.")
+          return None
+
+       if self.nosub:
+          print(code)
+       else:
+          if self.results.lower() == 'html':
+             ll = self._io.submit(code, "html")
+             if not self.batch:
+                self.DISPLAY(self.HTML(ll['LST']))
+             else:
+                return ll
+          else:
+             ll = self._io.submit(code, "text")
+             if self.batch:
+                return ll
+             else:
+                print(ll['LST'])
 
 
 if __name__ == "__main__":
