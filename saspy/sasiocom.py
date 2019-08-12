@@ -437,7 +437,7 @@ class SASSessionCOM(object):
         prompt = prompt if prompt is not None else {}
         macro_declare = ''
         for key, value in prompt.items():
-            macro_declare += '%let {} = {};\n'.format(*self._prompt(key, val))
+            macro_declare += '%let {} = {};\n'.format(*self._prompt(key, value))
 
         # Submit program
         self._asubmit(RESET + macro_declare + code + RESET, results)
