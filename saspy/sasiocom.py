@@ -61,6 +61,9 @@ class SASConfigCOM(object):
 
         self.output = outs.get('output', 'html5')
 
+        self.verbose = opts.get('verbose', True)
+        self.verbose = kwargs.get('verbose', self.verbose)
+
         self._lock = opts.get('lock_down', True)
         self._prompt = session.sascfg._prompt
 
@@ -250,6 +253,9 @@ class SASSessionCOM(object):
         self.adodb.Open('Provider={}; Data Source=iom-id://{}'.format(
             self.sascfg.provider, self.workspace.UniqueIdentifier))
 
+        if self.sascfg.verbose:
+            print("SAS Connection established. Workspace UniqueIdentifier is "+str(self.workspace.UniqueIdentifier)+"\n")
+
         return self.workspace.UniqueIdentifier
 
     def _endsas(self):
@@ -259,6 +265,8 @@ class SASSessionCOM(object):
         self.adodb.Close()
         self.keeper.RemoveObject(self.workspace)
         self.workspace.Close()
+        if self.sascfg.verbose:
+            print("SAS Connection terminated. Workspace UniqueIdentifierid was "+str(self.pid))
 
     def _getlst(self, buf: int=2048) -> str:
         """
