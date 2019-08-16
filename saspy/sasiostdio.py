@@ -1352,7 +1352,8 @@ Will use HTML5 for this SASsession.""")
       return len(x.encode(self.sascfg.encoding))
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a',
-                         libref: str ="", keep_outer_quotes: bool=False):
+                         libref: str ="", keep_outer_quotes: bool=False,
+                                          embedded_newlines: bool=False):
       """
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
@@ -1361,6 +1362,7 @@ Will use HTML5 for this SASsession.""")
       keep_outer_quotes - for character columns, have SAS keep any outer quotes instead of stripping them off.
       """
       input  = ""
+      xlate  = ""
       card   = ""
       format = ""
       length = ""
@@ -1382,6 +1384,9 @@ Will use HTML5 for this SASsession.""")
             if keep_outer_quotes:
                input  += "~ "
             dts.append('C')
+            if embedded_newlines:
+               xlate += "'"+str(df.columns[name])+"'n = translate("+"'"+str(df.columns[name])+"'n, '0A'x, '01'x);\n "
+               xlate += "'"+str(df.columns[name])+"'n = translate("+"'"+str(df.columns[name])+"'n, '0D'x, '02'x);\n "
          else:
             if df.dtypes[df.columns[name]].kind in ('M'):
                length += " '"+str(df.columns[name])+"'n 8"
@@ -1403,7 +1408,7 @@ Will use HTML5 for this SASsession.""")
          code += "length"+length+";\n"
       if len(format):
          code += "format "+format+";\n"
-      code += "infile datalines delimiter='03'x DSD STOPOVER;\n input "+input+";\n datalines4;"
+      code += "infile datalines delimiter='03'x DSD STOPOVER;\n input "+input+";\n"+xlate+";\n datalines4;"
       self._asubmit(code, "text")
 
       for row in df.itertuples(index=False):
@@ -1414,8 +1419,12 @@ Will use HTML5 for this SASsession.""")
 
             if   dts[col] == 'N' and var == 'nan':
                var = '.'
-            elif dts[col] == 'C' and var == 'nan':
-               var = ' '
+            elif dts[col] == 'C':
+               if var == 'nan':
+                  var = ' '
+               else:
+                  if embedded_newlines:
+                     var = var.replace('\n', chr(1)).replace('\r', chr(2))
             elif dts[col] == 'B':
                var = str(int(row[col]))
             elif dts[col] == 'D':

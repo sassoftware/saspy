@@ -871,7 +871,8 @@ class SASsession():
         return log
      
     def df2sd(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
-              results: str = '', keep_outer_quotes: bool = False) -> 'SASdata':
+              results: str = '', keep_outer_quotes: bool = False,
+                                 embedded_newlines: bool = False) -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
@@ -882,10 +883,11 @@ class SASsession():
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :return: SASdata object
         """
-        return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes)
+        return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines)
 
     def dataframe2sasdata(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
-                          results: str = '', keep_outer_quotes: bool = False) -> 'SASdata':
+                          results: str = '', keep_outer_quotes: bool = False,
+                                             embedded_newlines: bool = False) -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
@@ -910,7 +912,7 @@ class SASsession():
             print("too complicated to show the code, read the source :), sorry.")
             return None
         else:
-            self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes)
+            self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines)
 
         if self.exist(table, libref):
             return SASdata(self, libref, table, results)
