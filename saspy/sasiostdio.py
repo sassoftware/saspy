@@ -1353,13 +1353,18 @@ Will use HTML5 for this SASsession.""")
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a',
                          libref: str ="", keep_outer_quotes: bool=False,
-                                          embedded_newlines: bool=False):
+                                          embedded_newlines: bool=False,
+                         LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03'):
       """
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       keep_outer_quotes - for character columns, have SAS keep any outer quotes instead of stripping them off.
+      embedded_newlines - if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
+      LF - if embedded_newlines=True, the cheacter to use for LF when transferring the data; defaults to '\x01'
+      CR - if embedded_newlines=True, the cheacter to use for CR when transferring the data; defaults to '\x02'
+      colsep - the column seperator chatracter used for streaming the delimmited data to SAS defaults to '\x03'
       """
       input  = ""
       xlate  = ""
@@ -1368,6 +1373,9 @@ Will use HTML5 for this SASsession.""")
       length = ""
       dts    = []
       ncols  = len(df.columns)
+      lf     = "'"+'%02x' % ord(LF.encode(self.sascfg.encoding))+"'x"
+      cr     = "'"+'%02x' % ord(CR.encode(self.sascfg.encoding))+"'x "
+      delim  = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
       for name in range(ncols):
          input += "'"+str(df.columns[name])+"'n "
@@ -1385,8 +1393,8 @@ Will use HTML5 for this SASsession.""")
                input  += "~ "
             dts.append('C')
             if embedded_newlines:
-               xlate += "'"+str(df.columns[name])+"'n = translate("+"'"+str(df.columns[name])+"'n, '0A'x, '01'x);\n "
-               xlate += "'"+str(df.columns[name])+"'n = translate("+"'"+str(df.columns[name])+"'n, '0D'x, '02'x);\n "
+               xlate += "'"+str(df.columns[name])+"'n = translate("+"'"+str(df.columns[name])+"'n, '0A'x, "+lf+");\n "
+               xlate += "'"+str(df.columns[name])+"'n = translate("+"'"+str(df.columns[name])+"'n, '0D'x, "+cr+");\n "
          else:
             if df.dtypes[df.columns[name]].kind in ('M'):
                length += " '"+str(df.columns[name])+"'n 8"
@@ -1408,7 +1416,7 @@ Will use HTML5 for this SASsession.""")
          code += "length"+length+";\n"
       if len(format):
          code += "format "+format+";\n"
-      code += "infile datalines delimiter='03'x DSD STOPOVER;\n input "+input+";\n"+xlate+";\n datalines4;"
+      code += "infile datalines delimiter="+delim+" DSD STOPOVER;\n input "+input+";\n"+xlate+";\n datalines4;"
       self._asubmit(code, "text")
 
       for row in df.itertuples(index=False):
@@ -1424,7 +1432,7 @@ Will use HTML5 for this SASsession.""")
                   var = ' '
                else:
                   if embedded_newlines:
-                     var = var.replace('\n', chr(1)).replace('\r', chr(2))
+                     var = var.replace('\n', LF).replace('\r', CR)
             elif dts[col] == 'B':
                var = str(int(row[col]))
             elif dts[col] == 'D':
@@ -1435,7 +1443,7 @@ Will use HTML5 for this SASsession.""")
 
             card += var
             if col < (ncols-1):
-               card += chr(3)
+               card += colsep
          self.stdin.write(card.encode(self.sascfg.encoding)+b'\n')
          #self._asubmit(card, "text")
 
@@ -1448,8 +1456,8 @@ Will use HTML5 for this SASsession.""")
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref  - the libref for the SAS Data Set.
-      rowsep  - the row seperator character to use; defaults to '\n'
-      colsep  - the column seperator character to use; defaults to '\t'
+      rowsep  - the row seperator character to use; defaults to '\x01'
+      colsep  - the column seperator character to use; defaults to '\x02'
       port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       """
       dsopts = dsopts if dsopts is not None else {}
