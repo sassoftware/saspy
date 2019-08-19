@@ -360,6 +360,12 @@ is the text of the last warning message generated in the SAS log.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="saspy.SASsession.cat">
+<code class="descname">cat</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.cat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like Linux &#8216;cat&#8217; - open and print the contents of a file</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASsession.dataframe2sasdata">
 <code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
@@ -373,6 +379,10 @@ is the text of the last warning message generated in the SAS log.</p>
 <li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
 <li><strong>results</strong> &#8211; format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</li>
 <li><strong>keep_outer_quotes</strong> &#8211; the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them</li>
+<li><strong>embedded_newlines</strong> &#8211; if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set</li>
+<li><strong>LF</strong> &#8211; if embedded_newlines=True, the cheacter to use for LF when transferring the data; defaults to &#8216;&#8217;</li>
+<li><strong>CR</strong> &#8211; if embedded_newlines=True, the cheacter to use for CR when transferring the data; defaults to &#8216;&#8217;</li>
+<li><strong>colsep</strong> &#8211; the column seperator chatracter used for streaming the delimmited data to SAS defaults to &#8216;&#8217;</li>
 </ul>
 </td>
 </tr>
@@ -413,6 +423,10 @@ is the text of the last warning message generated in the SAS log.</p>
 <li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
 <li><strong>results</strong> &#8211; format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</li>
 <li><strong>keep_outer_quotes</strong> &#8211; the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them</li>
+<li><strong>embedded_newlines</strong> &#8211; if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set</li>
+<li><strong>LF</strong> &#8211; if embedded_newlines=True, the cheacter to use for LF when transferring the data; defaults to &#8216;&#8217;</li>
+<li><strong>CR</strong> &#8211; if embedded_newlines=True, the cheacter to use for CR when transferring the data; defaults to &#8216;&#8217;</li>
+<li><strong>colsep</strong> &#8211; the column seperator chatracter used for streaming the delimmited data to SAS defaults to &#8216;&#8217;</li>
 </ul>
 </td>
 </tr>
@@ -860,6 +874,36 @@ but you can run this way too; get the objects display them yourself and/or write
 </dd></dl>
 
 <dl class="method">
+<dt id="saspy.SASsession.sil">
+<code class="descname">sil</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.sil" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for simple_interest_loan</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.simple_interest_loan">
+<code class="descname">simple_interest_loan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.simple_interest_loan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the amortization schedule of a simple interest load given 3 of the 4 variables
+You must specify 3 of the for variables, to solve for the 4th.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>life</strong> &#8211; length of loan in months</li>
+<li><strong>rate</strong> &#8211; interest rate as a decimal percent: .03 is 3% apr</li>
+<li><strong>amount</strong> &#8211; amount of loan</li>
+<li><strong>payment</strong> &#8211; monthly payment amount</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SAS Log showing the amortization schule calculated for the missing variable</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASsession.submit">
 <code class="descname">submit</code><span class="sig-paren">(</span><em>code: str</em>, <em>results: str = ''</em>, <em>prompt: dict = None</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#saspy.SASsession.submit" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.</p>
@@ -1055,6 +1099,39 @@ You create a SASdata object by using the sasdata() method of the SASsession obje
 </tr>
 </tbody>
 </table>
+<dl class="method">
+<dt id="saspy.sasdata.SASdata.add_vars">
+<code class="descname">add_vars</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.sasdata.SASdata.add_vars" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy table to itesf, or to &#8216;out=&#8217; table and add any vars if you want</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vars</strong> &#8211; REQUIRED dictionayr of variable names (keys) and assignment statement (values)
+to maintain variable order use collections.OrderedDict Assignment statements must be valid 
+SAS assignment expressions.</li>
+<li><strong>out</strong> &#8211; OPTIONAL takes a SASdata Object you create ahead of time. If not specified, replaces the existing table
+and the current SAS data object still refers to the replacement table.</li>
+<li><strong>kwargs</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">SAS Log showing what happened</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Example:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<ol class="arabic simple">
+<li>cars   = sas.sasdata(&#8216;cars&#8217;, &#8216;sashelp&#8217;)</li>
+<li>wkcars = sas.sasdata(&#8216;cars&#8217;)</li>
+<li>cars.add_vars({&#8216;PW_ratio&#8217;: &#8216;weight / horsepower&#8217;, &#8216;Overhang&#8217; : &#8216;length - wheelbase&#8217;}, wkcars)</li>
+<li>wkcars.head()</li>
+</ol>
+</dd></dl>
+
 <dl class="method">
 <dt id="saspy.sasdata.SASdata.assessModel">
 <code class="descname">assessModel</code><span class="sig-paren">(</span><em>target: str</em>, <em>prediction: str</em>, <em>nominal: bool = True</em>, <em>event: str = ''</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.sasdata.SASdata.assessModel" title="Permalink to this definition">¶</a></dt>
