@@ -871,7 +871,9 @@ class SASsession():
         return log
      
     def df2sd(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
-              results: str = '', keep_outer_quotes: bool = False) -> 'SASdata':
+              results: str = '', keep_outer_quotes: bool = False,
+                                 embedded_newlines: bool = False, 
+              LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03') -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
@@ -880,12 +882,18 @@ class SASsession():
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
+        :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
+        :param LF: if embedded_newlines=True, the cheacter to use for LF when transferring the data; defaults to '\x01'
+        :param CR: if embedded_newlines=True, the cheacter to use for CR when transferring the data; defaults to '\x02'
+        :param colsep: the column seperator chatracter used for streaming the delimmited data to SAS defaults to '\x03'
         :return: SASdata object
         """
-        return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes)
+        return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, LF, CR, colsep)
 
     def dataframe2sasdata(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
-                          results: str = '', keep_outer_quotes: bool = False) -> 'SASdata':
+                          results: str = '', keep_outer_quotes: bool = False,
+                                             embedded_newlines: bool = False,
+                          LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03') -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
@@ -894,6 +902,10 @@ class SASsession():
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
+        :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
+        :param LF: if embedded_newlines=True, the cheacter to use for LF when transferring the data; defaults to '\x01'
+        :param CR: if embedded_newlines=True, the cheacter to use for CR when transferring the data; defaults to '\x02'
+        :param colsep: the column seperator chatracter used for streaming the delimmited data to SAS defaults to '\x03'
         :return: SASdata object
         """
         if self.sascfg.pandas:
@@ -910,7 +922,7 @@ class SASsession():
             print("too complicated to show the code, read the source :), sorry.")
             return None
         else:
-            self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes)
+            self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, LF, CR, colsep)
 
         if self.exist(table, libref):
             return SASdata(self, libref, table, results)

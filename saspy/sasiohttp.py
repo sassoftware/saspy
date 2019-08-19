@@ -1010,20 +1010,30 @@ class SASsessionHTTP():
       return len(x.encode(self.sascfg.encoding))
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', 
-                         libref: str ="", keep_outer_quotes: bool=False):
+                         libref: str ="", keep_outer_quotes: bool=False,
+                                          embedded_newlines: bool=False,
+                         LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03'):
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       keep_outer_quotes - for character columns, have SAS keep any outer quotes instead of stripping them off.
+      embedded_newlines - if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
+      LF - if embedded_newlines=True, the cheacter to use for LF when transferring the data; defaults to '\x01'
+      CR - if embedded_newlines=True, the cheacter to use for CR when transferring the data; defaults to '\x02'
+      colsep - the column seperator chatracter used for streaming the delimmited data to SAS defaults to '\x03'
       '''
       input  = ""
+      xlate  = ""
       card   = ""
       format = ""
       length = ""
       dts    = []
       ncols  = len(df.columns)
+      lf     = "'"+'%02x' % ord(LF.encode(self.sascfg.encoding))+"'x"
+      cr     = "'"+'%02x' % ord(CR.encode(self.sascfg.encoding))+"'x "
+      delim  = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
       for name in range(ncols):
          input += "'"+str(df.columns[name])+"'n "
@@ -1040,6 +1050,9 @@ class SASsessionHTTP():
             if keep_outer_quotes:
                input  += "~ "
             dts.append('C')
+            if embedded_newlines:
+               xlate += "'"+str(df.columns[name])+"'n = translate("+"'"+str(df.columns[name])+"'n, '0A'x, "+lf+");\n "
+               xlate += "'"+str(df.columns[name])+"'n = translate("+"'"+str(df.columns[name])+"'n, '0D'x, "+cr+");\n "
          else:
             if df.dtypes[df.columns[name]].kind in ('M'):
                length += " '"+str(df.columns[name])+"'n 8"
@@ -1061,7 +1074,7 @@ class SASsessionHTTP():
          code += "length "+length+";\n"
       if len(format):
          code += "format "+format+";\n"
-      code += "infile datalines delimiter='03'x DSD STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\ndatalines4;"
+      code += "infile datalines delimiter="+delim+" DSD STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
       self._asubmit(code, "text")
 
       code = ""
@@ -1072,8 +1085,12 @@ class SASsessionHTTP():
 
             if   dts[col] == 'N' and var == 'nan':
                var = '.'
-            elif dts[col] == 'C' and var == 'nan':
-               var = ' '
+            elif dts[col] == 'C':
+               if var == 'nan':
+                  var = ' '
+               else:
+                  if embedded_newlines:
+                     var = var.replace('\n', LF).replace('\r', CR)
             elif dts[col] == 'B':
                var = str(int(row[col]))
             elif dts[col] == 'D':
@@ -1084,7 +1101,7 @@ class SASsessionHTTP():
 
             card += var
             if col < (ncols-1):
-               card += chr(3)
+               card += colsep
          code += card+"\n"
          if len(code) > 4000:
             self._asubmit(code, "text")
