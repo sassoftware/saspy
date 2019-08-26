@@ -883,9 +883,9 @@ class SASsession():
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
-        :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to '\x01'
-        :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
-        :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
+        :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)
+        :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)
+        :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)
         :return: SASdata object
         """
         return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, LF, CR, colsep)
@@ -903,9 +903,9 @@ class SASsession():
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
-        :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to '\x01'
-        :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
-        :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
+        :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1) 
+        :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2) 
+        :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3) 
         :return: SASdata object
         """
         if self.sascfg.pandas:
