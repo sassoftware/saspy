@@ -582,13 +582,22 @@ class SASSessionCOM(object):
         else:
             return self.submit(proc_code, 'text')['LOG']
 
-    def dataframe2sasdata(self, df: 'pd.DataFrame', table: str, libref: str=None, keep_outer_quotes: bool=False):
+    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a',
+                          libref: str ="", keep_outer_quotes: bool=False,
+                                           embedded_newlines: bool=False,
+                          LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03'):
         """
         Create a SAS dataset from a pandas data frame.
         :param df [pd.DataFrame]: Pandas data frame containing data to write.
         :param table [str]: Table name.
         :option libref [str]: Library name. Default work.
         :option keep_outer_quotes [bool]: Not supported.
+
+        None of these options are used by this access method; they are needed for other access methods
+        embedded_newlines - if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
+        LF - if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to '\x01'
+        CR - if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
+        colsep - the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
         """
         DATETIME_NAME = 'E8601DT26.6'
         DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%f'
