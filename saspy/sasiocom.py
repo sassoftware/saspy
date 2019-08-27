@@ -362,9 +362,9 @@ class SASSessionCOM(object):
         while not schema.EOF:
             col_info = {x.Name: x.Value for x in schema.Fields}
             if col_info['FORMAT_NAME'] in self._sb.sas_date_fmts:
-                col_info['CONVERT'] = lambda x: self._sb.SAS_EPOCH + datetime.timedelta(days=x)
+                col_info['CONVERT'] = lambda x: self._sb.SAS_EPOCH + datetime.timedelta(days=x)    if x else x
             elif col_info['FORMAT_NAME'] in self._sb.sas_datetime_fmts:
-                col_info['CONVERT'] = lambda x: self._sb.SAS_EPOCH + datetime.timedelta(seconds=x)
+                col_info['CONVERT'] = lambda x: self._sb.SAS_EPOCH + datetime.timedelta(seconds=x) if x else x
             # elif FIXME TIME FORMATS
             else:
                 col_info['CONVERT'] = lambda x: x
@@ -706,13 +706,14 @@ class SASSessionCOM(object):
                 col_length = col['FORMAT_LENGTH']
                 col_precis = col['FORMAT_DECIMAL']
 
-            full_format = FORMAT_STRING.format(
-                column=col['COLUMN_NAME'],
-                format=col_format,
-                length=col_length,
-                precision=col_precis)
-
-            fmtlist.append(full_format)
+            if col['FORMAT_NAME']:
+               full_format = FORMAT_STRING.format(
+                   column=col['COLUMN_NAME'],
+                   format=col_format,
+                   length=col_length,
+                   precision=col_precis)
+   
+               fmtlist.append(full_format)
 
         export = EXPORT.format(fmt=' '.join(fmtlist),
             tbl=tablepath,
