@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.1.3 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.1.4 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.1.3 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.1.4 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.1.3
+                3.1.4
               </div>
             
           
@@ -815,8 +815,8 @@ install other non-standard python modules.</p>
 </div>
 <div class="section" id="iom-using-com">
 <h3>IOM using COM<a class="headerlink" href="#iom-using-com" title="Permalink to this headline">¶</a></h3>
-<p>New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency.
-Connections from Windows clients to local and remote SAS 9.4 hosts are supported.</p>
+<p>New in 3.1.0, this user contributed access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method,
+but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.</p>
 <p>SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.</p>
 <p>The COM access method requires a Python module that saspy, in general, does not; pypiwin32  If you do not have this already installed before trying to use the COM
 access method, you will likely see an error similar to this when trying to establish a connection. Just install that modules to solve this.</p>
@@ -833,8 +833,8 @@ access method, you will likely see an error similar to this when trying to estab
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
 </div>
-<p>To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define</p>
-<p>the configuration parameter <code class="docutils literal"><span class="pre">class_id</span></code> with the SAS Workspace GUID. The best way to identify that value is by using <code class="docutils literal"><span class="pre">PROC</span> <span class="pre">IOMOPERATE</span></code>.</p>
+<p>To connect to a remote SAS server, you must specify the IOM host name and port number. The Class Identifier is also required, but is a constant which will be
+prpvided on your behalf (starting in V3.1.4). The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to; in this case Workspace Server.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">proc</span> <span class="n">iomoperate</span><span class="p">;</span>
     <span class="nb">list</span> <span class="n">types</span><span class="p">;</span>
 <span class="n">run</span><span class="p">;</span>
@@ -842,18 +842,20 @@ access method, you will likely see an error similar to this when trying to estab
 </div>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">SAS</span> <span class="n">Workspace</span> <span class="n">Server</span>
     <span class="n">Short</span> <span class="nb">type</span> <span class="n">name</span>  <span class="p">:</span> <span class="n">Workspace</span>
-    <span class="n">Class</span> <span class="n">identifier</span> <span class="p">:</span> <span class="mi">440196</span><span class="n">d4</span><span class="o">-</span><span class="mi">90</span><span class="n">f0</span><span class="o">-</span><span class="mi">11</span><span class="n">d0</span><span class="o">-</span><span class="mi">9</span><span class="n">f41</span><span class="o">-</span><span class="mi">00</span><span class="n">a024bb830c</span>
+    <span class="n">Class</span> <span class="n">identifier</span> <span class="p">:</span> <span class="mi">440196</span><span class="n">d4</span><span class="o">-</span><span class="mi">90</span><span class="n">f0</span><span class="o">-</span><span class="mi">11</span><span class="n">d0</span><span class="o">-</span><span class="mi">9</span><span class="n">f41</span><span class="o">-</span><span class="mi">00</span><span class="n">a024bb830c</span>  <span class="o">/*</span> <span class="n">this</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">constant</span> <span class="n">that</span> <span class="n">doesn</span><span class="s1">&#39;t change */</span>
 </pre></div>
 </div>
 <p>To connect to a local SAS instance, do not specify the <code class="docutils literal"><span class="pre">iomhost</span></code> paramter. Local connections do not require a host, port, class_id.
 Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored on local connections.</p>
 <dl class="docutils">
 <dt>iomhost -</dt>
-<dd>The resolvable host name, or IP address to the IOM object spawner.</dd>
+<dd>The resolvable host name, or IP address to the IOM object spawner. Only required for remote connections. Don&#8217;t specify for local connections.</dd>
 <dt>iomport -</dt>
-<dd>The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).</dd>
+<dd>The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!). Only required for remote connections. Don&#8217;t specify for local connections.</dd>
 <dt>class_id -</dt>
-<dd>The IOM workspace server class identfier. Use <code class="docutils literal"><span class="pre">PROC</span> <span class="pre">IOMOPERATE</span></code> to identify the correct value for your configuration.</dd>
+<dd>This value turns out to be a constant which hasn&#8217;t changed in years and probably never will. So, you shouldn&#8217;t need to specify this. The value of
+&#8216;440196d4-90f0-11d0-9f41-00a024bb830c&#8217; will be used by default. Though you can specify it explitly here to override the default; but you should never need to.
+The IOM workspace server class identfier. Use <code class="docutils literal"><span class="pre">PROC</span> <span class="pre">IOMOPERATE</span></code> to identify the correct value for your configuration.</dd>
 <dt>provider -</dt>
 <dd>(Required) The SAS IOM Data Provider is an OLE DB data provider that supports access to SAS data sets that are managed by SAS Integrated Object Model (IOM) servers. The &#8216;sas.iomprovider&#8217; provider is recommended.</dd>
 <dt>authkey -</dt>
@@ -1014,7 +1016,7 @@ If you want to run saspy in Zeppelin, set this in your configuration definition:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.1.3',
+            VERSION:'3.1.4',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
