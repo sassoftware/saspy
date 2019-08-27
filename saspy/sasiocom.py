@@ -55,9 +55,9 @@ class SASConfigCOM(object):
         self.user = cfg.get('omruser')
         self.pw = cfg.get('omrpw')
         self.authkey = cfg.get('authkey')
-        self.class_id = cfg.get('class_id')
+        self.class_id = cfg.get('class_id', '440196d4-90f0-11d0-9f41-00a024bb830c')
         self.provider = cfg.get('provider')
-        self.encoding = cfg.get('encoding', 'utf-8')
+        self.encoding = cfg.get('encoding', '')
 
         self.output = outs.get('output', 'html5')
 

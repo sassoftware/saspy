@@ -728,8 +728,8 @@ install other non-standard python modules.
 
 IOM using COM
 =============
-New in 3.1.0, this access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, but there is no Java dependency.
-Connections from Windows clients to local and remote SAS 9.4 hosts are supported.
+New in 3.1.0, this user contributed access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, 
+but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.
 
 SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.
 
@@ -749,9 +749,8 @@ NameError: name 'dynamic' is not defined
 >>>
 
 
-To connect to a SAS server, you must define a few attributes: host name, port number, and Class Identifier. The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to. To connect to a Workspace server, you must define 
-
-the configuration parameter ``class_id`` with the SAS Workspace GUID. The best way to identify that value is by using ``PROC IOMOPERATE``.
+To connect to a remote SAS server, you must specify the IOM host name and port number. The Class Identifier is also required, but is a constant which will be
+prpvided on your behalf (starting in V3.1.4). The Class Identifier is a 32-character GUID that indicates the type of SAS server to connect to; in this case Workspace Server.
 
 ::
 
@@ -763,16 +762,18 @@ the configuration parameter ``class_id`` with the SAS Workspace GUID. The best w
 
     SAS Workspace Server 
         Short type name  : Workspace 
-        Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c
+        Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c  /* this is a constant that doesn't change */
 
 To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. 
 Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored on local connections.
 
 iomhost - 
-    The resolvable host name, or IP address to the IOM object spawner.
+    The resolvable host name, or IP address to the IOM object spawner. Only required for remote connections. Don't specify for local connections.
 iomport - 
-    The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
+    The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!). Only required for remote connections. Don't specify for local connections.
 class_id -
+    This value turns out to be a constant which hasn't changed in years and probably never will. So, you shouldn't need to specify this. The value of
+    '440196d4-90f0-11d0-9f41-00a024bb830c' will be used by default. Though you can specify it explitly here to override the default; but you should never need to.
     The IOM workspace server class identfier. Use ``PROC IOMOPERATE`` to identify the correct value for your configuration.
 provider -
     (Required) The SAS IOM Data Provider is an OLE DB data provider that supports access to SAS data sets that are managed by SAS Integrated Object Model (IOM) servers. The 'sas.iomprovider' provider is recommended.
