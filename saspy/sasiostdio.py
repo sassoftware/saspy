@@ -572,8 +572,10 @@ Will use HTML5 for this SASsession.""")
       bc       = False
       done     = False
       logn     = self._logcnt()
-      logcodei = "%put E3969440A681A24088859985" + logn + ";"
-      logcodeo = b"\nE3969440A681A24088859985" + logn.encode()
+      #logcodei = "%put E3969440A681A24088859985" + logn + ";"
+      #logcodeo = b"\nE3969440A681A24088859985" + logn.encode()
+      logcodei = "%put %upcase(e3969440a681a24088859985" + logn + ");"
+      logcodeo = b"E3969440A681A24088859985" + logn.encode()
       pcodei   = ''
       pcodeiv  = ''
       pcodeo   = ''
@@ -665,7 +667,7 @@ Will use HTML5 for this SASsession.""")
                          if logf.count(logcodeo) >= 1:
                              bail = True
                          if not bail and bc:
-                             self.stdin.write(odsclose+logcodei.encode(self.sascfg.encoding) + b'\n')
+                             self.stdin.write(odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
                              self.stdin.flush()
                              bc = False
              done = True
@@ -726,7 +728,7 @@ Will use HTML5 for this SASsession.""")
       final = logf.partition(logcodei)
       z = final[0].rpartition(chr(10))
       prev = '%08d' %  (self._log_cnt - 1)
-      zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
+      zz = z[0].rpartition("E3969440A681A24088859985" + prev)
       logd = zz[2].replace(mj.decode(self.sascfg.encoding), '')
 
       lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
@@ -876,7 +878,7 @@ Will use HTML5 for this SASsession.""")
             self._log += log
             logn = self._logcnt(False)
 
-            if log.count("\nE3969440A681A24088859985"+logn) >= 1:
+            if log.count("E3969440A681A24088859985"+logn+"\n") >= 1:
                print("******************Found end of step. No interupt processed")
                found = True
 
@@ -910,13 +912,11 @@ Will use HTML5 for this SASsession.""")
       if len(libref):
          code += libref+"."
       code += table+"', 'VIEW');\n if e or v then e = 1;\n"
-      code += "te='TABLE_EXISTS='; put te e;run;"
+      code += "put 'TABLE_EXISTS=' e 'TAB_EXTEND=';run;"
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
-      l2 = l2[2].partition("\n")
-      exists = int(l2[0])
+      exists = int(ll['LOG'].rpartition("TABLE_EXISTS=")[2].rpartition(" TAB_EXTEND=")[0])
 
       return bool(exists)
 
@@ -1513,7 +1513,7 @@ Will use HTML5 for this SASsession.""")
       topts['firstobs'] = ''
       
       code  = "data work._n_u_l_l_;output;run;\n"
-      code += "data _null_; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
+      code += "data _null_; file STDERR; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
 
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
@@ -1716,7 +1716,7 @@ Will use HTML5 for this SASsession.""")
       topts['firstobs'] = ''
 
       code  = "data work._n_u_l_l_;output;run;\n"
-      code += "data _null_; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
+      code += "data _null_; file STDERR; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
 
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"

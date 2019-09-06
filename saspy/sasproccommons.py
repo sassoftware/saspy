@@ -312,16 +312,26 @@ class SASProcCommons:
         :param args: list likely none
         :return: list -- the tables and graphs available for tab complete
         """
-        code = "%listdata("
-        code += obj
-        code += ");"
+        code  = """
+        data _null_;
+           set _{}filelist(where=(length(method)>1)) end=last;
+           if _n_=1 then put "METHLIST=";
+              put "METH=" method "METHEND=";
+              if  last then put "METHLISTEND=";
+           run;
+        """.format(obj)
+
         self.logger.debug("Object Method macro call: " + str(code))
         res = self.sas.submit(code, "text")
-        meth = res['LOG'].splitlines()
-        for i in range(len(meth)):
-            meth[i] = meth[i].lstrip().rstrip()
         self.logger.debug('SAS Log: ' + res['LOG'])
-        objlist = meth[meth.index('startparse9878') + 1:meth.index('endparse9878')]
+
+        objlist = []
+        log = res['LOG'].rpartition('METHLISTEND=')[0].rpartition('METHLIST=')
+                                                                                  
+        for i in range(log[2].count('METH=')):                                    
+           log = log[2].partition('METH=')[2].partition(' METHEND=')                    
+           objlist.append(log[0].strip())                                                         
+
         self.logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
@@ -343,8 +353,8 @@ class SASProcCommons:
              vart = vartype(d, i);
              var  = varname(d, i);
              if vart eq 'C' then
-                put var; end;
-          put 'VARLISTend=';
+                put "VAR=" var "VAREND="; end;
+          put 'VARLISTEND=';
         run;
         """
         # ignore teach_me_SAS mode to run contents
@@ -352,12 +362,16 @@ class SASProcCommons:
         self.sas.nosub = False
         ll = self.sas.submit(char_string.format(data.libref, data.table + data._dsopts()))
         self.sas.nosub = nosub
-        l2 = ll['LOG'].partition("VARLIST=\n")
-        l2 = l2[2].rpartition("VARLISTend=\n")
-        charlist1 = l2[0].split("\n")
-        del charlist1[len(charlist1) - 1]
-        charlist1 = [x.casefold() for x in charlist1]
-        return charlist1
+
+        charlist = []
+        log = ll['LOG'].rpartition('VARLISTEND=')[0].rpartition('VARLIST=')
+                                                                                  
+        for i in range(log[2].count('VAR=')):                                    
+           log = log[2].partition('VAR=')[2].partition(' VAREND=')                    
+           charlist.append(log[0].strip())                                                         
+
+        charlist = [x.casefold() for x in charlist]
+        return charlist
 
     def _processNominals(self, kwargs, data):
         nom = kwargs.pop('nominals', None)

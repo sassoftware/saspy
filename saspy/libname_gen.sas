@@ -99,18 +99,6 @@ options pagesize=max;
 %getdata(cars,qqplot);
 %getdata(cars,diagnosticspanel);
 */;
-%macro listdata(objname);
-    data _null_;
-        set _&objname.filelist(where=(length(method)>1)) end=last;
-        if _n_=1 then put "startparse9878";
-        put method;
-        if  last then put "endparse9878";
-    run;
-%mend listdata;
-/*
-%listdata(cars);
-%listdata(lm);
-*/
 
 
 
