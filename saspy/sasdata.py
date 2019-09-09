@@ -370,7 +370,7 @@ class SASdata:
                              vart = vartype(d, i);
                              var  = varname(d, i);
                              if vart eq 'N' then
-                                put 'VAR=' var 'VAREND=';
+                                put %upcase('var=') var %upcase('varEND=');
                           end;
                           put 'VARLISTEND=';
                         run;
@@ -656,35 +656,32 @@ class SASdata:
         varcode += "nvars = attrn(d, 'NVARS');\n"
         varcode += "put 'VARNUMS=' nvars 'VARNUMS_END=';\n"
         varcode += "put 'VARLIST=';\n"
-        varcode += "do i = 1 to nvars; var = varname(d, i); put 'VAR=' var 'VAREND='; end;\n"
+        varcode += "do i = 1 to nvars; var = varname(d, i); put %upcase('var=') var %upcase('varEND='); end;\n"
         varcode += "put 'TYPELIST=';\n"
-        varcode += "do i = 1 to nvars; var = vartype(d, i); put 'TYPE=' var 'TYPEEND='; end;\n"
+        varcode += "do i = 1 to nvars; var = vartype(d, i); put %upcase('type=') var %upcase('typeEND='); end;\n"
         varcode += "put 'END_ALL_VARS_AND_TYPES=';\n"
         varcode += "run;"
 
         ll = self.sas._io.submit(varcode, "text")
  
-        l2 = ll['LOG'].rpartition("VARNUMS=")
-        l2 = l2[2].partition("VARNUMS_END=")                                 
-        nvars = int(float(l2[0]))                                  
+        l2 = ll['LOG'].rpartition("VARNUMS=")[2].partition("VARNUMS_END=") 
+        nvars = int(float(l2[0].strip()))                                  
         
-        l2 = l2[2].partition("TYPELIST=")
-        vlist = l2[0].split(" VAREND=")                                  
-        varlist = []                                   
-        for var1 in vlist:                            
-           part = var1.rpartition('VAR=')               
-           if part[1] == 'VAR=':                        
-              varlist.append(part[2].upper())                  
-        
-        l2 = l2[2].partition("END_ALL_VARS_AND_TYPES=")
-        tlist = l2[0].split(" TYPEEND=")                                  
-        vartype  = []                                   
-        for typ1 in tlist:                            
-           part = typ1.rpartition('TYPE=')               
-           if part[1] == 'TYPE=':                        
-              vartype.append(part[2])                  
+        varlist = []
+        log = ll['LOG'].rpartition('TYPELIST=')[0].rpartition('VARLIST=')
+                                                                                  
+        for i in range(log[2].count('VAR=')):                                    
+           log = log[2].partition('VAR=')[2].partition('VAREND=')                    
+           varlist.append(log[0].strip().upper())                                                         
 
-        varListType = dict(zip(varlist, vartype))
+        typelist = []
+        log = ll['LOG'].rpartition('END_ALL_VARS_AND_TYPES=')[0].rpartition('TYPELIST=')
+                                                                                  
+        for i in range(log[2].count('VAR=')):                                    
+           log = log[2].partition('TYPE=')[2].partition('TYPEEND=')                    
+           typelist.append(log[0].strip().upper())                                                         
+
+        varListType = dict(zip(varlist, typelist))
 
         # process vars dictionary to generate code
         ## setup default statements

@@ -1321,7 +1321,7 @@ class SASsession():
               put "LIBREFSSTART=";
            cobs = 2;
            if libref NE libname then
-              put "LIB=" libname 'LIBEND=';
+              put  %upcase("lib=") libname  %upcase('libEND=');
            libref = libname;
            if last then
               put "LIBREFSEND=";
@@ -1370,11 +1370,11 @@ class SASsession():
                   if dq NE 0 then
                      do;
                         dname = strip(name) || '"""+self.hostsep+"""';
-                        put 'DIR_FILE=' dname 'FILEEND=';
+                        put %upcase('DIR_file=') dname %upcase('fileEND=');
                         rc = dclose(dq);
                      end;
                   else
-                     put 'FILE=' name 'FILEEND=';
+                     put %upcase('file=') name %upcase('fileEND=');
                end;
 
             put 'MEMEND=';
@@ -1453,32 +1453,30 @@ class SASsession():
            res = self.sd2df('_saspy_lib_list', 'work')
            return res
            
-        tablist = []
-
-        if self.sasdata('_saspy_lib_list', 'work').obs() > 0:
-           code = """
-           data _null_;
-              set work._saspy_lib_list end=last curobs=first;
-              if first EQ 1 then
-                 put 'MEMSTART=';
-              put 'MEMNAME=' memname 'MEMNAMEEND=';
-              put 'MEMTYPE=' memtype 'MEMTYPEEND=';
-              if last then
-                 put 'MEMEND=';
-           run;
-           """
+        code = """
+        data _null_;
+           set work._saspy_lib_list end=last curobs=first;
+           if first EQ 1 then
+              put 'MEMSTART=';
+           put %upcase('memNAME=') memname %upcase('memNAMEEND=');
+           put %upcase('memTYPE=') memtype %upcase('memTYPEEND=');
+           if last then
+              put 'MEMEND=';
+        run;
+        """
         
-           ll  = self.submit(code, results='text')
+        ll  = self.submit(code, results='text')
         
-           log = ll['LOG'].rpartition('MEMEND=')[0].rpartition('MEMSTART=')
-                                                                                     
-           for i in range(log[2].count('MEMNAME=')):                                    
-              log = log[2].partition('MEMNAME=')[2].partition(' MEMNAMEEND=')                    
-              key = log[0]
-              log = log[2].partition('MEMTYPE=')[2].partition(' MEMTYPEEND=')                     
-              val = log[0]
-              tablist.append(tuple((key, val)))                                                         
+        log = ll['LOG'].rpartition('MEMEND=')[0].rpartition('MEMSTART=')
                                                                                   
+        tablist = []
+        for i in range(log[2].count('MEMNAME=')):                                    
+           log = log[2].partition('MEMNAME=')[2].partition(' MEMNAMEEND=')                    
+           key = log[0]
+           log = log[2].partition('MEMTYPE=')[2].partition(' MEMTYPEEND=')                     
+           val = log[0]
+           tablist.append(tuple((key, val)))                                                         
+                                                                               
         return tablist
 
 
@@ -1550,8 +1548,8 @@ class SASsession():
                  do i=1 to infonum;
                     infoname=foptname(fid, i);
                     infoval=finfo(fid, infoname);
-                    put 'INFONAME=' infoname 'INFONAMEEND=';
-                    put 'INFOVAL=' infoval 'INFOVALEND=';
+                    put %upcase('infoNAME=') infoname %upcase('infoNAMEEND=');
+                    put %upcase('infoVAL=') infoval %upcase('infoVALEND=');
                  end;
               end; 
            put 'INFOEND=';

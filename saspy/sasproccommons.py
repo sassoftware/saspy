@@ -316,8 +316,8 @@ class SASProcCommons:
         data _null_;
            set _{}filelist(where=(length(method)>1)) end=last;
            if _n_=1 then put "METHLIST=";
-              put "METH=" method "METHEND=";
-              if  last then put "METHLISTEND=";
+           put %upcase("meth=") method %upcase("methEND=");
+           if  last then put "METHLISTEND=";
            run;
         """.format(obj)
 
@@ -353,7 +353,7 @@ class SASProcCommons:
              vart = vartype(d, i);
              var  = varname(d, i);
              if vart eq 'C' then
-                put "VAR=" var "VAREND="; end;
+                put %upcase("var=") var %upcase("varEND="; end;
           put 'VARLISTEND=';
         run;
         """
