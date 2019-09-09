@@ -353,7 +353,7 @@ class SASProcCommons:
              vart = vartype(d, i);
              var  = varname(d, i);
              if vart eq 'C' then
-                put %upcase("var=") var %upcase("varEND="; end;
+                put %upcase("var=") var %upcase("varEND="); end;
           put 'VARLISTEND=';
         run;
         """
