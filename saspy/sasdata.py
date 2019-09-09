@@ -670,14 +670,14 @@ class SASdata:
         varlist = []
         log = ll['LOG'].rpartition('TYPELIST=')[0].rpartition('VARLIST=')
                                                                                   
-        for i in range(log[2].count('VAR=')):                                    
+        for vari in range(log[2].count('VAR=')):                                    
            log = log[2].partition('VAR=')[2].partition('VAREND=')                    
            varlist.append(log[0].strip().upper())                                                         
 
         typelist = []
         log = ll['LOG'].rpartition('END_ALL_VARS_AND_TYPES=')[0].rpartition('TYPELIST=')
                                                                                   
-        for i in range(log[2].count('VAR=')):                                    
+        for typei in range(log[2].count('VAR=')):                                    
            log = log[2].partition('TYPE=')[2].partition('TYPEEND=')                    
            typelist.append(log[0].strip().upper())                                                         
 
