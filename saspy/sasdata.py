@@ -384,7 +384,7 @@ class SASdata:
                     numlist = []
                     log = ll['LOG'].rpartition('VARLISTEND=')[0].rpartition('VARLIST=')
                                                                                               
-                    for i in range(log[2].count('VAR=')):                                    
+                    for vari in range(log[2].count('VAR=')):                                    
                        log = log[2].partition('VAR=')[2].partition(' VAREND=')                    
                        numlist.append(log[0].strip())                                                         
 
