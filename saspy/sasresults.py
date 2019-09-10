@@ -23,16 +23,22 @@ class SASresults(object):
 
     def __init__(self, attrs, session, objname, nosub=False, log=''):
 
-        if len(attrs) > 0:
+        if len(attrs)  > 0:
            self._names = attrs
-           if len(log)>0:
+           if len(log) > 0:
                self._names.append("LOG")
         else:
            self._names = ['ERROR_LOG']
+
+        # no valid names start with _ and some procs somehow cause this. causes recursion error
+        for item in self._names:
+          if item.startswith('_'):
+             self._names.remove(item)
+
         self._name = objname
-        self.sas = session
+        self.sas   = session
         self.nosub = nosub
-        self._log = log
+        self._log  = log
 
     def __dir__(self) -> list:
         """Overload dir method to return the attributes"""
