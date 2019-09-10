@@ -344,6 +344,7 @@ class SASsession():
         self.sas_datetime_fmts = sas_datetime_fmts
         self.DISPLAY           = self.sascfg.DISPLAY
         self.HTML              = self.sascfg.HTML
+        self.logoffset         = 0
 
         if not self.sascfg.valid:
             self._io = None
@@ -425,6 +426,18 @@ class SASsession():
 
         if self.sascfg.autoexec:
             self.submit(self.sascfg.autoexec)
+
+        # this is to support parsing the log to fring log records w/ 'ERROR' when diagnostic logging is enabled.
+        # in thi scase the log can have prefix and/or suffix info so the 'regular' log data is in the middle, not left justified
+        if self.sascfg.mode in ['STDIO', 'SSH', '']:
+           ll = self.submit("""data _null_; file STDERR; put %upcase('col0REG='); 
+                               data _null_; put %upcase('col0LOG=');run;""", results='text')
+           regoff = len(ll['LOG'].rpartition('COL0REG=')[0].rpartition('\n')[2])
+           logoff = len(ll['LOG'].rpartition('COL0LOG=')[0].rpartition('\n')[2])
+
+        if regoff == 0 and logoff > 0:
+           self.logoffset = logoff
+
 
     def __repr__(self):
         """

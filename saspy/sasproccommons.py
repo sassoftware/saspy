@@ -187,8 +187,7 @@ class SASProcCommons:
         self.sas = session
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
-    @staticmethod
-    def _errorLog(log):
+    def _errorLog(self, log):
         if isinstance(log, str):
             lines = re.split(r'[\n]\s*', log)
             i = 0
@@ -196,7 +195,7 @@ class SASProcCommons:
             for line in lines:
                 i += 1
                 e = []
-                if line.startswith('ERROR'):
+                if line[self.sas.logoffset:].startswith('ERROR'):
                     e = lines[(max(i - 1, 0)):(min(i + 0, len(lines)))]
                 elog = elog + e
             return "\n".join(elog)
@@ -636,7 +635,7 @@ class SASProcCommons:
             if not self.sas.nosub:
                 ll = self.sas.submit(code, "text")
                 log = ll['LOG']
-                error = SASProcCommons._errorLog(log)
+                error = SASProcCommons._errorLog(self, log)
                 isinstance(error, str)
                 if len(error) > 1:
                     RuntimeWarning("ERRORS found in SAS log: \n%s" % error)
