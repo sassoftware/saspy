@@ -435,8 +435,8 @@ class SASsession():
            regoff = len(ll['LOG'].rpartition('COL0REG=')[0].rpartition('\n')[2])
            logoff = len(ll['LOG'].rpartition('COL0LOG=')[0].rpartition('\n')[2])
 
-        if regoff == 0 and logoff > 0:
-           self.logoffset = logoff
+           if regoff == 0 and logoff > 0:
+              self.logoffset = logoff
 
 
     def __repr__(self):
