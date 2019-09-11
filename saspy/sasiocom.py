@@ -529,7 +529,7 @@ class SASSessionCOM(object):
 
         recordset.Close()
 
-        return (header, rows)
+        return (header, rows, meta)
 
     def read_csv(self, filepath: str, table: str, libref: str=None, nosub: bool=False, opts: dict=None):
         """
@@ -661,8 +661,12 @@ class SASSessionCOM(object):
         if method.upper() == 'CSV':
             df = self.sasdata2dataframeCSV(table, libref, dsopts=dsopts, **kwargs)
         else:
-            header, rows = self.read_sasdata(table, libref, dsopts=dsopts)
+            header, rows, meta = self.read_sasdata(table, libref, dsopts=dsopts)
             df = pd.DataFrame.from_records(rows, columns=header)
+
+        for col in meta.keys():
+           if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
+              df[col] = pd.to_datetime(df[col], errors='coerce')
 
         return df
 
