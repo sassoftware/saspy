@@ -599,7 +599,7 @@ class SASSessionCOM(object):
         CR - if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
         colsep - the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
         """
-        DATETIME_NAME = 'E8601DT26.6'
+        DATETIME_NAME = 'DATETIME26.6'
         DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%f'
 
         tablepath = self._sb._tablepath(table, libref=libref)
@@ -664,9 +664,9 @@ class SASSessionCOM(object):
             header, rows, meta = self.read_sasdata(table, libref, dsopts=dsopts)
             df = pd.DataFrame.from_records(rows, columns=header)
 
-        for col in meta.keys():
-           if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
-              df[col] = pd.to_datetime(df[col], errors='coerce')
+            for col in meta.keys():
+               if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
+                  df[col] = pd.to_datetime(df[col], errors='coerce')
 
         return df
 
@@ -702,7 +702,8 @@ class SASSessionCOM(object):
         # the column during construction.
         datecols = []
         fmtlist = []
-        for name, col in self._schema(table, libref).items():
+        meta = self._schema(table, libref)
+        for name, col in meta.items():
             if col['FORMAT_NAME'] in self._sb.sas_date_fmts:
                 datecols.append(name)
                 col_format = self.FMT_DEFAULT_DATE_NAME
@@ -746,6 +747,10 @@ class SASSessionCOM(object):
                 f.write(outstring)
 
         df = pd.read_csv(io.StringIO(outstring), parse_dates=datecols)
+
+        for col in meta.keys():
+           if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
+              df[col] = pd.to_datetime(df[col], errors='coerce')
 
         return df
 
