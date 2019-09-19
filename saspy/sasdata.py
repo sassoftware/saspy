@@ -133,7 +133,7 @@ class SASdata:
     def _checkLogForError(self, log):
         lines = re.split(r'[\n]\s*', log)
         for line in lines:
-            if line.startswith('ERROR'):
+            if line[self.sas.logoffset:].startswith('ERROR'):
                 return (False, line)
         return (True, '')
 
@@ -228,8 +228,10 @@ class SASdata:
 
         :param obs: the number of rows of the table that you want to display. The default is 5
         :return:
-        """
-        code = "proc sql;select count(*) format best32. into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;quit;"
+        """   
+        code  = "proc sql;select count(*) format best32. into :lastobs from "
+        code += self.libref + '.' + self.table + self._dsopts()
+        code += ";%put lastobs=&lastobs lastobsend=;\nquit;"
 
         nosub = self.sas.nosub
         self.sas.nosub = False
@@ -239,7 +241,7 @@ class SASdata:
             ll = self.sas.submit(code, "text")
 
             lastobs = ll['LOG'].rpartition("lastobs=")
-            lastobs = lastobs[2].partition(" tom")
+            lastobs = lastobs[2].partition(" lastobsend=")
             lastobs = int(lastobs[0])
         else:
             lastobs = obs
@@ -252,7 +254,8 @@ class SASdata:
         topts['obs'] = lastobs
         topts['firstobs'] = firstobs
 
-        code = "proc print data=" + self.libref + '.' + self.table + self.sas._dsopts(topts) + ";run;"
+        code  = "proc print data=" + self.libref + '.' 
+        code += self.table + self.sas._dsopts(topts) + ";run;"
 
         self.sas.nosub = nosub
         if self.sas.nosub:
@@ -286,7 +289,9 @@ class SASdata:
         """
         return the number of observations for your SASdata object
         """
-        code = "proc sql;select count(*) format best32. into :lastobs from " + self.libref + '.' + self.table + self._dsopts() + ";%put lastobs=&lastobs tom;quit;"
+        code  = "proc sql;select count(*) format best32. into :lastobs from "
+        code += self.libref + '.' + self.table + self._dsopts() 
+        code += ";%put lastobs=&lastobs lastobsend=;\nquit;"
 
         if self.sas.nosub:
             print(code)
@@ -297,7 +302,7 @@ class SASdata:
             ll = self.sas.submit(code, "text")
 
             lastobs = ll['LOG'].rpartition("lastobs=")
-            lastobs = lastobs[2].partition(" tom")
+            lastobs = lastobs[2].partition(" lastobsend=")
             lastobs = int(lastobs[0])
         else:
             print("The SASdata object is not valid. The table doesn't exist in this SAS session at this time.")
@@ -365,8 +370,9 @@ class SASdata:
                              vart = vartype(d, i);
                              var  = varname(d, i);
                              if vart eq 'N' then
-                                put var; end;
-                             put 'VARLISTend=';
+                                put %upcase('var=') var %upcase('varEND=');
+                          end;
+                          put 'VARLISTEND=';
                         run;
                         """
                     # ignore teach_me_SAS mode to run contents
@@ -374,24 +380,28 @@ class SASdata:
                     self.sas.nosub = False
                     ll = self.sas.submit(num_string.format(self.libref, self.table + self._dsopts()))
                     self.sas.nosub = nosub
-                    l2 = ll['LOG'].partition("VARLIST=\n")
-                    l2 = l2[2].rpartition("VARLISTend=\n")
-                    numlist1 = l2[0].split("\n")
 
-                    # check if var is in numlist1
+                    numlist = []
+                    log = ll['LOG'].rpartition('VARLISTEND=')[0].rpartition('VARLIST=')
+                                                                                              
+                    for vari in range(log[2].count('VAR=')):                                    
+                       log = log[2].partition('VAR=')[2].partition(' VAREND=')                    
+                       numlist.append(log[0].strip())                                                         
+
+                   # check if var is in numlist
                     if isinstance(var, str):
                         tlist = var.split()
                     elif isinstance(var, list):
                         tlist = var
                     else:
                         raise SyntaxError("var must be a string or list you submitted: %s" % str(type(var)))
-                if set(numlist1).isdisjoint(tlist):
+                if set(numlist).isdisjoint(tlist):
                     if isinstance(var, str):
                         code += "class _character_;\ntarget %s;\nvar _numeric_;\n" % var
                     else:
                         code += "class _character_;\ntarget %s;\nvar _numeric_;\n" % " ".join(var)
                 else:
-                    varlist = [x for x in numlist1 if x not in tlist]
+                    varlist = [x for x in numlist if x not in tlist]
                     varlist.extend(["_cvfold%s" % j for j in range(1, i) if k > 1 and i > 1])
                     code += "class %s _character_;\ntarget %s;\nvar %s;\n" % (var, var, " ".join(varlist))
 
@@ -422,7 +432,7 @@ class SASdata:
             ll = self.sas.submit(code + split_code, "text")
             elog = []
             for line in ll['LOG'].splitlines():
-                if line.startswith('ERROR'):
+                if line[self.sas.logoffset:].startswith('ERROR'):
                     elog.append(line)
             if len(elog):
                 raise RuntimeError("\n".join(elog))
@@ -642,27 +652,36 @@ class SASdata:
             out_libref = self.libref
 
         # get list of variables and types
-        varcode = "data _null_; d = open('" + self.libref + "." + self.table + "');\n"
+        varcode  = "data _null_; d = open('" + self.libref + "." + self.table + "');\n"
         varcode += "nvars = attrn(d, 'NVARS');\n"
-        varcode += "vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
-        varcode += "put vn nvars; put vl;\n"
-        varcode += "do i = 1 to nvars; var = varname(d, i); put var; end;\n"
-        varcode += "put vt;\n"
-        varcode += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
+        varcode += "put 'VARNUMS=' nvars 'VARNUMS_END=';\n"
+        varcode += "put 'VARLIST=';\n"
+        varcode += "do i = 1 to nvars; var = varname(d, i); put %upcase('var=') var %upcase('varEND='); end;\n"
+        varcode += "put 'TYPELIST=';\n"
+        varcode += "do i = 1 to nvars; var = vartype(d, i); put %upcase('type=') var %upcase('typeEND='); end;\n"
+        varcode += "put 'END_ALL_VARS_AND_TYPES=';\n"
         varcode += "run;"
-        print(varcode)
+
         ll = self.sas._io.submit(varcode, "text")
-        l2 = ll['LOG'].rpartition("VARNUMS= ")
-        l2 = l2[2].partition("\n")
-        nvars = int(float(l2[0]))
-        l2 = l2[2].partition("\n")
-        varlist = l2[2].upper().split("\n", nvars)
-        del varlist[nvars]
-        l2 = l2[2].partition("VARTYPE=")
-        l2 = l2[2].partition("\n")
-        vartype = l2[2].split("\n", nvars)
-        del vartype[nvars]
-        varListType = dict(zip(varlist, vartype))
+ 
+        l2 = ll['LOG'].rpartition("VARNUMS=")[2].partition("VARNUMS_END=") 
+        nvars = int(float(l2[0].strip()))                                  
+        
+        varlist = []
+        log = ll['LOG'].rpartition('TYPELIST=')[0].rpartition('VARLIST=')
+                                                                                  
+        for vari in range(log[2].count('VAR=')):                                    
+           log = log[2].partition('VAR=')[2].partition('VAREND=')                    
+           varlist.append(log[0].strip().upper())                                                         
+
+        typelist = []
+        log = ll['LOG'].rpartition('END_ALL_VARS_AND_TYPES=')[0].rpartition('TYPELIST=')
+                                                                                  
+        for typei in range(log[2].count('VAR=')):                                    
+           log = log[2].partition('TYPE=')[2].partition('TYPEEND=')                    
+           typelist.append(log[0].strip().upper())                                                         
+
+        varListType = dict(zip(varlist, typelist))
 
         # process vars dictionary to generate code
         ## setup default statements
@@ -784,7 +803,7 @@ class SASdata:
             ll = self.sas.submit(code, "text")
             elog = []
             for line in ll['LOG'].splitlines():
-                if line.startswith('ERROR'):
+                if line[self.sas.logoffset:].startswith('ERROR'):
                     elog.append(line)
             if len(elog):
                 raise RuntimeError("\n".join(elog))
@@ -1058,13 +1077,13 @@ class SASdata:
         :param kwargs:
         :return: JSON str
         """
-        code = "filename file1 temp;"
+        code = "filename file1 temp;\n"
         code += "proc json out=file1"
         if pretty:
             code += " pretty "
         if not sastag:
             code += " nosastags "
-        code +=";\n export %s.%s %s;\n run;" % (self.libref, self.table, self._dsopts())
+        code +=";\n  export %s.%s %s;\n run;" % (self.libref, self.table, self._dsopts())
 
         if self.sas.nosub:
             print(code)
@@ -1079,9 +1098,9 @@ class SASdata:
             elog = []
             fpath=''
             for line in ll['LOG'].splitlines():
-                if line.startswith('JSONFilePath:'):
+                if line[self.sas.logoffset:].startswith('JSONFilePath:'):
                     fpath = line[14:]
-                if line.startswith('ERROR'):
+                if line[self.sas.logoffset:].startswith('ERROR'):
                     elog.append(line)
             if len(elog):
                 raise RuntimeError("\n".join(elog))

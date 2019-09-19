@@ -83,7 +83,7 @@ class SASMagic(ipym.Magics):
             mva.submit(line + ';')
 
         res = mva.submit(cell)
-        dis = self._which_display(res['LOG'], res['LST'])
+        dis = self._which_display(mva, res['LOG'], res['LST'])
 
         if len(line)>0:  # Restore SAS options 
             mva.submit(restoreOpts)
@@ -110,7 +110,7 @@ class SASMagic(ipym.Magics):
 
         """
         res = self.mva.submit("proc iml; " + cell + " quit;")
-        dis = self._which_display(res['LOG'], res['LST'])
+        dis = self._which_display(self.mva, res['LOG'], res['LST'])
         return dis
 
     @ipym.cell_magic
@@ -144,7 +144,7 @@ class SASMagic(ipym.Magics):
 
         """
         res = self.mva.submit("proc optmodel; " + cell + " quit;")
-        dis = self._which_display(res['LOG'], res['LST'])
+        dis = self._which_display(self.mva, res['LOG'], res['LST'])
         return dis
 
     def _get_lst_len(self):
@@ -156,7 +156,7 @@ class SASMagic(ipym.Magics):
         return
 
     @staticmethod
-    def _which_display(log, output):
+    def _which_display(mva, log, output):
         lst_len = 30762
         lines = re.split(r'[\n]\s*', log)
         i = 0
@@ -164,7 +164,7 @@ class SASMagic(ipym.Magics):
         for line in lines:
             i += 1
             e = []
-            if line.startswith('ERROR'):
+            if line[mva.logoffset:].startswith('ERROR'):
                 e = lines[(max(i - 15, 0)):(min(i + 16, len(lines)))]
             elog = elog + e
         if len(elog) == 0 and len(output) > lst_len:   # no error and LST output

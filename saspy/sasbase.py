@@ -344,6 +344,7 @@ class SASsession():
         self.sas_datetime_fmts = sas_datetime_fmts
         self.DISPLAY           = self.sascfg.DISPLAY
         self.HTML              = self.sascfg.HTML
+        self.logoffset         = 0
 
         if not self.sascfg.valid:
             self._io = None
@@ -361,15 +362,19 @@ class SASsession():
         elif self.sascfg.mode == 'HTTP':
             self._io = SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
-        sysvars = """options nosource;
-            %put WORKPATH=%sysfunc(pathname(work));
-            %put ENDWORKPATH=;
-            %put ENCODING=&SYSENCODING;
-            %put SYSVLONG=&SYSVLONG4;
-            %put SYSJOBID=&SYSJOBID;
-            %put SYSSCP=&SYSSCP;
-            options source;
+        # gather some session info
+        sysvars  = "data _null_; length x $ 4096;"
+        if self.sascfg.mode in ['STDIO', 'SSH', '']:
+           sysvars += " file STDERR;"
+        sysvars += """
+               x = resolve('%sysfunc(pathname(work))');  put 'WORKPATH=' x 'WORKPATHEND=';
+               x = resolve('&SYSENCODING');              put 'ENCODING=' x 'ENCODINGEND=';
+               x = resolve('&SYSVLONG4');                put 'SYSVLONG=' x 'SYSVLONGEND=';
+               x = resolve('&SYSJOBID');                 put 'SYSJOBID=' x 'SYSJOBIDEND=';
+               x = resolve('&SYSSCP');                     put 'SYSSCP=' x 'SYSSCPEND=';
+            run;
         """
+
         # Validating encoding is done next, so handle it not being set for
         # this one call
         enc = self._io.sascfg.encoding
@@ -379,15 +384,15 @@ class SASsession():
         self._io.sascfg.encoding = enc
 
         vlist         = res.rpartition('SYSSCP=')
-        self.hostsep  = vlist[2].partition('\n')[0]
+        self.hostsep  = vlist[2].partition(' SYSSCPEND=')[0]
         vlist         = res.rpartition('SYSJOBID=')
-        self.SASpid   = vlist[2].partition('\n')[0]
+        self.SASpid   = vlist[2].partition(' SYSJOBIDEND=')[0]
         vlist         = res.rpartition('SYSVLONG=')
-        self.sasver   = vlist[2].partition('\n')[0]
+        self.sasver   = vlist[2].partition(' SYSVLONGEND=')[0]
         vlist         = res.rpartition('ENCODING=')
-        self.sascei   = vlist[2].partition('\n')[0]
-        vlist         = res.rpartition('\nENDWORKPATH=')
-        self.workpath = vlist[0].rpartition('WORKPATH=')[2].strip().replace('\n','') 
+        self.sascei   = vlist[2].partition(' ENCODINGEND=')[0]
+        vlist         = res.rpartition('WORKPATH=')
+        self.workpath = vlist[2].rpartition('WORKPATHEND=')[0].strip().replace('\n','') 
 
         # validate encoding
         pyenc = sas_encoding_mapping[self.sascei]
@@ -421,6 +426,18 @@ class SASsession():
 
         if self.sascfg.autoexec:
             self.submit(self.sascfg.autoexec)
+
+        # this is to support parsing the log to fring log records w/ 'ERROR' when diagnostic logging is enabled.
+        # in thi scase the log can have prefix and/or suffix info so the 'regular' log data is in the middle, not left justified
+        if self.sascfg.mode in ['STDIO', 'SSH', '']:
+           ll = self.submit("""data _null_; file STDERR; put %upcase('col0REG='); 
+                               data _null_; put %upcase('col0LOG=');run;""", results='text')
+           regoff = len(ll['LOG'].rpartition('COL0REG=')[0].rpartition('\n')[2])
+           logoff = len(ll['LOG'].rpartition('COL0LOG=')[0].rpartition('\n')[2])
+
+           if regoff == 0 and logoff > 0:
+              self.logoffset = logoff
+
 
     def __repr__(self):
         """
@@ -535,6 +552,7 @@ class SASsession():
 
         ll = self._io.submit(code, results, prompt)
 
+        self._lastlog = ll['LOG']
         return ll
 
     def saslog(self) -> str:
@@ -545,6 +563,15 @@ class SASsession():
         :rtype: str
         """
         return self._io.saslog()
+
+    def lastlog(self) -> str:
+        """
+        This method is used to get LOG from the most recetly executed submit() method.
+
+        :return: SAS log
+        :rtype: str
+        """
+        return self._lastlog
 
     def teach_me_SAS(self, nosub: bool):
         """
@@ -1229,10 +1256,9 @@ class SASsession():
             - name    is a character
 
         """
-        ll = self.submit("%put " + name + "=&" + name + ";\n")
+        ll = self.submit("%put " + name + "=&" + name + " tom=;\n")
 
-        l2 = ll['LOG'].rpartition(name + "=")
-        l2 = l2[2].partition("\n")
+        l2 = ll['LOG'].rpartition(name + "=")[2].partition(" tom=")
         try:
             var = int(l2[0])
         except:
@@ -1305,13 +1331,13 @@ class SASsession():
         data _null_; retain libref; retain cobs 1; 
            set sashelp.vlibnam end=last;
            if cobs EQ 1 then
-              put "LIBREFSSTART";
+              put "LIBREFSSTART=";
            cobs = 2;
            if libref NE libname then
-              put "LIBREF=" libname;
+              put  %upcase("lib=") libname  %upcase('libEND=');
            libref = libname;
            if last then
-              put "LIBREFSEND";
+              put "LIBREFSEND=";
         run;
         """
 
@@ -1322,11 +1348,11 @@ class SASsession():
            ll = self.submit(code, results='text')
 
         librefs = []
-        log = ll['LOG'].rpartition('LIBREFSEND')[0].rpartition('LIBREFSSTART')
+        log = ll['LOG'].rpartition('LIBREFSEND=')[0].rpartition('LIBREFSSTART=')
                                                                                   
-        for i in range(log[2].count('LIBREF=')):                                    
-           log = log[2].partition('LIBREF=')[2].partition('\n')                    
-           librefs.append(log[0].strip())                                                         
+        for i in range(log[2].count('LIB=')):                                    
+           log = log[2].partition('LIB=')[2].partition(' LIBEND=')                    
+           librefs.append(log[0])                                                         
                                                                                   
         return librefs
 
@@ -1345,7 +1371,7 @@ class SASsession():
          if did > 0 then
             do;
                memcount = dnum(did);
-               put 'MEMCOUNT=' memcount;
+               put 'MEMCOUNT=' memcount 'MEMCOUNTEND=';
                do while (memcount > 0);
                   name = dread(did, memcount);
                   memcount = memcount - 1;
@@ -1357,20 +1383,20 @@ class SASsession():
                   if dq NE 0 then
                      do;
                         dname = strip(name) || '"""+self.hostsep+"""';
-                        put 'DIR=' dname;
+                        put %upcase('DIR_file=') dname %upcase('fileEND=');
                         rc = dclose(dq);
                      end;
                   else
-                     put 'FILE=' name;
+                     put %upcase('file=') name %upcase('fileEND=');
                end;
 
-            put 'MEMEND';
+            put 'MEMEND=';
             rc = dclose(did);
             end;
          else
             do;
-               put 'MEMCOUNT=0';
-               put 'MEMEND';
+               put 'MEMCOUNT=0 MEMCOUNTEND=';
+               put 'MEMEND=';
            end;
 
          rc = filename('saspydq');
@@ -1386,15 +1412,15 @@ class SASsession():
 
         dirlist = []
 
-        l2 = ll['LOG'].rpartition("MEMCOUNT=")[2].partition("\n")
+        l2 = ll['LOG'].rpartition("MEMCOUNT=")[2].partition(" MEMCOUNTEND=")
         memcount = int(l2[0])
 
-        l3 = l2[2].rpartition("MEMEND")[0]
-
-        for row in l3.split(sep='\n'):
-            i = row.partition('=')
-            if i[0] in ['FILE', 'DIR']:
-                dirlist.append(i[2])
+        dirlist = []
+        log = ll['LOG'].rpartition('MEMEND=')[0].rpartition('MEMCOUNTEND=')
+                                                                                  
+        for i in range(log[2].count('FILE=')):                                    
+           log = log[2].partition('FILE=')[2].partition(' FILEEND=')                    
+           dirlist.append(log[0])                                                         
 
         if memcount != len(dirlist):
             print("Some problem parsing list. Should be " + str(memcount) + " entries but got " + str(
@@ -1411,11 +1437,11 @@ class SASsession():
         """
 
         if not self.nosub:
-           ll = self.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+"));")
+           ll = self.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+")) LIB_EXT_END=;")
 
-           exists = ll['LOG'].rpartition('LIBREF_EXISTS=')[2].split('\n')[0]
+           exists = int(ll['LOG'].rpartition('LIBREF_EXISTS=')[2].rpartition('LIB_EXT_END=')[0])
 
-           if exists != '0':
+           if exists != 0:
               print('Libref provided is not assigned')
               return None
 
@@ -1434,7 +1460,7 @@ class SASsession():
             print(code)
             return None
         else:
-           ll  = self.submit(code, results='text')
+           ll = self.submit(code, results='text')
 
         if results != 'list':
            res = self.sd2df('_saspy_lib_list', 'work')
@@ -1444,27 +1470,27 @@ class SASsession():
         data _null_;
            set work._saspy_lib_list end=last curobs=first;
            if first EQ 1 then
-              put 'MEMSTART';
-           put 'MEMNAME=' memname;
-           put 'MEMTYPE=' memtype;
+              put 'MEMSTART=';
+           put %upcase('memNAME=') memname %upcase('memNAMEEND=');
+           put %upcase('memTYPE=') memtype %upcase('memTYPEEND=');
            if last then
-              put 'MEMEND';
+              put 'MEMEND=';
         run;
         """
-
+        
         ll  = self.submit(code, results='text')
-
-        res = []
-        log = ll['LOG'].rpartition('MEMEND')[0].rpartition('MEMSTART')
+        
+        log = ll['LOG'].rpartition('MEMEND=')[0].rpartition('MEMSTART=')
                                                                                   
-        for i in range(log[2].count('MEMNAME')):                                    
-           log = log[2].partition('MEMNAME=')[2].partition('\n')                    
-           key = log[0]                                                           
-           log = log[2].partition('MEMTYPE=')[2].partition('\n')                     
-           val = log[0]                                                           
-           res.append(tuple((key, val)))                                                         
-                                                                                  
-        return res
+        tablist = []
+        for i in range(log[2].count('MEMNAME=')):                                    
+           log = log[2].partition('MEMNAME=')[2].partition(' MEMNAMEEND=')                    
+           key = log[0]
+           log = log[2].partition('MEMTYPE=')[2].partition(' MEMTYPEEND=')                     
+           val = log[0]
+           tablist.append(tuple((key, val)))                                                         
+                                                                               
+        return tablist
 
 
     def file_info(self, filepath, results: str = 'dict', fileref: str = '_spfinfo', quiet: bool = False):
@@ -1476,13 +1502,13 @@ class SASsession():
 
         if not self.nosub:
            code  = "filename "+fileref+" '"+filepath+"';\n"
-           code += "%put FILEREF_EXISTS=%sysfunc(fexist("+fileref+"));"
+           code += "%put FILEREF_EXISTS=%sysfunc(fexist("+fileref+")) FILE_EXTEND=;"
    
            ll = self.submit(code)
    
-           exists = ll['LOG'].rpartition('FILEREF_EXISTS=')[2].split('\n')[0]
+           exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
    
-           if exists != '1':
+           if exists != 1:
               if not quiet:
                  print('The filepath provided does not exist')
               ll = self.submit("filename "+fileref+" clear;")
@@ -1492,7 +1518,7 @@ class SASsession():
            code="""
            proc delete data=work._SASPY_FILE_INFO;run;
            data work._SASPY_FILE_INFO;
-              length infoname infoval $256;
+              length infoname $256 infoval $4096;
               drop rc fid infonum i close;
               fid=fopen('filerefx');
               if fid then
@@ -1521,9 +1547,13 @@ class SASsession():
 
         code="""options nosource;
         data _null_;
-           length infoname infoval $256;
+           length infoname $256 infoval $4096;
+        """
+        if self.sascfg.mode in ['STDIO', 'SSH', '']:
+           code +=" file STDERR; "
+        code +="""
            drop rc fid infonum i close;
-           put 'INFOSTART';
+           put 'INFOSTART=';
            fid=fopen('filerefx');
            if fid then
               do;
@@ -1531,12 +1561,11 @@ class SASsession():
                  do i=1 to infonum;
                     infoname=foptname(fid, i);
                     infoval=finfo(fid, infoname);
-                    put 'INFONAME=' infoname;
-                    put 'INFOVAL=' infoval;
-                    put 'ENDINFOVAL=';
+                    put %upcase('infoNAME=') infoname %upcase('infoNAMEEND=');
+                    put %upcase('infoVAL=') infoval %upcase('infoVALEND=');
                  end;
               end; 
-           put 'INFOEND';
+           put 'INFOEND=';
            close=fclose(fid);
            rc = filename('filerefx');
         run; options source;
@@ -1548,15 +1577,29 @@ class SASsession():
         else:
            ll  = self.submit(code, results='text')
 
+        vi = len(ll['LOG'].rpartition('INFOEND=')[0].rpartition('\n')[2])                          
+ 
         res = {}
-        log = ll['LOG'].rpartition('INFOEND')[0].rpartition('INFOSTART')
+        log = ll['LOG'].rpartition('INFOEND=')[0].rpartition('INFOSTART=')
                                                                                   
-        for i in range(log[2].count('INFONAME')):                                    
-           log = log[2].partition('INFONAME=')[2].partition('\n')                    
-           key = log[0]                                                           
-           log = log[2].partition('INFOVAL=')[2].partition('\nENDINFOVAL=')
-           val = log[0].strip().replace('\n','')
-           res[key] = val                                                         
+        if vi > 0:
+           for i in range(log[2].count('INFONAME=')):                                    
+              log = log[2].partition('INFONAME=')[2].partition(' INFONAMEEND=')                    
+              key = log[0]
+              log = log[2].partition('INFOVAL=')[2].partition('INFOVALEND=')
+                    
+              vx = log[0].split('\n')                                    
+              val = vx[0]                                                                   
+              for x in vx[1:]:                                                                        
+                 val += x[vi:]                                                              
+              res[key] = val.strip()                                                         
+        else:
+           for i in range(log[2].count('INFONAME=')):                                    
+              log = log[2].partition('INFONAME=')[2].partition(' INFONAMEEND=')                    
+              key = log[0]
+              log = log[2].partition('INFOVAL=')[2].partition('INFOVALEND=')
+              val = log[0].replace('\n', '').strip()
+              res[key] = val                                                         
                                                                                   
         return res
 
