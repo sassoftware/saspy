@@ -21,11 +21,8 @@ or, for a given branch (put the name of the branch after @)::
 
     pip install git+https://git@github.com/sassoftware/saspy.git@branchname
 
-To use this module after installation, you need to edit the sascfg.py file to 
-configure it to be able to connect and start a SAS session. Note, you should 
-actually copy sascfg.py to sascfg_personal.py and edit sascfg_personal.py.
-This way your edit's won't be overridden if a new sascfg.py is pulled.
-Follow the instructions in the next section.
+To use this module after installation, you need to copy the example sascfg.py file to a 
+sascfg_personal.py and edit sascfg_personal.py per the instructions in the next section.
 
 * If you run into any problems, see :doc:`troubleshooting`.
 * If you have questions, open an issue at https://github.com/sassoftware/saspy/issues.
@@ -135,40 +132,55 @@ sascfg_personal.py
 
 Originally, sascfg.py was the config file saspy used. But, since the saspy.cfg file is in the saspy repo, it can be updated
 on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
-you've in your instalation. If you used that file for your configuration, then you would need to keep
+you've in your installation. If you used that file for your configuration, then you would need to keep
 a copy elsewhere and then replace the new one with your copy after upgrading or pulling, if yours was replaced. 
 
-There is a simple solution to this. Your configurations can (should) be in a file named sascfg_personal.py.
+So, the sascfg.py file bacame the exampls file, and sascfg_personal.py is config file to edit and use.
 This file doesn't exist in the repo, so it will never be overwritten when you upgrade or pull.
 saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
-import sascfg.py.
+import sascfg.py (only for backwaed compatibility).
 
 So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
-file. Then you won't have to worry about sascfg.py getting clobbered when you pull or upgrade. Note that
-the sascfg.py file has examples of all of the various kinds of connections you could use. You don't need
+file. Note that the sascfg.py file has examples of all of the various kinds of connections you could use. You don't need
 all of that in your _personal version; only the parts you need for your situation. The next section
 explains the minimum parts you would need.
-
-Also, everything in this doc applies to the _personal version; it's the same, just a version of the file
-that will be used if it exists instead of the original one, but it won't get overwritten.
 
 Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
 as long as that location is accessible to python. If the path is in the python search path, then you're good.
 That includes being in the repo directory, of course, which is the most convenient (that's where I have it!).
+If it's location isn't in the python path, you can use the cfgfile='' parm on the SASsession() method to point to it.
 
-**New in 3.1.1**: You can now place a sascfg_personal.py configuration file in your home directory. The following
-path "~/.config/saspy/" will be searched for a sascfg_personal.py file. If none exists, the library will fall
-back through a hierarchy of configuration paths. If the `cfgfile` argument is provided to the session, that argument
-will be used or an exception will be thrown if the config cannot be found.
+**New in 3.1.6**: You can now place a sascfg_personal.py configuration file in your home directory. The following
+path "~/.config/saspy/" will be searched for a sascfg_personal.py file. 
 
-If the configuration is in the repo or another path that python will find it, you can just create a session as follows:
+The new search order will basically be the same as it has been, but with this new home config directory inserted
+after the current dir and before the rest of the python path. The following will be the order in which the config file will
+be found. 
+
+If you don't specify cfgfile= on SASsession, then sascfg_personal.py will be found:
+
+1) saspy install directory (same place as the sascfg.py examples file in to repo)
+2) current dir (whatever that is; wherever you started python)
+3) ~/.config/saspy - the new directory being added in 3.1.5 (that works on windows too: think %HOMEPATH%\.config\saspy)
+4) the rest of the directories in the python path
+5) if not found, then sascfg.py in the saspy repo (only to support way, way, way back compatibility - don't use this)
+
+Note that once this has been imported it will be the one config file used for the python session, as it's imported by name
+so it will be cached and that is what will be used even if imported again.
+
+If you use the cfgfile= to specify a specific file, then that file will be used and no search path will matter.
+Note that in the case of cfgfile=, you can use different files for different SASsession()'s in the python session. 
+Whatever file you specify for a given SASsession will be used as the config file for that session.
+
+
+If the configuration file is in the search path described above, you can just create a session as follows:
 
 .. code-block:: ipython3
 
     sas = saspy.SASsession()
 
 
-If, however, it is not in the python search path, you can use the cfgfile= parameter in your SASsession() invocation to 
+If, however, it is not in any of those directories, then you can use the cfgfile= parameter in your SASsession() invocation to 
 specify its location:
 
 .. code-block:: ipython3
@@ -185,7 +197,7 @@ but more definitively by submitting the following:
     sys.path
 
         
-sascfg_personal.py (saspy_personal.py) details
+sascfg_personal.py details
 ==============================================
 There are three main parts to this configuration file.
 
