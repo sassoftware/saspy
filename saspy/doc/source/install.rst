@@ -161,7 +161,7 @@ If you don't specify cfgfile= on SASsession, then sascfg_personal.py will be fou
 
 1) saspy install directory (same place as the sascfg.py examples file in to repo)
 2) current dir (whatever that is; wherever you started python)
-3) ~/.config/saspy - the new directory being added in 3.1.5 (that works on windows too: think %HOMEPATH%\.config\saspy)
+3) ~/.config/saspy - the new directory being added in 3.1.5 (that works on windows too: think %HOMEPATH%\\.config\\saspy)
 4) the rest of the directories in the python path
 5) if not found, then sascfg.py in the saspy repo (only to support way, way, way back compatibility - don't use this)
 
