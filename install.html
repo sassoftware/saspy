@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.1.4 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.1.5 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.1.4 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.1.5 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.1.4
+                3.1.5
               </div>
             
           
@@ -98,7 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#sascfg-personal-py">sascfg_personal.py</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#sascfg-personal-py-saspy-personal-py-details">sascfg_personal.py (saspy_personal.py) details</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sascfg-personal-py-details">sascfg_personal.py details</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stdio">STDIO</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#iom-using-java">IOM using Java</a><ul>
@@ -200,11 +200,8 @@ installations.  To install the latest version using <cite>pip</cite>, you execut
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sassoftware</span><span class="o">/</span><span class="n">saspy</span><span class="o">.</span><span class="n">git</span><span class="nd">@branchname</span>
 </pre></div>
 </div>
-<p>To use this module after installation, you need to edit the sascfg.py file to
-configure it to be able to connect and start a SAS session. Note, you should
-actually copy sascfg.py to sascfg_personal.py and edit sascfg_personal.py.
-This way your edit&#8217;s won&#8217;t be overridden if a new sascfg.py is pulled.
-Follow the instructions in the next section.</p>
+<p>To use this module after installation, you need to copy the example sascfg.py file to a
+sascfg_personal.py and edit sascfg_personal.py per the instructions in the next section.</p>
 <ul class="simple">
 <li>If you run into any problems, see <a class="reference internal" href="troubleshooting.html"><span class="doc">Troubleshooting</span></a>.</li>
 <li>If you have questions, open an issue at <a class="reference external" href="https://github.com/sassoftware/saspy/issues">https://github.com/sassoftware/saspy/issues</a>.</li>
@@ -300,27 +297,43 @@ It is the directory that is the module, so the sascfg.py file is in that directo
 <h3>sascfg_personal.py<a class="headerlink" href="#sascfg-personal-py" title="Permalink to this headline">¶</a></h3>
 <p>Originally, sascfg.py was the config file saspy used. But, since the saspy.cfg file is in the saspy repo, it can be updated
 on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
-you&#8217;ve in your instalation. If you used that file for your configuration, then you would need to keep
+you&#8217;ve in your installation. If you used that file for your configuration, then you would need to keep
 a copy elsewhere and then replace the new one with your copy after upgrading or pulling, if yours was replaced.</p>
-<p>There is a simple solution to this. Your configurations can (should) be in a file named sascfg_personal.py.
+<p>So, the sascfg.py file bacame the exampls file, and sascfg_personal.py is config file to edit and use.
 This file doesn&#8217;t exist in the repo, so it will never be overwritten when you upgrade or pull.
 saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
-import sascfg.py.</p>
+import sascfg.py (only for backwaed compatibility).</p>
 <p>So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
-file. Then you won&#8217;t have to worry about sascfg.py getting clobbered when you pull or upgrade. Note that
-the sascfg.py file has examples of all of the various kinds of connections you could use. You don&#8217;t need
+file. Note that the sascfg.py file has examples of all of the various kinds of connections you could use. You don&#8217;t need
 all of that in your _personal version; only the parts you need for your situation. The next section
 explains the minimum parts you would need.</p>
-<p>Also, everything in this doc applies to the _personal version; it&#8217;s the same, just a version of the file
-that will be used if it exists instead of the original one, but it won&#8217;t get overwritten.</p>
 <p>Also note that this file does not have to live in the repo itself. It can be anywhere on the filesystem
-as long as that location is accessible to python. If the path is in the python search path, then your good.
-That includes being in the repo directory, of course, which is the most convenient (that&#8217;s where I have it!).</p>
-<p>If it is in the repo or another path that python will find it, you can just create a session as follows:</p>
+as long as that location is accessible to python. If the path is in the python search path, then you&#8217;re good.
+That includes being in the repo directory, of course, which is the most convenient (that&#8217;s where I have it!).
+If it&#8217;s location isn&#8217;t in the python path, you can use the cfgfile=&#8217;&#8217; parm on the SASsession() method to point to it.</p>
+<p><strong>New in 3.1.6</strong>: You can now place a sascfg_personal.py configuration file in your home directory. The following
+path &#8220;~/.config/saspy/&#8221; will be searched for a sascfg_personal.py file.</p>
+<p>The new search order will basically be the same as it has been, but with this new home config directory inserted
+after the current dir and before the rest of the python path. The following will be the order in which the config file will
+be found.</p>
+<p>If you don&#8217;t specify cfgfile= on SASsession, then sascfg_personal.py will be found:</p>
+<ol class="arabic simple">
+<li>saspy install directory (same place as the sascfg.py examples file in to repo)</li>
+<li>current dir (whatever that is; wherever you started python)</li>
+<li>~/.config/saspy - the new directory being added in 3.1.5 (that works on windows too: think %HOMEPATH%.configsaspy)</li>
+<li>the rest of the directories in the python path</li>
+<li>if not found, then sascfg.py in the saspy repo (only to support way, way, way back compatibility - don&#8217;t use this)</li>
+</ol>
+<p>Note that once this has been imported it will be the one config file used for the python session, as it&#8217;s imported by name
+so it will be cached and that is what will be used even if imported again.</p>
+<p>If you use the cfgfile= to specify a specific file, then that file will be used and no search path will matter.
+Note that in the case of cfgfile=, you can use different files for different SASsession()&#8217;s in the python session.
+Whatever file you specify for a given SASsession will be used as the config file for that session.</p>
+<p>If the configuration file is in the search path described above, you can just create a session as follows:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>If, however, it is not in the python search path, you can use the cfgfile= parameter in your SASsession() invocation to
+<p>If, however, it is not in any of those directories, then you can use the cfgfile= parameter in your SASsession() invocation to
 specify its location:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgfile</span><span class="o">=</span><span class="s1">&#39;/some/path/to/your/config/sascfg_personal.py&#39;</span><span class="p">)</span>
 </pre></div>
@@ -331,9 +344,38 @@ but more definitively by submitting the following:</p>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
 </pre></div>
 </div>
+<p>There are also some new convenience methods and attributes in 3.1.6 to help in the case where you have multiple
+sascfg_personal.py files.</p>
+<p>First is the saspy.SAScfg attribute which will show you the sascfg_personal.py file that would be used
+if you submitted SASsession(). This is found and set when you import saspy.</p>
+<p>There is also a saspy.list_configs() method which shows you what sascfg_personal.py files are found in the
+search order listed above, in that order.</p>
+<p>Here&#8217;s an example showing these (I have one in the saspy install dir, current dir and the new ~/.config/saspy dir):</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">tom</span><span class="o">&gt;</span> <span class="n">pwd</span>
+<span class="o">/</span><span class="n">u</span><span class="o">/</span><span class="n">sastpw</span>
+<span class="n">tom</span><span class="o">&gt;</span> <span class="n">python3</span><span class="o">.</span><span class="mi">5</span>
+<span class="n">Python</span> <span class="mf">3.5</span><span class="o">.</span><span class="mi">6</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Nov</span> <span class="mi">16</span> <span class="mi">2018</span><span class="p">,</span> <span class="mi">15</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mi">39</span><span class="p">)</span>
+<span class="p">[</span><span class="n">GCC</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span> <span class="mi">20120313</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span><span class="o">-</span><span class="mi">23</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
+<span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">sys</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
+<span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib64/python35.zip&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib64/python3.5&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib64/python3.5/plat-linux&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib64/python3.5/lib-dynload&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib64/python3.5/site-packages&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib/python3.5/site-packages&#39;</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/opt/tom/github/saspy/saspy/__init__.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SAScfg</span>
+<span class="s1">&#39;/opt/tom/github/saspy/saspy/sascfg_personal.py&#39;</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">list_configs</span><span class="p">()</span>
+<span class="p">[</span><span class="s1">&#39;/opt/tom/github/saspy/saspy/sascfg_personal.py&#39;</span><span class="p">,</span> <span class="s1">&#39;/u/sastpw/sascfg_personal.py&#39;</span><span class="p">,</span> <span class="s1">&#39;/u/sastpw/.config/saspy/sascfg_personal.py&#39;</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
 </div>
-<div class="section" id="sascfg-personal-py-saspy-personal-py-details">
-<h3>sascfg_personal.py (saspy_personal.py) details<a class="headerlink" href="#sascfg-personal-py-saspy-personal-py-details" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="sascfg-personal-py-details">
+<h3>sascfg_personal.py details<a class="headerlink" href="#sascfg-personal-py-details" title="Permalink to this headline">¶</a></h3>
 <p>There are three main parts to this configuration file.</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -1016,7 +1058,7 @@ If you want to run saspy in Zeppelin, set this in your configuration definition:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.1.4',
+            VERSION:'3.1.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
