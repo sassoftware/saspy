@@ -196,6 +196,43 @@ but more definitively by submitting the following:
     import sys
     sys.path
 
+
+There are also some new convenience methods and attributes in 3.1.6 to help in the case where you have multiple
+sascfg_personal.py files. 
+
+First is the saspy.SAScfg attribute which will show you the sascfg_personal.py file that would be used
+if you submitted SASsession(). This is found and set when you import saspy. 
+
+There is also a saspy.list_configs() method which shows you what sascfg_personal.py files are found in the
+search order listed above, in that order.
+
+Here's an example showing these (I have one in the saspy install dir, current dir and the new ~/.config/saspy dir):
+  
+
+.. code-block:: ipython3
+
+    tom> pwd
+    /u/sastpw
+    tom> python3.5
+    Python 3.5.6 (default, Nov 16 2018, 15:50:39)
+    [GCC 4.4.7 20120313 (Red Hat 4.4.7-23)] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import sys
+    >>> sys.path
+    ['', '/usr/lib64/python35.zip', '/usr/lib64/python3.5', '/usr/lib64/python3.5/plat-linux', '/usr/lib64/python3.5/lib-dynload', '/usr/lib64/python3.5/site-packages', '/usr/lib/python3.5/site-packages']
+    >>>
+    >>> import saspy
+    >>> saspy
+    <module 'saspy' from '/opt/tom/github/saspy/saspy/__init__.py'>
+    >>>
+    >>> saspy.SAScfg
+    '/opt/tom/github/saspy/saspy/sascfg_personal.py'
+    >>>
+    >>> saspy.list_configs()
+    ['/opt/tom/github/saspy/saspy/sascfg_personal.py', '/u/sastpw/sascfg_personal.py', '/u/sastpw/.config/saspy/sascfg_personal.py']
+    >>>
+
+
         
 sascfg_personal.py details
 ==============================================
