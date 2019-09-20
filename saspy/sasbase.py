@@ -515,7 +515,7 @@ class SASsession():
 
         x  = "Access Method         = %s\n" % self.sascfg.mode
         x += "SAS Config name       = %s\n" % self.sascfg.name
-        x += "SAS Config file       = %s\n" % self.sascfg.SAScfg
+        x += "SAS Config file       = %s\n" % self.sascfg.origin
         x += "WORK Path             = %s\n" % self.workpath
         x += "SAS Version           = %s\n" % self.sasver
         x += "SASPy Version         = %s\n" % self.version
