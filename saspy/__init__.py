@@ -21,10 +21,12 @@ from __future__ import print_function
 from saspy.version import __version__
 from saspy.sasbase import SASsession, SASconfig, list_configs
 from saspy.sasdata import SASdata
-from saspy.sasexceptions import SASIONotSupportedError, SASConfigNotFoundError, SASConfigNotValidError
+from saspy.sasexceptions import SASIONotSupportedError, SASConfigNotValidError, SASConfigNotValidError
 from saspy.sasproccommons import SASProcCommons
 from saspy.sastabulate import Tabulate
 from saspy.sasresults import SASresults
+
+import os, sys
 
 def isnotebook():
     try:
@@ -41,3 +43,27 @@ def isnotebook():
 if isnotebook():
     from saspy.sas_magic import SASMagic
     get_ipython().register_magics(SASMagic)
+
+def _find_cfg():
+   sp    = []
+   sp[:] = sys.path
+   sp[0] = os.path.abspath(sp[0])
+   sp.insert(1, os.path.expanduser('~/.config/saspy'))
+   sp.insert(0, __file__.rsplit(os.sep+'__init__.py')[0])
+
+   cfg = 'Not found'
+
+   for dir in sp:
+      f1 = dir+os.sep+'sascfg_personal.py'
+      if os.path.isfile(f1):
+         cfg = f1
+         break
+
+   if cfg == 'Not found':
+      f1 =__file__.rsplit('__init__.py')[0]+'sascfg.py'
+      if os.path.isfile(f1):
+         cfg = f1
+
+   return cfg
+
+SAScfg = _find_cfg()
