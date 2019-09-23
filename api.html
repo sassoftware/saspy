@@ -512,12 +512,15 @@ See the Advanced topics section of the doc for details</p>
 <dl class="method">
 <dt id="saspy.SASsession.lastlog">
 <code class="descname">lastlog</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.lastlog" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method is used to get LOG from the most recetly executed submit() method.</p>
+<dd><p>This method is used to get the LOG from the most recetly executed submit() method. That is either
+a user submitted submit() or internally submitted by any saspy method. This is just a convenience
+over the saslog() method, to just see the LOG for the last code that was submitted instead of the
+whole session.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">SAS log</td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">SAS log (partial)</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
 </tr>
