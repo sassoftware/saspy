@@ -629,9 +629,12 @@ class SASsession():
 
     def lastlog(self) -> str:
         """
-        This method is used to get LOG from the most recetly executed submit() method.
+        This method is used to get the LOG from the most recetly executed submit() method. That is either
+        a user submitted submit() or internally submitted by any saspy method. This is just a convenience
+        over the saslog() method, to just see the LOG for the last code that was submitted instead of the
+        whole session.
 
-        :return: SAS log
+        :return: SAS log (partial)
         :rtype: str
         """
         return self._lastlog
