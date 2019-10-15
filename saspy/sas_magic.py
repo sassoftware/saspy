@@ -54,8 +54,22 @@ class SASMagic(ipym.Magics):
         """
         
         mva = self.mva
-        if len(line) and line in self.shell.user_ns:  # session supplied
-            _mva = self.shell.user_ns[line]
+        if len(line):  # session supplied
+            names = line.split('.')
+            _mva = None
+            for i,name in enumerate(names):
+                if i==0:
+                    if name in self.shell.user_ns:
+                        _mva = self.shell.user_ns[name]
+                    else:
+                        break
+                else:
+                    try:
+                        _mva = getattr(_mva, name)
+                    except Exception as e:
+                        print(e)
+                        break
+
             if isinstance(_mva, SASsession):
                 mva = _mva
             else:
