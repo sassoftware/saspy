@@ -355,7 +355,7 @@ Will use HTML5 for this SASsession.""")
          enc = self.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
          if enc == '':
             self.sascfg.encoding = 'utf-8'
-         self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
+         ll = self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
          self.sascfg.encoding = enc
          if self.pid is None:
             print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
@@ -904,14 +904,14 @@ Will use HTML5 for this SASsession.""")
 
       Returns True it the Data Set exists and False if it does not
       """
-      code  = "data _null_; e = exist('"
+      code  = "data _null_; e = %sysfunc(exist("
       if len(libref):
          code += libref+"."
-      code += table+"');\n"
-      code += "v = exist('"
+      code += table+"));\n"
+      code += "v = %sysfunc(exist("
       if len(libref):
          code += libref+"."
-      code += table+"', 'VIEW');\n if e or v then e = 1;\n"
+      code += table+", 'VIEW'));\n if e or v then e = 1;\n"
       code += "put 'TABLE_EXISTS=' e 'TAB_EXTEND=';run;"
 
       ll = self.submit(code, "text")

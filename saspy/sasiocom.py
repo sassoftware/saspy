@@ -253,6 +253,7 @@ class SASSessionCOM(object):
         self.adodb.Open('Provider={}; Data Source=iom-id://{}'.format(
             self.sascfg.provider, self.workspace.UniqueIdentifier))
 
+        ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
         if self.sascfg.verbose:
             print("SAS Connection established. Workspace UniqueIdentifier is "+str(self.workspace.UniqueIdentifier)+"\n")
 
@@ -345,6 +346,27 @@ class SASSessionCOM(object):
         """
         self.workspace.LanguageService.Reset()
 
+    def _tablepath(self, table: str, libref: str=None) -> str:
+        """
+        Define a sas dataset path based on a table name and optional libref
+        name. Will return a two-level or one-level path string based on the
+        provided arguments. One-level names are of this form: `table`, while
+        two-level names are of this form: `libref.table`. If libref is not
+        defined, SAS will implicitly define the library to WORK or USER. The
+        USER library needs to have been defined previously in SAS, otherwise
+        WORK is the default option. If the `libref` parameter is any value
+        that evaluates to `False`, the one-level path is returned.
+        :param table [str]: SAS data set name.
+        :option libref [str]: Optional library name.
+        :return [str]:
+        """
+        if not libref:
+            path = table
+        else:
+            path = '{}.{}'.format(libref, table)
+
+        return path
+
     def _schema(self, table: str, libref: str=None) -> dict:
         """
         Request a table schema for a given `libref.table`.
@@ -352,7 +374,7 @@ class SASSessionCOM(object):
         :option libref [str]: Library name.
         :return [dict]:
         """
-        tablepath = self._sb._tablepath(table, libref=libref)
+        tablepath = self._tablepath(table, libref=libref)
         criteria = [None, None, tablepath]
 
         schema = self.adodb.OpenSchema(self.SCHEMA_COLUMNS, criteria)
@@ -479,15 +501,34 @@ class SASSessionCOM(object):
         :option libref [str]: Library name.
         :return [bool]:
         """
-        tablepath = self._sb._tablepath(table, libref=libref)
-        criteria = [None, None, tablepath]
+        #tablepath = self._tablepath(table, libref=libref)
+        #criteria = [None, None, tablepath]
 
-        schema = self.adodb.OpenSchema(self.SCHEMA_COLUMNS, criteria)
-        exists = not schema.BOF
+        #schema = self.adodb.OpenSchema(self.SCHEMA_COLUMNS, criteria)
+        #exists = not schema.BOF
 
-        schema.Close()
+        #schema.Close()
 
-        return exists
+        #return exists
+
+        code  = "data _null_; e = %sysfunc(exist("
+        if len(libref):
+           code += libref+"."
+        code += table+"));\n"
+        code += "v = %sysfunc(exist("
+        if len(libref):
+           code += libref+"."
+        code += table+", 'VIEW'));\n if e or v then e = 1;\n"
+        code += "te='TABLE_EXISTS='; put te e;run;\n"
+      
+        ll = self.submit(code, "text")
+      
+        l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
+        l2 = l2[2].partition("\n")
+        exists = int(l2[0])
+      
+        return bool(exists)
+
 
     def read_sasdata(self, table: str, libref: str=None, dsopts: dict=None) -> tuple:
         """
@@ -505,7 +546,7 @@ class SASSessionCOM(object):
         """
 
         dsopts = self._sb._dsopts(dsopts) if dsopts is not None else ''
-        tablepath = self._sb._tablepath(table, libref=libref)
+        tablepath = self._tablepath(table, libref=libref)
         recordset = dynamic.Dispatch('ADODB.RecordSet')
 
         # Create an intermediate dataset with `dsopts` applied
@@ -542,7 +583,7 @@ class SASSessionCOM(object):
         """
         opts = opts if opts is not None else {}
         filepath = 'url ' + filepath if filepath.lower().startswith('http') else filepath
-        tablepath = self._sb._tablepath(table, libref=libref)
+        tablepath = self._tablepath(table, libref=libref)
 
         proc_code = """
             filename csv_file "{}";
@@ -568,7 +609,7 @@ class SASSessionCOM(object):
         """
         opts = opts if opts is not None else {}
         dsopts = dsopts if dsopts is not None else {}
-        tablepath = self._sb._tablepath(table, libref=libref)
+        tablepath = self._tablepath(table, libref=libref)
 
         proc_code = """
             filename csv_file "{}";
@@ -602,7 +643,7 @@ class SASSessionCOM(object):
         DATETIME_NAME = 'DATETIME26.6'
         DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%f'
 
-        tablepath = self._sb._tablepath(table, libref=libref)
+        tablepath = self._tablepath(table, libref=libref)
 
         columns = []
         formats = {}
@@ -695,7 +736,7 @@ class SASSessionCOM(object):
 
         sas_csv = '{}saspy_sd2df.csv'.format(self._sb.workpath)
         opts = self._sb._dsopts(dsopts) if dsopts is not None else ''
-        tablepath = self._sb._tablepath(table, libref=libref)
+        tablepath = self._tablepath(table, libref=libref)
 
         # Convert any date format to one pandas can understand (ISO-8601).
         # Save a reference of the column name in a list so pandas can parse

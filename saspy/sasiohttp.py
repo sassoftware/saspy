@@ -73,6 +73,9 @@ class SASconfigHTTP:
       lock = self.cfgopts.get('lock_down', True)
       # in lock down mode, don't allow runtime overrides of option values from the config file.
 
+      self.verbose = self.cfgopts.get('verbose', True)
+      self.verbose = kwargs.get('verbose', self.verbose)
+
       inip = kwargs.get('ip', '')             
       if len(inip) > 0:
          if lock and len(self.ip):
@@ -469,8 +472,9 @@ class SASsessionHTTP():
             print(key+"="+str(jobid.get(key)))
          return None
 
-      self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
-      print("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self.pid)       
+      ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
+      if self.sascfg.verbose:
+         print("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self.pid)       
 
       return self.pid
 
@@ -485,7 +489,8 @@ class SASsessionHTTP():
          resp = req.read()
          conn.close()
 
-         print("SAS server terminated for SESSION_ID="+self._session.get('id'))       
+         if self.sascfg.verbose:
+            print("SAS server terminated for SESSION_ID="+self._session.get('id'))       
          self._session   = None
          self.pid        = None
          self._sb.SASpid = None
@@ -795,6 +800,23 @@ class SASsessionHTTP():
          else:
             libref = 'WORK'
 
+      code  = "data _null_; e = %sysfunc(exist("
+      code += libref+"."
+      code += table+"));\n"
+      code += "v = %sysfunc(exist("
+      code += libref+"."
+      code += table+", 'VIEW'));\n if e or v then e = 1;\n"
+      code += "te='TABLE_EXISTS='; put te e;run;\n"
+
+      ll = self.submit(code, "text")
+
+      l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
+      l2 = l2[2].partition("\n")
+      exists = int(l2[0])
+
+      return bool(exists)
+   
+      """
       # HEAD Data Table
       conn = self.sascfg.HTTPConn; conn.connect()
       headers={"Accept":"*/*", "Authorization":"Bearer "+self.sascfg._token}
@@ -809,6 +831,7 @@ class SASsessionHTTP():
          exists = False
    
       return exists
+      """
    
    def read_csv(self, file: str, table: str, libref: str ="", nosub: bool=False, opts: dict ={}) -> '<SASdata object>':
       '''
