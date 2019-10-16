@@ -472,7 +472,7 @@ Will use HTML5 for this SASsession.""")
       enc = self.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
       if enc == '':
          self.sascfg.encoding = 'utf-8'
-      ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
+      ll = self.submit("options svgtitle='svgtitle'; options validvarname=any validmemname=extend pagesize=max nosyntaxcheck; ods graphics on;", "text")
       self.sascfg.encoding = enc
 
       if self.pid is None:
@@ -1062,11 +1062,11 @@ Will use HTML5 for this SASsession.""")
       code  = "data _null_; e = %sysfunc(exist("
       if len(libref):
          code += libref+"."
-      code += table+"));\n"
+      code += "'"+table.strip()+"'n));\n"
       code += "v = %sysfunc(exist("
       if len(libref):
          code += libref+"."
-      code += table+", 'VIEW'));\n if e or v then e = 1;\n"
+      code += "'"+table.strip()+"'n, 'VIEW'));\n if e or v then e = 1;\n"
       code += "te='TABLE_EXISTS='; put te e;run;\n"
 
       ll = self.submit(code, "text")
@@ -1096,7 +1096,7 @@ Will use HTML5 for this SASsession.""")
       code += "proc import datafile=x out="
       if len(libref):
          code += libref+"."
-      code += table+" dbms=csv replace; "+self._sb._impopts(opts)+" run;"
+      code += "'"+table.strip()+"'n dbms=csv replace; "+self._sb._impopts(opts)+" run;"
 
       if nosub:
          print(code)
@@ -1117,7 +1117,12 @@ Will use HTML5 for this SASsession.""")
 
       code  = "filename x \""+file+"\";\n"
       code += "options nosource;\n"
-      code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
+      code += "proc export data="
+
+      if len(libref):
+         code += libref+"."
+
+      code += "'"+table.strip()+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
       code += self._sb._expopts(opts)+" run\n;"
       code += "options source;\n"
 
@@ -1442,7 +1447,7 @@ Will use HTML5 for this SASsession.""")
       code = "data "
       if len(libref):
          code += libref+"."
-      code += table+";\n"
+      code += "'"+table.strip()+"'n;\n"
       if len(length):
          code += "length "+length+";\n"
       if len(format):
@@ -1505,9 +1510,9 @@ Will use HTML5 for this SASsession.""")
       logcodeb =  logcodeo.encode()
 
       if libref:
-         tabname = libref+"."+table
+         tabname = libref+".'"+table.strip()+"'n "
       else:
-         tabname = table
+         tabname = "'"+table.strip()+"'n "
 
       code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
@@ -1710,9 +1715,9 @@ Will use HTML5 for this SASsession.""")
       logcodeo = "\nE3969440A681A24088859985" + logn
 
       if libref:
-         tabname = libref+"."+table
+         tabname = libref+".'"+table.strip()+"'n "
       else:
-         tabname = table
+         tabname = "'"+table.strip()+"'n "
 
       tmpdir  = None
 

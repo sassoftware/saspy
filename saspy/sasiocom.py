@@ -253,7 +253,7 @@ class SASSessionCOM(object):
         self.adodb.Open('Provider={}; Data Source=iom-id://{}'.format(
             self.sascfg.provider, self.workspace.UniqueIdentifier))
 
-        ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
+        ll = self.submit("options svgtitle='svgtitle'; options validvarname=any validmemname=extend pagesize=max nosyntaxcheck; ods graphics on;", "text")
         if self.sascfg.verbose:
             print("SAS Connection established. Workspace UniqueIdentifier is "+str(self.workspace.UniqueIdentifier)+"\n")
 

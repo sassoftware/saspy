@@ -472,7 +472,7 @@ class SASsessionHTTP():
             print(key+"="+str(jobid.get(key)))
          return None
 
-      ll = self.submit("options svgtitle='svgtitle'; options validvarname=any pagesize=max nosyntaxcheck; ods graphics on;", "text")
+      ll = self.submit("options svgtitle='svgtitle'; options validvarname=any validmemname=extend pagesize=max nosyntaxcheck; ods graphics on;", "text")
       if self.sascfg.verbose:
          print("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self.pid)       
 
@@ -802,10 +802,10 @@ class SASsessionHTTP():
 
       code  = "data _null_; e = %sysfunc(exist("
       code += libref+"."
-      code += table+"));\n"
+      code += "'"+table.strip()+"'n));\n"
       code += "v = %sysfunc(exist("
       code += libref+"."
-      code += table+", 'VIEW'));\n if e or v then e = 1;\n"
+      code += "'"+table.strip()+"'n, 'VIEW'));\n if e or v then e = 1;\n"
       code += "te='TABLE_EXISTS='; put te e;run;\n"
 
       ll = self.submit(code, "text")
@@ -850,7 +850,7 @@ class SASsessionHTTP():
       code += "proc import datafile=x out="
       if len(libref):
          code += libref+"."
-      code += table+" dbms=csv replace; "+self._sb._impopts(opts)+" run;"
+      code += "'"+table.strip()+"'n dbms=csv replace; "+self._sb._impopts(opts)+" run;"
    
       if nosub:
          print(code)
@@ -867,7 +867,12 @@ class SASsessionHTTP():
       '''
       code  = "filename x \""+file+"\";\n"
       code += "options nosource;\n"
-      code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
+      code += "proc export data="
+
+      if len(libref):
+         code += libref+"."
+
+      code += "'"+table.strip()+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
       code += self._sb._expopts(opts)+" run\n;"
       code += "options source;\n"
 
@@ -1092,7 +1097,7 @@ class SASsessionHTTP():
       code = "data "
       if len(libref):
          code += libref+"."
-      code += table+";\n"
+      code += "'"+table.strip()+"'n;\n"
       if len(length):
          code += "length "+length+";\n"
       if len(format):
@@ -1146,9 +1151,9 @@ class SASsessionHTTP():
          return self.sasdata2dataframeCSV(table, libref, dsopts, **kwargs)
 
       if libref:
-         tabname = libref+"."+table
+         tabname = libref+".'"+table.strip()+"'n "
       else:
-         tabname = table
+         tabname = "'"+table.strip()+"'n "
 
       code  = "proc sql; create view work.sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
 
@@ -1300,9 +1305,9 @@ class SASsessionHTTP():
       '''
 
       if libref:
-         tabname = libref+"."+table
+         tabname = libref+".'"+table.strip()+"'n "
       else:
-         tabname = table
+         tabname = "'"+table.strip()+"'n "
 
       tmpdir  = None
 
