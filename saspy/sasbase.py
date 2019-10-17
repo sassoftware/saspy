@@ -76,6 +76,12 @@ def zepDISPLAY(x):
 def zepHTML(x):
    return("%html "+x)
 
+def dbDISPLAY(x):
+   displayHTML(x)
+
+def dbHTML(x):
+   return(x)
+
 def list_configs() -> list:
    cfg   = []
    sp    = []
@@ -170,13 +176,16 @@ class SASconfig(object):
         if self.display == '':
            self.display = 'jupyter'
         else:
-           if self.display.lower() not in ['zeppelin', 'jupyter']:
+           if self.display.lower() not in ['zeppelin', 'jupyter', 'databricks']:
               print("Invalid value specified for 'display'. Using the default of 'jupyter'")
               self.display = 'jupyter'
 
-        if self.display.lower() == 'zeppelin':
+        if   self.display.lower() == 'zeppelin':
            self.DISPLAY = zepDISPLAY
            self.HTML    = zepHTML
+        elif self.display.lower() == 'databricks':
+           self.DISPLAY = dbDISPLAY
+           self.HTML    = dbHTML
         else:
            self.DISPLAY = DISPLAY
            self.HTML    = HTML
@@ -1315,7 +1324,7 @@ class SASsession():
         """
         ll = self.submit("%let " + name + "=%NRBQUOTE(" + str(value) + ");\n")
 
-    def symget(self, name):
+    def symget(self, name, outtype=None):
         """
         :param name:  name of the macro varable to set:
 
@@ -1325,13 +1334,26 @@ class SASsession():
         ll = self.submit("%put " + name + "=&" + name + " tom=;\n")
 
         l2 = ll['LOG'].rpartition(name + "=")[2].partition(" tom=")
-        try:
-            var = int(l2[0])
-        except:
-            try:
-                var = float(l2[0])
-            except:
-                var = l2[0]
+
+        if outtype is not None and type(outtype) not in [int, float, str]:
+           print("invalid type specified. supported are [int, float, str], will return default type")
+           outtype=None
+
+        if outtype is not None:
+           if   type(outtype) == int:
+              var = int(l2[0])
+           elif type(outtype) == float:
+              var = float(l2[0])
+           elif type(outtype) == str:
+              var = l2[0]
+        else:
+           try:
+              var = int(l2[0])
+           except:
+              try:
+                 var = float(l2[0])
+              except:
+                 var = l2[0]
 
         return var
 
