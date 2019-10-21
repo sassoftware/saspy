@@ -196,6 +196,8 @@ class SASdata:
         """
         topts = dict(self.dsopts)
         topts['obs'] = obs
+        if 'firstobs' in self.dsopts.keys():
+           topts['obs'] = self.dsopts['firstobs'] + obs
         code = "proc print data=" + self.libref + '.' + self.table + self.sas._dsopts(topts) + ";run;"
 
         if self.sas.nosub:
@@ -229,7 +231,8 @@ class SASdata:
         :param obs: the number of rows of the table that you want to display. The default is 5
         :return:
         """   
-        code  = "proc sql;select count(*) format best32. into :lastobs from "
+        code  = "%let lastobs=-1;\n"
+        code += "proc sql;select count(*) format best32. into :lastobs from "
         code += self.libref + '.' + self.table + self._dsopts()
         code += ";%put lastobs=&lastobs lastobsend=;\nquit;"
 
@@ -245,6 +248,11 @@ class SASdata:
             lastobs = int(lastobs[0])
         else:
             lastobs = obs
+
+        if lastobs == -1:
+            print("The number of obs was not able to be determined. Check the SAS log (below) for errors.")
+            print(ll['LOG'])
+            return None
 
         firstobs = lastobs - (obs - 1)
         if firstobs < 1:
@@ -289,7 +297,8 @@ class SASdata:
         """
         return the number of observations for your SASdata object
         """
-        code  = "proc sql;select count(*) format best32. into :lastobs from "
+        code  = "%let lastobs=-1;\n"
+        code += "proc sql;select count(*) format best32. into :lastobs from "
         code += self.libref + '.' + self.table + self._dsopts() 
         code += ";%put lastobs=&lastobs lastobsend=;\nquit;"
 
@@ -306,6 +315,11 @@ class SASdata:
             lastobs = int(lastobs[0])
         else:
             print("The SASdata object is not valid. The table doesn't exist in this SAS session at this time.")
+            lastobs = None
+
+        if lastobs == -1:
+            print("The number of obs was not able to be determined. Check the SAS log (below) for errors.")
+            print(ll['LOG'])
             lastobs = None
 
         return lastobs
