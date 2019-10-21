@@ -87,7 +87,7 @@ class SASdata:
             if self.sas.sascfg.mode == 'HTTP':
                 self.libref = 'WORK'
 
-        self.table    = table
+        self.table    = table.strip()
         self.dsopts   = dsopts if dsopts is not None else {}
         self.results  = results
         self.tabulate = sp2.Tabulate(sassession, self)
@@ -198,14 +198,14 @@ class SASdata:
         topts['obs'] = obs
         if 'firstobs' in self.dsopts.keys():
            topts['obs'] = self.dsopts['firstobs'] + obs
-        code = "proc print data=" + self.libref + '.' + self.table + self.sas._dsopts(topts) + ";run;"
+        code = "proc print data=" + self.libref + ".'" + self.table + "'n " + self.sas._dsopts(topts) + ";run;"
 
         if self.sas.nosub:
             print(code)
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "data _head ; set %s.%s %s; run;" % (self.libref, self.table, self.sas._dsopts(topts))
+            code = "data _head ; set %s.'%s'n %s; run;" % (self.libref, self.table, self.sas._dsopts(topts))
             return self._returnPD(code, '_head')
         else:
             ll = self._is_valid()
@@ -233,7 +233,7 @@ class SASdata:
         """   
         code  = "%let lastobs=-1;\n"
         code += "proc sql;select count(*) format best32. into :lastobs from "
-        code += self.libref + '.' + self.table + self._dsopts()
+        code += self.libref + ".'" + self.table + "'n " + self._dsopts()
         code += ";%put lastobs=&lastobs lastobsend=;\nquit;"
 
         nosub = self.sas.nosub
@@ -262,8 +262,8 @@ class SASdata:
         topts['obs'] = lastobs
         topts['firstobs'] = firstobs
 
-        code  = "proc print data=" + self.libref + '.' 
-        code += self.table + self.sas._dsopts(topts) + ";run;"
+        code  = "proc print data=" + self.libref + ".'" 
+        code += self.table + "'n " + self.sas._dsopts(topts) + ";run;"
 
         self.sas.nosub = nosub
         if self.sas.nosub:
@@ -271,7 +271,7 @@ class SASdata:
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "data _tail ; set %s.%s %s; run;" % (self.libref, self.table, self.sas._dsopts(topts))
+            code = "data _tail ; set %s.'%s'n %s; run;" % (self.libref, self.table, self.sas._dsopts(topts))
             return self._returnPD(code, '_tail')
         else:
             if self.HTML:
@@ -299,7 +299,7 @@ class SASdata:
         """
         code  = "%let lastobs=-1;\n"
         code += "proc sql;select count(*) format best32. into :lastobs from "
-        code += self.libref + '.' + self.table + self._dsopts() 
+        code += self.libref + ".'" + self.table + "'n " + self._dsopts() 
         code += ";%put lastobs=&lastobs lastobsend=;\nquit;"
 
         if self.sas.nosub:
@@ -355,20 +355,20 @@ class SASdata:
             out_libref = out.libref
         else:
             try:
-                out_table = out.split('.')[1]
+                out_table = out.split('.')[1].strip()
                 out_libref = out.split('.')[0]
             except IndexError:
-                out_table = out
+                out_table = out.strip()
                 out_libref = 'work'
         while i <= k:
             # get the list of variables
             if k == 1:
-                code += "proc hpsample data=%s.%s %s out=%s.%s %s samppct=%s seed=%s Partition;\n" % (
+                code += "proc hpsample data=%s.'%s'n %s out=%s.'%s'n %s samppct=%s seed=%s Partition;\n" % (
                     self.libref, self.table, self._dsopts(), out_libref, out_table, self._dsopts(), fraction * 100,
                     seed)
             else:
                 seed += 1
-                code += "proc hpsample data=%s.%s %s out=%s.%s %s samppct=%s seed=%s partition PARTINDNAME=_cvfold%s;\n" % (
+                code += "proc hpsample data=%s.'%s'n %s out=%s.'%s'n %s samppct=%s seed=%s partition PARTINDNAME=_cvfold%s;\n" % (
                     self.libref, self.table, self._dsopts(), out_libref, out_table, self._dsopts(), fraction * 100,
                     seed, i)
 
@@ -377,7 +377,7 @@ class SASdata:
                 if i == 1:
                     num_string = """
                         data _null_; file LOG;
-                          d = open('{0}.{1}');
+                          d = open("{0}.'{1}'n");
                           nvars = attrn(d, 'NVARS'); 
                           put 'VARLIST=';
                           do i = 1 to nvars; 
@@ -428,12 +428,12 @@ class SASdata:
         if not singleOut:
             split_code += 'DATA '
             for j in range(1, k + 1):
-                split_code += "\t%s.%s%s_train(drop=_Partind_ _cvfold:)\n" % (out_libref, out_table, j)
-                split_code += "\t%s.%s%s_score(drop=_Partind_ _cvfold:)\n" % (out_libref, out_table, j)
-            split_code += ';\n \tset %s.%s;\n' % (out_libref, out_table)
+                split_code += "\t%s.'%s%s_train'n (drop=_Partind_ _cvfold:)\n" % (out_libref, out_table, j)
+                split_code += "\t%s.'%s%s_score'n (drop=_Partind_ _cvfold:)\n" % (out_libref, out_table, j)
+            split_code += ";\n \tset %s.'%s'n;\n" % (out_libref, out_table)
             for z in range(1, k + 1):
-                split_code += "\tif _cvfold%s = 1 or _partind_ = 1 then output %s.%s%s_train;\n" % (z, out_libref, out_table, z)
-                split_code += "\telse output %s.%s%s_score;\n" % (out_libref, out_table, z)
+                split_code += "\tif _cvfold%s = 1 or _partind_ = 1 then output %s.'%s%s_train'n;\n" % (z, out_libref, out_table, z)
+                split_code += "\telse output %s.'%s%s_score'n;\n" % (out_libref, out_table, z)
             split_code += 'run;'
         runcode = True
         if self.sas.nosub:
@@ -458,7 +458,7 @@ class SASdata:
 
                 for j in range(1, k + 1):
                     outTableList.append((self.sas.sasdata(out_table + str(j) + "_train", out_libref, dsopts=self._dsopts()),
-                                               self.sas.sasdata(out_table + str(j) + "_score", out_libref, dsopts=self._dsopts())))
+                                         self.sas.sasdata(out_table + str(j) + "_score", out_libref, dsopts=self._dsopts())))
                 return outTableList
             if out:
                 if not isinstance(out, str):
@@ -474,7 +474,7 @@ class SASdata:
 
         :return: output
         """
-        code = "proc contents data=" + self.libref + '.' + self.table + self._dsopts() + ";run;"
+        code = "proc contents data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";run;"
 
         if self.sas.nosub:
             print(code)
@@ -482,7 +482,7 @@ class SASdata:
 
         ll = self._is_valid()
         if self.results.upper() == 'PANDAS':
-            code  = "proc contents data=%s.%s %s ;" % (self.libref, self.table, self._dsopts())
+            code  = "proc contents data=%s.'%s'n %s ;" % (self.libref, self.table, self._dsopts())
             code += "ods output Attributes=work._attributes;"
             code += "ods output EngineHost=work._EngineHost;"
             code += "ods output Variables=work._Variables;"
@@ -510,14 +510,14 @@ class SASdata:
         """
         display metadata about the table, size, number of rows, columns and their data type
         """
-        code = "proc contents data=" + self.libref + '.' + self.table + ' ' + self._dsopts() + ";ods select Variables;run;"
+        code = "proc contents data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";ods select Variables;run;"
 
         if self.sas.nosub:
             print(code)
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "proc contents data=%s.%s %s ;ods output Variables=work._variables ;run;" % (self.libref, self.table, self._dsopts())
+            code = "proc contents data=%s.'%s'n %s ;ods output Variables=work._variables ;run;" % (self.libref, self.table, self._dsopts())
             df = self._returnPD(code, '_variables')
             df['Type'] = df['Type'].str.rstrip()
             return df
@@ -551,7 +551,7 @@ class SASdata:
         info_code = """
         data work._statsInfo ;
             do rows=0 by 1 while( not last ) ;
-                set {0}.{1}{2} end=last;
+                set {0}.'{1}'n {2} end=last;
                 array chrs _character_ ;
                 array nums _numeric_ ;
                 array ccounts(999) _temporary_ ;
@@ -607,7 +607,7 @@ class SASdata:
         """
         dsopts = self._dsopts().partition(';\n\tformat')
 
-        code  = "proc means data=" + self.libref + '.' + self.table + dsopts[0] + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;"
+        code  = "proc means data=" + self.libref + ".'" + self.table + "'n " + dsopts[0] + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;"
         code += dsopts[1]+dsopts[2]+"run;"
 
         if self.sas.nosub:
@@ -617,7 +617,7 @@ class SASdata:
         ll = self._is_valid()
 
         if self.results.upper() == 'PANDAS':
-            code = "proc means data=%s.%s %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; %s ods output Summary=work._summary; run;" % (
+            code = "proc means data=%s.'%s'n %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; %s ods output Summary=work._summary; run;" % (
                 self.libref, self.table, dsopts[0], dsopts[1]+dsopts[2])
             return self._returnPD(code, '_summary')
         else:
@@ -652,21 +652,21 @@ class SASdata:
                 fn = out.partition('.')
                 if fn[1] == '.':
                     out_libref = fn[0]
-                    out_table = fn[2]
+                    out_table = fn[2].strip()
                 else:
                     out_libref = ''
-                    out_table = fn[0]
+                    out_table = fn[0].strip()
             else:
                 out_libref = out.libref
                 out_table = out.table
-            outstr = "out=%s.%s" % (out_libref, out_table)
+            outstr = "out=%s.'%s'n" % (out_libref, out_table)
 
         else:
             out_table = self.table
             out_libref = self.libref
 
         # get list of variables and types
-        varcode  = "data _null_; d = open('" + self.libref + "." + self.table + "');\n"
+        varcode  = 'data _null_; d = open("' + self.libref + ".'" + self.table + "'n " + '");\n'
         varcode += "nvars = attrn(d, 'NVARS');\n"
         varcode += "put 'VARNUMS=' nvars 'VARNUMS_END=';\n"
         varcode += "put 'VARLIST=';\n"
@@ -703,9 +703,9 @@ class SASdata:
         sqlsel = ' %s(%s),\n'
         sqlinto = ' into\n'
         if len(out_libref)>0 :
-            ds1 = "data " + out_libref + "." + out_table + "; set " + self.libref + "." + self.table + self._dsopts() + ";\n"
+            ds1 = "data " + out_libref + ".'" + out_table + "'n " + "; set " + self.libref + ".'" + self.table +"'n " + self._dsopts() + ";\n"
         else:
-            ds1 = "data " + out_table + "; set " + self.libref + "." + self.table + self._dsopts() + ";\n"
+            ds1 = "data '" + out_table + "'n " + "; set " + self.libref + "." + self.table + self._dsopts() + ";\n"
         dsmiss = 'if missing({0}) then {1} = {2};\n'
         if replace:
             dsmiss = prefix+'{1} = {0}; if missing({0}) then %s{1} = {2};\n' % prefix
@@ -743,14 +743,14 @@ class SASdata:
                     sql += sqlsel % (key, v)
                     sqlinto += ' :imp_' + v + ',\n'
                     if key.lower == 'mode':
-                        modesql += modeq % (v, v, self.libref + "." + self.table + self._dsopts() , v, v, v)
+                        modesql += modeq % (v, v, self.libref + ".'" + self.table + "'n " + self._dsopts() , v, v, v)
                     if varListType.get(v.upper()) == "N":
                         ds1 += dsmiss.format(v, v, '&imp_' + v + '.')
                     else:
                         ds1 += dsmiss.format(v, v, '"&imp_' + v + '."')
 
         if len(sql) > 20:
-            sql = sql.rstrip(', \n') + '\n' + sqlinto.rstrip(', \n') + '\n  from ' + self.libref + '.' + self.table + self._dsopts() + ';\nquit;\n'
+            sql = sql.rstrip(', \n') + '\n' + sqlinto.rstrip(', \n') + '\n  from ' + self.libref + ".'" + self.table + "'n " + self._dsopts() + ';\nquit;\n'
         else:
             sql = ''
         ds1 += 'run;\n'
@@ -788,21 +788,21 @@ class SASdata:
                 fn = out.partition('.')
                 if fn[1] == '.':
                     libref = fn[0]
-                    table = fn[2]
-                    outstr = "out=%s.%s" % (libref, table)
+                    table  = fn[2].strip()
+                    outstr = "out=%s.'%s'n" % (libref, table)
                 else:
                     libref = ''
-                    table = fn[0]
-                    outstr = "out=" + table
+                    table  = fn[0].strip()
+                    outstr = "out='" + table + "'n " 
             else:
                 libref = out.libref
-                table = out.table
-                outstr = "out=%s.%s" % (out.libref, out.table)
+                table  = out.table
+                outstr = "out=%s.'%s'n" % (out.libref, out.table)
 
         if 'options' in kwargs:
             options = kwargs['options']
 
-        code = "proc sort data=%s.%s%s %s %s ;\n" % (self.libref, self.table, self._dsopts(), outstr, options)
+        code = "proc sort data=%s.'%s'n %s %s %s ;\n" % (self.libref, self.table, self._dsopts(), outstr, options)
         code += "by %s;" % by
         code += "run\n;"
         runcode = True
@@ -854,11 +854,11 @@ class SASdata:
               print("out= needs to be a SASdata object")
               return None
            else:
-              outtab = out.libref + '.' + out.table + out._dsopts() 
+              outtab = out.libref + ".'" + out.table + "'n " + out._dsopts() 
         else:
-           outtab = self.libref + '.' + self.table + self._dsopts() 
+           outtab = self.libref + ".'" + self.table + "'n " + self._dsopts() 
 
-        code  = "data "+outtab+"; set " + self.libref + '.' + self.table + self._dsopts() + ";\n"
+        code  = "data "+outtab+"; set " + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";\n"
         for key in vars.keys():
            code += key+" = "+vars[key]+";\n"
         code += "; run;"
@@ -896,7 +896,7 @@ class SASdata:
         code = "%macro proccall(d);\n"
 
         # build parameters
-        score_table = str(self.libref + '.' + self.table)
+        score_table = str(self.libref + ".'" + self.table + "'n " )
         binstats = str(objname + '.' + "ASSESSMENTSTATISTICS")
         out = str(objname + '.' + "ASSESSMENTBINSTATISTICS")
         level = 'interval'
@@ -909,7 +909,7 @@ class SASdata:
                     raise Exception(event)
             except Exception:
                 print("No event was specified for a nominal target. Here are possible options:\n")
-                event_code = "proc hpdmdb data=%s.%s %s classout=work._DMDBCLASSTARGET(keep=name nraw craw level frequency nmisspercent);" % (
+                event_code = "proc hpdmdb data=%s.'%s'n %s classout=work._DMDBCLASSTARGET(keep=name nraw craw level frequency nmisspercent);" % (
                     self.libref, self.table, self._dsopts())
                 event_code += "\nclass %s ; \nrun;" % target
                 event_code += "data _null_; set work._DMDBCLASSTARGET; where ^(NRAW eq . and CRAW eq '') and lowcase(name)=lowcase('%s');" % target
@@ -976,7 +976,7 @@ class SASdata:
             """
             code += graphics.format(out)
         code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,%s);" % (objname, objtype, self.table)
+        code += "%%mangobj(%s,%s,'%s'n);" % (objname, objtype, self.table)
 
         if self.sas.nosub:
             print(code)
@@ -1019,8 +1019,8 @@ class SASdata:
             outTable = self.table
             outLibref = self.libref
         codestr = code
-        code = "data %s.%s%s;" % (outLibref, outTable, self._dsopts())
-        code += "set %s.%s%s;" % (self.libref, self.table, self._dsopts())
+        code = "data %s.'%s'n %s;" % (outLibref, outTable, self._dsopts())
+        code += "set %s.'%s'n %s;" % (self.libref, self.table, self._dsopts())
         if len(file)>0:
             code += '%%include "%s";' % file
         else:
@@ -1097,7 +1097,7 @@ class SASdata:
             code += " pretty "
         if not sastag:
             code += " nosastags "
-        code +=";\n  export %s.%s %s;\n run;" % (self.libref, self.table, self._dsopts())
+        code +=";\n  export %s.'%s'n %s;\n run;" % (self.libref, self.table, self._dsopts())
 
         if self.sas.nosub:
             print(code)
@@ -1136,7 +1136,7 @@ class SASdata:
         :param label:
         :return:
         """
-        code = "proc sgplot data=%s.%s %s;" % (self.libref, self.table, self._dsopts())
+        code = "proc sgplot data=%s.'%s'n %s;" % (self.libref, self.table, self._dsopts())
         if len(options):
             code += "\n\theatmap x='%s'n y='%s'n / %s;" % (x, y, options)
         else:
@@ -1174,7 +1174,7 @@ class SASdata:
         :param label: LegendLABEL= value for sgplot
         :return:
         """
-        code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
+        code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts()
         code += ";\n\thistogram '" + var + "'n / scale=count"
         if len(label) > 0:
             code += " LegendLABEL='" + label + "'"
@@ -1208,7 +1208,7 @@ class SASdata:
         :param title: an optional Title for the chart
         :return: Data Table
         """
-        code = "proc freq data=%s.%s %s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
+        code = "proc freq data=%s.'%s'n %s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
         code += "\n\ttables '%s'n / out=tmpFreqOut;" % var
         code += "\nrun;"
         if len(title) > 0:
@@ -1222,7 +1222,7 @@ class SASdata:
 
         ll = self._is_valid()
         if self.results.upper() == 'PANDAS':
-            code = "proc freq data=%s.%s%s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
+            code = "proc freq data=%s.'%s'n %s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
             code += "\n\ttables '%s'n / out=tmpFreqOut;" % var
             code += "\nrun;"
             code += "\ndata tmpFreqOut; set tmpFreqOut(obs=%s); run;" % n
@@ -1253,7 +1253,7 @@ class SASdata:
         :param label: LegendLABEL= value for sgplot
         :return: graphic plot
         """
-        code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts()
+        code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts()
         code += ";\n\tvbar '" + var + "'n" 
         if len(label) > 0:
             code += " / LegendLABEL='" + label + "'"
@@ -1287,7 +1287,7 @@ class SASdata:
         :return: graph object
         """
 
-        code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts() + ";\n"
+        code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
 
@@ -1327,7 +1327,7 @@ class SASdata:
         :return: graph object
         """
 
-        code = "proc sgplot data=" + self.libref + '.' + self.table + self._dsopts() + ";\n"
+        code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
 
