@@ -355,7 +355,7 @@ Will use HTML5 for this SASsession.""")
          enc = self.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
          if enc == '':
             self.sascfg.encoding = 'utf-8'
-         self.submit("options svgtitle='svgtitle'; options validvarname=any; ods graphics on;", "text")
+         ll = self.submit("options svgtitle='svgtitle'; options validvarname=any validmemname=extend; ods graphics on;", "text")
          self.sascfg.encoding = enc
          if self.pid is None:
             print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
@@ -904,14 +904,14 @@ Will use HTML5 for this SASsession.""")
 
       Returns True it the Data Set exists and False if it does not
       """
-      code  = "data _null_; e = exist('"
+      code  = "data _null_; e = %sysfunc(exist("
       if len(libref):
          code += libref+"."
-      code += table+"');\n"
-      code += "v = exist('"
+      code += "'"+table.strip()+"'n));\n"
+      code += "v = %sysfunc(exist("
       if len(libref):
          code += libref+"."
-      code += table+"', 'VIEW');\n if e or v then e = 1;\n"
+      code += "'"+table.strip()+"'n, 'VIEW'));\n if e or v then e = 1;\n"
       code += "put 'TABLE_EXISTS=' e 'TAB_EXTEND=';run;"
 
       ll = self.submit(code, "text")
@@ -939,7 +939,7 @@ Will use HTML5 for this SASsession.""")
       if len(libref):
          code += libref+"."
 
-      code += table+" dbms=csv replace; "+self._sb._impopts(opts)+" run;"
+      code += "'"+table.strip()+"'n dbms=csv replace; "+self._sb._impopts(opts)+" run;"
 
       if nosub:
          print(code)
@@ -960,8 +960,13 @@ Will use HTML5 for this SASsession.""")
 
       code  = "filename x \""+file+"\";\n"
       code += "options nosource;\n"
-      code += "proc export data="+libref+"."+table+self._sb._dsopts(dsopts)+" outfile=x"
-      code += " dbms=csv replace; "+self._sb._expopts(opts)+" run;"
+      code += "proc export data="
+
+      if len(libref):
+         code += libref+"."
+
+      code += "'"+table.strip()+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
+      code += self._sb._expopts(opts)+" run;\n"
       code += "options source;\n"
 
       if nosub:
@@ -1411,7 +1416,7 @@ Will use HTML5 for this SASsession.""")
       code = "data "
       if len(libref):
          code += libref+"."
-      code += table+";\n"
+      code += "'"+table.strip()+"'n;\n"
       if len(length):
          code += "length"+length+";\n"
       if len(format):
@@ -1475,9 +1480,9 @@ Will use HTML5 for this SASsession.""")
       datar = ""
 
       if libref:
-         tabname = libref+"."+table
+         tabname = libref+".'"+table.strip()+"'n "
       else:
-         tabname = table
+         tabname = "'"+table.strip()+"'n "
 
       code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code += "data _null_; file STDERR;d = open('sasdata2dataframe');\n"
@@ -1670,9 +1675,9 @@ Will use HTML5 for this SASsession.""")
          port = self.sascfg.tunnel
 
       if libref:
-         tabname = libref+"."+table
+         tabname = libref+".'"+table.strip()+"'n "
       else:
-         tabname = table
+         tabname = "'"+table.strip()+"'n "
 
       tmpdir  = None
 

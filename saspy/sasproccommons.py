@@ -120,7 +120,7 @@ class Codegen(object):
                 if self.objtype.lower() == 'nnet' and self._key.casefold() == 'train':
                     return "{0} {1};\n".format(self._key, ' '.join('{}={}'.format(key, val) for key, val in self._args.items()))
                 if self._key.casefold() == 'out' and not len(self.outmeth):
-                    return "output out={}.{}\n;".format(self._args.libref, self._args.table)
+                    return "output out={}.'{}'n\n;".format(self._args.libref, self._args.table)
 
                 if self._key.casefold() == 'save' and self.objtype == 'treeboost':
                     return '{} %s ;\n'.format(self._key) % ' '.join('{} = {}'.format(key, val) for key, val in self._args.items())
@@ -145,21 +145,21 @@ class Codegen(object):
 
         elif isinstance(self._args, SASdata):
             key = "{} =".format(self._key)
-            args = "{}.{}".format(self._args.libref, self._args.table)
+            args = "{}.'{}'n".format(self._args.libref, self._args.table)
             if self._key in ['out','output']:
-                return 'output out={}.{}\n;'.format(self._args.libref, self._args.table)
+                return "output out={}.'{}'n\n;".format(self._args.libref, self._args.table)
             if self._key == 'score':
                 if self.objtype.casefold() == 'hp4score':
-                    return "score out={}.{}\n;".format(self._args.libref, self._args.table)
+                    return "score out={}.'{}'n\n;".format(self._args.libref, self._args.table)
                 elif self.objtype.casefold() == 'tpspline':
-                    return "score data={0}.{1} out={2}.{3}\n;".format(self.data.libref, self.data.table, self._args.libref, self._args.table)
-                return "score out={}.{}\n;".format(self._args.libref, self._args.table)
+                    return "score data={0}.'{1}'n out={2}.'{3}'n\n;".format(self.data.libref, self.data.table, self._args.libref, self._args.table)
+                return "score out={}.'{}'n\n;".format(self._args.libref, self._args.table)
             elif self._key == 'savestate':
-                return "{} rstore = {}.{}\n;".format(key, self._args.libref, self._args.table)
+                return "{} rstore = {}.'{}'n\n;".format(key, self._args.libref, self._args.table)
             elif self._key in ['output', 'out']:
                 if len(self.outmeth):
                     return "{} out = {};\n".format(self._key, args)
-                return "{}.{}".format(self._args.libref, self._args.table)
+                return "{}.'{}'n".format(self._args.libref, self._args.table)
         if self._key in ['stmtpassthrough', 'prog_stmts']:
             return "{0} ;\n".format(args)
         if self._key =='cls':
@@ -257,11 +257,10 @@ class SASProcCommons:
         if 'plot' in args:
             plot = args['plot']
         if len(outmeth) and not outds == None:
-            #outstr = outds.libref + '.' + outds.table
-            code += "proc %s data=%s.%s%s %s %s=%s %s ;\n" % (
+            code += "proc %s data=%s.'%s'n %s %s %s=%s %s ;\n" % (
                 objtype, data.libref, data.table, data._dsopts(), plot, outmeth, outstr, procopts)
         else:
-            code += "proc %s data=%s.%s%s %s %s ;\n" % (
+            code += "proc %s data=%s.'%s'n %s %s %s ;\n" % (
             objtype, data.libref, data.table, data._dsopts(), plot, procopts)
             if outds is not None:
                 args['output'] = outds
@@ -296,7 +295,7 @@ class SASProcCommons:
                 debug_code += gen.debug
 
         code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,%s);" % (objname, objtype, data.table)
+        code += "%%mangobj(%s,%s,'%s'n);" % (objname, objtype, data.table)
         if self.logger.level == 10:
             print("Proc code submission:\n " + str(code))
             print("\n\n\n" + debug_code)
@@ -345,7 +344,7 @@ class SASProcCommons:
         # Get list of character variables to add to nominal list
         char_string = """
         data _null_; file LOG;
-          d = open('{0}.{1}');
+          d = open("{0}.'{1}'n");
           nvars = attrn(d, 'NVARS');
           put 'VARLIST=';
           do i = 1 to nvars;
@@ -595,7 +594,7 @@ class SASProcCommons:
         if isinstance(data, str):
             tempdata = data
             try:
-                table = tempdata.split('.')[-1]
+                table = tempdata.split('.')[-1].strip()
                 lib = tempdata.split('.')[-2]
             except IndexError:
                 lib = ''

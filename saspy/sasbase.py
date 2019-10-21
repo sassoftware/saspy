@@ -1292,27 +1292,6 @@ class SASsession():
                             optstr += 'NO; '
         return optstr
 
-    def _tablepath(self, table: str, libref: str=None) -> str:
-        """
-        Define a sas dataset path based on a table name and optional libref
-        name. Will return a two-level or one-level path string based on the
-        provided arguments. One-level names are of this form: `table`, while
-        two-level names are of this form: `libref.table`. If libref is not
-        defined, SAS will implicitly define the library to WORK or USER. The
-        USER library needs to have been defined previously in SAS, otherwise
-        WORK is the default option. If the `libref` parameter is any value
-        that evaluates to `False`, the one-level path is returned.
-        :param table [str]: SAS data set name.
-        :option libref [str]: Optional library name.
-        :return [str]:
-        """
-        if not libref:
-            path = table
-        else:
-            path = '{}.{}'.format(libref, table)
-
-        return path
-
     def symput(self, name, value):
         """
         :param name:  name of the macro varable to set:
@@ -1734,9 +1713,9 @@ class SASsession():
           code += " payment="+str(payment)
           vars += 1
        if out is not None:
-          code += " out="+out.libref + '.' + out.table + out._dsopts() 
+          code += " out="+out.libref + ".'" + out.table +"'n " + out._dsopts() 
        if out_summary is not None:
-          code += " outsum="+out_summary.libref + '.' + out_summary.table + out_summary._dsopts() 
+          code += " outsum="+out_summary.libref + ".'" + out_summary.table  +"'n " + out_summary._dsopts() 
        code += "; run;"
 
        if vars != 3:
