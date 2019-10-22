@@ -800,12 +800,12 @@ class SASsessionHTTP():
          else:
             libref = 'WORK'
 
-      code  = "data _null_; e = %sysfunc(exist("
+      code  = 'data _null_; e = exist("'
       code += libref+"."
-      code += "'"+table.strip()+"'n));\n"
-      code += "v = %sysfunc(exist("
+      code += "'"+table.strip()+"'n"+'"'+");\n"
+      code += 'v = exist("'
       code += libref+"."
-      code += "'"+table.strip()+"'n, 'VIEW'));\n if e or v then e = 1;\n"
+      code += "'"+table.strip()+"'n"+'"'+", 'VIEW');\n if e or v then e = 1;\n"
       code += "te='TABLE_EXISTS='; put te e;run;\n"
 
       ll = self.submit(code, "text")

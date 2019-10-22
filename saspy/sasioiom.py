@@ -1059,14 +1059,14 @@ Will use HTML5 for this SASsession.""")
 
       Returns True it the Data Set exists and False if it does not
       """
-      code  = "data _null_; e = %sysfunc(exist("
+      code  = 'data _null_; e = exist("'
       if len(libref):
          code += libref+"."
-      code += "'"+table.strip()+"'n));\n"
-      code += "v = %sysfunc(exist("
+      code += "'"+table.strip()+"'n"+'"'+");\n"
+      code += 'v = exist("'
       if len(libref):
          code += libref+"."
-      code += "'"+table.strip()+"'n, 'VIEW'));\n if e or v then e = 1;\n"
+      code += "'"+table.strip()+"'n"+'"'+", 'VIEW');\n if e or v then e = 1;\n"
       code += "te='TABLE_EXISTS='; put te e;run;\n"
 
       ll = self.submit(code, "text")
