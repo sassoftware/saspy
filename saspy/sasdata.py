@@ -298,9 +298,9 @@ class SASdata:
         return the number of observations for your SASdata object
         """
         code  = "%let lastobs=-1;\n"
-        code += "proc sql;select count(*) format best32. into :lastobs from "
-        code += self.libref + ".'" + self.table + "'n " + self._dsopts() 
-        code += ";%put lastobs=&lastobs lastobsend=;\nquit;"
+        code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+ self.libref + ".'" + self.table + "'n " + self._dsopts() +";run;\n"
+        code += "proc sql;select count(*) format best32. into :lastobs from sasdata2dataframe;"
+        code += "%put lastobs=&lastobs lastobsend=;\nquit;"
 
         if self.sas.nosub:
             print(code)

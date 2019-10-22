@@ -1155,7 +1155,8 @@ class SASsessionHTTP():
       else:
          tabname = "'"+table.strip()+"'n "
 
-      code  = "proc sql; create view work.sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
+      #code  = "proc sql; create view work.sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
+      code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
 
       ll = self.submit(code, "text")
 
@@ -1317,7 +1318,8 @@ class SASsessionHTTP():
       else:
          tmpcsv  = tempfile
 
-      code  = "proc sql; create view work.sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
+      #code  = "proc sql; create view work.sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
+      code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
 
       ll = self.submit(code, "text")
 
