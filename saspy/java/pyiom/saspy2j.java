@@ -649,6 +649,15 @@ public class saspy2j
                         e.printStackTrace();
                         break;
                         }
+                     catch (org.omg.CORBA.DATA_CONVERSION e)
+                        {
+                        String msg = "We failed in reading the Log\n"+e.getMessage();
+                        errp.write(msg);
+                        errp.flush();
+                        lang.Submit("%put "+eol.substring(1)+";");
+                        slen = 1;
+                        continue;
+                        }
                      }
                   }
                }
