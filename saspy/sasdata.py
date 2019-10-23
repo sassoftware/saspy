@@ -293,13 +293,16 @@ class SASdata:
                 else:
                     return ll
 
-    def obs(self):
+    def obs(self, force: bool = False):
         """
         return the number of observations for your SASdata object
         """
         code  = "%let lastobs=-1;\n"
-        code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+ self.libref + ".'" + self.table + "'n " + self._dsopts() +";run;\n"
-        code += "proc sql;select count(*) format best32. into :lastobs from sasdata2dataframe;"
+        if not force:
+           code += "proc sql;select count(*) format best32. into :lastobs from "+ self.libref + ".'" + self.table + "'n " + self._dsopts() + ";"
+        else:
+           code += "data sasdata2dataframe / view=sasdata2dataframe; set "+ self.libref + ".'" + self.table + "'n " + self._dsopts() +";run;\n"
+           code += "proc sql;select count(*) format best32. into :lastobs from sasdata2dataframe;"
         code += "%put lastobs=&lastobs lastobsend=;\nquit;"
 
         if self.sas.nosub:
@@ -318,8 +321,8 @@ class SASdata:
             lastobs = None
 
         if lastobs == -1:
-            print("The number of obs was not able to be determined. Check the SAS log (below) for errors.")
-            print(ll['LOG'])
+            print("The number of obs was not able to be determined. You can specify obs(force=True) to force it to be calculated")
+            #print(ll['LOG'])
             lastobs = None
 
         return lastobs
