@@ -602,7 +602,7 @@ class SASSessionCOM(object):
         else:
             return self.submit(proc_code, 'text')
 
-    def write_csv(self, filepath: str, table: str, libref: str=None, nosub: bool=True,  opts: dict=None, dsopts: dict=None):
+    def write_csv(self, filepath: str, table: str, libref: str=None, nosub: bool=True, dsopts: dict=None, opts: dict=None):
         """
         Submit an export job to the SAS workspace.
         :param filepath [str]: File URI.
@@ -618,7 +618,7 @@ class SASSessionCOM(object):
 
         proc_code = """
             filename csv_file "{}";
-            proc export data={} outfile=csv_file dbms=csv replace;
+            proc export data={} {} outfile=csv_file dbms=csv replace;
                 {}
             run;
         """.format(filepath.replace('"', '""'), tablepath, self._sb._dsopts(dsopts), self._sb._expopts(opts))
@@ -708,7 +708,7 @@ class SASSessionCOM(object):
             df = self.sasdata2dataframeCSV(table, libref, dsopts=dsopts, **kwargs)
         else:
             header, rows, meta = self.read_sasdata(table, libref, dsopts=dsopts)
-            df = pd.DataFrame.from_records(rows, columns=header)
+            df = pd.DataFrame.from_records(rows, columns=header, **kwargs)
 
             for col in meta.keys():
                if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
@@ -716,7 +716,7 @@ class SASSessionCOM(object):
 
         return df
 
-    def sasdata2dataframeCSV(self, table: str, libref: str=None, dsopts: dict=None, **kwargs) -> 'pd.DataFrame':
+    def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
         """
         Create a pandas data frame from a SAS dataset.
         :param table [str]: Table name.
@@ -736,12 +736,12 @@ class SASSessionCOM(object):
             proc export data=_saspy_sd2df {dopt}
                     outfile="{out}"
                     dbms=csv replace;
-                    {exopts};
+                    {exopts}
             run;
         """
 
         sas_csv = '{}saspy_sd2df.csv'.format(self._sb.workpath)
-        opts = self._sb._dsopts(dsopts) if dsopts is not None else ''
+        dopts = self._sb._dsopts(dsopts) if dsopts is not None else ''
         tablepath = self._tablepath(table, libref=libref)
 
         expopts = self._sb._expopts(kwargs.pop('opts', {}))
@@ -780,8 +780,8 @@ class SASSessionCOM(object):
 
         export = EXPORT.format(fmt=' '.join(fmtlist),
             tbl=tablepath,
-            dopt=opts,
-            exopt=expopts,
+            dopt=dopts,
+            exopts=expopts,
             out=sas_csv)
 
         # Use `LanguageService.Submit` instead of `submit` for a slight
@@ -796,7 +796,7 @@ class SASSessionCOM(object):
             with open(kwargs['tempfile'], 'w') as f:
                 f.write(outstring)
 
-        df = pd.read_csv(io.StringIO(outstring), parse_dates=datecols)
+        df = pd.read_csv(io.StringIO(outstring), parse_dates=datecols, **kwargs)
 
         for col in meta.keys():
            if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
