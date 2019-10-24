@@ -736,12 +736,15 @@ class SASSessionCOM(object):
             proc export data=_saspy_sd2df {dopt}
                     outfile="{out}"
                     dbms=csv replace;
+                    {exopts};
             run;
         """
 
         sas_csv = '{}saspy_sd2df.csv'.format(self._sb.workpath)
         opts = self._sb._dsopts(dsopts) if dsopts is not None else ''
         tablepath = self._tablepath(table, libref=libref)
+
+        expopts = self._sb._expopts(kwargs.pop('opts', {}))
 
         # Convert any date format to one pandas can understand (ISO-8601).
         # Save a reference of the column name in a list so pandas can parse
@@ -778,6 +781,7 @@ class SASSessionCOM(object):
         export = EXPORT.format(fmt=' '.join(fmtlist),
             tbl=tablepath,
             dopt=opts,
+            exopt=expopts,
             out=sas_csv)
 
         # Use `LanguageService.Submit` instead of `submit` for a slight

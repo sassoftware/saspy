@@ -919,12 +919,23 @@ class SASsession():
 
             .. code-block:: python
 
-                             {'where'    : 'msrp < 20000 and make = "Ford"'
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
-                              'obs'      :  10
-                              'firstobs' : '12'
+                             {'where'    : 'msrp < 20000 and make = "Ford"',
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight',
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'],
+                              'obs'      :  10,
+                              'firstobs' : '12',
                               'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                             }
+
+        :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames)
+
+            - delimiter is a single character
+            - putnames is a bool  [True | False]
+
+            .. code-block:: python
+
+                             {'delimiter' : '~',  
+                              'putnames'  : True
                              }
         :return: SAS log
         """

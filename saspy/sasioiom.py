@@ -1707,6 +1707,7 @@ Will use HTML5 for this SASsession.""")
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       """
       dsopts = dsopts if dsopts is not None else {}
+      opts   = kwargs.pop('opts', {})
 
       logf     = ''
       lstf     = ''
@@ -1817,7 +1818,8 @@ Will use HTML5 for this SASsession.""")
          code    = ''
 
       #code += "options nosource;\n"
-      code += "proc export data=sasdata2dataframe outfile="+outname+" dbms=csv replace; run\n;"
+      code += "proc export data=sasdata2dataframe outfile="+outname+" dbms=csv replace;\n"
+      code += self._sb._expopts(opts)+" run;\n"
       #code += "options source;\n"
 
       ll = self._asubmit(code, 'text')

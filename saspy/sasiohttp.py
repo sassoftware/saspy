@@ -1304,6 +1304,7 @@ class SASsessionHTTP():
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       '''
+      opts   = kwargs.pop('opts', {})
 
       if libref:
          tabname = libref+".'"+table.strip()+"'n "
@@ -1398,7 +1399,8 @@ class SASsessionHTTP():
 
       #code += "options nosource;\n"
       code  = "filename _tomodsx '"+self._sb.workpath+"_tomodsx' lrecl="+str(self.sascfg.lrecl)+" recfm=v  encoding='utf-8';\n"
-      code += "proc export data=work.sasdata2dataframe outfile=_tomodsx dbms=csv replace; run\n;"
+      code += "proc export data=work.sasdata2dataframe outfile=_tomodsx dbms=csv replace;\n"
+      code += self._sb._expopts(opts)+" run;\n"
       #code += "options source;\n"
 
       ll = self.submit(code, 'text')

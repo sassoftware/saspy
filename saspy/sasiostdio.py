@@ -965,7 +965,7 @@ Will use HTML5 for this SASsession.""")
       if len(libref):
          code += libref+"."
 
-      code += "'"+table.strip()+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
+      code += "'"+table.strip()+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace;\n"
       code += self._sb._expopts(opts)+" run;\n"
       code += "options source;\n"
 
@@ -1668,8 +1668,8 @@ Will use HTML5 for this SASsession.""")
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       """
       dsopts = dsopts if dsopts is not None else {}
-
-      port =  kwargs.get('port', 0)
+      opts   = kwargs.pop('opts', {})
+      port   = kwargs.get('port', 0)
 
       if port==0 and self.sascfg.tunnel:
          # we are using a tunnel; default to that port
@@ -1789,7 +1789,8 @@ Will use HTML5 for this SASsession.""")
 
       code  = ''
       #code += "options nosource;\n"
-      code  = "proc export data=sasdata2dataframe outfile=sock dbms=csv replace; run\n;"
+      code  = "proc export data=sasdata2dataframe outfile=sock dbms=csv replace;\n"
+      code += self._sb._expopts(opts)+" run;\n"
       #code += "options source;\n"
 
       if self.sascfg.ssh:
