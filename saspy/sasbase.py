@@ -1316,9 +1316,11 @@ class SASsession():
 
     def symget(self, name, outtype=None):
         """
-        :param name:  name of the macro varable to set:
+        :param name:    name of the macro varable to get:
+        :param outtype: desired output type of the python variable
 
-            - name    is a character
+            - name    required - is a character string
+            - outtype optional - is one of [int, float, str]  
 
         """
         ll = self.submit("%put " + name + "=&" + name + " tom=;\n")
