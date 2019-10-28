@@ -14,6 +14,12 @@
 #  limitations under the License.
 #
 
+#so the doc will generate for df methods
+try:
+   import pandas
+except Exception as e:
+   pass
+
 import logging
 import re
 import saspy as sp2
@@ -293,8 +299,9 @@ class SASdata:
                 else:
                     return ll
 
-    def obs(self, force: bool = False):
+    def obs(self, force: bool = False) -> int:
         """
+        :param force: if nobs isn't availble, set to True to force it to be calculated; may take time
         return the number of observations for your SASdata object
         """
         code  = "%let lastobs=-1;\n"
@@ -542,7 +549,7 @@ class SASdata:
                 else:
                     return ll
 
-    def info(self):
+    def info(self) -> 'pandas.DataFrame':
         """
         Display the column info on a SAS data object
 
@@ -832,7 +839,7 @@ class SASdata:
         else:
             return self
 
-    def add_vars(self, vars: dict, out: object = None, **kwargs) -> 'SASLOG':
+    def add_vars(self, vars: dict, out: object = None, **kwargs):
         """
         Copy table to itesf, or to 'out=' table and add any vars if you want
 
@@ -1045,7 +1052,7 @@ class SASdata:
         else:
             return ll
 
-    def to_frame(self, **kwargs) -> 'pd.DataFrame':
+    def to_frame(self, **kwargs) -> 'pandas.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame
 
@@ -1055,7 +1062,7 @@ class SASdata:
         """
         return self.to_df(**kwargs)
 
-    def to_df(self, method: str = 'MEMORY', **kwargs) -> 'pd.DataFrame':
+    def to_df(self, method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame
 
@@ -1072,7 +1079,7 @@ class SASdata:
                raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
 
-    def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
+    def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pandas.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame via CSV file
 

@@ -16,10 +16,10 @@
 import logging
 from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
+from saspy.sasresults   import SASresults
 
 if TYPE_CHECKING:
-    from saspy.sasresults import SASresults
-    from saspy.sasbase import SASdata
+    from saspy.sasdata import SASdata
 
 
 class SASViyaML:
@@ -96,7 +96,7 @@ class SASViyaML:
                 target: [str, list, dict] = None,
                 procopts: str = None,
                 stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                **kwargs: dict) -> SASresults:
         """
         Python method to call the FACTMAC procedure
 
@@ -127,7 +127,7 @@ class SASViyaML:
                 output: [str, bool, 'SASdata'] = None,
                 procopts: str = None,
                 stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                **kwargs: dict) -> SASresults:
         """
         Python method to call the FASTKNN procedure
 
@@ -161,7 +161,7 @@ class SASViyaML:
                weight: str = None,
                procopts: str = None,
                stmtpassthrough: str = None,
-               **kwargs: dict) -> 'SASresults':
+               **kwargs: dict) -> SASresults:
         """
         Python method to call the FOREST procedure
 
@@ -202,7 +202,7 @@ class SASViyaML:
                   weight: str = None,
                   procopts: str = None,
                   stmtpassthrough: str = None,
-                  **kwargs: dict) -> 'SASresults':
+                  **kwargs: dict) -> SASresults:
         """
         Python method to call the HPCLUS procedure
 
@@ -243,7 +243,7 @@ class SASViyaML:
              weight: str = None,
              procopts: str = None,
              stmtpassthrough: str = None,
-             **kwargs: dict) -> 'SASresults':
+             **kwargs: dict) -> SASresults:
         """
         Python method to call the HPNEURAL procedure
 
@@ -279,7 +279,7 @@ class SASViyaML:
              weight: str = None,
              procopts: str = None,
              stmtpassthrough: str = None,
-             **kwargs: dict) -> 'SASresults':
+             **kwargs: dict) -> SASresults:
         """
         Python method to call the SVDD procedure
 
@@ -313,7 +313,7 @@ class SASViyaML:
                   target: [str, list, dict] = None,
                   procopts: str = None,
                   stmtpassthrough: str = None,
-                  **kwargs: dict) -> 'SASresults':
+                  **kwargs: dict) -> SASresults:
         """
         Python method to call the SVMACHINE procedure
 

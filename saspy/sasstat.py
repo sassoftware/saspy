@@ -18,9 +18,10 @@ import logging
 from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
 
+from saspy.sasresults import SASresults
+
 if TYPE_CHECKING:
-    from saspy.sasresults import SASresults
-    from saspy.sasbase import SASdata
+    from saspy.sasdata import SASdata
 
 
 # from pdb import set_trace as bp
@@ -104,7 +105,7 @@ class SASstat:
                 target: [str, list, dict] = None,
                 procopts: str = None,
                 stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                **kwargs: dict) -> SASresults:
         """
         Python method to call the HPSPLIT procedure
 
@@ -146,7 +147,7 @@ class SASstat:
             weight: str = None,
             procopts: str = None,
             stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+            **kwargs: dict) -> SASresults:
         """
         Python method to call the REG procedure
 
@@ -189,7 +190,7 @@ class SASstat:
               weight: str = None,
               procopts: str = None,
               stmtpassthrough: str = None,
-              **kwargs: dict) -> 'SASresults':
+              **kwargs: dict) -> SASresults:
         """
         Python method to call the MIXED procedure
 
@@ -236,7 +237,7 @@ class SASstat:
             weight: str = None,
             procopts: str = None,
             stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+            **kwargs: dict) -> SASresults:
         """
         Python method to call the GLM procedure
 
@@ -287,7 +288,7 @@ class SASstat:
                  weight: str = None,
                  procopts: str = None,
                  stmtpassthrough: str = None,
-                 **kwargs: dict) -> 'SASresults':
+                 **kwargs: dict) -> SASresults:
         """
         Python method to call the LOGISTIC procedure
 
@@ -327,7 +328,7 @@ class SASstat:
                  score: [str, bool, 'SASdata'] = True,
                  procopts: str = None,
                  stmtpassthrough: str = None,
-                 **kwargs: dict) -> 'SASresults':
+                 **kwargs: dict) -> SASresults:
         """
         Python method to call the TPSPLINE procedure
 
@@ -362,7 +363,7 @@ class SASstat:
                    weight: str = None,
                    procopts: str = None,
                    stmtpassthrough: str = None,
-                   **kwargs: dict) -> 'SASresults':
+                   **kwargs: dict) -> SASresults:
         """
         Python method to call the HPLOGISTIC procedure
 
@@ -402,7 +403,7 @@ class SASstat:
               weight: str = None,
               procopts: str = None,
               stmtpassthrough: str = None,
-              **kwargs: dict) -> 'SASresults':
+              **kwargs: dict) -> SASresults:
         """
         Python method to call the HPREG procedure
 
@@ -452,7 +453,7 @@ class SASstat:
               weight: str = None,
               procopts: str = None,
               stmtpassthrough: str = None,
-              **kwargs: dict) -> 'SASresults':
+              **kwargs: dict) -> SASresults:
         """
         Python method to call the PHREG procedure
 
@@ -496,7 +497,7 @@ class SASstat:
               weight: str = None,
               procopts: str = None,
               stmtpassthrough: str = None,
-              **kwargs: dict) -> 'SASresults':
+              **kwargs: dict) -> SASresults:
         """
         Python method to call the TTEST procedure
 
@@ -525,7 +526,7 @@ class SASstat:
                weight: str = None,
                procopts: str = None,
                stmtpassthrough: str = None,
-               **kwargs: dict) -> 'SASresults':
+               **kwargs: dict) -> SASresults:
         """
         Python method to call the FACTOR procedure
 

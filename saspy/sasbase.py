@@ -36,6 +36,12 @@
 # sas.[have_at_it]()
 #
 
+#so the doc will generate for df methods
+try:
+   import pandas
+except Exception as e:
+   pass
+
 import os
 import sys
 import datetime
@@ -669,9 +675,7 @@ class SASsession():
 
         When `set_batch ==True`, you get the same dictionary returned as from the `SASsession.submit()` method.
 
-        :param batch: bool
-        :rtype: bool
-        :return: True = return dict([LOG, LST]. False = display LST to screen.
+        :param batch: bool   True = return dict([LOG, LST]. False = display LST to screen.
         """
         self.batch = batch
 
@@ -983,7 +987,7 @@ class SASsession():
      
         return log
      
-    def df2sd(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
+    def df2sd(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '',
               results: str = '', keep_outer_quotes: bool = False,
                                  embedded_newlines: bool = False, 
               LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03') -> 'SASdata':
@@ -1003,9 +1007,9 @@ class SASsession():
         """
         return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, LF, CR, colsep)
 
-    def dataframe2sasdata(self, df: 'pd.DataFrame', table: str = '_df', libref: str = '',
+    def dataframe2sasdata(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '', 
                           results: str = '', keep_outer_quotes: bool = False,
-                                             embedded_newlines: bool = False,
+                                             embedded_newlines: bool = False, 
                           LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03') -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
@@ -1042,8 +1046,8 @@ class SASsession():
         else:
             return None
 
-    def sd2df(self, table: str, libref: str = '', dsopts: dict = None, method: str = 'MEMORY',
-              **kwargs) -> 'pd.DataFrame':
+    def sd2df(self, table: str, libref: str = '', dsopts: dict = None, 
+              method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'sasdata2dataframe'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -1075,8 +1079,8 @@ class SASsession():
         dsopts = dsopts if dsopts is not None else {}
         return self.sasdata2dataframe(table, libref, dsopts, method, **kwargs)
 
-    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None, tempkeep: bool = False,
-                  **kwargs) -> 'pd.DataFrame':
+    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None, 
+                  tempkeep: bool = False, **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'sasdata2dataframe' specifying method='CSV'. Why type all that?
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -1110,8 +1114,8 @@ class SASsession():
         return self.sasdata2dataframe(table, libref, dsopts, method='CSV', tempfile=tempfile, tempkeep=tempkeep,
                                       **kwargs)
 
-    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None, method: str = 'MEMORY',
-                          **kwargs) -> 'pd.DataFrame':
+    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None, 
+                          method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
         SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
@@ -1303,24 +1307,18 @@ class SASsession():
                             optstr += 'NO; '
         return optstr
 
-    def symput(self, name, value):
+    def symput(self, name: str, value):
         """
-        :param name:  name of the macro varable to set:
-        :param value: python variable to use for the value to assign to the macro variable:
-
-            - name    is a character
-            - value   is a variable that can be resolved to a string
+        :param name:  name of the macro varable to set
+        :param value: python variable, that can be resolved to a string, to use for the value to assign to the macro variable
 
         """
         ll = self.submit("%let " + name + "=%NRBQUOTE(" + str(value) + ");\n")
 
-    def symget(self, name, outtype=None):
+    def symget(self, name: str, outtype=None):
         """
-        :param name:    name of the macro varable to get:
-        :param outtype: desired output type of the python variable
-
-            - name    required - is a character string
-            - outtype optional - is one of [int, float, str]  
+        :param name:    [required] name of the macro varable to get
+        :param outtype: [optional] desired output type of the python variable; valid types are [int, float, str]
 
         """
         ll = self.submit("%put " + name + "=&" + name + " tom=;\n")
@@ -1402,7 +1400,7 @@ class SASsession():
         """
         return self.symget("SYSLIBRC")
 
-    def assigned_librefs(self):
+    def assigned_librefs(self) -> list:
         """
         This method returns the list of currently assigned librefs
         """
@@ -1437,7 +1435,7 @@ class SASsession():
         return librefs
 
 
-    def dirlist(self, path):
+    def dirlist(self, path) -> dict:
         """
         This method returns the directory list for the path specified where SAS is running
         """
@@ -1509,7 +1507,7 @@ class SASsession():
         return dirlist
 
 
-    def list_tables(self, libref, results: str = 'list'):
+    def list_tables(self, libref, results: str = 'list') -> list:
         """
         This method returns a list of tuples containing MEMNAME, MEMTYPE of members in the library of memtype data or view
 
@@ -1573,7 +1571,7 @@ class SASsession():
         return tablist
 
 
-    def file_info(self, filepath, results: str = 'dict', fileref: str = '_spfinfo', quiet: bool = False):
+    def file_info(self, filepath, results: str = 'dict', fileref: str = '_spfinfo', quiet: bool = False) -> dict:
         """
         This method returns a dictionary containing the file attributes for the file name provided
 
@@ -1683,7 +1681,7 @@ class SASsession():
                                                                                   
         return res
 
-    def cat(self, path):
+    def cat(self, path) -> str:
        """
        Like Linux 'cat' - open and print the contents of a file
        """
@@ -1693,13 +1691,13 @@ class SASsession():
        print(dat)
 
 
-    def sil(self, life=None, rate=None, amount=None, payment=None, out: object = None, out_summary: object = None) -> 'SAS LST':
+    def sil(self, life=None, rate=None, amount=None, payment=None, out: object = None, out_summary: object = None):
        """
        Alias for simple_interest_loan
        """
        return self.simple_interest_loan(life, rate, amount, payment, out, out_summary)
       
-    def simple_interest_loan(self, life=None, rate=None, amount=None, payment=None, out: object = None, out_summary: object = None) -> 'SAS LST':
+    def simple_interest_loan(self, life=None, rate=None, amount=None, payment=None, out: object = None, out_summary: object = None):
        """
        Calculate the amortization schedule of a simple interest load given 3 of the 4 variables
        You must specify 3 of the for variables, to solve for the 4th.
@@ -1708,7 +1706,7 @@ class SASsession():
        :param rate:    interest rate as a decimal percent: .03 is 3% apr 
        :param amount:  amount of loan
        :param payment: monthly payment amount
-       :return: SAS Log showing the amortization schule calculated for the missing variable
+       :return: SAS Lst showing the amortization schule calculated for the missing variable
        """
        vars = 0
 

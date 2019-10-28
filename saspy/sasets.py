@@ -16,9 +16,9 @@
 import logging
 from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
+from saspy.sasresults   import SASresults
 
 if TYPE_CHECKING:
-    from saspy.sasresults import SASresults
     from saspy.sasbase import SASdata
 
 
@@ -97,7 +97,7 @@ class SASets:
                    var: str = None,
                    procopts: str = None,
                    stmtpassthrough: str = None,
-                   **kwargs: dict) -> 'SASresults':
+                   **kwargs: dict) -> SASresults:
         """
         Python method to call the TIMESERIES procedure
 
@@ -130,7 +130,7 @@ class SASets:
               outlier: str = None,
               procopts: str = None,
               stmtpassthrough: str = None,
-              **kwargs: dict) -> 'SASresults':
+              **kwargs: dict) -> SASresults:
         """
         Python method to call the ARIMA procedure
 
@@ -173,7 +173,7 @@ class SASets:
             splineseason: str = None,
             procopts: str = None,
             stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+            **kwargs: dict) -> SASresults:
         """
         Python method to call the UCM procedure
 
@@ -214,7 +214,7 @@ class SASets:
             out: [str, 'SASdata'] = None,
             procopts: str = None,
             stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+            **kwargs: dict) -> SASresults:
         """
         Python method to call the ESM procedure
 
@@ -238,7 +238,7 @@ class SASets:
                out: [str, 'SASdata'] = None,
                procopts: str = None,
                stmtpassthrough: str = None,
-               **kwargs: dict) -> 'SASresults':
+               **kwargs: dict) -> SASresults:
         """
         Python method to call the TIMEID procedure
 
@@ -266,7 +266,7 @@ class SASets:
                  var: str = None,
                  procopts: str = None,
                  stmtpassthrough: str = None,
-                 **kwargs: dict) -> 'SASresults':
+                 **kwargs: dict) -> SASresults:
         """
         Python method to call the TIMEDATA procedure
 
@@ -302,7 +302,7 @@ class SASets:
             var: str = None,
             procopts: [str, list] = None,
             stmtpassthrough: [str, list] = None,
-            **kwargs: dict) -> 'SASresults':
+            **kwargs: dict) -> SASresults:
         """
         Python method to call the X11 procedure
 
@@ -355,7 +355,7 @@ class SASets:
             x11: str = None,
             procopts: str = None,
             stmtpassthrough: str = None,
-            **kwargs: dict) -> 'SASresults':
+            **kwargs: dict) -> SASresults:
         """
         Python method to call the X12 procedure
 
@@ -406,7 +406,7 @@ class SASets:
                test: str = None,
                procopts: str = None,
                stmtpassthrough: str = None,
-               **kwargs: dict) -> 'SASresults':
+               **kwargs: dict) -> SASresults:
         """
         Python method to call the VARMAX procedure
 
@@ -452,7 +452,7 @@ class SASets:
                 test: str = None,
                 procopts: str = None,
                 stmtpassthrough: str = None,
-                **kwargs: dict) -> 'SASresults':
+                **kwargs: dict) -> SASresults:
         """
         Python method to call the AUTOREG procedure
 
@@ -480,7 +480,7 @@ class SASets:
                id: [str, list] = None,
                procopts: str = None,
                stmtpassthrough: str = None,
-               **kwargs: dict) -> 'SASresults':
+               **kwargs: dict) -> SASresults:
         """
         Python method to call the EXPAND procedure
 

@@ -17,10 +17,10 @@
 import logging
 from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
+from saspy.sasresults   import SASresults
 
 if TYPE_CHECKING:
-    from saspy.sasresults import SASresults
-    from saspy.sasbase import SASdata
+    from saspy.sasdata import SASdata
 
 
 class SASqc:
@@ -90,7 +90,7 @@ class SASqc:
               xchart: str = None,
               procopts: str = None,
               stmtpassthrough: str = None,
-              **kwargs: dict) -> 'SASresults':
+              **kwargs: dict) -> SASresults:
         """
         Python method to call the CUSUM procedure
 
@@ -111,7 +111,7 @@ class SASqc:
                   machart: str = None,
                   procopts: str = None,
                   stmtpassthrough: str = None,
-                  **kwargs: dict) -> 'SASresults':
+                  **kwargs: dict) -> SASresults:
         """
         Python method to call the MACONTROL procedure
 
@@ -144,7 +144,7 @@ class SASqc:
                    weight: str = None,
                    procopts: str = None,
                    stmtpassthrough: str = None,
-                   **kwargs: dict) -> 'SASresults':
+                   **kwargs: dict) -> SASresults:
         """
         Python method to call the CAPABILITY procedure
 
@@ -187,7 +187,7 @@ class SASqc:
                  xschart: str = None,
                  procopts: str = None,
                  stmtpassthrough: str = None,
-                 **kwargs: dict) -> 'SASresults':
+                 **kwargs: dict) -> SASresults:
         """
         Python method to call the SHEWHART procedure
 

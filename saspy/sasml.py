@@ -16,9 +16,9 @@
 import logging
 from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
+from saspy.sasresults   import SASresults
 
 if TYPE_CHECKING:
-    from saspy.sasresults import SASresults
     from saspy.sasbase import SASdata
 
 
@@ -95,7 +95,7 @@ class SASml:
                  target: [str, list, dict] = None,
                  procopts: str = None,
                  stmtpassthrough: str = None,
-                 **kwargs: dict) -> 'SASresults':
+                 **kwargs: dict) -> SASresults:
         """
         Python method to call the HPFOREST procedure
 
@@ -122,7 +122,7 @@ class SASml:
                  score: [str, bool, 'SASdata'] = True,
                  procopts: str = None,
                  stmtpassthrough: str = None,
-                 **kwargs: dict) -> 'SASresults':
+                 **kwargs: dict) -> SASresults:
         """
         Python method to call the HP4SCORE procedure
 
@@ -147,7 +147,7 @@ class SASml:
                   score: [str, bool, 'SASdata'] = True,
                   procopts: str = None,
                   stmtpassthrough: str = None,
-                  **kwargs: dict) -> 'SASresults':
+                  **kwargs: dict) -> SASresults:
         """
         Python method to call the HPCLUS procedure
 
@@ -177,7 +177,7 @@ class SASml:
                  train: [str, dict] = None,
                  procopts: str = None,
                  stmtpassthrough: str = None,
-                 **kwargs: dict) -> 'SASresults':
+                 **kwargs: dict) -> SASresults:
         """
         Python method to call the HPNEURAL procedure
 
@@ -213,7 +213,7 @@ class SASml:
                   target: [str, list, dict] = None,
                   procopts: str = None,
                   stmtpassthrough: str = None,
-                  **kwargs: dict) -> 'SASresults':
+                  **kwargs: dict) -> SASresults:
         """
         Python method to call the TREEBOOST procedure
 
@@ -248,7 +248,7 @@ class SASml:
                target: [str, list, dict] = None,
                procopts: str = None,
                stmtpassthrough: str = None,
-               **kwargs: dict) -> 'SASresults':
+               **kwargs: dict) -> SASresults:
         """
         Python method to call the HPBNET procedure
 

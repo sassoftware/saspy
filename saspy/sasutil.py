@@ -16,10 +16,10 @@
 import logging
 from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
+from saspy.sasresults   import SASresults
 
 if TYPE_CHECKING:
-    from saspy.sasresults import SASresults
-    from saspy.sasbase import SASdata
+    from saspy.sasdata import SASdata
 
 
 class SASutil:
@@ -99,7 +99,7 @@ class SASutil:
                  performance: str = None,
                  procopts: str = None,
                  stmtpassthrough: str = None,
-                 **kwargs: dict) -> 'SASresults':
+                 **kwargs: dict) -> SASresults:
         """
         Python method to call the HPIMPUTE procedure
 
@@ -128,7 +128,7 @@ class SASutil:
               target: [str, list, dict] = None,
               procopts: str = None,
               stmtpassthrough: str = None,
-              **kwargs: dict) -> 'SASresults':
+              **kwargs: dict) -> SASresults:
         """
         Python method to call the HPBIN procedure.
 
@@ -155,7 +155,7 @@ class SASutil:
                  var: str = None,
                  procopts: [str, list, dict] = None,
                  stmtpassthrough: [str, list, dict] = None,
-                 **kwargs: dict) -> 'SASresults':
+                 **kwargs: dict) -> SASresults:
         """
         Python method to call the HPSAMPLE procedure.
 
@@ -189,18 +189,28 @@ class SASutil:
                    weight: str = None,
                    procopts: str = None,
                    stmtpassthrough: str = None,
-                   **kwargs: dict) -> 'SASresults':
+                   **kwargs: dict) -> SASresults:
         """
         Python method to call the UNIVARIATE procedure
 
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=procstat&docsetTarget=procstat_univariate_syntax.htm&locale=en
 
-        The PROC UNIVARIATE statement invokes the procedure. The VAR statement specifies the numeric variables to be analyzed, and it is required if the OUTPUT statement is used to save summary statistics in an output data set. If you do not use the VAR statement, all numeric variables in the data set are analyzed. The plot statements (CDFPLOT, HISTOGRAM, PPPLOT, PROBPLOT, and QQPLOT) create graphical displays, and the INSET statement enhances these displays by adding a table of summary statistics directly on the graph. You can specify one or more of each of the plot statements, the INSET statement, and the OUTPUT statement. If you use a VAR statement, the variables listed in a plot statement must be a subset of the variables listed in the VAR statement.
+        The PROC UNIVARIATE statement invokes the procedure. The VAR statement specifies the numeric variables to be analyzed, and it is required if 
+        the OUTPUT statement is used to save summary statistics in an output data set. If you do not use the VAR statement, all numeric variables in
+        the data set are analyzed. The plot statements (CDFPLOT, HISTOGRAM, PPPLOT, PROBPLOT, and QQPLOT) create graphical displays, and the INSET
+        statement enhances these displays by adding a table of summary statistics directly on the graph. You can specify one or more of each of the 
+        plot statements, the INSET statement, and the OUTPUT statement. If you use a VAR statement, the variables listed in a plot statement must be
+        a subset of the variables listed in the VAR statement.                                                    
 
-        You can specify a BY statement to obtain separate analyses for each BY group. The FREQ statement specifies a variable whose values provide the frequency for each observation. The ID statement specifies one or more variables to identify the extreme observations. The WEIGHT statement specifies a variable whose values are used to weight certain statistics.
+        You can specify a BY statement to obtain separate analyses for each BY group. The FREQ statement specifies a variable whose values provide the
+        frequency for each observation. The ID statement specifies one or more variables to identify the extreme observations. The WEIGHT statement 
+        specifies a variable whose values are used to weight certain statistics.
 
-        You can use a CLASS statement to specify one or two variables that group the data into classification levels. The analysis is carried out for each combination of levels in the input data set, or within each BY group if you also specify a BY statement. You can use the CLASS statement with plot statements to create comparative displays, in which each cell contains a plot for one combination of classification levels.
+        You can use a CLASS statement to specify one or two variables that group the data into classification levels. The analysis is carried out for each
+        combination of levels in the input data set, or within each BY group if you also specify a BY statement. You can use the CLASS statement with plot 
+        statements to create comparative displays, in which each cell contains a plot for one combination of classification levels.                                                                                                                             
+                                                                                                                                                                          
 
         :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can be a string or list type.
