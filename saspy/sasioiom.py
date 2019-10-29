@@ -1931,6 +1931,237 @@ Will use HTML5 for this SASsession.""")
 
       return df
 
+   def sasdata2dataframeTOM(self, table: str, libref: str ='', dsopts: dict = None,
+                            rowsep: str = '\x01', colsep: str = '\x02', tempfile: str=None, 
+                            tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
+      """
+      This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
+      table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref   - the libref for the SAS Data Set.
+      dsopts   - data set options for the input SAS Data Set
+      tempfile - file to use to store CSV, else temporary file will be used.
+      tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+      """
+      dsopts = dsopts if dsopts is not None else {}
+      opts   = kwargs.pop('opts', {})
+
+      logf     = ''
+      lstf     = ''
+      logn     = self._logcnt()
+      logcodei = "%put E3969440A681A24088859985" + logn + ";"
+      lstcodeo =   "E3969440A681A24088859985" + logn
+      logcodeo = "\nE3969440A681A24088859985" + logn
+
+      if libref:
+         tabname = libref+".'"+table.strip()+"'n "
+      else:
+         tabname = "'"+table.strip()+"'n "
+
+      tmpdir  = None
+
+      if tempfile is None:
+         tmpdir = tf.TemporaryDirectory()
+         tmpcsv = tmpdir.name+os.sep+"tomodsx"
+      else:
+         tmpcsv  = tempfile
+
+      #code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
+      code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
+      code += "length var $256;\n"
+      code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
+      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
+      code += "put lr lrecl; put vn nvars; put vl;\n"
+      code += "do i = 1 to nvars; var = compress(varname(d, i), '00'x); put var; end;\n"
+      code += "put vt;\n"
+      code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
+      code += "run;"
+
+      ll = self.submit(code, "text")
+
+      l2 = ll['LOG'].rpartition("LRECL= ")
+      l2 = l2[2].partition("\n")
+      lrecl = int(l2[0])
+
+      l2 = l2[2].partition("VARNUMS= ")
+      l2 = l2[2].partition("\n")
+      nvars = int(l2[0])
+
+      l2 = l2[2].partition("\n")
+      varlist = l2[2].split("\n", nvars)
+      del varlist[nvars]
+
+      l2 = l2[2].partition("VARTYPE=")
+      l2 = l2[2].partition("\n")
+      vartype = l2[2].split("\n", nvars)
+      del vartype[nvars]
+
+      topts             = dict(dsopts)
+      topts['obs']      = 0
+      topts['firstobs'] = ''
+
+      code  = "data work._n_u_l_l_;output;run;\n"
+      code += "data _null_; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
+
+      for i in range(nvars):
+         code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
+      code += "run;\nproc delete data=work._n_u_l_l_;run;"
+
+      ll = self.submit(code, "text")
+
+      l2 = ll['LOG'].rpartition("FMT_CATS=")
+      l2 = l2[2].partition("\n")
+      varcat = l2[2].split("\n", nvars)
+      del varcat[nvars]
+
+      if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
+         local   = True
+         outname = "_tomodsx"
+         code    = "filename _tomodsx '"+tmpcsv+"' lrecl=1 recfm=f encoding=binary;\n"
+      else:
+         local   = False
+         outname = self._tomods1.decode()
+         code    = ""
+
+      rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
+      cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
+
+      code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
+      code += "file "+outname+" lrecl=1 recfm=f encoding=binary; put "
+      for i in range(nvars):
+         code += "'"+varlist[i]+"'n "
+         if vartype[i] == 'N':
+            if varcat[i] in self._sb.sas_date_fmts:
+               code += 'E8601DA10. '
+            else:
+               if varcat[i] in self._sb.sas_time_fmts:
+                  code += 'E8601TM15.6 '
+               else:
+                  if varcat[i] in self._sb.sas_datetime_fmts:
+                     code += 'E8601DT26.6 '
+                  else:
+                     code += 'best32. '
+         if (i < (len(varlist)-1)):
+            code += cdelim+' '
+         else:
+            code += rdelim
+      code += "; run;\n"
+      ll = self._asubmit(code, "text")
+
+      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode())
+
+      done  = False
+      bail  = False
+      datar = b""
+
+      if not local:
+         csv = open(tmpcsv, mode='w')
+         while not done:
+                while True:
+                    if os.name == 'nt':
+                       try:
+                          rc = self.pid.wait(0)
+                          self.pid = None
+                          self._sb.SASpid = None
+                          print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                          return None
+                       except:
+                          pass
+                    else:
+                       rc = os.waitpid(self.pid, os.WNOHANG)
+                       if rc[1]:
+                           self.pid = None
+                           self._sb.SASpid = None
+                           print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                           return None
+
+                    try:
+                       data = self.stdout[0].recv(4096)
+                    except (BlockingIOError):
+                       data = b''
+
+                    if len(data) > 0:
+                       datar += data
+                       data   = datar.rpartition(rowsep.encode())
+                       datap  = data[0]+data[1]
+                       datar  = data[2]
+
+                       if datap.count(lstcodeo.encode()) >= 1:
+                          done  = True
+                          datar = datap.rpartition(logcodeo.encode())
+                          datap = datar[0]
+
+                       csv.write(datap.decode(self.sascfg.encoding, errors='replace'))
+                       if bail and done:
+                          break
+                    else:
+                       if datar.count(lstcodeo.encode()) >= 1:
+                          done = True
+                       if bail and done:
+                          break
+                       sleep(0.1)
+                       try:
+                          log = self.stderr[0].recv(4096).decode(errors='replace')
+                       except (BlockingIOError):
+                          log = b''
+
+                       if len(log) > 0:
+                          logf += log
+                          if logf.count(logcodeo) >= 1:
+                             bail = True
+                done = True
+                self._log += logf
+
+         csv.close()
+      else:
+         while True:
+            try:
+               lst = self.stdout[0].recv(4096).decode(errors='replace')
+            except (BlockingIOError):
+               lst = b''
+
+            if len(lst) > 0:
+               lstf += lst
+               if lstf.count(lstcodeo) >= 1:
+                  done = True;
+
+            try:
+               log = self.stderr[0].recv(4096).decode(errors='replace')
+            except (BlockingIOError):
+               sleep(0.1)
+               log = b''
+
+            if len(log) > 0:
+               logf += log
+               if logf.count(logcodeo) >= 1:
+                  bail = True;
+                  self._log += logf
+
+            if done and bail:
+               break
+
+      df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
+                       sep=colsep, lineterminator=rowsep, **kwargs)
+
+      if tmpdir:
+         tmpdir.cleanup()
+      else:
+         if not tempkeep:
+            os.remove(tmpcsv)
+
+      for i in range(nvars):
+         if vartype[i] == 'N':
+            if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+               if df.dtypes[df.columns[i]].kind not in ('f','u','i','b','B','c','?'):
+                  df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce')
+            else:
+               if df.dtypes[df.columns[i]].kind not in ('M'):
+                  df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
+         else:
+            df[varlist[i]].replace(' ', np.NaN, True)
+
+      return df
+
 if __name__ == "__main__":
     startsas()
 
