@@ -58,6 +58,7 @@ class SASconfigIOM:
       self.javaparms = cfg.get('javaparms', '')
       self.lrecl     = cfg.get('lrecl', None)
       self.reconnect = cfg.get('reconnect', True)
+      self.logbufsz  = cfg.get('logbufsz', None)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -190,6 +191,13 @@ class SASconfigIOM:
             print("Parameter 'reconnect' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.reconnect = bool(inrecon)
+
+      inlogsz = kwargs.get('logbufsz', None)
+      if inlogsz:
+         if inlogsz < 32:
+            self.logbufsz = 32
+         else:
+            self.logbufsz = inlogsz
 
       self._prompt = session._sb.sascfg._prompt
 
@@ -337,6 +345,8 @@ Will use HTML5 for this SASsession.""")
       else:
          parms += ["-zero"]
       parms += ["-lrecl", str(self.sascfg.lrecl)]
+      if self.sascfg.logbufsz is not None:
+         parms += ["-logbufsz", str(self.sascfg.logbufsz)]
       parms += ['']
 
       s = ''
@@ -1939,6 +1949,8 @@ Will use HTML5 for this SASsession.""")
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref   - the libref for the SAS Data Set.
       dsopts   - data set options for the input SAS Data Set
+      rowsep  - the row seperator character to use; defaults to '\x01'
+      colsep  - the column seperator character to use; defaults to '\x02'
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       """

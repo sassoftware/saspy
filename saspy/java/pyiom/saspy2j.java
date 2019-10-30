@@ -102,6 +102,7 @@ public class saspy2j
    static int      hosts    = 0;
    static String[] iomhosts;
    static int      lrecl    = 32767;
+   static int      logsz    = 32767;
 
 
    public static void main(String[] args) throws
@@ -119,6 +120,7 @@ public class saspy2j
 
       String addr = "";
       String log  = "";
+      String plog = "";
       String lst  = "";
       String pgm  = "";
       String eol  = "";
@@ -157,6 +159,8 @@ public class saspy2j
             spn = true;
          else if (args[x].equalsIgnoreCase("-lrecl"))
             lrecl = Integer.parseInt(args[x + 1]);
+         else if (args[x].equalsIgnoreCase("-logbufsz"))
+            logsz = Integer.parseInt(args[x + 1]);
          }
 
       iomhosts = iomhost.split(";");
@@ -603,14 +607,14 @@ public class saspy2j
                      {
                      try
                         {
-                        log  = lang.FlushLog(9999999);
+                        log  = lang.FlushLog(logsz);
                         slen = log.length();
                         if (slen > 0)
                            {
                            errp.write(log);
                            errp.flush();
 
-                           if (log.contains(eol))
+                           if ((plog+log).contains(eol))
                               {
                               outp.write(eol);
                               if (ods)
@@ -621,6 +625,7 @@ public class saspy2j
                               outp.flush();
                               fndeol = true;
                               }
+                           plog = log;
                            }
                         }
                      catch (org.omg.CORBA.COMM_FAILURE e)
