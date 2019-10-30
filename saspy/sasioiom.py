@@ -2026,6 +2026,18 @@ Will use HTML5 for this SASsession.""")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
+      dts = kwargs.pop('dtype', '')
+      if dts == '':
+         dts = {}
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                  dts[varlist[i]] = 'float'
+               else:
+                  dts[varlist[i]] = 'str'
+            else:
+               dts[varlist[i]] = 'str'
+
       if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
          local   = True
          outname = "_tomodsx"
@@ -2152,8 +2164,9 @@ Will use HTML5 for this SASsession.""")
             if done and bail:
                break
 
+      miss = ['                               .', '                         .']
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
-                       sep=colsep, lineterminator=rowsep, **kwargs)
+                       sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, **kwargs)
 
       if tmpdir:
          tmpdir.cleanup()
