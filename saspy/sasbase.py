@@ -325,6 +325,8 @@ class SASsession():
     :param results: Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
     :param lrecl: An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
     :param autoexec: A string of SAS code that will be submitted upon establishing a connection
+    :param display: controls how to display html in differnet notebooks. default is jupyter.
+           valid values are ['jupyter', 'zeppelin', 'databricks']
     :return: 'SASsession'
     :rtype: 'SASsession'
 
@@ -346,6 +348,7 @@ class SASsession():
 
     :param port: (Optional) The ssh port of the remote machine normally 22 (equivalent to invoking ssh with the -p option)
     :param tunnel: (Optional) Certain methods of saspy require opening a local port and accepting data streamed from the SAS instance.
+    :param rtunnel: (Optional) Certain methods of saspy require opening a remote port and accepting data streamed to the SAS instance.
 
     **IOM**
 
@@ -369,14 +372,15 @@ class SASsession():
 
     and for IOM IO via COM
 
-    :param host: Resolvable host name or IP of the server
-    :param port: Server port
+    :param iomhost: Resolvable host name or IP of the server
+    :param iomport: Server port
     :param class_id: IOM workspace server class identifier
     :param provider: IOM provider
+    :param authkey: Key value for finding credentials in .authfile
     :param encoding: This is the python encoding value that matches the SAS
                      session encoding of the IOM server
-    :param user: User
-    :param pw: Password
+    :param omruser: User
+    :param omrpw: Password
 
 
     **Common SASsession attributes**

@@ -319,9 +319,10 @@ lrecl -
     An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 display -
-    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'. The default
-    when this is not specified is 'jupyter'. Jupyter uses IPython to render HTML, which is how saspy has 
-    always worked. To support Zeppelin's display method, a different display interface had to be added to saspy.
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
+    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'. 
+    Jupyter uses IPython to render HTML, which is how saspy has always worked. 
+    To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
 
 .. code-block:: ipython3
@@ -563,6 +564,8 @@ encoding  -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and 
     windows-1252, respectively. 
+timeout -
+    Timeout value for establishing connection to workspace server
 appserver -
     If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
     that you want to connect to, i.e.: 'SASApp - Workspace Server'. Without this the Object spawner will only try the
@@ -588,10 +591,15 @@ lrecl -
     An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 display -
-    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'. The default
-    when this is not specified is 'jupyter'. Jupyter uses IPython to render HTML, which is how saspy has 
-    always worked. To support Zeppelin's display method, a different display interface had to be added to saspy.
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
+    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'. 
+    Jupyter uses IPython to render HTML, which is how saspy has always worked. 
+    To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
+
+logbufsz -
+    see issue 266 for details on this. not needed normally
+
 
 
 .. code-block:: ipython3
@@ -720,10 +728,14 @@ lrecl -
     An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 display -
-    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'. The default
-    when this is not specified is 'jupyter'. Jupyter uses IPython to render HTML, which is how saspy has 
-    always worked. To support Zeppelin's display method, a different display interface had to be added to saspy.
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
+    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'. 
+    Jupyter uses IPython to render HTML, which is how saspy has always worked. 
+    To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
+
+logbufsz -
+    see issue 266 for details on this. not needed normally
 
 .. code-block:: ipython3
 
@@ -932,9 +944,10 @@ lrecl -
     (Optional) An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 display -
-    (Optional) This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'. The default
-    when this is not specified is 'jupyter'. Jupyter uses IPython to render HTML, which is how saspy has 
-    always worked. To support Zeppelin's display method, a different display interface had to be added to saspy.
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
+    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'. 
+    Jupyter uses IPython to render HTML, which is how saspy has always worked. 
+    To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
 
 .. code-block:: ipython3
