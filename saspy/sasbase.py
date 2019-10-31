@@ -363,6 +363,7 @@ class SASsession():
     :param appserver: Appserver name of the workspace server to connect to
     :param sspi: Boolean for using IWA to connect to a workspace server configured to use IWA
     :param javaparms: for specifying java command line options if necessary
+    :param logbufsz: see issue 266 for details on this. not needed normally
 
     **COM**
 
