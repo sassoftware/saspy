@@ -1216,7 +1216,7 @@ class SASsession():
 
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
-                       See the specific sasdata2dataframe* method in the access method got valid possibilities.
+                       See the specific sasdata2dataframe* method in the access method for valid possibilities.
                        These are generally here for diagnostics when researching issue, to override things or try
                        different options.  
 
