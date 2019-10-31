@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 3.1.6 documentation</title>
+  <title>API Reference &mdash; saspy 3.1.7 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.1.6 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.1.7 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.1.6
+                3.1.7
               </div>
             
           
@@ -602,8 +602,7 @@ whole session.</p>
 <dl class="method">
 <dt id="saspy.SASsession.sasdata2dataframe">
 <code class="descname">sasdata2dataframe</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>method: str = 'MEMORY'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sasdata2dataframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
+<dd><p>This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -630,8 +629,23 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 </pre></div>
 </div>
 </li>
-<li><strong>method</strong> &#8211; defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data</li>
-<li><strong>kwargs</strong> &#8211; dictionary</li>
+<li><strong>method</strong> &#8211; <p>defaults to MEMORY:</p>
+<ul>
+<li>MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory</li>
+<li>CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data</li>
+<li><dl class="first docutils">
+<dt>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.</dt>
+<dd>this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
+has problems with</dd>
+</dl>
+</li>
+</ul>
+</li>
+<li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method got valid possibilities.
+These are generally here for diagnostics when researching issue, to override things or try
+different options.</li>
 </ul>
 </td>
 </tr>
@@ -764,8 +778,7 @@ See the SASViyaML.py module.</p>
 <dl class="method">
 <dt id="saspy.SASsession.sd2df">
 <code class="descname">sd2df</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>method: str = 'MEMORY'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is an alias for &#8216;sasdata2dataframe&#8217;. Why type all that?
-SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
+<dd><p>This is an alias for &#8216;sasdata2dataframe&#8217;. Why type all that?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -792,8 +805,23 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 </pre></div>
 </div>
 </li>
-<li><strong>method</strong> &#8211; defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data</li>
-<li><strong>kwargs</strong> &#8211; dictionary</li>
+<li><strong>method</strong> &#8211; <p>defaults to MEMORY;</p>
+<ul>
+<li>MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory</li>
+<li>CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data</li>
+<li><dl class="first docutils">
+<dt>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.</dt>
+<dd>this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
+has problems with</dd>
+</dl>
+</li>
+</ul>
+</li>
+<li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.
+These are generally here for diagnostics when researching issue, to override things or try
+different options.</li>
 </ul>
 </td>
 </tr>
@@ -806,9 +834,8 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 
 <dl class="method">
 <dt id="saspy.SASsession.sd2df_CSV">
-<code class="descname">sd2df_CSV</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_CSV" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is an alias for &#8216;sasdata2dataframe&#8217; specifying method=&#8217;CSV&#8217;. Why type all that?
-SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame</p>
+<code class="descname">sd2df_CSV</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>opts: dict = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_CSV" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an alias for &#8216;sasdata2dataframe&#8217; specifying method=&#8217;CSV&#8217;. Why type all that?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -837,7 +864,69 @@ SASdata object that refers to the Sas Data Set you want to export to a Pandas Da
 </li>
 <li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local CSV file; default it a temporary file that&#8217;s cleaned up</li>
 <li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
-<li><strong>kwargs</strong> &#8211; dictionary</li>
+<li><strong>opts</strong> &#8211; <p>a dictionary containing any of the following Proc Export options(delimiter, putnames)</p>
+<ul>
+<li>delimiter is a single character</li>
+<li>putnames is a bool  [True | False]</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>  
+ <span class="s1">&#39;putnames&#39;</span>  <span class="p">:</span> <span class="bp">True</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.
+These are generally here for diagnostics when researching issue, to override things or try
+different options.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Pandas data frame</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.sd2df_DISK">
+<code class="descname">sd2df_DISK</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_DISK" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an alias for &#8216;sasdata2dataframe&#8217; specifying method=&#8217;DISK&#8217;. Why type all that?</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>table</strong> &#8211; the name of the SAS Data Set you want to export to a Pandas Data Frame</li>
+<li><strong>libref</strong> &#8211; the libref for the SAS Data Set.</li>
+<li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
+<ul>
+<li>where is a string</li>
+<li>keep are strings or list of strings.</li>
+<li>drop are strings or list of strings.</li>
+<li>obs is a numbers - either string or int</li>
+<li>first obs is a numbers - either string or int</li>
+<li>format is a string or dictionary { var: format }</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
+ <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local file; default it a temporary file that&#8217;s cleaned up</li>
+<li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
+<li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.
+These are generally here for diagnostics when researching issue, to override things or try
+different options.</li>
 </ul>
 </td>
 </tr>
@@ -1530,9 +1619,24 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file</strong> &#8211; the OS filesystem path of the file to be created (exported from this SAS Data Set)</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file</strong> &#8211; the OS filesystem path of the file to be created (exported from this SAS Data Set)</li>
+<li><strong>opts</strong> &#8211; <p>a dictionary containing any of the following Proc Export options(delimiter, putnames)</p>
+<ul>
+<li>delimiter is a single character</li>
+<li>putnames is a bool  [True | False]</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>  
+ <span class="s1">&#39;putnames&#39;</span>  <span class="p">:</span> <span class="bp">True</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -1547,8 +1651,23 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>method</strong> &#8211; defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data</li>
-<li><strong>kwargs</strong> &#8211; </li>
+<li><strong>method</strong> &#8211; <p>defaults to MEMORY:</p>
+<ul>
+<li>MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory</li>
+<li>CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data</li>
+<li><dl class="first docutils">
+<dt>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.</dt>
+<dd>this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
+has problems with</dd>
+</dl>
+</li>
+</ul>
+</li>
+<li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.
+These are generally here for diagnostics when researching issue, to override things or try
+different options.</li>
 </ul>
 </td>
 </tr>
@@ -1561,8 +1680,8 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 
 <dl class="method">
 <dt id="saspy.sasdata.SASdata.to_df_CSV">
-<code class="descname">to_df_CSV</code><span class="sig-paren">(</span><em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.sasdata.SASdata.to_df_CSV" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export this SAS Data Set to a Pandas Data Frame via CSV file</p>
+<code class="descname">to_df_CSV</code><span class="sig-paren">(</span><em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>opts: dict = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.sasdata.SASdata.to_df_CSV" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an alias for &#8216;to_df&#8217; specifying method=&#8217;CSV&#8217;.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1570,7 +1689,51 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local CSV file; default it a temporary file that&#8217;s cleaned up</li>
 <li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
-<li><strong>kwargs</strong> &#8211; </li>
+<li><strong>opts</strong> &#8211; <p>a dictionary containing any of the following Proc Export options(delimiter, putnames)</p>
+<ul>
+<li>delimiter is a single character</li>
+<li>putnames is a bool  [True | False]</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>  
+ <span class="s1">&#39;putnames&#39;</span>  <span class="p">:</span> <span class="bp">True</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.
+These are generally here for diagnostics when researching issue, to override things or try
+different options.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Pandas data frame</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">&#8216;pd.DataFrame&#8217;</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.sasdata.SASdata.to_df_DISK">
+<code class="descname">to_df_DISK</code><span class="sig-paren">(</span><em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.sasdata.SASdata.to_df_DISK" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is an alias for &#8216;to_df&#8217; specifying method=&#8217;DISK&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local file; default it a temporary file that&#8217;s cleaned up</li>
+<li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
+<li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.
+These are generally here for diagnostics when researching issue, to override things or try
+different options.</li>
 </ul>
 </td>
 </tr>
@@ -1587,7 +1750,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <dl class="method">
 <dt id="saspy.sasdata.SASdata.to_frame">
 <code class="descname">to_frame</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.sasdata.SASdata.to_frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export this SAS Data Set to a Pandas Data Frame</p>
+<dd><p>This is just an alias for to_df()</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -3948,7 +4111,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.1.6',
+            VERSION:'3.1.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
