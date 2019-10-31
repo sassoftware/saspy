@@ -210,6 +210,8 @@ These are generally defined in the sascfg_personal.py file as opposed to being s
 <li><strong>results</strong> &#8211; Type of tabular results to return. default is &#8216;Pandas&#8217;, other options are &#8216;HTML or &#8216;TEXT&#8217;</li>
 <li><strong>lrecl</strong> &#8211; An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</li>
 <li><strong>autoexec</strong> &#8211; A string of SAS code that will be submitted upon establishing a connection</li>
+<li><strong>display</strong> &#8211; controls how to display html in differnet notebooks. default is jupyter.
+valid values are [&#8216;jupyter&#8217;, &#8216;zeppelin&#8217;, &#8216;databricks&#8217;]</li>
 </ul>
 </td>
 </tr>
@@ -248,6 +250,7 @@ These are generally defined in the sascfg_personal.py file as opposed to being s
 <li><strong>identity</strong> &#8211; (Optional) path to a .ppk identity file to be used on the ssh -i parameter</li>
 <li><strong>port</strong> &#8211; (Optional) The ssh port of the remote machine normally 22 (equivalent to invoking ssh with the -p option)</li>
 <li><strong>tunnel</strong> &#8211; (Optional) Certain methods of saspy require opening a local port and accepting data streamed from the SAS instance.</li>
+<li><strong>rtunnel</strong> &#8211; (Optional) Certain methods of saspy require opening a remote port and accepting data streamed to the SAS instance.</li>
 </ul>
 </td>
 </tr>
@@ -272,6 +275,7 @@ These are generally defined in the sascfg_personal.py file as opposed to being s
 <li><strong>appserver</strong> &#8211; Appserver name of the workspace server to connect to</li>
 <li><strong>sspi</strong> &#8211; Boolean for using IWA to connect to a workspace server configured to use IWA</li>
 <li><strong>javaparms</strong> &#8211; for specifying java command line options if necessary</li>
+<li><strong>logbufsz</strong> &#8211; see issue 266 for details on this. not needed normally</li>
 </ul>
 </td>
 </tr>
@@ -284,14 +288,15 @@ These are generally defined in the sascfg_personal.py file as opposed to being s
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>host</strong> &#8211; Resolvable host name or IP of the server</li>
-<li><strong>port</strong> &#8211; Server port</li>
+<li><strong>iomhost</strong> &#8211; Resolvable host name or IP of the server</li>
+<li><strong>iomport</strong> &#8211; Server port</li>
 <li><strong>class_id</strong> &#8211; IOM workspace server class identifier</li>
 <li><strong>provider</strong> &#8211; IOM provider</li>
+<li><strong>authkey</strong> &#8211; Key value for finding credentials in .authfile</li>
 <li><strong>encoding</strong> &#8211; This is the python encoding value that matches the SAS
 session encoding of the IOM server</li>
-<li><strong>user</strong> &#8211; User</li>
-<li><strong>pw</strong> &#8211; Password</li>
+<li><strong>omruser</strong> &#8211; User</li>
+<li><strong>omrpw</strong> &#8211; Password</li>
 </ul>
 </td>
 </tr>

@@ -446,9 +446,10 @@ which would be after SAS already included any autoexec file if there was one.</d
 <dt>lrecl -</dt>
 <dd>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
 <dt>display -</dt>
-<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;. The default
-when this is not specified is &#8216;jupyter&#8217;. Jupyter uses IPython to render HTML, which is how saspy has
-always worked. To support Zeppelin&#8217;s display method, a different display interface had to be added to saspy.
+<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;,
+or, as of version 3.1.7, &#8216;databricks&#8217;. The default when this is not specified is &#8216;jupyter&#8217;.
+Jupyter uses IPython to render HTML, which is how saspy has always worked.
+To support other Notebooks display methods, different display interface have to be added to saspy.
 If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
@@ -659,6 +660,8 @@ default encodings for running SAS in Unicode, on Unix, and on Windows,
 respectively. Those map to Python encoding values: utf8, latin1, and
 windows-1252, respectively.</p>
 </dd>
+<dt>timeout -</dt>
+<dd>Timeout value for establishing connection to workspace server</dd>
 <dt>appserver -</dt>
 <dd>If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
 that you want to connect to, i.e.: &#8216;SASApp - Workspace Server&#8217;. Without this the Object spawner will only try the
@@ -681,10 +684,13 @@ does allows for a way to specify them if something was needed.</dd>
 <dt>lrecl -</dt>
 <dd>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
 <dt>display -</dt>
-<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;. The default
-when this is not specified is &#8216;jupyter&#8217;. Jupyter uses IPython to render HTML, which is how saspy has
-always worked. To support Zeppelin&#8217;s display method, a different display interface had to be added to saspy.
+<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;,
+or, as of version 3.1.7, &#8216;databricks&#8217;. The default when this is not specified is &#8216;jupyter&#8217;.
+Jupyter uses IPython to render HTML, which is how saspy has always worked.
+To support other Notebooks display methods, different display interface have to be added to saspy.
 If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
+<dt>logbufsz -</dt>
+<dd>see issue 266 for details on this. not needed normally</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Unix client class path</span>
 <span class="n">cpL</span>  <span class="o">=</span>  <span class="s2">&quot;/whever/I/put/these/jars/sas.svc.connection.jar&quot;</span>
@@ -798,10 +804,13 @@ does allows for a way to specify them if something was needed.</dd>
 <dt>lrecl -</dt>
 <dd>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
 <dt>display -</dt>
-<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;. The default
-when this is not specified is &#8216;jupyter&#8217;. Jupyter uses IPython to render HTML, which is how saspy has
-always worked. To support Zeppelin&#8217;s display method, a different display interface had to be added to saspy.
+<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;,
+or, as of version 3.1.7, &#8216;databricks&#8217;. The default when this is not specified is &#8216;jupyter&#8217;.
+Jupyter uses IPython to render HTML, which is how saspy has always worked.
+To support other Notebooks display methods, different display interface have to be added to saspy.
 If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
+<dt>logbufsz -</dt>
+<dd>see issue 266 for details on this. not needed normally</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Windows client class path</span>
 <span class="c1"># build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION</span>
@@ -994,9 +1003,10 @@ which would be after SAS already included any autoexec file if there was one.</d
 <dt>lrecl -</dt>
 <dd>(Optional) An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
 <dt>display -</dt>
-<dd>(Optional) This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;. The default
-when this is not specified is &#8216;jupyter&#8217;. Jupyter uses IPython to render HTML, which is how saspy has
-always worked. To support Zeppelin&#8217;s display method, a different display interface had to be added to saspy.
+<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;,
+or, as of version 3.1.7, &#8216;databricks&#8217;. The default when this is not specified is &#8216;jupyter&#8217;.
+Jupyter uses IPython to render HTML, which is how saspy has always worked.
+To support other Notebooks display methods, different display interface have to be added to saspy.
 If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">httpsviya</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ip&#39;</span>      <span class="p">:</span> <span class="s1">&#39;sastpw.rndk8s.openstack.sas.com&#39;</span><span class="p">,</span>
