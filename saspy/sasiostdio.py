@@ -1835,20 +1835,23 @@ Will use HTML5 for this SASsession.""")
             os.remove(tmpcsv)
 
       for i in range(nvars):
-         if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-            df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
+         if vartype[i] == 'N':
+            if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
 
       return df
 
-   def sasdata2dataframeTOM(self, table: str, libref: str ='', dsopts: dict = None,  
-                            rowsep: str = '\x01', colsep: str = '\x02', tempfile: str=None, 
-                            tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframeDISK(self, table: str, libref: str ='', dsopts: dict = None,  
+                             rowsep: str = '\x01', colsep: str = '\x02', tempfile: str=None, 
+                             tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref   - the libref for the SAS Data Set.
       dsopts   - data set options for the input SAS Data Set
       port     - port to use for socket. Defaults to 0 which uses a random available ephemeral port
+      rowsep   - the row seperator character to use; defaults to '\x01'
+      colsep   - the column seperator character to use; defaults to '\x02'
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       """
@@ -1920,18 +1923,6 @@ Will use HTML5 for this SASsession.""")
       l2 = l2[2].partition("\n")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
-
-      dts = kwargs.pop('dtype', '')
-      if dts == '':
-         dts = {}
-         for i in range(nvars):
-            if vartype[i] == 'N':
-               if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  dts[varlist[i]] = 'float'
-               else:
-                  dts[varlist[i]] = 'str'
-            else:
-               dts[varlist[i]] = 'str'
 
       if self.sascfg.ssh:
          try:
@@ -2020,7 +2011,19 @@ Will use HTML5 for this SASsession.""")
       else:
          ll = self.submit(code, "text")
 
-      miss = ['                               .', '                         .']
+      dts = kwargs.pop('dtype', '')
+      if dts == '':
+         dts = {}
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                  dts[varlist[i]] = 'float'
+               else:
+                  dts[varlist[i]] = 'str'
+            else:
+               dts[varlist[i]] = 'str'
+
+      miss = ['                               .', '                         .', ' ']
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, **kwargs)
 
@@ -2032,14 +2035,8 @@ Will use HTML5 for this SASsession.""")
 
       for i in range(nvars):
          if vartype[i] == 'N':
-            if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-               if df.dtypes[df.columns[i]].kind not in ('f','u','i','b','B','c','?'):
-                  df[varlist[i]] = pd.to_numeric(df[varlist[i]], errors='coerce')
-            else:
-               if df.dtypes[df.columns[i]].kind not in ('M'):
-                  df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
-         else:
-            df[varlist[i]].replace(' ', np.NaN, True)
+            if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
 
       return df
 

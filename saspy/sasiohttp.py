@@ -1144,6 +1144,7 @@ class SASsessionHTTP():
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref  - the libref for the SAS Data Set.
+      dsopts  - data set options for the input SAS Data Set
       '''
 
       method = kwargs.pop('method', None)
@@ -1282,7 +1283,7 @@ class SASsessionHTTP():
                if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
                   tdf[varlist[i]] = pd.to_numeric(tdf[varlist[i]], errors='coerce') 
                else:
-                  tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='ignore') 
+                  tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce') 
             else:
                tdf[varlist[i]] = tdf[varlist[i]].apply(str.strip)
                tdf[varlist[i]].replace('', np.NaN, True)
@@ -1381,10 +1382,6 @@ class SASsessionHTTP():
       code += ";run;\n"
       ll = self.submit(code, "text")
 
-      conn = self.sascfg.HTTPConn; conn.connect()
-      headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
-      uri = "/compute/sessions/"+self.pid+"/data/work/saspy_ds2df/rows"
-
       dts = kwargs.pop('dtype', '')
       if dts == '':
          dts = {}
@@ -1416,8 +1413,139 @@ class SASsessionHTTP():
             os.remove(tmpcsv)
 
       for i in range(nvars):
-         if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-            df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
+         if vartype[i] == 'FLOAT':
+            if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
+
+      return df
+
+   def sasdata2dataframeDISK(self, table: str, libref: str ='', dsopts: dict ={},
+                             rowsep: str = '\x01', colsep: str = '\x02', tempfile: str=None, 
+                             tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
+      '''
+      This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
+      table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref   - the libref for the SAS Data Set.
+      dsopts   - data set options for the input SAS Data Set
+      rowsep   - the row seperator character to use; defaults to '\x01'
+      colsep   - the column seperator character to use; defaults to '\x02'
+      tempfile - file to use to store CSV, else temporary file will be used.
+      tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+      '''
+      opts   = kwargs.pop('opts', {})
+
+      if libref:
+         tabname = libref+".'"+table.strip()+"'n "
+      else:
+         tabname = "'"+table.strip()+"'n "
+
+      tmpdir  = None
+
+      if tempfile is None:
+         tmpdir = tf.TemporaryDirectory()
+         tmpcsv = tmpdir.name+os.sep+"tomodsx"
+      else:
+         tmpcsv  = tempfile
+
+      code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+
+      ll = self.submit(code, "text")
+
+      ##GET Data Table Info
+      #conn = self.sascfg.HTTPConn; conn.connect()
+      #headers={"Accept":"application/vnd.sas.compute.data.table+json", "Authorization":"Bearer "+self.sascfg._token}
+      #conn.request('GET', "/compute/sessions/"+self.pid+"/data/work/sasdata2dataframe", headers=headers)
+      #req = conn.getresponse()
+      #status = req.status
+      #conn.close()
+
+      #resp = req.read()
+      #js = json.loads(resp.decode(self.sascfg.encoding))
+
+      conn = self.sascfg.HTTPConn; conn.connect()
+      headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
+      conn.request('GET', "/compute/sessions/"+self.pid+"/data/work/sasdata2dataframe/columns?start=0&limit=9999999", headers=headers)
+      req = conn.getresponse()
+      status = req.status
+      resp = req.read()
+      conn.close()
+
+      js = json.loads(resp.decode(self.sascfg.encoding))
+
+      varlist = []
+      vartype = []
+      nvars = js.get('count')
+      lst = js.get('items')
+      for i in range(len(lst)):
+         varlist.append(lst[i].get('name'))
+         vartype.append(lst[i].get('type'))
+
+      code  = "data _null_; set work.sasdata2dataframe(obs=1);put 'FMT_CATS=';\n"
+      for i in range(nvars):
+         code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
+      code += "run;\n"
+   
+      ll = self.submit(code, "text")
+
+      l2 = ll['LOG'].rpartition("FMT_CATS=")
+      l2 = l2[2].partition("\n")              
+      varcat = l2[2].split("\n", nvars)
+      del varcat[nvars]
+
+      rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
+      cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
+
+      code  = "filename _tomodsx '"+self._sb.workpath+"_tomodsx' lrecl=1 recfm=f encoding=binary;\n"
+      code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
+      code += "file _tomodsx lrecl=1 recfm=f encoding=binary; put "
+      for i in range(nvars):
+         code += "'"+varlist[i]+"'n "
+         if vartype[i] == 'FLOAT':
+            if varcat[i] in self._sb.sas_date_fmts:
+               code += 'E8601DA10. '
+            else:
+               if varcat[i] in self._sb.sas_time_fmts:
+                  code += 'E8601TM15.6 '
+               else:
+                  if varcat[i] in self._sb.sas_datetime_fmts:
+                     code += 'E8601DT26.6 '
+                  else:
+                     code += 'best32. '
+         if (i < (len(varlist)-1)):
+            code += cdelim+' '
+         else:
+            code += rdelim
+      code += "; run;\n"
+      ll = self.submit(code, "text")
+
+      ll = self.download(tmpcsv, self._sb.workpath+"_tomodsx")
+
+      dts = kwargs.pop('dtype', '')
+      if dts == '':
+         dts = {}
+         for i in range(nvars):
+            if vartype[i] == 'FLOAT':
+               if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                  dts[varlist[i]] = 'float'
+               else:
+                  dts[varlist[i]] = 'str'
+            else:
+               dts[varlist[i]] = 'str'
+
+      miss = ['                               .', '                         .', ' ']
+      df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
+                       sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, **kwargs)
+
+      if tmpdir:
+         tmpdir.cleanup()
+      else:
+         if not tempkeep:
+            os.remove(tmpcsv)
+
+      for i in range(nvars):
+         if vartype[i] == 'FLOAT':
+            if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
 
       return df
 
