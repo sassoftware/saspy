@@ -704,6 +704,10 @@ class SASSessionCOM(object):
         :option tempfile [str]: File path for the saved output file.
         :return [pd.DataFrame]:
         """
+        if method.upper() == 'DISK':
+           print("This access method doesn't support the DISK method. Try CSV or MEMORY")
+           return None
+
         if method.upper() == 'CSV':
             df = self.sasdata2dataframeCSV(table, libref, dsopts=dsopts, **kwargs)
         else:
@@ -722,6 +726,7 @@ class SASSessionCOM(object):
         :param table [str]: Table name.
         :option libref [str]: Library name.
         :option dsopts [dict]: Dataset options.
+        :option opts [dict]: dictionary containing any of the following Proc Export options(delimiter, putnames)
         :option tempkeep [bool]: Download the csv file if using the csv method.
         :option tempfile [str]: File path for the saved output file.
         :return [pd.DataFrame]:

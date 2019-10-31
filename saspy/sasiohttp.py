@@ -1148,8 +1148,10 @@ class SASsessionHTTP():
       '''
 
       method = kwargs.pop('method', None)
-      if method and method.lower() == 'csv':
+      if   method and method.lower() == 'csv':
          return self.sasdata2dataframeCSV(table, libref, dsopts, **kwargs)
+      elif method and method.lower() == 'disk':
+         return self.sasdata2dataframeDISK(table, libref, dsopts, **kwargs)
 
       if libref:
          tabname = libref+".'"+table.strip()+"'n "
@@ -1302,6 +1304,7 @@ class SASsessionHTTP():
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref   - the libref for the SAS Data Set.
       dsopts   - data set options for the input SAS Data Set
+      opts     - a dictionary containing any of the following Proc Export options(delimiter, putnames)
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       '''

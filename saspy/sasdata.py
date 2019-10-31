@@ -1001,6 +1001,16 @@ class SASdata:
         This method will export a SAS Data Set to a file in CSV format.
 
         :param file: the OS filesystem path of the file to be created (exported from this SAS Data Set)
+        :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames)
+
+            - delimiter is a single character
+            - putnames is a bool  [True | False]
+
+            .. code-block:: python
+
+                             {'delimiter' : '~',  
+                              'putnames'  : True
+                             }
         :return:
         """
         opts = opts if opts is not None else {}
@@ -1054,7 +1064,7 @@ class SASdata:
 
     def to_frame(self, **kwargs) -> 'pandas.DataFrame':
         """
-        Export this SAS Data Set to a Pandas Data Frame
+        This is just an alias for to_df()
 
         :param kwargs:
         :return: Pandas data frame
@@ -1066,8 +1076,20 @@ class SASdata:
         """
         Export this SAS Data Set to a Pandas Data Frame
 
-        :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
-        :param kwargs:
+        :param method: defaults to MEMORY:
+
+           - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
+           - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
+           - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.
+                    this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
+                    has problems with 
+
+        :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                       They are either access method specific parms or specific pandas parms.
+                       See the specific sasdata2dataframe* method in the access method for valid possibilities.
+                       These are generally here for diagnostics when researching issue, to override things or try
+                       different options.  
+
         :return: Pandas data frame
         """
         ll = self._is_valid()
@@ -1079,17 +1101,51 @@ class SASdata:
                raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
             return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
 
-    def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pandas.DataFrame':
+    def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, opts: dict = None, **kwargs) -> 'pandas.DataFrame':
         """
-        Export this SAS Data Set to a Pandas Data Frame via CSV file
+        This is an alias for 'to_df' specifying method='CSV'.
 
         :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
-        :param kwargs:
+        :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames)
+
+            - delimiter is a single character
+            - putnames is a bool  [True | False]
+
+            .. code-block:: python
+
+                             {'delimiter' : '~',  
+                              'putnames'  : True
+                             }
+
+        :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                       They are either access method specific parms or specific pandas parms.
+                       See the specific sasdata2dataframe* method in the access method for valid possibilities.
+                       These are generally here for diagnostics when researching issue, to override things or try
+                       different options.  
+
         :return: Pandas data frame
         :rtype: 'pd.DataFrame'
         """
-        return self.to_df(method='CSV', tempfile=tempfile, tempkeep=tempkeep, **kwargs)
+        opts   =   opts if   opts is not None else {}
+        return self.to_df(method='CSV', tempfile=tempfile, tempkeep=tempkeep, opts=opts, **kwargs)
+
+    def to_df_DISK(self, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pandas.DataFrame':
+        """
+        This is an alias for 'to_df' specifying method='DISK'.
+
+        :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                       They are either access method specific parms or specific pandas parms.
+                       See the specific sasdata2dataframe* method in the access method for valid possibilities.
+                       These are generally here for diagnostics when researching issue, to override things or try
+                       different options.  
+
+        :return: Pandas data frame
+        :rtype: 'pd.DataFrame'
+        """
+        return self.to_df(method='DISK', tempfile=tempfile, tempkeep=tempkeep, **kwargs)
 
     def to_json(self, pretty: bool = False, sastag: bool = False, **kwargs) -> str:
         """

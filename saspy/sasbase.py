@@ -1050,7 +1050,6 @@ class SASsession():
               method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'sasdata2dataframe'. Why type all that?
-        SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
 
         :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
         :param libref: the libref for the SAS Data Set.
@@ -1072,18 +1071,29 @@ class SASsession():
                               'firstobs' : '12'
                               'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
-        :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
-        :param kwargs: dictionary
+        :param method: defaults to MEMORY;
+
+           - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
+           - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
+           - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.
+                    this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
+                    has problems with 
+
+        :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                       They are either access method specific parms or specific pandas parms.
+                       See the specific sasdata2dataframe* method in the access method for valid possibilities.
+                       These are generally here for diagnostics when researching issue, to override things or try
+                       different options.  
+
         :return: Pandas data frame
         """
         dsopts = dsopts if dsopts is not None else {}
         return self.sasdata2dataframe(table, libref, dsopts, method, **kwargs)
 
     def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None, 
-                  tempkeep: bool = False, **kwargs) -> 'pandas.DataFrame':
+                  tempkeep: bool = False, opts: dict = None, **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'sasdata2dataframe' specifying method='CSV'. Why type all that?
-        SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
 
         :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
         :param libref: the libref for the SAS Data Set.
@@ -1107,18 +1117,73 @@ class SASsession():
                              }
         :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
-        :param kwargs: dictionary
+        :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames)
+
+            - delimiter is a single character
+            - putnames is a bool  [True | False]
+
+            .. code-block:: python
+
+                             {'delimiter' : '~',  
+                              'putnames'  : True
+                             }
+
+        :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                       They are either access method specific parms or specific pandas parms.
+                       See the specific sasdata2dataframe* method in the access method for valid possibilities.
+                       These are generally here for diagnostics when researching issue, to override things or try
+                       different options.  
+
         :return: Pandas data frame
         """
         dsopts = dsopts if dsopts is not None else {}
+        opts   =   opts if   opts is not None else {}
         return self.sasdata2dataframe(table, libref, dsopts, method='CSV', tempfile=tempfile, tempkeep=tempkeep,
+                                      opts=opts, **kwargs)
+
+    def sd2df_DISK(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None, 
+                  tempkeep: bool = False, **kwargs) -> 'pandas.DataFrame':
+        """
+        This is an alias for 'sasdata2dataframe' specifying method='DISK'. Why type all that?
+
+        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
+        :param libref: the libref for the SAS Data Set.
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+
+            - where is a string
+            - keep are strings or list of strings.
+            - drop are strings or list of strings.
+            - obs is a numbers - either string or int
+            - first obs is a numbers - either string or int
+            - format is a string or dictionary { var: format }
+
+            .. code-block:: python
+
+                             {'where'    : 'msrp < 20000 and make = "Ford"'
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
+                              'obs'      :  10
+                              'firstobs' : '12'
+                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                             }
+        :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                       They are either access method specific parms or specific pandas parms.
+                       See the specific sasdata2dataframe* method in the access method for valid possibilities.
+                       These are generally here for diagnostics when researching issue, to override things or try
+                       different options.  
+
+        :return: Pandas data frame
+        """
+        dsopts = dsopts if dsopts is not None else {}
+        return self.sasdata2dataframe(table, libref, dsopts, method='DISK', tempfile=tempfile, tempkeep=tempkeep,
                                       **kwargs)
 
     def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None, 
                           method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-        SASdata object that refers to the Sas Data Set you want to export to a Pandas Data Frame
 
         :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
         :param libref: the libref for the SAS Data Set.
@@ -1141,8 +1206,20 @@ class SASsession():
                               'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
 
-        :param method: defaults to MEMORY; the original method. CSV is the other choice which uses an intermediary csv file; faster for large data
-        :param kwargs: dictionary
+        :param method: defaults to MEMORY:
+
+           - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
+           - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
+           - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.
+                    this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
+                    has problems with 
+
+        :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                       They are either access method specific parms or specific pandas parms.
+                       See the specific sasdata2dataframe* method in the access method got valid possibilities.
+                       These are generally here for diagnostics when researching issue, to override things or try
+                       different options.  
+
         :return: Pandas data frame
         """
         if self.sascfg.pandas:
