@@ -801,7 +801,7 @@ class SASsession():
         if len(ll['LST']) > 0:
             self.DISPLAY(self.HTML(ll['LST']))
         else:
-            self.DISPLAY(self.HTML("<pre> NOT HTML TO RENDER. LOG IS:\n"+ll['LOG']+" </pre>"))
+            self.DISPLAY(self.HTML("<pre> NO HTML TO RENDER. LOG IS:\n"+ll['LOG']+" </pre>"))
 
     def sasdata(self, table: str, libref: str = '', results: str = '', dsopts: dict = None) -> 'SASdata':
         """
