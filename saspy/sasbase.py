@@ -1230,6 +1230,10 @@ class SASsession():
         if self.sascfg.pandas:
            raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
 
+        if method.lower() not in ['memory', 'csv', 'disk']:
+            print("The specified method is not valid. Supported methods are MEMORY, CSV and DISK")
+            return None
+
         dsopts = dsopts if dsopts is not None else {}
         if self.exist(table, libref) == 0:
             print('The SAS Data Set ' + libref + '.' + table + ' does not exist')
