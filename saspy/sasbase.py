@@ -794,6 +794,15 @@ class SASsession():
         self._io._asubmit(code.decode(), results='text')
         os.close(fd)
 
+    def _render_html_or_log(self, ll):
+        """
+        This method renders the html lst if it's there else the log
+        """
+        if len(ll['LST']) > 0:
+            self.DISPLAY(self.HTML(ll['LST']))
+        else:
+            self.DISPLAY(self.HTML("<pre> NOT HTML TO RENDER. LOG IS:\n"+ll['LOG']+" </pre>"))
+
     def sasdata(self, table: str, libref: str = '', results: str = '', dsopts: dict = None) -> 'SASdata':
         """
         Method to define an existing SAS dataset so that it can be accessed via SASPy
@@ -877,7 +886,7 @@ class SASsession():
            if self.results.lower() == 'html':
               ll = self._io.submit(code, "html")
               if not self.batch:
-                 self.DISPLAY(self.HTML(ll['LST']))
+                 self._render_html_or_log(ll)
               else:
                  return ll
            else:
@@ -1825,7 +1834,7 @@ class SASsession():
           if self.results.lower() == 'html':
              ll = self._io.submit(code, "html")
              if not self.batch:
-                self.DISPLAY(self.HTML(ll['LST']))
+                self._render_html_or_log(ll)
              else:
                 return ll
           else:

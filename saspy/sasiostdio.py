@@ -734,6 +734,7 @@ Will use HTML5 for this SASsession.""")
       lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                     '<body class="l body">').replace("font-size: x-small;",
                                                                                      "font-size:  normal;")
+      self._sb._lastlog = logd
       return dict(LOG=logd, LST=lstd)
 
    def _breakprompt(self, eos):

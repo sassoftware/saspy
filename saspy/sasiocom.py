@@ -490,6 +490,7 @@ class SASSessionCOM(object):
         # submits is not a burden.
         self._reset()
 
+        self._sb._lastlog = log
         return {'LOG': log, 'LST': listing}
 
     def saslog(self) -> str:

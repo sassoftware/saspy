@@ -770,6 +770,11 @@ class SASsessionHTTP():
       else:
          lstd = self._getlsttxt(jobid)
 
+      trip = lstd.rpartition("/*]]>*/")
+      if len(trip[1]) > 0 and len(trip[2]) < 200:
+         lstd = ''
+
+      self._sb._lastlog = logd
       return dict(LOG=logd, LST=lstd)
 
    def saslog(self):

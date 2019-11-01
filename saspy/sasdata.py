@@ -218,8 +218,8 @@ class SASdata:
             if self.HTML:
                 if not ll:
                     ll = self.sas._io.submit(code)
-                if not self.sas.batch:
-                    self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+                if not self.sas.batch:  
+                   self.sas._render_html_or_log(ll)
                 else:
                     return ll
             else:
@@ -286,7 +286,7 @@ class SASdata:
                 else:
                     ll = le
                 if not self.sas.batch:
-                    self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+                    self.sas._render_html_or_log(ll)
                 else:
                     return ll
             else:
@@ -505,7 +505,7 @@ class SASdata:
                 if not ll:
                     ll = self.sas._io.submit(code)
                 if not self.sas.batch:
-                    self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+                    self.sas._render_html_or_log(ll)
                 else:
                     return ll
             else:
@@ -538,7 +538,7 @@ class SASdata:
                 if not ll:
                     ll = self.sas._io.submit(code)
                 if not self.sas.batch:
-                    self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+                    self.sas._render_html_or_log(ll)
                 else:
                     return ll
             else:
@@ -635,7 +635,7 @@ class SASdata:
                if not ll:
                   ll = self.sas._io.submit(code)
                if not self.sas.batch:
-                  self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+                  self.sas._render_html_or_log(ll)
                else:
                   return ll
             else:
@@ -1226,7 +1226,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+            self.sas._render_html_or_log(ll)
         else:
             return ll
 
@@ -1260,7 +1260,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+            self.sas._render_html_or_log(ll)
         else:
             return ll
 
@@ -1298,7 +1298,7 @@ class SASdata:
                 if not ll:
                     ll = self.sas._io.submit(code)
                 if not self.sas.batch:
-                    self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+                    self.sas._render_html_or_log(ll)
                 else:
                     return ll
             else:
@@ -1339,7 +1339,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+            self.sas._render_html_or_log(ll)
         else:
             return ll
 
@@ -1379,7 +1379,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+            self.sas._render_html_or_log(ll)
         else:
             return ll
 
@@ -1419,7 +1419,7 @@ class SASdata:
             ll = self.sas._io.submit(code)
             self.HTML = html
         if not self.sas.batch:
-            self.sas.DISPLAY(self.sas.HTML(ll['LST']))
+            self.sas._render_html_or_log(ll)
         else:
             return ll
 
