@@ -589,6 +589,62 @@ class SASsession():
 
         return self._io._asubmit(code, results)
 
+    def submitLOG(self, code, results: str = '', prompt: dict = None):
+        '''
+        This method is a convenience wrapper around the submit() method. It executes the submit then prints the LOG that was returned.
+        '''
+        print(self.submit(code, results, prompt)['LOG'])
+
+    def submitLST(self, code, results: str = '', prompt: dict = None, method: str = None):
+        '''
+        This method is a convenience wrapper around the submit() method. It executes the submit then renders the LST that was returned,
+        as either HTML or TEXT, depending upon results. The method= parameter allows you to adjust what gets returned to suit your needs.
+
+           - listonly   - this is the default, and returns the LST (will be empty if no output was produced by what you submitted) 
+           - listorlog  - this returns the LST, unless it's empty, then it returns the LOG instead (one or the other). Useful in case there's an ERROR.
+           - listandlog - as you might guess, this returns both. The LST followed by the LOG
+           - logandlist - as you might guess, this returns both. The LOG followed by the LST
+        '''
+        if method is None:
+           method = 'listonly'
+
+        if method.lower() not in ['listonly', 'listorlog', 'listandlog', 'logandlist']:
+           print("The specified method is not valid. Using the default: 'listonly'")
+           method = 'listonly'
+
+        if results == '':
+           if self.results.upper() == 'PANDAS':
+              results = 'HTML'
+           else:
+              results = self.results
+
+        ll  = self.submit(code, results, prompt)
+
+        if results.upper() == 'HTML':
+           if   method.lower() == 'listonly':
+              self.DISPLAY(self.HTML(ll['LST']))
+           elif method.lower() == 'listorlog':
+              if len(ll['LST']) > 0:
+                 self.DISPLAY(self.HTML(ll['LST']))
+              else:
+                 self.DISPLAY(self.HTML("<pre>"+ll['LOG']+"</pre>"))
+           elif method.lower() == 'listandlog':
+              self.DISPLAY(self.HTML(ll['LST']+"\n<pre>"+ll['LOG']+"</pre>"))
+           else:
+              self.DISPLAY(self.HTML("<pre>"+ll['LOG']+"\n</pre>"+ll['LST']))
+        else:
+           if   method.lower() == 'listonly':
+              print(ll['LST'])
+           elif method.lower() == 'listorlog':
+              if len(ll['LST']) > 0:
+                 print(ll['LST'])
+              else:
+                 print(ll['LOG'])
+           elif method.lower() == 'listandlog':
+              print(ll['LST']+"\n"+ll['LOG'])
+           else:
+              print(ll['LOG']+"\n"+ll['LST'])
+
     def submit(self, code: str, results: str = '', prompt: dict = None) -> dict:
         '''
         This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
