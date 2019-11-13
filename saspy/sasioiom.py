@@ -2169,7 +2169,12 @@ Will use HTML5 for this SASsession.""")
             else:
                dts[varlist[i]] = 'str'
 
-      miss = ['                               .', '                         .', ' ']
+      miss = ['                               .', 
+              '                         .', 
+              '              .', 
+              '         .', 
+              ' ']
+
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, **kwargs)
 
