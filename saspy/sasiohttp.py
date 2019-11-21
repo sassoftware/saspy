@@ -1209,19 +1209,23 @@ class SASsessionHTTP():
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      code  = "data work.saspy_ds2df / view=work.saspy_ds2df; set "+tabname+self._sb._dsopts(dsopts)+";\n format "
+      code  = "data work.saspy_ds2df / view=work.saspy_ds2df; set "+tabname+self._sb._dsopts(dsopts)+";\n"
       for i in range(nvars):
          if vartype[i] == 'FLOAT':
+            code += "format '"+varlist[i]+"'n "
             if varcat[i] in self._sb.sas_date_fmts:
-               code += "'"+varlist[i]+"'n E8601DA10. "
+               code += 'E8601DA10.'
             else:
                if varcat[i] in self._sb.sas_time_fmts:
-                  code += "'"+varlist[i]+"'n E8601TM15.6 "
+                  code += 'E8601TM15.6'
                else:
                   if varcat[i] in self._sb.sas_datetime_fmts:
-                     code += "'"+varlist[i]+"'n E8601DT26.6 "
+                     code += 'E8601DT26.6'
                   else:
-                     code += "'"+varlist[i]+"'n best32. "
+                     code += 'best32.'
+            code += '; '
+            if i % 10 == 0:
+               code +='\n'
       code += ";run;\n"
       ll = self.submit(code, "text")
 
@@ -1505,25 +1509,36 @@ class SASsessionHTTP():
 
       code  = "filename _tomodsx '"+self._sb.workpath+"_tomodsx' lrecl=1 recfm=f encoding=binary;\n"
       code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
-      code += "file _tomodsx lrecl=1 recfm=f encoding=binary; put "
       for i in range(nvars):
-         code += "'"+varlist[i]+"'n "
          if vartype[i] == 'FLOAT':
+            code += "format '"+varlist[i]+"'n "
             if varcat[i] in self._sb.sas_date_fmts:
-               code += 'E8601DA10. '
+               code += 'E8601DA10.'
             else:
                if varcat[i] in self._sb.sas_time_fmts:
-                  code += 'E8601TM15.6 '
+                  code += 'E8601TM15.6'
                else:
                   if varcat[i] in self._sb.sas_datetime_fmts:
-                     code += 'E8601DT26.6 '
+                     code += 'E8601DT26.6'
                   else:
-                     code += 'best32. '
-         if (i < (len(varlist)-1)):
-            code += cdelim+' '
+                     code += 'best32.'
+            code += '; '
+            if i % 10 == 0:
+               code +='\n'
+
+      code += "file _tomodsx lrecl=1 recfm=f encoding=binary;\n"
+
+      last  = len(varlist)-1
+      for i in range(nvars):
+         code += "put '"+varlist[i]+"'n "
+         if i != last:
+            code += cdelim+'; '
          else:
-            code += rdelim
-      code += "; run;\n"
+            code += rdelim+'; '
+         if i % 10 == 0:
+            code +='\n'
+      code += "run;"
+
       ll = self.submit(code, "text")
 
       ll = self.download(tmpcsv, self._sb.workpath+"_tomodsx")
@@ -1540,11 +1555,7 @@ class SASsessionHTTP():
             else:
                dts[varlist[i]] = 'str'
 
-      miss = ['                               .', 
-              '                         .', 
-              '              .', 
-              '         .', 
-              ' ']
+      miss = ['.', ' ']
 
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, **kwargs)

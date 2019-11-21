@@ -1579,25 +1579,36 @@ Will use HTML5 for this SASsession.""")
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
-      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n file "+self._tomods1.decode()+" dlm="+cdelim+" termstr=NL; put "
-
+      code  = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
       for i in range(nvars):
-         code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
+            code += "format '"+varlist[i]+"'n "
             if varcat[i] in self._sb.sas_date_fmts:
-               code += 'E8601DA10. '+cdelim
+               code += 'E8601DA10.'
             else:
                if varcat[i] in self._sb.sas_time_fmts:
-                  code += 'E8601TM15.6 '+cdelim
+                  code += 'E8601TM15.6'
                else:
                   if varcat[i] in self._sb.sas_datetime_fmts:
-                     code += 'E8601DT26.6 '+cdelim
+                     code += 'E8601DT26.6'
                   else:
-                     code += 'best32. '+cdelim
-         if not (i < (len(varlist)-1)):
-            code += rdelim
-      code += ";\n run;"
+                     code += 'best32.'
+            code += '; '
+            if i % 10 == 0:
+               code +='\n'
 
+      code += "file "+self._tomods1.decode()+" lrecl=1 recfm=f encoding=binary;\n"
+
+      last  = len(varlist)-1
+      for i in range(nvars):
+         code += "put '"+varlist[i]+"'n "
+         if i != last:
+            code += cdelim+'; '
+         else:
+            code += rdelim+'; '
+         if i % 10 == 0:
+            code +='\n'
+      code += "run;"
       ll = self._asubmit(code, 'text')
 
       self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
@@ -1648,12 +1659,12 @@ Will use HTML5 for this SASsession.""")
                    first = False
 
                 datar += data
-                data   = datar.rpartition(colsep.encode()+rowsep.encode()+b'\n')
+                data   = datar.rpartition(rowsep.encode())
                 datap  = data[0]+data[1]
                 datar  = data[2]
 
                 datap = datap.decode(self.sascfg.encoding, errors='replace')
-                for i in datap.split(sep=colsep+rowsep+'\n'):
+                for i in datap.split(sep=rowsep):
                    if i != '':
                       r.append(tuple(i.split(sep=colsep)))
 
@@ -2044,25 +2055,36 @@ Will use HTML5 for this SASsession.""")
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
       code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
-      code += "file "+outname+" lrecl=1 recfm=f encoding=binary; put "
       for i in range(nvars):
-         code += "'"+varlist[i]+"'n "
          if vartype[i] == 'N':
+            code += "format '"+varlist[i]+"'n "
             if varcat[i] in self._sb.sas_date_fmts:
-               code += 'E8601DA10. '
+               code += 'E8601DA10.'
             else:
                if varcat[i] in self._sb.sas_time_fmts:
-                  code += 'E8601TM15.6 '
+                  code += 'E8601TM15.6'
                else:
                   if varcat[i] in self._sb.sas_datetime_fmts:
-                     code += 'E8601DT26.6 '
+                     code += 'E8601DT26.6'
                   else:
-                     code += 'best32. '
-         if (i < (len(varlist)-1)):
-            code += cdelim+' '
+                     code += 'best32.'
+            code += '; '
+            if i % 10 == 0:
+               code +='\n'
+
+      code += "file "+outname+" lrecl=1 recfm=f encoding=binary;\n"
+
+      last  = len(varlist)-1
+      for i in range(nvars):
+         code += "put '"+varlist[i]+"'n "
+         if i != last:
+            code += cdelim+'; '
          else:
-            code += rdelim
-      code += "; run;\n"
+            code += rdelim+'; '
+         if i % 10 == 0:
+            code +='\n'
+      code += "run;"
+
       ll = self._asubmit(code, "text")
 
       self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode())
@@ -2169,11 +2191,7 @@ Will use HTML5 for this SASsession.""")
             else:
                dts[varlist[i]] = 'str'
 
-      miss = ['                               .', 
-              '                         .', 
-              '              .', 
-              '         .', 
-              ' ']
+      miss = ['.', ' ']
 
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, **kwargs)
