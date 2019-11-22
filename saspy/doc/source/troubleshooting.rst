@@ -558,9 +558,9 @@ Here are examples of each of the above problems:
     No SAS process attached. SAS process has terminated unexpectedly.
 
 
-3)  The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.
+3)  The native implementation module for the security package could not be found in the path.
 
-    For Windows Local connection, you don't have the path to the sspiauth.dll in yout System Path variable. See the configuration doc
+    For Windows Local connection (and remote connections using IWA via {'sspi' : True}), you don't have the path to the sspiauth.dll in yout System Path variable. See the configuration doc
     to see how to specify this: https://sassoftware.github.io/saspy/install.html#local
 
 .. code-block:: ipython3
@@ -569,7 +569,7 @@ Here are examples of each of the above problems:
     >>> import saspy
     >>> sas = saspy.SASsession()
     
-    The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.
+    The native implementation module for the security package could not be found in the path.
     SAS process has terminated unexpectedly. RC from wait was: 4294967290
     SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
     
@@ -630,6 +630,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__pxx__sp0__1\\deploywiz\\sas.core.jar;
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
+
 
 
 
