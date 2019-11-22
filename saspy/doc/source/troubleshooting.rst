@@ -502,7 +502,7 @@ Scroll down based upon the number to see an example of that error and help on wh
 2) **The application could not log on to the server "host:port". The user ID "wrong_user" or the password is incorrect.**
 
 
-3) **The native implementation module for the security package could not be found in the path.
+3) **The native implementation module for the security package could not be found in the path.**
 
 
 4) **The application could not find a command to launch a SAS Workspace Server.**
@@ -630,6 +630,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__pxx__sp0__1\\deploywiz\\sas.core.jar;
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
+
 
 
 
