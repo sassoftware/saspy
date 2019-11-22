@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Troubleshooting &mdash; saspy 3.1.7 documentation</title>
+  <title>Troubleshooting &mdash; saspy 3.1.8 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.1.7 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.1.8 documentation" href="index.html"/>
         <link rel="next" title="License" href="license.html"/>
         <link rel="prev" title="Contributing new methods" href="adding-procedures.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.1.7
+                3.1.8
               </div>
             
           
@@ -649,15 +649,15 @@ be trying to connect you to the wrong App Serever.</p>
 </pre></div>
 </div>
 <ol class="arabic" start="3">
-<li><p class="first">The native implementation module for the security package could not be found in the path.The native implementation module for the security package could not be found in the path.</p>
-<p>For Windows Local connection, you don&#8217;t have the path to the sspiauth.dll in yout System Path variable. See the configuration doc
+<li><p class="first">The native implementation module for the security package could not be found in the path.</p>
+<p>For Windows Local connection (and remote connections using IWA via {&#8216;sspi&#8217; : True}), you don&#8217;t have the path to the sspiauth.dll in yout System Path variable. See the configuration doc
 to see how to specify this: <a class="reference external" href="https://sassoftware.github.io/saspy/install.html#local">https://sassoftware.github.io/saspy/install.html#local</a></p>
 </li>
 </ol>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
 
-<span class="n">The</span> <span class="n">native</span> <span class="n">implementation</span> <span class="n">module</span> <span class="k">for</span> <span class="n">the</span> <span class="n">security</span> <span class="n">package</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">path</span><span class="o">.</span><span class="n">The</span> <span class="n">native</span> <span class="n">implementation</span> <span class="n">module</span> <span class="k">for</span> <span class="n">the</span> <span class="n">security</span> <span class="n">package</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">path</span><span class="o">.</span>
+<span class="n">The</span> <span class="n">native</span> <span class="n">implementation</span> <span class="n">module</span> <span class="k">for</span> <span class="n">the</span> <span class="n">security</span> <span class="n">package</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">path</span><span class="o">.</span>
 <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span> <span class="nn">wait</span> <span class="nn">was</span><span class="p">:</span> <span class="mi">4294967290</span>
 <span class="n">SAS</span> <span class="n">Connection</span> <span class="n">failed</span><span class="o">.</span> <span class="n">No</span> <span class="n">connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Double</span> <span class="n">check</span> <span class="n">your</span> <span class="n">settings</span> <span class="ow">in</span> <span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span> <span class="nb">file</span><span class="o">.</span>
 
@@ -711,6 +711,7 @@ The work around for this is to use the &#8216;javaparms&#8217; option on the con
 <span class="n">C</span><span class="p">:</span>\\<span class="n">Program</span> <span class="n">Files</span>\\<span class="n">SASHome</span>\\<span class="n">SASDeploymentManager</span>\\<span class="mf">9.4</span>\\<span class="n">products</span>\\<span class="n">deploywiz__94485__pxx__sp0__1</span>\\<span class="n">deploywiz</span>\\<span class="n">sas</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">jar</span><span class="p">;</span>
 <span class="n">C</span><span class="p">:</span>\\<span class="n">ProgramData</span>\\<span class="n">Anaconda3</span>\\<span class="n">Lib</span>\\<span class="n">site</span><span class="o">-</span><span class="n">packages</span>\\<span class="n">saspy</span>\\<span class="n">java</span>\\<span class="n">saspyiom</span><span class="o">.</span><span class="n">jar</span><span class="s1">&#39;,</span>
 <span class="s1">&#39;pyiom.saspy2j&#39;</span><span class="p">,</span> <span class="s1">&#39;-host&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="s1">&#39;-stdinport&#39;</span><span class="p">,</span> <span class="s1">&#39;57425&#39;</span><span class="p">,</span> <span class="s1">&#39;-stdoutport&#39;</span><span class="p">,</span> <span class="s1">&#39;57426&#39;</span><span class="p">,</span> <span class="s1">&#39;-stderrport&#39;</span><span class="p">,</span> <span class="s1">&#39;57427&#39;</span><span class="p">,</span> <span class="s1">&#39;-zero&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+
 
 
 
@@ -878,7 +879,7 @@ following code (assuming your session object is named sas).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.1.7',
+            VERSION:'3.1.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

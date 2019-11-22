@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 3.1.7 documentation</title>
+  <title>API Reference &mdash; saspy 3.1.8 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.1.7 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.1.8 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.1.7
+                3.1.8
               </div>
             
           
@@ -1049,6 +1049,27 @@ or show what you type and keep the macros (they will still be available later).<
 <dd>print(results[&#8216;LOG&#8217;])
 HTML(results[&#8216;LST&#8217;])</dd>
 </dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.submitLOG">
+<code class="descname">submitLOG</code><span class="sig-paren">(</span><em>code</em>, <em>results: str = ''</em>, <em>prompt: dict = None</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.submitLOG" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is a convenience wrapper around the submit() method. It executes the submit then prints the LOG that was returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.submitLST">
+<code class="descname">submitLST</code><span class="sig-paren">(</span><em>code</em>, <em>results: str = ''</em>, <em>prompt: dict = None</em>, <em>method: str = None</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.submitLST" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is a convenience wrapper around the submit() method. It executes the submit then renders the LST that was returned,
+as either HTML or TEXT, depending upon results. The method= parameter allows you to adjust what gets returned to suit your needs.</p>
+<blockquote>
+<div><ul class="simple">
+<li>listonly   - this is the default, and returns the LST (will be empty if no output was produced by what you submitted)</li>
+<li>listorlog  - this returns the LST, unless it&#8217;s empty, then it returns the LOG instead (one or the other). Useful in case there&#8217;s an ERROR.</li>
+<li>listandlog - as you might guess, this returns both. The LST followed by the LOG</li>
+<li>logandlist - as you might guess, this returns both. The LOG followed by the LST</li>
+</ul>
+</div></blockquote>
 </dd></dl>
 
 <dl class="method">
@@ -4116,7 +4137,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.1.7',
+            VERSION:'3.1.8',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
