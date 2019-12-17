@@ -201,6 +201,8 @@ class SASsessionSTDIO():
       self._log_cnt = 0
       self._log     = ""
 
+      self._sb.m5dsbug01 = True
+
       self._startsas()
 
    def __del__(self):
@@ -1557,7 +1559,11 @@ Will use HTML5 for this SASsession.""")
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
 
-      code = "filename sock socket '"+host+":"+str(port)+"' lrecl=1 recfm=f encoding=binary;\n"
+      if self._sb.m5dsbug01:
+         code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF;\n"
+      else:
+         code = "filename sock socket '"+host+":"+str(port)+"' lrecl=1 recfm=f encoding=binary;\n"
+
       code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
       for i in range(nvars):
          if vartype[i] == 'N':
@@ -1576,18 +1582,27 @@ Will use HTML5 for this SASsession.""")
             if i % 10 == 0:
                code +='\n'
 
-      code += "file sock; "
-
-      last  = len(varlist)-1
-      for i in range(nvars):
-         code += "put '"+varlist[i]+"'n "
-         if i != last:
-            code += cdelim+'; '
-         else:
-            code += rdelim+'; '
-         if i % 10 == 0:
-            code +='\n'
-      code += "run;"
+      if self._sb.m5dsbug01:
+         rsep = colsep+rowsep+'\n'
+         code += "file sock dlm="+cdelim+";\nput "
+         for i in range(nvars):
+            code += " '"+varlist[i]+"'n "
+            if i % 10 == 0:
+               code +='\n'
+         code += rdelim+";\nrun;"
+      else:
+         rsep = rowsep
+         code += "file sock; "
+         last  = len(varlist)-1
+         for i in range(nvars):
+            code += "put '"+varlist[i]+"'n "
+            if i != last:
+               code += cdelim+'; '
+            else:
+               code += rdelim+'; '
+            if i % 10 == 0:
+               code +='\n'
+         code += "run;"
 
       sock.listen(1)
       self._asubmit(code, 'text')
@@ -1610,12 +1625,12 @@ Will use HTML5 for this SASsession.""")
             else:
                break
 
-            data  = datar.rpartition(rowsep.encode())
+            data  = datar.rpartition(rsep.encode())
             datap = data[0]+data[1]
             datar = data[2]
 
             datap = datap.decode(self.sascfg.encoding, errors='replace')
-            for i in datap.split(sep=rowsep):
+            for i in datap.split(sep=rsep):
                if i != '':
                   r.append(tuple(i.split(sep=colsep)))
 
@@ -1941,7 +1956,7 @@ Will use HTML5 for this SASsession.""")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      if self.sascfg.ssh:
+      if self.sascfg.ssh or self._sb.m5dsbug01:
          try:
             sock = socks.socket()
             if self.sascfg.tunnel:
@@ -1957,10 +1972,18 @@ Will use HTML5 for this SASsession.""")
             host = self.sascfg.hostip  #socks.gethostname()
          else:
             host = 'localhost'
-         code = "filename sock socket '"+host+":"+str(port)+"' lrecl=1 recfm=f encoding=binary;\n"
+         enc  = 'utf_8'
+         if self._sb.m5dsbug01:
+            code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF;\n"
+         else:
+            code = "filename sock socket '"+host+":"+str(port)+"' lrecl=1 recfm=f encoding=binary;\n"
       else:
          host = ''
-         code = "filename sock        '"+tmpcsv            +"' lrecl=1 recfm=f encoding=binary;\n"
+         enc  = self.sascfg.encoding
+         if self._sb.m5dsbug01:
+            code = "filename sock        '"+tmpcsv            +"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF;\n"
+         else:
+            code = "filename sock        '"+tmpcsv            +"' lrecl=1 recfm=f encoding=binary;\n"
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
@@ -1983,19 +2006,29 @@ Will use HTML5 for this SASsession.""")
             if i % 10 == 0:
                code +='\n'
 
-      last  = len(varlist)-1
-      code += "file sock; "
-      for i in range(nvars):
-         code += "put '"+varlist[i]+"'n "
-         if i != last:
-            code += cdelim+'; '
-         else:
-            code += rdelim+'; '
-         if i % 10 == 0:
-            code +='\n'
-      code += "run;"
+      if self._sb.m5dsbug01:
+         rsep = colsep+rowsep+'\n'
+         code += "file sock dlm="+cdelim+";\nput "
+         for i in range(nvars):
+            code += " '"+varlist[i]+"'n "
+            if i % 10 == 0:
+               code +='\n'
+         code += rdelim+";\nrun;"
+      else:
+         rsep = rowsep
+         code += "file sock; "
+         last  = len(varlist)-1
+         for i in range(nvars):
+            code += "put '"+varlist[i]+"'n "
+            if i != last:
+               code += cdelim+'; '
+            else:
+               code += rdelim+'; '
+            if i % 10 == 0:
+               code +='\n'
+         code += "run;"
 
-      if self.sascfg.ssh:
+      if self.sascfg.ssh or self._sb.m5dsbug01:
          csv = open(tmpcsv, mode='w')
          sock.listen(1)
          self._asubmit(code, 'text')
@@ -2012,14 +2045,14 @@ Will use HTML5 for this SASsession.""")
                else:
                   break
    
-               data  = datar.rpartition(rowsep.encode())
+               data  = datar.rpartition(rsep.encode())
                datap = data[0]+data[1]
                datar = data[2]
-   
-               csv.write(datap.decode(self.sascfg.encoding, errors='replace'))
-   
-               #datap = datap.decode(self.sascfg.encoding, errors='replace')
-               #csv.write(datap.replace('Vol', 'Vol\n'))
+
+               if not self._sb.m5dsbug01:
+                  csv.write(datap.decode(self.sascfg.encoding, errors='replace'))
+               else:
+                  csv.write(datap.decode(self.sascfg.encoding, errors='replace').replace(rsep,rowsep))
          except:
             print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
             if newsock[0]:
@@ -2053,7 +2086,8 @@ Will use HTML5 for this SASsession.""")
       miss = ['.', ' ']
 
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
-                       sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, **kwargs)
+                       sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
+                       encoding=enc, **kwargs)
 
       if tmpdir:
          tmpdir.cleanup()
