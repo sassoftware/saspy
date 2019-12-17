@@ -172,6 +172,7 @@ class SASconfig(object):
         self.display  = cfg.get('display',  '')
         self.results  = cfg.get('results')
         self.autoexec = cfg.get('autoexec')
+        self.m5dsbug  = cfg.get('m5dsbug')
 
         indisplay = kwargs.get('display', '')
         if len(indisplay) > 0:
@@ -202,6 +203,10 @@ class SASconfig(object):
                 print("Parameter 'autoexec' passed to SAS_session was ignored due to configuration restriction.")
             else:
                 self.autoexec = inautoexec
+
+        inm5dsbug = kwargs.get('m5dsbug', None)
+        if inm5dsbug:
+           self.m5dsbug = inm5dsbug
 
         if java is not None:
             self.mode = 'IOM'
@@ -509,6 +514,16 @@ class SASsession():
         if self.sascfg.autoexec:
             self.submit(self.sascfg.autoexec)
 
+        if self.sascfg.m5dsbug is None:
+           if self.sasver[:9] in ['9.04.01M5', 'V.03.04M0', 'V.03.03M0']:
+              self.m5dsbug = True
+              print("There is a known bug in the Data Step in 940M5. This session is conected to that version or") 
+              print("an equivalent SPRE version. Setting 'm5dsbug' to True to use alternate code to work around this bug.") 
+              print("You can eliminate this message by setting {'m5dsbug' : True} of to False it it has been hotfixed")
+              print("in your configuration definition for this connection. Or on:  SASsession(m5dsbug = [True | False])")
+           else:
+              self.m5dsbug = False
+                 
         # this is to support parsing the log to fring log records w/ 'ERROR' when diagnostic logging is enabled.
         # in thi scase the log can have prefix and/or suffix info so the 'regular' log data is in the middle, not left justified
         if self.sascfg.mode in ['STDIO', 'SSH', '']:

@@ -235,8 +235,6 @@ class SASsessionIOM():
       self._log     = ""
       self._tomods1 = b"_tomods1"
 
-      self._sb.m5dsbug01 = True
-
       self._startsas()
 
    def __del__(self):
@@ -1599,7 +1597,7 @@ Will use HTML5 for this SASsession.""")
             if i % 10 == 0:
                code +='\n'
 
-      if self._sb.m5dsbug01:
+      if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
          code += "file "+self._tomods1.decode()+" dlm="+cdelim+" termstr=NL;\nput "
          for i in range(nvars):
@@ -2052,11 +2050,11 @@ Will use HTML5 for this SASsession.""")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1') and not self._sb.m5dsbug01:
+      if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1') and not self._sb.m5dsbug:
          local   = True
          enc     = self.sascfg.encoding
          outname = "_tomodsx"
-         if self._sb.m5dsbug01:
+         if self._sb.m5dsbug:
             code    = "filename _tomodsx '"+tmpcsv+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=NL;\n"
          else:
             code    = "filename _tomodsx '"+tmpcsv+"' lrecl=1 recfm=f encoding=binary;\n"
@@ -2087,7 +2085,7 @@ Will use HTML5 for this SASsession.""")
             if i % 10 == 0:
                code +='\n'
 
-      if self._sb.m5dsbug01:
+      if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
          code += "file "+outname+" dlm="+cdelim+" termstr=NL;\nput "
          for i in range(nvars):
@@ -2153,7 +2151,7 @@ Will use HTML5 for this SASsession.""")
                           datar = datap.rpartition(logcodeo.encode())
                           datap = datar[0]
 
-                       if not self._sb.m5dsbug01:
+                       if not self._sb.m5dsbug:
                           csv.write(datap.decode(self.sascfg.encoding, errors='replace'))
                        else:
                           csv.write(datap.decode(self.sascfg.encoding, errors='replace').replace(rsep,rowsep))

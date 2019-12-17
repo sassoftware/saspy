@@ -1,4 +1,4 @@
-#
+#             
 # Copyright SAS Institute
 #
 #  Licensed under the Apache License, Version 2.0 (the License);
@@ -200,8 +200,6 @@ class SASsessionSTDIO():
       self.sascfg   = SASconfigSTDIO(self, **kwargs)
       self._log_cnt = 0
       self._log     = ""
-
-      self._sb.m5dsbug01 = True
 
       self._startsas()
 
@@ -1559,7 +1557,7 @@ Will use HTML5 for this SASsession.""")
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
 
-      if self._sb.m5dsbug01:
+      if self._sb.m5dsbug:
          code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF;\n"
       else:
          code = "filename sock socket '"+host+":"+str(port)+"' lrecl=1 recfm=f encoding=binary;\n"
@@ -1582,7 +1580,7 @@ Will use HTML5 for this SASsession.""")
             if i % 10 == 0:
                code +='\n'
 
-      if self._sb.m5dsbug01:
+      if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
          code += "file sock dlm="+cdelim+";\nput "
          for i in range(nvars):
@@ -1956,7 +1954,7 @@ Will use HTML5 for this SASsession.""")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      if self.sascfg.ssh or self._sb.m5dsbug01:
+      if self.sascfg.ssh or self._sb.m5dsbug:
          try:
             sock = socks.socket()
             if self.sascfg.tunnel:
@@ -1973,14 +1971,14 @@ Will use HTML5 for this SASsession.""")
          else:
             host = 'localhost'
          enc  = 'utf_8'
-         if self._sb.m5dsbug01:
+         if self._sb.m5dsbug:
             code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF;\n"
          else:
             code = "filename sock socket '"+host+":"+str(port)+"' lrecl=1 recfm=f encoding=binary;\n"
       else:
          host = ''
          enc  = self.sascfg.encoding
-         if self._sb.m5dsbug01:
+         if self._sb.m5dsbug:
             code = "filename sock        '"+tmpcsv            +"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF;\n"
          else:
             code = "filename sock        '"+tmpcsv            +"' lrecl=1 recfm=f encoding=binary;\n"
@@ -2006,7 +2004,7 @@ Will use HTML5 for this SASsession.""")
             if i % 10 == 0:
                code +='\n'
 
-      if self._sb.m5dsbug01:
+      if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
          code += "file sock dlm="+cdelim+";\nput "
          for i in range(nvars):
@@ -2028,7 +2026,7 @@ Will use HTML5 for this SASsession.""")
                code +='\n'
          code += "run;"
 
-      if self.sascfg.ssh or self._sb.m5dsbug01:
+      if self.sascfg.ssh or self._sb.m5dsbug:
          csv = open(tmpcsv, mode='w')
          sock.listen(1)
          self._asubmit(code, 'text')
@@ -2049,7 +2047,7 @@ Will use HTML5 for this SASsession.""")
                datap = data[0]+data[1]
                datar = data[2]
 
-               if not self._sb.m5dsbug01:
+               if not self._sb.m5dsbug:
                   csv.write(datap.decode(self.sascfg.encoding, errors='replace'))
                else:
                   csv.write(datap.decode(self.sascfg.encoding, errors='replace').replace(rsep,rowsep))
