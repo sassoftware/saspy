@@ -523,6 +523,8 @@ class SASsession():
               print("in your configuration definition for this connection. Or on:  SASsession(m5dsbug = [True | False])")
            else:
               self.m5dsbug = False
+        else:
+           self.m5dsbug = self.sascfg.m5dsbug
                  
         # this is to support parsing the log to fring log records w/ 'ERROR' when diagnostic logging is enabled.
         # in thi scase the log can have prefix and/or suffix info so the 'regular' log data is in the middle, not left justified
