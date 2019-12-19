@@ -515,12 +515,12 @@ class SASsession():
             self.submit(self.sascfg.autoexec)
 
         if self.sascfg.m5dsbug is None:
-           if self.sasver[:9] in ['9.04.01M5', 'V.03.04M0', 'V.03.03M0']:
+           if self.sasver[:9] in ['9.04.01M5']: #, 'V.03.04M0', 'V.03.03M0']: couldn't reproduce on SPRE
               self.m5dsbug = True
-              print("There is a known bug in the Data Step in 940M5. This session is conected to that version or") 
-              print("an equivalent SPRE version. Setting 'm5dsbug' to True to use alternate code to work around this bug.") 
-              print("You can eliminate this message by setting {'m5dsbug' : True} of to False it it has been hotfixed")
-              print("in your configuration definition for this connection. Or on:  SASsession(m5dsbug = [True | False])")
+              print("There is a known bug in the Data Step in 940M5. This session is conected to that version.") 
+              print("Setting 'm5dsbug' to True to use alternate code to work around this bug.") 
+              print("You can eliminate this message by setting {'m5dsbug' : True} (or to False it it has been hotfixed)")
+              print("in your configuration definition for this connection, or on SASsession(m5dsbug = [True | False])")
            else:
               self.m5dsbug = False
         else:
