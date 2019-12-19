@@ -1597,23 +1597,31 @@ Will use HTML5 for this SASsession.""")
             if i % 10 == 0:
                code +='\n'
 
-      code += "file "+self._tomods1.decode()+" lrecl=1 recfm=f encoding=binary;\n"
+      if self._sb.m5dsbug:
+         rsep = colsep+rowsep+'\n'
+         code += "file "+self._tomods1.decode()+" dlm="+cdelim+" termstr=NL;\nput "
+         for i in range(nvars):
+            code += " '"+varlist[i]+"'n "
+            if i % 10 == 0:
+               code +='\n'
+         code += rdelim+";\nrun;"
+      else:
+         rsep = rowsep
+         code += "file "+self._tomods1.decode()+" lrecl=1 recfm=f encoding=binary;\n"
+         last  = len(varlist)-1
+         for i in range(nvars):
+            code += "put '"+varlist[i]+"'n "
+            if i != last:
+               code += cdelim+'; '
+            else:
+               code += rdelim+'; '
+            if i % 10 == 0:
+               code +='\n'
+         code += "run;"
 
-      last  = len(varlist)-1
-      for i in range(nvars):
-         code += "put '"+varlist[i]+"'n "
-         if i != last:
-            code += cdelim+'; '
-         else:
-            code += rdelim+'; '
-         if i % 10 == 0:
-            code +='\n'
-      code += "run;"
       ll = self._asubmit(code, 'text')
-
       self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
-
-
+     
       BOM   = "\ufeff".encode()
       done  = False
       first = True
@@ -1659,12 +1667,12 @@ Will use HTML5 for this SASsession.""")
                    first = False
 
                 datar += data
-                data   = datar.rpartition(rowsep.encode())
+                data   = datar.rpartition(rsep.encode())
                 datap  = data[0]+data[1]
                 datar  = data[2]
 
                 datap = datap.decode(self.sascfg.encoding, errors='replace')
-                for i in datap.split(sep=rowsep):
+                for i in datap.split(sep=rsep):
                    if i != '':
                       r.append(tuple(i.split(sep=colsep)))
 
@@ -2042,12 +2050,17 @@ Will use HTML5 for this SASsession.""")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
+      if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1') and not self._sb.m5dsbug:
          local   = True
+         enc     = self.sascfg.encoding
          outname = "_tomodsx"
-         code    = "filename _tomodsx '"+tmpcsv+"' lrecl=1 recfm=f encoding=binary;\n"
+         if self._sb.m5dsbug:
+            code    = "filename _tomodsx '"+tmpcsv+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=NL;\n"
+         else:
+            code    = "filename _tomodsx '"+tmpcsv+"' lrecl=1 recfm=f encoding=binary;\n"
       else:
          local   = False
+         enc     = 'utf_8'
          outname = self._tomods1.decode()
          code    = ""
 
@@ -2072,21 +2085,29 @@ Will use HTML5 for this SASsession.""")
             if i % 10 == 0:
                code +='\n'
 
-      code += "file "+outname+" lrecl=1 recfm=f encoding=binary;\n"
-
-      last  = len(varlist)-1
-      for i in range(nvars):
-         code += "put '"+varlist[i]+"'n "
-         if i != last:
-            code += cdelim+'; '
-         else:
-            code += rdelim+'; '
-         if i % 10 == 0:
-            code +='\n'
-      code += "run;"
+      if self._sb.m5dsbug:
+         rsep = colsep+rowsep+'\n'
+         code += "file "+outname+" dlm="+cdelim+" termstr=NL;\nput "
+         for i in range(nvars):
+            code += " '"+varlist[i]+"'n "
+            if i % 10 == 0:
+               code +='\n'
+         code += rdelim+";\nrun;"
+      else:
+         rsep = rowsep
+         code += "file "+outname+" lrecl=1 recfm=f encoding=binary;\n"
+         last  = len(varlist)-1
+         for i in range(nvars):
+            code += "put '"+varlist[i]+"'n "
+            if i != last:
+               code += cdelim+'; '
+            else:
+               code += rdelim+'; '
+            if i % 10 == 0:
+               code +='\n'
+         code += "run;"
 
       ll = self._asubmit(code, "text")
-
       self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode())
 
       done  = False
@@ -2121,7 +2142,7 @@ Will use HTML5 for this SASsession.""")
 
                     if len(data) > 0:
                        datar += data
-                       data   = datar.rpartition(rowsep.encode())
+                       data   = datar.rpartition(rsep.encode())
                        datap  = data[0]+data[1]
                        datar  = data[2]
 
@@ -2130,7 +2151,10 @@ Will use HTML5 for this SASsession.""")
                           datar = datap.rpartition(logcodeo.encode())
                           datap = datar[0]
 
-                       csv.write(datap.decode(self.sascfg.encoding, errors='replace'))
+                       if not self._sb.m5dsbug:
+                          csv.write(datap.decode(self.sascfg.encoding, errors='replace'))
+                       else:
+                          csv.write(datap.decode(self.sascfg.encoding, errors='replace').replace(rsep,rowsep))
                        if bail and done:
                           break
                     else:
@@ -2194,7 +2218,8 @@ Will use HTML5 for this SASsession.""")
       miss = ['.', ' ']
 
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
-                       sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, **kwargs)
+                       sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
+                       encoding=enc, **kwargs)
 
       if tmpdir:
          tmpdir.cleanup()

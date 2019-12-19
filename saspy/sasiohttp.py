@@ -1558,7 +1558,8 @@ class SASsessionHTTP():
       miss = ['.', ' ']
 
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
-                       sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, **kwargs)
+                       sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
+                       encoding=self.sascfg.encoding, **kwargs)
 
       if tmpdir:
          tmpdir.cleanup()
