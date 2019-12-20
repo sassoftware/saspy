@@ -205,7 +205,7 @@ class SASconfig(object):
                 self.autoexec = inautoexec
 
         inm5dsbug = kwargs.get('m5dsbug', None)
-        if inm5dsbug:
+        if inm5dsbug is not None:
            self.m5dsbug = inm5dsbug
 
         if java is not None:
