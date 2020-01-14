@@ -13,10 +13,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from saspy.SASLogLexer import SASLogStyle, SASLogLexer
-from pygments.formatters import HtmlFormatter
-from pygments import highlight
-
+try:
+   from pygments.formatters import HtmlFormatter
+   from pygments import highlight
+   from saspy.SASLogLexer import SASLogStyle, SASLogLexer
+except:
+   pass
 
 class SASresults(object):
     """Return results from a SAS Model object"""
@@ -40,6 +42,14 @@ class SASresults(object):
         self.nosub = nosub
         self._log  = log
 
+        try:
+           if SASLogLexer:
+              self.nopyg = False
+           else:
+              self.nopyg = True
+        except:
+           self.nopyg = True
+
     def __dir__(self) -> list:
         """Overload dir method to return the attributes"""
         return self._names
@@ -49,13 +59,13 @@ class SASresults(object):
             return getattr(self, attr)
         if attr.upper() == 'LOG' or attr.upper() == 'ERROR_LOG':
             if self.sas.sascfg.display.lower() == 'zeppelin':
-               if not self.sas.batch:
+               if not self.sas.batch and not self.nopyg:
                    self.sas.DISPLAY(self.sas.HTML(self._colorLog(self._log)))
                else:
                    print(self._log)
                return
             else:
-               if not self.sas.batch:
+               if not self.sas.batch and not self.nopyg:
                    return self.sas.HTML(self._colorLog(self._log))
                else:
                    return self._log
