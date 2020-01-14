@@ -18,9 +18,10 @@ import os
 import signal
 import subprocess
 import tempfile as tf
-from time import sleep
+from   time import sleep
 import socket as socks
 import codecs
+import select as sel
 
 try:
    import pandas as pd
@@ -1404,7 +1405,7 @@ Will use HTML5 for this SASsession.""")
          else:
             if df.dtypes[df.columns[name]].kind in ('M'):
                length += " '"+str(df.columns[name])+"'n 8"
-               input  += ":E8601DT26.6 "
+               input  += ":B8601DT26.6 "
                format += "'"+str(df.columns[name])+"'n E8601DT26.6 "
                dts.append('D')
             else:
@@ -1442,7 +1443,7 @@ Will use HTML5 for this SASsession.""")
             elif dts[col] == 'B':
                var = str(int(row[col]))
             elif dts[col] == 'D':
-               if var == 'nan':
+               if var in ['nan', 'NaT', 'NaN']:
                   var = '.'
                else:
                   var = str(row[col].to_datetime64())[:26]
@@ -1451,13 +1452,17 @@ Will use HTML5 for this SASsession.""")
             if col < (ncols-1):
                card += colsep
          self.stdin.write(card.encode(self.sascfg.encoding)+b'\n')
-         #self._asubmit(card, "text")
+
+         log = self.stderr.read1(4096)
+         if len(log) > 0:
+            self._log += log.decode(self.sascfg.encoding, errors='replace')
 
       self._asubmit(";;;;", "text")
       ll = self.submit("run;", 'text')
       return
 
-   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None, rowsep: str = '\x01',
+                         colsep: str = '\x02', wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -1465,14 +1470,15 @@ Will use HTML5 for this SASsession.""")
       rowsep  - the row seperator character to use; defaults to '\x01'
       colsep  - the column seperator character to use; defaults to '\x02'
       port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
+      wait    - seconds to wait for socket connection from SAS; catches hang if an error in SAS. 0 = no timeout
       """
       dsopts = dsopts if dsopts is not None else {}
 
       method = kwargs.pop('method', None)
       if   method and method.lower() == 'csv':
-         return self.sasdata2dataframeCSV(table, libref, dsopts, **kwargs)
+         return self.sasdata2dataframeCSV(table, libref, dsopts, wait=wait, **kwargs)
       elif method and method.lower() == 'disk':
-         return self.sasdata2dataframeDISK(table, libref, dsopts, **kwargs)
+         return self.sasdata2dataframeDISK(table, libref, dsopts, rowsep, colsep, wait=wait, **kwargs)
 
       port =  kwargs.get('port', 0)
 
@@ -1612,6 +1618,12 @@ Will use HTML5 for this SASsession.""")
       if not trows:
          trows = 100000
 
+      if wait > 0 and sel.select([sock],[],[],wait)[0] == []:
+         print("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
+         sock.close()
+         ll = self.submit("", 'text')
+         return ll['LOG']
+         
       newsock = (0,0)
       try:
          newsock = sock.accept()
@@ -1686,7 +1698,8 @@ Will use HTML5 for this SASsession.""")
 
       return df
 
-   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, tempfile: str=None, tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, tempfile: str=None, 
+                            tempkeep: bool=False, wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -1696,6 +1709,7 @@ Will use HTML5 for this SASsession.""")
       port     - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+      wait     - seconds to wait for socket connection from SAS; catches hang if an error in SAS. 0 = no timeout
       """
       dsopts = dsopts if dsopts is not None else {}
       opts   = kwargs.pop('opts', {})
@@ -1828,6 +1842,12 @@ Will use HTML5 for this SASsession.""")
          sock.listen(1)
          self._asubmit(code, 'text')
 
+         if wait > 0 and sel.select([sock],[],[],wait)[0] == []:
+            print("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
+            sock.close()
+            ll = self.submit("", 'text')
+            return ll['LOG']
+         
          newsock = (0,0)
          try:
             newsock = sock.accept()
@@ -1856,7 +1876,13 @@ Will use HTML5 for this SASsession.""")
          df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
       else:
          ll = self.submit(code, "text")
-         df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
+         try:
+            df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
+         except FileNotFoundError:
+            print("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
+            if tmpdir:
+               tmpdir.cleanup()
+            return ll['LOG']
 
       if tmpdir:
          tmpdir.cleanup()
@@ -1873,7 +1899,7 @@ Will use HTML5 for this SASsession.""")
 
    def sasdata2dataframeDISK(self, table: str, libref: str ='', dsopts: dict = None,  
                              rowsep: str = '\x01', colsep: str = '\x02', tempfile: str=None, 
-                             tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
+                             tempkeep: bool=False, wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -1884,6 +1910,7 @@ Will use HTML5 for this SASsession.""")
       port     - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+      wait     - seconds to wait for socket connection from SAS; catches hang if an error in SAS. 0 = no timeout
       """
       dsopts = dsopts if dsopts is not None else {}
       opts   = kwargs.pop('opts', {})
@@ -1978,10 +2005,7 @@ Will use HTML5 for this SASsession.""")
       else:
          host = ''
          enc  = self.sascfg.encoding
-         if self._sb.m5dsbug:
-            code = "filename sock        '"+tmpcsv            +"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF;\n"
-         else:
-            code = "filename sock        '"+tmpcsv            +"' lrecl=1 recfm=f encoding=binary;\n"
+         code = "filename sock        '"+tmpcsv            +"' lrecl=1 recfm=f encoding=binary;\n"
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
@@ -2031,6 +2055,12 @@ Will use HTML5 for this SASsession.""")
          sock.listen(1)
          self._asubmit(code, 'text')
 
+         if wait > 0 and sel.select([sock],[],[],wait)[0] == []:
+            print("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
+            sock.close()
+            ll = self.submit("", 'text')
+            return ll['LOG']
+         
          datar   = b""
          newsock = (0,0)
          try:
@@ -2083,9 +2113,15 @@ Will use HTML5 for this SASsession.""")
 
       miss = ['.', ' ']
 
-      df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
-                       sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
-                       encoding=enc, **kwargs)
+      try:
+         df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
+                          sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
+                          encoding=enc, **kwargs)
+      except FileNotFoundError:
+         print("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
+         if tmpdir:
+            tmpdir.cleanup()
+         return ll['LOG']
 
       if tmpdir:
          tmpdir.cleanup()
