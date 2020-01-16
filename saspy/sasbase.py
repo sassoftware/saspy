@@ -1079,7 +1079,7 @@ class SASsession():
               results: str = '', keep_outer_quotes: bool = False,
                                  embedded_newlines: bool = False, 
               LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
-              datetimes: dict={}) -> 'SASdata':
+              datetimes: dict={}, outfmts: dict={}) -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
@@ -1093,16 +1093,17 @@ class SASsession():
         :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)
         :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
+        :param outfmts: dict with column names and formats to assign to the new SAS data set
         :return: SASdata object
         """
         return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, 
-                                      LF, CR, colsep, datetimes)
+                                      LF, CR, colsep, datetimes, outfmts)
 
     def dataframe2sasdata(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '', 
                           results: str = '', keep_outer_quotes: bool = False,
                                              embedded_newlines: bool = False, 
                           LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
-                          datetimes: dict={}) -> 'SASdata':
+                          datetimes: dict={}, outfmts: dict={}) -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
@@ -1116,6 +1117,7 @@ class SASsession():
         :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2) 
         :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3) 
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
+        :param outfmts: dict with column names and formats to assign to the new SAS data set
         :return: SASdata object
         """
         if self.sascfg.pandas:
@@ -1133,7 +1135,7 @@ class SASsession():
             return None
         else:
             self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, 
-                                       LF, CR, colsep, datetimes)
+                                       LF, CR, colsep, datetimes, outfmts)
 
         if self.exist(table, libref):
             return SASdata(self, libref, table, results)
