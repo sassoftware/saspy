@@ -1579,7 +1579,7 @@ Will use HTML5 for this SASsession.""")
       topts['firstobs'] = ''
    
       code  = "data work._n_u_l_l_;output;run;\n"
-      code += "data _null_; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
+      code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
    
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
@@ -1814,7 +1814,7 @@ Will use HTML5 for this SASsession.""")
       topts['firstobs'] = ''
 
       code  = "data work._n_u_l_l_;output;run;\n"
-      code += "data _null_; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
+      code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
 
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
@@ -2053,7 +2053,7 @@ Will use HTML5 for this SASsession.""")
       topts['firstobs'] = ''
 
       code  = "data work._n_u_l_l_;output;run;\n"
-      code += "data _null_; set "+tabname+self._sb._dsopts(topts)+" work._n_u_l_l_;put 'FMT_CATS=';\n"
+      code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
 
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
