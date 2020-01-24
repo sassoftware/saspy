@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced topics &mdash; saspy 3.1.8 documentation</title>
+  <title>Advanced topics &mdash; saspy 3.2.0 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.1.8 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.2.0 documentation" href="index.html"/>
         <link rel="next" title="Contributing new methods" href="adding-procedures.html"/>
         <link rel="prev" title="API Reference" href="api.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.1.8
+                3.2.0
               </div>
             
           
@@ -105,6 +105,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#disconnecting-from-an-iom-session-and-reconnecting-back-to-it">Disconnecting from an IOM session and reconnecting back to it.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">Configuring Grid Option Sets to have saspy run on a specific Queue.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dates-times-and-datetimes-oh-my">Dates, Times and Datetimes, Oh my!</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
@@ -355,10 +356,14 @@ the dataframe. This performs significantly faster, as it doesn&#8217;t consume m
 is much faster than trying to append data in memory as it&#8217;s streamed into python from SAS.</p>
 <p>There is now a parameter for these methods to specify which method to use: method=[&#8216;MEMORY&#8217; | &#8216;CSV&#8217;].
 The default is still MEMORY. But you can specify CSV to use this new method: to_df(method=&#8217;CSV&#8217;), sd2df(method=&#8217;CSV&#8217;).</p>
-<p>There are also alias routines which specify this for you: to_df_csv() and sd2df_csv().</p>
+<p>There are also alias routines which specify this for you: to_df_CSV() and sd2df_CSV().</p>
 <p>Another optimization with this is when saspy and SAS are on the same machine. When this is the case, there is no transfer required.
 The CSV file written by SAS is the file specified in read_csv(). For remote connections, the CSV file still needs to be transferred from
 SAS to saspy and written to disk locally for the read_csv() method. This is still significantly faster for larger data.</p>
+<p>Starting in saspy version 3.1.7, there is now a third method for sd2df; &#8216;DISK&#8217;. method=[&#8216;MEMORY&#8217; | &#8216;CSV&#8217; | &#8216;DISK&#8217;], or the aliases
+to_df_DISK() and sd2df_DISK(). This mehtod uses the same code as MEMORY to get the data, but stores it in a file, like the CSV method, so
+that reading it into a dataframe w/ Pandas performs much better. This method allows better control over things like embedded delimiters
+and newlines, which Pandas can have parsing problem with reading CSV file created from proc export.</p>
 </div>
 <div class="section" id="using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">
 <h2>Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports<a class="headerlink" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports" title="Permalink to this headline">¶</a></h2>
@@ -472,6 +477,60 @@ Then add a Keyword-&gt; &#8216;isGridCapable&#8217; and save it. Just like the p
 <p>After creating the SASPy folder (application), and setting it to grid capable, when you go back in to the grid options mapping wizard (the first part
 of the document referenced above), SASPy should now be available to choose and you can set this up as you want.</p>
 </div>
+<div class="section" id="dates-times-and-datetimes-oh-my">
+<h2>Dates, Times and Datetimes, Oh my!<a class="headerlink" href="#dates-times-and-datetimes-oh-my" title="Permalink to this headline">¶</a></h2>
+<p>The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most cases, if you start with a SAS dataset
+and import it to a dataframe, then send it back to SAS, you should end up with the same data in SAS as you started with. However, there
+are some caveats. First, SAS Formats do not transfer to a dataframe, so on the round trip the new SAS dataset will not necessarily have the
+same formats defined on it as the original data set. Starting in saspy version3.2.0, there is an option on df2sd to specify the formats you
+want defined on the new data set; outfmts={}. The keys for this are the column names and the values are the SAS formats you want defined.</p>
+<p>For example:
+df2sd(?, outfmts={&#8216;col1&#8217; : &#8216;YYMMDD.&#8217;, &#8216;col2&#8217; : &#8216;TIMEAMPM.&#8217;, &#8216;some_numeric_col&#8217; : &#8216;comma32.4&#8217;})</p>
+<p>To see the formats that are defined on the original data set, use the contents() method on that SASdata object.</p>
+<p>One other issue is with SAS variables having Date and Time formats, which are logically data types of Date or Time. SAS only really has Numeric
+and Character data types, but the date, time, and datetime formats on Numeric variables identify them as representing date, time, or datetime
+data types. Pandas dataframe, has a datetime datatype, but not a date or a time datatype. When using sd2df, any SAS variable with date, time or
+datetime formats will be created in the dataframe as a datetime64[ns]. It is easy enough in python to reference only the date part, or time part
+of a pandas datetime column. In fact the column can be converted to datetime.date or datetime.time with one python statement.</p>
+<p>When using df2sd to transfer a dataframe to a SAS data set, with values you want be stored as SAS dates, times or datetimes, the following is
+the appropriate way to do so. In each case, the value in the dataframe must be a Pandas datetime64 value. For datetimes this just works. For
+date or time only values, specify the (new in V3.2.0) option datetimes={} on df2sd. The datetimes={} takes keys of the column names and values of &#8216;date&#8217; or &#8216;time&#8217;.
+The code generated to create the SAS data set will then only use the date or time portion of the Pandas datetime64 value to populate the SAS variables,
+and assign default date or time formats for those variables. You can, of course, specify specific date tor time formats using the outfmts={} option if
+you want.</p>
+<p>For example:
+df2sd(?, datetimes={&#8216;d&#8217; : &#8216;date&#8217;, &#8216;t&#8217; : &#8216;time&#8217;})</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">rows</span> <span class="o">=</span> <span class="p">[[</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1965</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1965</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1965</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">,</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="s1">&#39;t&#39;</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span>
+               <span class="n">dt</span>                   <span class="n">d</span>                   <span class="n">t</span>
+<span class="mi">0</span> <span class="mi">1965</span><span class="o">-</span><span class="mo">01</span><span class="o">-</span><span class="mo">01</span> <span class="mi">08</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">01</span> <span class="mi">1965</span><span class="o">-</span><span class="mo">01</span><span class="o">-</span><span class="mo">01</span> <span class="mi">08</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">01</span> <span class="mi">1965</span><span class="o">-</span><span class="mo">01</span><span class="o">-</span><span class="mo">01</span> <span class="mi">08</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">01</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">datetimes</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;d&#39;</span> <span class="p">:</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span> <span class="p">:</span> <span class="s1">&#39;time&#39;</span><span class="p">},</span> <span class="n">results</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+
+
+                                                           <span class="n">The</span> <span class="n">SAS</span> <span class="n">System</span>                         <span class="mi">11</span><span class="p">:</span><span class="mi">31</span> <span class="n">Friday</span><span class="p">,</span> <span class="n">January</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">2020</span>   <span class="mi">2</span>
+
+                                    <span class="n">Obs</span>    <span class="n">dt</span>                                <span class="n">d</span>            <span class="n">t</span>
+
+                                     <span class="mi">1</span>     <span class="mi">1965</span><span class="o">-</span><span class="mo">01</span><span class="o">-</span><span class="mo">01</span><span class="n">T08</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mf">01.000000</span>    <span class="mi">1965</span><span class="o">-</span><span class="mo">01</span><span class="o">-</span><span class="mo">01</span>    <span class="mi">08</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">01</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># For &#39;dt&#39; column, we still import it as a datetime, but specifying a numeric format will display it as a number (seconds since Jan 1,  1960)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># and I&#39;ve chosen different date and time formats for the other two variables too</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">datetimes</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;d&#39;</span> <span class="p">:</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span> <span class="p">:</span> <span class="s1">&#39;time&#39;</span><span class="p">},</span> <span class="n">outfmts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;dt&#39;</span> <span class="p">:</span> <span class="s1">&#39;comma32.4&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span> <span class="p">:</span> <span class="s1">&#39;YYMMDD.&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span> <span class="p">:</span> <span class="s1">&#39;TIMEAMPM.&#39;</span><span class="p">},</span> <span class="n">results</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+                                                           <span class="n">The</span> <span class="n">SAS</span> <span class="n">System</span>                         <span class="mi">09</span><span class="p">:</span><span class="mi">59</span> <span class="n">Friday</span><span class="p">,</span> <span class="n">January</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">2020</span>   <span class="mi">1</span>
+
+                                 <span class="n">Obs</span>                                  <span class="n">dt</span>           <span class="n">d</span>             <span class="n">t</span>
+
+                                  <span class="mi">1</span>                     <span class="mi">157</span><span class="p">,</span><span class="mi">881</span><span class="p">,</span><span class="mf">601.0000</span>    <span class="mi">65</span><span class="o">-</span><span class="mo">01</span><span class="o">-</span><span class="mo">01</span>    <span class="mi">8</span><span class="p">:</span><span class="mo">00</span><span class="p">:</span><span class="mo">01</span> <span class="n">AM</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p>For more examples of this date, time, datetime conversion, see the example notebook here: <a class="reference external" href="https://github.com/sassoftware/saspy-examples/blob/master/Issue_examples/Issue279.ipynb">https://github.com/sassoftware/saspy-examples/blob/master/Issue_examples/Issue279.ipynb</a></p>
+</div>
 </div>
 
 
@@ -518,7 +577,7 @@ of the document referenced above), SASPy should now be available to choose and y
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.1.8',
+            VERSION:'3.2.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

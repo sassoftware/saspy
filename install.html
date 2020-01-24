@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.1.8 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.2.0 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.1.8 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.2.0 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.1.8
+                3.2.0
               </div>
             
           
@@ -451,6 +451,12 @@ or, as of version 3.1.7, &#8216;databricks&#8217;. The default when this is not 
 Jupyter uses IPython to render HTML, which is how saspy has always worked.
 To support other Notebooks display methods, different display interface have to be added to saspy.
 If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
+<dt>m5dsbug -</dt>
+<dd>This is a new key, as of version 3.1.9, to address a bug in the data step in the M5 maintenance release.
+This bug affects the code generated in the sasdata2dataframe method of this access method. It&#8217;s only
+is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. Setting this
+key to True will cause different code to be generated to work around this problem. See the description
+of V3.1.9 here for more info: <a class="reference external" href="https://github.com/sassoftware/saspy/releases/tag/v3.1.9">https://github.com/sassoftware/saspy/releases/tag/v3.1.9</a></dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
             <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">,</span> <span class="s2">&quot;-autoexec&quot;</span><span class="p">,</span> <span class="s2">&quot;/user/tom/autoexec.sas&quot;</span><span class="p">],</span>
@@ -691,6 +697,12 @@ To support other Notebooks display methods, different display interface have to 
 If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
 <dt>logbufsz -</dt>
 <dd>see issue 266 for details on this. not needed normally</dd>
+<dt>m5dsbug -</dt>
+<dd>This is a new key, as of version 3.1.9, to address a bug in the data step in the M5 maintenance release.
+This bug affects the code generated in the sasdata2dataframe method of this access method. It&#8217;s only
+is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. Setting this
+key to True will cause different code to be generated to work around this problem. See the description
+of V3.1.9 here for more info: <a class="reference external" href="https://github.com/sassoftware/saspy/releases/tag/v3.1.9">https://github.com/sassoftware/saspy/releases/tag/v3.1.9</a></dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Unix client class path</span>
 <span class="n">cpL</span>  <span class="o">=</span>  <span class="s2">&quot;/whever/I/put/these/jars/sas.svc.connection.jar&quot;</span>
@@ -811,6 +823,12 @@ To support other Notebooks display methods, different display interface have to 
 If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
 <dt>logbufsz -</dt>
 <dd>see issue 266 for details on this. not needed normally</dd>
+<dt>m5dsbug -</dt>
+<dd>This is a new key, as of version 3.1.9, to address a bug in the data step in the M5 maintenance release.
+This bug affects the code generated in the sasdata2dataframe method of this access method. It&#8217;s only
+is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. Setting this
+key to True will cause different code to be generated to work around this problem. See the description
+of V3.1.9 here for more info: <a class="reference external" href="https://github.com/sassoftware/saspy/releases/tag/v3.1.9">https://github.com/sassoftware/saspy/releases/tag/v3.1.9</a></dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># Windows client class path</span>
 <span class="c1"># build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION</span>
@@ -1068,7 +1086,7 @@ If you want to run saspy in Zeppelin, set this in your configuration definition:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.1.8',
+            VERSION:'3.2.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
