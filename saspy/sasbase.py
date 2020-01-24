@@ -1093,7 +1093,7 @@ class SASsession():
         :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)
         :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
-        :param outfmts: dict with column names and formats to assign to the new SAS data set
+        :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
         :return: SASdata object
         """
         return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, 
@@ -1117,7 +1117,7 @@ class SASsession():
         :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2) 
         :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3) 
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
-        :param outfmts: dict with column names and formats to assign to the new SAS data set
+        :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
         :return: SASdata object
         """
         if self.sascfg.pandas:

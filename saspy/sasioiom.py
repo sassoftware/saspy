@@ -1414,7 +1414,7 @@ Will use HTML5 for this SASsession.""")
       CR - if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
       colsep - the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
       datetimes - dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
-      outfmts - dict with column names and formats to assign to the new SAS data set
+      outfmts - dict with column names and SAS formats to assign to the new SAS data set
       """
       input   = ""
       xlate   = ""
@@ -1861,8 +1861,8 @@ Will use HTML5 for this SASsession.""")
       code += ";\n run;\n"
       ll = self.submit(code, "text")
 
-      dts = kwargs.pop('dtype', '')
-      if dts == '':
+      k_dts = kwargs.pop('dtype', '')
+      if k_dts == '':
          dts = {}
          for i in range(nvars):
             if vartype[i] == 'N':
@@ -1872,6 +1872,8 @@ Will use HTML5 for this SASsession.""")
                   dts[varlist[i]] = 'str'
             else:
                dts[varlist[i]] = 'str'
+      else:
+         dts = k_dts
 
       if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
          local   = True
@@ -1990,10 +1992,11 @@ Will use HTML5 for this SASsession.""")
          if not tempkeep:
             os.remove(tmpcsv)
 
-      for i in range(nvars):
-         if vartype[i] == 'N':
-            if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
+      if k_dts == '':  # don't override these if user provided their own dtypes
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                  df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
 
       return df
 
@@ -2235,8 +2238,8 @@ Will use HTML5 for this SASsession.""")
             if done and bail:
                break
 
-      dts = kwargs.pop('dtype', '')
-      if dts == '':
+      k_dts = kwargs.pop('dtype', '')
+      if k_dts == '':
          dts = {}
          for i in range(nvars):
             if vartype[i] == 'N':
@@ -2246,6 +2249,8 @@ Will use HTML5 for this SASsession.""")
                   dts[varlist[i]] = 'str'
             else:
                dts[varlist[i]] = 'str'
+      else:
+         dts = k_dts
 
       miss = ['.', ' ']
 
@@ -2259,10 +2264,11 @@ Will use HTML5 for this SASsession.""")
          if not tempkeep:
             os.remove(tmpcsv)
 
-      for i in range(nvars):
-         if vartype[i] == 'N':
-            if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-               df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
+      if k_dts == '':  # don't override these if user provided their own dtypes
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                  df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
 
       return df
 
