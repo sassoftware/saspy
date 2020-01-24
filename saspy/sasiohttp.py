@@ -1045,7 +1045,8 @@ class SASsessionHTTP():
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', 
                          libref: str ="", keep_outer_quotes: bool=False,
                                           embedded_newlines: bool=False,
-                         LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03'):
+                         LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
+                         datetimes: dict={}, outfmts: dict={}):
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
@@ -1056,20 +1057,25 @@ class SASsessionHTTP():
       LF - if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to '\x01'
       CR - if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
       colsep - the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
+      datetimes - dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
+      outfmts - dict with column names and formats to assign to the new SAS data set
       '''
-      input  = ""
-      xlate  = ""
-      card   = ""
-      format = ""
-      length = ""
-      dts    = []
-      ncols  = len(df.columns)
-      lf     = "'"+'%02x' % ord(LF.encode(self.sascfg.encoding))+"'x"
-      cr     = "'"+'%02x' % ord(CR.encode(self.sascfg.encoding))+"'x "
-      delim  = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
+      input   = ""
+      xlate   = ""
+      card    = ""
+      format  = ""
+      length  = ""
+      dts     = []
+      ncols   = len(df.columns)
+      lf      = "'"+'%02x' % ord(LF.encode(self.sascfg.encoding))+"'x"
+      cr      = "'"+'%02x' % ord(CR.encode(self.sascfg.encoding))+"'x "
+      delim   = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
+      dtkeys  = datetimes.keys()
+      fmtkeys = outfmts.keys()
 
       for name in range(ncols):
-         input += "'"+str(df.columns[name])+"'n "
+         colname = str(df.columns[name])
+         input  += "'"+colname+"'n "
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
             try:
                col_l = df[df.columns[name]].astype(str).apply(self._getbytelen).max()
@@ -1079,21 +1085,47 @@ class SASsessionHTTP():
                return None
             if col_l == 0:
                col_l = 8
-            length += " '"+str(df.columns[name])+"'n $"+str(col_l)
+            length += " '"+colname+"'n $"+str(col_l)
             if keep_outer_quotes:
                input  += "~ "
             dts.append('C')
             if embedded_newlines:
-               xlate += "'"+str(df.columns[name])+"'n = translate("+"'"+str(df.columns[name])+"'n, '0A'x, "+lf+");\n "
-               xlate += "'"+str(df.columns[name])+"'n = translate("+"'"+str(df.columns[name])+"'n, '0D'x, "+cr+");\n "
+               xlate += " '"+colname+"'n = translate('"+colname+"'n, '0A'x, "+lf+");\n"
+               xlate += " '"+colname+"'n = translate('"+colname+"'n, '0D'x, "+cr+");\n"
          else:
             if df.dtypes[df.columns[name]].kind in ('M'):
-               length += " '"+str(df.columns[name])+"'n 8"
-               input  += ":E8601DT26.6 "
-               format += "'"+str(df.columns[name])+"'n E8601DT26.6 "
+               length += " '"+colname+"'n 8"
+               input  += ":B8601DT26.6 "
+               if colname not in dtkeys:
+                  if colname in fmtkeys:
+                     format += "'"+colname+"'n "+outfmts[colname]+" "
+                  else:
+                     format += "'"+colname+"'n E8601DT26.6 "
+               else:
+                  if datetimes[colname].lower() == 'date':
+                     if colname in fmtkeys:
+                        format += "'"+colname+"'n "+outfmts[colname]+" "
+                     else:
+                        format += "'"+colname+"'n E8601DA. "
+                     xlate  += " '"+colname+"'n = datepart('"+colname+"'n);\n"
+                  else:
+                     if datetimes[colname].lower() == 'time':
+                        if colname in fmtkeys:
+                           format += "'"+colname+"'n "+outfmts[colname]+" "
+                        else:
+                           format += "'"+colname+"'n E8601TM. "
+                        xlate  += " '"+colname+"'n = timepart('"+colname+"'n);\n"
+                     else:
+                        print("invalid value for datetimes for column "+colname+". Using default.")
+                        if colname in fmtkeys:
+                           format += "'"+colname+"'n "+outfmts[colname]+" "
+                        else:
+                           format += "'"+colname+"'n E8601DT26.6 "
                dts.append('D')
             else:
-               length += " '"+str(df.columns[name])+"'n 8"
+               length += " '"+colname+"'n 8"
+               if colname in fmtkeys:
+                  format += "'"+colname+"'n "+outfmts[colname]+" "
                if df.dtypes[df.columns[name]] == 'bool':
                   dts.append('B')
                else:

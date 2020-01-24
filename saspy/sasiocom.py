@@ -632,7 +632,8 @@ class SASSessionCOM(object):
     def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a',
                           libref: str ="", keep_outer_quotes: bool=False,
                                            embedded_newlines: bool=False,
-                          LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03'):
+                          LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
+                          datetimes: dict={}, outfmts: dict={}):
         """
         Create a SAS dataset from a pandas data frame.
         :param df [pd.DataFrame]: Pandas data frame containing data to write.
@@ -645,6 +646,8 @@ class SASSessionCOM(object):
         LF - if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to '\x01'
         CR - if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
         colsep - the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
+        datetimes - not implemented yet in this access method
+        outfmts - not implemented yet in this access method
         """
         DATETIME_NAME = 'DATETIME26.6'
         DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%f'
