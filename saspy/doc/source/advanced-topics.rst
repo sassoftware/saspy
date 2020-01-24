@@ -231,11 +231,16 @@ is much faster than trying to append data in memory as it's streamed into python
 There is now a parameter for these methods to specify which method to use: method=['MEMORY' | 'CSV'].
 The default is still MEMORY. But you can specify CSV to use this new method: to_df(method='CSV'), sd2df(method='CSV').
 
-There are also alias routines which specify this for you: to_df_csv() and sd2df_csv().
+There are also alias routines which specify this for you: to_df_CSV() and sd2df_CSV().
 
 Another optimization with this is when saspy and SAS are on the same machine. When this is the case, there is no transfer required.
 The CSV file written by SAS is the file specified in read_csv(). For remote connections, the CSV file still needs to be transferred from
 SAS to saspy and written to disk locally for the read_csv() method. This is still significantly faster for larger data.
+
+Starting in saspy version 3.1.7, there is now a third method for sd2df; 'DISK'. method=['MEMORY' | 'CSV' | 'DISK'], or the aliases
+to_df_DISK() and sd2df_DISK(). This mehtod uses the same code as MEMORY to get the data, but stores it in a file, like the CSV method, so
+that reading it into a dataframe w/ Pandas performs much better. This method allows better control over things like embedded delimiters
+and newlines, which Pandas can have parsing problem with reading CSV file created from proc export.
 
 
 *****************************************************************************
@@ -385,3 +390,69 @@ After creating the SASPy folder (application), and setting it to grid capable, w
 of the document referenced above), SASPy should now be available to choose and you can set this up as you want.
 
 
+**********************************
+Dates, Times and Datetimes, Oh my!
+**********************************
+
+The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most cases, if you start with a SAS dataset
+and import it to a dataframe, then send it back to SAS, you should end up with the same data in SAS as you started with. However, there
+are some caveats. First, SAS Formats do not transfer to a dataframe, so on the round trip the new SAS dataset will not necessarily have the
+same formats defined on it as the original data set. Starting in saspy version3.2.0, there is an option on df2sd to specify the formats you 
+want defined on the new data set; outfmts={}. The keys for this are the column names and the values are the SAS formats you want defined.
+
+For example:
+df2sd(?, outfmts={'col1' : 'YYMMDD.', 'col2' : 'TIMEAMPM.', 'some_numeric_col' : 'comma32.4'})
+
+To see the formats that are defined on the original data set, use the contents() method on that SASdata object.
+
+One other issue is with SAS variables having Date and Time formats, which are logically data types of Date or Time. SAS only really has Numeric
+and Character data types, but the date, time, and datetime formats on Numeric variables identify them as representing date, time, or datetime
+data types. Pandas dataframe, has a datetime datatype, but not a date or a time datatype. When using sd2df, any SAS variable with date, time or
+datetime formats will be created in the dataframe as a datetime64[ns]. It is easy enough in python to reference only the date part, or time part
+of a pandas datetime column. In fact the column can be converted to datetime.date or datetime.time with one python statement.
+
+When using df2sd to transfer a dataframe to a SAS data set, with values you want be stored as SAS dates, times or datetimes, the following is
+the appropriate way to do so. In each case, the value in the dataframe must be a Pandas datetime64 value. For datetimes this just works. For
+date or time only values, specify the (new in V3.2.0) option datetimes={} on df2sd. The datetimes={} takes keys of the column names and values of 'date' or 'time'.
+The code generated to create the SAS data set will then only use the date or time portion of the Pandas datetime64 value to populate the SAS variables,
+and assign default date or time formats for those variables. You can, of course, specify specific date tor time formats using the outfmts={} option if
+you want.
+
+For example:
+df2sd(?, datetimes={'d' : 'date', 't' : 'time'}) 
+
+.. code-block:: ipython3
+
+    >>> rows = [[datetime.datetime(1965, 1, 1, 8, 0, 1), datetime.datetime(1965, 1, 1, 8, 0, 1), datetime.datetime(1965, 1, 1, 8, 0, 1)]]
+    >>> df = pd.DataFrame.from_records(rows, columns=['dt','d','t'])
+    >>> df
+                   dt                   d                   t
+    0 1965-01-01 08:00:01 1965-01-01 08:00:01 1965-01-01 08:00:01
+
+    >>> sd = sas.df2sd(df, datetimes={'d' : 'date', 't' : 'time'}, results='text')
+    >>> sd.head()
+    
+    
+                                                               The SAS System                         11:31 Friday, January 24, 2020   2
+    
+                                        Obs    dt                                d            t
+    
+                                         1     1965-01-01T08:00:01.000000    1965-01-01    08:00:01
+    >>>
+    >>> # For 'dt' column, we still import it as a datetime, but specifying a numeric format will display it as a number (seconds since Jan 1,  1960)
+    >>> # and I've chosen different date and time formats for the other two variables too
+    >>>
+    >>> sd = sas.df2sd(df, datetimes={'d' : 'date', 't' : 'time'}, outfmts={'dt' : 'comma32.4', 'd' : 'YYMMDD.', 't' : 'TIMEAMPM.'}, results='text')
+    >>> sd.head()
+                                                               The SAS System                         09:59 Friday, January 24, 2020   1
+    
+                                     Obs                                  dt           d             t
+
+                                      1                     157,881,601.0000    65-01-01    8:00:01 AM
+    >>>
+    
+For more examples of this date, time, datetime conversion, see the example notebook here: https://github.com/sassoftware/saspy-examples/blob/master/Issue_examples/Issue279.ipynb
+    
+    
+    
+    

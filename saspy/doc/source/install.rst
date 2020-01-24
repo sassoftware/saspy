@@ -325,6 +325,13 @@ display -
     To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
 
+m5dsbug -
+    This is a new key, as of version 3.1.9, to address a bug in the data step in the M5 maintenance release.
+    This bug affects the code generated in the sasdata2dataframe method of this access method. It's only
+    is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. Setting this
+    key to True will cause different code to be generated to work around this problem. See the description
+    of V3.1.9 here for more info: https://github.com/sassoftware/saspy/releases/tag/v3.1.9
+
 .. code-block:: ipython3
 
     default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
@@ -600,7 +607,12 @@ display -
 logbufsz -
     see issue 266 for details on this. not needed normally
 
-
+m5dsbug -
+    This is a new key, as of version 3.1.9, to address a bug in the data step in the M5 maintenance release.
+    This bug affects the code generated in the sasdata2dataframe method of this access method. It's only
+    is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. Setting this
+    key to True will cause different code to be generated to work around this problem. See the description
+    of V3.1.9 here for more info: https://github.com/sassoftware/saspy/releases/tag/v3.1.9
 
 .. code-block:: ipython3
 
@@ -736,6 +748,13 @@ display -
 
 logbufsz -
     see issue 266 for details on this. not needed normally
+
+m5dsbug -
+    This is a new key, as of version 3.1.9, to address a bug in the data step in the M5 maintenance release.
+    This bug affects the code generated in the sasdata2dataframe method of this access method. It's only
+    is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. Setting this
+    key to True will cause different code to be generated to work around this problem. See the description
+    of V3.1.9 here for more info: https://github.com/sassoftware/saspy/releases/tag/v3.1.9
 
 .. code-block:: ipython3
 
