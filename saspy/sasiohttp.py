@@ -1086,6 +1086,8 @@ class SASsessionHTTP():
             if col_l == 0:
                col_l = 8
             length += " '"+colname+"'n $"+str(col_l)
+            if colname in fmtkeys:
+               format += "'"+colname+"'n "+outfmts[colname]+" "
             if keep_outer_quotes:
                input  += "~ "
             dts.append('C')
@@ -1159,7 +1161,7 @@ class SASsessionHTTP():
             elif dts[col] == 'B':
                var = str(int(row[col]))
             elif dts[col] == 'D':
-               if var == 'nan':
+               if var in ['nan', 'NaT', 'NaN']:
                   var = '.'
                else:
                   var = str(row[col].to_datetime64())[:26]
@@ -1195,7 +1197,6 @@ class SASsessionHTTP():
       else:
          tabname = "'"+table.strip()+"'n "
 
-      #code  = "proc sql; create view work.sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
 
       ll = self.submit(code, "text")
@@ -1364,7 +1365,6 @@ class SASsessionHTTP():
       else:
          tmpcsv  = tempfile
 
-      #code  = "proc sql; create view work.sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
 
       ll = self.submit(code, "text")
@@ -1411,23 +1411,30 @@ class SASsessionHTTP():
       del varcat[nvars]
 
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
-      for i in range(nvars):
-         if vartype[i] == 'FLOAT':
-            if varcat[i] in self._sb.sas_date_fmts:
-               code += "'"+varlist[i]+"'n E8601DA10. "
-            else:
-               if varcat[i] in self._sb.sas_time_fmts:
-                  code += "'"+varlist[i]+"'n E8601TM15.6 "
+
+      my_fmts = kwargs.pop('my_fmts', False)
+      k_dts   = kwargs.pop('dtype',   None)
+      if k_dts is None and my_fmts:
+         print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+         my_fmts = False
+
+      if not my_fmts:
+         for i in range(nvars):
+            if vartype[i] == 'FLOAT':
+               if varcat[i] in self._sb.sas_date_fmts:
+                  code += "'"+varlist[i]+"'n E8601DA10. "
                else:
-                  if varcat[i] in self._sb.sas_datetime_fmts:
-                     code += "'"+varlist[i]+"'n E8601DT26.6 "
+                  if varcat[i] in self._sb.sas_time_fmts:
+                     code += "'"+varlist[i]+"'n E8601TM15.6 "
                   else:
-                     code += "'"+varlist[i]+"'n best32. "
+                     if varcat[i] in self._sb.sas_datetime_fmts:
+                        code += "'"+varlist[i]+"'n E8601DT26.6 "
+                     else:
+                        code += "'"+varlist[i]+"'n best32. "
       code += ";run;\n"
       ll = self.submit(code, "text")
 
-      k_dts = kwargs.pop('dtype', '')
-      if k_dts == '':
+      if k_dts is None:
          dts = {}
          for i in range(nvars):
             if vartype[i] == 'FLOAT':
@@ -1458,7 +1465,7 @@ class SASsessionHTTP():
          if not tempkeep:
             os.remove(tmpcsv)
 
-      if k_dts == '':  # don't override these if user provided their own dtypes
+      if k_dts is None:  # don't override these if user provided their own dtypes
          for i in range(nvars):
             if vartype[i] == 'FLOAT':
                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
@@ -1542,24 +1549,32 @@ class SASsessionHTTP():
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
+      my_fmts = kwargs.pop('my_fmts', False)
+      k_dts   = kwargs.pop('dtype',   None)
+      if k_dts is None and my_fmts:
+         print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+         my_fmts = False
+
       code  = "filename _tomodsx '"+self._sb.workpath+"_tomodsx' lrecl=1 recfm=f encoding=binary;\n"
       code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
-      for i in range(nvars):
-         if vartype[i] == 'FLOAT':
-            code += "format '"+varlist[i]+"'n "
-            if varcat[i] in self._sb.sas_date_fmts:
-               code += 'E8601DA10.'
-            else:
-               if varcat[i] in self._sb.sas_time_fmts:
-                  code += 'E8601TM15.6'
+
+      if not my_fmts:
+         for i in range(nvars):
+            if vartype[i] == 'FLOAT':
+               code += "format '"+varlist[i]+"'n "
+               if varcat[i] in self._sb.sas_date_fmts:
+                  code += 'E8601DA10.'
                else:
-                  if varcat[i] in self._sb.sas_datetime_fmts:
-                     code += 'E8601DT26.6'
+                  if varcat[i] in self._sb.sas_time_fmts:
+                     code += 'E8601TM15.6'
                   else:
-                     code += 'best32.'
-            code += '; '
-            if i % 10 == 0:
-               code +='\n'
+                     if varcat[i] in self._sb.sas_datetime_fmts:
+                        code += 'E8601DT26.6'
+                     else:
+                        code += 'best32.'
+               code += '; '
+               if i % 10 == 0:
+                  code +='\n'
 
       code += "file _tomodsx lrecl=1 recfm=f encoding=binary;\n"
 
@@ -1578,8 +1593,7 @@ class SASsessionHTTP():
 
       ll = self.download(tmpcsv, self._sb.workpath+"_tomodsx")
 
-      k_dts = kwargs.pop('dtype', '')
-      if k_dts == '':
+      if k_dts is None:
          dts = {}
          for i in range(nvars):
             if vartype[i] == 'FLOAT':
@@ -1604,7 +1618,7 @@ class SASsessionHTTP():
          if not tempkeep:
             os.remove(tmpcsv)
 
-      if k_dts == '':  # don't override these if user provided their own dtypes
+      if k_dts is None:  # don't override these if user provided their own dtypes
          for i in range(nvars):
             if vartype[i] == 'FLOAT':
                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:

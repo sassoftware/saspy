@@ -1442,6 +1442,8 @@ Will use HTML5 for this SASsession.""")
             if col_l == 0:
                col_l = 8
             length += " '"+colname+"'n $"+str(col_l)
+            if colname in fmtkeys:
+               format += "'"+colname+"'n "+outfmts[colname]+" "
             if keep_outer_quotes:
                input  += "~ "
             dts.append('C')
@@ -1515,7 +1517,7 @@ Will use HTML5 for this SASsession.""")
             elif dts[col] == 'B':
                var = str(int(row[col]))
             elif dts[col] == 'D':
-               if var == 'nan':
+               if var in ['nan', 'NaT', 'NaN']:
                   var = '.'
                else:
                   var = str(row[col].to_datetime64())[:26]
@@ -1559,7 +1561,6 @@ Will use HTML5 for this SASsession.""")
       else:
          tabname = "'"+table.strip()+"'n "
 
-      #code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
       code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
       code += "length var $256;\n"
@@ -1794,7 +1795,6 @@ Will use HTML5 for this SASsession.""")
       else:
          tmpcsv  = tempfile
 
-      #code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
       code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
       code += "length var $256;\n"
@@ -1845,24 +1845,30 @@ Will use HTML5 for this SASsession.""")
 
       code = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
 
-      for i in range(nvars):
-         if vartype[i] == 'N':
-            code += "'"+varlist[i]+"'n "
-            if varcat[i] in self._sb.sas_date_fmts:
-               code += 'E8601DA10. '
-            else:
-               if varcat[i] in self._sb.sas_time_fmts:
-                  code += 'E8601TM15.6 '
+      my_fmts = kwargs.pop('my_fmts', False)
+      k_dts   = kwargs.pop('dtype',   None)
+      if k_dts is None and my_fmts:
+         print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+         my_fmts = False
+
+      if not my_fmts:
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               code += "'"+varlist[i]+"'n "
+               if varcat[i] in self._sb.sas_date_fmts:
+                  code += 'E8601DA10. '
                else:
-                  if varcat[i] in self._sb.sas_datetime_fmts:
-                     code += 'E8601DT26.6 '
+                  if varcat[i] in self._sb.sas_time_fmts:
+                     code += 'E8601TM15.6 '
                   else:
-                     code += 'best32. '
+                     if varcat[i] in self._sb.sas_datetime_fmts:
+                        code += 'E8601DT26.6 '
+                     else:
+                        code += 'best32. '
       code += ";\n run;\n"
       ll = self.submit(code, "text")
 
-      k_dts = kwargs.pop('dtype', '')
-      if k_dts == '':
+      if k_dts is None:
          dts = {}
          for i in range(nvars):
             if vartype[i] == 'N':
@@ -1992,7 +1998,7 @@ Will use HTML5 for this SASsession.""")
          if not tempkeep:
             os.remove(tmpcsv)
 
-      if k_dts == '':  # don't override these if user provided their own dtypes
+      if k_dts is None:  # don't override these if user provided their own dtypes
          for i in range(nvars):
             if vartype[i] == 'N':
                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
@@ -2036,7 +2042,6 @@ Will use HTML5 for this SASsession.""")
       else:
          tmpcsv  = tempfile
 
-      #code  = "proc sql; create view sasdata2dataframe as select * from "+tabname+self._sb._dsopts(dsopts)+";quit;\n"
       code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
       code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
       code += "length var $256;\n"
@@ -2102,23 +2107,31 @@ Will use HTML5 for this SASsession.""")
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
+      my_fmts = kwargs.pop('my_fmts', False)
+      k_dts   = kwargs.pop('dtype',   None)
+      if k_dts is None and my_fmts:
+         print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+         my_fmts = False
+
       code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
-      for i in range(nvars):
-         if vartype[i] == 'N':
-            code += "format '"+varlist[i]+"'n "
-            if varcat[i] in self._sb.sas_date_fmts:
-               code += 'E8601DA10.'
-            else:
-               if varcat[i] in self._sb.sas_time_fmts:
-                  code += 'E8601TM15.6'
+
+      if not my_fmts:
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               code += "format '"+varlist[i]+"'n "
+               if varcat[i] in self._sb.sas_date_fmts:
+                  code += 'E8601DA10.'
                else:
-                  if varcat[i] in self._sb.sas_datetime_fmts:
-                     code += 'E8601DT26.6'
+                  if varcat[i] in self._sb.sas_time_fmts:
+                     code += 'E8601TM15.6'
                   else:
-                     code += 'best32.'
-            code += '; '
-            if i % 10 == 0:
-               code +='\n'
+                     if varcat[i] in self._sb.sas_datetime_fmts:
+                        code += 'E8601DT26.6'
+                     else:
+                        code += 'best32.'
+               code += '; '
+               if i % 10 == 0:
+                  code +='\n'
 
       if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
@@ -2238,8 +2251,7 @@ Will use HTML5 for this SASsession.""")
             if done and bail:
                break
 
-      k_dts = kwargs.pop('dtype', '')
-      if k_dts == '':
+      if k_dts is None:
          dts = {}
          for i in range(nvars):
             if vartype[i] == 'N':
@@ -2264,7 +2276,7 @@ Will use HTML5 for this SASsession.""")
          if not tempkeep:
             os.remove(tmpcsv)
 
-      if k_dts == '':  # don't override these if user provided their own dtypes
+      if k_dts is None:  # don't override these if user provided their own dtypes
          for i in range(nvars):
             if vartype[i] == 'N':
                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
