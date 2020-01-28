@@ -1534,7 +1534,8 @@ Will use HTML5 for this SASsession.""")
       ll = self.submit("run;", 'text')
       return
 
-   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None, rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None, rowsep: str = '\x01',
+                         colsep: str = '\x02', **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -1549,6 +1550,14 @@ Will use HTML5 for this SASsession.""")
          return self.sasdata2dataframeCSV(table, libref, dsopts, **kwargs)
       elif method and method.lower() == 'disk':
          return self.sasdata2dataframeDISK(table, libref, dsopts, **kwargs)
+
+      my_fmts = kwargs.pop('my_fmts', False)
+      k_dts   = kwargs.pop('dtype',   None)
+      if self.sascfg.verbose:
+         if my_fmts != False:
+            print("'my_fmts=' is only used with the CSV or DISK version of this method. option ignored.")
+         if k_dts is not None:
+            print("'dtype=' is only used with the CSV or DISK version of this method. option ignored.")
 
       logf     = ''
       logn     = self._logcnt()
@@ -1771,6 +1780,12 @@ Will use HTML5 for this SASsession.""")
       opts     - a dictionary containing any of the following Proc Export options(delimiter, putnames)
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+
+      These two options are for advanced usage. They override how saspy imports data. For more info
+      see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
+ 
+      dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+      my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       dsopts = dsopts if dsopts is not None else {}
       opts   = kwargs.pop('opts', {})
@@ -2018,6 +2033,12 @@ Will use HTML5 for this SASsession.""")
       colsep   - the column seperator character to use; defaults to '\x02'
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+
+      These two options are for advanced usage. They override how saspy imports data. For more info
+      see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
+ 
+      dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+      my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       dsopts = dsopts if dsopts is not None else {}
       opts   = kwargs.pop('opts', {})

@@ -639,9 +639,9 @@ class SASSessionCOM(object):
         :param df [pd.DataFrame]: Pandas data frame containing data to write.
         :param table [str]: Table name.
         :option libref [str]: Library name. Default work.
-        :option keep_outer_quotes [bool]: Not supported.
 
         None of these options are used by this access method; they are needed for other access methods
+        keep_outer_quotes - for character columns, have SAS keep any outer quotes instead of stripping them off.
         embedded_newlines - if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
         LF - if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to '\x01'
         CR - if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
@@ -651,6 +651,18 @@ class SASSessionCOM(object):
         """
         DATETIME_NAME = 'DATETIME26.6'
         DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%f'
+
+        if self.sascfg.verbose:
+           if keep_outer_quotes != False:
+              print("'keep_outer_quotes=' is not used with this access method. option ignored.")
+           if embedded_newlines != False:
+              print("'embedded_newlines=' is not used with this access method. option ignored.")
+           if LF != '\x01' or CR != '\x02' or colsep != '\x03':
+              print("'LF=, CR= and colsep=' are not used with this access method. option(s) ignored.")
+           if datetimes != {}:
+              print("'datetimes=' is not used with this access method. option ignored.")
+           if outfmts != {}:
+              print("'outfmts=' is not used with this access method. option ignored.")
 
         tablepath = self._tablepath(table, libref=libref)
 
@@ -715,6 +727,14 @@ class SASSessionCOM(object):
         if method.upper() == 'CSV':
             df = self.sasdata2dataframeCSV(table, libref, dsopts=dsopts, **kwargs)
         else:
+            my_fmts = kwargs.pop('my_fmts', False)
+            k_dts   = kwargs.pop('dtype',   None)
+            if self.sascfg.verbose:
+               if my_fmts != False:
+                  print("'my_fmts=' is not supported in this access method. option ignored.")
+               if k_dts is not None:
+                  print("'dtype=' is only used with the CSV version of this method. option ignored.")
+
             header, rows, meta = self.read_sasdata(table, libref, dsopts=dsopts)
             df = pd.DataFrame.from_records(rows, columns=header, **kwargs)
 
@@ -724,7 +744,8 @@ class SASSessionCOM(object):
 
         return df
 
-    def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
+    def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, 
+                             tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
         """
         Create a pandas data frame from a SAS dataset.
         :param table [str]: Table name.
@@ -748,6 +769,11 @@ class SASSessionCOM(object):
                     {exopts}
             run;
         """
+        k_dts   = kwargs.get('dtype',   None)
+        my_fmts = kwargs.pop('my_fmts', False)
+        if self.sascfg.verbose:
+           if my_fmts != False:
+              print("'my_fmts=' is not supported in this access method. option ignored.")
 
         sas_csv = '{}saspy_sd2df.csv'.format(self._sb.workpath)
         dopts = self._sb._dsopts(dsopts) if dsopts is not None else ''
@@ -807,9 +833,10 @@ class SASSessionCOM(object):
 
         df = pd.read_csv(io.StringIO(outstring), parse_dates=datecols, **kwargs)
 
-        for col in meta.keys():
-           if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
-              df[col] = pd.to_datetime(df[col], errors='coerce')
+        if k_dts is None:  # don't override these if user provided their own dtypes
+           for col in meta.keys():
+              if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
+                 df[col] = pd.to_datetime(df[col], errors='coerce')
 
         return df
 

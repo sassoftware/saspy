@@ -1514,6 +1514,14 @@ Will use HTML5 for this SASsession.""")
       elif method and method.lower() == 'disk':
          return self.sasdata2dataframeDISK(table, libref, dsopts, rowsep, colsep, wait=wait, **kwargs)
 
+      my_fmts = kwargs.pop('my_fmts', False)
+      k_dts   = kwargs.pop('dtype',   None)
+      if self.sascfg.verbose:
+         if my_fmts != False:
+            print("'my_fmts=' is only used with the CSV or DISK version of this method. option ignored.")
+         if k_dts is not None:
+            print("'dtype=' is only used with the CSV or DISK version of this method. option ignored.")
+
       port =  kwargs.get('port', 0)
 
       if port==0 and self.sascfg.tunnel:
@@ -1743,6 +1751,12 @@ Will use HTML5 for this SASsession.""")
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       wait     - seconds to wait for socket connection from SAS; catches hang if an error in SAS. 0 = no timeout
+
+      These two options are for advanced usage. They override how saspy imports data. For more info
+      see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
+ 
+      dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+      my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       dsopts = dsopts if dsopts is not None else {}
       opts   = kwargs.pop('opts', {})
@@ -1952,6 +1966,12 @@ Will use HTML5 for this SASsession.""")
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
       wait     - seconds to wait for socket connection from SAS; catches hang if an error in SAS. 0 = no timeout
+
+      These two options are for advanced usage. They override how saspy imports data. For more info
+      see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
+ 
+      dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+      my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       dsopts = dsopts if dsopts is not None else {}
       opts   = kwargs.pop('opts', {})
