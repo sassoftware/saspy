@@ -386,40 +386,72 @@ If you right click on Applications, you can selct 'New'->'Folder.
 2) Do that and set the name of the new folder to SASPy. Then right click and select Properties - just like in the picture in the doc. 
 Then add a Keyword-> 'isGridCapable' and save it. Just like the picture in the doc.
 
-After creating the SASPy folder (application), and setting it to grid capable, when you go back in to the grid options mapping wizard (the first part
-of the document referenced above), SASPy should now be available to choose and you can set this up as you want.
+After creating the SASPy folder (application), and setting it to grid capable, when you go back
+in to the grid options mapping wizard (the first part of the document referenced above), SASPy
+should now be available to choose and you can set this up as you want.
 
 
 **********************************
 Dates, Times and Datetimes, Oh my!
 **********************************
 
-The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most cases, if you start with a SAS dataset
-and import it to a dataframe, then send it back to SAS, you should end up with the same data in SAS as you started with. However, there
-are some caveats. First, SAS Formats do not transfer to a dataframe, so on the round trip the new SAS dataset will not necessarily have the
-same formats defined on it as the original data set. Starting in saspy version3.2.0, there is an option on df2sd to specify the formats you 
-want defined on the new data set; outfmts={}. The keys for this are the column names and the values are the SAS formats you want defined.
+The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most
+cases, if you start with a SAS dataset and import it to a dataframe, then send it back to SAS,
+you should end up with the same data in SAS as you started with. However, there are some caveats.
+First, SAS Formats do not transfer to a dataframe, so on the round trip the new SAS dataset will
+not necessarily have the same formats defined on it as the original data set. Starting in saspy
+version3.2.0, there is an option on df2sd to specify the formats you want defined on the new data
+set; outfmts={}. The keys for this are the column names and the values are the SAS formats you
+want defined.                                                                                                                     
 
 For example:
-df2sd(?, outfmts={'col1' : 'YYMMDD.', 'col2' : 'TIMEAMPM.', 'some_numeric_col' : 'comma32.4'})
+df2sd(..., outfmts={'col1' : 'YYMMDD.', 'col2' : 'TIMEAMPM.', 'some_numeric_col' : 'comma32.4'})
 
-To see the formats that are defined on the original data set, use the contents() method on that SASdata object.
+To see the formats that are defined on the original data set, use the contents() or columnInfo()
+method on that SASdata object.
 
-One other issue is with SAS variables having Date and Time formats, which are logically data types of Date or Time. SAS only really has Numeric
-and Character data types, but the date, time, and datetime formats on Numeric variables identify them as representing date, time, or datetime
-data types. Pandas dataframe, has a datetime datatype, but not a date or a time datatype. When using sd2df, any SAS variable with date, time or
-datetime formats will be created in the dataframe as a datetime64[ns]. It is easy enough in python to reference only the date part, or time part
-of a pandas datetime column. In fact the column can be converted to datetime.date or datetime.time with one python statement.
+One other issue is with SAS variables having Date and Time formats, which are logically data types
+of Date or Time. SAS only really has Numeric and Character data types, but the date, time, and
+datetime formats on Numeric variables identify them as representing date, time, or datetime data
+types. Pandas dataframe, has a datetime datatype, but not a date or a time datatype. When using 
+sd2df, any SAS variable with date, time or datetime formats will be created in the dataframe as a
+datetime64[ns]. It is easy enough in python to reference only the date part, or time part of a
+pandas datetime column. In fact the column can be converted to datetime.date or datetime.time
+with one python statement. For instance, given datetime columns, the following can convert to 
+the datetime date or time:
 
-When using df2sd to transfer a dataframe to a SAS data set, with values you want be stored as SAS dates, times or datetimes, the following is
-the appropriate way to do so. In each case, the value in the dataframe must be a Pandas datetime64 value. For datetimes this just works. For
-date or time only values, specify the (new in V3.2.0) option datetimes={} on df2sd. The datetimes={} takes keys of the column names and values of 'date' or 'time'.
-The code generated to create the SAS data set will then only use the date or time portion of the Pandas datetime64 value to populate the SAS variables,
-and assign default date or time formats for those variables. You can, of course, specify specific date tor time formats using the outfmts={} option if
-you want.
+Given df_conv.dtypes:
+
+.. code-block:: ipython3
+
+    dt     datetime64[ns]
+    tm     datetime64[ns]
+
+
+    convert datetime columns to date or time only type (honoring missing values)
+    
+    nat = pd.to_datetime('')
+    df_conv['dt'] = df_conv['dt'].apply(lambda x: x if x is nat else pd.Timestamp.date(x))
+    df_conv['tm'] = df_conv['tm'].apply(lambda x: x if x is nat else pd.Timestamp.time(x))
+
+    
+    convert these back to datetimes
+    
+    df_conv['dt'] = pd.to_datetime(df_conv['dt'].astype('str'), errors='coerce')
+    df_conv['tm'] = pd.to_datetime(df_conv['tm'].astype('str'), errors='coerce')                                                                                                
+
+
+When using df2sd to transfer a dataframe to a SAS data set, with values you want be stored as SAS
+dates, times or datetimes, the following is the appropriate way to do so. In each case, the value
+in the dataframe must be a Pandas datetime64 value. For datetimes this just works. For date or
+time only values, specify the (new in V3.2.0) option datetimes={} on df2sd. The datetimes={} takes
+keys of the column names and values of 'date' or 'time'. The code generated to create the SAS data
+set will then only use the date or time portion of the Pandas datetime64 value to populate the SAS
+variables, and assign default date or time formats for those variables. You can, of course, specify
+specific date or time formats using the outfmts={} option if you want.
 
 For example:
-df2sd(?, datetimes={'d' : 'date', 't' : 'time'}) 
+df2sd(..., datetimes={'d' : 'date', 't' : 'time'}) 
 
 .. code-block:: ipython3
 
@@ -451,8 +483,137 @@ df2sd(?, datetimes={'d' : 'date', 't' : 'time'})
                                       1                     157,881,601.0000    65-01-01    8:00:01 AM
     >>>
     
-For more examples of this date, time, datetime conversion, see the example notebook here: https://github.com/sassoftware/saspy-examples/blob/master/Issue_examples/Issue279.ipynb
+For more examples of this date, time, datetime conversion, see the example notebook here:
+https://github.com/sassoftware/saspy-examples/blob/master/Issue_examples/Issue279.ipynb
     
     
     
+***********************************
+Advanced sd2df and df2sd techniques
+***********************************
+
+The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most cases,
+you don't need to specify extra options. But, there are extra options to cover a variety of specific
+use cases. The section above describes using the datetime= and outfmts= with df2sd, and this section will
+show how to manipulate sd2df if you want your dataframe to have non-default dtypes. Based upon an issue
+request to allow the dataframe created by sd2df to have differnent types than what are created by default,
+there are a couple options which can be used to accomplish this.
+
+Both the CSV and DISK methods of sd2df use Pandas read_csv method to create the dataframe from a file
+containing the SAS data. The read_csv method has many options. By default the sd2df CSV and DISK methods
+supply some of these parameters to control how the dataframe is created. There are two things in particular
+that must correlate to get the correct results in the dataframe. They are the format of the data values,
+for a given column, and the dtype specified for the creation of the column. The format of the data is 
+controlled by the SAS format being used to write the data values. The dtype is controlled by the dtype= 
+parameter on read_csv. By default saspy controls both of these, matching them up to create the valid
+dataframe columns.
+
+The sd2df* methods take a kwargs parameter. This can be used to pass through pandas parameters to the
+create dataframe method. dtype= is one of these that you can pass through. If you pass this through,
+then sd2df will not set the dtypes itself for any column. It will pass your dtype= value to read_csv. Now,
+if the format of the data values doesn't match what Pandas can parse into the dtypes you specify, then
+it won't work correctly. But, as of saspy version 3.2.0, there is an option (my_fmts=) to override
+saspy's choice of formats for writing the data values and use the formats defined on the data set, or
+specified by you via the dsopts= parameter (or attribute of a SASdata object); my_fmts = [**False** | True].
+In this way, you can control both the format of the data values and the dtypes you want Pandas to create
+from them.
+
+Let's loot at an example. One request was to have all of the data in the dataframe be string types.
+This can be done quite easily with just the dtype= parameter.
+
+.. code-block:: ipython3
+
+    # lets get two numerics from the cars dataset. FYI, they have formats defined as DOLLAR8. 
+    df = sas.sd2df_DISK('cars', 'sashelp', dtype='str',      dsopts={'keep' : 'MSRP Invoice'})
+    
+    >>> df.dtypes
+    MSRP       object
+    Invoice    object
+    dtype: object
+    >>>
+    >>> df.head()
+        MSRP Invoice
+    0  36945   33337
+    1  23820   21761
+    2  26990   24647
+    3  33195   30299
+    4  43755   39014
+    >>>
+
+Now, since we're creating these as stings, we probably want the SAS formatted version of the strings;
+same as we would see in the SAS output of the data. So, we set my_fmts=True.
+
+.. code-block:: ipython3
+
+    df = sas.sd2df_DISK('cars', 'sashelp', dtype='str', my_fmts=True,     dsopts={'keep' : 'MSRP Invoice'})
+    
+    >>> df.dtypes
+    MSRP       object
+    Invoice    object
+    dtype: object
+    >>>
+    >>> df.head()
+          MSRP  Invoice
+    0  $36,945  $33,337
+    1  $23,820  $21,761
+    2  $26,990  $24,647
+    3  $33,195  $30,299
+    4  $43,755  $39,014
+    >>>
+    
+
+And, if you wanted to specify your own SAS format to use for this, overriding the ones defined on
+the dataset, you can specify it on the dsopts=.
+
+.. code-block:: ipython3
+
+    df = sas.sd2df_DISK('cars', 'sashelp', dtype='str', my_fmts=True, 
+                         dsopts={'keep' : 'MSRP Invoice', 'format' : 'msrp dollar32.2'})
+    >>> df.dtypes
+    MSRP       object
+    Invoice    object
+    dtype: object
+    >>>
+    >>> df.head()
+             MSRP  Invoice
+    0  $36,945.00  $33,337
+    1  $23,820.00  $21,761
+    2  $26,990.00  $24,647
+    3  $33,195.00  $30,299
+    4  $43,755.00  $39,014
+    >>>
+    
+The dtype= parameter can also be a dictionary for each column and type. See the Pandas doc for more
+on that. So, you can control the format and type of each column yourself, but it is then up to you
+to be sure the values can be parsed by Pandas to the types you specify. When using these options,
+sd2df will not override anything you've provided, so you control it all.
+
+One last example where You only want to override one column and have the other defaulted.
+
+.. code-block:: ipython3
+
+    df = sas.sd2df_DISK('cars', 'sashelp', dtype={'invoice' : 'int'}, my_fmts=True, 
+                         dsopts={'keep' : 'MSRP Invoice', 'format' : 'msrp dollar32.2 invoice best32.'})
+    
+    >>> df.dtypes
+    MSRP       object
+    Invoice     int64
+    dtype: object
+    >>> df.head()
+             MSRP  Invoice
+    0  $36,945.00    33337
+    1  $23,820.00    21761
+    2  $26,990.00    24647
+    3  $33,195.00    30299
+    4  $43,755.00    39014
+    >>>
+    
+Remember, if you want to send data like this back to a SAS data set and you want the original types,
+you need to have any numerics as a numeric type, dates, times or datetimes as a datetime64 type. You can
+use the datetimes= to create date or time SAS variables from a full datetime, and anything that is 
+an Object type, will be a character variable in SAS, with the str() of the object as the value.
+
+There's more interesting reading about this on the issue that started it. Take a look at 
+https://github.com/sassoftware/saspy/issues/279 to see where this fuctionality came from.
+
     
