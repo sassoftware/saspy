@@ -520,7 +520,7 @@ the datetime date or time:</p>
 <span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;tm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;tm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">),</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>When using df2sd to transfer a dataframe to a SAS data set, with values you want be stored as SAS
+<p>When using df2sd to transfer a dataframe to a SAS data set, with values you want to be stored as SAS
 dates, times or datetimes, the following is the appropriate way to do so. In each case, the value
 in the dataframe must be a Pandas datetime64 value. For datetimes this just works. For date or
 time only values, specify the (new in V3.2.0) option datetimes={} on df2sd. The datetimes={} takes
@@ -629,7 +629,7 @@ same as we would see in the SAS output of the data. So, we set my_fmts=True.</p>
 <p>And, if you wanted to specify your own SAS format to use for this, overriding the ones defined on
 the dataset, you can specify it on the dsopts=.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sd2df_DISK</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">my_fmts</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                     <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span> <span class="p">:</span> <span class="s1">&#39;msrp dollar32.2&#39;</span><span class="p">})</span>
+                     <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;msrp&#39;</span><span class="p">:</span><span class="s1">&#39;dollar32.2&#39;</span><span class="p">}})</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
 <span class="n">MSRP</span>       <span class="nb">object</span>
 <span class="n">Invoice</span>    <span class="nb">object</span>
@@ -651,7 +651,7 @@ to be sure the values can be parsed by Pandas to the types you specify. When usi
 sd2df will not override anything you&#8217;ve provided, so you control it all.</p>
 <p>One last example where You only want to override one column and have the other defaulted.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sd2df_DISK</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;invoice&#39;</span> <span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">},</span> <span class="n">my_fmts</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
-                     <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span> <span class="p">:</span> <span class="s1">&#39;msrp dollar32.2 invoice best32.&#39;</span><span class="p">})</span>
+                     <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;msrp&#39;</span><span class="p">:</span><span class="s1">&#39;dollar32.2&#39;</span><span class="p">,</span><span class="s1">&#39;invoice&#39;</span><span class="p">:</span><span class="s1">&#39;best32.&#39;</span><span class="p">}})</span>
 
 <span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
 <span class="n">MSRP</span>       <span class="nb">object</span>
