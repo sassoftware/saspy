@@ -441,7 +441,7 @@ Given df_conv.dtypes:
     df_conv['tm'] = pd.to_datetime(df_conv['tm'].astype('str'), errors='coerce')                                                                                                
 
 
-When using df2sd to transfer a dataframe to a SAS data set, with values you want be stored as SAS
+When using df2sd to transfer a dataframe to a SAS data set, with values you want to be stored as SAS
 dates, times or datetimes, the following is the appropriate way to do so. In each case, the value
 in the dataframe must be a Pandas datetime64 value. For datetimes this just works. For date or
 time only values, specify the (new in V3.2.0) option datetimes={} on df2sd. The datetimes={} takes
@@ -568,7 +568,7 @@ the dataset, you can specify it on the dsopts=.
 .. code-block:: ipython3
 
     df = sas.sd2df_DISK('cars', 'sashelp', dtype='str', my_fmts=True, 
-                         dsopts={'keep' : 'MSRP Invoice', 'format' : 'msrp dollar32.2'})
+                         dsopts={'keep' : 'MSRP Invoice', 'format' : {'msrp':'dollar32.2'}})
     >>> df.dtypes
     MSRP       object
     Invoice    object
@@ -593,7 +593,7 @@ One last example where You only want to override one column and have the other d
 .. code-block:: ipython3
 
     df = sas.sd2df_DISK('cars', 'sashelp', dtype={'invoice' : 'int'}, my_fmts=True, 
-                         dsopts={'keep' : 'MSRP Invoice', 'format' : 'msrp dollar32.2 invoice best32.'})
+                         dsopts={'keep' : 'MSRP Invoice', 'format' : {'msrp':'dollar32.2','invoice':'best32.'}})
     
     >>> df.dtypes
     MSRP       object
