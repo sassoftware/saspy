@@ -1362,7 +1362,7 @@ Will use HTML5 for this SASsession.""")
                          libref: str ="", keep_outer_quotes: bool=False,
                                           embedded_newlines: bool=False,
                          LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
-                         datetimes: dict={}, outfmts: dict={}):
+                         datetimes: dict={}, outfmts: dict={}, labels: dict={}):
       """
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
@@ -1375,12 +1375,14 @@ Will use HTML5 for this SASsession.""")
       colsep - the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
       datetimes - dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
       outfmts - dict with column names and SAS formats to assign to the new SAS data set
+      labels  - dict with column names and SAS Labels to assign to the new SAS data set
       """
       input   = ""
       xlate   = ""
       card    = ""
       format  = ""
       length  = ""
+      label   = ""
       dts     = []
       ncols   = len(df.columns)
       lf      = "'"+'%02x' % ord(LF.encode(self.sascfg.encoding))+"'x"
@@ -1388,10 +1390,13 @@ Will use HTML5 for this SASsession.""")
       delim   = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
       dtkeys  = datetimes.keys()
       fmtkeys = outfmts.keys()
+      labkeys = labels.keys()
 
       for name in range(ncols):
          colname = str(df.columns[name])
          input  += "'"+colname+"'n "
+         if colname in labkeys:
+            label += "label '"+colname+"'n ="+labels[colname]+";\n"
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
             try:
                col_l = df[df.columns[name]].astype(str).apply(self._getbytelen).max()
@@ -1457,6 +1462,7 @@ Will use HTML5 for this SASsession.""")
          code += "length"+length+";\n"
       if len(format):
          code += "format "+format+";\n"
+      code += label
       code += "infile datalines delimiter="+delim+" DSD STOPOVER;\n input "+input+";\n"+xlate+";\n datalines4;"
       self._asubmit(code, "text")
 

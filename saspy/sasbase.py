@@ -1079,7 +1079,7 @@ class SASsession():
               results: str = '', keep_outer_quotes: bool = False,
                                  embedded_newlines: bool = False, 
               LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
-              datetimes: dict={}, outfmts: dict={}) -> 'SASdata':
+              datetimes: dict={}, outfmts: dict={}, labels: dict={}) -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
@@ -1097,13 +1097,13 @@ class SASsession():
         :return: SASdata object
         """
         return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, 
-                                      LF, CR, colsep, datetimes, outfmts)
+                                      LF, CR, colsep, datetimes, outfmts, labels)
 
     def dataframe2sasdata(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '', 
                           results: str = '', keep_outer_quotes: bool = False,
                                              embedded_newlines: bool = False, 
                           LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
-                          datetimes: dict={}, outfmts: dict={}) -> 'SASdata':
+                          datetimes: dict={}, outfmts: dict={}, labels: dict={}) -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
@@ -1135,7 +1135,7 @@ class SASsession():
             return None
         else:
             self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, 
-                                       LF, CR, colsep, datetimes, outfmts)
+                                       LF, CR, colsep, datetimes, outfmts, labels)
 
         if self.exist(table, libref):
             return SASdata(self, libref, table, results)
