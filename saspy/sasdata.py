@@ -1427,12 +1427,14 @@ class SASdata:
               renamevars: dict=None, labelvars: dict=None):
        """
        Modify a table, setting formats, informats or changing the data set name itself
-
+       or renaming variables or adding labels to variables
        :param formats: dict of variable names and formats to assign
        :param informats: dict of variable names and informats to assign
-       :param label: string of the label to assign to the data set; if it requires outer quotes, provide them
+       :param label: string of the label to assign to the data set; 
+              if it requires outer quotes, provide them
        :param renamevars: dict of variable names and new names tr rename the variables
-       :param labelvars: dict of variable names and labels to assign to them
+       :param labelvars: dict of variable names and labels to assign to them;
+              if any lables require outer quotes, provide them
        :return: SASLOG for this step
        """
        code  = "proc datasets dd="+self.libref+" nolist; modify '"+self.table+"'n " 
@@ -1465,13 +1467,13 @@ class SASdata:
              code += " '"+var+"'n = "+labelvars[var]
           code += ";\n"
 
-       code += "run;"
+       code += ";run;quit;"
 
        if self.sas.nosub:
           print(code)
           return
 
-       ll = self.sas._io.submit(code)
+       ll = self.sas._io.submit(code, results='text')
        if not self.sas.batch:
           print(ll['LOG'])
        else:
@@ -1485,7 +1487,7 @@ class SASdata:
        :return: SASLOG for this step
        """
        code  = "proc datasets dd="+self.libref+" nolist;\n"
-       code += "change '"+self.table+"'n = '"+name+"'n;\nrun;" 
+       code += "change '"+self.table+"'n = '"+name+"'n;\nrun;quit;" 
 
        if self.sas.nosub:
           print(code)
@@ -1499,7 +1501,7 @@ class SASdata:
           else:
              return failmsg
 
-       ll = self.sas._io.submit(code)
+       ll = self.sas._io.submit(code, results='text')
 
        if not self.sas.exist(name, self.libref):
           failmsg = "New named data set doesn't exist. Rename must have failed.\n"
