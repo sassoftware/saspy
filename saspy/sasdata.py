@@ -1423,3 +1423,93 @@ class SASdata:
         else:
             return ll
 
+    def modify(self, formats: dict=None, informats: dict=None, label: str=None,
+              renamevars: dict=None, labelvars: dict=None):
+       """
+       Modify a table, setting formats, informats or changing the data set name itself
+
+       :param formats: dict of variable names and formats to assign
+       :param informats: dict of variable names and informats to assign
+       :param label: string of the label to assign to the data set; if it requires outer quotes, provide them
+       :param renamevars: dict of variable names and new names tr rename the variables
+       :param labelvars: dict of variable names and labels to assign to them
+       :return: SASLOG for this step
+       """
+       code  = "proc datasets dd="+self.libref+" nolist; modify '"+self.table+"'n " 
+
+       if label is not None:
+          code += "(label="+label+")"
+       code += ";\n"
+
+       if formats is not None:
+          code += "format"
+          for var in formats:
+             code += " '"+var+"'n "+formats[var]
+          code += ";\n"
+
+       if informats is not None:
+          code += "informat"
+          for var in informats:
+             code += " '"+var+"'n "+informats[var]
+          code += ";\n"
+
+       if renamevars is not None:
+          code += "rename"
+          for var in renamevars:
+             code += " '"+var+"'n = '"+renamevars[var]+"'n" 
+          code += ";\n"
+
+       if labelvars is not None:
+          code += "label"
+          for var in labelvars:
+             code += " '"+var+"'n = "+labelvars[var]
+          code += ";\n"
+
+       code += "run;"
+
+       if self.sas.nosub:
+          print(code)
+          return
+
+       ll = self.sas._io.submit(code)
+       if not self.sas.batch:
+          print(ll['LOG'])
+       else:
+          return ll['LOG']
+
+    def rename(self, name: str=None):
+       """
+       Rename this data set
+
+       :param name: new name for this data set
+       :return: SASLOG for this step
+       """
+       code  = "proc datasets dd="+self.libref+" nolist;\n"
+       code += "change '"+self.table+"'n = '"+name+"'n;\nrun;" 
+
+       if self.sas.nosub:
+          print(code)
+          return
+
+       if self.sas.exist(name, self.libref):
+          failmsg = "Data set with new name already exists. Rename failed."
+          if not self.sas.batch:
+             print(failmsg)
+             return None
+          else:
+             return failmsg
+
+       ll = self.sas._io.submit(code)
+
+       if not self.sas.exist(name, self.libref):
+          failmsg = "New named data set doesn't exist. Rename must have failed.\n"
+       else:
+          failmsg = ""
+          self.table = name
+
+       if not self.sas.batch:
+          print(failmsg+ll['LOG'])
+          return None
+       else:
+          return failmsg+ll['LOG']
+
