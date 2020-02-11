@@ -208,16 +208,51 @@ class SASconfig(object):
         if inm5dsbug is not None:
            self.m5dsbug = inm5dsbug
 
+        inip = kwargs.get('ip', None)             
+        if inip:
+           if lock and len(ip):
+              print("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
+           else:
+              ip = inip   
+
+        inssh = kwargs.get('ssh', None)
+        if inssh:
+           if lock and len(ssh):
+              print("Parameter 'ssh' passed to SAS_session was ignored due to configuration restriction.")
+           else:
+              ssh = inssh
+
+        insaspath = kwargs.get('saspath', None)
+        if insaspath:
+           if lock and len(path):
+              print("Parameter 'saspath' passed to SAS_session was ignored due to configuration restriction.")
+           else:
+              path = insaspath
+
+        injava = kwargs.get('java', None)
+        if injava:
+           if lock and len(java):
+              print("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
+           else:
+              java = injava
+
+        inprov = kwargs.get('provider', None)
+        if inprov:
+           if lock and len(provider):
+              print("Parameter 'provider' passed to SAS_session was ignored due to configuration restriction.")
+           else:
+              provider = inprov
+
         if java is not None:
             self.mode = 'IOM'
         elif ip is not None:
             self.mode = 'HTTP'
         elif ssh is not None:
             self.mode = 'SSH'
-        elif path is not None:
-            self.mode = 'STDIO'
         elif provider is not None:
             self.mode = 'COM'
+        elif path is not None:
+            self.mode = 'STDIO'
         else:
             raise SASConfigNotValidError(cfgname)
 
