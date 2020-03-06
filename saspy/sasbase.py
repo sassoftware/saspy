@@ -517,7 +517,14 @@ class SASsession():
         self.workpath = vlist[2].rpartition('WORKPATHEND=')[0].strip().replace('\n','') 
 
         # validate encoding
-        pyenc = sas_encoding_mapping[self.sascei]
+        try:
+           pyenc = sas_encoding_mapping[self.sascei]
+        except KeyError:
+           pyenc = None
+           print("Invalid response from SAS on inital submission. printing the SASLOG as diagnostic")
+           print(self.saslog())
+           raise
+
         if pyenc is not None:
            if self._io.sascfg.encoding != '':
               if self._io.sascfg.encoding.lower() not in pyenc:
