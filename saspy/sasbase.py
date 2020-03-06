@@ -522,7 +522,7 @@ class SASsession():
         except KeyError:
            pyenc = None
            print("Invalid response from SAS on inital submission. printing the SASLOG as diagnostic")
-           print(self.saslog())
+           print(self._io._log)
            raise
 
         if pyenc is not None:
