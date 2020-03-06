@@ -230,10 +230,10 @@ class SASsessionIOM():
       self.stdout = None
 
       self._sb      = kwargs.get('sb', None)
-      self.sascfg   = SASconfigIOM(self, **kwargs)
       self._log_cnt = 0
       self._log     = ""
       self._tomods1 = b"_tomods1"
+      self.sascfg   = SASconfigIOM(self, **kwargs)
 
       self._startsas()
 

@@ -193,9 +193,9 @@ class SASSessionCOM(object):
     STREAM_WRITE = 2
 
     def __init__(self, **kwargs):
+        self._log = ''
         self.sascfg = SASConfigCOM(**kwargs)
         self._sb = kwargs.get('sb')
-        self._log = ''
 
         self.pid = self._startsas()
 

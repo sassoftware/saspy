@@ -379,6 +379,7 @@ class SASsessionHTTP():
       self.pid        = None
       self._session   = None
       self._sb        = kwargs.get('sb', None)
+      self._log       = "\nNo SAS session established, something must have failed trying to connect\n"
       self.sascfg     = SASconfigHTTP(self, **kwargs)
 
       if self.sascfg._token:

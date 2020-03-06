@@ -198,9 +198,9 @@ class SASsessionSTDIO():
       self.stdout = None
 
       self._sb      = kwargs.get('sb', None)
-      self.sascfg   = SASconfigSTDIO(self, **kwargs)
       self._log_cnt = 0
       self._log     = ""
+      self.sascfg   = SASconfigSTDIO(self, **kwargs)
 
       self._startsas()
 
