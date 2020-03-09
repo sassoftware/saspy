@@ -18,10 +18,12 @@ import base64
 import json
 import os
 import ssl
+import sys
 
 import tempfile as tf
 from time import sleep
 
+from saspy.sasexceptions import (SASHTTPauthenticateError)
 try:
    import pandas as pd
    import numpy  as np
@@ -298,17 +300,19 @@ class SASconfigHTTP:
          conn.request('POST', "/SASLogon/oauth/token", body=d1, headers=headers)
          req = conn.getresponse()
       except:
-         import sys
-         print("Failure in GET AuthToken. Could not connect to the logon service. Exception info:\n"+str(sys.exc_info()))
-         return None
+         #print("Failure in GET AuthToken. Could not connect to the logon service. Exception info:\n"+str(sys.exc_info()))
+         raise SASHTTPauthenticateError(msg="Could not connect to the logon service. Exception info:\n"+str(sys.exc_info()))
+         #return None
 
       status = req.status
       resp = req.read()
       conn.close()
 
       if status > 299:
-         print("Failure in GET AuthToken. Status="+str(status)+"\nResponse="+resp.decode(self.encoding))
-         return None
+         #print("Failure in GET AuthToken. Status="+str(status)+"\nResponse="+resp.decode(self.encoding))
+         msg="Could not connect to the logon service. Exception info:\nStatus="+str(status)+"\nResponse="+str(resp)
+         raise SASHTTPauthenticateError(msg)
+         #return None
 
       js = json.loads(resp.decode(self.encoding))
       token = js.get('access_token')

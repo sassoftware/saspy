@@ -44,3 +44,14 @@ class SASIONotSupportedError(Exception):
             alt_text = ''
 
         return 'Cannot use {} I/O module on Windows. {}'.format(self.method, alt_text)
+
+
+class SASHTTPauthenticateError(Exception):
+    def __init__(self, msg: str):
+        self.msg = msg
+
+    def __str__(self):
+        return 'Failure in GET AuthToken.\n {}'.format(self.msg)
+
+
+
