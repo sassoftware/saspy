@@ -1427,6 +1427,7 @@ class SASdata:
               renamevars: dict=None, labelvars: dict=None):
        """
        Modify a table, setting formats, informats or changing the data set name itself or renaming variables or adding labels to variables
+
        :param formats: dict of variable names and formats to assign
        :param informats: dict of variable names and informats to assign
        :param label: string of the label to assign to the data set; if it requires outer quotes, provide them
