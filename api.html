@@ -372,7 +372,7 @@ is the text of the last warning message generated in the SAS log.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.dataframe2sasdata">
-<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = False</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = False</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -418,7 +418,7 @@ is the text of the last warning message generated in the SAS log.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.df2sd">
-<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = False</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
+<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = False</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;dataframe2sasdata&#8217;. Why type all that?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1433,7 +1433,7 @@ and generates a bar chart.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">&#8216;SASdata&#8217;</p>
 </td>
 </tr>
 </tbody>
@@ -1442,7 +1442,7 @@ and generates a bar chart.</p>
 
 <dl class="method">
 <dt id="saspy.sasdata.SASdata.info">
-<code class="descname">info</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.sasdata.SASdata.info" title="Permalink to this definition">¶</a></dt>
+<code class="descname">info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#saspy.sasdata.SASdata.info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display the column info on a SAS data object</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1466,6 +1466,19 @@ and generates a bar chart.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.sasdata.SASdata.modify">
+<code class="descname">modify</code><span class="sig-paren">(</span><em>formats: dict = None</em>, <em>informats: dict = None</em>, <em>label: str = None</em>, <em>renamevars: dict = None</em>, <em>labelvars: dict = None</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.sasdata.SASdata.modify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify a table, setting formats, informats or changing the data set name itself
+or renaming variables or adding labels to variables
+:param formats: dict of variable names and formats to assign
+:param informats: dict of variable names and informats to assign
+:param label: string of the label to assign to the data set; if it requires outer quotes, provide them
+:param renamevars: dict of variable names and new names tr rename the variables
+:param labelvars: dict of variable names and labels to assign to them; if any lables require outer quotes, provide them
+:return: SASLOG for this step</p>
 </dd></dl>
 
 <dl class="method">
@@ -1503,6 +1516,22 @@ stratifying with respect to that variable</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Tuples or SAS data object</p>
 </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.sasdata.SASdata.rename">
+<code class="descname">rename</code><span class="sig-paren">(</span><em>name: str = None</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.sasdata.SASdata.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename this data set</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> &#8211; new name for this data set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">SASLOG for this step</td>
 </tr>
 </tbody>
 </table>
