@@ -549,7 +549,7 @@ class SASdata:
                 else:
                     return ll
 
-    def info(self) -> 'pandas.DataFrame':
+    def info(self):
         """
         Display the column info on a SAS data object
 
@@ -654,7 +654,7 @@ class SASdata:
         :param replace:
         :param prefix:
         :param out:
-        :return:
+        :return: 'SASdata'
         """
         outstr = ''
         if out:
@@ -1426,15 +1426,12 @@ class SASdata:
     def modify(self, formats: dict=None, informats: dict=None, label: str=None,
               renamevars: dict=None, labelvars: dict=None):
        """
-       Modify a table, setting formats, informats or changing the data set name itself
-       or renaming variables or adding labels to variables
+       Modify a table, setting formats, informats or changing the data set name itself or renaming variables or adding labels to variables
        :param formats: dict of variable names and formats to assign
        :param informats: dict of variable names and informats to assign
-       :param label: string of the label to assign to the data set; 
-              if it requires outer quotes, provide them
+       :param label: string of the label to assign to the data set; if it requires outer quotes, provide them
        :param renamevars: dict of variable names and new names tr rename the variables
-       :param labelvars: dict of variable names and labels to assign to them;
-              if any lables require outer quotes, provide them
+       :param labelvars: dict of variable names and labels to assign to them; if any lables require outer quotes, provide them
        :return: SASLOG for this step
        """
        code  = "proc datasets dd="+self.libref+" nolist; modify '"+self.table+"'n " 

@@ -1,5 +1,4 @@
 import logging
-from typing import TYPE_CHECKING
 
 try:
     import pandas as pd

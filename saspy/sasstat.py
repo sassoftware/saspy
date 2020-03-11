@@ -15,14 +15,8 @@
 #
 
 import logging
-from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
-
-from saspy.sasresults import SASresults
-
-if TYPE_CHECKING:
-    from saspy.sasdata import SASdata
-
+from saspy.sasresults   import SASresults
 
 # from pdb import set_trace as bp
 

@@ -14,12 +14,9 @@
 #  limitations under the License.
 #
 import logging
-from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
 from saspy.sasresults   import SASresults
-
-if TYPE_CHECKING:
-    from saspy.sasbase import SASdata
+from saspy.sasdata      import SASdata
 
 
 

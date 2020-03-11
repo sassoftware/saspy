@@ -14,12 +14,9 @@
 #  limitations under the License.
 #
 import logging
-from typing import TYPE_CHECKING
 from saspy.sasdecorator import procDecorator
 from saspy.sasresults   import SASresults
-
-if TYPE_CHECKING:
-    from saspy.sasdata import SASdata
+from saspy.sasdata      import SASdata
 
 
 class SASutil:
@@ -209,7 +206,8 @@ class SASutil:
 
         You can use a CLASS statement to specify one or two variables that group the data into classification levels. The analysis is carried out for each
         combination of levels in the input data set, or within each BY group if you also specify a BY statement. You can use the CLASS statement with plot 
-        statements to create comparative displays, in which each cell contains a plot for one combination of classification levels.                                                                                                                             
+        statements to create comparative displays, in which each cell contains a plot for one combination of classification levels.                                                                                                                            
+ 
                                                                                                                                                                           
 
         :param data: SASdata object or string. This parameter is required.
