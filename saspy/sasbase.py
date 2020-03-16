@@ -1540,9 +1540,8 @@ class SASsession():
         :param outtype: [optional] desired output type of the python variable; valid types are [int, float, str]
 
         """
-        ll = self.submit("%put " + name + "=&" + name + " tom=;\n")
-
-        l2 = ll['LOG'].rpartition(name + "=")[2].partition(" tom=")
+        ll = self.submit("%put " + name + "=&" + name + " "+ name+"END=;\n")
+        l2 = ll['LOG'].rpartition(name + "=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
 
         if outtype is not None and type(outtype) not in [int, float, str]:
            print("invalid type specified. supported are [int, float, str], will return default type")
@@ -1550,19 +1549,19 @@ class SASsession():
 
         if outtype is not None:
            if   type(outtype) == int:
-              var = int(l2[0])
+              var = int(l2)
            elif type(outtype) == float:
-              var = float(l2[0])
+              var = float(l2)
            elif type(outtype) == str:
-              var = l2[0]
+              var = l2
         else:
            try:
-              var = int(l2[0])
+              var = int(l2)
            except:
               try:
-                 var = float(l2[0])
+                 var = float(l2)
               except:
-                 var = l2[0]
+                 var = l2
 
         return var
 
