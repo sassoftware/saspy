@@ -50,7 +50,7 @@ class SASconfigIOM:
       self.omruser   = cfg.get('omruser', '')
       self.omrpw     = cfg.get('omrpw', '')
       self.encoding  = cfg.get('encoding', '')
-      self.classpath = cfg.get('classpath', '')
+      self.classpath = cfg.get('classpath', None)
       self.authkey   = cfg.get('authkey', '')
       self.timeout   = cfg.get('timeout', None)
       self.appserver = cfg.get('appserver', '')
@@ -131,12 +131,39 @@ class SASconfigIOM:
          else:
             self.sspi = insspi
 
-      incp = kwargs.get('classpath', '')
-      if len(incp) > 0:
-         if lock and len(self.classpath):
+      incp = kwargs.get('classpath', None)
+      if incp is not None:
+         if lock and self.classpath is not None:
             print("Parameter 'classpath' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.classpath = incp
+
+      if self.classpath is None:
+         import importlib
+         sep   = '\\' if os.name == 'nt' else '/'
+         delim = ';'  if os.name == 'nt' else ':'
+
+         cpath = importlib.util.find_spec(self.__module__).origin.replace('sasioiom.py','java')+sep
+         cp    = cpath+"saspyiom.jar"
+
+         cpath = cpath+"iomclient"+sep
+         cp   += delim+cpath+"log4j.jar"
+         cp   += delim+cpath+"sas.security.sspi.jar"
+         cp   += delim+cpath+"sas.core.jar"
+         cp   += delim+cpath+"sas.svc.connection.jar"
+
+         cp   += delim+cpath+"sas.rutil.jar"
+         cp   += delim+cpath+"sas.rutil.nls.jar"
+         cp   += delim+cpath+"sastpj.rutil.jar"
+
+         cpath = cpath.replace("iomclient", "thirdparty")
+         cp   += delim+cpath+"glassfish-corba-internal-api.jar"
+         cp   += delim+cpath+"glassfish-corba-omgapi.jar"
+         cp   += delim+cpath+"glassfish-corba-orb.jar"
+         cp   += delim+cpath+"pfl-basic.jar"
+         cp   += delim+cpath+"pfl-tf.jar"
+
+         self.classpath = cp
 
       inak = kwargs.get('authkey', '')
       if len(inak) > 0:

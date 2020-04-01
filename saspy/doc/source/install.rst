@@ -431,13 +431,21 @@ The IOM connection method also enables you to connect to SAS from Windows (STDIO
 The connection can be to a local SAS installation or a remote IOM Workspace server running
 on any supported platform.
 
+
+ATTN, as of saspy version 3.3.3, the classpath is no longer required!
+The 4 required IOM Java client jars are now included in the saspy repo, and they, along with the saspyiom.jar and the 
+thirdparty CORBA jars will be automatically provided as the calsspath by saspy. This is generally all that is needed.
+If you require the 3 encryption jars, shown below, they still need to be acquired from your SAS deployment, and then
+if you put them in the saspy/java/iomclient directory of the saspy install, they will be included in the classpath for you.
+If you put them somewhere else, then you need to provide the whole classpath, with all jars, like before V3.3.3. 
+
 The IOM connection method requires the following:
 
 * Java 7 or higher installed on your Client machine (where you're running SASPy)
 * The SAS Java IOM Client (just the jars listed below; these can be copied to your client system from wherever your SAS install is)
 * Setting the CLASSPATH to access the SAS Java IOM Client JAR files.
 * Setting the CLASSPATH to include the the saspyiom.jar file (and the thirdparty jars for Java version 9 and higher).
-* Setting the CLASSPATH to include client side encryption jars, if you have encryption configured for your IOM
+* Setting the CLASSPATH to include client side encryption jars, if you have encryption configured for your IOM Workspace server
 
 The ``'classpath'`` key for the configuration definition requires a little additional
 explanation before we get to further details. There are four (4) JAR files that are 
@@ -449,18 +457,12 @@ file, like so:
 
 ::
 
-    # build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION
-    cp  =  "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar"
-    cp += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar"
-    cp += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar"
-    cp += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar"
-    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
-
-    # And, if you've configured IOM to use Encryption, you need these client side jars.
-    cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904300.0.0.20150204190000_v940m3\\sas.rutil.jar"
-    cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil.nls_904300.0.0.20150204190000_v940m3\\sas.rutil.nls.jar"
-    cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.rutil_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar"
-    
+    # build out a local classpath variable to use below   CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION
+    cp  =  "C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
+    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\sas.svc.connection.jar"
+    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\log4j.jar"
+    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\sas.security.sspi.jar"
+    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\sas.core.jar"
 
     # Java 10+ no longer provides CORBA (9 has it but doesn't load it by default). These jars provide the CORBA support
     # that the IOM client needs. Add these to the classpath to work with the latest Java releases. 
@@ -470,6 +472,13 @@ file, like so:
     cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-orb.jar"
     cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\pfl-basic.jar"
     cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\pfl-tf.jar"
+
+    # And, if you've configured IOM to use Encryption, you need these client side jars.
+    cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904300.0.0.20150204190000_v940m3\\sas.rutil.jar"
+    cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil.nls_904300.0.0.20150204190000_v940m3\\sas.rutil.nls.jar"
+    cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.rutil_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar"
+    
+
     
 
 And then simply refer to the ``cp`` variable in the configuration definition:
@@ -502,7 +511,7 @@ the IOM Client. This can easily be added back in using the 'javaparms' configura
   
 
 
-The IOM access method now has support for getting the required user/password from an authinfo file in the user's home directory
+The IOM access method has support for getting the required user/password from an authinfo file in the user's home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it's _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for `authkey`. Next is the 'user' key followed by the value (the user id)
 and then 'password' key followed by its value (the user's password). Note that there are permission rules for this file. On linux the file must
@@ -549,8 +558,8 @@ iomhost -
 iomport - 
     (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
 classpath - 
-    (Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar. These can be wherever. Just make sure the path is correct.
-    These jars work across platforms, so you can copy them from a Unix system to Windows or the other way too. Same with saspyiom.jar.
+    (Mo longer Required) Unless you require the 3 encryption jars, you no longer need to specify this. If you do have to use those 3 jars,
+    then provide the complete classpath with all of the jars in it like previously required.
 authkey -
     The keyword that starts a line in the authinfo file containing user and or password for this connection.
 omruser - 
@@ -616,28 +625,11 @@ m5dsbug -
 
 .. code-block:: ipython3
 
-    # Unix client class path
-    cpL  =  "/whever/I/put/these/jars/sas.svc.connection.jar"
-    cpL += ":/whever/I/put/these/jars/log4j.jar"
-    cpL += ":/whever/I/put/these/jars/sas.security.sspi.jar"
-    cpL += ":/whever/I/put/these/jars/sas.core.jar"
-    cpL += ":/whever/I/put/these/jars/saspyiom.jar"
-    #cpL += ":/usr/lib/python3.5/site-packages/saspy/java/saspyiom.jar"
-
-    # Windows client class path
-    cpW  =  "C:\\wherever\\I\\put\\these\\jars\\sas.svc.connection.jar"
-    cpW += ";C:\\wherever\\I\\put\\these\\jars\\log4j.jar"
-    cpW += ";C:\\wherever\\I\\put\\these\\jars\\sas.security.sspi.jar"
-    cpW += ";C:\\wherever\\I\\put\\these\\jars\\sas.core.jar"
-    #cpW += ";C:\\wherever\\I\\put\\these\\jars\\saspyiom.jar"
-    cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
-
     # Unix client and Unix IOM server  NEW 2.1.6 - with load balanced object spawners
     iomlinux = {'java'      : '/usr/bin/java',
                 'iomhost'   : ['linux.grid1.iom.host','linux.grid2.iom.host','linux.grid3.iom.host','linux.grid4.iom.host'],
                 'iomport'   : 8591,
                 'encoding'  : 'latin1',
-                'classpath' : cpL,
                 'appserver' : 'SASApp Prod - Workspace Server'
                 }
 
@@ -646,7 +638,6 @@ m5dsbug -
                 'iomhost'   : 'windows.iom.host',
                 'iomport'   : 8591,
                 'encoding'  : 'windows-1252',
-                'classpath' : cpL,
                 'appserver' : 'SASApp Test - Workspace Server'
                }
 
@@ -655,7 +646,6 @@ m5dsbug -
                    'iomhost'   : 'linux.iom.host',
                    'iomport'   : 8591,
                    'encoding'  : 'latin1',
-                   'classpath' : cpW
                   }
 
     # Windows client and Windows IOM server
@@ -663,14 +653,12 @@ m5dsbug -
                    'iomhost'   : 'windows.iom.host',
                    'iomport'   : 8591,
                    'encoding'  : 'windows-1252',
-                   'classpath' : cpW
                   }
 
     # Windows client and with IWA to Remote IOM server
     winiomIWA   = {'java'      : 'java',
                    'iomhost'   : 'some.iom.host',
                    'iomport'   : 8591,
-                   'classpath' : cpW,
                    'sspi'      : True
                   }
 
@@ -712,7 +700,7 @@ github site: https://github.com/sassoftware/saspy-examples/blob/master/SAS_contr
 java      - 
     (Required) The path to the Java executable to use. 
 classpath - 
-    (Required) The CLASSPATH to the IOM client JAR files and saspyiom.jar.
+    (Mo longer Required) This is now generated by saspy and not nexessary for Local mode at all. 
 encoding  -
     NOTE: as of saspy V2.4.2, you no longer need to set the encoding. SASpy
     will determine the SAS session encoding and map that to the Python encoding for you.
@@ -758,19 +746,8 @@ m5dsbug -
 
 .. code-block:: ipython3
 
-    # Windows client class path
-    # build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION
-    cpW  =  "C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar"
-    cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\log4j.jar"
-    cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar"
-    cpW += ";C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94472__prt__xx__sp0__1\\deploywiz\\sas.core.jar"
-    cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
-
-
     # Windows client and Local Windows IOM server
     winlocal    = {'java'      : 'java',
-                   'encoding'  : 'windows-1252',
-                   'classpath' : cpW
                   }
 
 .. note:: Having the ``'java'`` key is the trigger to use the IOM access method.

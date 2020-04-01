@@ -1,7 +1,108 @@
+# LICENSES
 
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
+This package is released under two licenes:
+
+   1. **Apache 2.0**
+   2. **SAS License Agreement for Corrective Code or Additional Functionality**
+   
+The **Apache 2.0** license pertains to the Python code contained in the GitHub
+repository at https://github.com/sassoftware/saspy.  
+
+The **SAS License Agreement for Corrective Code or Additional Functionality**
+pertains to the four .jar files which comprise the IOM Java Client that saspy
+uses for IOM connections to SAS. 
+
+The terms and conditions for each license are outlined below.
+
+
+##  SAS License Agreement for Corrective Code or Additional Functionality
+
+   PLEASE CAREFULLY READ THE TERMS AND CONDITIONS OF THIS LICENSE AGREEMENT
+   ("AGREEMENT"). BY ACCEPTING THIS AGREEMENT AND/OR USING THE CODE, AS
+   DEFINED BELOW, YOU, ON BEHALF OF CUSTOMER, AS DEFINED BELOW, ARE AGREEING
+   TO THESE TERMS AND SAS, AS DEFINED BELOW, WILL AUTHORIZE YOU TO DOWNLOAD
+   THE CODE. YOU REPRESENT AND WARRANT THAT YOU HAVE FULL AUTHORITY TO
+   BIND CUSTOMER TO THIS AGREEMENT. IF YOU DO NOT AGREE TO ALL OF THE TERMS
+   OF THIS AGREEMENT, DO NOT ACCEPT THIS AGREEMENT OR ATTEMPT TO DOWNLOAD
+   THE CODE.
+
+   You are downloading software code ("Code") which will become part of
+   a software product ("Software") that is currently licensed from SAS
+   Institute Inc. or one of its subsidiaries ("SAS") under a separate
+   software license agreement ("Software License Agreement"). The legal
+   entity that entered into the Software License Agreement with SAS is
+   defined as "Customer." The Code is designed either to correct an error
+   in the Software or to add functionality to the Software. The Code is
+   governed by the Software License Agreement and this Agreement. If you
+   are not an authorized user under the Software License Agreement, you may
+   not download the Code.
+
+   In addition to the terms of the Software License Agreement, the
+   following terms apply to the Code:
+
+   EXPORT/IMPORT RESTRICTIONS. SAS hereby notifies Customer that the Code
+   is of United States of America ("United States") origin and United
+   States export laws and regulations apply to the Code. Both SAS and
+   Customer agree to comply with these and other applicable export and
+   import laws and regulations. Customer's compliance obligations include
+   ensuring (a) that there is no access, download, export, re-export,
+   import, or distribution of the Code or any underlying information,
+   technology or data except in full compliance with all laws and
+   regulations of the United States and in full compliance with any other
+   applicable laws and regulations; and (b) compliance with restrictions of
+   countries other than the United States related to exports and imports.
+   United States export classification information for Software can be
+   found at SAS' Export Compliance website located at
+   http://support.sas.com/adminservices/export.html. By accepting the
+   Agreement and using and/or, if authorized, downloading the Code,
+   Customer agrees to the foregoing and represents and warrants that
+   (i) neither Customer nor any User, as defined in the Software License
+   Agreement, is a party to whom the United States prohibits access to the
+   Code; (ii) neither Customer nor any User is located in, under control
+   of, or a national or resident of any country to which export of the
+   Code is restricted by laws of the United States or other applicable
+   laws and regulations, including E:1 countries (currently Cuba, Iran,
+   North Korea, Syria, and Sudan); (iii) neither Customer nor any User
+   will use the Code in activities directly or indirectly related to the
+   proliferation of weapons of mass destruction; (iv) neither Customer nor
+   any User will share access to the Code with a party identified in this
+   paragraph; and (v) neither Customer nor any User shall further export
+   the Code without a license or other authorization from the United States.
+
+   Source code from which the Code object code is derived ("Source Code")
+   is not being provided and is a SAS trade secret to which access is not
+   authorized. Customer may not reverse assemble, reverse engineer, or
+   decompile the Code or otherwise attempt to recreate the Source Code,
+   except to the extent applicable laws specifically prohibit such
+   restriction.
+
+   Upon termination of the license to use the Software, Customer agrees
+   to delete and destroy the Code and certify to SAS that the Code has
+   been deleted and destroyed.
+
+   SAS' LICENSORS DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+   WITHOUT LIMITATION ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS
+   FOR A PARTICULAR PURPOSE, OR ARISING AS A RESULT OF CUSTOM OR USAGE IN
+   THE TRADE OR BY COURSE OF DEALING. SAS' LICENSORS PROVIDE THEIR
+   SOFTWARE "AS IS."
+
+   SAS' LICENSORS SHALL NOT BE LIABLE TO YOU OR CUSTOMER FOR ANY GENERAL,
+   SPECIAL, DIRECT, INDIRECT, CONSEQUENTIAL, INCIDENTAL OR OTHER DAMAGES
+   ARISING OUT OF OR RELATED TO THE SOFTWARE OR CODE.
+
+   Customer agrees not to release the results of any benchmarking you
+   perform on the Code or the Software.
+
+   LGL2100/04AUG16 SAS and all other SAS Institute Inc. product or
+   service names are registered trademarks or trademarks of SAS Institute
+   Inc. in the USA and other countries. (R) indicates USA registration.
+   Other brand and product names are trademarks of their respective
+   companies.
+
+
+##                               Apache License
+###                        Version 2.0, January 2004
+####                    http://www.apache.org/licenses/
 
    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
