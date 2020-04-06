@@ -24,6 +24,7 @@ import tempfile as tf
 from time import sleep
 
 from saspy.sasexceptions import (SASHTTPauthenticateError)
+from saspy.sasexceptions import (SASHTTPconnectionError)
 try:
    import pandas as pd
    import numpy  as np
@@ -418,16 +419,25 @@ class SASsessionHTTP():
       conn = self.sascfg.HTTPConn; conn.connect()
       d1 = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":'+options+'}}'
       headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
-      conn.request('POST', uri, body=d1, headers=headers)
-      req = conn.getresponse()
+
+      try:
+         conn.request('POST', uri, body=d1, headers=headers)
+         req = conn.getresponse()
+      except:
+         #print("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
+         raise SASHTTPconnectionError(msg="Could not acquire a SAS Session for context: "+self.sascfg.ctxname+". Exception info:\n"+str(sys.exc_info()))
+         #return None
+
       status = req.status
       resp = req.read()
       conn.close()
 
       if status > 299:
-         print("Failure in POST Session \n"+resp.decode(self.sascfg.encoding))
-         print("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
-         return None
+         #print("Failure in POST Session \n"+resp.decode(self.sascfg.encoding))
+         #print("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
+         msg="Could not acquire a SAS Session for context: "+self.sascfg.ctxname+". Exception info:\nStatus="+str(status)+"\nResponse="+str(resp)
+         raise SASHTTPconnectionError(msg)
+         #return None
 
       self._session = json.loads(resp.decode(self.sascfg.encoding))
 
