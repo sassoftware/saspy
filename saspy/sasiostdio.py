@@ -340,8 +340,8 @@ Will use HTML5 for this SASsession.""")
       fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
 
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          lst = self.stdout.read1(4096)
@@ -381,7 +381,7 @@ Will use HTML5 for this SASsession.""")
          sleep(1)
          if self.pid:
             try:
-               rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
+               rc = os.waitpid(self.pid, os.WNOHANG)
             except (subprocess.TimeoutExpired):
                if self.sascfg.verbose:
                   print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
@@ -399,8 +399,8 @@ Will use HTML5 for this SASsession.""")
       logn   = self._logcnt(False)
       code1  = "%put E3969440A681A24088859985"+logn+";\nE3969440A681A24088859985"+logn
 
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
@@ -421,8 +421,8 @@ Will use HTML5 for this SASsession.""")
       if self.pid == None:
          self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
@@ -461,8 +461,8 @@ Will use HTML5 for this SASsession.""")
       if self.pid == None:
          self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
@@ -497,8 +497,8 @@ Will use HTML5 for this SASsession.""")
       if self.pid == None:
          self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
@@ -586,8 +586,8 @@ Will use HTML5 for this SASsession.""")
          print("No SAS process attached. SAS process has terminated unexpectedly.")
          return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
 
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
@@ -637,8 +637,8 @@ Will use HTML5 for this SASsession.""")
       while not done:
          try:
              while True:
-                 rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-                 if rc is not None:
+                 rc = os.waitpid(self.pid, os.WNOHANG)
+                 if rc[0] != 0:
                      log = b''
                      try:
                         log = self.stderr.read1(4096)
@@ -763,8 +763,8 @@ Will use HTML5 for this SASsession.""")
         sleep(.25)
 
         while True:
-            rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-            if rc is not None:
+            rc = os.waitpid(self.pid, os.WNOHANG)
+            if rc[0] != 0:
                 self.pid = None
                 self._sb.SASpid = None
                 outrc = str(rc)
