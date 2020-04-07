@@ -380,13 +380,24 @@ Will use HTML5 for this SASsession.""")
             #self._asubmit(code,'text')
          sleep(1)
          if self.pid:
-            try:
+            pid = self.pid
+            x = 5
+            while True:
                rc = os.waitpid(self.pid, os.WNOHANG)
-            except (subprocess.TimeoutExpired):
+               if rc[0] != 0:
+                  break
+               x = x - 1
+               if x < 1:
+                  break
+               sleep(1)
+           
+            if rc[0] != 0:
+               pass
+            else:
                if self.sascfg.verbose:
                   print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
-                  ret = rc
                os.kill(self.pid, signal.SIGKILL)
+
          if self.sascfg.verbose:
             print("SAS Connection terminated. Subprocess id was "+str(self.pid))
          self.pid        = None
