@@ -1218,8 +1218,7 @@ Will use HTML5 for this SASsession.""")
          run;
 
          filename saspydir;
-         filename sock;
-         %put FINISHED"""+str(port)+"""FINISHEDEND;\n"""
+         filename sock;\n"""
 
       sock.listen(1)
       self._asubmit(code, 'text')
