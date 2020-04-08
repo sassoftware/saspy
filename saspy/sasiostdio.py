@@ -340,8 +340,8 @@ Will use HTML5 for this SASsession.""")
       fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
       fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
 
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          lst = self.stdout.read1(4096)
@@ -380,13 +380,24 @@ Will use HTML5 for this SASsession.""")
             #self._asubmit(code,'text')
          sleep(1)
          if self.pid:
-            try:
-               rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-            except (subprocess.TimeoutExpired):
+            pid = self.pid
+            x = 5
+            while True:
+               rc = os.waitpid(self.pid, os.WNOHANG)
+               if rc[0] != 0:
+                  break
+               x = x - 1
+               if x < 1:
+                  break
+               sleep(1)
+           
+            if rc[0] != 0:
+               pass
+            else:
                if self.sascfg.verbose:
                   print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
-                  ret = rc
                os.kill(self.pid, signal.SIGKILL)
+
          if self.sascfg.verbose:
             print("SAS Connection terminated. Subprocess id was "+str(self.pid))
          self.pid        = None
@@ -399,8 +410,8 @@ Will use HTML5 for this SASsession.""")
       logn   = self._logcnt(False)
       code1  = "%put E3969440A681A24088859985"+logn+";\nE3969440A681A24088859985"+logn
 
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
@@ -421,8 +432,8 @@ Will use HTML5 for this SASsession.""")
       if self.pid == None:
          self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
@@ -461,8 +472,8 @@ Will use HTML5 for this SASsession.""")
       if self.pid == None:
          self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
@@ -497,8 +508,8 @@ Will use HTML5 for this SASsession.""")
       if self.pid == None:
          self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
@@ -586,8 +597,8 @@ Will use HTML5 for this SASsession.""")
          print("No SAS process attached. SAS process has terminated unexpectedly.")
          return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
 
-      rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-      if rc != None:
+      rc = os.waitpid(self.pid, os.WNOHANG)
+      if rc[0] != 0:
          self.pid = None
          self._sb.SASpid = None
          return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
@@ -637,8 +648,8 @@ Will use HTML5 for this SASsession.""")
       while not done:
          try:
              while True:
-                 rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-                 if rc is not None:
+                 rc = os.waitpid(self.pid, os.WNOHANG)
+                 if rc[0] != 0:
                      log = b''
                      try:
                         log = self.stderr.read1(4096)
@@ -763,8 +774,8 @@ Will use HTML5 for this SASsession.""")
         sleep(.25)
 
         while True:
-            rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
-            if rc is not None:
+            rc = os.waitpid(self.pid, os.WNOHANG)
+            if rc[0] != 0:
                 self.pid = None
                 self._sb.SASpid = None
                 outrc = str(rc)
@@ -1068,12 +1079,6 @@ Will use HTML5 for this SASsession.""")
                return {'Success' : False, 
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
 
-      try:
-         fd = open(localfile, 'rb')
-      except OSError as e:
-         return {'Success' : False, 
-                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
-
       port =  kwargs.get('port', 0)
 
       if self.sascfg.ssh and self.sascfg.rtunnel and port == 0:
@@ -1082,6 +1087,12 @@ Will use HTML5 for this SASsession.""")
          host = 'localhost'
       else:
          return self._upload_client(localfile, remotefile, overwrite, permission, **kwargs)
+
+      try:
+         fd = open(localfile, 'rb')
+      except OSError as e:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
 
       code = """
          filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
@@ -1164,12 +1175,6 @@ Will use HTML5 for this SASsession.""")
                return {'Success' : False, 
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
 
-      try:
-         fd = open(localfile, 'rb')
-      except OSError as e:
-         return {'Success' : False, 
-                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
-
       port =  kwargs.get('port', 0)
 
       if port==0 and self.sascfg.tunnel:
@@ -1183,6 +1188,12 @@ Will use HTML5 for this SASsession.""")
             host = 'localhost'
       else:
          host = ''
+
+      try:
+         fd = open(localfile, 'rb')
+      except OSError as e:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
 
       try:
          sock = socks.socket()
@@ -1207,11 +1218,20 @@ Will use HTML5 for this SASsession.""")
          run;
 
          filename saspydir;
-         filename sock;\n"""
+         filename sock;
+         %put FINISHED"""+str(port)+"""FINISHEDEND;\n"""
 
       sock.listen(1)
       self._asubmit(code, 'text')
 
+      if sel.select([sock],[],[],100)[0] == []:
+         print("error occured in SAS during upload. Check the returned LOG for issues.")
+         sock.close()
+         fd.close()
+         ll = self.submit("", 'text')
+         return {'Success' : False, 
+                 'LOG'     : "Failure in upload.\n"+ll['LOG']}
+         
       newsock = (0,0)
       try:
          newsock = sock.accept()
@@ -1317,8 +1337,15 @@ Will use HTML5 for this SASsession.""")
       sock.listen(1)
       self._asubmit(code, 'text')
 
+      if sel.select([sock],[],[],100)[0] == []:
+         print("error occured in SAS during download. Check the returned LOG for issues.")
+         sock.close()
+         fd.close()
+         ll = self.submit("", 'text')
+         return {'Success' : False, 
+                 'LOG'     : "Failure in download.\n"+ll['LOG']}
+         
       datar = b''
-
       newsock = (0,0)
       try:
          newsock = sock.accept()
