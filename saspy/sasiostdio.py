@@ -1079,12 +1079,6 @@ Will use HTML5 for this SASsession.""")
                return {'Success' : False, 
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
 
-      try:
-         fd = open(localfile, 'rb')
-      except OSError as e:
-         return {'Success' : False, 
-                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
-
       port =  kwargs.get('port', 0)
 
       if self.sascfg.ssh and self.sascfg.rtunnel and port == 0:
@@ -1093,6 +1087,12 @@ Will use HTML5 for this SASsession.""")
          host = 'localhost'
       else:
          return self._upload_client(localfile, remotefile, overwrite, permission, **kwargs)
+
+      try:
+         fd = open(localfile, 'rb')
+      except OSError as e:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
 
       code = """
          filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
@@ -1175,12 +1175,6 @@ Will use HTML5 for this SASsession.""")
                return {'Success' : False, 
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
 
-      try:
-         fd = open(localfile, 'rb')
-      except OSError as e:
-         return {'Success' : False, 
-                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
-
       port =  kwargs.get('port', 0)
 
       if port==0 and self.sascfg.tunnel:
@@ -1194,6 +1188,12 @@ Will use HTML5 for this SASsession.""")
             host = 'localhost'
       else:
          host = ''
+
+      try:
+         fd = open(localfile, 'rb')
+      except OSError as e:
+         return {'Success' : False, 
+                 'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
 
       try:
          sock = socks.socket()
@@ -1224,13 +1224,16 @@ Will use HTML5 for this SASsession.""")
       sock.listen(1)
       self._asubmit(code, 'text')
 
+      if sel.select([sock],[],[],100)[0] == []:
+         print("error occured in SAS during upload. Check the returned LOG for issues.")
+         sock.close()
+         fd.close()
+         ll = self.submit("", 'text')
+         return {'Success' : False, 
+                 'LOG'     : "Failure in upload.\n"+ll['LOG']}
+         
       newsock = (0,0)
-      sleep(.5)
-      log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
       try:
-         if "FINISHED"+str(port)+"FINISHEDEND" in log:
-            print("Failure trying to upload, check log.")
-            raise Exception
          newsock = sock.accept()
          while True:
             buf  = fd.read1(4096)
@@ -1262,11 +1265,11 @@ Will use HTML5 for this SASsession.""")
          fd.close()
          ll = self.submit("", 'text')
          return {'Success' : False, 
-                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+log+ll['LOG']}
+                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+ll['LOG']}
 
       ll = self.submit("", 'text')
       return {'Success' : True, 
-              'LOG'     : log+ll['LOG']}
+              'LOG'     : ll['LOG']}
  
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
@@ -1334,8 +1337,15 @@ Will use HTML5 for this SASsession.""")
       sock.listen(1)
       self._asubmit(code, 'text')
 
+      if sel.select([sock],[],[],100)[0] == []:
+         print("error occured in SAS during download. Check the returned LOG for issues.")
+         sock.close()
+         fd.close()
+         ll = self.submit("", 'text')
+         return {'Success' : False, 
+                 'LOG'     : "Failure in download.\n"+ll['LOG']}
+         
       datar = b''
-
       newsock = (0,0)
       try:
          newsock = sock.accept()
