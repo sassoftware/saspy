@@ -1218,13 +1218,19 @@ Will use HTML5 for this SASsession.""")
          run;
 
          filename saspydir;
-         filename sock;\n"""
+         filename sock;
+         %put FINISHED"""+str(port)+"""FINISHEDEND;\n"""
 
       sock.listen(1)
       self._asubmit(code, 'text')
 
       newsock = (0,0)
+      sleep(.5)
+      log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
       try:
+         if "FINISHED"+str(port)+"FINISHEDEND" in log:
+            print("Failure trying to upload, check log.")
+            raise Exception
          newsock = sock.accept()
          while True:
             buf  = fd.read1(4096)
@@ -1256,11 +1262,11 @@ Will use HTML5 for this SASsession.""")
          fd.close()
          ll = self.submit("", 'text')
          return {'Success' : False, 
-                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+ll['LOG']}
+                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+log+ll['LOG']}
 
       ll = self.submit("", 'text')
       return {'Success' : True, 
-              'LOG'     : ll['LOG']}
+              'LOG'     : log+ll['LOG']}
  
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
