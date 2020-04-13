@@ -412,7 +412,7 @@ rtunnel -
                 'host'    : 'remote.linux.host',
                 'identity': '/usr/home/.ssh/alt_id.pem',
                 'port'    : 9922,
-                'tunnel'  : 9911
+                'tunnel'  : 9911,
                 'rtunnel' : 9912
                }
 
