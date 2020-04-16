@@ -1223,7 +1223,7 @@ Will use HTML5 for this SASsession.""")
       sock.listen(1)
       self._asubmit(code, 'text')
 
-      if sel.select([sock],[],[],100)[0] == []:
+      if sel.select([sock],[],[],10)[0] == []:
          print("error occured in SAS during upload. Check the returned LOG for issues.")
          sock.close()
          fd.close()
@@ -1336,7 +1336,7 @@ Will use HTML5 for this SASsession.""")
       sock.listen(1)
       self._asubmit(code, 'text')
 
-      if sel.select([sock],[],[],100)[0] == []:
+      if sel.select([sock],[],[],10)[0] == []:
          print("error occured in SAS during download. Check the returned LOG for issues.")
          sock.close()
          fd.close()
