@@ -1258,7 +1258,7 @@ Will use HTML5 for this SASsession.""")
             if newsock[0]:
                newsock[0].shutdown(socks.SHUT_RDWR)
                newsock[0].close()
-         except Exception as e:
+         except Exception as e2:
             pass
          sock.close()
          fd.close()
