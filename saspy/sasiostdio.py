@@ -1361,9 +1361,12 @@ Will use HTML5 for this SASsession.""")
                fd.write(datar[:8192])
                datar = datar[8192:]
       except:
-         if newsock[0]:
-            newsock[0].shutdown(socks.SHUT_RDWR)
-            newsock[0].close()
+         try:
+            if newsock[0]:
+               newsock[0].shutdown(socks.SHUT_RDWR)
+               newsock[0].close()
+         except Exception as e:
+            pass
          sock.close()
          fd.close()
          ll = self.submit("filename saspydir;", 'text')
@@ -1738,9 +1741,12 @@ Will use HTML5 for this SASsession.""")
                r = []
       except:
          print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
-         if newsock[0]:
-            newsock[0].shutdown(socks.SHUT_RDWR)
-            newsock[0].close()
+         try:
+            if newsock[0]:
+               newsock[0].shutdown(socks.SHUT_RDWR)
+               newsock[0].close()
+         except Exception as e:
+            pass
          sock.close()
          ll = self.submit("", 'text')
          return ll['LOG']
@@ -1946,9 +1952,12 @@ Will use HTML5 for this SASsession.""")
                csv.write(data)
          except:
             print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
-            if newsock[0]:
-               newsock[0].shutdown(socks.SHUT_RDWR)
-               newsock[0].close()
+            try:
+               if newsock[0]:
+                  newsock[0].shutdown(socks.SHUT_RDWR)
+                  newsock[0].close()
+            except Exception as e:
+               pass
             sock.close()
             ll = self.submit("", 'text')
             return ll['LOG']
@@ -2183,9 +2192,12 @@ Will use HTML5 for this SASsession.""")
                   csv.write(datap.decode(self.sascfg.encoding, errors='replace').replace(rsep,rowsep))
          except:
             print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
-            if newsock[0]:
-               newsock[0].shutdown(socks.SHUT_RDWR)
-               newsock[0].close()
+            try:
+               if newsock[0]:
+                  newsock[0].shutdown(socks.SHUT_RDWR)
+                  newsock[0].close()
+            except Exception as e:
+               pass
             sock.close()
             ll = self.submit("", 'text')
             return ll['LOG']
