@@ -1143,12 +1143,12 @@ Will use HTML5 for this SASsession.""")
                   sock.close()
                   fd.close()
                   break
-         except Exception as e:
+         except (KeyboardInterrupt, Exception) as e:
             sock.close()
             fd.close()
             ll = self.submit("", 'text')
             return {'Success' : False, 
-                    'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+ll['LOG']}
+                    'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
         
       ll = self.submit("", 'text')
       return {'Success' : True, 
