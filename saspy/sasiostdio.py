@@ -1253,18 +1253,18 @@ Will use HTML5 for this SASsession.""")
                sock.close()
                fd.close()
                break
-      except Exception as e:
+      except (KeyboardInterrupt, Exception) as e:
          try:
             if newsock[0]:
                newsock[0].shutdown(socks.SHUT_RDWR)
                newsock[0].close()
-         except Exception as e2:
+         except:
             pass
          sock.close()
          fd.close()
          ll = self.submit("", 'text')
          return {'Success' : False, 
-                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+ll['LOG']}
+                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
       ll = self.submit("", 'text')
       return {'Success' : True, 
@@ -1360,18 +1360,18 @@ Will use HTML5 for this SASsession.""")
             if len(datar) > 8300:
                fd.write(datar[:8192])
                datar = datar[8192:]
-      except:
+      except (KeyboardInterrupt, Exception) as e:
          try:
             if newsock[0]:
                newsock[0].shutdown(socks.SHUT_RDWR)
                newsock[0].close()
-         except Exception as e:
+         except:
             pass
          sock.close()
          fd.close()
          ll = self.submit("filename saspydir;", 'text')
          return {'Success' : False, 
-                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+ll['LOG']}
+                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
       newsock[0].shutdown(socks.SHUT_RDWR)
       newsock[0].close()
@@ -1739,7 +1739,7 @@ Will use HTML5 for this SASsession.""")
                else:
                   df = tdf
                r = []
-      except:
+      except (KeyboardInterrupt, Exception) as e:
          print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
          try:
             if newsock[0]:
@@ -1749,7 +1749,7 @@ Will use HTML5 for this SASsession.""")
             pass
          sock.close()
          ll = self.submit("", 'text')
-         return ll['LOG']
+         return str(e)+"\n\n"+ll['LOG']
 
       newsock[0].shutdown(socks.SHUT_RDWR)
       newsock[0].close()
@@ -1950,17 +1950,17 @@ Will use HTML5 for this SASsession.""")
                   break
 
                csv.write(data)
-         except:
+         except (KeyboardInterrupt, Exception) as e:
             print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
             try:
                if newsock[0]:
                   newsock[0].shutdown(socks.SHUT_RDWR)
                   newsock[0].close()
-            except Exception as e:
+            except:
                pass
             sock.close()
             ll = self.submit("", 'text')
-            return ll['LOG']
+            return str(e)+"\n\n"+ll['LOG']
 
          newsock[0].shutdown(socks.SHUT_RDWR)
          newsock[0].close()
@@ -2190,17 +2190,17 @@ Will use HTML5 for this SASsession.""")
                   csv.write(datap.decode(self.sascfg.encoding, errors='replace'))
                else:
                   csv.write(datap.decode(self.sascfg.encoding, errors='replace').replace(rsep,rowsep))
-         except:
+         except (KeyboardInterrupt, Exception) as e:
             print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
             try:
                if newsock[0]:
                   newsock[0].shutdown(socks.SHUT_RDWR)
                   newsock[0].close()
-            except Exception as e:
+            except:
                pass
             sock.close()
             ll = self.submit("", 'text')
-            return ll['LOG']
+            return str(e)+"\n\n"+ll['LOG']
    
          newsock[0].shutdown(socks.SHUT_RDWR)
          newsock[0].close()
