@@ -1513,3 +1513,95 @@ class SASdata:
        else:
           return failmsg+ll['LOG']
 
+    def delete(self):
+       """
+       Delete this data set; the SASdata object is still available
+
+       :return: SASLOG for this step
+       """
+       code  = "proc delete data="+self.libref + ".'" + self.table + "'n;run;" 
+
+       if self.sas.nosub:
+          print(code)
+          return
+
+       ll = self.sas._io.submit(code, results='text')
+
+       if self.sas.exist(self.table, self.libref):
+          ll['LOG'] = "Data set still exists. Delete must have failed.\n"+ll['LOG']
+
+       if not self.sas.batch:
+          print(ll['LOG'])
+          return None
+       else:
+          return ll['LOG']
+
+    def append(self, data, force: bool=False):
+       """
+       Append 'data' to this SAS Data Set. data can either be another SASdataobject or
+       a Pandas DataFrame, in which case dataframe2sasdata(data) will be run for you to
+       load the data into a SAS data Set which will then be appended to this data set.
+
+       :param data: Either a SASdata object or a Pandas DataFrame
+       :param force: boolean to force appended even if anomolies exist which could cause dropping or truncating 
+       :return: SASLOG for this step
+       """
+       new = None
+
+       if not self.sas.sascfg.pandas:
+          if type(data) is pandas.core.frame.DataFrame:
+             new = 'df'
+       else:
+          new = 'no pandas'
+
+       if type(data) is type(self):
+          new = 'sd'
+
+       if new not in ['df','sd']:
+          failmsg = "The data parameter passed in must be either a SASdata object or a Pandas DataFrame. No data was appended."
+          if not self.sas.batch:
+             print(failmsg)
+             return None
+          else:
+             return failmsg
+
+       if new == 'df':
+          new = self.sas.df2sd(data, '_temp_df')
+          if type(new) is not type(self):
+             failmsg = "df2sd on input data failed. Check SASLOG for errors."
+             if not self.sas.batch:
+                print(failmsg)
+                return None
+             else:
+                return failmsg
+       else:
+          new = data
+
+       if self.sas.nosub:
+          print(code)
+          return
+
+       if not self.sas.exist(new.table, new.libref):
+          failmsg = "Data set to be appended doesn't exist. No data was appended."
+          if not self.sas.batch:
+             print(failmsg)
+             return None
+          else:
+             return failmsg
+
+       code  = "proc append base="+self.libref+".'"+self.table+"'n\n"
+       code += "            data="+ new.libref+".'"+ new.table+"'n"+new._dsopts()
+       if force: 
+          code += "\n   force" 
+       code += ";\nrun;" 
+
+       ll = self.sas._io.submit(code, results='text')
+
+       x = new.delete()
+
+       if not self.sas.batch:
+          print(ll['LOG'])
+          return None
+       else:
+          return ll['LOG']
+

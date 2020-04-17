@@ -1725,7 +1725,7 @@ class SASsession():
         return dirlist
 
 
-    def list_tables(self, libref, results: str = 'list') -> list:
+    def list_tables(self, libref: str='work', results: str = 'list') -> list:
         """
         This method returns a list of tuples containing MEMNAME, MEMTYPE of members in the library of memtype data or view
 
