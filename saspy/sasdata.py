@@ -1513,7 +1513,7 @@ class SASdata:
        else:
           return failmsg+ll['LOG']
 
-    def delete(self):
+    def delete(self, quiet=False):
        """
        Delete this data set; the SASdata object is still available
 
@@ -1531,7 +1531,8 @@ class SASdata:
           ll['LOG'] = "Data set still exists. Delete must have failed.\n"+ll['LOG']
 
        if not self.sas.batch:
-          print(ll['LOG'])
+          if not quiet:
+             print(ll['LOG'])
           return None
        else:
           return ll['LOG']
@@ -1597,7 +1598,7 @@ class SASdata:
 
        ll = self.sas._io.submit(code, results='text')
 
-       x = new.delete()
+       new.delete(quiet=True)
 
        if not self.sas.batch:
           print(ll['LOG'])
