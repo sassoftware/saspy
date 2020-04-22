@@ -459,6 +459,7 @@ public class saspy2j
                      pgm = pgm.substring(0, idx);
                      try{
                         lang.Submit(pgm);
+                        lang.Submit("\n%put "+eol+";\n");
                         break;
                         }
                      catch(org.omg.CORBA.COMM_FAILURE e)
