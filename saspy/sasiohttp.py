@@ -583,7 +583,7 @@ class SASsessionHTTP():
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
       while i < len(results):
          # GET an ODS Result
-         if results[i].get('type') == 'ODS':
+         if results[i].get('type') == 'ODS' and len(results[i].get('links')) > 0:
             conn.request('GET', results[i].get('links')[0].get('href'), headers=headers)
             req = conn.getresponse()
             status = req.status
