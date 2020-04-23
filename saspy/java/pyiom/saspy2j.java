@@ -459,7 +459,7 @@ public class saspy2j
                      pgm = pgm.substring(0, idx);
                      try{
                         lang.Submit(pgm);
-                        lang.Submit("\nproc printto;run;\n%put "+eol+";\n");
+                        lang.Submit("\nproc printto;run;\n%put "+eol.substring(1)+";\n");
                         break;
                         }
                      catch(org.omg.CORBA.COMM_FAILURE e)
@@ -468,6 +468,7 @@ public class saspy2j
                            {
                            connect(true, false, false);
                            lang.Submit(pgm);
+                           lang.Submit("\nproc printto;run;\n%put "+eol.substring(1)+";\n");
                            break;
                            }
                         else
@@ -660,7 +661,7 @@ public class saspy2j
                         String msg = "We failed in reading the Log\n"+e.getMessage();
                         errp.write(msg);
                         errp.flush();
-                        lang.Submit("%put "+eol.substring(1)+";");
+                        lang.Submit("%put "+eol.substring(1)+";\n");
                         slen = 1;
                         continue;
                         }
