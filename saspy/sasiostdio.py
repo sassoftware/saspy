@@ -1096,7 +1096,8 @@ Will use HTML5 for this SASsession.""")
 
       code = """
          filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
-         filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=S encoding=binary lrecl=4096;
+         filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=S lrecl=4096;
+         #filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=S encoding=binary lrecl=4096;
 
          data _null_; nb = -1;
          infile sock nbyte=nb; 
@@ -1208,7 +1209,8 @@ Will use HTML5 for this SASsession.""")
 
       code = """
          filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
-         filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary lrecl=4096;
+         filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S lrecl=4096;
+         #filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary lrecl=4096;
 
          data _null_; nb = -1;
          infile sock nbyte=nb; 
@@ -1325,7 +1327,8 @@ Will use HTML5 for this SASsession.""")
 
       code = """
          filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=4096;
-         filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary;
+         filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S lrecl=4096;
+         #filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary;
          data _null_;
          file sock;
          infile saspydir;
@@ -1642,7 +1645,8 @@ Will use HTML5 for this SASsession.""")
       if self._sb.m5dsbug:
          code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF;\n"
       else:
-         code = "filename sock socket '"+host+":"+str(port)+"' lrecl=1 recfm=f encoding=binary;\n"
+         code = "filename sock socket '"+host+":"+str(port)+"' recfm=S  lrecl=4096;\n"
+         #code = "filename sock socket '"+host+":"+str(port)+"' lrecl=1 recfm=f encoding=binary;\n"
 
       code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
       for i in range(nvars):
@@ -2102,11 +2106,12 @@ Will use HTML5 for this SASsession.""")
          if self._sb.m5dsbug:
             code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF;\n"
          else:
-            code = "filename sock socket '"+host+":"+str(port)+"' lrecl=1 recfm=f encoding=binary;\n"
+            code = "filename sock socket '"+host+":"+str(port)+"' recfm=S lrecl=4096;\n"
+            #code = "filename sock socket '"+host+":"+str(port)+"' lrecl=1 recfm=F encoding=binary;\n"
       else:
          host = ''
          enc  = self.sascfg.encoding
-         code = "filename sock        '"+tmpcsv            +"' lrecl=1 recfm=f encoding=binary;\n"
+         code = "filename sock        '"+tmpcsv            +"' lrecl=1 recfm=F encoding=binary;\n"
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
