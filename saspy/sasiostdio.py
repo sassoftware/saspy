@@ -1097,7 +1097,7 @@ Will use HTML5 for this SASsession.""")
       code = """
          filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
          filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=S lrecl=4096;
-         #filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=S encoding=binary lrecl=4096;
+         /* filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=S encoding=binary lrecl=4096; */
 
          data _null_; nb = -1;
          infile sock nbyte=nb; 
@@ -1210,7 +1210,7 @@ Will use HTML5 for this SASsession.""")
       code = """
          filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
          filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S lrecl=4096;
-         #filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary lrecl=4096;
+         /* filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary lrecl=4096; */
 
          data _null_; nb = -1;
          infile sock nbyte=nb; 
@@ -1328,7 +1328,7 @@ Will use HTML5 for this SASsession.""")
       code = """
          filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=4096;
          filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S lrecl=4096;
-         #filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary;
+         /* filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary; */
          data _null_;
          file sock;
          infile saspydir;
@@ -1668,6 +1668,7 @@ Will use HTML5 for this SASsession.""")
 
       if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
+         csep = colsep
          code += "file sock dlm="+cdelim+";\nput "
          for i in range(nvars):
             code += " '"+varlist[i]+"'n "
@@ -1675,7 +1676,8 @@ Will use HTML5 for this SASsession.""")
                code +='\n'
          code += rdelim+";\nrun;"
       else:
-         rsep = rowsep
+         rsep = ' '+rowsep
+         csep = ' '+colsep
          code += "file sock; "
          last  = len(varlist)-1
          for i in range(nvars):
@@ -1722,7 +1724,7 @@ Will use HTML5 for this SASsession.""")
             datap = datap.decode(self.sascfg.encoding, errors='replace')
             for i in datap.split(sep=rsep):
                if i != '':
-                  r.append(tuple(i.split(sep=colsep)))
+                  r.append(tuple(i.split(sep=csep)))
 
             if len(r) > trows:
                tdf = pd.DataFrame.from_records(r, columns=varlist)
@@ -2144,6 +2146,7 @@ Will use HTML5 for this SASsession.""")
 
       if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
+         csep = colsep
          code += "file sock dlm="+cdelim+";\nput "
          for i in range(nvars):
             code += " '"+varlist[i]+"'n "
@@ -2151,7 +2154,8 @@ Will use HTML5 for this SASsession.""")
                code +='\n'
          code += rdelim+";\nrun;"
       else:
-         rsep = rowsep
+         rsep = ' '+rowsep
+         csep = ' '+colsep
          code += "file sock; "
          last  = len(varlist)-1
          for i in range(nvars):
@@ -2191,10 +2195,14 @@ Will use HTML5 for this SASsession.""")
                datap = data[0]+data[1]
                datar = data[2]
 
+               '''
                if not self._sb.m5dsbug:
                   csv.write(datap.decode(self.sascfg.encoding, errors='replace'))
                else:
                   csv.write(datap.decode(self.sascfg.encoding, errors='replace').replace(rsep,rowsep))
+               '''
+               csv.write(datap.decode(self.sascfg.encoding, errors='replace').replace(rsep,rowsep))
+
          except (KeyboardInterrupt, Exception) as e:
             print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
             try:
