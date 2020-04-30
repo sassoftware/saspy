@@ -30,7 +30,6 @@ object-oriented methods and Python magics.
    api
    advanced-topics
    adding-procedures
-   limitations
    troubleshooting
    license
 
