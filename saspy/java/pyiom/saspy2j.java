@@ -459,7 +459,7 @@ public class saspy2j
                      pgm = pgm.substring(0, idx);
                      try{
                         lang.Submit(pgm);
-                        lang.Submit("\nproc printto;run;\n%put "+eol.substring(1)+";\n");
+                        lang.Submit("\n%put "+eol.substring(1)+";\n");
                         break;
                         }
                      catch(org.omg.CORBA.COMM_FAILURE e)
@@ -468,7 +468,7 @@ public class saspy2j
                            {
                            connect(true, false, false);
                            lang.Submit(pgm);
-                           lang.Submit("\nproc printto;run;\n%put "+eol.substring(1)+";\n");
+                           lang.Submit("\n%put "+eol.substring(1)+";\n");
                            break;
                            }
                         else
