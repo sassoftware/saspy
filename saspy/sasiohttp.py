@@ -664,7 +664,7 @@ class SASsessionHTTP():
 
       return jobid
 
-   def submit(self, code: str, results: str ="html", prompt: dict = []) -> dict:
+   def submit(self, code: str, results: str ="html", prompt: dict = None, **kwargs) -> dict:
       '''
       code    - the SAS statements you want to execute 
       results - format of results, HTML is default, TEXT is the alternative
@@ -688,6 +688,9 @@ class SASsessionHTTP():
             print(results['LOG'])
             HTML(results['LST']) 
       '''
+      prompt  = prompt if prompt is not None else {}
+      printto = kwargs.pop('undo', False)
+
       #odsopen  = json.dumps("ods listing close;ods html5 (id=saspy_internal) options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
       #odsopen  = json.dumps("ods listing close;ods html5 (id=saspy_internal) options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n")
       #odsclose = json.dumps("ods html5 (id=saspy_internal) close;ods listing;\n")
@@ -790,6 +793,20 @@ class SASsessionHTTP():
          lstd = ''
 
       self._sb._lastlog = logd
+
+      # issue 294
+      if printto:
+         conn = self.sascfg.HTTPConn; conn.connect()
+         jcode = json.dumps('proc printto;run;\n')
+         d1 = '{"code":['+jcode+']}'
+         headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json",
+                  "Authorization":"Bearer "+self.sascfg._token}
+         conn.request('POST', self._uri_exe, body=d1, headers=headers)
+         req = conn.getresponse()
+         status = req.status
+         resp = req.read()
+         conn.close()
+
       return dict(LOG=logd, LST=lstd)
 
    def saslog(self):

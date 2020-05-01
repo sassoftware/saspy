@@ -247,7 +247,7 @@ class SASdata:
 
         le = self._is_valid()
         if not le:
-            ll = self.sas.submit(code, "text")
+            ll = self.sas._io.submit(code, "text")
 
             lastobs = ll['LOG'].rpartition("lastobs=")
             lastobs = lastobs[2].partition(" lastobsend=")
@@ -318,7 +318,7 @@ class SASdata:
 
         le = self._is_valid()
         if not le:
-            ll = self.sas.submit(code, "text")
+            ll = self.sas._io.submit(code, "text")
 
             lastobs = ll['LOG'].rpartition("lastobs=")
             lastobs = lastobs[2].partition(" lastobsend=")
@@ -402,7 +402,7 @@ class SASdata:
                     # ignore teach_me_SAS mode to run contents
                     nosub = self.sas.nosub
                     self.sas.nosub = False
-                    ll = self.sas.submit(num_string.format(self.libref, self.table + self._dsopts()))
+                    ll = self.sas._io.submit(num_string.format(self.libref, self.table + self._dsopts()))
                     self.sas.nosub = nosub
 
                     numlist = []
@@ -453,7 +453,7 @@ class SASdata:
         if ll:
             runcode = False
         if runcode:
-            ll = self.sas.submit(code + split_code, "text")
+            ll = self.sas._io.submit(code + split_code, "text")
             elog = []
             for line in ll['LOG'].splitlines():
                 if line[self.sas.logoffset:].startswith('ERROR'):
@@ -768,7 +768,7 @@ class SASdata:
         if self.sas.nosub:
             print(modesql + sql + ds1)
             return None
-        ll = self.sas.submit(modesql + sql + ds1)
+        ll = self.sas._io.submit(modesql + sql + ds1)
         return self.sas.sasdata(out_table, libref=out_libref, results=self.results, dsopts=self._dsopts())
 
     def sort(self, by: str, out: object = '', **kwargs) -> 'SASdata':
@@ -824,7 +824,7 @@ class SASdata:
         if ll:
             runcode = False
         if runcode:
-            ll = self.sas.submit(code, "text")
+            ll = self.sas._io.submit(code, "text")
             elog = []
             for line in ll['LOG'].splitlines():
                 if line[self.sas.logoffset:].startswith('ERROR'):
@@ -899,7 +899,7 @@ class SASdata:
         :return: SAS result object
         """
         # submit autocall macro
-        self.sas.submit("%aamodel;")
+        self.sas._io.submit("%aamodel;")
         objtype = "datastep"
         objname = '{s:{c}^{n}}'.format(s=self.table[:3], n=3,
                                        c='_') + self.sas._objcnt()  # translate to a libname so needs to be less than 8
@@ -992,7 +992,7 @@ class SASdata:
             print(code)
             return
 
-        ll = self.sas.submit(code, 'text')
+        ll = self.sas._io.submit(code, 'text')
         obj1 = sp2.SASProcCommons._objectmethods(self, objname)
         return sp2.SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
 
@@ -1174,7 +1174,7 @@ class SASdata:
         if ll:
             runcode = False
         if runcode:
-            ll = self.sas.submit(code, "text")
+            ll = self.sas._io.submit(code, "text")
             elog = []
             fpath=''
             for line in ll['LOG'].splitlines():

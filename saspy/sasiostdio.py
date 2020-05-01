@@ -544,7 +544,7 @@ Will use HTML5 for this SASsession.""")
 
       return str(out)
 
-   def submit(self, code: str, results: str ="html", prompt: dict = None) -> dict:
+   def submit(self, code: str, results: str ="html", prompt: dict = None, **kwargs) -> dict:
       '''
       This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
       code    - the SAS statements you want to execute
@@ -569,7 +569,8 @@ Will use HTML5 for this SASsession.""")
             print(results['LOG'])
             HTML(results['LST'])
       '''
-      prompt = prompt if prompt is not None else {}
+      prompt  = prompt if prompt is not None else {}
+      printto = kwargs.pop('undo', False)
 
       odsopen  = b"ods listing close;ods "+self.sascfg.output.encode()+ \
                  b" (id=saspy_internal) file=stdout options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style.encode()+ \
@@ -591,6 +592,7 @@ Will use HTML5 for this SASsession.""")
       pcodei   = ''
       pcodeiv  = ''
       pcodeo   = ''
+      undo     = b'proc printto;run;\n' if printto else b''
 
       if self.pid == None:
          self._sb.SASpid = None
@@ -642,7 +644,7 @@ Will use HTML5 for this SASsession.""")
       if ods:
          self.stdin.write(odsclose)
 
-      out = self.stdin.write(b'\n'+logcodei.encode(self.sascfg.encoding)+b'\n')
+      out = self.stdin.write(undo+logcodei.encode(self.sascfg.encoding)+b'\n')
       self.stdin.flush()
 
       while not done:
@@ -679,7 +681,7 @@ Will use HTML5 for this SASsession.""")
                          if logf.count(logcodeo) >= 1:
                              bail = True
                          if not bail and bc:
-                             self.stdin.write(odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
+                             self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
                              self.stdin.flush()
                              bc = False
              done = True
@@ -716,7 +718,7 @@ Will use HTML5 for this SASsession.""")
              else:
                 print('Exception ignored, continuing to process...\n')
 
-             self.stdin.write(odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
+             self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
              self.stdin.flush()
 
       if ods:

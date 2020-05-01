@@ -452,7 +452,7 @@ class SASSessionCOM(object):
         full_code = ods_open + code + ods_close
         self.workspace.LanguageService.Submit(full_code)
 
-    def submit(self, code: str, results: str='html', prompt: dict=None) -> dict:
+    def submit(self, code: str, results: str='html', prompt: dict=None, **kwargs) -> dict:
         """
         Submit any SAS code. Returns log and listing as dictionary with keys
         LOG and LST.
@@ -460,8 +460,10 @@ class SASSessionCOM(object):
         :option results [str]: Result format. Options: HTML, TEXT. Default HTML.
         :option prompt [dict]: Create macro variables from prompted keys.
         """
-        RESET = """;*';*";*/;quit;run;"""
-        prompt = prompt if prompt is not None else {}
+        RESET   = """;*';*";*/;quit;run;"""
+        prompt  = prompt if prompt is not None else {}
+        printto = kwargs.pop('undo', False)
+
         macro_declare = ''
         for key, value in prompt.items():
             macro_declare += '%let {} = {};\n'.format(*self._prompt(key, value))
@@ -489,6 +491,9 @@ class SASSessionCOM(object):
         # operation seems pretty lightweight, so calling `_reset()` on all
         # submits is not a burden.
         self._reset()
+
+        if printto:
+           self._asubmit(RESET + "proc printto;run;\n" + RESET, 'text')
 
         self._sb._lastlog = log
         return {'LOG': log, 'LST': listing}
