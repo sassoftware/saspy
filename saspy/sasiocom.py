@@ -493,7 +493,8 @@ class SASSessionCOM(object):
         self._reset()
 
         if printto:
-           self._asubmit(RESET + "proc printto;run;\n" + RESET, 'text')
+           self._asubmit("\nproc printto;run;\n", 'text')
+           log += self._getlog()
 
         self._sb._lastlog = log
         return {'LOG': log, 'LST': listing}
