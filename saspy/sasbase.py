@@ -712,9 +712,9 @@ class SASsession():
         :param saspath: overrides saspath Dict entry of cfgname in sascfg_personal.py file
         :param code:    the SAS statements you want to execute
         :param results: format of results. 'HTML' by default, alternatively 'TEXT'
-        :param prompt:  dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete
-                        the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
-                        or show what you type and keep the macros (they will still be available later).
+        :param prompt:  dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete \
+                        the keys which are the names of the macro variables. The boolean flag is to either hide what you type and \
+                        delete the macros, or show what you type and keep the macros (they will still be available later).
 
             for example (what you type for pw will not be displayed, user and dsname will):
 
