@@ -813,8 +813,18 @@ Will use HTML5 for this SASsession.""")
                            bc = True
                            break
                     else:
-                        #print("******************No 'Select' or 'Press' found in lst="+lstf.decode(self.sascfg.encoding, errors='replace'))
-                        pass
+                        print("******************No 'Select' or 'Press' found. Here's what was found.")
+                        found = True
+                        print('Processing interrupt\nAttn handler Query is\n\n' + lst.decode(self.sascfg.encoding, errors='replace'))
+                        response = None
+                        while response is None:
+                           response = self.sascfg._prompt("Please enter your Response: or N/A only if there are no choices: ")
+                        self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
+                        self.stdin.flush()
+                        if response in ['N/A', '']:
+                           break
+                        found = True
+                        bc = True
             else:
                 log = self.stderr.read1(4096)
                 logf += log
