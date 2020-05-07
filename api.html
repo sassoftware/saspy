@@ -1024,11 +1024,7 @@ You must specify 3 of the for variables, to solve for the 4th.</p>
 <li><strong>saspath</strong> &#8211; overrides saspath Dict entry of cfgname in sascfg_personal.py file</li>
 <li><strong>code</strong> &#8211; the SAS statements you want to execute</li>
 <li><strong>results</strong> &#8211; format of results. &#8216;HTML&#8217; by default, alternatively &#8216;TEXT&#8217;</li>
-<li><strong>prompt</strong> &#8211; <dl class="docutils">
-<dt>dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete</dt>
-<dd>the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
-or show what you type and keep the macros (they will still be available later).</dd>
-</dl>
+<li><strong>prompt</strong> &#8211; <p>dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete                         the keys which are the names of the macro variables. The boolean flag is to either hide what you type and                         delete the macros, or show what you type and keep the macros (they will still be available later).</p>
 <p>for example (what you type for pw will not be displayed, user and dsname will):</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">results_dict</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
              <span class="sd">&quot;&quot;&quot;</span>
