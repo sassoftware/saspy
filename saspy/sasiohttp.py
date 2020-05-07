@@ -19,6 +19,7 @@ import json
 import os
 import ssl
 import sys
+import urllib
 
 import tempfile as tf
 from time import sleep
@@ -289,10 +290,12 @@ class SASconfigHTTP:
 
    def _authenticate(self, user, pw):
       #import pdb; pdb.set_trace()
-
+      uuser = urllib.parse.quote(user)
+      upw   = urllib.parse.quote(pw)
+      
       # POST AuthToken
       conn = self.HTTPConn; conn.connect()
-      d1 = ("grant_type=password&username="+user+"&password="+pw).encode(self.encoding)
+      d1 = ("grant_type=password&username="+uuser+"&password="+upw).encode(self.encoding)
       basic = base64.encodebytes("sas.tkmtrb:".encode(self.encoding))
       authheader = '%s' % basic.splitlines()[0].decode(self.encoding)
       headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
