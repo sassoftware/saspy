@@ -98,6 +98,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="limitations.html">Limitations, restrictions and work arounds</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 </ul>
@@ -165,7 +166,7 @@
             
   <div class="section" id="module-saspy">
 <span id="saspy"></span><h1>SASPy<a class="headerlink" href="#module-saspy" title="Permalink to this headline">¶</a></h1>
-<p><strong>Date</strong>: Apr 30, 2020 <strong>Version</strong>: 3.3.5</p>
+<p><strong>Date</strong>: May 07, 2020 <strong>Version</strong>: 3.3.5</p>
 <p><strong>Binary Installers:</strong> <a class="reference external" href="http://github.com/sassoftware/saspy/releases">http://github.com/sassoftware/saspy/releases</a></p>
 <p><strong>Source Repository:</strong> <a class="reference external" href="http://github.com/sassoftware/saspy">http://github.com/sassoftware/saspy</a></p>
 <p><strong>Issues and Ideas:</strong> <a class="reference external" href="https://github.com/sassoftware/saspy/issues">https://github.com/sassoftware/saspy/issues</a></p>
@@ -258,6 +259,23 @@ object-oriented methods and Python magics.</p>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="adding-procedures.html#overview">Overview</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="adding-procedures.html#process">Process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="limitations.html">Limitations, restrictions and work arounds</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="limitations.html#saslog">SASLOG</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#proc-printto">Proc Printto</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="limitations.html#terminating-sas-out-from-under-saspy">Terminating SAS out from under saspy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#abort-macro-and-abort-statement">%abort macro and abort statement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#canceling-submitted-statements">Canceling submitted statements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="limitations.html#perfect-storm">Perfect Storm</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#combining-proc-printto-and-abort-cancel">Combining proc printto and abort cancel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#printto-option-on-submit-methods">printto= option on submit methods</a></li>
 </ul>
 </li>
 </ul>
