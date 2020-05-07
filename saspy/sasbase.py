@@ -714,6 +714,9 @@ class SASsession():
         - prompt  - dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete
                     the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
                     or show what you type and keep the macros (they will still be available later).
+        - printto - this optiom, when set to True, will cause saspy to issue a 'proc printto;run;' after the code that is being
+                    submitted. This will 'undo' any proc printto w/in the submitted code that redirected the LOG or LST, to return 
+                    the LOG/LST back to saspy. This is explained in more detail in the doc: https://sassoftware.github.io/saspy/limitations.html
 
             for example (what you type for pw will not be displayed, user and dsname will):
 
