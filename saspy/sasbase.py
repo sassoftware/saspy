@@ -709,14 +709,12 @@ class SASsession():
         '''
         This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
 
-        - code    - the SAS statements you want to execute
-        - results - format of results. 'HTML' by default, alternatively 'TEXT'
-        - prompt  - dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete
-                    the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
-                    or show what you type and keep the macros (they will still be available later).
-        - printto - this optiom, when set to True, will cause saspy to issue a 'proc printto;run;' after the code that is being
-                    submitted. This will 'undo' any proc printto w/in the submitted code that redirected the LOG or LST, to return 
-                    the LOG/LST back to saspy. This is explained in more detail in the doc: https://sassoftware.github.io/saspy/limitations.html
+        :param saspath: overrides saspath Dict entry of cfgname in sascfg_personal.py file
+        :param code:    the SAS statements you want to execute
+        :param results: format of results. 'HTML' by default, alternatively 'TEXT'
+        :param prompt:  dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete
+                        the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
+                        or show what you type and keep the macros (they will still be available later).
 
             for example (what you type for pw will not be displayed, user and dsname will):
 
@@ -730,7 +728,11 @@ class SASsession():
                              prompt = {'user': False, 'pw': True, 'dsname': False}
                              )
 
-            Returns - a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is 'results' (HTML or TEXT)
+        :param printto: this option, when set to True, will cause saspy to issue a 'proc printto;run;' after the code that is being \
+                        submitted. This will 'undo' any proc printto w/in the submitted code that redirected the LOG or LST, to return \
+                        the LOG/LST back to saspy. This is explained in more detail in the doc: https://sassoftware.github.io/saspy/limitations.html
+
+        :return: a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is 'results' (HTML or TEXT)
 
         NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()
 
@@ -779,8 +781,8 @@ class SASsession():
 
     def teach_me_SAS(self, nosub: bool):
         """
-        nosub - bool. True means don't submit the code, print it out so I can see what the SAS code would be.
-            False means run normally - submit the code.
+        :param nosub: bool. True means don't submit the code, print it out so I can see what the SAS code would be. \
+                      False means run normally - submit the code.
         """
         self.nosub = nosub
 
@@ -1215,8 +1217,8 @@ class SASsession():
 
            - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
-           - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.
-                    this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
+           - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import. \
+                    this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV \
                     has problems with 
 
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
