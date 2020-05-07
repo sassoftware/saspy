@@ -37,7 +37,9 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.3.5 documentation" href="index.html"/> 
+    <link rel="top" title="saspy 3.3.5 documentation" href="index.html"/>
+        <link rel="next" title="Troubleshooting" href="troubleshooting.html"/>
+        <link rel="prev" title="Contributing new methods" href="adding-procedures.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -90,13 +92,30 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Limitations, restrictions and work arounds</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#saslog">SASLOG</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#proc-printto">Proc Printto</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#terminating-sas-out-from-under-saspy">Terminating SAS out from under saspy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#abort-macro-and-abort-statement">%abort macro and abort statement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#canceling-submitted-statements">Canceling submitted statements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#perfect-storm">Perfect Storm</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#combining-proc-printto-and-abort-cancel">Combining proc printto and abort cancel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#printto-option-on-submit-methods">printto= option on submit methods</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 </ul>
@@ -319,6 +338,15 @@ And this is actually a non-standard use case, though is can be allowed and suppo
            </div>
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="troubleshooting.html" class="btn btn-neutral float-right" title="Troubleshooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="adding-procedures.html" class="btn btn-neutral" title="Contributing new methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

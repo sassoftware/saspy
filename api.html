@@ -114,6 +114,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="limitations.html">Limitations, restrictions and work arounds</a></li>
 <li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 </ul>
@@ -818,12 +819,7 @@ See the SASViyaML.py module.</p>
 <ul>
 <li>MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory</li>
 <li>CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data</li>
-<li><dl class="first docutils">
-<dt>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.</dt>
-<dd>this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
-has problems with</dd>
-</dl>
-</li>
+<li>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV                     has problems with</li>
 </ul>
 </li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
@@ -1020,24 +1016,19 @@ You must specify 3 of the for variables, to solve for the 4th.</p>
 <dt id="saspy.SASsession.submit">
 <code class="descname">submit</code><span class="sig-paren">(</span><em>code: str</em>, <em>results: str = ''</em>, <em>prompt: dict = None</em>, <em>printto=False</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#saspy.SASsession.submit" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.</p>
-<ul>
-<li><p class="first">code    - the SAS statements you want to execute</p>
-</li>
-<li><p class="first">results - format of results. &#8216;HTML&#8217; by default, alternatively &#8216;TEXT&#8217;</p>
-</li>
-<li><dl class="first docutils">
-<dt>prompt  - dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete</dt>
-<dd><p class="first last">the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
-or show what you type and keep the macros (they will still be available later).</p>
-</dd>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>saspath</strong> &#8211; overrides saspath Dict entry of cfgname in sascfg_personal.py file</li>
+<li><strong>code</strong> &#8211; the SAS statements you want to execute</li>
+<li><strong>results</strong> &#8211; format of results. &#8216;HTML&#8217; by default, alternatively &#8216;TEXT&#8217;</li>
+<li><strong>prompt</strong> &#8211; <dl class="docutils">
+<dt>dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete</dt>
+<dd>the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
+or show what you type and keep the macros (they will still be available later).</dd>
 </dl>
-</li>
-<li><dl class="first docutils">
-<dt>printto - this optiom, when set to True, will cause saspy to issue a &#8216;proc printto;run;&#8217; after the code that is being</dt>
-<dd><blockquote class="first">
-<div><p>submitted. This will &#8216;undo&#8217; any proc printto w/in the submitted code that redirected the LOG or LST, to return 
-the LOG/LST back to saspy. This is explained in more detail in the doc: <a class="reference external" href="https://sassoftware.github.io/saspy/limitations.html">https://sassoftware.github.io/saspy/limitations.html</a></p>
-</div></blockquote>
 <p>for example (what you type for pw will not be displayed, user and dsname will):</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">results_dict</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
              <span class="sd">&quot;&quot;&quot;</span>
@@ -1048,11 +1039,16 @@ the LOG/LST back to saspy. This is explained in more detail in the doc: <a class
              <span class="p">)</span>
 </pre></div>
 </div>
-<p class="last">Returns - a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is &#8216;results&#8217; (HTML or TEXT)</p>
-</dd>
-</dl>
 </li>
+<li><strong>printto</strong> &#8211; this option, when set to True, will cause saspy to issue a &#8216;proc printto;run;&#8217; after the code that is being                         submitted. This will &#8216;undo&#8217; any proc printto w/in the submitted code that redirected the LOG or LST, to return                         the LOG/LST back to saspy. This is explained in more detail in the doc: <a class="reference external" href="https://sassoftware.github.io/saspy/limitations.html">https://sassoftware.github.io/saspy/limitations.html</a></li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is &#8216;results&#8217; (HTML or TEXT)</p>
+</td>
+</tr>
+</tbody>
+</table>
 <p>NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()</p>
 <p>In Zeppelin, the html LST results can be displayed via print(&#8220;%html &#8220;+ ll[&#8216;LST&#8217;]) to diplay as HTML.</p>
 <dl class="docutils">
@@ -1120,10 +1116,14 @@ as either HTML or TEXT, depending upon results. The method= parameter allows you
 <dl class="method">
 <dt id="saspy.SASsession.teach_me_SAS">
 <code class="descname">teach_me_SAS</code><span class="sig-paren">(</span><em>nosub: bool</em><span class="sig-paren">)</span><a class="headerlink" href="#saspy.SASsession.teach_me_SAS" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>nosub - bool. True means don&#8217;t submit the code, print it out so I can see what the SAS code would be.</dt>
-<dd>False means run normally - submit the code.</dd>
-</dl>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>nosub</strong> &#8211; bool. True means don&#8217;t submit the code, print it out so I can see what the SAS code would be.                       False means run normally - submit the code.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
