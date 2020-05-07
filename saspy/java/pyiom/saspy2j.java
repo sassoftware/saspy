@@ -128,6 +128,7 @@ public class saspy2j
       boolean fndeol = false;
       boolean zero   = false;
       boolean ods    = false;
+      boolean undo   = false;
 
       OctetSeqHolder odsdata = new OctetSeqHolder();
       char[]         in      = new char[4097];
@@ -454,12 +455,21 @@ public class saspy2j
                      serr.close();
                      return;
                      }
+                  else if (eol.contains("PRINTTO"))
+                     {
+                     undo = true;
+                     pgm  = pgm.substring(idx + 13 + 33);
+                     }
                   else
                      {
                      pgm = pgm.substring(0, idx);
                      try{
                         lang.Submit(pgm);
-                        lang.Submit("\nproc printto;run;\n%put "+eol.substring(1)+";\n");
+                        if (undo)
+                           lang.Submit("\nproc printto;run;\n%put "+eol.substring(1)+";\n");
+                        else
+                           lang.Submit("\n%put "+eol.substring(1)+";\n");
+                        undo = false;
                         break;
                         }
                      catch(org.omg.CORBA.COMM_FAILURE e)
@@ -468,7 +478,11 @@ public class saspy2j
                            {
                            connect(true, false, false);
                            lang.Submit(pgm);
-                           lang.Submit("\nproc printto;run;\n%put "+eol.substring(1)+";\n");
+                           if (undo)
+                              lang.Submit("\nproc printto;run;\n%put "+eol.substring(1)+";\n");
+                           else
+                              lang.Submit("\n%put "+eol.substring(1)+";\n");
+                           undo = false;
                            break;
                            }
                         else

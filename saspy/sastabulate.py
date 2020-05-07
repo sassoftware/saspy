@@ -330,7 +330,7 @@ class Tabulate:
             return self.to_nested_dataframe(code)
 
     def to_nested_dataframe(self, code):
-        result = self.sas.submit(code)
+        result = self.sas._io.submit(code)
         outdata = self.sas.sd2df('temptab')
 
         # slice groupings (classes) and stats from results table

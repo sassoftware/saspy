@@ -320,7 +320,7 @@ class SASProcCommons:
         """.format(obj)
 
         self.logger.debug("Object Method macro call: " + str(code))
-        res = self.sas.submit(code, "text")
+        res = self.sas._io.submit(code, "text")
         self.logger.debug('SAS Log: ' + res['LOG'])
 
         objlist = []
@@ -358,7 +358,7 @@ class SASProcCommons:
         # ignore teach_me_SAS mode to run contents
         nosub = self.sas.nosub
         self.sas.nosub = False
-        ll = self.sas.submit(char_string.format(data.libref, data.table + data._dsopts()))
+        ll = self.sas._io.submit(char_string.format(data.libref, data.table + data._dsopts()))
         self.sas.nosub = nosub
 
         charlist = []
@@ -632,7 +632,7 @@ class SASProcCommons:
             code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, verifiedKwargs)
             self.logger.debug(procname + " macro submission: " + str(code))
             if not self.sas.nosub:
-                ll = self.sas.submit(code, "text")
+                ll = self.sas._io.submit(code, "text")
                 log = ll['LOG']
                 error = SASProcCommons._errorLog(self, log)
                 isinstance(error, str)

@@ -97,7 +97,7 @@ class SASresults(object):
         graphics = ['PLOT', 'OGRAM', 'PANEL', 'BY', 'MAP']
         if any(x in attr for x in graphics):
             code = '%%getdata(%s, %s);' % (self._name, attr)
-            res = self.sas.submit(code)
+            res = self.sas._io.submit(code)
             return res
         else:
             if self.sas.exist(attr, '_'+self._name):
@@ -109,7 +109,7 @@ class SASresults(object):
                df = self.sas.sasdata2dataframe(attr, libref=lref)
             else:
                code = '%%getdata(%s, %s);' % (self._name, attr)
-               df   = self.sas.submit(code)
+               df   = self.sas._io.submit(code)
             return df
 
 

@@ -742,7 +742,7 @@ Will use HTML5 for this SASsession.""")
 
       return
 
-   def submit(self, code: str, results: str ="html", prompt: dict = None) -> dict:
+   def submit(self, code: str, results: str ="html", prompt: dict = None, **kwargs) -> dict:
       '''
       This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
       code    - the SAS statements you want to execute
@@ -767,7 +767,8 @@ Will use HTML5 for this SASsession.""")
             print(results['LOG'])
             HTML(results['LST'])
       '''
-      prompt = prompt if prompt is not None else {}
+      prompt  = prompt if prompt is not None else {}
+      printto = kwargs.pop('undo', False)
 
       #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsopen  = b"ods listing close;ods "+self.sascfg.output.encode()+ \
@@ -848,12 +849,13 @@ Will use HTML5 for this SASsession.""")
          pgm += odsopen
 
       pgm += mj+b'\n'+pcodei.encode()+pcodeiv.encode()
-      pgm += code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj
+      pgm += code.encode()+b'\n'+pcodeo.encode()+b'\n'+mj+b'\n'
 
       if ods:
          pgm += odsclose
 
-      pgm += b'\n'+logcodei.encode()+b'\n'
+      if printto:
+         self.stdin[0].send(b'\ntom says EOL=PRINTTO                         \n')
       self.stdin[0].send(pgm+b'tom says EOL='+logcodeo+b'\n')
 
       while not done:
@@ -907,7 +909,7 @@ Will use HTML5 for this SASsession.""")
                        if logf.count(logcodeo) >= 1:
                           bail = True
                        if not bail and bc:
-                          self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo+b'\n')
+                          #self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo+b'\n')
                           bc = False
              done = True
 
@@ -942,7 +944,7 @@ Will use HTML5 for this SASsession.""")
              else:
                 print('Exception ignored, continuing to process...\n')
 
-             self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo+b'\n')
+             #self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo+b'\n')
 
       try:
          lstf = lstf.decode()
@@ -1354,7 +1356,8 @@ Will use HTML5 for this SASsession.""")
       logf  = ll['LOG']
 
       self.stdin[0].send(b'tom says EOL=DNLOAD                          \n')
-      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
+      self.stdin[0].send(b'\ntom says EOL='+logcodeb+b'\n')
+      #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
 
       done  = False
       datar = b''
@@ -1695,7 +1698,8 @@ Will use HTML5 for this SASsession.""")
          code += "run;"
 
       ll = self._asubmit(code, 'text')
-      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
+      self.stdin[0].send(b'\ntom says EOL='+logcodeb+b'\n')
+      #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
      
       BOM   = "\ufeff".encode()
       done  = False
@@ -1945,7 +1949,8 @@ Will use HTML5 for this SASsession.""")
 
       ll = self._asubmit(code, 'text')
 
-      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode())
+      self.stdin[0].send(b'\ntom says EOL='+logcodeo.encode())
+      #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode())
 
       done  = False
       bail  = False
@@ -2210,7 +2215,8 @@ Will use HTML5 for this SASsession.""")
          code += "run;"
 
       ll = self._asubmit(code, "text")
-      self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode())
+      self.stdin[0].send(b'\ntom says EOL='+logcodeo.encode())
+      #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode())
 
       done  = False
       bail  = False

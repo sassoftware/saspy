@@ -502,7 +502,7 @@ class SASsession():
         enc = self._io.sascfg.encoding
         if enc == '':
            self._io.sascfg.encoding = 'utf_8'
-        res = self.submit(sysvars, "text")['LOG']
+        res = self._io.submit(sysvars, "text")['LOG']
         self._io.sascfg.encoding = enc
 
         vlist         = res.rpartition('SYSSCP=')
@@ -554,7 +554,7 @@ class SASsession():
         self.workpath = self.workpath + self.hostsep
 
         if self.sascfg.autoexec:
-            self.submit(self.sascfg.autoexec)
+            self._io.submit(self.sascfg.autoexec)
 
         if self.sascfg.m5dsbug is None:
            if self.sasver[:9] in ['9.04.01M5'] and self.sascei in ['utf-8', 'euc-cn', 'euc-jp', 'euc-kr', 'shift-jis', 'big5']:
@@ -572,7 +572,7 @@ class SASsession():
         # this is to support parsing the log to fring log records w/ 'ERROR' when diagnostic logging is enabled.
         # in thi scase the log can have prefix and/or suffix info so the 'regular' log data is in the middle, not left justified
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
-           ll = self.submit("""data _null_; file STDERR; put %upcase('col0REG='); 
+           ll = self._io.submit("""data _null_; file STDERR; put %upcase('col0REG='); 
                                data _null_; put %upcase('col0LOG=');run;""", results='text')
            regoff = len(ll['LOG'].rpartition('COL0REG=')[0].rpartition('\n')[2])
            logoff = len(ll['LOG'].rpartition('COL0LOG=')[0].rpartition('\n')[2])
@@ -649,13 +649,13 @@ class SASsession():
 
         return self._io._asubmit(code, results)
 
-    def submitLOG(self, code, results: str = '', prompt: dict = None):
+    def submitLOG(self, code, results: str = '', prompt: dict = None, printto=False):
         '''
         This method is a convenience wrapper around the submit() method. It executes the submit then prints the LOG that was returned.
         '''
-        print(self.submit(code, results, prompt)['LOG'])
+        print(self.submit(code, results, prompt, printto)['LOG'])
 
-    def submitLST(self, code, results: str = '', prompt: dict = None, method: str = None):
+    def submitLST(self, code, results: str = '', prompt: dict = None, method: str = None, printto=False):
         '''
         This method is a convenience wrapper around the submit() method. It executes the submit then renders the LST that was returned,
         as either HTML or TEXT, depending upon results. The method= parameter allows you to adjust what gets returned to suit your needs.
@@ -678,7 +678,7 @@ class SASsession():
            else:
               results = self.results
 
-        ll  = self.submit(code, results, prompt)
+        ll  = self.submit(code, results, prompt, printto)
 
         if results.upper() == 'HTML':
            if   method.lower() == 'listonly':
@@ -705,7 +705,7 @@ class SASsession():
            else:
               print(ll['LOG']+"\n"+ll['LST'])
 
-    def submit(self, code: str, results: str = '', prompt: dict = None) -> dict:
+    def submit(self, code: str, results: str = '', prompt: dict = None, printto=False) -> dict:
         '''
         This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
 
@@ -714,6 +714,9 @@ class SASsession():
         - prompt  - dict of names:flags to prompt for; create macro variables (used in submitted code), then keep or delete
                     the keys which are the names of the macro variables. The boolean flag is to either hide what you type and delete the macros,
                     or show what you type and keep the macros (they will still be available later).
+        - printto - this optiom, when set to True, will cause saspy to issue a 'proc printto;run;' after the code that is being
+                    submitted. This will 'undo' any proc printto w/in the submitted code that redirected the LOG or LST, to return 
+                    the LOG/LST back to saspy. This is explained in more detail in the doc: https://sassoftware.github.io/saspy/limitations.html
 
             for example (what you type for pw will not be displayed, user and dsname will):
 
@@ -749,9 +752,8 @@ class SASsession():
             else:
                 results = self.results
 
-        ll = self._io.submit(code, results, prompt)
+        ll = self._io.submit(code, results, prompt, undo=printto)
 
-        self._lastlog = ll['LOG']
         return ll
 
     def saslog(self) -> str:
@@ -1532,7 +1534,7 @@ class SASsession():
         :param value: python variable, that can be resolved to a string, to use for the value to assign to the macro variable
 
         """
-        ll = self.submit("%let " + name + "=%NRBQUOTE(" + str(value) + ");\n")
+        ll = self._io.submit("%let " + name + "=%NRBQUOTE(" + str(value) + ");\n")
 
     def symget(self, name: str, outtype=None):
         """
@@ -1540,7 +1542,7 @@ class SASsession():
         :param outtype: [optional] desired output type of the python variable; valid types are [int, float, str]
 
         """
-        ll = self.submit("%put " + name + "=&" + name + " "+ name+"END=;\n")
+        ll = self._io.submit("%put " + name + "=&" + name + " "+ name+"END=;\n")
         l2 = ll['LOG'].rpartition(name + "=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
 
         if outtype is not None and type(outtype) not in [int, float, str]:
@@ -1641,7 +1643,7 @@ class SASsession():
             print(code)
             return None
         else:
-           ll = self.submit(code, results='text')
+           ll = self._io.submit(code, results='text')
 
         librefs = []
         log = ll['LOG'].rpartition('LIBREFSEND=')[0].rpartition('LIBREFSSTART=')
@@ -1704,7 +1706,7 @@ class SASsession():
             print(code)
             return None
         else:
-           ll = self.submit(code, results='text')
+           ll = self._io.submit(code, results='text')
 
         dirlist = []
 
@@ -1733,7 +1735,7 @@ class SASsession():
         """
 
         if not self.nosub:
-           ll = self.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+")) LIB_EXT_END=;")
+           ll = self._io.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+")) LIB_EXT_END=;")
 
            exists = int(ll['LOG'].rpartition('LIBREF_EXISTS=')[2].rpartition('LIB_EXT_END=')[0])
 
@@ -1756,7 +1758,7 @@ class SASsession():
             print(code)
             return None
         else:
-           ll = self.submit(code, results='text')
+           ll = self._io.submit(code, results='text')
 
         if results != 'list':
            res = self.sd2df('_saspy_lib_list', 'work')
@@ -1774,7 +1776,7 @@ class SASsession():
         run;
         """
         
-        ll  = self.submit(code, results='text')
+        ll  = self._io.submit(code, results='text')
         
         log = ll['LOG'].rpartition('MEMEND=')[0].rpartition('MEMSTART=')
                                                                                   
@@ -1800,14 +1802,14 @@ class SASsession():
            code  = "filename "+fileref+" '"+filepath+"';\n"
            code += "%put FILEREF_EXISTS=%sysfunc(fexist("+fileref+")) FILE_EXTEND=;"
    
-           ll = self.submit(code)
+           ll = self._io.submit(code)
    
            exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
    
            if exists != 1:
               if not quiet:
                  print('The filepath provided does not exist')
-              ll = self.submit("filename "+fileref+" clear;")
+              ll = self._io.submit("filename "+fileref+" clear;")
               return None
 
         if results != 'dict':
@@ -1835,7 +1837,7 @@ class SASsession():
                print(code)
                return None
            else:
-              ll  = self.submit(code, results='text')
+              ll  = self._io.submit(code, results='text')
    
            res = self.sd2df('_SASPY_FILE_INFO', 'work')
            return res
@@ -1871,7 +1873,7 @@ class SASsession():
             print(code)
             return None
         else:
-           ll  = self.submit(code, results='text')
+           ll  = self._io.submit(code, results='text')
 
         vi = len(ll['LOG'].rpartition('INFOEND=')[0].rpartition('\n')[2])                          
  
