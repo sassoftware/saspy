@@ -51,6 +51,7 @@ class SASconfigHTTP:
       self.options   = cfg.get('options', [])
       self.ssl       = cfg.get('ssl', True)
       self.verify    = cfg.get('verify', True)
+      self.timeout   = cfg.get('timeout', None)
       user           = cfg.get('user', '')
       pw             = cfg.get('pw', '')
       self.encoding  = cfg.get('encoding', '')
@@ -121,6 +122,13 @@ class SASconfigHTTP:
             print("Parameter 'verify' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.verify = bool(inver)
+
+      intout = kwargs.get('timeout', None)
+      if intout is not None:
+         if lock and self.timeout:
+            print("Parameter 'timeout' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.timeout = intout
 
       inuser = kwargs.get('user', '')              
       if len(inuser) > 0:
@@ -214,18 +222,18 @@ class SASconfigHTTP:
          if self.verify:
             # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifyable
             try:
-               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port)
+               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout)
                self._token = self._authenticate(user, pw)
             except ssl.SSLError as e:
                print("SSL connection failed, creating an unverified ssl connection. Error was:"+str(e))
-               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, context=ssl._create_unverified_context())
+               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
                print("You can set 'verify=False' to get rid of this message ")
                self._token   = self._authenticate(user, pw)
          else:
-            self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, context=ssl._create_unverified_context())
+            self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
             self._token = self._authenticate(user, pw)
       else:
-         self.HTTPConn = hc.HTTPConnection(self.ip, self.port)
+         self.HTTPConn = hc.HTTPConnection(self.ip, self.port, timeout=self.timeout)
          self._token   = self._authenticate(user, pw)
 
       # get AuthToken
