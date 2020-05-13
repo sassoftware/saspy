@@ -1569,6 +1569,18 @@ class SASsession():
 
         return var
 
+    def symexist(self, name: str):
+        """
+        :param name:    [required] name of the macro varable to check for existence
+
+        """
+        ll = self._io.submit("%put " + name + "=%symexist(" + name + ") "+ name+"END=;\n")
+        l2 = ll['LOG'].rpartition(name + "=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
+
+        var = int(l2)
+
+        return bool(var)
+
     def disconnect(self):
         """
         This method disconnects an IOM session to allow for reconnecting when switching networks
