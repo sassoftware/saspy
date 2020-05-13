@@ -1573,6 +1573,7 @@ class SASsession():
         """
         :param name:    [required] name of the macro varable to check for existence
 
+        :return: bool
         """
         ll = self._io.submit("%put " + name + "=%symexist(" + name + ") "+ name+"END=;\n")
         l2 = ll['LOG'].rpartition(name + "=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 

@@ -913,6 +913,8 @@ context -
     if you don't provide one here, saspy will query the Service upon connecting and get a list of available Contexts and
     prompt you for which one to use.
 
+timeout -
+    HTTPConnection timeout value, in seconds. Defaults to None.
 options -
     (Optional) SAS options to include when connecting. These **must** be a Python list.
 
