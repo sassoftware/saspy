@@ -245,9 +245,9 @@ class SASconfigHTTP:
 
       # GET Contexts 
       contexts = self._get_contexts()
-      if contexts == None:
+      if contexts == None or len(contexts) == 0:
          self._token = None
-         return 
+         raise SASHTTPconnectionError(msg="No SAS Contexts found for Compute Service. Can't get a Compute Server.")
 
       ctxnames = []
       for i in range(len(contexts)):
@@ -271,17 +271,26 @@ class SASconfigHTTP:
 
       while self.ctxname not in ctxnames:
          if not lock:
+            '''    this was original code before compute was production. users can't create these on the fly.
             createctx = self._prompt(
                 "SAS Context specified was not found. Do you want to create a new context named "+self.ctxname+" [Yes|No]?")
             if createctx.upper() in ('YES', 'Y'):
                contexts = self._create_context(user)
             else:
-               self.ctxname = self._prompt(
+            '''
+            try:
+               ctxname = self._prompt(
                    "SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: " + 
                     str(ctxnames)+" ")
-               if self.ctxname is None:
+               if ctxname is None:
                   self._token = None
                   return 
+               else:
+                  self.ctxname = ctxname
+            except:
+               raise SASHTTPconnectionError(msg=
+                   "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " + 
+                    str(ctxnames)+" ")
          else:
             msg  = "SAS Context specified in the SASconfig ("+self.ctxname+") was not found on this server, and because " 
             msg += "the SASconfig is in lockdown mode, there is no prompting for other contexts. No connection established."
