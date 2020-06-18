@@ -245,29 +245,35 @@ class SASconfigHTTP:
 
       # GET Contexts 
       contexts = self._get_contexts()
-      if contexts == None or len(contexts) == 0:
+      if contexts == None:
          self._token = None
-         raise SASHTTPconnectionError(msg="No SAS Contexts found for Compute Service. Can't get a Compute Server.")
+         raise SASHTTPconnectionError(msg="No Contexts found on Compute Service at ip="+self.ip)
 
       ctxnames = []
       for i in range(len(contexts)):
          ctxnames.append(contexts[i].get('name'))
 
+      if len(ctxnames) == 0:
+         self._token = None
+         raise SASHTTPconnectionError(msg="No Contexts found on Compute Service at ip="+self.ip)
+
       if len(self.ctxname) == 0:
-         if len(ctxnames) == 0:
-            print("No Contexts found on Compute Service at ip=" + self.ip)
-            self._token = None
-            return 
+         if len(ctxnames) == 1:
+            self.ctxname = ctxnames[0]
+            print("Using SAS Context: " + self.ctxname)
          else:
-            if len(ctxnames) == 1:
-               self.ctxname = ctxnames[0]
-               print("Using SAS Context: " + self.ctxname)
-            else:
-               self.ctxname = self._prompt("Please enter the SAS Context you wish to run. Available contexts are: " +
-                                            str(ctxnames)+" ")
-               if self.ctxname is None:
+            try:
+               ctxname = self._prompt("Please enter the SAS Context you wish to run. Available contexts are: " +
+                                      str(ctxnames)+" ")
+               if ctxname is None:
                   self._token = None
                   return 
+               else:
+                  self.ctxname = ctxname
+            except:
+               raise SASHTTPconnectionError(msg=
+                  "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " + 
+                   str(ctxnames)+" ")
 
       while self.ctxname not in ctxnames:
          if not lock:
