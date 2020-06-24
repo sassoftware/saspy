@@ -621,7 +621,7 @@ Will use HTML5 for this SASsession.""")
             while not gotit:
                var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
                if var is None:
-                  raise KeyboardInterrupt
+                  raise RuntimeError("No value for prompted macro variable provided.") 
                if len(var) > 0:
                   gotit = True
                else:
@@ -703,6 +703,9 @@ Will use HTML5 for this SASsession.""")
              return dict(LOG=log.encode(), LST='')
 
          except (KeyboardInterrupt, SystemExit):
+             if not self.sascfg.prompt:
+                raise 
+
              print('Exception caught!')
              ll = self._breakprompt(logcodeo)
 

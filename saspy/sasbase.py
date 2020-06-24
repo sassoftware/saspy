@@ -133,6 +133,10 @@ class SASconfig(object):
         # Get Config options. Fallback to empty dict.
         self.cfgopts = getattr(SAScfg, "SAS_config_options", {})
 
+        # See if we don't want to allow prompting in this environment
+        prompt = self.cfgopts.get('prompt', True)
+        self.prompt = kwargs.get('prompt', prompt)
+
         # In lock down mode, don't allow runtime overrides of option values from the config file.
         lock = self.cfgopts.get('lock_down', True)
 
@@ -159,7 +163,7 @@ class SASconfig(object):
                 "The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: " +
                 str(configs) + " ")
             if cfgname is None:
-                raise KeyboardInterrupt
+                raise RuntimeError("No SAS Config name provided.") 
 
         self.name = cfgname
         cfg = getattr(SAScfg, cfgname)
@@ -328,24 +332,26 @@ class SASconfig(object):
         return SAScfg
 
     def _prompt(self, prompt, pw=False):
-        if self._kernel is None:
-            if not pw:
-                try:
-                    return input(prompt)
-                except KeyboardInterrupt:
-                    return None
-            else:
-                try:
-                    return getpass.getpass(prompt)
-                except KeyboardInterrupt:
-                    return None
+        if self.prompt:
+           if self._kernel is None:
+               if not pw:
+                   try:
+                       return input(prompt)
+                   except KeyboardInterrupt:
+                       return None
+               else:
+                   try:
+                       return getpass.getpass(prompt)
+                   except KeyboardInterrupt:
+                       return None
+           else:
+               try:
+                   return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
+                                                      password=pw)
+               except KeyboardInterrupt:
+                   return None
         else:
-            try:
-                return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
-                                                   password=pw)
-            except KeyboardInterrupt:
-                return None
-
+           return None 
 
 class SASsession():
     """

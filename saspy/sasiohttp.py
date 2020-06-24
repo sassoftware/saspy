@@ -172,9 +172,12 @@ class SASconfigHTTP:
       while len(self.ip) == 0:
          if not lock:
             self.ip = self._prompt("Please enter the host (ip address) you are trying to connect to: ")
+            if self.ip is None:
+               self._token = None
+               raise RuntimeError("No IP address provided.") 
          else:
             print("In lockdown mode and missing ip adress in the config named: "+cfgname )
-            return
+            raise RuntimeError("No IP address provided.") 
 
       if not self.port:
          if self.ssl:
@@ -210,13 +213,13 @@ class SASconfigHTTP:
          user = self._prompt("Please enter userid: ")
          if user is None:
             self._token = None
-            return 
+            raise RuntimeError("No userid provided.") 
 
       while len(pw) == 0:
          pw = self._prompt("Please enter password: ", pw = True)
          if pw is None:
             self._token = None
-            return 
+            raise RuntimeError("No password provided.") 
 
       if self.ssl:
          if self.verify:
@@ -267,7 +270,7 @@ class SASconfigHTTP:
                                       str(ctxnames)+" ")
                if ctxname is None:
                   self._token = None
-                  return 
+                  raise RuntimeError("No SAS Context provided.") 
                else:
                   self.ctxname = ctxname
             except:
@@ -290,7 +293,7 @@ class SASconfigHTTP:
                     str(ctxnames)+" ")
                if ctxname is None:
                   self._token = None
-                  return 
+                  raise RuntimeError("No SAS Context provided.") 
                else:
                   self.ctxname = ctxname
             except:
@@ -302,7 +305,7 @@ class SASconfigHTTP:
             msg += "the SASconfig is in lockdown mode, there is no prompting for other contexts. No connection established."
             print(msg)
             self._token = None
-            return 
+            raise RuntimeError("No SAS Context provided.") 
 
       for i in range(len(contexts)):
          if contexts[i].get('name') == self.ctxname:
@@ -743,6 +746,8 @@ class SASsessionHTTP():
             gotit = False
             while not gotit:
                var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
+               if var is None:
+                  raise RuntimeError("No value for prompted macro variable provided.") 
                if len(var) > 0:
                   gotit = True
                else:
@@ -798,7 +803,7 @@ class SASsessionHTTP():
             response = self.sascfg._prompt(
                       "SAS attention handling not yet supported over HTTP. Please enter (Q) to Quit waiting for results or (C) to continue waiting.")
             while True:
-               if response.upper() == 'Q':
+               if response is None or response.upper() == 'Q':
                   conn.close()
                   return dict(LOG='', LST='', BC=True)
                if response.upper() == 'C':
