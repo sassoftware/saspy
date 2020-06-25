@@ -293,7 +293,9 @@ class SASconfigHTTP:
                     str(ctxnames)+" ")
                if ctxname is None:
                   self._token = None
-                  raise RuntimeError("No SAS Context provided.") 
+                  raise SASHTTPconnectionError(msg=
+                      "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " + 
+                       str(ctxnames)+" ")
                else:
                   self.ctxname = ctxname
             except:
