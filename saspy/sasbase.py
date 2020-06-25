@@ -1547,11 +1547,20 @@ class SASsession():
     def symget(self, name: str, outtype=None):
         """
         :param name:    [required] name of the macro varable to get
-        :param outtype: [optional] desired output type of the python variable; valid types are [int, float, str]
+        :param outtype: [optional] desired output type of the python variable; valid types are [int, float, str] \
+                        provide an object of the type [1, 1.0, ' '] or a string of 'int', 'float' or 'str' 
 
         """
         ll = self._io.submit("%put " + name + "=&" + name + " "+ name+"END=;\n")
         l2 = ll['LOG'].rpartition(name + "=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
+
+        if outtype is not None:
+           if   outtype == 'int':
+              outtype = 1
+           elif outtype == 'float':
+              outtype = 1.0
+           elif outtype == 'str':
+              outtype = ' '
 
         if outtype is not None and type(outtype) not in [int, float, str]:
            print("invalid type specified. supported are [int, float, str], will return default type")
