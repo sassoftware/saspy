@@ -703,8 +703,8 @@ Will use HTML5 for this SASsession.""")
              return dict(LOG=log.encode(), LST='')
 
          except (KeyboardInterrupt, SystemExit):
-             if not self.sascfg.prompt:
-                raise 
+             if not self._sb.sascfg.prompt:
+                raise KeyboardInterrupt("Interupt handling is disabled due to prompting being disabled.")
 
              print('Exception caught!')
              ll = self._breakprompt(logcodeo)

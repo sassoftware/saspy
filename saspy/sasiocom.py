@@ -414,7 +414,7 @@ class SASSessionCOM(object):
         while input_ok is False:
             val = self.sascfg._prompt('Enter value for macro variable {} '.format(key), pw=hide)
 
-            if var is None:
+            if val is None:
                raise RuntimeError("No value for prompted macro variable provided.") 
 
             if val:
