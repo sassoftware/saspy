@@ -44,8 +44,11 @@ SAS_config_names=['default']
 #
 # 'verbose'   - True | False. True = Allow print statements for debug type messages
 #
+# 'prompt'    - True | False. True = Allow prompting as necessary
+#
 SAS_config_options = {'lock_down': False,
-                      'verbose'  : True
+                      'verbose'  : True,
+                      'prompt'   : True
                      }
 
 # Configuration options for SAS output. By default output is HTML 5.0 (using "ods html5" statement) but certain templates might not work 
