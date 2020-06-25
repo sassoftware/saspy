@@ -1559,8 +1559,6 @@ class SASsession():
               outtype = 1
            elif outtype == 'float':
               outtype = 1.0
-           elif outtype == 'str':
-              outtype = ' '
 
         if outtype is not None and type(outtype) not in [int, float, str]:
            print("invalid type specified. supported are [int, float, str], will return default type")
