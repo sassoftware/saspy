@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.3.6 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.3.7 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.3.6 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.3.7 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.3.6
+                3.3.7
               </div>
             
           
@@ -389,14 +389,19 @@ search order listed above, in that order.</p>
 <p>In reverse order, the configuration definitions are Python dictionaries. Each dictionary
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
 These values are defined in the following sections.</p>
-<p>SAS_config_options has two options. The first option (lock_down) restricts (or allows) an end
+<p>SAS_config_options has three options. The first option (lock_down) restricts (or allows) an end
 users&#8217; ability to override settings in the configuration definitions by passing them as parameters
 on the <code class="docutils literal"><span class="pre">SASsession()</span></code>. Each of the keys in the configuration definition can be passed in at
 run time on the SASsession(). If lock_down is set to True, any keys defined in the configuration
 definition cannot be overridden in SASsession(), Keys that are not specified in the Config Def, can be
 specified at run time on the SASsession(). If set to False, any config def key can be specified
 on the SASsession().</p>
-<p>The second (verbose) controls the printing of some debug type messages.</p>
+<p>The second (verbose) controls the printing of some debug type messages. While the third, &#8216;prompt&#8217;
+defines whether saspy can prompt the user if necessary. You would set this to False, if running a
+script in the background, where no input could be provided and if a prompt were to be issued, the
+process would hang waiting on input. Prompt= can also be provided on the SASsession() as a parameter,
+though not in the configuration definition, as most prompting that can happen has to do with, and
+happens prior to parsing, the configuration definition.</p>
 <p>SAS_config_names is the list of configuration definition names to make available to an
 end user at connection time. Any configuration definitions that are not listed in
 SAS_config_names are simply inaccessible by an end user. You can add several configuration
@@ -407,9 +412,13 @@ it could be named Bob. But then it wouldn&#8217;t be obvious that it&#8217;s for
 <p>So, your sascfg_personal.py file only need a few things in it; not everything in the example sascfg.py file.
 For example, if you had SAS installed on your Linux system, your sascfg_personal.py file may simply be the following:</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">SAS_config_names</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mycfg&#39;</span><span class="p">]</span>
-<span class="n">SAS_config_options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lock_down&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
-                      <span class="s1">&#39;verbose&#39;</span>  <span class="p">:</span> <span class="bp">True</span>
-                     <span class="p">}</span>
+
+<span class="c1"># this is actually optional, you only have to have it to change the defaults</span>
+<span class="c1">#SAS_config_options = {&#39;lock_down&#39;: False,</span>
+<span class="c1">#                      &#39;verbose&#39;  : True,</span>
+<span class="c1">#                      &#39;prompt&#39;   : True</span>
+<span class="c1">#                     }</span>
+
 <span class="n">mycfg</span>              <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span>  <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span>
                      <span class="p">}</span>
 </pre></div>
@@ -974,6 +983,8 @@ blank, the user is <strong>prompted</strong> for a password at runtime, unless i
 <dd>(Optional) The Compute Service has different Contexts that you can connect to. Think Appserver in IOM.
 if you don&#8217;t provide one here, saspy will query the Service upon connecting and get a list of available Contexts and
 prompt you for which one to use.</dd>
+<dt>timeout -</dt>
+<dd>HTTPConnection timeout value, in seconds. Defaults to None.</dd>
 <dt>options -</dt>
 <dd>(Optional) SAS options to include when connecting. These <strong>must</strong> be a Python list.</dd>
 <dt>encoding -</dt>
@@ -1062,7 +1073,7 @@ If you want to run saspy in Zeppelin, set this in your configuration definition:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.3.6',
+            VERSION:'3.3.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
