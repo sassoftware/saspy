@@ -347,7 +347,7 @@ Will use HTML5 for this SASsession.""")
                   self.sockout.close()
                   self.sockerr.close()
                   self.pid = None
-                  raise KeyboardInterrupt
+                  raise RuntimeError("No SAS IOM User id provided.") 
 
       pgm    = self.sascfg.java
       parms  = [pgm]
@@ -502,7 +502,7 @@ Will use HTML5 for this SASsession.""")
                   else:
                      os.kill(self.pid, signal.SIGKILL)
                   self.pid = None
-                  raise KeyboardInterrupt
+                  raise RuntimeError("No SAS IOM User password provided.") 
             pw += '\n'
             self.stdin[0].send(pw.encode())
 
@@ -832,7 +832,7 @@ Will use HTML5 for this SASsession.""")
             while not gotit:
                var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
                if var is None:
-                  raise KeyboardInterrupt
+                  raise RuntimeError("No value for prompted macro variable provided.") 
                if len(var) > 0:
                   gotit = True
                else:
