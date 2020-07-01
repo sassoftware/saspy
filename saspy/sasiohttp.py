@@ -796,7 +796,7 @@ class SASsessionHTTP():
                conn.request('GET', uri, headers=headers)
                req = conn.getresponse()
                resp = req.read()
-               if resp not in [b'running', 'pending']:
+               if resp not in [b'running', b'pending']:
                   done = True
                   break
                sleep(.5)
