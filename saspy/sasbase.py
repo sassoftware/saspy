@@ -169,6 +169,7 @@ class SASconfig(object):
         cfg = getattr(SAScfg, cfgname)
 
         ip            = cfg.get('ip')
+        url           = cfg.get('url')
         ssh           = cfg.get('ssh')
         path          = cfg.get('saspath')
         java          = cfg.get('java')
@@ -203,7 +204,7 @@ class SASconfig(object):
 
         inautoexec = kwargs.get('autoexec', None)
         if inautoexec:
-            if lock and self.autoexec:
+            if lock and self.autoexec is not None:
                 print("Parameter 'autoexec' passed to SAS_session was ignored due to configuration restriction.")
             else:
                 self.autoexec = inautoexec
@@ -212,43 +213,52 @@ class SASconfig(object):
         if inm5dsbug is not None:
            self.m5dsbug = inm5dsbug
 
+        inurl = kwargs.get('url', None)             
+        if inurl:
+           if lock and url is not None:
+              print("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
+           else:
+              url = inurl   
+
         inip = kwargs.get('ip', None)             
         if inip:
-           if lock and len(ip):
+           if lock and ip is not None:
               print("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
            else:
               ip = inip   
 
         inssh = kwargs.get('ssh', None)
         if inssh:
-           if lock and len(ssh):
+           if lock and ssh is not None:
               print("Parameter 'ssh' passed to SAS_session was ignored due to configuration restriction.")
            else:
               ssh = inssh
 
         insaspath = kwargs.get('saspath', None)
         if insaspath:
-           if lock and len(path):
+           if lock and path is not None:
               print("Parameter 'saspath' passed to SAS_session was ignored due to configuration restriction.")
            else:
               path = insaspath
 
         injava = kwargs.get('java', None)
         if injava:
-           if lock and len(java):
+           if lock and java is not None:
               print("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
            else:
               java = injava
 
         inprov = kwargs.get('provider', None)
         if inprov:
-           if lock and len(provider):
+           if lock and provider is not None:
               print("Parameter 'provider' passed to SAS_session was ignored due to configuration restriction.")
            else:
               provider = inprov
 
         if java is not None:
             self.mode = 'IOM'
+        elif url is not None:
+            self.mode = 'HTTP'
         elif ip is not None:
             self.mode = 'HTTP'
         elif ssh is not None:

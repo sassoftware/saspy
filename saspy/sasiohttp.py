@@ -44,6 +44,7 @@ class SASconfigHTTP:
       self.name      = session._sb.sascfg.name
       cfg            = getattr(SAScfg, self.name)
 
+      self.url       = cfg.get('url', '')
       self.ip        = cfg.get('ip', '')
       self.port      = cfg.get('port', None)
       self.ctxname   = cfg.get('context', '')
@@ -80,6 +81,13 @@ class SASconfigHTTP:
 
       self.verbose = self.cfgopts.get('verbose', True)
       self.verbose = kwargs.get('verbose', self.verbose)
+
+      inurl = kwargs.get('url', '')             
+      if len(inurl) > 0:
+         if lock and len(self.url):
+            print("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.url = inurl   
 
       inip = kwargs.get('ip', '')             
       if len(inip) > 0:
@@ -168,6 +176,16 @@ class SASconfigHTTP:
             print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.authkey = inak   
+
+      if len(self.url) > 0:
+         http = self.url.split('://')
+         hp   = http[1].split(':')
+         if http[0].lower() in ['http', 'https']:
+            self.ip   = hp[0]
+            self.port = hp[1] if len(hp) > 1 else self.port
+            self.ssl  = True if 's' in http[0].lower() else False
+         else:
+            print("Parameter 'url' not in recognized format. Expeting 'http[s]://host[:port]'. Ignoring parameter.")
 
       while len(self.ip) == 0:
          if not lock:
