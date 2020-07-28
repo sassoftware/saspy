@@ -383,8 +383,8 @@ class SASconfigHTTP:
       conn.close()
 
       if status > 299:
-         print("Failure in GET Contexts. Status="+str(status)+"\nResponse="+resp.decode(self.encoding))
-         return None
+         fmsg = "Failure in GET Contexts. Status="+str(status)+"\nResponse="+resp.decode(self.encoding)
+         raise SASHTTPconnectionError(msg=fmsg)
 
       js = json.loads(resp.decode(self.encoding))
       contexts = js.get('items')
