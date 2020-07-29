@@ -235,7 +235,7 @@ Here's an example showing these (I have one in the saspy install dir, current di
 
         
 sascfg_personal.py details
-==============================================
+==========================
 There are three main parts to this configuration file.
 
         1) SAS_config_names
@@ -287,6 +287,49 @@ For example, if you had SAS installed on your Linux system, your sascfg_personal
                          }
 
 
+Choosing an Access Method
+=========================
+
+How do you know how to configure SASPy? Well, the first thing is to know is what SAS
+instance you are trying to connect to. Next is where are you connecting to it from - what
+client are you running SASPy on? These two answers will dictate which access method you
+will use and thus what your configuration definition will contain.
+
+
+::
+
+    What kind of SAS deployment, and where?
+        a. Stand-alone SAS 9 install
+            i. On Linux
+                1. Client Linux
+                    a. STDIO - over SSH if not the same machine
+                2. Client Windows
+                    a. Can't get there from here
+            ii. On Windows
+                1. Client Linux
+                    a. Can't get there from here
+                2. Client Windows
+                    a. IOM or COM - on same machine. Can't get there if different machines
+        b. Workspace server (this is SAS 9, and deployment on any platform is fine)
+            i. Client Linux
+                1. IOM - local or remote
+            ii. Client Windows
+                1. IOM or COM - local or remote
+        c. SAS Viya install
+            i. On Linux
+                1. Client Linux
+                    a. HTTP - must have compute service configured and running
+                    b. STDIO - over SSH if not the same machine
+                2. Client Windows
+                    a. HTTP - must have compute service configured and running
+            ii. On Windows
+                1. HTTP - must have compute service configured and running
+
+             
+Now you can go to the access method specific configuration below to
+see what you'll need for your configuration definition.There are also example
+configuration definitions in the example configuration file, sascfg.py, showing each of these
+different cases.
 
 STDIO
 =====
