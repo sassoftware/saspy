@@ -1240,8 +1240,6 @@ class SASsession():
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
-                       These are generally here for diagnostics when researching issue, to override things or try
-                       different options.  
 
         :return: Pandas data frame
         """
@@ -1289,8 +1287,6 @@ class SASsession():
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
-                       These are generally here for diagnostics when researching issue, to override things or try
-                       different options.  
 
         :return: Pandas data frame
         """
@@ -1300,7 +1296,7 @@ class SASsession():
                                       opts=opts, **kwargs)
 
     def sd2df_DISK(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None, 
-                  tempkeep: bool = False, **kwargs) -> 'pandas.DataFrame':
+                  tempkeep: bool = False, rowsep: str = '\x01', colsep: str = '\x02',**kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'sasdata2dataframe' specifying method='DISK'. Why type all that?
 
@@ -1324,19 +1320,20 @@ class SASsession():
                               'firstobs' : '12'
                               'format'  : {'money': 'dollar10', 'time': 'tod5.'}
                              }
+
         :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        :param rowsep: the row seperator character to use; defaults to '\x01'
+        :param colsep: the column seperator character to use; defaults to '\x02'
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
-                       These are generally here for diagnostics when researching issue, to override things or try
-                       different options.  
 
         :return: Pandas data frame
         """
         dsopts = dsopts if dsopts is not None else {}
         return self.sasdata2dataframe(table, libref, dsopts, method='DISK', tempfile=tempfile, tempkeep=tempkeep,
-                                      **kwargs)
+                                      rowsep=rowsep, colsep=colsep, **kwargs)
 
     def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None, 
                           method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
@@ -1375,8 +1372,6 @@ class SASsession():
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
-                       These are generally here for diagnostics when researching issue, to override things or try
-                       different options.  
 
         :return: Pandas data frame
         """
