@@ -1133,8 +1133,8 @@ class SASdata:
 
         :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
-        :param rowsep: the row seperator character to use; defaults to '\x01'
-        :param colsep: the column seperator character to use; defaults to '\x02'
+        :param rowsep: the row seperator character to use; defaults to hex(1)
+        :param colsep: the column seperator character to use; defaults to hex(2)
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
