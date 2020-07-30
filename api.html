@@ -653,9 +653,7 @@ has problems with</dd>
 </li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.
-These are generally here for diagnostics when researching issue, to override things or try
-different options.</li>
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
 </ul>
 </td>
 </tr>
@@ -824,9 +822,7 @@ See the SASViyaML.py module.</p>
 </li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.
-These are generally here for diagnostics when researching issue, to override things or try
-different options.</li>
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
 </ul>
 </td>
 </tr>
@@ -882,9 +878,7 @@ different options.</li>
 </li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.
-These are generally here for diagnostics when researching issue, to override things or try
-different options.</li>
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
 </ul>
 </td>
 </tr>
@@ -897,7 +891,7 @@ different options.</li>
 
 <dl class="method">
 <dt id="saspy.SASsession.sd2df_DISK">
-<code class="descname">sd2df_DISK</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_DISK" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sd2df_DISK</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>rowsep: str = '\x01'</em>, <em>colsep: str = '\x02'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_DISK" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;sasdata2dataframe&#8217; specifying method=&#8217;DISK&#8217;. Why type all that?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -927,11 +921,11 @@ different options.</li>
 </li>
 <li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local file; default it a temporary file that&#8217;s cleaned up</li>
 <li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
+<li><strong>rowsep</strong> &#8211; the row seperator character to use; defaults to &#8216;&#8217;</li>
+<li><strong>colsep</strong> &#8211; the column seperator character to use; defaults to &#8216;&#8217;</li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.
-These are generally here for diagnostics when researching issue, to override things or try
-different options.</li>
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
 </ul>
 </td>
 </tr>
@@ -1790,9 +1784,7 @@ has problems with</dd>
 </li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.
-These are generally here for diagnostics when researching issue, to override things or try
-different options.</li>
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
 </ul>
 </td>
 </tr>
@@ -1827,9 +1819,7 @@ different options.</li>
 </li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.
-These are generally here for diagnostics when researching issue, to override things or try
-different options.</li>
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
 </ul>
 </td>
 </tr>
@@ -1845,7 +1835,7 @@ different options.</li>
 
 <dl class="method">
 <dt id="saspy.sasdata.SASdata.to_df_DISK">
-<code class="descname">to_df_DISK</code><span class="sig-paren">(</span><em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.sasdata.SASdata.to_df_DISK" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_df_DISK</code><span class="sig-paren">(</span><em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>rowsep: str = '\x01'</em>, <em>colsep: str = '\x02'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.sasdata.SASdata.to_df_DISK" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;to_df&#8217; specifying method=&#8217;DISK&#8217;.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1854,11 +1844,11 @@ different options.</li>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local file; default it a temporary file that&#8217;s cleaned up</li>
 <li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
+<li><strong>rowsep</strong> &#8211; the row seperator character to use; defaults to &#8216;&#8217;</li>
+<li><strong>colsep</strong> &#8211; the column seperator character to use; defaults to &#8216;&#8217;</li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.
-These are generally here for diagnostics when researching issue, to override things or try
-different options.</li>
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
 </ul>
 </td>
 </tr>
