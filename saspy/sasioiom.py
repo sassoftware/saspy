@@ -1585,7 +1585,7 @@ Will use HTML5 for this SASsession.""")
       if   method and method.lower() == 'csv':
          return self.sasdata2dataframeCSV(table, libref, dsopts, **kwargs)
       elif method and method.lower() == 'disk':
-         return self.sasdata2dataframeDISK(table, libref, dsopts, **kwargs)
+         return self.sasdata2dataframeDISK(table, libref, dsopts, rowsep, colsep, **kwargs)
 
       my_fmts = kwargs.pop('my_fmts', False)
       k_dts   = kwargs.pop('dtype',   None)
@@ -1808,7 +1808,8 @@ Will use HTML5 for this SASsession.""")
 
       return df
 
-   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, tempfile: str=None, tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, opts: dict = None, 
+                            tempfile: str=None, tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -1825,7 +1826,7 @@ Will use HTML5 for this SASsession.""")
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       dsopts = dsopts if dsopts is not None else {}
-      opts   = kwargs.pop('opts', {})
+      opts   = opts   if   opts is not None else {}
 
       logf     = ''
       lstf     = ''
@@ -2079,7 +2080,6 @@ Will use HTML5 for this SASsession.""")
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       dsopts = dsopts if dsopts is not None else {}
-      opts   = kwargs.pop('opts', {})
 
       logf     = ''
       lstf     = ''

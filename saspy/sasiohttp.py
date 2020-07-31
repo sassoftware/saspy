@@ -1437,7 +1437,8 @@ class SASsessionHTTP():
       return df
 
 
-   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict ={}, tempfile: str=None, tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict =None, opts: dict = None, 
+                            tempfile: str=None, tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -1453,7 +1454,8 @@ class SASsessionHTTP():
       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       '''
-      opts   = kwargs.pop('opts', {})
+      dsopts = dsopts if dsopts is not None else {}
+      opts   = opts   if   opts is not None else {}
 
       if libref:
          tabname = libref+".'"+table.strip()+"'n "
@@ -1595,8 +1597,6 @@ class SASsessionHTTP():
       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       '''
-      opts   = kwargs.pop('opts', {})
-
       if libref:
          tabname = libref+".'"+table.strip()+"'n "
       else:

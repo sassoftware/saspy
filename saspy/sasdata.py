@@ -1142,8 +1142,7 @@ class SASdata:
         :return: Pandas data frame
         :rtype: 'pd.DataFrame'
         """
-        return self.to_df(method='DISK', tempfile=tempfile, tempkeep=tempkeep, 
-                          rowsep=rowsep, colsep=colsep, **kwargs)
+        return self.to_df(method='DISK', tempfile=tempfile, tempkeep=tempkeep, rowsep=rowsep, colsep=colsep, **kwargs)
 
     def to_json(self, pretty: bool = False, sastag: bool = False, **kwargs) -> str:
         """

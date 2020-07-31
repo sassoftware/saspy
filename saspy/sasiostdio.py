@@ -1549,7 +1549,7 @@ Will use HTML5 for this SASsession.""")
       return
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None, rowsep: str = '\x01',
-                         colsep: str = '\x02', wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
+                         colsep: str = '\x02', port: int=0, wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -1563,9 +1563,9 @@ Will use HTML5 for this SASsession.""")
 
       method = kwargs.pop('method', None)
       if   method and method.lower() == 'csv':
-         return self.sasdata2dataframeCSV(table, libref, dsopts, wait=wait, **kwargs)
+         return self.sasdata2dataframeCSV(table, libref, dsopts, port=port, wait=wait, **kwargs)
       elif method and method.lower() == 'disk':
-         return self.sasdata2dataframeDISK(table, libref, dsopts, rowsep, colsep, wait=wait, **kwargs)
+         return self.sasdata2dataframeDISK(table, libref, dsopts, rowsep, colsep, port=port, wait=wait, **kwargs)
 
       my_fmts = kwargs.pop('my_fmts', False)
       k_dts   = kwargs.pop('dtype',   None)
@@ -1574,8 +1574,6 @@ Will use HTML5 for this SASsession.""")
             print("'my_fmts=' is only used with the CSV or DISK version of this method. option ignored.")
          if k_dts is not None:
             print("'dtype=' is only used with the CSV or DISK version of this method. option ignored.")
-
-      port =  kwargs.get('port', 0)
 
       if port==0 and self.sascfg.tunnel:
          # we are using a tunnel; default to that port
@@ -1798,17 +1796,17 @@ Will use HTML5 for this SASsession.""")
 
       return df
 
-   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, tempfile: str=None, 
-                            tempkeep: bool=False, wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, opts: dict = None, 
+                            tempfile: str=None, tempkeep: bool=False, port: int=0, wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref   - the libref for the SAS Data Set.
       dsopts   - data set options for the input SAS Data Set
       opts     - a dictionary containing any of the following Proc Export options(delimiter, putnames)
-      port     - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+      port     - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       wait     - seconds to wait for socket connection from SAS; catches hang if an error in SAS. 0 = no timeout
 
       These two options are for advanced usage. They override how saspy imports data. For more info
@@ -1818,8 +1816,7 @@ Will use HTML5 for this SASsession.""")
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       dsopts = dsopts if dsopts is not None else {}
-      opts   = kwargs.pop('opts', {})
-      port   = kwargs.get('port', 0)
+      opts   = opts   if   opts is not None else {}
 
       if port==0 and self.sascfg.tunnel:
          # we are using a tunnel; default to that port
@@ -2016,7 +2013,7 @@ Will use HTML5 for this SASsession.""")
 
    def sasdata2dataframeDISK(self, table: str, libref: str ='', dsopts: dict = None,  
                              rowsep: str = '\x01', colsep: str = '\x02', tempfile: str=None, 
-                             tempkeep: bool=False, wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
+                             tempkeep: bool=False, port: int=0, wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table    - the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -2024,9 +2021,9 @@ Will use HTML5 for this SASsession.""")
       dsopts   - data set options for the input SAS Data Set
       rowsep   - the row seperator character to use; defaults to '\x01'
       colsep   - the column seperator character to use; defaults to '\x02'
-      port     - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+      port     - port to use for socket. Defaults to 0 which uses a random available ephemeral port
       wait     - seconds to wait for socket connection from SAS; catches hang if an error in SAS. 0 = no timeout
 
       These two options are for advanced usage. They override how saspy imports data. For more info
@@ -2036,8 +2033,6 @@ Will use HTML5 for this SASsession.""")
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       dsopts = dsopts if dsopts is not None else {}
-      opts   = kwargs.pop('opts', {})
-      port   = kwargs.get('port', 0)
 
       if port==0 and self.sascfg.tunnel:
          # we are using a tunnel; default to that port
