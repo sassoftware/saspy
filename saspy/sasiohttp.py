@@ -1230,7 +1230,7 @@ class SASsessionHTTP():
       if len(format):
          code += "format "+format+";\n"
       code += label
-      code += "infile datalines delimiter="+delim+" DSD STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
+      code += "infile datalines delimiter="+delim+" STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
       self._asubmit(code, "text")
 
       code = ""
@@ -1597,6 +1597,9 @@ class SASsessionHTTP():
       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       '''
+      rowrep = kwargs.pop('rowrep', ' ')
+      colrep = kwargs.pop('colrep', ' ')
+
       if libref:
          tabname = libref+".'"+table.strip()+"'n "
       else:
@@ -1685,8 +1688,20 @@ class SASsessionHTTP():
                if i % 10 == 0:
                   code +='\n'
 
-      code += "file _tomodsx lrecl=1 recfm=f encoding=binary;\n"
-
+      code += "\nfile _tomodsx lrecl=1 recfm=f encoding=binary;\n"
+      for i in range(nvars):
+         if vartype[i] != 'FLOAT':
+            code += "'"+varlist[i]+"'n = translate('"
+            code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                        '%02x%02x' %                               \
+                        (ord(rowrep.encode(self.sascfg.encoding)), \
+                         ord(colrep.encode(self.sascfg.encoding))),
+                        '%02x%02x' %                               \
+                        (ord(rowsep.encode(self.sascfg.encoding)), \
+                         ord(colsep.encode(self.sascfg.encoding))))
+            if i % 10 == 0:
+               code +='\n'
+      code += "\n"
       last  = len(varlist)-1
       for i in range(nvars):
          code += "put '"+varlist[i]+"'n "
@@ -1717,9 +1732,11 @@ class SASsessionHTTP():
 
       miss = ['.', ' ']
 
+      quoting = kwargs.pop('quoting', 3)
+
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
-                       encoding=self.sascfg.encoding, **kwargs)
+                       encoding=self.sascfg.encoding, quoting=quoting, **kwargs)
 
       if tmpdir:
          tmpdir.cleanup()
@@ -1734,15 +1751,3 @@ class SASsessionHTTP():
                   df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
 
       return df
-
-
-if __name__ == "__main__":
-    startsas()
-
-    submit(sys.argv[1], "text")
-
-    print(_getlog())
-    print(_getlsttxt())
-
-    endsas()
-

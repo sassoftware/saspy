@@ -1510,7 +1510,8 @@ Will use HTML5 for this SASsession.""")
       if len(format):
          code += "format "+format+";\n"
       code += label
-      code += "infile datalines delimiter="+delim+" DSD STOPOVER;\n input "+input+";\n"+xlate+";\n datalines4;"
+      #code += "infile datalines delimiter="+delim+" STOPOVER;\n input "+input+";\n"+xlate+";\n datalines4;"
+      code += "infile datalines delimiter="+delim+" STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
       self._asubmit(code, "text")
 
       for row in df.itertuples(index=False):
@@ -1566,6 +1567,9 @@ Will use HTML5 for this SASsession.""")
          return self.sasdata2dataframeCSV(table, libref, dsopts, port=port, wait=wait, **kwargs)
       elif method and method.lower() == 'disk':
          return self.sasdata2dataframeDISK(table, libref, dsopts, rowsep, colsep, port=port, wait=wait, **kwargs)
+
+      rowrep = kwargs.pop('rowrep', ' ')
+      colrep = kwargs.pop('colrep', ' ')
 
       my_fmts = kwargs.pop('my_fmts', False)
       k_dts   = kwargs.pop('dtype',   None)
@@ -1682,7 +1686,20 @@ Will use HTML5 for this SASsession.""")
       if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
          csep = colsep
-         code += "file sock dlm="+cdelim+";\nput "
+         code += "\nfile sock dlm="+cdelim+";\n"
+         for i in range(nvars):
+            if vartype[i] != 'N':
+               code += "'"+varlist[i]+"'n = translate('"
+               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                           '%02x%02x' %                               \
+                           (ord(rowrep.encode(self.sascfg.encoding)), \
+                            ord(colrep.encode(self.sascfg.encoding))),
+                           '%02x%02x' %                               \
+                           (ord(rowsep.encode(self.sascfg.encoding)), \
+                            ord(colsep.encode(self.sascfg.encoding))))
+               if i % 10 == 0:
+                  code +='\n'
+         code += "\nput "
          for i in range(nvars):
             code += " '"+varlist[i]+"'n "
             if i % 10 == 0:
@@ -1691,7 +1708,20 @@ Will use HTML5 for this SASsession.""")
       else:
          rsep = ' '+rowsep
          csep = ' '+colsep
-         code += "file sock; "
+         code += "\nfile sock;\n"
+         for i in range(nvars):
+            if vartype[i] != 'N':
+               code += "'"+varlist[i]+"'n = translate('"
+               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                           '%02x%02x' %                               \
+                           (ord(rowrep.encode(self.sascfg.encoding)), \
+                            ord(colrep.encode(self.sascfg.encoding))),
+                           '%02x%02x' %                               \
+                           (ord(rowsep.encode(self.sascfg.encoding)), \
+                            ord(colsep.encode(self.sascfg.encoding))))
+               if i % 10 == 0:
+                  code +='\n'
+         code += "\n"
          last  = len(varlist)-1
          for i in range(nvars):
             code += "put '"+varlist[i]+"'n "
@@ -2033,6 +2063,8 @@ Will use HTML5 for this SASsession.""")
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       dsopts = dsopts if dsopts is not None else {}
+      rowrep = kwargs.pop('rowrep', ' ')
+      colrep = kwargs.pop('colrep', ' ')
 
       if port==0 and self.sascfg.tunnel:
          # we are using a tunnel; default to that port
@@ -2157,7 +2189,20 @@ Will use HTML5 for this SASsession.""")
       if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
          csep = colsep
-         code += "file sock dlm="+cdelim+";\nput "
+         code += "\nfile sock dlm="+cdelim+";\n"
+         for i in range(nvars):
+            if vartype[i] != 'N':
+               code += "'"+varlist[i]+"'n = translate('"
+               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                           '%02x%02x' %                               \
+                           (ord(rowrep.encode(self.sascfg.encoding)), \
+                            ord(colrep.encode(self.sascfg.encoding))),
+                           '%02x%02x' %                               \
+                           (ord(rowsep.encode(self.sascfg.encoding)), \
+                            ord(colsep.encode(self.sascfg.encoding))))
+               if i % 10 == 0:
+                  code +='\n'
+         code += "\nput "
          for i in range(nvars):
             code += " '"+varlist[i]+"'n "
             if i % 10 == 0:
@@ -2166,7 +2211,20 @@ Will use HTML5 for this SASsession.""")
       else:
          rsep = ' '+rowsep
          csep = ' '+colsep
-         code += "file sock; "
+         code += "\nfile sock;\n"
+         for i in range(nvars):
+            if vartype[i] != 'N':
+               code += "'"+varlist[i]+"'n = translate('"
+               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                           '%02x%02x' %                               \
+                           (ord(rowrep.encode(self.sascfg.encoding)), \
+                            ord(colrep.encode(self.sascfg.encoding))),
+                           '%02x%02x' %                               \
+                           (ord(rowsep.encode(self.sascfg.encoding)), \
+                            ord(colsep.encode(self.sascfg.encoding))))
+               if i % 10 == 0:
+                  code +='\n'
+         code += "\n"
          last  = len(varlist)-1
          for i in range(nvars):
             code += "put '"+varlist[i]+"'n "
@@ -2247,12 +2305,14 @@ Will use HTML5 for this SASsession.""")
       else:
          dts = k_dts
 
-      miss = ['.', ' ']
+      miss = ['.', ' ', '. ']
+
+      quoting = kwargs.pop('quoting', 3)
 
       try:
          df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
                           sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
-                          encoding=enc, **kwargs)
+                          encoding=enc, quoting=quoting, **kwargs)
       except FileNotFoundError:
          print("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
          if tmpdir:
@@ -2272,13 +2332,3 @@ Will use HTML5 for this SASsession.""")
                   df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
 
       return df
-
-if __name__ == "__main__":
-    startsas()
-
-    submit(sys.argv[1], "text")
-
-    print(_getlog())
-    print(_getlsttxt())
-
-    endsas()

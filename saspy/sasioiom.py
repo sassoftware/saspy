@@ -1533,7 +1533,7 @@ Will use HTML5 for this SASsession.""")
       if len(format):
          code += "format "+format+";\n"
       code += label
-      code += "infile datalines delimiter="+delim+" DSD STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
+      code += "infile datalines delimiter="+delim+" STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
       self._asubmit(code, "text")
 
       code = ""
@@ -1586,6 +1586,9 @@ Will use HTML5 for this SASsession.""")
          return self.sasdata2dataframeCSV(table, libref, dsopts, **kwargs)
       elif method and method.lower() == 'disk':
          return self.sasdata2dataframeDISK(table, libref, dsopts, rowsep, colsep, **kwargs)
+
+      rowrep = kwargs.pop('rowrep', ' ')
+      colrep = kwargs.pop('colrep', ' ')
 
       my_fmts = kwargs.pop('my_fmts', False)
       k_dts   = kwargs.pop('dtype',   None)
@@ -1677,22 +1680,48 @@ Will use HTML5 for this SASsession.""")
 
       if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
-         code += "file "+self._tomods1.decode()+" dlm="+cdelim+" termstr=NL;\nput "
+         code += "\nfile "+self._tomods1.decode()+" dlm="+cdelim+" termstr=NL;\n"
+         for i in range(nvars):
+            if vartype[i] != 'N':
+               code += "'"+varlist[i]+"'n = translate('"
+               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                           '%02x%02x' %                               \
+                           (ord(rowrep.encode(self.sascfg.encoding)), \
+                            ord(colrep.encode(self.sascfg.encoding))),
+                           '%02x%02x' %                               \
+                           (ord(rowsep.encode(self.sascfg.encoding)), \
+                            ord(colsep.encode(self.sascfg.encoding))))
+               if i % 10 == 0:
+                  code +='\n'
+         code += "\nput "
          for i in range(nvars):
             code += " '"+varlist[i]+"'n "
             if i % 10 == 0:
                code +='\n'
          code += rdelim+";\nrun;"
       else:
-         rsep = rowsep
-         code += "file "+self._tomods1.decode()+" lrecl=1 recfm=f encoding=binary;\n"
+         rsep = rowsep+rowsep
+         code += "\nfile "+self._tomods1.decode()+" lrecl=1 recfm=f encoding=binary;\n"
+         for i in range(nvars):
+            if vartype[i] != 'N':
+               code += "'"+varlist[i]+"'n = translate('"
+               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                           '%02x%02x' %                               \
+                           (ord(rowrep.encode(self.sascfg.encoding)), \
+                            ord(colrep.encode(self.sascfg.encoding))),
+                           '%02x%02x' %                               \
+                           (ord(rowsep.encode(self.sascfg.encoding)), \
+                            ord(colsep.encode(self.sascfg.encoding))))
+               if i % 10 == 0:
+                  code +='\n'
+         code += "\n"
          last  = len(varlist)-1
          for i in range(nvars):
             code += "put '"+varlist[i]+"'n "
             if i != last:
                code += cdelim+'; '
             else:
-               code += rdelim+'; '
+               code += rdelim+rdelim+'; '
             if i % 10 == 0:
                code +='\n'
          code += "run;"
@@ -1786,6 +1815,7 @@ Will use HTML5 for this SASsession.""")
                    if logf.count(logcodeo) >= 1:
                       bail = True
          done = True
+         self._log += logf
 
       if len(r) > 0 or df is None:
          tdf = pd.DataFrame.from_records(r, columns=varlist)
@@ -2080,6 +2110,8 @@ Will use HTML5 for this SASsession.""")
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       dsopts = dsopts if dsopts is not None else {}
+      rowrep = kwargs.pop('rowrep', ' ')
+      colrep = kwargs.pop('colrep', ' ')
 
       logf     = ''
       lstf     = ''
@@ -2194,7 +2226,20 @@ Will use HTML5 for this SASsession.""")
 
       if self._sb.m5dsbug:
          rsep = colsep+rowsep+'\n'
-         code += "file "+outname+" dlm="+cdelim+" termstr=NL;\nput "
+         code += "\nfile "+outname+" dlm="+cdelim+" termstr=NL;\n"
+         for i in range(nvars):
+            if vartype[i] != 'N':
+               code += "'"+varlist[i]+"'n = translate('"
+               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                           '%02x%02x' %                               \
+                           (ord(rowrep.encode(self.sascfg.encoding)), \
+                            ord(colrep.encode(self.sascfg.encoding))),
+                           '%02x%02x' %                               \
+                           (ord(rowsep.encode(self.sascfg.encoding)), \
+                            ord(colsep.encode(self.sascfg.encoding))))
+               if i % 10 == 0:
+                  code +='\n'
+         code += "\nput "
          for i in range(nvars):
             code += " '"+varlist[i]+"'n "
             if i % 10 == 0:
@@ -2202,7 +2247,20 @@ Will use HTML5 for this SASsession.""")
          code += rdelim+";\nrun;"
       else:
          rsep = rowsep
-         code += "file "+outname+" lrecl=1 recfm=f encoding=binary;\n"
+         code += "\nfile "+outname+" lrecl=1 recfm=f encoding=binary;\n"
+         for i in range(nvars):
+            if vartype[i] != 'N':
+               code += "'"+varlist[i]+"'n = translate('"
+               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                           '%02x%02x' %                               \
+                           (ord(rowrep.encode(self.sascfg.encoding)), \
+                            ord(colrep.encode(self.sascfg.encoding))),
+                           '%02x%02x' %                               \
+                           (ord(rowsep.encode(self.sascfg.encoding)), \
+                            ord(colsep.encode(self.sascfg.encoding))))
+               if i % 10 == 0:
+                  code +='\n'
+         code += "\n"
          last  = len(varlist)-1
          for i in range(nvars):
             code += "put '"+varlist[i]+"'n "
@@ -2326,9 +2384,11 @@ Will use HTML5 for this SASsession.""")
 
       miss = ['.', ' ']
 
+      quoting = kwargs.pop('quoting', 3)
+
       df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
-                       encoding=enc, **kwargs)
+                       encoding=enc, quoting=quoting, **kwargs)
 
       if tmpdir:
          tmpdir.cleanup()
@@ -2343,13 +2403,3 @@ Will use HTML5 for this SASsession.""")
                   df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
 
       return df
-
-if __name__ == "__main__":
-    startsas()
-
-    submit(sys.argv[1], "text")
-
-    print(_getlog())
-    print(_getlsttxt())
-
-    endsas()
