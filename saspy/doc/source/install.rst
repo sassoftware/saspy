@@ -239,7 +239,7 @@ sascfg_personal.py details
 There are three main parts to this configuration file.
 
         1) SAS_config_names
-        2) SAS_config_options
+        2) SAS_config_options  # this dictionary isn't required unless you want to change a default
         3) Configuration definitions
 
 In reverse order, the configuration definitions are Python dictionaries. Each dictionary 
@@ -472,7 +472,8 @@ rtunnel -
 IOM using Java
 ==============
 This connection method opens many connectivity options. This method enables you to 
-connect to any Workspace server on any supported platform. 
+connect to any Workspace server on any supported platform. It requires Java 7 or higher
+installed on your Client machine (where you're running SASPy) 
 
 You can also use `SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__
 to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
@@ -490,81 +491,18 @@ ATTN, as of saspy version 3.3.3, the classpath is no longer required!
 The 4 required IOM Java client jars are now included in the saspy repo, and they, along with the saspyiom.jar and the 
 thirdparty CORBA jars will be automatically provided as the calsspath by saspy. This is generally all that is needed.
 If you require the 3 encryption jars, shown below, they still need to be acquired from your SAS deployment, and then
-if you put them in the saspy/java/iomclient directory of the saspy install, they will be included in the classpath for you.
-If you put them somewhere else, then you need to provide the whole classpath, with all jars, like before V3.3.3. 
+put in the saspy/java/iomclient directory of the saspy install (where the 4 included jars are) so they will be included
+in the classpath for you.
 
-The IOM connection method requires the following:
-
-* Java 7 or higher installed on your Client machine (where you're running SASPy)
-* The SAS Java IOM Client (just the jars listed below; these can be copied to your client system from wherever your SAS install is)
-* Setting the CLASSPATH to access the SAS Java IOM Client JAR files.
-* Setting the CLASSPATH to include the the saspyiom.jar file (and the thirdparty jars for Java version 9 and higher).
-* Setting the CLASSPATH to include client side encryption jars, if you have encryption configured for your IOM Workspace server
-
-The ``'classpath'`` key for the configuration definition requires a little additional
-explanation before we get to further details. There are four (4) JAR files that are 
-required for the Java IOM Client. The JAR files are available from your existing SAS
-installation.  There is one JAR file that is provided with this package: 
-saspyiom.jar. These five JAR files must be provided (fully qualified paths) in a 
-CLASSPATH environment variable. This is done in a very simple way in the sascfg_personal.py 
-file, like so:
+The 3 encryption jars, if needed, can be found in a SAS deployment in a location similar to the following.
 
 ::
 
-    # build out a local classpath variable to use below   CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION
-    cp  =  "C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
-    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\sas.svc.connection.jar"
-    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\log4j.jar"
-    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\sas.security.sspi.jar"
-    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\sas.core.jar"
-
-    # Java 10+ no longer provides CORBA (9 has it but doesn't load it by default). These jars provide the CORBA support
-    # that the IOM client needs. Add these to the classpath to work with the latest Java releases. 
-    # These can even be in the classpath for Jave (7 or 8) that don't need them, with no problem. 
-    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-internal-api.jar"
-    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-omgapi.jar"
-    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-orb.jar"
-    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\pfl-basic.jar"
-    cp += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\pfl-tf.jar"
-
-    # And, if you've configured IOM to use Encryption, you need these client side jars.
-    cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904300.0.0.20150204190000_v940m3\\sas.rutil.jar"
-    cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil.nls_904300.0.0.20150204190000_v940m3\\sas.rutil.nls.jar"
-    cp += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.rutil_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar"
-    
+    $SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil_904600.0.0.20181017190000_v940m6/sas.rutil.jar
+    $SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil.nls_904600.0.0.20181017190000_v940m6/sas.rutil.nls.jar
+    $SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_20121211183517/sastpj.rutil.jar
 
     
-
-And then simply refer to the ``cp`` variable in the configuration definition:
-
-::
-
-    'classpath' : cp,
-
-Also worth noting: these five JAR files are compatible with both Windows and Unix client systems. So you can copy the jars from whatever system
-SAS is installed on, to your client (where python is running), even if one is Unix and the other is Windows (either way).  
-
-.. note::
-    If you have a \\u or \\U in your classpath string, like: "c:\\User\\sastpw\\...', you will have to use either 
-    a double backslash instead, like \\\\u or \\\\U ("c:\\\\User\\sastpw\\...') or mark the string as raw (not 
-    unicode) with a r prefix, like r"C:\\User\\sastpw\\..." 
-    or else you will get an error like this: SyntaxError: (unicode error) 'unicodeescape' codec can't decode 
-    bytes in position 3-4: truncated \UXXXXXXXX escape 
-
-
-
-This following 'fix' for Java 9 is not longer needed, and it didn't solve Java 10 or 11. See the thirdparty jars above
-to solve the missing CORBA in any of the Java releases.
-
-It has been reported to me that Java9 no longer includes CORBA in it's default search path. CORBA is a requirement for
-the IOM Client. This can easily be added back in using the 'javaparms' configuration key (defined below), as follows.
-
-::
-
-    "javaparms": ["--add-modules=java.corba"],   # NO LONGER NEEDED - See 'classpath' above for solution
-  
-
-
 The IOM access method has support for getting the required user/password from an authinfo file in the user's home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it's _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for `authkey`. Next is the 'user' key followed by the value (the user id)
@@ -624,6 +562,7 @@ omrpw  -
 encoding  -
     NOTE: as of saspy V2.4.2, you no longer need to set the encoding. SASpy
     will determine the SAS session encoding and map that to the Python encoding for you.
+    You can set this to eliminate the message, at connection time, about what encoding was determined.
 
     This is the Python encoding value that matches the SAS session encoding of 
     the IOM server to which you are connecting. The Python encoding values can be 
@@ -682,7 +621,6 @@ m5dsbug -
     iomlinux = {'java'      : '/usr/bin/java',
                 'iomhost'   : ['linux.grid1.iom.host','linux.grid2.iom.host','linux.grid3.iom.host','linux.grid4.iom.host'],
                 'iomport'   : 8591,
-                'encoding'  : 'latin1',
                 'appserver' : 'SASApp Prod - Workspace Server'
                 }
 
@@ -690,7 +628,6 @@ m5dsbug -
     iomwin   = {'java'      : '/usr/bin/java',
                 'iomhost'   : 'windows.iom.host',
                 'iomport'   : 8591,
-                'encoding'  : 'windows-1252',
                 'appserver' : 'SASApp Test - Workspace Server'
                }
 
@@ -698,14 +635,12 @@ m5dsbug -
     winiomlinux = {'java'      : 'java',
                    'iomhost'   : 'linux.iom.host',
                    'iomport'   : 8591,
-                   'encoding'  : 'latin1',
                   }
 
     # Windows client and Windows IOM server
     winiomwin   = {'java'      : 'java',
                    'iomhost'   : 'windows.iom.host',
                    'iomport'   : 8591,
-                   'encoding'  : 'windows-1252',
                   }
 
     # Windows client and with IWA to Remote IOM server
@@ -728,25 +663,21 @@ java.library.path, or in the home directory of your Java client. You can search
 for this file in your SAS deployment, though it is likely
 in SASHome\\SASFoundation\\9.4\\core\\sasext.
 
-If you add the file to the system PATH environment variable, only list the path to 
+If you add this to the system PATH environment variable, only list the path to 
 the directory--do not include the file itself. For example:
 
 ::
 
     C:\Program Files\SASHome\SASFoundation\9.4\core\sasext 
 
+An alternative to puting this directory in your PATH, is to add it at runtime. You can add this
+to your sascfg_personal.py file, or even submit it before importing saspy and trying to make a conection.
+Obviously, use the correct path for your system: 
 
-Starting in version 2.4.1, there is a autocfg.py batch script available in saspy that
-you can use to generate the sascfg_personal.py file for a Windows Local connection.
-This script can also be run interactively. You can tell it the path/name of the file
-you want it to create, tell it where your SASHome install directory it (if not in the default location).
-And where to find java.exe, if java isn't already in your path to be found.
+::
 
-The default takes no parameters and creates sascfg_personal.py in the saspy install directory
-to be used immediately. That assumes SAS in installed in the default location and the java command can be found.
-
-See the example notebook that shows the various ways to use this script in the saspy-examples
-github site: https://github.com/sassoftware/saspy-examples/blob/master/SAS_contrib/autocfg.ipynb
+    import os
+    os.environ["PATH"] += ";C:\\Program Files\\SASHome\\SASFoundation\\9.4\\core\\sasext"
 
 
 

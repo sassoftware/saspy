@@ -37,7 +37,9 @@
 
 SAS_config_names=['default']
 
-# Configuration options for saspy - python Dict
+
+
+# Configuration options for saspy - python Dict   # not required unless changing any of the defaults
 # valid key are:
 # 
 # 'lock_down' - True | False. True = Prevent runtime overrides of SAS_Config values below
@@ -51,6 +53,8 @@ SAS_config_options = {'lock_down': False,
                       'prompt'   : True
                      }
 
+
+
 # Configuration options for SAS output. By default output is HTML 5.0 (using "ods html5" statement) but certain templates might not work 
 # properly with HTML 5.0 so it can also be set to HTML 4.0 instead (using "ods html" statement). This option will only work when using IOM
 # in local mode. Note that HTML 4.0 will generate images separately which clutters the workspace and if you download the notebook as HTML, 
@@ -59,7 +63,8 @@ SAS_config_options = {'lock_down': False,
 # 
 # 'output' = ['html5', 'html']
 #
-SAS_output_options = {'output' : 'html5'}
+SAS_output_options = {'output' : 'html5'}       # not required unless changing any of the default
+
 
 
 # Configuration Definitions
@@ -69,10 +74,7 @@ SAS_output_options = {'output' : 'html5'}
 # The default path to the sas start up script is: /opt/sasinside/SASHome/SASFoundation/9.4/sas
 # A usual install path is: /opt/sasinside/SASHome
 #
-# Since python uses utf-8, running SAS with encoding=utf-8 is the expected use case. By default Unix SAS runs in Latin1 (iso-8859-1),
-# which does not work well as utf-8. So, transcoding has been implemented in the python layer. The 'encoding' option can be specified to match
-# the SAS session encoding (see https://docs.python.org/3.5/library/codecs.html#standard-encodings for python encoding values). latin1 is appropriate
-# for the default Unix SAS session encoding
+# The encoding is figured out by saspy. You don't need to specify it, unless you just want to get rid of the message about which encoding was determined.
 #                                                                                                         
 # valid keys are:
 # 'saspath'  - [REQUIRED] path to SAS startup script i.e.: /opt/sasinside/SASHome/SASFoundation/9.4/sas
@@ -106,22 +108,8 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # The absence of the iomhost option triggers local Windows SAS mode. In this case none of 'iomhost', 'iomport', 'omruser', 'omrpw' are needed.
 # a local SAS session is started up and connected to.
 #
-# Since python uses utf-8, running SAS with encoding=utf-8 is the expected use case. By default Windows SAS runs in WLatin1 (windows-1252),
-# which does not work well as utf-8. So, transcoding has been implemented in the python layer. The 'encoding' option can be specified to match
-# the SAS session encoding (see https://docs.python.org/3.5/library/codecs.html#standard-encodings for python encoding values). windows-1252 is appropriate
-# for the default Windows SAS session encoding
-#                                                                                                         
+# The encoding is figured out by saspy. You don't need to specify it, unless you just want to get rid of the message about which encoding was determined.
 
-#
-# NEW IN V3.3.3!!!  No longer need the classpath, as the 4 IOM client jars are now included in the saspy repo. saspy will generate the classpath itself.
-# If your workspace server is configured to use Encryption then you still need to get those 3 jars from your SAS install and code the full classpath. 
-# But most cases aren't set up encryption, so for most cases, you no loinger need to provice the classpath
-#
-
-###### Pre- V3.3.3:  Since this IOM access method uses the Java IOM client, a classpath is required for the java process to find the necessary jars. Use the template below
-###### to build out a classpath variable and assign that to the 'classpath' option in the configuration definition. The IOM client jars are delivered as part
-###### of a Base SAS install, so should be available in any SAS install. The saspyiom.jar is available in the saspy repo/install. 
-#
 # NONE OF THE PATHS IN THESE EAMPLES ARE RIGHT FOR YOUT INSTALL. YOU HAVE TO CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION 
 #
 # valid keys are:
@@ -132,77 +120,37 @@ ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
 # 'omruser'   - not suggested        [REQUIRED for remote IOM case but PROMPTED for at runtime] Don't specify to use a local Windows Session
 # 'omrpw'     - really not suggested [REQUIRED for remote IOM case but PROMPTED for at runtime] Don't specify to use a local Windows Session
 # 'encoding'  - This is the python encoding value that matches the SAS session encoding of the IOM server you are connecting to
-# 'classpath' - [REQUIRED] classpath to IOM client jars and saspy client jar.
 # 'appserver' - name of physical workspace server (when more than one app server defined in OMR) i.e.: 'SASApp - Workspace Server'
 # 'sspi'      - boolean. use IWA instead of user/pw to connect to the IOM workspace server
 
 
-# build out a local classpath variable to use below for Linux clients  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION 
-cpL  =  "/opt/github/saspy/java/saspyiom.jar"
-cpL += ":/opt/github/saspy/java/iomclient/sas.svc.connection.jar"
-cpL += ":/opt/github/saspy/java/iomclient/log4j.jar"
-cpL += ":/opt/github/saspy/java/iomclient/sas.security.sspi.jar"
-cpL += ":/opt/github/saspy/java/iomclient/sas.core.jar"
-
 iomlinux = {'java'      : '/usr/bin/java',
             'iomhost'   : 'linux.iom.host',
             'iomport'   : 8591,
-            'encoding'  : 'latin1',
-            #'classpath' : cpL
             }           
 
 iomwin   = {'java'      : '/usr/bin/java',
             'iomhost'   : 'windows.iom.host',
             'iomport'   : 8591,
-            'encoding'  : 'windows-1252',
-            #'classpath' : cpL
             }
-
-         
-# build out a local classpath variable to use below for Windows clients   CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION 
-cpW  =  "C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar"
-cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\sas.svc.connection.jar"
-cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\log4j.jar"
-cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\sas.security.sspi.jar"
-cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\iomclient\\sas.core.jar"
-
-# These jars provide CORBA support for Java 10+ which no longer provides CORBA itself.  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION 
-cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-internal-api.jar"
-cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-omgapi.jar"
-cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\glassfish-corba-orb.jar"
-cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\pfl-basic.jar"
-cpW += ";C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\thirdparty\\pfl-tf.jar"
-
-# And, if you've configured IOM to use Encryption, you need these client side jars.  CHANGE THE PATHS TO BE CORRECT FOR YOUR INSTALLATION 
-#cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil_904300.0.0.20150204190000_v940m3\\sas.rutil.jar"
-#cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sas.rutil.nls_904300.0.0.20150204190000_v940m3\\sas.rutil.nls.jar"
-#cpW += ";C:\\Program Files\\SASHome\\SASVersionedJarRepository\\eclipse\\plugins\\sastpj.rutil_6.1.0.0_SAS_20121211183517\\sastpj.rutil.jar"
-
 
 winlocal = {'java'      : 'java',
             'encoding'  : 'windows-1252',
-            #'classpath' : cpW
             }
 
 winiomlinux = {'java'   : 'java',
             'iomhost'   : 'linux.iom.host',
             'iomport'   : 8591,
-            'encoding'  : 'latin1',
-            #'classpath' : cpW
             }
 
 winiomwin  = {'java'    : 'java',
             'iomhost'   : 'windows.iom.host',
             'iomport'   : 8591,
-            'encoding'  : 'windows-1252',
-            #'classpath' : cpW
             }
 
 winiomIWA  = {'java'    : 'java',
             'iomhost'   : 'windows.iom.host',
             'iomport'   : 8591,
-            'encoding'  : 'windows-1252',
-            #'classpath' : cpW,
             'sspi'      : True
             }
 
