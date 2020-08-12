@@ -167,3 +167,31 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         self.assertFalse(os.path.isfile(tmpcsv))
 
         tmpdir.cleanup()
+
+
+    def test_sd2df_DISK(self):
+        """
+        Test method sasdata2dataframe using `method=disk` and arguments
+        """
+
+        data = [[42.5, '"quoted string"', 'non quoted string',44.4,'"leading quote string','"leading"and embedded string',0],
+        [42.5, '"quoted string"', 'non quoted string',44.4,'"leading quote string','"leading"and embedded string',0],
+        [42.5, '"quoted string"', 'non quoted string',44.4,'"leading quote string','"leading"and embedded string',0],
+        [42.5, '"quoted string"', 'non quoted string',44.4,'"leading quote string','"leading"and embedded string',0]]
+        df = pd.DataFrame(data)
+
+        sd  = self.sas.df2sd(df, 'quotes')
+
+        df2 = sd.to_df()
+        df3 = sd.to_df_DISK()
+
+        self.assertFalse(False in (df2 == df3))
+
+        cars = self.sas.sasdata('cars','sashelp', results='text')
+        df   = cars.to_df_DISK(colsep='A', rowsep='E', colrep='"', rowrep='?')
+
+        self.assertTrue(df.shape == (428, 15))
+
+
+
+
