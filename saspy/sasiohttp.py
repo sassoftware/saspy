@@ -1127,8 +1127,9 @@ class SASsessionHTTP():
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', 
                          libref: str ="", keep_outer_quotes: bool=False,
-                                          embedded_newlines: bool=False,
-                         LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
+                                          embedded_newlines: bool=True,
+                         LF: str = '\x01', CR: str = '\x02',
+                         colsep: str = '\x03', colrep: str = ' ',
                          datetimes: dict={}, outfmts: dict={}, labels: dict={}):
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
@@ -1245,7 +1246,9 @@ class SASsessionHTTP():
                if var == 'nan':
                   var = ' '
                else:
+                  var = var.replace(colsep, colrep)
                   if embedded_newlines:
+                     var = var.replace(LF, colrep).replace(CR, colrep)
                      var = var.replace('\n', LF).replace('\r', CR)
             elif dts[col] == 'B':
                var = str(int(row[col]))
@@ -1267,19 +1270,29 @@ class SASsessionHTTP():
       ll = self.submit("run;", 'text')
       return
 
-   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict ={}, **kwargs) -> '<Pandas Data Frame object>':
+   def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
+                         rowsep: str = '\x01', colsep: str = '\x02',
+                         rowrep: str = ' ',    colrep: str = ' ',
+                         **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
       table   - the name of the SAS Data Set you want to export to a Pandas Data Frame
       libref  - the libref for the SAS Data Set.
       dsopts  - data set options for the input SAS Data Set
+      Only for DISK version:
+      rowsep  - the row seperator character to use; defaults to '\x01'
+      colsep  - the column seperator character to use; defaults to '\x02'
+      rowrep  - the char to convert to for any embedded rowsep chars, defaults to  ' '
+      colrep  - the char to convert to for any embedded colsep chars, defaults to  ' '
       '''
+      dsopts = dsopts if dsopts is not None else {}
 
       method = kwargs.pop('method', None)
       if   method and method.lower() == 'csv':
          return self.sasdata2dataframeCSV(table, libref, dsopts, **kwargs)
       elif method and method.lower() == 'disk':
-         return self.sasdata2dataframeDISK(table, libref, dsopts, **kwargs)
+         return self.sasdata2dataframeDISK(table, libref, dsopts, rowsep, colsep,
+                                           rowrep, colrep, **kwargs)
 
       my_fmts = kwargs.pop('my_fmts', False)
       k_dts   = kwargs.pop('dtype',   None)
@@ -1364,7 +1377,7 @@ class SASsessionHTTP():
       uri = "/compute/sessions/"+self.pid+"/data/work/saspy_ds2df/rows"
 
       r     = []
-      df    = None
+      df    = pd.DataFrame.from_records(r, columns=varlist)
       trows = kwargs.get('trows', None)
       if not trows:
          trows = 100000
@@ -1578,8 +1591,9 @@ class SASsessionHTTP():
 
       return df
 
-   def sasdata2dataframeDISK(self, table: str, libref: str ='', dsopts: dict ={},
-                             rowsep: str = '\x01', colsep: str = '\x02', tempfile: str=None, 
+   def sasdata2dataframeDISK(self, table: str, libref: str ='', dsopts: dict = None,
+                             rowsep: str = '\x01', colsep: str = '\x02',
+                             rowrep: str = ' ',    colrep: str = ' ', tempfile: str=None, 
                              tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -1588,6 +1602,8 @@ class SASsessionHTTP():
       dsopts   - data set options for the input SAS Data Set
       rowsep   - the row seperator character to use; defaults to '\x01'
       colsep   - the column seperator character to use; defaults to '\x02'
+      rowrep  - the char to convert to for any embedded rowsep chars, defaults to  ' '
+      colrep  - the char to convert to for any embedded colsep chars, defaults to  ' '
       tempfile - file to use to store CSV, else temporary file will be used.
       tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
@@ -1597,8 +1613,7 @@ class SASsessionHTTP():
       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       '''
-      rowrep = kwargs.pop('rowrep', ' ')
-      colrep = kwargs.pop('colrep', ' ')
+      dsopts = dsopts if dsopts is not None else {}
 
       if libref:
          tabname = libref+".'"+table.strip()+"'n "

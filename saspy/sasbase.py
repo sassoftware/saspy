@@ -1139,8 +1139,9 @@ class SASsession():
      
     def df2sd(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '',
               results: str = '', keep_outer_quotes: bool = False,
-                                 embedded_newlines: bool = False, 
-              LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
+                                 embedded_newlines: bool = True, 
+              LF: str = '\x01', CR: str = '\x02',
+              colsep: str = '\x03', colrep: str = ' ',
               datetimes: dict={}, outfmts: dict={}, labels: dict={}) -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
@@ -1154,17 +1155,19 @@ class SASsession():
         :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)
         :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)
         :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)
+        :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
         :return: SASdata object
         """
         return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, 
-                                      LF, CR, colsep, datetimes, outfmts, labels)
+                                      LF, CR, colsep, colrep, datetimes, outfmts, labels)
 
     def dataframe2sasdata(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '', 
                           results: str = '', keep_outer_quotes: bool = False,
-                                             embedded_newlines: bool = False, 
-                          LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
+                                             embedded_newlines: bool = True, 
+                          LF: str = '\x01', CR: str = '\x02',
+                          colsep: str = '\x03', colrep: str = ' ',
                           datetimes: dict={}, outfmts: dict={}, labels: dict={}) -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
@@ -1178,6 +1181,7 @@ class SASsession():
         :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1) 
         :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2) 
         :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3) 
+        :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
         :return: SASdata object
@@ -1197,7 +1201,7 @@ class SASsession():
             return None
         else:
             self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, 
-                                       LF, CR, colsep, datetimes, outfmts, labels)
+                                       LF, CR, colsep, colrep, datetimes, outfmts, labels)
 
         if self.exist(table, libref):
             return SASdata(self, libref, table, results)
@@ -1236,6 +1240,18 @@ class SASsession():
            - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import. \
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV \
                     has problems with 
+
+
+        For the CSV and DISK methods, the following 2 parameters are also available
+        :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+
+        For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method
+        :param rowsep: the row seperator character to use; defaults to hex(1)
+        :param colsep: the column seperator character to use; defaults to hex(2)
+        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
+        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
+
 
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
@@ -1296,7 +1312,8 @@ class SASsession():
                                       opts=opts, **kwargs)
 
     def sd2df_DISK(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None, 
-                  tempkeep: bool = False, rowsep: str = '\x01', colsep: str = '\x02',**kwargs) -> 'pandas.DataFrame':
+                  tempkeep: bool = False, rowsep: str = '\x01', colsep: str = '\x02',
+                  rowrep: str = ' ', colrep: str = ' ', **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'sasdata2dataframe' specifying method='DISK'. Why type all that?
 
@@ -1323,8 +1340,13 @@ class SASsession():
 
         :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+
         :param rowsep: the row seperator character to use; defaults to hex(1)
         :param colsep: the column seperator character to use; defaults to hex(2)
+        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
+        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
+
+
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
@@ -1333,7 +1355,7 @@ class SASsession():
         """
         dsopts = dsopts if dsopts is not None else {}
         return self.sasdata2dataframe(table, libref, dsopts, method='DISK', tempfile=tempfile, tempkeep=tempkeep,
-                                      rowsep=rowsep, colsep=colsep, **kwargs)
+                                      rowsep=rowsep, colsep=colsep, rowrep=rowrep, colrep=colrep, **kwargs)
 
     def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None, 
                           method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
@@ -1368,6 +1390,18 @@ class SASsession():
            - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
                     has problems with 
+
+
+        For the CSV and DISK methods, the following 2 parameters are also available
+        :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+
+        For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method
+        :param rowsep: the row seperator character to use; defaults to hex(1)
+        :param colsep: the column seperator character to use; defaults to hex(2)
+        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
+        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
+
 
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
