@@ -1872,12 +1872,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <ul class="simple">
 <li>MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory</li>
 <li>CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data</li>
-<li><dl class="first docutils">
-<dt>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.</dt>
-<dd>this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
-has problems with</dd>
-</dl>
-</li>
+<li>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.                       this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV                      has problems with</li>
 </ul>
 </td>
 </tr>
