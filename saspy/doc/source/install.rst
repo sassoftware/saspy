@@ -869,10 +869,15 @@ So, it is still connecting to MVA SAS and all of the methods behave the same as 
 
 The keys for this configuration definition dictionary are:
 
+url - 
+    (Required if ip not specified) The URL to Viya, of the form 'http[s]://host.idenifier[:port]'. When this is specified,
+    ip= will not be used, as the host's ip is retrieven from the url. Also, ssl= is set based upon http or https and port=
+    is also parsed from the url, if provided, else defaulted based upon the derived ssl= value. So neither ip, port nor ssl
+    are needed when url= is used. 
 ip - 
-    (Required) The resolvable host name, or IP address to the Viya Compute Service
+    (Required if url not specified) The resolvable host name, or IP address to the Viya Compute Service
 port - 
-    (Optional) The port to use to connect to the Compute Service. This will default to either 80 or 443 based upon the ssl key.
+    The port to use to connect to the Compute Service. This will default to either 80 or 443 based upon the ssl key.
 ssl - 
     (Optional) Boolean identifying whether to use HTTPS (ssl=True) or just HTTP. The default is True and will default to port 443 if
     the port is not specified. If set to False, it will default to port 80, if the port is not specified.

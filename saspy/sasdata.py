@@ -1080,8 +1080,8 @@ class SASdata:
 
            - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
-           - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.
-                    this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
+           - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.   \
+                    this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV  \
                     has problems with 
 
 
