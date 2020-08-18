@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 3.3.7 documentation</title>
+  <title>API Reference &mdash; saspy 3.5.0 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.3.7 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.5.0 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.3.7
+                3.5.0
               </div>
             
           
@@ -373,22 +373,45 @@ is the text of the last warning message generated in the SAS log.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.dataframe2sasdata">
-<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = False</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>df</strong> &#8211; Pandas Data Frame to import to a SAS Data Set</li>
 <li><strong>table</strong> &#8211; the name of the SAS Data Set to create</li>
 <li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
 <li><strong>results</strong> &#8211; format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>As of version 3.5.0, keep_outer_quotes is deprecated and embedded_newlines defaults to True</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>keep_outer_quotes</strong> &#8211; the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them</li>
 <li><strong>embedded_newlines</strong> &#8211; if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>colrep is new as of version 3.5.0</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>LF</strong> &#8211; if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)</li>
 <li><strong>CR</strong> &#8211; if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)</li>
 <li><strong>colsep</strong> &#8211; the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)</li>
+<li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  &#8216; &#8216;</li>
 <li><strong>datetimes</strong> &#8211; dict with column names as keys and values of &#8216;date&#8217; or &#8216;time&#8217; to create SAS date or times instead of datetimes</li>
 <li><strong>outfmts</strong> &#8211; dict with column names and SAS formats to assign to the new SAS data set</li>
 </ul>
@@ -419,22 +442,45 @@ is the text of the last warning message generated in the SAS log.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.df2sd">
-<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = False</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
+<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;dataframe2sasdata&#8217;. Why type all that?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>df</strong> &#8211; <code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code> Pandas Data Frame to import to a SAS Data Set</li>
 <li><strong>table</strong> &#8211; the name of the SAS Data Set to create</li>
 <li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
 <li><strong>results</strong> &#8211; format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>As of version 3.5.0, keep_outer_quotes is deprecated and embedded_newlines defaults to True</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>keep_outer_quotes</strong> &#8211; the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them</li>
 <li><strong>embedded_newlines</strong> &#8211; if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>colrep is new as of version 3.5.0</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>LF</strong> &#8211; if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)</li>
 <li><strong>CR</strong> &#8211; if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)</li>
 <li><strong>colsep</strong> &#8211; the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)</li>
+<li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  &#8216; &#8216;</li>
 <li><strong>datetimes</strong> &#8211; dict with column names as keys and values of &#8216;date&#8217; or &#8216;time&#8217; to create SAS date or times instead of datetimes</li>
 <li><strong>outfmts</strong> &#8211; dict with column names and SAS formats to assign to the new SAS data set</li>
 </ul>
@@ -617,7 +663,7 @@ whole session.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>table</strong> &#8211; the name of the SAS Data Set you want to export to a Pandas Data Frame</li>
 <li><strong>libref</strong> &#8211; the libref for the SAS Data Set.</li>
 <li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
@@ -643,14 +689,37 @@ whole session.</p>
 <ul>
 <li>MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory</li>
 <li>CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data</li>
-<li><dl class="first docutils">
-<dt>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.</dt>
-<dd>this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
-has problems with</dd>
-</dl>
-</li>
+<li>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.                      this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV                     has problems with</li>
 </ul>
 </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>For the CSV and DISK methods, the following 2 parameters are also available</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local file; default it a temporary file that&#8217;s cleaned up</li>
+<li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rowsep</strong> &#8211; the row seperator character to use; defaults to hex(1)</li>
+<li><strong>colsep</strong> &#8211; the column seperator character to use; defaults to hex(2)</li>
+<li><strong>rowrep</strong> &#8211; the char to convert to for any embedded rowsep chars, defaults to  &#8216; &#8216;</li>
+<li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep chars, defaults to  &#8216; &#8216;</li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
 See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
@@ -791,7 +860,7 @@ See the SASViyaML.py module.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>table</strong> &#8211; the name of the SAS Data Set you want to export to a Pandas Data Frame</li>
 <li><strong>libref</strong> &#8211; the libref for the SAS Data Set.</li>
 <li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
@@ -820,6 +889,34 @@ See the SASViyaML.py module.</p>
 <li>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV                     has problems with</li>
 </ul>
 </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>For the CSV and DISK methods, the following 2 parameters are also available</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local file; default it a temporary file that&#8217;s cleaned up</li>
+<li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rowsep</strong> &#8211; the row seperator character to use; defaults to hex(1)</li>
+<li><strong>colsep</strong> &#8211; the column seperator character to use; defaults to hex(2)</li>
+<li><strong>rowrep</strong> &#8211; the char to convert to for any embedded rowsep chars, defaults to  &#8216; &#8216;</li>
+<li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep chars, defaults to  &#8216; &#8216;</li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
 See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
@@ -891,7 +988,7 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 
 <dl class="method">
 <dt id="saspy.SASsession.sd2df_DISK">
-<code class="descname">sd2df_DISK</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>rowsep: str = '\x01'</em>, <em>colsep: str = '\x02'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_DISK" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sd2df_DISK</code><span class="sig-paren">(</span><em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>rowsep: str = '\x01'</em>, <em>colsep: str = '\x02'</em>, <em>rowrep: str = ' '</em>, <em>colrep: str = ' '</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.sd2df_DISK" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;sasdata2dataframe&#8217; specifying method=&#8217;DISK&#8217;. Why type all that?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -923,6 +1020,8 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 <li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
 <li><strong>rowsep</strong> &#8211; the row seperator character to use; defaults to hex(1)</li>
 <li><strong>colsep</strong> &#8211; the column seperator character to use; defaults to hex(2)</li>
+<li><strong>rowrep</strong> &#8211; the char to convert to for any embedded rowsep chars, defaults to  &#8216; &#8216;</li>
+<li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep chars, defaults to  &#8216; &#8216;</li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
 See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
@@ -1769,9 +1868,8 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>method</strong> &#8211; <p>defaults to MEMORY:</p>
-<ul>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>method</strong> &#8211; <p>defaults to MEMORY:</p>
+<ul class="simple">
 <li>MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory</li>
 <li>CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data</li>
 <li><dl class="first docutils">
@@ -1781,7 +1879,33 @@ has problems with</dd>
 </dl>
 </li>
 </ul>
-</li>
+</td>
+</tr>
+</tbody>
+</table>
+<p>For the CSV and DISK methods, the following 2 parameters are also available</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>tempfile</strong> &#8211; [optional] an OS path for a file to use for the local file; default it a temporary file that&#8217;s cleaned up</li>
+<li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>For the MEMORY and DISK methods the following 4 parameters are also available, depending upon access method</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rowsep</strong> &#8211; the row seperator character to use; defaults to hex(1)</li>
+<li><strong>colsep</strong> &#8211; the column seperator character to use; defaults to hex(2)</li>
+<li><strong>rowrep</strong> &#8211; the char to convert to for any embedded rowsep chars, defaults to  &#8216; &#8216;</li>
+<li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep chars, defaults to  &#8216; &#8216;</li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
 See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
@@ -1835,7 +1959,7 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 
 <dl class="method">
 <dt id="saspy.sasdata.SASdata.to_df_DISK">
-<code class="descname">to_df_DISK</code><span class="sig-paren">(</span><em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>rowsep: str = '\x01'</em>, <em>colsep: str = '\x02'</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.sasdata.SASdata.to_df_DISK" title="Permalink to this definition">¶</a></dt>
+<code class="descname">to_df_DISK</code><span class="sig-paren">(</span><em>tempfile: str = None</em>, <em>tempkeep: bool = False</em>, <em>rowsep: str = '\x01'</em>, <em>colsep: str = '\x02'</em>, <em>rowrep: str = ' '</em>, <em>colrep: str = ' '</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.sasdata.SASdata.to_df_DISK" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;to_df&#8217; specifying method=&#8217;DISK&#8217;.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1846,6 +1970,8 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 <li><strong>tempkeep</strong> &#8211; if you specify your own file to use with tempfile=, this controls whether it&#8217;s cleaned up after using it</li>
 <li><strong>rowsep</strong> &#8211; the row seperator character to use; defaults to hex(1)</li>
 <li><strong>colsep</strong> &#8211; the column seperator character to use; defaults to hex(2)</li>
+<li><strong>rowrep</strong> &#8211; the char to convert to for any embedded rowsep chars, defaults to  &#8216; &#8216;</li>
+<li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep chars, defaults to  &#8216; &#8216;</li>
 <li><strong>kwargs</strong> &#8211; a dictionary. These vary per access method, and are generally NOT needed.
 They are either access method specific parms or specific pandas parms.
 See the specific sasdata2dataframe* method in the access method for valid possibilities.</li>
@@ -4226,7 +4352,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.3.7',
+            VERSION:'3.5.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
