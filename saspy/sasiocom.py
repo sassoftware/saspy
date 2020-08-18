@@ -637,8 +637,9 @@ class SASSessionCOM(object):
 
     def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a',
                           libref: str ="", keep_outer_quotes: bool=False,
-                                           embedded_newlines: bool=False,
-                          LF: str = '\x01', CR: str = '\x02', colsep: str = '\x03',
+                                           embedded_newlines: bool=True,
+                          LF: str = '\x01', CR: str = '\x02',
+                          colsep: str = '\x03', colrep: str = ' ',
                           datetimes: dict={}, outfmts: dict={}, labels: dict={}):
         """
         Create a SAS dataset from a pandas data frame.
@@ -652,6 +653,7 @@ class SASSessionCOM(object):
         LF - if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to '\x01'
         CR - if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
         colsep - the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
+        colrep - the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         datetimes - not implemented yet in this access method
         outfmts - not implemented yet in this access method
         labels - not implemented yet in this access method
@@ -727,6 +729,13 @@ class SASSessionCOM(object):
         :option tempfile [str]: File path for the saved output file.
         :return [pd.DataFrame]:
         """
+        # strip off unused by this access method options from kwargs
+        # so they can't be passes to panda later
+        rowsep = kwargs.pop('rowsep', ' ')
+        colsep = kwargs.pop('colsep', ' ')
+        rowrep = kwargs.pop('rowrep', ' ')
+        colrep = kwargs.pop('colrep', ' ')
+
         if method.upper() == 'DISK':
            print("This access method doesn't support the DISK method. Try CSV or MEMORY")
            return None

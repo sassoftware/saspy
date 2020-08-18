@@ -1084,6 +1084,18 @@ class SASdata:
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
                     has problems with 
 
+
+        For the CSV and DISK methods, the following 2 parameters are also available
+        :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
+        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+
+        For the MEMORY and DISK methods the following 4 parameters are also available, depending upon access method
+        :param rowsep: the row seperator character to use; defaults to hex(1)
+        :param colsep: the column seperator character to use; defaults to hex(2)
+        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
+        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
+
+
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
@@ -1127,7 +1139,8 @@ class SASdata:
         return self.to_df(method='CSV', tempfile=tempfile, tempkeep=tempkeep, opts=opts, **kwargs)
 
     def to_df_DISK(self, tempfile: str=None, tempkeep: bool=False, 
-                   rowsep: str = '\x01', colsep: str = '\x02', **kwargs) -> 'pandas.DataFrame':
+                   rowsep: str = '\x01', colsep: str = '\x02',
+                   rowrep: str = ' ',    colrep: str = ' ', **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'to_df' specifying method='DISK'.
 
@@ -1135,6 +1148,8 @@ class SASdata:
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param rowsep: the row seperator character to use; defaults to hex(1)
         :param colsep: the column seperator character to use; defaults to hex(2)
+        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
+        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
@@ -1142,7 +1157,8 @@ class SASdata:
         :return: Pandas data frame
         :rtype: 'pd.DataFrame'
         """
-        return self.to_df(method='DISK', tempfile=tempfile, tempkeep=tempkeep, rowsep=rowsep, colsep=colsep, **kwargs)
+        return self.to_df(method='DISK', tempfile=tempfile, tempkeep=tempkeep, 
+                          rowsep=rowsep, colsep=colsep, rowrep=rowrep, colrep=colrep, **kwargs)
 
     def to_json(self, pretty: bool = False, sastag: bool = False, **kwargs) -> str:
         """

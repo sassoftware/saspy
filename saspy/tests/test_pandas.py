@@ -167,3 +167,37 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         self.assertFalse(os.path.isfile(tmpcsv))
 
         tmpdir.cleanup()
+
+
+    def test_sd2df_DISK(self):
+        """
+        Test method sasdata2dataframe using `method=disk` and arguments
+        """
+
+        data = [
+        [442.5, '"quoted\x01 string"', 'non\t\tquoted string',44.4,'"leading quote string',    '"leading"and embed\x0Aded string','''"all' "over' 'the "place"''',0],
+        [132.5, '"quoted\x02 string"', 'non quoted string',   41.4,'"leading quote string',    '"leading"and embed\x0Dded string','''"all' "over' 'the "place"''',20.7],
+        [242.5, '"quoted\x03 string"', 'non quoted string',   42.4,'"leading\t\t quote string','"leading"and embed\x0Aded string','''"all' "over' 'the "place"''',20.8],
+        [342.5, '"quoted\x02 string"', 'non quoted string',   43.4,'"leading quote string',    '"leading"and embed\x0Dded string','''"all' "over' 'the "place"''',10.9],
+        [342.5, "'quoted\x01 string'", 'non quoted string',   43.4,'''"leading'quote string''','"leading"and embed\x0Adedstring"','''"all' "over' 'the "place"''',10.9],
+        ]
+
+        df = pd.DataFrame(data)
+
+        sd  = self.sas.df2sd(df, 'quotes')
+
+        df2 = sd.to_df()
+        df3 = sd.to_df_DISK()
+
+        self.assertTrue(df2.shape == (5, 8))
+        self.assertTrue(df3.shape == (5, 8))
+        self.assertFalse(False in (df2 == df3))
+
+        cars = self.sas.sasdata('cars','sashelp', results='text')
+        df   = cars.to_df_DISK(colsep='A', rowsep='E', colrep='"', rowrep='?')
+
+        self.assertTrue(df.shape == (428, 15))
+
+
+
+
