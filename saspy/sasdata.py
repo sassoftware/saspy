@@ -1086,10 +1086,12 @@ class SASdata:
 
 
         For the CSV and DISK methods, the following 2 parameters are also available
+
         :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
         For the MEMORY and DISK methods the following 4 parameters are also available, depending upon access method
+
         :param rowsep: the row seperator character to use; defaults to hex(1)
         :param colsep: the column seperator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '

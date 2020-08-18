@@ -1150,8 +1150,14 @@ class SASsession():
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+
+        As of version 3.5.0, keep_outer_quotes is deprecated and embedded_newlines defaults to True
+
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
+
+        colrep is new as of version 3.5.0
+
         :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)
         :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)
         :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)
@@ -1176,8 +1182,14 @@ class SASsession():
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+
+        As of version 3.5.0, keep_outer_quotes is deprecated and embedded_newlines defaults to True
+
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
         :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
+
+        colrep is new as of version 3.5.0
+
         :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1) 
         :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2) 
         :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3) 
@@ -1243,10 +1255,12 @@ class SASsession():
 
 
         For the CSV and DISK methods, the following 2 parameters are also available
+
         :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
         For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method
+
         :param rowsep: the row seperator character to use; defaults to hex(1)
         :param colsep: the column seperator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
@@ -1387,16 +1401,18 @@ class SASsession():
 
            - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
-           - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.
-                    this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV
+           - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.  \
+                    this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV \
                     has problems with 
 
 
         For the CSV and DISK methods, the following 2 parameters are also available
+
         :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
         For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method
+
         :param rowsep: the row seperator character to use; defaults to hex(1)
         :param colsep: the column seperator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
