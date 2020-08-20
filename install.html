@@ -104,6 +104,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#iom-using-java">IOM using Java</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required">ATTN, as of saspy version 3.3.3, the classpath is no longer required!</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-authinfo-file-authinfo-on-windows">The .authinfo file (_authinfo on Windows)</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#remote">Remote</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#local">Local</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#iom-to-mvs-sas">IOM to MVS SAS</a></li>
@@ -612,6 +613,9 @@ $SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil.nls_904600.0.0.2018
 $SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_20121211183517/sastpj.rutil.jar
 </pre></div>
 </div>
+</div>
+<div class="section" id="the-authinfo-file-authinfo-on-windows">
+<h4>The .authinfo file (_authinfo on Windows)<a class="headerlink" href="#the-authinfo-file-authinfo-on-windows" title="Permalink to this headline">¶</a></h4>
 <p>The IOM access method has support for getting the required user/password from an authinfo file in the user&#8217;s home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it&#8217;s _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for <cite>authkey</cite>. Next is the &#8216;user&#8217; key followed by the value (the user id)
