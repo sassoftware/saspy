@@ -503,6 +503,9 @@ The 3 encryption jars, if needed, can be found in a SAS deployment in a location
     $SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_20121211183517/sastpj.rutil.jar
 
     
+The .authinfo file (_authinfo on Windows)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 The IOM access method has support for getting the required user/password from an authinfo file in the user's home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it's _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for `authkey`. Next is the 'user' key followed by the value (the user id)

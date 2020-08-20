@@ -34,8 +34,8 @@ However, if that's too easy, you can also download a specific release from
 the repo and and instll from that. To install a given release, use the following, 
 where the X.X.X is the release version you want.
 
-    pip install https://github.com/sassoftware/saspy/releases/download/vX.X.X/saspy.tar.gz
-    
+    pip install https://github.com/sassoftware/saspy/archive/vX.X.X.tar.gz
+
 # Getting Started     
 
 All of the doc, including install and configuration information can be found at
