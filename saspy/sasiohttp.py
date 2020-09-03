@@ -376,7 +376,7 @@ class SASconfigHTTP:
       headers={"Accept":"application/vnd.sas.collection+json",
                "Accept-Item":"application/vnd.sas.compute.context.summary+json",
                "Authorization":"Bearer "+self._token}
-      conn.request('GET', "/compute/contexts", headers=headers)
+      conn.request('GET', "/compute/contexts?limit=999999", headers=headers)
       req = conn.getresponse()
       status = req.status
       resp = req.read()
