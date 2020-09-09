@@ -126,7 +126,7 @@ class SASconfigHTTP:
 
       inver = kwargs.get('verify', None)         
       if inver is not None:
-         if lock and self.ssl:
+         if lock and self.verify:
             print("Parameter 'verify' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.verify = bool(inver)
@@ -246,7 +246,7 @@ class SASconfigHTTP:
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout)
                self._token = self._authenticate(user, pw)
             except ssl.SSLError as e:
-               print("SSL connection failed, creating an unverified ssl connection. Error was:"+str(e))
+               print("SSL certificate verification failed, creating an unverified SSL connection. Error was:"+str(e))
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
                print("You can set 'verify=False' to get rid of this message ")
                self._token   = self._authenticate(user, pw)
