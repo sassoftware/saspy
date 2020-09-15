@@ -1382,7 +1382,7 @@ class SASsessionHTTP():
       uri = "/compute/sessions/"+self.pid+"/data/work/saspy_ds2df/rows"
 
       r     = []
-      df    = pd.DataFrame.from_records(r, columns=varlist)
+      df    = None
       trows = kwargs.get('trows', None)
       if not trows:
          trows = 100000
@@ -1440,7 +1440,8 @@ class SASsessionHTTP():
          for i in range(nvars):
             if vartype[i] == 'FLOAT':
                if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  tdf[varlist[i]] = pd.to_numeric(tdf[varlist[i]], errors='coerce') 
+                  if tdf.dtypes[tdf.columns[i]].kind not in ('f','u','i','b','B','c','?'):
+                     tdf[varlist[i]] = pd.to_numeric(tdf[varlist[i]], errors='coerce') 
                else:
                   tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce') 
             else:
