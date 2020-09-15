@@ -1433,7 +1433,8 @@ Will use HTML5 for this SASsession.""")
                                           embedded_newlines: bool=True,
                          LF: str = '\x01', CR: str = '\x02',
                          colsep: str = '\x03', colrep: str = ' ',
-                         datetimes: dict={}, outfmts: dict={}, labels: dict={}):
+                         datetimes: dict={}, outfmts: dict={}, labels: dict={},
+                         outencoding: str = ''):
       """
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
@@ -1528,7 +1529,11 @@ Will use HTML5 for this SASsession.""")
       code = "data "
       if len(libref):
          code += libref+"."
-      code += "'"+table.strip()+"'n;\n"
+      code += "'"+table.strip()+"'n"
+      if len(outencoding):
+         code += '(encoding="'+outencoding+'");\n'
+      else:
+         code += ";\n"
       if len(length):
          code += "length "+length+";\n"
       if len(format):

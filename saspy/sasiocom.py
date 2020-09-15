@@ -640,7 +640,8 @@ class SASSessionCOM(object):
                                            embedded_newlines: bool=True,
                           LF: str = '\x01', CR: str = '\x02',
                           colsep: str = '\x03', colrep: str = ' ',
-                          datetimes: dict={}, outfmts: dict={}, labels: dict={}):
+                          datetimes: dict={}, outfmts: dict={}, labels: dict={},
+                          outencoding: str = ''):
         """
         Create a SAS dataset from a pandas data frame.
         :param df [pd.DataFrame]: Pandas data frame containing data to write.
@@ -657,6 +658,7 @@ class SASSessionCOM(object):
         datetimes - not implemented yet in this access method
         outfmts - not implemented yet in this access method
         labels - not implemented yet in this access method
+        outencoding - not implemented yet in this access method
         """
         DATETIME_NAME = 'DATETIME26.6'
         DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%f'

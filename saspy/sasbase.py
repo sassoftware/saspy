@@ -954,15 +954,17 @@ class SASsession():
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
             - format is a string or dictionary { var: format }
+            - encoding is a string
 
             .. code-block:: python
 
-                             {'where'    : 'msrp < 20000 and make = "Ford"'
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
-                              'obs'      :  10
-                              'firstobs' : '12'
-                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                             {'where'    : 'msrp < 20000 and make = "Ford"' ,
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight' ,
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'] ,
+                              'obs'      :  10 ,
+                              'firstobs' : '12' ,
+                              'format'   : {'money': 'dollar10', 'time': 'tod5.'} ,
+                              'encoding' : 'latin9'
                              }
 
         :return: SASdata object
@@ -1070,16 +1072,19 @@ class SASsession():
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
             - format is a string or dictionary { var: format }
+            - encoding is a string
 
             .. code-block:: python
 
-                             {'where'    : 'msrp < 20000 and make = "Ford"',
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight',
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'],
-                              'obs'      :  10,
-                              'firstobs' : '12',
-                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                             {'where'    : 'msrp < 20000 and make = "Ford"' ,
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight' ,
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'] ,
+                              'obs'      :  10 ,
+                              'firstobs' : '12' ,
+                              'format'   : {'money': 'dollar10', 'time': 'tod5.'} ,
+                              'encoding' : 'latin9'
                              }
+
 
         :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames)
 
@@ -1142,7 +1147,8 @@ class SASsession():
                                  embedded_newlines: bool = True, 
               LF: str = '\x01', CR: str = '\x02',
               colsep: str = '\x03', colrep: str = ' ',
-              datetimes: dict={}, outfmts: dict={}, labels: dict={}) -> 'SASdata':
+              datetimes: dict={}, outfmts: dict={}, labels: dict={},
+              outencoding: str = '') -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
@@ -1164,17 +1170,20 @@ class SASsession():
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
+        :param outencoding: the SAS encoding value to use to write out the table, is not the session encoding.
+
         :return: SASdata object
         """
         return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, 
-                                      LF, CR, colsep, colrep, datetimes, outfmts, labels)
+                                      LF, CR, colsep, colrep, datetimes, outfmts, labels, outencoding)
 
     def dataframe2sasdata(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '', 
                           results: str = '', keep_outer_quotes: bool = False,
                                              embedded_newlines: bool = True, 
                           LF: str = '\x01', CR: str = '\x02',
                           colsep: str = '\x03', colrep: str = ' ',
-                          datetimes: dict={}, outfmts: dict={}, labels: dict={}) -> 'SASdata':
+                          datetimes: dict={}, outfmts: dict={}, labels: dict={},
+                          outencoding: str = '') -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
@@ -1196,6 +1205,8 @@ class SASsession():
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
+        :param outencoding: the SAS encoding value to use to write out the table, is not the session encoding.
+   
         :return: SASdata object
         """
         if self.sascfg.pandas:
@@ -1213,10 +1224,14 @@ class SASsession():
             return None
         else:
             self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, 
-                                       LF, CR, colsep, colrep, datetimes, outfmts, labels)
+                                       LF, CR, colsep, colrep, datetimes, outfmts, labels, outencoding)
+
+        dsopts = {}
+        if len(outencoding):
+           dsopts['encoding'] = outencoding
 
         if self.exist(table, libref):
-            return SASdata(self, libref, table, results)
+            return SASdata(self, libref, table, results, dsopts)
         else:
             return None
 
@@ -1235,16 +1250,20 @@ class SASsession():
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
             - format is a string or dictionary { var: format }
+            - encoding is a string
 
             .. code-block:: python
 
-                             {'where'    : 'msrp < 20000 and make = "Ford"'
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
-                              'obs'      :  10
-                              'firstobs' : '12'
-                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                             {'where'    : 'msrp < 20000 and make = "Ford"' ,
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight' ,
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'] ,
+                              'obs'      :  10 ,
+                              'firstobs' : '12' ,
+                              'format'   : {'money': 'dollar10', 'time': 'tod5.'} ,
+                              'encoding' : 'latin9'
                              }
+
+
         :param method: defaults to MEMORY;
 
            - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
@@ -1291,16 +1310,20 @@ class SASsession():
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
             - format is a string or dictionary { var: format }
+            - encoding is a string
 
             .. code-block:: python
 
-                             {'where'    : 'msrp < 20000 and make = "Ford"'
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
-                              'obs'      :  10
-                              'firstobs' : '12'
-                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                             {'where'    : 'msrp < 20000 and make = "Ford"' ,
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight' ,
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'] ,
+                              'obs'      :  10 ,
+                              'firstobs' : '12' ,
+                              'format'   : {'money': 'dollar10', 'time': 'tod5.'} ,
+                              'encoding' : 'latin9'
                              }
+
+
         :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
         :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames)
@@ -1341,15 +1364,17 @@ class SASsession():
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
             - format is a string or dictionary { var: format }
+            - encoding is a string
 
             .. code-block:: python
 
-                             {'where'    : 'msrp < 20000 and make = "Ford"'
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
-                              'obs'      :  10
-                              'firstobs' : '12'
-                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                             {'where'    : 'msrp < 20000 and make = "Ford"' ,
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight' ,
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'] ,
+                              'obs'      :  10 ,
+                              'firstobs' : '12' ,
+                              'format'   : {'money': 'dollar10', 'time': 'tod5.'} ,
+                              'encoding' : 'latin9'
                              }
 
         :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
@@ -1386,15 +1411,17 @@ class SASsession():
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
             - format is a string or dictionary { var: format }
+            - encoding is a string
 
             .. code-block:: python
 
-                             {'where'    : 'msrp < 20000 and make = "Ford"'
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
-                              'obs'      :  10
-                              'firstobs' : '12'
-                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                             {'where'    : 'msrp < 20000 and make = "Ford"' ,
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight' ,
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'] ,
+                              'obs'      :  10 ,
+                              'firstobs' : '12' ,
+                              'format'   : {'money': 'dollar10', 'time': 'tod5.'} ,
+                              'encoding' : 'latin9'
                              }
 
         :param method: defaults to MEMORY:
@@ -1453,15 +1480,17 @@ class SASsession():
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
             - format is a string or dictionary { var: format }
+            - encoding is a string 
 
             .. code-block:: python
 
-                             {'where'    : 'msrp < 20000 and make = "Ford"'
-                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight'
-                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight']
-                              'obs'      :  10
-                              'firstobs' : '12'
-                              'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                             {'where'    : 'msrp < 20000 and make = "Ford"' ,
+                              'keep'     : 'msrp enginesize Cylinders Horsepower Weight' ,
+                              'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'] ,
+                              'obs'      :  10 ,
+                              'firstobs' : '12' ,
+                              'format'   : {'money': 'dollar10', 'time': 'tod5.'} ,
+                              'encoding' : 'latin9'
                              }
         :return: str
         """
@@ -1497,6 +1526,9 @@ class SASsession():
 
                     elif key == 'firstobs':
                         opts += 'firstobs=' + str(dsopts[key]) + ' '
+
+                    elif key == 'encoding':
+                        opts += 'encoding="' + str(dsopts[key]) + '" '
 
                     elif key == 'format':
                         if isinstance(dsopts[key], str):
