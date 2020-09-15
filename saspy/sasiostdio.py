@@ -1506,7 +1506,7 @@ Will use HTML5 for this SASsession.""")
       code = "data "
       if len(libref):
          code += libref+"."
-      code += "'"+table.strip()+"'n;\n"
+      code += "'"+table.strip()+"'n"
       if len(outencoding):
          code += '(encoding="'+outencoding+'");\n'
       else:
