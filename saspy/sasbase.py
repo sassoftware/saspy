@@ -1170,7 +1170,7 @@ class SASsession():
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
-        :param outencoding: the SAS encoding value to use to write out the table, is not the session encoding.
+        :param outencoding: the SAS encoding value to use to write out the table, if not the session encoding.
 
         :return: SASdata object
         """
@@ -1205,7 +1205,7 @@ class SASsession():
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
-        :param outencoding: the SAS encoding value to use to write out the table, is not the session encoding.
+        :param outencoding: the SAS encoding value to use to write out the table, if not the session encoding.
    
         :return: SASdata object
         """
