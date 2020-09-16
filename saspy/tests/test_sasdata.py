@@ -610,3 +610,18 @@ class TestSASdataObject(unittest.TestCase):
         res = tr.info()
 
         self.assertIsNone(res, msg="only works with Pandas")
+
+    def test_outencoding(self):
+        """
+        Test outencoding option and encoding dsopts
+        """
+        df = self.sas.sd2df("class", "sashelp")
+        sd = self.sas.df2sd(df, 'class2', outencoding='ebcdic500')
+        self.assertTrue('encoding' in sd.dsopts.keys(), msg="encoding not set in dsopts")
+        self.assertTrue('ebcdic500'== sd.dsopts['encoding'], msg="encoding not correct")
+
+        ll = sd.add_vars({'tom':'"hi tom"'})
+        self.assertTrue('Cross Environment Data Access' in ll['LOG'], msg="CEDA msg not found")
+
+
+
