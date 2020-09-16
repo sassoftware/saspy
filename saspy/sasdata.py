@@ -44,15 +44,17 @@ class SASdata:
         - obs is a numbers - either string or int
         - first obs is a numbers - either string or int
         - format is a string or dictionary { var: format }
+        - encoding is a string
 
         .. code-block:: python
 
-                         {'where'    : 'msrp < 20000 and make = "Ford"',
-                          'keep'     : 'msrp enginesize Cylinders Horsepower Weight',
-                          'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'],
-                          'obs'      :  10,
-                          'firstobs' : '12'
-                          'format'  : {'money': 'dollar10', 'time': 'tod5.'}
+                         {'where'    : 'msrp < 20000 and make = "Ford"' ,
+                          'keep'     : 'msrp enginesize Cylinders Horsepower Weight' ,
+                          'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'] ,
+                          'obs'      :  10 ,
+                          'firstobs' : '12' ,
+                          'format'   : {'money': 'dollar10', 'time': 'tod5.'} ,
+                          'encoding' : 'latin9'
                          }
 
     """
