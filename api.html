@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 3.5.0 documentation</title>
+  <title>API Reference &mdash; saspy 3.5.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.5.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.5.1 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.5.0
+                3.5.1
               </div>
             
           
@@ -373,7 +373,7 @@ is the text of the last warning message generated in the SAS log.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.dataframe2sasdata">
-<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em>, <em>outencoding: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -414,6 +414,7 @@ is the text of the last warning message generated in the SAS log.</p>
 <li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  &#8216; &#8216;</li>
 <li><strong>datetimes</strong> &#8211; dict with column names as keys and values of &#8216;date&#8217; or &#8216;time&#8217; to create SAS date or times instead of datetimes</li>
 <li><strong>outfmts</strong> &#8211; dict with column names and SAS formats to assign to the new SAS data set</li>
+<li><strong>outencoding</strong> &#8211; the SAS encoding value to use to write out the table, if not the session encoding.</li>
 </ul>
 </td>
 </tr>
@@ -442,7 +443,7 @@ is the text of the last warning message generated in the SAS log.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.df2sd">
-<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
+<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em>, <em>outencoding: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;dataframe2sasdata&#8217;. Why type all that?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -483,6 +484,7 @@ is the text of the last warning message generated in the SAS log.</p>
 <li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  &#8216; &#8216;</li>
 <li><strong>datetimes</strong> &#8211; dict with column names as keys and values of &#8216;date&#8217; or &#8216;time&#8217; to create SAS date or times instead of datetimes</li>
 <li><strong>outfmts</strong> &#8211; dict with column names and SAS formats to assign to the new SAS data set</li>
+<li><strong>outencoding</strong> &#8211; the SAS encoding value to use to write out the table, if not the session encoding.</li>
 </ul>
 </td>
 </tr>
@@ -634,13 +636,15 @@ whole session.</p>
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
 <li>format is a string or dictionary { var: format }</li>
+<li>encoding is a string</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
- <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
- <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
- <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
- <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
- <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span> <span class="p">,</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span> <span class="p">,</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;format&#39;</span>   <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span> <span class="p">,</span>
+ <span class="s1">&#39;encoding&#39;</span> <span class="p">:</span> <span class="s1">&#39;latin9&#39;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -674,13 +678,15 @@ whole session.</p>
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
 <li>format is a string or dictionary { var: format }</li>
+<li>encoding is a string</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
- <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
- <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
- <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
- <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
- <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span> <span class="p">,</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span> <span class="p">,</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;format&#39;</span>   <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span> <span class="p">,</span>
+ <span class="s1">&#39;encoding&#39;</span> <span class="p">:</span> <span class="s1">&#39;latin9&#39;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -871,13 +877,15 @@ See the SASViyaML.py module.</p>
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
 <li>format is a string or dictionary { var: format }</li>
+<li>encoding is a string</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
- <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
- <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
- <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
- <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
- <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span> <span class="p">,</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span> <span class="p">,</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;format&#39;</span>   <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span> <span class="p">,</span>
+ <span class="s1">&#39;encoding&#39;</span> <span class="p">:</span> <span class="s1">&#39;latin9&#39;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -949,13 +957,15 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
 <li>format is a string or dictionary { var: format }</li>
+<li>encoding is a string</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
- <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
- <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
- <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
- <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
- <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span> <span class="p">,</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span> <span class="p">,</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;format&#39;</span>   <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span> <span class="p">,</span>
+ <span class="s1">&#39;encoding&#39;</span> <span class="p">:</span> <span class="s1">&#39;latin9&#39;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -1005,13 +1015,15 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
 <li>format is a string or dictionary { var: format }</li>
+<li>encoding is a string</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span>
- <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span>
- <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span>
- <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span>
- <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span>
- <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span> <span class="p">,</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span> <span class="p">,</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;format&#39;</span>   <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span> <span class="p">,</span>
+ <span class="s1">&#39;encoding&#39;</span> <span class="p">:</span> <span class="s1">&#39;latin9&#39;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -1273,13 +1285,15 @@ as either HTML or TEXT, depending upon results. The method= parameter allows you
 <li>obs is a numbers - either string or int</li>
 <li>first obs is a numbers - either string or int</li>
 <li>format is a string or dictionary { var: format }</li>
+<li>encoding is a string</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span><span class="p">,</span>
- <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span><span class="p">,</span>
- <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">],</span>
- <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span><span class="p">,</span>
- <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span><span class="p">,</span>
- <span class="s1">&#39;format&#39;</span>  <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;where&#39;</span>    <span class="p">:</span> <span class="s1">&#39;msrp &lt; 20000 and make = &quot;Ford&quot;&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;keep&#39;</span>     <span class="p">:</span> <span class="s1">&#39;msrp enginesize Cylinders Horsepower Weight&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;drop&#39;</span>     <span class="p">:</span> <span class="p">[</span><span class="s1">&#39;msrp&#39;</span><span class="p">,</span> <span class="s1">&#39;enginesize&#39;</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">]</span> <span class="p">,</span>
+ <span class="s1">&#39;obs&#39;</span>      <span class="p">:</span>  <span class="mi">10</span> <span class="p">,</span>
+ <span class="s1">&#39;firstobs&#39;</span> <span class="p">:</span> <span class="s1">&#39;12&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;format&#39;</span>   <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;money&#39;</span><span class="p">:</span> <span class="s1">&#39;dollar10&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">:</span> <span class="s1">&#39;tod5.&#39;</span><span class="p">}</span> <span class="p">,</span>
+ <span class="s1">&#39;encoding&#39;</span> <span class="p">:</span> <span class="s1">&#39;latin9&#39;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -4347,7 +4361,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.5.0',
+            VERSION:'3.5.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
