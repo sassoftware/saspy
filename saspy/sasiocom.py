@@ -666,7 +666,7 @@ class SASSessionCOM(object):
         if self.sascfg.verbose:
            if keep_outer_quotes != False:
               print("'keep_outer_quotes=' is not used with this access method. option ignored.")
-           if embedded_newlines != False:
+           if embedded_newlines != True:
               print("'embedded_newlines=' is not used with this access method. option ignored.")
            if LF != '\x01' or CR != '\x02' or colsep != '\x03':
               print("'LF=, CR= and colsep=' are not used with this access method. option(s) ignored.")

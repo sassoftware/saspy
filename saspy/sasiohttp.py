@@ -864,7 +864,7 @@ class SASsessionHTTP():
       '''
       this method is used to get the current, full contents of the SASLOG
       '''
-      return self._getlog()
+      return self._log
 
    def exist(self, table: str, libref: str ="") -> bool:
       '''
