@@ -1108,13 +1108,13 @@ class SASdata:
             return None
 
         ll = self._is_valid()
-        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not ll:
             html = self.HTML
             self.HTML = 1
             ll = self.sas._io.submit(code)
             self.HTML = html
-            self.sas._lastlog = self.sas._io._log[lastlog:]
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas.DISPLAY(self.sas.HTML(ll['LST']))
         else:
@@ -1301,13 +1301,13 @@ class SASdata:
             return
 
         ll = self._is_valid()
-        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not ll:
             html = self.HTML
             self.HTML = 1
             ll = self.sas._io.submit(code)
-            self.sas._lastlog = self.sas._io._log[lastlog:]
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas._render_html_or_log(ll)
         else:
@@ -1338,13 +1338,13 @@ class SASdata:
             return
 
         ll = self._is_valid()
-        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not ll:
             html = self.HTML
             self.HTML = 1
             ll = self.sas._io.submit(code)
-            self.sas._lastlog = self.sas._io._log[lastlog:]
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas._render_html_or_log(ll)
         else:
@@ -1426,13 +1426,13 @@ class SASdata:
             return
 
         ll = self._is_valid()
-        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not ll:
             html = self.HTML
             self.HTML = 1
             ll = self.sas._io.submit(code)
-            self.sas._lastlog = self.sas._io._log[lastlog:]
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas._render_html_or_log(ll)
         else:
@@ -1469,13 +1469,13 @@ class SASdata:
             return
 
         ll = self._is_valid()
-        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not ll:
             html = self.HTML
             self.HTML = 1
             ll = self.sas._io.submit(code)
-            self.sas._lastlog = self.sas._io._log[lastlog:]
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas._render_html_or_log(ll)
         else:
@@ -1512,13 +1512,13 @@ class SASdata:
             return
 
         ll = self._is_valid()
-        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not ll:
             html = self.HTML
             self.HTML = 1
             ll = self.sas._io.submit(code)
-            self.sas._lastlog = self.sas._io._log[lastlog:]
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas._render_html_or_log(ll)
         else:
@@ -1607,13 +1607,12 @@ class SASdata:
        ll = self.sas._io.submit(code, results='text')
 
        if not self.sas.exist(name, self.libref):
-          self.sas._lastlog = self.sas._io._log[lastlog:]
           failmsg = "New named data set doesn't exist. Rename must have failed.\n"
        else:
-          self.sas._lastlog = self.sas._io._log[lastlog:]
           failmsg = ""
           self.table = name
 
+       self.sas._lastlog = self.sas._io._log[lastlog:]
        if not self.sas.batch:
           print(failmsg+ll['LOG'])
           return None
