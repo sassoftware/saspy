@@ -202,6 +202,7 @@ class SASdata:
         :param obs: the number of rows of the table that you want to display. The default is 5
         :return:
         """
+        lastlog = len(self.sas._io._log)
         topts = dict(self.dsopts)
         topts['obs'] = obs
         if 'firstobs' in self.dsopts.keys():
@@ -214,12 +215,16 @@ class SASdata:
 
         if self.results.upper() == 'PANDAS':
             code = "data _head ; set %s.'%s'n %s; run;" % (self.libref, self.table, self.sas._dsopts(topts))
-            return self._returnPD(code, '_head')
+            df   = self._returnPD(code, '_head')
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return df
         else:
             ll = self._is_valid()
+            self.sas._lastlog = self.sas._io._log[lastlog:]
             if self.HTML:
                 if not ll:
                     ll = self.sas._io.submit(code)
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                 if not self.sas.batch:  
                    self.sas._render_html_or_log(ll)
                 else:
@@ -227,6 +232,7 @@ class SASdata:
             else:
                 if not ll:
                     ll = self.sas._io.submit(code, "text")
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                 if not self.sas.batch:
                     print(ll['LST'])
                 else:
@@ -239,6 +245,7 @@ class SASdata:
         :param obs: the number of rows of the table that you want to display. The default is 5
         :return:
         """   
+        lastlog = len(self.sas._io._log)
         code  = "%let lastobs=-1;\n"
         code += "proc sql;select count(*) format best32. into :lastobs from "
         code += self.libref + ".'" + self.table + "'n " + self._dsopts()
@@ -280,11 +287,14 @@ class SASdata:
 
         if self.results.upper() == 'PANDAS':
             code = "data _tail ; set %s.'%s'n %s; run;" % (self.libref, self.table, self.sas._dsopts(topts))
-            return self._returnPD(code, '_tail')
+            df   = self._returnPD(code, '_tail')
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return df
         else:
             if self.HTML:
                 if not le:
                     ll = self.sas._io.submit(code)
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                 else:
                     ll = le
                 if not self.sas.batch:
@@ -294,6 +304,7 @@ class SASdata:
             else:
                 if not le:
                     ll = self.sas._io.submit(code, "text")
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                 else:
                     ll = le
                 if not self.sas.batch:
@@ -306,6 +317,7 @@ class SASdata:
         :param force: if nobs isn't availble, set to True to force it to be calculated; may take time
         return the number of observations for your SASdata object
         """
+        lastlog = len(self.sas._io._log)
         code  = "%let lastobs=-1;\n"
         if not force:
            code += "proc sql;select count(*) format best32. into :lastobs from "+ self.libref + ".'" + self.table + "'n " + self._dsopts() + ";"
@@ -334,6 +346,7 @@ class SASdata:
             #print(ll['LOG'])
             lastobs = None
 
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         return lastobs
 
     def partition(self, var: str = '', fraction: float = .7, seed: int = 9878, kfold: int = 1,
@@ -350,6 +363,7 @@ class SASdata:
         :param singleOut: boolean to return single table or seperate tables
         :return: Tuples or SAS data object
         """
+        lastlog = len(self.sas._io._log)
         # loop through for k folds cross-validation
         i = 1
         # initialize code string so that loops work
@@ -452,10 +466,12 @@ class SASdata:
             print(code + '\n\n' + split_code)
             runcode = False
         ll = self._is_valid()
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if ll:
             runcode = False
         if runcode:
             ll = self.sas._io.submit(code + split_code, "text")
+            self.sas._lastlog = self.sas._io._log[lastlog:]
             elog = []
             for line in ll['LOG'].splitlines():
                 if line[self.sas.logoffset:].startswith('ERROR'):
@@ -465,18 +481,22 @@ class SASdata:
             if not singleOut:
                 outTableList = []
                 if k == 1:
-                    return (self.sas.sasdata(out_table + str(k) + "_train", out_libref, dsopts=self._dsopts()),
+                    ret =  (self.sas.sasdata(out_table + str(k) + "_train", out_libref, dsopts=self._dsopts()),
                             self.sas.sasdata(out_table + str(k) + "_score", out_libref, dsopts=self._dsopts()))
-
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
+                    return ret
                 for j in range(1, k + 1):
                     outTableList.append((self.sas.sasdata(out_table + str(j) + "_train", out_libref, dsopts=self._dsopts()),
                                          self.sas.sasdata(out_table + str(j) + "_score", out_libref, dsopts=self._dsopts())))
+                self.sas._lastlog = self.sas._io._log[lastlog:]
                 return outTableList
             if out:
                 if not isinstance(out, str):
                     return out
                 else:
-                    return self.sas.sasdata(out_table, out_libref, self.results)
+                    ret = self.sas.sasdata(out_table, out_libref, self.results)
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
+                    return ret 
             else:
                 return self
 
@@ -486,6 +506,7 @@ class SASdata:
 
         :return: output
         """
+        lastlog = len(self.sas._io._log)
         code = "proc contents data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";run;"
 
         if self.sas.nosub:
@@ -500,12 +521,14 @@ class SASdata:
             code += "ods output Variables=work._Variables;"
             code += "ods output Sortedby=work._Sortedby;"
             code += "run;"
-            return self._returnPD(code, ['_attributes', '_EngineHost', '_Variables', '_Sortedby'])
-
+            df = self._returnPD(code, ['_attributes', '_EngineHost', '_Variables', '_Sortedby'])
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return df
         else:
             if self.HTML:
                 if not ll:
                     ll = self.sas._io.submit(code)
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                 if not self.sas.batch:
                     self.sas._render_html_or_log(ll)
                 else:
@@ -513,6 +536,7 @@ class SASdata:
             else:
                 if not ll:
                     ll = self.sas._io.submit(code, "text")
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                 if not self.sas.batch:
                     print(ll['LST'])
                 else:
@@ -522,6 +546,7 @@ class SASdata:
         """
         display metadata about the table, size, number of rows, columns and their data type
         """
+        lastlog = len(self.sas._io._log)
         code = "proc contents data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";ods select Variables;run;"
 
         if self.sas.nosub:
@@ -532,6 +557,7 @@ class SASdata:
             code = "proc contents data=%s.'%s'n %s ;ods output Variables=work._variables ;run;" % (self.libref, self.table, self._dsopts())
             df = self._returnPD(code, '_variables')
             df['Type'] = df['Type'].str.rstrip()
+            self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
 
         else:
@@ -539,6 +565,7 @@ class SASdata:
             if self.HTML:
                 if not ll:
                     ll = self.sas._io.submit(code)
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                 if not self.sas.batch:
                     self.sas._render_html_or_log(ll)
                 else:
@@ -546,6 +573,7 @@ class SASdata:
             else:
                 if not ll:
                     ll = self.sas._io.submit(code, "text")
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                 if not self.sas.batch:
                     print(ll['LST'])
                 else:
@@ -557,6 +585,7 @@ class SASdata:
 
         :return: Pandas data frame
         """
+        lastlog = len(self.sas._io._log)
         if self.results.casefold() != 'pandas':
             print("The info method only works with Pandas results")
             return None
@@ -601,6 +630,7 @@ class SASdata:
         df = df.iloc[:, :]
         df.index.name = None
         df.name = None
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         return df
 
     def describe(self):
@@ -617,6 +647,7 @@ class SASdata:
 
         :return:
         """
+        lastlog = len(self.sas._io._log)
         dsopts = self._dsopts().partition(';\n\tformat')
 
         code  = "proc means data=" + self.libref + ".'" + self.table + "'n " + dsopts[0] + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;"
@@ -631,11 +662,14 @@ class SASdata:
         if self.results.upper() == 'PANDAS':
             code = "proc means data=%s.'%s'n %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; %s ods output Summary=work._summary; run;" % (
                 self.libref, self.table, dsopts[0], dsopts[1]+dsopts[2])
-            return self._returnPD(code, '_summary')
+            df = self._returnPD(code, '_summary')
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return df
         else:
             if self.HTML:
                if not ll:
                   ll = self.sas._io.submit(code)
+                  self.sas._lastlog = self.sas._io._log[lastlog:]
                if not self.sas.batch:
                   self.sas._render_html_or_log(ll)
                else:
@@ -643,6 +677,7 @@ class SASdata:
             else:
                if not ll:
                   ll = self.sas._io.submit(code, "text")
+                  self.sas._lastlog = self.sas._io._log[lastlog:]
                if not self.sas.batch:
                   print(ll['LST'])
                else:
@@ -658,6 +693,7 @@ class SASdata:
         :param out:
         :return: 'SASdata'
         """
+        lastlog = len(self.sas._io._log)
         outstr = ''
         if out:
             if isinstance(out, str):
@@ -770,8 +806,10 @@ class SASdata:
         if self.sas.nosub:
             print(modesql + sql + ds1)
             return None
-        ll = self.sas._io.submit(modesql + sql + ds1)
-        return self.sas.sasdata(out_table, libref=out_libref, results=self.results, dsopts=self._dsopts())
+        ll  = self.sas._io.submit(modesql + sql + ds1)
+        ret = self.sas.sasdata(out_table, libref=out_libref, results=self.results, dsopts=self._dsopts())
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+        return ret
 
     def sort(self, by: str, out: object = '', **kwargs) -> 'SASdata':
         """
@@ -793,6 +831,7 @@ class SASdata:
         #. stat_results = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type'))
         #. stat_results2 = stat.reg(model='horsepower = Cylinders EngineSize', by='type', data=wkcars.sort('type','work.cars'))
         """
+        lastlog = len(self.sas._io._log)
         outstr = ''
         options = ''
         if out:
@@ -825,8 +864,10 @@ class SASdata:
         ll = self._is_valid()
         if ll:
             runcode = False
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if runcode:
             ll = self.sas._io.submit(code, "text")
+            self.sas._lastlog = self.sas._io._log[lastlog:]
             elog = []
             for line in ll['LOG'].splitlines():
                 if line[self.sas.logoffset:].startswith('ERROR'):
@@ -837,7 +878,9 @@ class SASdata:
             if not isinstance(out, str):
                 return out
             else:
-                return self.sas.sasdata(table, libref, self.results)
+                ret = self.sas.sasdata(table, libref, self.results)
+                self.sas._lastlog = self.sas._io._log[lastlog:]
+                return ret
         else:
             return self
 
@@ -860,6 +903,7 @@ class SASdata:
         #. cars.add_vars({'PW_ratio': 'weight / horsepower', 'Overhang' : 'length - wheelbase'}, wkcars)
         #. wkcars.head()
         """
+        lastlog = len(self.sas._io._log)
 
         if out is not None:
            if not isinstance(out, SASdata):
@@ -882,6 +926,7 @@ class SASdata:
         ll = self._is_valid()
         if not ll:
             ll = self.sas._io.submit(code, "text")
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             print(ll['LOG'])
         else:
@@ -900,6 +945,7 @@ class SASdata:
         :param kwargs:
         :return: SAS result object
         """
+        lastlog = len(self.sas._io._log)
         # submit autocall macro
         self.sas._io.submit("%aamodel;")
         objtype = "datastep"
@@ -926,7 +972,7 @@ class SASdata:
                 event_code += "\nclass %s ; \nrun;" % target
                 event_code += "data _null_; set work._DMDBCLASSTARGET; where ^(NRAW eq . and CRAW eq '') and lowcase(name)=lowcase('%s');" % target
                 ec = self.sas._io.submit(event_code)
-                HTML(ec['LST'])
+                self.sas.HTML(ec['LST'])
                 # TODO: Finish output of the list of nominals variables
 
         if nominal:
@@ -994,9 +1040,12 @@ class SASdata:
             print(code)
             return
 
-        ll = self.sas._io.submit(code, 'text')
+        ll   = self.sas._io.submit(code, 'text')
         obj1 = sp2.SASProcCommons._objectmethods(self, objname)
-        return sp2.SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
+        ret  = sp2.SASresults(obj1, self.sas, objname, self.sas.nosub, ll['LOG'])
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+        return ret
 
     def to_csv(self, file: str, opts: dict = None) -> str:
         """
@@ -1015,16 +1064,20 @@ class SASdata:
                              }
         :return:
         """
+        lastlog = len(self.sas._io._log)
         opts = opts if opts is not None else {}
         ll = self._is_valid()
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if ll:
             if not self.sas.batch:
                 print(ll['LOG'])
             else:
                 return ll
         else:
-            return self.sas.write_csv(file, self.table, self.libref, self.dsopts, opts)
-
+            csv = self.sas.write_csv(file, self.table, self.libref, self.dsopts, opts)
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return csv
+             
     def score(self, file: str = '', code: str = '', out: 'SASdata' = None) -> 'SASdata':
         """
         This method is meant to update a SAS Data object with a model score file.
@@ -1034,6 +1087,7 @@ class SASdata:
         :param out: Where to the write the file. Defaults to update in place
         :return: The Scored SAS Data object.
         """
+        lastlog = len(self.sas._io._log)
         if out is not None:
             outTable = out.table
             outLibref = out.libref
@@ -1059,6 +1113,8 @@ class SASdata:
             self.HTML = 1
             ll = self.sas._io.submit(code)
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas.DISPLAY(self.sas.HTML(ll['LST']))
         else:
@@ -1106,14 +1162,18 @@ class SASdata:
 
         :return: Pandas data frame
         """
+        lastlog = len(self.sas._io._log)
         ll = self._is_valid()
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if ll:
             print(ll['LOG'])
             return None
         else:
             if self.sas.sascfg.pandas:
                raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
-            return self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
+            df = self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return df
 
     def to_df_CSV(self, tempfile: str=None, tempkeep: bool=False, opts: dict = None, **kwargs) -> 'pandas.DataFrame':
         """
@@ -1174,6 +1234,7 @@ class SASdata:
         :param kwargs:
         :return: JSON str
         """
+        lastlog = len(self.sas._io._log)
         code = "filename file1 temp;\n"
         code += "proc json out=file1"
         if pretty:
@@ -1187,11 +1248,13 @@ class SASdata:
             return None
 
         ll = self._is_valid()
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         runcode = True
         if ll:
             runcode = False
         if runcode:
             ll = self.sas._io.submit(code, "text")
+            self.sas._lastlog = self.sas._io._log[lastlog:]
             elog = []
             fpath=''
             for line in ll['LOG'].splitlines():
@@ -1219,6 +1282,7 @@ class SASdata:
         :param label:
         :return:
         """
+        lastlog = len(self.sas._io._log)
         code = "proc sgplot data=%s.'%s'n %s;" % (self.libref, self.table, self._dsopts())
         if len(options):
             code += "\n\theatmap x='%s'n y='%s'n / %s;" % (x, y, options)
@@ -1242,6 +1306,8 @@ class SASdata:
             self.HTML = 1
             ll = self.sas._io.submit(code)
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas._render_html_or_log(ll)
         else:
@@ -1257,6 +1323,7 @@ class SASdata:
         :param label: LegendLABEL= value for sgplot
         :return:
         """
+        lastlog = len(self.sas._io._log)
         code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts()
         code += ";\n\thistogram '" + var + "'n / scale=count"
         if len(label) > 0:
@@ -1276,6 +1343,8 @@ class SASdata:
             self.HTML = 1
             ll = self.sas._io.submit(code)
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas._render_html_or_log(ll)
         else:
@@ -1291,6 +1360,7 @@ class SASdata:
         :param title: an optional Title for the chart
         :return: Data Table
         """
+        lastlog = len(self.sas._io._log)
         code = "proc freq data=%s.'%s'n %s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
         code += "\n\ttables '%s'n / out=tmpFreqOut;" % var
         code += "\nrun;"
@@ -1309,11 +1379,15 @@ class SASdata:
             code += "\n\ttables '%s'n / out=tmpFreqOut;" % var
             code += "\nrun;"
             code += "\ndata tmpFreqOut; set tmpFreqOut(obs=%s); run;" % n
-            return self._returnPD(code, 'tmpFreqOut')
+
+            df = self._returnPD(code, 'tmpFreqOut')
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return df
         else:
             if self.HTML:
                 if not ll:
                     ll = self.sas._io.submit(code)
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                 if not self.sas.batch:
                     self.sas._render_html_or_log(ll)
                 else:
@@ -1321,6 +1395,7 @@ class SASdata:
             else:
                 if not ll:
                     ll = self.sas._io.submit(code, "text")
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                 if not self.sas.batch:
                     print(ll['LST'])
                 else:
@@ -1336,6 +1411,7 @@ class SASdata:
         :param label: LegendLABEL= value for sgplot
         :return: graphic plot
         """
+        lastlog = len(self.sas._io._log)
         code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts()
         code += ";\n\tvbar '" + var + "'n" 
         if len(label) > 0:
@@ -1355,6 +1431,8 @@ class SASdata:
             self.HTML = 1
             ll = self.sas._io.submit(code)
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas._render_html_or_log(ll)
         else:
@@ -1369,6 +1447,7 @@ class SASdata:
         :param title: an optional Title for the chart
         :return: graph object
         """
+        lastlog = len(self.sas._io._log)
 
         code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";\n"
         if len(title) > 0:
@@ -1395,6 +1474,8 @@ class SASdata:
             self.HTML = 1
             ll = self.sas._io.submit(code)
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas._render_html_or_log(ll)
         else:
@@ -1409,6 +1490,7 @@ class SASdata:
         :param title: an optional Title for the chart
         :return: graph object
         """
+        lastlog = len(self.sas._io._log)
 
         code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";\n"
         if len(title) > 0:
@@ -1435,6 +1517,8 @@ class SASdata:
             self.HTML = 1
             ll = self.sas._io.submit(code)
             self.HTML = html
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         if not self.sas.batch:
             self.sas._render_html_or_log(ll)
         else:
@@ -1452,6 +1536,7 @@ class SASdata:
        :param labelvars: dict of variable names and labels to assign to them; if any lables require outer quotes, provide them
        :return: SASLOG for this step
        """
+       lastlog = len(self.sas._io._log)
        code  = "proc datasets dd="+self.libref+" nolist; modify '"+self.table+"'n " 
 
        if label is not None:
@@ -1489,6 +1574,7 @@ class SASdata:
           return
 
        ll = self.sas._io.submit(code, results='text')
+       self.sas._lastlog = self.sas._io._log[lastlog:]
        if not self.sas.batch:
           print(ll['LOG'])
        else:
@@ -1501,6 +1587,7 @@ class SASdata:
        :param name: new name for this data set
        :return: SASLOG for this step
        """
+       lastlog = len(self.sas._io._log)
        code  = "proc datasets dd="+self.libref+" nolist;\n"
        code += "change '"+self.table+"'n = '"+name+"'n;\nrun;quit;" 
 
@@ -1509,6 +1596,7 @@ class SASdata:
           return
 
        if self.sas.exist(name, self.libref):
+          self.sas._lastlog = self.sas._io._log[lastlog:]
           failmsg = "Data set with new name already exists. Rename failed."
           if not self.sas.batch:
              print(failmsg)
@@ -1524,6 +1612,7 @@ class SASdata:
           failmsg = ""
           self.table = name
 
+       self.sas._lastlog = self.sas._io._log[lastlog:]
        if not self.sas.batch:
           print(failmsg+ll['LOG'])
           return None
@@ -1536,6 +1625,7 @@ class SASdata:
 
        :return: SASLOG for this step
        """
+       lastlog = len(self.sas._io._log)
        code  = "proc delete data="+self.libref + ".'" + self.table + "'n;run;" 
 
        if self.sas.nosub:
@@ -1546,6 +1636,8 @@ class SASdata:
 
        if self.sas.exist(self.table, self.libref):
           ll['LOG'] = "Data set still exists. Delete must have failed.\n"+ll['LOG']
+
+       self.sas._lastlog = self.sas._io._log[lastlog:]
 
        if not self.sas.batch:
           if not quiet:
@@ -1564,6 +1656,7 @@ class SASdata:
        :param force: boolean to force appended even if anomolies exist which could cause dropping or truncating 
        :return: SASLOG for this step
        """
+       lastlog = len(self.sas._io._log)
        new = None
 
        if not self.sas.sascfg.pandas:
@@ -1600,6 +1693,7 @@ class SASdata:
           return
 
        if not self.sas.exist(new.table, new.libref):
+          self.sas._lastlog = self.sas._io._log[lastlog:]
           failmsg = "Data set to be appended doesn't exist. No data was appended."
           if not self.sas.batch:
              print(failmsg)
@@ -1614,6 +1708,7 @@ class SASdata:
        code += ";\nrun;" 
 
        ll = self.sas._io.submit(code, results='text')
+       self.sas._lastlog = self.sas._io._log[lastlog:]
 
        new.delete(quiet=True)
 

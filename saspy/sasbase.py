@@ -969,7 +969,8 @@ class SASsession():
 
         :return: SASdata object
         """
-        dsopts = dsopts if dsopts is not None else {}
+        lastlog = len(self._io._log)
+        dsopts  = dsopts if dsopts is not None else {}
 
         if results == '':
             results = self.results
@@ -978,6 +979,8 @@ class SASsession():
             if not self.batch:
                 print(
                     "Table " + sd.libref + '.' + sd.table + " does not exist. This SASdata object will not be useful until the data set is created.")
+
+        self._lastlog = self._io._log[lastlog:]
         return sd
 
     def saslib(self, libref: str, engine: str = ' ', path: str = '',
@@ -1044,7 +1047,8 @@ class SASsession():
         :param opts: a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
         :return: SASdata object
         """
-        opts = opts if opts is not None else {}
+        lastlog = len(self._io._log)
+        opts    = opts if opts is not None else {}
 
         if results == '':
             results = self.results
@@ -1052,9 +1056,12 @@ class SASsession():
         self._io.read_csv(file, table, libref, self.nosub, opts)
 
         if self.exist(table, libref):
-            return SASdata(self, libref, table, results)
+            sd = SASdata(self, libref, table, results)
         else:
-            return None
+            sd =None
+
+        self._lastlog = self._io._log[lastlog:]
+        return sd
 
     def write_csv(self, file: str, table: str, libref: str = '',
                   dsopts: dict = None, opts: dict = None) -> str:
@@ -1117,12 +1124,14 @@ class SASsession():
         :param permission: permissions to set on the new file. See SAS Filename Statement Doc for syntax
         :return: SAS Log
         """
+        lastlog = len(self._io._log)
         if self.nosub:
             print("too complicated to show the code, read the source :), sorry.")
             return None
         else:
             log = self._io.upload(localfile, remotefile, overwrite, permission, **kwargs)
      
+        self._lastlog = self._io._log[lastlog:]
         return log
 
     def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
@@ -1134,12 +1143,14 @@ class SASsession():
         :param overwrite: overwrite the output file if it exists?
         :return: SAS Log
         """
+        lastlog = len(self._io._log)
         if self.nosub:
             print("too complicated to show the code, read the source :), sorry.")
             return None
         else:
             log = self._io.download(localfile, remotefile, overwrite, **kwargs)
      
+        self._lastlog = self._io._log[lastlog:]
         return log
      
     def df2sd(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '',
@@ -1209,6 +1220,7 @@ class SASsession():
    
         :return: SASdata object
         """
+        lastlog = len(self._io._log)
         if self.sascfg.pandas:
            raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
 
@@ -1231,9 +1243,12 @@ class SASsession():
            dsopts['encoding'] = outencoding
 
         if self.exist(table, libref):
-            return SASdata(self, libref, table, results, dsopts)
+            sd = SASdata(self, libref, table, results, dsopts)
         else:
-            return None
+            sd = None
+
+        self._lastlog = self._io._log[lastlog:]
+        return sd
 
     def sd2df(self, table: str, libref: str = '', dsopts: dict = None, 
               method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
@@ -1452,6 +1467,7 @@ class SASsession():
 
         :return: Pandas data frame
         """
+        lastlog = len(self._io._log)
         if self.sascfg.pandas:
            raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
 
@@ -1466,9 +1482,12 @@ class SASsession():
 
         if self.nosub:
             print("too complicated to show the code, read the source :), sorry.")
-            return None
+            df = None
         else:
-            return self._io.sasdata2dataframe(table, libref, dsopts, method=method, **kwargs)
+            df = self._io.sasdata2dataframe(table, libref, dsopts, method=method, **kwargs)
+
+        self._lastlog = self._io._log[lastlog:]
+        return df
 
     def _dsopts(self, dsopts):
         """
@@ -1848,6 +1867,7 @@ class SASsession():
 
         If you would like a Pandas dataframe returned instead of a list, specify results='pandas'
         """
+        lastlog = len(self._io._log)
 
         if not self.nosub:
            ll = self._io.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+")) LIB_EXT_END=;")
@@ -1877,6 +1897,7 @@ class SASsession():
 
         if results != 'list':
            res = self.sd2df('_saspy_lib_list', 'work')
+           self._lastlog = self._io._log[lastlog:]
            return res
            
         code = """
@@ -1903,6 +1924,7 @@ class SASsession():
            val = log[0]
            tablist.append(tuple((key, val)))                                                         
                                                                                
+        self._lastlog = self._io._log[lastlog:]
         return tablist
 
 
@@ -1912,6 +1934,7 @@ class SASsession():
 
         If you would like a Pandas dataframe returned instead of a dictionary, specify results='pandas'
         """
+        lastlog = len(self._io._log)
 
         if not self.nosub:
            code  = "filename "+fileref+" '"+filepath+"';\n"
@@ -1955,6 +1978,8 @@ class SASsession():
               ll  = self._io.submit(code, results='text')
    
            res = self.sd2df('_SASPY_FILE_INFO', 'work')
+
+           self._lastlog = self._io._log[lastlog:]
            return res
 
 
@@ -2014,6 +2039,7 @@ class SASsession():
               val = log[0].replace('\n', '').strip()
               res[key] = val                                                         
                                                                                   
+        self._lastlog = self._io._log[lastlog:]
         return res
 
     def cat(self, path) -> str:
