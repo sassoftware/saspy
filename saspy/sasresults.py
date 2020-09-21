@@ -94,10 +94,12 @@ class SASresults(object):
         return color_log
 
     def _go_run_code(self, attr) -> dict:
+        lastlog = len(self.sas._io._log)
         graphics = ['PLOT', 'OGRAM', 'PANEL', 'BY', 'MAP']
         if any(x in attr for x in graphics):
             code = '%%getdata(%s, %s);' % (self._name, attr)
             res = self.sas._io.submit(code)
+            self.sas._lastlog = self.sas._io._log[lastlog:]
             return res
         else:
             if self.sas.exist(attr, '_'+self._name):
@@ -110,6 +112,8 @@ class SASresults(object):
             else:
                code = '%%getdata(%s, %s);' % (self._name, attr)
                df   = self.sas._io.submit(code)
+
+            self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
 
 
@@ -121,6 +125,7 @@ class SASresults(object):
         """
         This method shows all the results attributes for a given object
         """
+        lastlog = len(self.sas._io._log)
         if not self.sas.batch:
            for i in self._names:
                if i.upper() != 'LOG' and i.upper() != 'ERROR_LOG':
@@ -130,10 +135,12 @@ class SASresults(object):
                          print("%text "+i+"\n"+str(x)+"\n")
                       else:
                          self.sas.DISPLAY(x)
+           self.sas._lastlog = self.sas._io._log[lastlog:]
         else:
            ret = []
            for i in self._names:
                if i.upper()!='LOG':
                    ret.append(self.__getattr__(i))
+           self.sas._lastlog = self.sas._io._log[lastlog:]
            return ret
 

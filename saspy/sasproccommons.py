@@ -590,6 +590,7 @@ class SASProcCommons:
         :param kwargs: dict (optional)
         :return: sas result object
         """
+        lastlog = len(self.sas._io._log)
         data = kwargs.pop('data', None)
         if isinstance(data, str):
             tempdata = data
@@ -638,6 +639,7 @@ class SASProcCommons:
                 isinstance(error, str)
                 if len(error) > 1:
                     RuntimeWarning("ERRORS found in SAS log: \n%s" % error)
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
                     return SASresults(obj1, self.sas, objname, nosub, log)
                 try:
                     obj1 = SASProcCommons._objectmethods(self, objname)
@@ -649,6 +651,8 @@ class SASProcCommons:
                 nosub = True
         else:
             RuntimeWarning("Error in code submission")
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
         return SASresults(obj1, self.sas, objname, nosub, log)
 
     @staticmethod

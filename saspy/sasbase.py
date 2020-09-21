@@ -596,6 +596,8 @@ class SASsession():
            if regoff == 0 and logoff > 0:
               self.logoffset = logoff
 
+        self._lastlog = self._io._log
+
 
     def __repr__(self):
         """
