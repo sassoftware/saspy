@@ -178,7 +178,7 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         [442.5, '"quoted\x01 string"', 'non\t\tquoted string',44.4,'"leading quote string',    '"leading"and embed\x0Aded string','''"all' "over' 'the "place"''',0],
         [132.5, '"quoted\x02 string"', 'non quoted string',   41.4,'"leading quote string',    '"leading"and embed\x0Dded string','''"all' "over' 'the "place"''',20.7],
         [242.5, '"quoted\x03 string"', 'non quoted string',   42.4,'"leading\t\t quote string','"leading"and embed\x0Aded string','''"all' "over' 'the "place"''',20.8],
-        [342.5, '"quoted\x02 string"', 'non quoted string',   43.4,'"leading quote string',    '"leading"and embed\x0Dded string','''"all' "over' 'the "place"''',10.9],
+        [342.5, '"quoted\x02 string"', '',                    43.4,'"leading quote string',    '"leading"and embed\x0Dded string','''"all' "over' 'the "place"''',10.9],
         [342.5, "'quoted\x01 string'", 'non quoted string',   43.4,'''"leading'quote string''','"leading"and embed\x0Adedstring"','''"all' "over' 'the "place"''',10.9],
         ]
 

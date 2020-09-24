@@ -1529,7 +1529,7 @@ Will use HTML5 for this SASsession.""")
             if   dts[col] == 'N' and var == 'nan':
                var = '.'
             elif dts[col] == 'C':
-               if var == 'nan':
+               if var == 'nan' or len(var) == 0:
                   var = ' '
                else:
                   var = var.replace(colsep, colrep)
