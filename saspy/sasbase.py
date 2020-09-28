@@ -1659,8 +1659,8 @@ class SASsession():
                         provide an object of the type [1, 1.0, ' '] or a string of 'int', 'float' or 'str' 
 
         """
-        ll = self._io.submit("%put " + name + "=&" + name + " "+ name+"END=;\n")
-        l2 = ll['LOG'].rpartition(name + "=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
+        ll = self._io.submit("%put " + name + "BEGIN=&" + name + " "+ name+"END=;\n")
+        l2 = ll['LOG'].rpartition(name + "BEGIN=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
 
         if outtype is not None:
            if   outtype == 'int':
@@ -1696,8 +1696,8 @@ class SASsession():
 
         :return: bool
         """
-        ll = self._io.submit("%put " + name + "=%symexist(" + name + ") "+ name+"END=;\n")
-        l2 = ll['LOG'].rpartition(name + "=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
+        ll = self._io.submit("%put " + name + "BEGIN=%symexist(" + name + ") "+ name+"END=;\n")
+        l2 = ll['LOG'].rpartition(name + "BEGIN=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
 
         var = int(l2)
 
