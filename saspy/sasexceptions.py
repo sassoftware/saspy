@@ -61,5 +61,12 @@ class SASHTTPconnectionError(Exception):
     def __str__(self):
         return 'Failure in GET Connection.\n {}'.format(self.msg)
 
+class SASHTTPsubmissionError(Exception):
+    def __init__(self, msg: str):
+        self.msg = msg
+
+    def __str__(self):
+        return 'Failure in submit().\n {}'.format(self.msg)
+
 
 

@@ -24,8 +24,8 @@ import urllib
 import tempfile as tf
 from time import sleep
 
-from saspy.sasexceptions import (SASHTTPauthenticateError)
-from saspy.sasexceptions import (SASHTTPconnectionError)
+from saspy.sasexceptions import (SASHTTPauthenticateError, SASHTTPconnectionError, SASHTTPsubmissionError)
+
 try:
    import pandas as pd
    import numpy  as np
@@ -138,20 +138,6 @@ class SASconfigHTTP:
          else:
             self.timeout = intout
 
-      inuser = kwargs.get('user', '')              
-      if len(inuser) > 0:
-         if lock and len(user):
-            print("Parameter 'user' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            user = inuser
-
-      inpw = kwargs.get('pw', '')                  
-      if len(inpw) > 0:
-         if lock and len(pw):
-            print("Parameter 'pw' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            pw = inpw
-
       inencoding = kwargs.get('encoding', 'NoOverride')
       if inencoding != 'NoOverride':
          if lock and len(self.encoding):
@@ -226,6 +212,20 @@ class SASconfigHTTP:
    
          if not found:
             print('Did not find key '+self.authkey+' in authinfo file:'+pwf+'\n')
+
+      inuser = kwargs.get('user', '')              
+      if len(inuser) > 0:
+         if lock and len(user):
+            print("Parameter 'user' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            user = inuser
+
+      inpw = kwargs.get('pw', '')                  
+      if len(inpw) > 0:
+         if lock and len(pw):
+            print("Parameter 'pw' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            pw = inpw
 
       while len(user) == 0:
          user = self._prompt("Please enter userid: ")
@@ -351,7 +351,8 @@ class SASconfigHTTP:
          req = conn.getresponse()
       except:
          #print("Failure in GET AuthToken. Could not connect to the logon service. Exception info:\n"+str(sys.exc_info()))
-         raise SASHTTPauthenticateError(msg="Could not connect to the logon service. Exception info:\n"+str(sys.exc_info()))
+         msg="Failure in GET AuthToken. Could not connect to the logon service. Exception info:\n"+str(sys.exc_info())
+         raise SASHTTPauthenticateError(msg)
          #return None
 
       status = req.status
@@ -360,7 +361,7 @@ class SASconfigHTTP:
 
       if status > 299:
          #print("Failure in GET AuthToken. Status="+str(status)+"\nResponse="+resp.decode(self.encoding))
-         msg="Could not connect to the logon service. Exception info:\nStatus="+str(status)+"\nResponse="+str(resp)
+         msg="Failure in GET AuthToken. Status="+str(status)+"\nResponse="+str(resp)
          raise SASHTTPauthenticateError(msg)
          #return None
 
@@ -793,10 +794,13 @@ class SASsessionHTTP():
       resp = req.read()
       conn.close()
 
-      jobid = json.loads(resp.decode(self.sascfg.encoding))
+      try:
+         jobid = json.loads(resp.decode(self.sascfg.encoding))
+      except:
+         raise SASHTTPsubmissionError(msg="Problem parsing response from Compute Service.\n   Status="+str(status)+"\n   Response="+str(resp))
+
       if not jobid or status > 299:
-         print("Problem submitting job to Compute Service.\n   Status code="+str(jobid.get('httpStatusCode'))+"\n   Message="+jobid.get('message'))
-         return dict(LOG=str(jobid), LST='')
+         raise SASHTTPsubmissionError(msg="Problem submitting job to Compute Service.\n   Status code="+str(jobid.get('httpStatusCode'))+"\n   Message="+jobid.get('message'))
 
       for ld in jobid.get('links'):
          if ld.get('method') == 'GET' and ld.get('rel') == 'state':
