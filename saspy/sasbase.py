@@ -1653,9 +1653,9 @@ class SASsession():
 
         """
         if quoting:
-           ll = self._io.submit("%let " + name + "=%" + quoting.upper() + "(" + str(value) + ");\n")
+           ll = self._io.submit("%let " + name + "=%" + quoting.upper() + "(" + str(value) + ");\n", results='text')
         else:
-           ll = self._io.submit("%let " + name + "=" + str(value) + ";\n")
+           ll = self._io.submit("%let " + name + "=" + str(value) + ";\n", results='text')
 
     def symget(self, name: str, outtype=None):
         """
@@ -1664,7 +1664,7 @@ class SASsession():
                         provide an object of the type [1, 1.0, ' '] or a string of 'int', 'float' or 'str' 
 
         """
-        ll = self._io.submit("%put " + name + "BEGIN=&" + name + " "+ name+"END=;\n")
+        ll = self._io.submit("%put " + name + "BEGIN=&" + name + " "+ name+"END=;\n", results='text')
         l2 = ll['LOG'].rpartition(name + "BEGIN=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
 
         if outtype is not None:
