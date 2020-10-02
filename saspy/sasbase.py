@@ -1644,13 +1644,18 @@ class SASsession():
                             optstr += 'NO; '
         return optstr
 
-    def symput(self, name: str, value):
+    def symput(self, name: str, value, quoting='NRBQUOTE'):
         """
         :param name:  name of the macro varable to set
         :param value: python variable, that can be resolved to a string, to use for the value to assign to the macro variable
+        :param quoting: None for 'asis' macro definition. Or any of the special SAS quoting function like \
+                        BQUOTE, NRBQUOTE, QUOTE, NRQUOTE, STR, NRSTR, SUPERQ, ...  default is NRBQUOTE
 
         """
-        ll = self._io.submit("%let " + name + "=%NRBQUOTE(" + str(value) + ");\n")
+        if quoting:
+           ll = self._io.submit("%let " + name + "=%" + quoting.upper() + "(" + str(value) + ");\n")
+        else:
+           ll = self._io.submit("%let " + name + "=" + str(value) + ";\n")
 
     def symget(self, name: str, outtype=None):
         """
