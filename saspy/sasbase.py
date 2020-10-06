@@ -534,27 +534,26 @@ class SASsession():
 
         # validate encoding
         try:
-           pyenc = sas_encoding_mapping[self.sascei]
+           self.pyenc = sas_encoding_mapping[self.sascei]
         except KeyError:
-           pyenc = None
            print("Invalid response from SAS on inital submission. printing the SASLOG as diagnostic")
            print(self._io._log)
            raise
 
-        if pyenc is not None:
+        if self.pyenc is not None:
            if self._io.sascfg.encoding != '':
-              if self._io.sascfg.encoding.lower() not in pyenc:
+              if self._io.sascfg.encoding.lower() not in self.pyenc:
                  print("The encoding value provided doesn't match the SAS session encoding.")
                  print("SAS encoding is "+self.sascei+". Specified encoding is "+self._io.sascfg.encoding+".")
-                 print("Using encoding "+pyenc[0]+" instead to avoid transcoding problems.")
-                 self._io.sascfg.encoding = pyenc[0]
+                 print("Using encoding "+self.pyenc[1]+" instead to avoid transcoding problems.")
+                 self._io.sascfg.encoding = self.pyenc[1]
                  print("You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.")
                  print("""If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it.\n""")
            else:
-              self._io.sascfg.encoding = pyenc[0]
+              self._io.sascfg.encoding = self.pyenc[1]
               if self._io.sascfg.verbose:
                  print("No encoding value provided. Will try to determine the correct encoding.")
-                 print("Setting encoding to "+pyenc[0]+" based upon the SAS session encoding value of "+self.sascei+".\n")
+                 print("Setting encoding to "+self.pyenc[1]+" based upon the SAS session encoding value of "+self.sascei+".\n")
         else:
            print("The SAS session encoding for this session ("+self.sasce+") doesn't have a known Python equivalent encoding.")
            if self._io.sascfg.encoding == '':
@@ -1073,7 +1072,6 @@ class SASsession():
         :param table: the name of the SAS Data Set you want to export to a CSV file
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
-        :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames)
 
             - where is a string
             - keep are strings or list of strings.
@@ -1161,7 +1159,8 @@ class SASsession():
               LF: str = '\x01', CR: str = '\x02',
               colsep: str = '\x03', colrep: str = ' ',
               datetimes: dict={}, outfmts: dict={}, labels: dict={},
-              outencoding: str = '') -> 'SASdata':
+              outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None,
+              **kwargs) -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
@@ -1183,12 +1182,46 @@ class SASsession():
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
-        :param outencoding: the SAS encoding value to use to write out the table, if not the session encoding.
+        :param outdsopts: a dictionary containing output data set options for the table being created \
+                          for instance, compress=, encoding=, index=, outrep=, replace=, rename= ... \
+                          the options will be generated simply as key=value, so if a value needs quotes or parentheses, provide them in the value
+
+            .. code-block:: python
+
+                             {'compress' : 'yes' ,
+                              'encoding' : 'latin9' ,
+                              'replace'  : 'NO' ,
+                              'rename'   : "(col1 = Column_one  col2 = 'Column Two'n)"
+                             }
+
+        :param encode_errors: 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char
+        :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
+                             SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
+            .. code-block:: python
+
+                'exact'  - the default if SAS is in a multibute encodeing. calculate the max number of bytes, in SAS encoding, \
+                           required for the longest actual value. This is slowest but most accurate. For big data, this can \
+                           take excessive time. If SAS is running in a single byte encoding then '1' (see below) is used, not this.
+
+                'safe'   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte \
+                           encoding. This is much faster, but could declare SAS Char variables longer than absolutly required \
+                           for multibyte SAS encodings. If SAS is running in a single byte encoding then '1' (see belsow) is used. \
+                           Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these. \
+                           ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it's variable
+ 
+                [1|2|3|4]- this is 'safe' except the number (1 or 2 or 3 or 4) is the multiplyer to use (BPC) instead of the \
+                           default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default \
+                           used, since charaters can only be 1 byte long so char len == byte len \
+                           For UTF-8 SAS session, 4 is the BPC, so if you know you don't have many actual unicode characters \
+                           you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead \
+                           of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
+                           chars (all the char data is actuall only 1 byte), you could specify 1 since it only requires 1 BPC. 
+
 
         :return: SASdata object
         """
-        return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, 
-                                      LF, CR, colsep, colrep, datetimes, outfmts, labels, outencoding)
+        return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
+                                      datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths, **kwargs)
 
     def dataframe2sasdata(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '', 
                           results: str = '', keep_outer_quotes: bool = False,
@@ -1196,7 +1229,7 @@ class SASsession():
                           LF: str = '\x01', CR: str = '\x02',
                           colsep: str = '\x03', colrep: str = ' ',
                           datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                          outencoding: str = '') -> 'SASdata':
+                          outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None, **kwargs) -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
@@ -1218,7 +1251,43 @@ class SASsession():
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
-        :param outencoding: the SAS encoding value to use to write out the table, if not the session encoding.
+        :param outdsopts: a dictionary containing output data set options for the table being created \
+                          for instance, compress=, encoding=, index=, outrep=, replace=, rename= ... \
+                          the options will be generated simply as key=value, so if a value needs quotes or parentheses, provide them in the value
+
+            .. code-block:: python
+
+                             {'compress' : 'yes' ,
+                              'encoding' : 'latin9' ,
+                              'replace'  : 'NO' ,
+                              'rename'   : "(col1 = Column_one  col2 = 'Column Two'n)"
+                             }
+
+        :param encode_errors: 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char
+        :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
+                             SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
+            .. code-block:: python
+
+                'exact'  - the default if SAS is in a multibute encodeing. calculate the max number of bytes, in SAS encoding, \
+                           required for the longest actual value. This is slowest but most accurate. For big data, this can \
+                           take excessive time. If SAS is running in a single byte encoding then '1' (see below) is used, not this.
+
+                'safe'   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte \
+                           encoding. This is much faster, but could declare SAS Char variables longer than absolutly required \
+                           for multibyte SAS encodings. If SAS is running in a single byte encoding then '1' (see belsow) is used. \
+                           Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these. \
+                           ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it's variable
+ 
+                [1|2|3|4]- this is 'safe' except the number (1 or 2 or 3 or 4) is the multiplyer to use (BPC) instead of the \
+                           default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default \
+                           used, since charaters can only be 1 byte long so char len == byte len \
+                           For UTF-8 SAS session, 4 is the BPC, so if you know you don't have many actual unicode characters \
+                           you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead \
+                           of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
+                           chars (all the char data is actuall only 1 byte), you could specify 1 since it only requires 1 BPC. 
+
+
+        :return: SASdata object
    
         :return: SASdata object
         """
@@ -1231,23 +1300,32 @@ class SASsession():
               print("The libref specified is not assigned in this SAS Session.")
               return None
 
+        # support oringinal implementation of outencoding - should have done it as a ds option to begin with
+        outencoding = kwargs.pop('outencoding', None)
+        if outencoding:
+           outdsopts['encoding'] = outencoding
+
         if results == '':
-            results = self.results
+           results = self.results
         if self.nosub:
-            print("too complicated to show the code, read the source :), sorry.")
-            return None
+           print("too complicated to show the code, read the source :), sorry.")
+           return None
         else:
-            self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, 
-                                       LF, CR, colsep, colrep, datetimes, outfmts, labels, outencoding)
-
-        dsopts = {}
-        if len(outencoding):
-           dsopts['encoding'] = outencoding
-
-        if self.exist(table, libref):
-            sd = SASdata(self, libref, table, results, dsopts)
+           rc = self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
+                                            datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths)
+        if rc:
+           sd = None
+           print("Transcoding error encountered.")
+           print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
         else:
-            sd = None
+           dsopts = {}
+           if outencoding:
+              dsopts['encoding'] = outencoding
+
+           if self.exist(table, libref):
+              sd = SASdata(self, libref, table, results, dsopts)
+           else:
+              sd = None
 
         self._lastlog = self._io._log[lastlog:]
         return sd
@@ -2190,62 +2268,62 @@ sas_datetime_fmts = (
 )
 
 sas_encoding_mapping = {
-'arabic':['iso8859_6', 'iso-8859-6', 'arabic'],
-'big5':['big5', 'big5-tw', 'csbig5'],
-'cyrillic':['iso8859_5', 'iso-8859-5', 'cyrillic'],
-'ebcdic037':['cp037', 'ibm037', 'ibm039'],
-'ebcdic273':['cp273', '273', 'ibm273', 'csibm273'],
-'ebcdic500':['cp500', 'ebcdic-cp-be', 'ebcdic-cp-ch', 'ibm500'],
-'euc-cn':['gb2312', 'chinese', 'csiso58gb231280', 'euc-cn', 'euccn', 'eucgb2312-cn', 'gb2312-1980', 'gb2312-80', 'iso-ir-58'],
-'euc-jp':['euc_jis_2004', 'jisx0213', 'eucjis2004'],
-'euc-kr':['euc_kr', 'euckr', 'korean', 'ksc5601', 'ks_c-5601', 'ks_c-5601-1987', 'ksx1001', 'ks_x-1001'],
-'greek':['iso8859_7', 'iso-8859-7', 'greek', 'greek8'],
-'hebrew':['iso8859_8', 'iso-8859-8', 'hebrew'],
-'ibm-949':['cp949', '949', 'ms949', 'uhc'],
-'kz1048':['kz1048', 'kz_1048', 'strk1048_2002', 'rk1048'],
-'latin10':['iso8859_16', 'iso-8859-16', 'latin10', 'l10'],
-'latin1':['latin_1', 'iso-8859-1', 'iso8859-1', '8859', 'cp819', 'latin', 'latin1', 'l1'],
-'latin2':['iso8859_2', 'iso-8859-2', 'latin2', 'l2'],
-'latin3':['iso8859_3', 'iso-8859-3', 'latin3', 'l3'],
-'latin4':['iso8859_4', 'iso-8859-4', 'latin4', 'l4'],
-'latin5':['iso8859_9', 'iso-8859-9', 'latin5', 'l5'],
-'latin6':['iso8859_10', 'iso-8859-10', 'latin6', 'l6'],
-'latin7':['iso8859_13', 'iso-8859-13', 'latin7', 'l7'],
-'latin8':['iso8859_14', 'iso-8859-14', 'latin8', 'l8'],
-'latin9':['iso8859_15', 'iso-8859-15', 'latin9', 'l9'],
-'ms-932':['cp932', '932', 'ms932', 'mskanji', 'ms-kanji'],
-'msdos737':['cp737'],
-'msdos775':['cp775', 'ibm775'],
-'open_ed-1026':['cp1026', 'ibm1026'],
-'open_ed-1140':['cp1140', 'ibm1140'],
-'open_ed-424':['cp424', 'ebcdic-cp-he', 'ibm424'],
-'open_ed-875':['cp875'],
-'pcoem437':['cp437', '437', 'ibm437'],
-'pcoem850':['cp850', '850', 'ibm850'],
-'pcoem852':['cp852', '852', 'ibm852'],
-'pcoem857':['cp857', '857', 'ibm857'],
-'pcoem858':['cp858', '858', 'ibm858'],
-'pcoem860':['cp860', '860', 'ibm860'],
-'pcoem862':['cp862', '862', 'ibm862'],
-'pcoem863':['cp863'],
-'pcoem864':['cp864', 'ibm864'],
-'pcoem865':['cp865', '865', 'ibm865'],
-'pcoem866':['cp866', '866', 'ibm866'],
-'pcoem869':['cp869', '869', 'cp-gr', 'ibm869'],
-'pcoem874':['cp874'],
-'shift-jis':['shift_jis', 'csshiftjis', 'shiftjis', 'sjis', 's_jis'],
-'thai':['iso8859_11', 'so-8859-11', 'thai'],
-'us-ascii':['ascii', '646', 'us-ascii'],
-'utf-8':['utf_8', 'u8', 'utf', 'utf8', 'utf-8'],
-'warabic':['cp1256', 'windows-1256'],
-'wbaltic':['cp1257', 'windows-1257'],
-'wcyrillic':['cp1251', 'windows-1251'],
-'wgreek':['cp1253', 'windows-1253'],
-'whebrew':['cp1255', 'windows-1255'],
-'wlatin1':['cp1252', 'windows-1252'],
-'wlatin2':['cp1250', 'windows-1250'],
-'wturkish':['cp1254', 'windows-1254'],
-'wvietnamese':['cp1258', 'windows-1258'],
+'arabic':      [1, 'iso8859_6', 'iso-8859-6', 'arabic'],
+'big5':        [2, 'big5', 'big5-tw', 'csbig5'],
+'cyrillic':    [1, 'iso8859_5', 'iso-8859-5', 'cyrillic'],
+'ebcdic037':   [1, 'cp037', 'ibm037', 'ibm039'],
+'ebcdic273':   [1, 'cp273', '273', 'ibm273', 'csibm273'],
+'ebcdic500':   [1, 'cp500', 'ebcdic-cp-be', 'ebcdic-cp-ch', 'ibm500'],
+'euc-cn':      [2, 'gb2312', 'chinese', 'csiso58gb231280', 'euc-cn', 'euccn', 'eucgb2312-cn', 'gb2312-1980', 'gb2312-80', 'iso-ir-58'],
+'euc-jp':      [4, 'euc_jis_2004', 'jisx0213', 'eucjis2004'],
+'euc-kr':      [4, 'euc_kr', 'euckr', 'korean', 'ksc5601', 'ks_c-5601', 'ks_c-5601-1987', 'ksx1001', 'ks_x-1001'],
+'greek':       [1, 'iso8859_7', 'iso-8859-7', 'greek', 'greek8'],
+'hebrew':      [1, 'iso8859_8', 'iso-8859-8', 'hebrew'],
+'ibm-949':     [1, 'cp949', '949', 'ms949', 'uhc'],
+'kz1048':      [1, 'kz1048', 'kz_1048', 'strk1048_2002', 'rk1048'],
+'latin10':     [1, 'iso8859_16', 'iso-8859-16', 'latin10', 'l10'],
+'latin1':      [1, 'latin_1', 'iso-8859-1', 'iso8859-1', '8859', 'cp819', 'latin', 'latin1', 'l1'],
+'latin2':      [1, 'iso8859_2', 'iso-8859-2', 'latin2', 'l2'],
+'latin3':      [1, 'iso8859_3', 'iso-8859-3', 'latin3', 'l3'],
+'latin4':      [1, 'iso8859_4', 'iso-8859-4', 'latin4', 'l4'],
+'latin5':      [1, 'iso8859_9', 'iso-8859-9', 'latin5', 'l5'],
+'latin6':      [1, 'iso8859_10', 'iso-8859-10', 'latin6', 'l6'],
+'latin7':      [1, 'iso8859_13', 'iso-8859-13', 'latin7', 'l7'],
+'latin8':      [1, 'iso8859_14', 'iso-8859-14', 'latin8', 'l8'],
+'latin9':      [1, 'iso8859_15', 'iso-8859-15', 'latin9', 'l9'],
+'ms-932':      [2, 'cp932', '932', 'ms932', 'mskanji', 'ms-kanji'],
+'msdos737':    [1, 'cp737'],
+'msdos775':    [1, 'cp775', 'ibm775'],
+'open_ed-1026':[1, 'cp1026', 'ibm1026'],
+'open_ed-1140':[1, 'cp1140', 'ibm1140'],
+'open_ed-424': [1, 'cp424', 'ebcdic-cp-he', 'ibm424'],
+'open_ed-875': [1, 'cp875'],
+'pcoem437':    [1, 'cp437', '437', 'ibm437'],
+'pcoem850':    [1, 'cp850', '850', 'ibm850'],
+'pcoem852':    [1, 'cp852', '852', 'ibm852'],
+'pcoem857':    [1, 'cp857', '857', 'ibm857'],
+'pcoem858':    [1, 'cp858', '858', 'ibm858'],
+'pcoem860':    [1, 'cp860', '860', 'ibm860'],
+'pcoem862':    [1, 'cp862', '862', 'ibm862'],
+'pcoem863':    [1, 'cp863'],
+'pcoem864':    [1, 'cp864', 'ibm864'],
+'pcoem865':    [1, 'cp865', '865', 'ibm865'],
+'pcoem866':    [1, 'cp866', '866', 'ibm866'],
+'pcoem869':    [1, 'cp869', '869', 'cp-gr', 'ibm869'],
+'pcoem874':    [1, 'cp874'],
+'shift-jis':   [2, 'shift_jis', 'csshiftjis', 'shiftjis', 'sjis', 's_jis'],
+'thai':        [1, 'iso8859_11', 'so-8859-11', 'thai'],
+'us-ascii':    [1, 'ascii', '646', 'us-ascii'],
+'utf-8':       [4, 'utf_8', 'u8', 'utf', 'utf8', 'utf-8'],
+'warabic':     [1, 'cp1256', 'windows-1256'],
+'wbaltic':     [1, 'cp1257', 'windows-1257'],
+'wcyrillic':   [1, 'cp1251', 'windows-1251'],
+'wgreek':      [1, 'cp1253', 'windows-1253'],
+'whebrew':     [1, 'cp1255', 'windows-1255'],
+'wlatin1':     [1, 'cp1252', 'windows-1252'],
+'wlatin2':     [1, 'cp1250', 'windows-1250'],
+'wturkish':    [1, 'cp1254', 'windows-1254'],
+'wvietnamese': [1, 'cp1258', 'windows-1258'],
 'any':None,
 'dec-cn':None,
 'dec-jp':None,

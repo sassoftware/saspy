@@ -1402,8 +1402,11 @@ Will use HTML5 for this SASsession.""")
       return {'Success' : True, 
               'LOG'     : ll['LOG']}
  
-   def _getbytelen(self, x):
+   def _getbytelenF(self, x):
       return len(x.encode(self.sascfg.encoding))
+
+   def _getbytelenR(self, x):
+      return len(x.encode(self.sascfg.encoding, errors='replace'))
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a',
                          libref: str ="", keep_outer_quotes: bool=False,
@@ -1411,7 +1414,7 @@ Will use HTML5 for this SASsession.""")
                          LF: str = '\x01', CR: str = '\x02',
                          colsep: str = '\x03', colrep: str = ' ',
                          datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                         outencoding: str = ''):
+                         outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None):
       """
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
@@ -1425,6 +1428,9 @@ Will use HTML5 for this SASsession.""")
       datetimes - dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
       outfmts - dict with column names and SAS formats to assign to the new SAS data set
       labels  - dict with column names and SAS Labels to assign to the new SAS data set
+      outdsopts - a dictionary containing output data set options for the table being created
+      encode_errors - 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char
+      char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set 
       """
       input   = ""
       xlate   = ""
@@ -1440,19 +1446,35 @@ Will use HTML5 for this SASsession.""")
       dtkeys  = datetimes.keys()
       fmtkeys = outfmts.keys()
       labkeys = labels.keys()
+      bpc     = self._sb.pyenc[0]
+      CorB    = bpc == 1 or (char_lengths and str(char_lengths) != 'exact')
+
+      if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
+         bpc  = int(char_lengths)
 
       for name in range(ncols):
          colname = str(df.columns[name])
          input  += "'"+colname+"'n "
          if colname in labkeys:
             label += "label '"+colname+"'n ="+labels[colname]+";\n"
+
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
-            try:
-               col_l = df[df.columns[name]].astype(str).apply(self._getbytelen).max()
-            except Exception as e:
-               print("Transcoding error encountered.")
-               print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
-               return None
+            if CorB:  # calc max Chars not Bytes
+               col_l = len(df[df.columns[name]].max()) * bpc
+            else:
+               if encode_errors == 'fail':
+                  try:
+                     col_l = df[df.columns[name]].astype(str).apply(self._getbytelenF).max()
+                     #col_l = len(max(df[df.columns[name]].astype(str), key=lambda x:len(x.encode(self.sascfg.encoding)))
+                  except Exception as e:
+                     print("Transcoding error encountered.")
+                     print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                     return 0
+               else:
+                  col_l = df[df.columns[name]].astype(str).apply(self._getbytelenR).max()
+                  #col_l = len(max(df[df.columns[name]].astype(str), key=lambda x:len(x.encode(self.sascfg.encoding, errors='replace')))
+                  #col_l = len(df[df.columns[name]].str.encode(self.sascfg.encoding, errors='replace').max()))
+
             if col_l == 0:
                col_l = 8
             length += " '"+colname+"'n $"+str(col_l)
@@ -1507,10 +1529,15 @@ Will use HTML5 for this SASsession.""")
       if len(libref):
          code += libref+"."
       code += "'"+table.strip()+"'n"
-      if len(outencoding):
-         code += '(encoding="'+outencoding+'");\n'
+
+      if len(outdsopts):
+         code += '('
+         for key in outdsopts:
+            code += key+'='+str(outdsopts[key]) + ' '
+         code += ");\n"
       else:
          code += ";\n"
+
       if len(length):
          code += "length"+length+";\n"
       if len(format):
@@ -1520,8 +1547,9 @@ Will use HTML5 for this SASsession.""")
       code += "infile datalines delimiter="+delim+" STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
       self._asubmit(code, "text")
 
+      row_num = 0
       for row in df.itertuples(index=False):
-      #for row in df.iterrows():
+         row_num += 1
          card  = ""
          for col in range(ncols):
             var = str(row[col])
@@ -1547,7 +1575,17 @@ Will use HTML5 for this SASsession.""")
             card += var
             if col < (ncols-1):
                card += colsep
-         self.stdin.write(card.encode(self.sascfg.encoding)+b'\n')
+
+         if encode_errors == 'fail':
+            try:
+               pgm = card.encode(self.sascfg.encoding)
+            except:
+               self._asubmit(";;;;", "text")
+               ll = self.submit("run;", 'text')
+               return row_num
+         else:
+            pgm = card.encode(self.sascfg.encoding, errors='replace')
+         self.stdin.write(pgm+b'\n')
 
          log = self.stderr.read1(4096)
          if len(log) > 0:
@@ -1555,7 +1593,7 @@ Will use HTML5 for this SASsession.""")
 
       self._asubmit(";;;;", "text")
       ll = self.submit("run;", 'text')
-      return
+      return None
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
                          rowsep: str = '\x01', colsep: str = '\x02',
