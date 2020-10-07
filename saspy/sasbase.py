@@ -1199,24 +1199,23 @@ class SASsession():
                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
             .. code-block:: python
 
-                'exact'  - the default if SAS is in a multibute encodeing. calculate the max number of bytes, in SAS encoding, \
+                'exact'  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding, \
                            required for the longest actual value. This is slowest but most accurate. For big data, this can \
                            take excessive time. If SAS is running in a single byte encoding then '1' (see below) is used, not this.
 
                 'safe'   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte \
-                           encoding. This is much faster, but could declare SAS Char variables longer than absolutly required \
-                           for multibyte SAS encodings. If SAS is running in a single byte encoding then '1' (see belsow) is used. \
+                           encoding. This is much faster, but could declare SAS Char variables longer than absolutely required \
+                           for multibyte SAS encodings. If SAS is running in a single byte encoding then '1' (see below) is used. \
                            Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these. \
                            ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it's variable
  
-                [1|2|3|4]- this is 'safe' except the number (1 or 2 or 3 or 4) is the multiplyer to use (BPC) instead of the \
+                [1|2|3|4]- this is 'safe' except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the \
                            default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default \
-                           used, since charaters can only be 1 byte long so char len == byte len \
+                           used, since characters can only be 1 byte long so char len == byte len \
                            For UTF-8 SAS session, 4 is the BPC, so if you know you don't have many actual unicode characters \
                            you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead \
                            of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
-                           chars (all the char data is actuall only 1 byte), you could specify 1 since it only requires 1 BPC. 
-
+                           chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC. 
 
         :return: SASdata object
         """
@@ -1268,27 +1267,24 @@ class SASsession():
                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
             .. code-block:: python
 
-                'exact'  - the default if SAS is in a multibute encodeing. calculate the max number of bytes, in SAS encoding, \
+                'exact'  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding, \
                            required for the longest actual value. This is slowest but most accurate. For big data, this can \
                            take excessive time. If SAS is running in a single byte encoding then '1' (see below) is used, not this.
 
                 'safe'   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte \
-                           encoding. This is much faster, but could declare SAS Char variables longer than absolutly required \
-                           for multibyte SAS encodings. If SAS is running in a single byte encoding then '1' (see belsow) is used. \
+                           encoding. This is much faster, but could declare SAS Char variables longer than absolutely required \
+                           for multibyte SAS encodings. If SAS is running in a single byte encoding then '1' (see below) is used. \
                            Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these. \
                            ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it's variable
  
-                [1|2|3|4]- this is 'safe' except the number (1 or 2 or 3 or 4) is the multiplyer to use (BPC) instead of the \
+                [1|2|3|4]- this is 'safe' except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the \
                            default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default \
-                           used, since charaters can only be 1 byte long so char len == byte len \
+                           used, since characters can only be 1 byte long so char len == byte len \
                            For UTF-8 SAS session, 4 is the BPC, so if you know you don't have many actual unicode characters \
                            you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead \
                            of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
-                           chars (all the char data is actuall only 1 byte), you could specify 1 since it only requires 1 BPC. 
+                           chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC. 
 
-
-        :return: SASdata object
-   
         :return: SASdata object
         """
         lastlog = len(self._io._log)
@@ -1312,12 +1308,8 @@ class SASsession():
            return None
         else:
            rc = self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
-                                            datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths)
-        if rc:
-           sd = None
-           print("Transcoding error encountered.")
-           print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
-        else:
+                                            datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths, **kwargs)
+        if rc is None:
            dsopts = {}
            if outencoding:
               dsopts['encoding'] = outencoding
@@ -1326,6 +1318,8 @@ class SASsession():
               sd = SASdata(self, libref, table, results, dsopts)
            else:
               sd = None
+        else:
+           sd = None
 
         self._lastlog = self._io._log[lastlog:]
         return sd

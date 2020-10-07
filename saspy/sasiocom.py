@@ -641,7 +641,8 @@ class SASSessionCOM(object):
                           LF: str = '\x01', CR: str = '\x02',
                           colsep: str = '\x03', colrep: str = ' ',
                           datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                          outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None):
+                          outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None,
+                          **kwargs):
         """
         Create a SAS dataset from a pandas data frame.
         :param df [pd.DataFrame]: Pandas data frame containing data to write.

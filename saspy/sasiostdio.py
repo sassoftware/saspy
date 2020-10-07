@@ -1414,7 +1414,8 @@ Will use HTML5 for this SASsession.""")
                          LF: str = '\x01', CR: str = '\x02',
                          colsep: str = '\x03', colrep: str = ' ',
                          datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                         outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None):
+                         outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None,
+                         **kwargs):
       """
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
@@ -1464,16 +1465,15 @@ Will use HTML5 for this SASsession.""")
             else:
                if encode_errors == 'fail':
                   try:
-                     col_l = df[df.columns[name]].astype(str).apply(self._getbytelenF).max()
-                     #col_l = len(max(df[df.columns[name]].astype(str), key=lambda x:len(x.encode(self.sascfg.encoding)))
+                     #col_l = df[df.columns[name]].astype(str).apply(self._getbytelenF).max()
+                     col_l = len(df[df.columns[name]].str.encode(self.sascfg.encoding).max())
                   except Exception as e:
                      print("Transcoding error encountered.")
                      print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
-                     return 0
+                     return -1
                else:
-                  col_l = df[df.columns[name]].astype(str).apply(self._getbytelenR).max()
-                  #col_l = len(max(df[df.columns[name]].astype(str), key=lambda x:len(x.encode(self.sascfg.encoding, errors='replace')))
-                  #col_l = len(df[df.columns[name]].str.encode(self.sascfg.encoding, errors='replace').max()))
+                  #col_l = df[df.columns[name]].astype(str).apply(self._getbytelenR).max()
+                  col_l = len(df[df.columns[name]].str.encode(self.sascfg.encoding, errors='replace').max())
 
             if col_l == 0:
                col_l = 8
@@ -1579,9 +1579,11 @@ Will use HTML5 for this SASsession.""")
          if encode_errors == 'fail':
             try:
                pgm = card.encode(self.sascfg.encoding)
-            except:
+            except Exception as e:
                self._asubmit(";;;;", "text")
                ll = self.submit("run;", 'text')
+               print("Transcoding error encountered.")
+               print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                return row_num
          else:
             pgm = card.encode(self.sascfg.encoding, errors='replace')
