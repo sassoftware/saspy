@@ -1476,6 +1476,8 @@ Will use HTML5 for this SASsession.""")
       if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
          bpc  = int(char_lengths)
 
+      import time
+      starttime = time.time()
       for name in range(ncols):
          colname = str(df.columns[name])
          input  += "'"+colname+"'n "
@@ -1548,6 +1550,7 @@ Will use HTML5 for this SASsession.""")
                else:
                   dts.append('N')
 
+      print("time (in seconds) to calculate column lengths= ",  time.time() - starttime)
       code = "data "
       if len(libref):
          code += libref+"."
@@ -1570,6 +1573,8 @@ Will use HTML5 for this SASsession.""")
       code += "else do;\n input "+input+";\n"+xlate+";\nend;\ndatalines4;"
       self._asubmit(code, "text")
 
+      blksz = int(kwargs.get('blocksize', 4000))
+      noencode = self._sb.sascei == 'utf-8' or encode_errors == 'ignore'
       row_num = 0
       code = ""
       for row in df.itertuples(index=False):
@@ -1601,49 +1606,39 @@ Will use HTML5 for this SASsession.""")
                card += colsep
          code += card+"\n"
 
-         if len(code) > 4000:
-            if self._sb.sascei != 'utf-8':
+         if len(code) > blksz:
+            if not noencode:
                if encode_errors == 'fail':
                   if CorB:
                      try:
                         chk = code.encode(self.sascfg.encoding)
-                        pgm = code
                      except Exception as e:
                         self._asubmit(";;;;\n;;;;", "text")
                         ll = self.submit("quit;", 'text')
                         print("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
                         print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                         return row_num
-                  else:
-                     pgm = code
                else:
-                  pgm = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
-            else:
-               pgm = code
+                 code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
 
-            self._asubmit(pgm, "text")
+            self._asubmit(code, "text")
             code = ""
 
-      if self._sb.sascei != 'utf-8':
+      if not noencode:
          if encode_errors == 'fail':
             if CorB:
                try:
                   chk = code.encode(self.sascfg.encoding)
-                  pgm = code
                except Exception as e:
                   self._asubmit(";;;;\n;;;;", "text")
                   ll = self.submit("quit;", 'text')
                   print("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
                   print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                   return  row_num
-            else:
-               pgm = code
          else:
-            pgm = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
-      else:
-         pgm = code
+            code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
        
-      self._asubmit(pgm+";;;;\n;;;;", "text")
+      self._asubmit(code+";;;;\n;;;;", "text")
       ll = self.submit("quit;", 'text')
       return None
 

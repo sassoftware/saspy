@@ -1194,7 +1194,9 @@ class SASsession():
                               'rename'   : "(col1 = Column_one  col2 = 'Column Two'n)"
                              }
 
-        :param encode_errors: 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char
+        :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail' which, other choice is to 'replace' \
+                              invalid chars with the replacement char. 'ignore' doesn't try to transcode in python, so you \
+                              get whatever happens in SAS based upon the data you send over. 
         :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
             .. code-block:: python
@@ -1262,7 +1264,9 @@ class SASsession():
                               'rename'   : "(col1 = Column_one  col2 = 'Column Two'n)"
                              }
 
-        :param encode_errors: 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char
+        :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail' which, other choice is to 'replace' \
+                              invalid chars with the replacement char. 'ignore' doesn't try to transcode in python, so you \
+                              get whatever happens in SAS based upon the data you send over. 
         :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
             .. code-block:: python
