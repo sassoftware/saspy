@@ -1470,9 +1470,9 @@ Will use HTML5 for this SASsession.""")
       dtkeys  = datetimes.keys()
       fmtkeys = outfmts.keys()
       labkeys = labels.keys()
+
       bpc     = self._sb.pyenc[0]
       CorB    = bpc == 1 or (char_lengths and str(char_lengths) != 'exact')
-
       if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
          bpc  = int(char_lengths)
 
@@ -1486,19 +1486,19 @@ Will use HTML5 for this SASsession.""")
 
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
             if CorB:  # calc max Chars not Bytes
-               col_l = len(df[df.columns[name]].max()) * bpc
+               col_l = max(df[df.columns[name]].astype(str).map(len)) * bpc 
             else:
                if encode_errors == 'fail':
-                  try:
-                     #col_l = df[df.columns[name]].astype(str).apply(self._getbytelenF).max()
-                     col_l = len(df[df.columns[name]].str.encode(self.sascfg.encoding).max())
+                  try: 
+                     col_l = max(df[df.columns[name]].apply(lambda x: len(str(x).encode(self.sascfg.encoding))))
+                     #col_l = max(df[df.columns[name]].astype(str).apply(self._getbytelenF))
                   except Exception as e:
                      print("Transcoding error encountered.")
                      print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                      return -1
                else:
-                  #col_l = df[df.columns[name]].astype(str).apply(self._getbytelenR).max()
-                  col_l = len(df[df.columns[name]].str.encode(self.sascfg.encoding, errors='replace').max())
+                  col_l = max(df[df.columns[name]].apply(lambda x: len(str(x).encode(self.sascfg.encoding, errors='replace'))))
+                  #col_l = max(df[df.columns[name]].astype(str).apply(self._getbytelenR))
 
             if col_l == 0:
                col_l = 8
