@@ -1461,17 +1461,17 @@ Will use HTML5 for this SASsession.""")
 
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
             if CorB:  # calc max Chars not Bytes
-               col_l = max(df[df.columns[name]].astype(str).map(len)) * bpc 
+               col_l = df[df.columns[name]].astype(str).map(len).max() * bpc 
             else:
                if encode_errors == 'fail':
                   try:
-                     col_l = max(df[df.columns[name]].apply(lambda x: len( str(x).encode(self.sascfg.encoding))))
+                     col_l = df[df.columns[name]].astype(str).apply(lambda x: len(x.encode(self.sascfg.encoding))).max()
                   except Exception as e:
                      print("Transcoding error encountered.")
                      print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                      return -1
                else:
-                  col_l = max(df[df.columns[name]].apply(lambda x: len( str(x).encode(self.sascfg.encoding, errors='replace'))))
+                  col_l = df[df.columns[name]].astype(str).apply(lambda x: len(x.encode(self.sascfg.encoding, errors='replace'))).max()
 
             if col_l == 0:
                col_l = 8
@@ -1545,7 +1545,9 @@ Will use HTML5 for this SASsession.""")
       code += "infile datalines delimiter="+delim+" STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
       self._asubmit(code, "text")
 
+      blksz = int(kwargs.get('blocksize', 4000))
       row_num = 0
+      code = ""
       for row in df.itertuples(index=False):
          row_num += 1
          card  = ""
@@ -1573,26 +1575,43 @@ Will use HTML5 for this SASsession.""")
             card += var
             if col < (ncols-1):
                card += colsep
+         code += card+"\n"
 
-         if encode_errors == 'fail':
+         if len(code) > blksz:
+            if encode_errors != 'replace':
+               try:
+                  code = code.encode(self.sascfg.encoding)
+               except Exception as e:
+                  self._asubmit(";;;;\n;;;;", "text")
+                  ll = self.submit("quit;", 'text')
+                  print("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
+                  print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                  return row_num
+            else:
+               code = code.encode(self.sascfg.encoding, errors='replace')
+            self.stdin.write(code+b'\n')
+            code = ""
+          
+            log = self.stderr.read1(4096)
+            if len(log) > 0:
+               self._log += log.decode(self.sascfg.encoding, errors='replace')
+
+      if len(code):
+         if encode_errors != 'replace':
             try:
-               pgm = card.encode(self.sascfg.encoding)
+               code = code.encode(self.sascfg.encoding)
             except Exception as e:
-               self._asubmit(";;;;", "text")
-               ll = self.submit("run;", 'text')
-               print("Transcoding error encountered.")
+               self._asubmit(";;;;\n;;;;", "text")
+               ll = self.submit("quit;", 'text')
+               print("Transcoding error encountered. Data transfer stopped on row "+str(row_num))
                print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                return row_num
          else:
-            pgm = card.encode(self.sascfg.encoding, errors='replace')
-         self.stdin.write(pgm+b'\n')
+            code = code.encode(self.sascfg.encoding, errors='replace')
+         self.stdin.write(code+b'\n')
 
-         log = self.stderr.read1(4096)
-         if len(log) > 0:
-            self._log += log.decode(self.sascfg.encoding, errors='replace')
-
-      self._asubmit(";;;;", "text")
-      ll = self.submit("run;", 'text')
+      self._asubmit(";;;;\n;;;;", "text")
+      ll = self.submit("quit;", 'text')
       return None
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
