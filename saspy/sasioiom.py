@@ -1473,11 +1473,15 @@ Will use HTML5 for this SASsession.""")
 
       bpc     = self._sb.pyenc[0]
       CorB    = bpc == 1 or (char_lengths and str(char_lengths) != 'exact')
-      if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
-         bpc  = int(char_lengths)
 
-      import time
-      starttime = time.time()
+      if type(char_lengths) is not dict:
+         charlens = self._sb._df_col_lengths(df, encode_errors, char_lengths)
+      else:
+         charlens = char_lengths 
+
+      if charlens is None:
+         return -1
+
       for name in range(ncols):
          colname = str(df.columns[name])
          input  += "'"+colname+"'n "
@@ -1485,24 +1489,11 @@ Will use HTML5 for this SASsession.""")
             label += "label '"+colname+"'n ="+labels[colname]+";\n"
 
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
-            if CorB:  # calc max Chars not Bytes
-               col_l = df[df.columns[name]].astype(str).map(len).max() * bpc 
-            else:
-               if encode_errors == 'fail':
-                  try: 
-                     col_l = df[df.columns[name]].astype(str).apply(lambda x: len(x.encode(self.sascfg.encoding))).max()
-                     #col_l = df[df.columns[name]].astype(str).apply(self._getbytelenF).max()
-                  except Exception as e:
-                     print("Transcoding error encountered.")
-                     print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
-                     return -1
-               else:
-                  col_l = df[df.columns[name]].astype(str).apply(lambda x: len(x.encode(self.sascfg.encoding, errors='replace'))).max
-                  #col_l = df[df.columns[name]].astype(str).apply(self._getbytelenR).max()
-
-            if col_l == 0:
-               col_l = 8
-            length += " '"+colname+"'n $"+str(col_l)
+            try:
+               length += " '"+colname+"'n $"+str(charlens[colname])
+            except KeyError as e:
+               print("Dictionary provided as char_lengths is missing column: "+colname)
+               raise e
             if colname in fmtkeys:
                format += "'"+colname+"'n "+outfmts[colname]+" "
             if keep_outer_quotes:
@@ -1550,7 +1541,6 @@ Will use HTML5 for this SASsession.""")
                else:
                   dts.append('N')
 
-      print("time (in seconds) to calculate column lengths= ",  time.time() - starttime)
       code = "data "
       if len(libref):
          code += libref+"."

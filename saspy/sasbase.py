@@ -1153,6 +1153,75 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return log
      
+    def _df_col_lengths(self, df: 'pandas.DataFrame', encode_errors: str = 'fail', char_lengths = None,
+                        **kwargs) -> dict:
+        """
+        This is a utility method for df2sd, use to get the character columns lengths from a dataframe to use to
+        create a SAS data set. This can be called by the user and the returned dict can be passed in to df2sd via
+        the char_lengths= option. For big data frames, this can take a long time, so this can be used to do it once,
+        and then the dictionary returned can be provided to df2sd each time it's called to avoid recalculating this again. 
+
+        :param df: :class:`pandas.DataFrame` Pandas Data Frame to import to a SAS Data Set
+
+        :param encode_errors: 'fail', 'replace' - default is to 'fail', other choice is to 'replace' \
+                              invalid chars with the replacement char. 
+        :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
+                             SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
+            .. code-block:: python
+
+                'exact'  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding, \
+                           required for the longest actual value. This is slowest but most accurate. For big data, this can \
+                           take excessive time. If SAS is running in a single byte encoding then '1' (see below) is used, not this.
+
+                'safe'   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte \
+                           encoding. This is much faster, but could declare SAS Char variables longer than absolutely required \
+                           for multibyte SAS encodings. If SAS is running in a single byte encoding then '1' (see below) is used. \
+                           Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these. \
+                           ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it's variable
+ 
+                [1|2|3|4]- this is 'safe' except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the \
+                           default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default \
+                           used, since characters can only be 1 byte long so char len == byte len \
+                           For UTF-8 SAS session, 4 is the BPC, so if you know you don't have many actual unicode characters \
+                           you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead \
+                           of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
+                           chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC. 
+
+        :return: SASdata object
+        """
+        ret = {}
+
+        bpc     = self.pyenc[0]
+        CorB    = bpc == 1 or (char_lengths and str(char_lengths) != 'exact')
+        if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
+           bpc  = int(char_lengths)
+      
+        import time
+        starttime = time.time()
+        for name in range(len(df.columns)):
+           colname = str(df.columns[name])
+           if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
+              if CorB:  # calc max Chars not Bytes
+                 col_l = df[df.columns[name]].astype(str).map(len).max() * bpc 
+              else:
+                 if encode_errors == 'fail':
+                    try: 
+                       col_l = df[df.columns[name]].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding))).max()
+                    except Exception as e:
+                       print("Transcoding error encountered.")
+                       print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                       return None
+                 else:
+                    col_l = df[df.columns[name]].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
+              if col_l == 0:
+                 col_l = 8
+              ret[colname] = col_l
+
+        print("time (in seconds) to calculate column lengths= ",  time.time() - starttime)
+
+        return ret
+
+
     def df2sd(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '',
               results: str = '', keep_outer_quotes: bool = False,
                                  embedded_newlines: bool = True, 
