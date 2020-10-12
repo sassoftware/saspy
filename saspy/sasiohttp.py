@@ -1349,10 +1349,16 @@ class SASsessionHTTP():
          varlist.append(lst[i].get('name'))
          vartype.append(lst[i].get('type'))
 
-      code  = "data _null_; set work.sasdata2dataframe(obs=1);put 'FMT_CATS=';\n"
+      topts = dict(dsopts)
+      topts.pop('firstobs', None)
+      topts.pop('obs', None)
+   
+      code  = "data work._n_u_l_l_;output;run;\n"
+      code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+   
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "run;\n"
+      code += "stop;\nrun;\n"
    
       ll = self.submit(code, "text")
 
@@ -1526,10 +1532,16 @@ class SASsessionHTTP():
          varlist.append(lst[i].get('name'))
          vartype.append(lst[i].get('type'))
 
-      code  = "data _null_; set work.sasdata2dataframe(obs=1);put 'FMT_CATS=';\n"
+      topts = dict(dsopts)
+      topts.pop('firstobs', None)
+      topts.pop('obs', None)
+   
+      code  = "data work._n_u_l_l_;output;run;\n"
+      code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+   
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "run;\n"
+      code += "stop;\nrun;\n"
    
       ll = self.submit(code, "text")
 
@@ -1671,10 +1683,16 @@ class SASsessionHTTP():
          varlist.append(lst[i].get('name'))
          vartype.append(lst[i].get('type'))
 
-      code  = "data _null_; set work.sasdata2dataframe(obs=1);put 'FMT_CATS=';\n"
+      topts = dict(dsopts)
+      topts.pop('firstobs', None)
+      topts.pop('obs', None)
+   
+      code  = "data work._n_u_l_l_;output;run;\n"
+      code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+   
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "run;\n"
+      code += "stop;\nrun;\n"
    
       ll = self.submit(code, "text")
 

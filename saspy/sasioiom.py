@@ -1649,16 +1649,16 @@ Will use HTML5 for this SASsession.""")
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
 
-      topts             = dict(dsopts)
-      topts['obs']      = 0
-      topts['firstobs'] = ''
+      topts = dict(dsopts)
+      topts.pop('firstobs', None)
+      topts.pop('obs', None)
    
       code  = "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
    
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "run;\nproc delete data=work._n_u_l_l_;run;"
+      code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
    
       ll = self.submit(code, "text")
    
@@ -1918,16 +1918,16 @@ Will use HTML5 for this SASsession.""")
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
 
-      topts             = dict(dsopts)
-      topts['obs']      = 0
-      topts['firstobs'] = ''
-
+      topts = dict(dsopts)
+      topts.pop('firstobs', None)
+      topts.pop('obs', None)
+   
       code  = "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
-
+   
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "run;\nproc delete data=work._n_u_l_l_;run;"
+      code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
 
       ll = self.submit(code, "text")
 
@@ -2174,16 +2174,16 @@ Will use HTML5 for this SASsession.""")
       vartype = l2[2].split("\n", nvars)
       del vartype[nvars]
 
-      topts             = dict(dsopts)
-      topts['obs']      = 0
-      topts['firstobs'] = ''
-
+      topts = dict(dsopts)
+      topts.pop('firstobs', None)
+      topts.pop('obs', None)
+   
       code  = "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
 
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "run;\nproc delete data=work._n_u_l_l_;run;"
+      code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
 
       ll = self.submit(code, "text")
 

@@ -500,9 +500,10 @@ class SASdata:
             else:
                 return self
 
-    def contents(self):
+    def contents(self, results=None):
         """
         display metadata about the table. size, number of rows, columns and their data type ...
+        You can override the format of the output with the results= option for this invocation
 
         :return: output
         """
@@ -513,8 +514,10 @@ class SASdata:
             print(code)
             return
 
+        results = self.results.upper() if results is None else results.upper()
+
         ll = self._is_valid()
-        if self.results.upper() == 'PANDAS':
+        if results == 'PANDAS':
             code  = "proc contents data=%s.'%s'n %s ;" % (self.libref, self.table, self._dsopts())
             code += "ods output Attributes=work._attributes;"
             code += "ods output EngineHost=work._EngineHost;"
@@ -525,7 +528,7 @@ class SASdata:
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
         else:
-            if self.HTML:
+            if results == 'HTML' and self.HTML:
                 if not ll:
                     ll = self.sas._io.submit(code)
                     self.sas._lastlog = self.sas._io._log[lastlog:]
