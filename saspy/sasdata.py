@@ -85,7 +85,18 @@ class SASdata:
 
         if len(libref):
             self.libref = libref
+
+            code  = "%let engine=BAD;\n"
+            code += "proc sql;select distinct engine into :engine from "
+            code += "sashelp.VLIBNAM where libname = '{}';".format(libref.upper()) 
+            code += ";%put engstart=&engine engend=;\nquit;"
+            ll = self.sas._io.submit(code, "text")
+           
+            eng = ll['LOG'].rpartition("engstart=")
+            eng = eng[2].partition(" engend=")
+            self.engine = eng[0].strip()
         else:
+            self.engine = 'BASE'
             if self.sas.exist(table, libref='user'):
                 self.libref = 'USER'
             else:
@@ -203,10 +214,20 @@ class SASdata:
         :return:
         """
         lastlog = len(self.sas._io._log)
-        topts = dict(self.dsopts)
-        topts['obs'] = obs
-        if 'firstobs' in self.dsopts.keys():
-           topts['obs'] = self.dsopts['firstobs'] + obs
+
+        topts   = dict(self.dsopts) 
+        optkeys = self.dsopts.keys()
+
+        if self.engine != 'SPDE':
+           firstobs = topts.get('firstobs', 1)
+           topts['obs'] = min(topts.get('obs', firstobs+obs-1), firstobs+obs-1) 
+        else:
+           firstobs = topts.get('startobs', 1)
+           topts['endobs'] = min(topts.get('endobs', topts.get('obs', firstobs+obs-1)), firstobs+obs-1) 
+
+           if 'obs' in optkeys:
+              del topts['obs']  
+
         code = "proc print data=" + self.libref + ".'" + self.table + "'n " + self.sas._dsopts(topts) + ";run;"
 
         if self.sas.nosub:
@@ -246,41 +267,43 @@ class SASdata:
         :return:
         """   
         lastlog = len(self.sas._io._log)
-        code  = "%let lastobs=-1;\n"
-        code += "proc sql;select count(*) format best32. into :lastobs from "
-        code += self.libref + ".'" + self.table + "'n " + self._dsopts()
-        code += ";%put lastobs=&lastobs lastobsend=;\nquit;"
 
         nosub = self.sas.nosub
         self.sas.nosub = False
+        nobs = self.obs()
+        self.sas.nosub = nosub
 
-        le = self._is_valid()
-        if not le:
-            ll = self.sas._io.submit(code, "text")
-
-            lastobs = ll['LOG'].rpartition("lastobs=")
-            lastobs = lastobs[2].partition(" lastobsend=")
-            lastobs = int(lastobs[0])
-        else:
-            lastobs = obs
-
-        if lastobs == -1:
-            print("The number of obs was not able to be determined. Check the SAS log (below) for errors.")
-            print(ll['LOG'])
+        if nobs is None:
             return None
 
-        firstobs = lastobs - (obs - 1)
-        if firstobs < 1:
-            firstobs = 1
+        if nobs < obs:
+            obs = nobs
 
-        topts = dict(self.dsopts)
-        topts['obs'] = lastobs
-        topts['firstobs'] = firstobs
+        topts   = dict(self.dsopts)
+        optkeys = topts.keys()
+
+        if self.engine != 'SPDE':
+           firstobs = topts.get('firstobs', 1)
+           lastobs  = topts.get('obs', nobs+firstobs-1)
+           firstobs = max(lastobs - obs+1, firstobs)
+   
+           topts['obs']      = lastobs
+           topts['firstobs'] = firstobs
+   
+        else:
+           firstobs = topts.get('startobs', 1)
+           lastobs  = topts.get('endobs', topts.get('obs', nobs+firstobs-1))
+           firstobs = max(lastobs - obs+1, firstobs)
+   
+           topts['endobs']   = lastobs
+           topts['startobs'] = firstobs
+
+           if 'obs' in optkeys: 
+              del topts['obs']  
 
         code  = "proc print data=" + self.libref + ".'" 
         code += self.table + "'n " + self.sas._dsopts(topts) + ";run;"
 
-        self.sas.nosub = nosub
         if self.sas.nosub:
             print(code)
             return
@@ -318,6 +341,11 @@ class SASdata:
         return the number of observations for your SASdata object
         """
         lastlog = len(self.sas._io._log)
+
+        if self.engine == 'SPDE':
+           if self.dsopts.get('startobs', None) or self.dsopts.get('endobs', None):
+              force = True
+
         code  = "%let lastobs=-1;\n"
         if not force:
            code += "proc sql;select count(*) format best32. into :lastobs from "+ self.libref + ".'" + self.table + "'n " + self._dsopts() + ";"
