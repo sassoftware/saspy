@@ -1263,7 +1263,7 @@ class SASsession():
                               'rename'   : "(col1 = Column_one  col2 = 'Column Two'n)"
                              }
 
-        :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail' which, other choice is to 'replace' \
+        :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail', other choice is to 'replace' \
                               invalid chars with the replacement char. 'ignore' doesn't try to transcode in python, so you \
                               get whatever happens in SAS based upon the data you send over. 
         :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
@@ -1287,6 +1287,8 @@ class SASsession():
                            you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead \
                            of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
                            chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC. 
+
+                dictionary - a dictionary containing all of the char column names and the lengths to use for defining the SAS variables
 
         :return: SASdata object
         """
@@ -1333,7 +1335,7 @@ class SASsession():
                               'rename'   : "(col1 = Column_one  col2 = 'Column Two'n)"
                              }
 
-        :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail' which, other choice is to 'replace' \
+        :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail', other choice is to 'replace' \
                               invalid chars with the replacement char. 'ignore' doesn't try to transcode in python, so you \
                               get whatever happens in SAS based upon the data you send over. 
         :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
@@ -1357,6 +1359,8 @@ class SASsession():
                            you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead \
                            of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
                            chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC. 
+
+                dictionary - a dictionary containing all of the char column names and the lengths to use for defining the SAS variables
 
         :return: SASdata object
         """

@@ -1459,6 +1459,8 @@ Will use HTML5 for this SASsession.""")
       if charlens is None:
          return -1
 
+      charlens = {k.upper():v for k,v in charlens.items()}
+
       for name in range(ncols):
          colname = str(df.columns[name])
          input  += "'"+colname+"'n "
@@ -1467,7 +1469,7 @@ Will use HTML5 for this SASsession.""")
 
          if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
             try:
-               length += " '"+colname+"'n $"+str(charlens[colname])
+               length += " '"+colname+"'n $"+str(charlens[colname.upper()])
             except KeyError as e:
                print("Dictionary provided as char_lengths is missing column: "+colname)
                raise e
