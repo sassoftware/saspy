@@ -1198,21 +1198,21 @@ class SASsession():
       
         import time
         starttime = time.time()
-        for name in range(len(df.columns)):
-           colname = str(df.columns[name])
-           if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
+        for name in df.columns:
+           colname = str(name)
+           if df.dtypes[name].kind in ('O','S','U','V'):
               if CorB:  # calc max Chars not Bytes
-                 col_l = df[df.columns[name]].astype(str).map(len).max() * bpc 
+                 col_l = df[name].astype(str).map(len).max() * bpc 
               else:
                  if encode_errors == 'fail':
                     try: 
-                       col_l = df[df.columns[name]].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding))).max()
+                       col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding))).max()
                     except Exception as e:
                        print("Transcoding error encountered.")
                        print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                        return None
                  else:
-                    col_l = df[df.columns[name]].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
+                    col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
               if col_l == 0:
                  col_l = 8
               ret[colname] = col_l
@@ -1288,8 +1288,9 @@ class SASsession():
                            of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
                            chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC. 
 
-                dictionary - a dictionary containing all of the char column names and the lengths to use for defining the SAS variables
-
+                dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates \
+                             runmning the code to calculate the lengths, and goes strainght to transferring the data \
+                             
         :return: SASdata object
         """
         return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
@@ -1360,7 +1361,9 @@ class SASsession():
                            of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
                            chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC. 
 
-                dictionary - a dictionary containing all of the char column names and the lengths to use for defining the SAS variables
+                dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates \
+                             runmning the code to calculate the lengths, and goes strainght to transferring the data \
+                             
 
         :return: SASdata object
         """
@@ -1387,11 +1390,10 @@ class SASsession():
            rc = self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
                                             datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths, **kwargs)
         if rc is None:
-           dsopts = {}
-           if outencoding:
-              dsopts['encoding'] = outencoding
-
            if self.exist(table, libref):
+              dsopts = {}
+              if outencoding:
+                 dsopts['encoding'] = outencoding
               sd = SASdata(self, libref, table, results, dsopts)
            else:
               sd = None

@@ -1484,13 +1484,13 @@ Will use HTML5 for this SASsession.""")
 
       charlens = {k.upper():v for k,v in charlens.items()}
 
-      for name in range(ncols):
-         colname = str(df.columns[name])
+      for name in df.columns:
+         colname = str(name)
          input  += "'"+colname+"'n "
          if colname in labkeys:
             label += "label '"+colname+"'n ="+labels[colname]+";\n"
 
-         if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
+         if df.dtypes[name].kind in ('O','S','U','V'):
             try:
                length += " '"+colname+"'n $"+str(charlens[colname.upper()])
             except KeyError as e:
@@ -1505,7 +1505,7 @@ Will use HTML5 for this SASsession.""")
                xlate += " '"+colname+"'n = translate('"+colname+"'n, '0A'x, "+lf+");\n"
                xlate += " '"+colname+"'n = translate('"+colname+"'n, '0D'x, "+cr+");\n"
          else:
-            if df.dtypes[df.columns[name]].kind in ('M'):
+            if df.dtypes[name].kind in ('M'):
                length += " '"+colname+"'n 8"
                input  += ":B8601DT26.6 "
                if colname not in dtkeys:
@@ -1538,7 +1538,7 @@ Will use HTML5 for this SASsession.""")
                length += " '"+colname+"'n 8"
                if colname in fmtkeys:
                   format += "'"+colname+"'n "+outfmts[colname]+" "
-               if df.dtypes[df.columns[name]] == 'bool':
+               if df.dtypes[name] == 'bool':
                   dts.append('B')
                else:
                   dts.append('N')
@@ -1582,9 +1582,6 @@ Will use HTML5 for this SASsession.""")
                   var = ' '
                else:
                   var = var.replace(colsep, colrep)
-                  if embedded_newlines:
-                     var = var.replace(LF, colrep).replace(CR, colrep)
-                     var = var.replace('\n', LF).replace('\r', CR)
             elif dts[col] == 'B':
                var = str(int(row[col]))
             elif dts[col] == 'D':
@@ -1596,6 +1593,11 @@ Will use HTML5 for this SASsession.""")
             card += var
             if col < (ncols-1):
                card += colsep
+
+         if embedded_newlines:
+            card = card.replace(LF, colrep).replace(CR, colrep)
+            card = card.replace('\n', LF).replace('\r', CR)
+
          code += card+"\n"
 
          if len(code) > blksz:
