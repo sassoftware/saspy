@@ -1035,8 +1035,9 @@ class SASsessionHTTP():
          conn.putheader("Authorization","Bearer "+self.sascfg._token)
          conn.endheaders()
 
+         blksz = int(kwargs.get('blocksize', 50000))
          while True:
-            buf = fd.read1(32768)
+            buf = fd.read1(blksz)
             if len(buf) == 0:
                conn.send(b"0\r\n\r\n")
                break
@@ -1265,7 +1266,7 @@ class SASsessionHTTP():
       code += "infile datalines delimiter="+delim+" STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
       self._asubmit(code, "text")
 
-      blksz = int(kwargs.get('blocksize', 4000))
+      blksz = int(kwargs.get('blocksize', 1000000))
       noencode = self._sb.sascei == 'utf-8' or encode_errors == 'ignore'
       row_num = 0
       code = ""
@@ -1318,7 +1319,7 @@ class SASsessionHTTP():
             self._asubmit(code, "text")
             code = ""
 
-      if not noencode:
+      if not noencode and len(code) > 0:
          if encode_errors == 'fail':
             if CorB:
                try:

@@ -1565,7 +1565,7 @@ Will use HTML5 for this SASsession.""")
       code += "else do;\n input "+input+";\n"+xlate+";\nend;\ndatalines4;"
       self._asubmit(code, "text")
 
-      blksz = int(kwargs.get('blocksize', 4000))
+      blksz = int(kwargs.get('blocksize', 32767))
       noencode = self._sb.sascei == 'utf-8' or encode_errors == 'ignore'
       row_num = 0
       code = ""
