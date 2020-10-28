@@ -1178,7 +1178,11 @@ class SASsessionHTTP():
          encode_errors = 'fail'
 
       bpc     = self._sb.pyenc[0]
-      CorB    = bpc == 1 or (char_lengths and str(char_lengths) != 'exact')
+
+      if char_lengths and str(char_lengths) == 'exact':
+         CnotB = False
+      else:
+         CnotB = bpc == 1
 
       if type(char_lengths) is not dict:
          charlens = self._sb.df_col_lengths(df, encode_errors, char_lengths)
@@ -1308,7 +1312,7 @@ class SASsessionHTTP():
          if len(code) > blksz:
             if not noencode:
                if encode_errors == 'fail':
-                  if CorB:
+                  if CnotB:
                      try:
                         chk = code.encode(self.sascfg.encoding)
                      except Exception as e:
@@ -1325,7 +1329,7 @@ class SASsessionHTTP():
 
       if not noencode and len(code) > 0:
          if encode_errors == 'fail':
-            if CorB:
+            if CnotB:
                try:
                   code = code.encode(self.sascfg.encoding).decode(self.sascfg.encoding)
                except Exception as e:

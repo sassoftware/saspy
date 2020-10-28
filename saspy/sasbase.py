@@ -1192,15 +1192,20 @@ class SASsession():
         if encode_errors is None:
            encode_errors = 'fail'
 
-        bpc     = self.pyenc[0]
-        CorB    = bpc == 1 or (char_lengths and str(char_lengths) != 'exact')
+        bpc = self.pyenc[0]
+
         if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
-           bpc  = int(char_lengths)
+           bpc = int(char_lengths)
       
+        if char_lengths and str(char_lengths) == 'exact':
+           CnotB = False
+        else:
+           CnotB = bpc == 1
+
         for name in df.columns:
            colname = str(name)
            if df.dtypes[name].kind in ('O','S','U','V'):
-              if CorB:  # calc max Chars not Bytes
+              if CnotB:  # calc max Chars not Bytes
                  col_l = df[name].astype(str).map(len).max() * bpc 
               else:
                  if encode_errors == 'fail':
