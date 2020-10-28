@@ -641,7 +641,7 @@ class SASSessionCOM(object):
                           LF: str = '\x01', CR: str = '\x02',
                           colsep: str = '\x03', colrep: str = ' ',
                           datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                          outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None,
+                          outdsopts: dict={}, encode_errors = None, char_lengths = None,
                           **kwargs):
         """
         Create a SAS dataset from a pandas data frame.
@@ -681,7 +681,7 @@ class SASSessionCOM(object):
               print("'labels=' is not used with this access method. option ignored.")
            if outdsopts != {}:
               print("'outdsopts=' is not used with this access method. option ignored.")
-           if encode_errors != {}:
+           if encode_errors:
               print("'encode_errors=' is not used with this access method. option ignored.")
            if char_lengths:
               print("'char_lengths=' is not used with this access method. option ignored.")

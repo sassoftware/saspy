@@ -1413,7 +1413,7 @@ Will use HTML5 for this SASsession.""")
                          LF: str = '\x01', CR: str = '\x02',
                          colsep: str = '\x03', colrep: str = ' ',
                          datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                         outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None,
+                         outdsopts: dict={}, encode_errors = None, char_lengths = None,
                          **kwargs):
       """
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
@@ -1447,11 +1447,14 @@ Will use HTML5 for this SASsession.""")
       fmtkeys = outfmts.keys()
       labkeys = labels.keys()
 
+      if encode_errors is None:
+         encode_errors = 'fail'
+
       bpc     = self._sb.pyenc[0]
       CorB    = bpc == 1 or (char_lengths and str(char_lengths) != 'exact')
 
       if type(char_lengths) is not dict:
-         charlens = self._sb._df_col_lengths(df, encode_errors, char_lengths)
+         charlens = self._sb.df_col_lengths(df, encode_errors, char_lengths)
       else:
          charlens = char_lengths 
 
@@ -1780,7 +1783,7 @@ Will use HTML5 for this SASsession.""")
                          LF: str = '\x01', CR: str = '\x02',
                          colsep: str = '\x03', colrep: str = ' ',
                          datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                         outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None,
+                         outdsopts: dict={}, encode_errors = None, char_lengths = None,
                          **kwargs):
       """
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
@@ -1814,11 +1817,14 @@ Will use HTML5 for this SASsession.""")
       fmtkeys = outfmts.keys()
       labkeys = labels.keys()
 
+      if encode_errors is None:
+         encode_errors = 'fail'
+
       bpc     = self._sb.pyenc[0]
       CorB    = bpc == 1 or (char_lengths and str(char_lengths) != 'exact')
 
       if type(char_lengths) is not dict:
-         charlens = self._sb._df_col_lengths(df, encode_errors, char_lengths)
+         charlens = self._sb.df_col_lengths(df, encode_errors, char_lengths)
       else:
          charlens = char_lengths 
 

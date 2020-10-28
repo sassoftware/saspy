@@ -1153,7 +1153,7 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return log
      
-    def _df_col_lengths(self, df: 'pandas.DataFrame', encode_errors: str = 'fail', char_lengths = None,
+    def df_col_lengths(self, df: 'pandas.DataFrame', encode_errors = None, char_lengths = None,
                         **kwargs) -> dict:
         """
         This is a utility method for df2sd, use to get the character columns lengths from a dataframe to use to
@@ -1190,14 +1190,14 @@ class SASsession():
         :return: SASdata object
         """
         ret = {}
+        if encode_errors is None:
+           encode_errors = 'fail'
 
         bpc     = self.pyenc[0]
         CorB    = bpc == 1 or (char_lengths and str(char_lengths) != 'exact')
         if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
            bpc  = int(char_lengths)
       
-        import time
-        starttime = time.time()
         for name in df.columns:
            colname = str(name)
            if df.dtypes[name].kind in ('O','S','U','V'):
@@ -1217,8 +1217,6 @@ class SASsession():
                  col_l = 8
               ret[colname] = col_l
 
-        print("time (in seconds) to calculate column lengths= ",  time.time() - starttime)
-
         return ret
 
 
@@ -1228,7 +1226,7 @@ class SASsession():
               LF: str = '\x01', CR: str = '\x02',
               colsep: str = '\x03', colrep: str = ' ',
               datetimes: dict={}, outfmts: dict={}, labels: dict={},
-              outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None,
+              outdsopts: dict={}, encode_errors = None, char_lengths = None,
               **kwargs) -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
@@ -1265,7 +1263,7 @@ class SASsession():
 
         :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail', other choice is to 'replace' \
                               invalid chars with the replacement char. 'ignore' doesn't try to transcode in python, so you \
-                              get whatever happens in SAS based upon the data you send over. 
+                              get whatever happens in SAS based upon the data you send over. Note 'ignore' is only valid for IOM and HTTP
         :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
             .. code-block:: python
@@ -1302,7 +1300,7 @@ class SASsession():
                           LF: str = '\x01', CR: str = '\x02',
                           colsep: str = '\x03', colrep: str = ' ',
                           datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                          outdsopts: dict={}, encode_errors: str = 'fail', char_lengths = None, **kwargs) -> 'SASdata':
+                          outdsopts: dict={}, encode_errors = None, char_lengths = None, **kwargs) -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
@@ -1338,7 +1336,7 @@ class SASsession():
 
         :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail', other choice is to 'replace' \
                               invalid chars with the replacement char. 'ignore' doesn't try to transcode in python, so you \
-                              get whatever happens in SAS based upon the data you send over. 
+                              get whatever happens in SAS based upon the data you send over. Note 'ignore' is only valid for IOM and HTTP 
         :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
             .. code-block:: python
