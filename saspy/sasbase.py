@@ -1171,9 +1171,10 @@ class SASsession():
         :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
 
-            - exact'  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding, \
-                        required for the longest actual value. This is slowest but most accurate. For big data, this can \
-                        take excessive time. If SAS is running in a single byte encoding then '1' (see below) is used, not this.
+            - 'exact'  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding, \
+                         required for the longest actual value. This is slowest but most accurate. For big data, this can \
+                         take excessive time. If SAS is running in a single byte encoding then this defaults to '1' (see below), \
+                         but you can override even that by explicitly specifying 'exact' when SAS is a single byte encoding.
 
             - 'safe'   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte \
                          encoding. This is much faster, but could declare SAS Char variables longer than absolutely required \
@@ -1276,7 +1277,8 @@ class SASsession():
 
             - 'exact'  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding, \
                          required for the longest actual value. This is slowest but most accurate. For big data, this can \
-                         take excessive time. If SAS is running in a single byte encoding then '1' (see below) is used, not this.
+                         take excessive time. If SAS is running in a single byte encoding then this defaults to '1' (see below), \
+                         but you can override even that by explicitly specifying 'exact' when SAS is a single byte encoding.
 
             - 'safe'   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte \
                          encoding. This is much faster, but could declare SAS Char variables longer than absolutely required \
@@ -1348,7 +1350,8 @@ class SASsession():
 
             - 'exact'  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding, \
                          required for the longest actual value. This is slowest but most accurate. For big data, this can \
-                         take excessive time. If SAS is running in a single byte encoding then '1' (see below) is used, not this.
+                         take excessive time. If SAS is running in a single byte encoding then this defaults to '1' (see below), \
+                         but you can override even that by explicitly specifying 'exact' when SAS is a single byte encoding.
 
             - 'safe'   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte \
                          encoding. This is much faster, but could declare SAS Char variables longer than absolutely required \
