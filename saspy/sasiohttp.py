@@ -1177,8 +1177,9 @@ class SASsessionHTTP():
       if encode_errors is None:
          encode_errors = 'fail'
 
-      bpc     = self._sb.pyenc[0]
-
+      bpc = self._sb.pyenc[0]
+      if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
+         bpc = int(char_lengths)
       if char_lengths and str(char_lengths) == 'exact':
          CnotB = False
       else:

@@ -1450,13 +1450,6 @@ Will use HTML5 for this SASsession.""")
       if encode_errors is None:
          encode_errors = 'fail'
 
-      bpc     = self._sb.pyenc[0]
-
-      if char_lengths and str(char_lengths) == 'exact':
-         CnotB = False
-      else:
-         CnotB = bpc == 1
-
       if type(char_lengths) is not dict:
          charlens = self._sb.df_col_lengths(df, encode_errors, char_lengths)
       else:
@@ -1824,8 +1817,9 @@ Will use HTML5 for this SASsession.""")
       if encode_errors is None:
          encode_errors = 'fail'
 
-      bpc     = self._sb.pyenc[0]
-
+      bpc = self._sb.pyenc[0]
+      if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
+         bpc = int(char_lengths)
       if char_lengths and str(char_lengths) == 'exact':
          CnotB = False
       else:
