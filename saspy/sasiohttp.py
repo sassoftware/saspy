@@ -1035,8 +1035,9 @@ class SASsessionHTTP():
          conn.putheader("Authorization","Bearer "+self.sascfg._token)
          conn.endheaders()
 
+         blksz = int(kwargs.get('blocksize', 50000))
          while True:
-            buf = fd.read1(32768)
+            buf = fd.read1(blksz)
             if len(buf) == 0:
                conn.send(b"0\r\n\r\n")
                break
@@ -1126,8 +1127,11 @@ class SASsessionHTTP():
       return {'Success' : True, 
               'LOG'     : logf}
  
-   def _getbytelen(self, x):
+   def _getbytelenF(self, x):
       return len(x.encode(self.sascfg.encoding))
+
+   def _getbytelenR(self, x):
+      return len(x.encode(self.sascfg.encoding, errors='replace'))
 
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', 
                          libref: str ="", keep_outer_quotes: bool=False,
@@ -1135,7 +1139,8 @@ class SASsessionHTTP():
                          LF: str = '\x01', CR: str = '\x02',
                          colsep: str = '\x03', colrep: str = ' ',
                          datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                         outencoding: str = ''):
+                         outdsopts: dict={}, encode_errors = None, char_lengths = None,
+                         **kwargs):
       '''
       This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
       df      - Pandas Data Frame to import to a SAS Data Set
@@ -1149,6 +1154,10 @@ class SASsessionHTTP():
       datetimes - dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
       outfmts - dict with column names and SAS formats to assign to the new SAS data set
       labels  - dict with column names and SAS Labels to assign to the new SAS data set
+      outdsopts - a dictionary containing output data set options for the table being created
+      encode_errors - 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char \
+                      'ignore' will not  transcode n Python, so you get whatever happens with your data and SAS
+      char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set 
       '''
       input   = ""
       xlate   = ""
@@ -1165,21 +1174,34 @@ class SASsessionHTTP():
       fmtkeys = outfmts.keys()
       labkeys = labels.keys()
 
-      for name in range(ncols):
-         colname = str(df.columns[name])
+      if encode_errors is None:
+         encode_errors = 'fail'
+
+      bpc     = self._sb.pyenc[0]
+      CorB    = bpc == 1 or (char_lengths and str(char_lengths) != 'exact')
+
+      if type(char_lengths) is not dict:
+         charlens = self._sb.df_col_lengths(df, encode_errors, char_lengths)
+      else:
+         charlens = char_lengths 
+
+      if charlens is None:
+         return -1
+
+      charlens = {k.upper():v for k,v in charlens.items()}
+
+      for name in df.columns:
+         colname = str(name)
          input  += "'"+colname+"'n "
          if colname in labkeys:
             label += "label '"+colname+"'n ="+labels[colname]+";\n"
-         if df.dtypes[df.columns[name]].kind in ('O','S','U','V'):
+
+         if df.dtypes[name].kind in ('O','S','U','V'):
             try:
-               col_l = df[df.columns[name]].astype(str).apply(self._getbytelen).max()
-            except Exception as e:
-               print("Transcoding error encountered.")
-               print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
-               return None
-            if col_l == 0:
-               col_l = 8
-            length += " '"+colname+"'n $"+str(col_l)
+               length += " '"+colname+"'n $"+str(charlens[colname.upper()])
+            except KeyError as e:
+               print("Dictionary provided as char_lengths is missing column: "+colname)
+               raise e
             if colname in fmtkeys:
                format += "'"+colname+"'n "+outfmts[colname]+" "
             if keep_outer_quotes:
@@ -1189,7 +1211,7 @@ class SASsessionHTTP():
                xlate += " '"+colname+"'n = translate('"+colname+"'n, '0A'x, "+lf+");\n"
                xlate += " '"+colname+"'n = translate('"+colname+"'n, '0D'x, "+cr+");\n"
          else:
-            if df.dtypes[df.columns[name]].kind in ('M'):
+            if df.dtypes[name].kind in ('M'):
                length += " '"+colname+"'n 8"
                input  += ":B8601DT26.6 "
                if colname not in dtkeys:
@@ -1222,7 +1244,7 @@ class SASsessionHTTP():
                length += " '"+colname+"'n 8"
                if colname in fmtkeys:
                   format += "'"+colname+"'n "+outfmts[colname]+" "
-               if df.dtypes[df.columns[name]] == 'bool':
+               if df.dtypes[name] == 'bool':
                   dts.append('B')
                else:
                   dts.append('N')
@@ -1231,10 +1253,15 @@ class SASsessionHTTP():
       if len(libref):
          code += libref+"."
       code += "'"+table.strip()+"'n"
-      if len(outencoding):
-         code += '(encoding="'+outencoding+'");\n'
+
+      if len(outdsopts):
+         code += '('
+         for key in outdsopts:
+            code += key+'='+str(outdsopts[key]) + ' '
+         code += ");\n"
       else:
          code += ";\n"
+
       if len(length):
          code += "length "+length+";\n"
       if len(format):
@@ -1243,8 +1270,12 @@ class SASsessionHTTP():
       code += "infile datalines delimiter="+delim+" STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
       self._asubmit(code, "text")
 
+      blksz = int(kwargs.get('blocksize', 1000000))
+      noencode = self._sb.sascei == 'utf-8' or encode_errors == 'ignore'
+      row_num = 0
       code = ""
       for row in df.itertuples(index=False):
+         row_num += 1
          card  = ""
          for col in range(ncols):
             var = str(row[col])
@@ -1256,9 +1287,6 @@ class SASsessionHTTP():
                   var = ' '
                else:
                   var = var.replace(colsep, colrep)
-                  if embedded_newlines:
-                     var = var.replace(LF, colrep).replace(CR, colrep)
-                     var = var.replace('\n', LF).replace('\r', CR)
             elif dts[col] == 'B':
                var = str(int(row[col]))
             elif dts[col] == 'D':
@@ -1270,14 +1298,48 @@ class SASsessionHTTP():
             card += var
             if col < (ncols-1):
                card += colsep
+
+         if embedded_newlines:
+            card = card.replace(LF, colrep).replace(CR, colrep)
+            card = card.replace('\n', LF).replace('\r', CR)
+
          code += card+"\n"
-         if len(code) > 4000:
+ 
+         if len(code) > blksz:
+            if not noencode:
+               if encode_errors == 'fail':
+                  if CorB:
+                     try:
+                        chk = code.encode(self.sascfg.encoding)
+                     except Exception as e:
+                        self._asubmit(";;;;\n;;;;", "text")
+                        ll = self.submit("run;", 'text')
+                        print("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
+                        print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                        return row_num
+               else:
+                  code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
+
             self._asubmit(code, "text")
             code = ""
 
-      self._asubmit(code+";;;;", "text")
-      ll = self.submit("run;", 'text')
-      return
+      if not noencode and len(code) > 0:
+         if encode_errors == 'fail':
+            if CorB:
+               try:
+                  code = code.encode(self.sascfg.encoding).decode(self.sascfg.encoding)
+               except Exception as e:
+                  self._asubmit(";;;;\n;;;;", "text")
+                  ll = self.submit("run;", 'text')
+                  print("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
+                  print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                  return row_num
+         else:
+            code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
+
+      self._asubmit(code+";;;;\n;;;;", "text")
+      ll = self.submit("quit;", 'text')
+      return None
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
                          rowsep: str = '\x01', colsep: str = '\x02',

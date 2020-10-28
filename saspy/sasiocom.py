@@ -641,7 +641,8 @@ class SASSessionCOM(object):
                           LF: str = '\x01', CR: str = '\x02',
                           colsep: str = '\x03', colrep: str = ' ',
                           datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                          outencoding: str = ''):
+                          outdsopts: dict={}, encode_errors = None, char_lengths = None,
+                          **kwargs):
         """
         Create a SAS dataset from a pandas data frame.
         :param df [pd.DataFrame]: Pandas data frame containing data to write.
@@ -658,7 +659,9 @@ class SASSessionCOM(object):
         datetimes - not implemented yet in this access method
         outfmts - not implemented yet in this access method
         labels - not implemented yet in this access method
-        outencoding - not implemented yet in this access method
+        outdsopts - not implemented yet in this access method
+        encode_errors - not implemented yet in this access method
+        char_lengths - not implemented yet in this access method
         """
         DATETIME_NAME = 'DATETIME26.6'
         DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%f'
@@ -674,6 +677,14 @@ class SASSessionCOM(object):
               print("'datetimes=' is not used with this access method. option ignored.")
            if outfmts != {}:
               print("'outfmts=' is not used with this access method. option ignored.")
+           if labels != {}:
+              print("'labels=' is not used with this access method. option ignored.")
+           if outdsopts != {}:
+              print("'outdsopts=' is not used with this access method. option ignored.")
+           if encode_errors:
+              print("'encode_errors=' is not used with this access method. option ignored.")
+           if char_lengths:
+              print("'char_lengths=' is not used with this access method. option ignored.")
 
         tablepath = self._tablepath(table, libref=libref)
 
@@ -719,6 +730,7 @@ class SASSessionCOM(object):
 
         self.adodb.Execute(sql_create)
         self.adodb.Execute(sql_insert)
+        return None
 
     def sasdata2dataframe(self, table: str, libref: str=None, dsopts: dict=None, method: str='', **kwargs) -> 'pd.DataFrame':
         """
