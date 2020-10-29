@@ -1153,7 +1153,7 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return log
      
-    def df_col_lengths(self, df: 'pandas.DataFrame', encode_errors = None, char_lengths = None,
+    def df_char_lengths(self, df: 'pandas.DataFrame', encode_errors = None, char_lengths = None,
                         **kwargs) -> dict:
         """
         This is a utility method for df2sd, use to get the character columns lengths from a dataframe to use to

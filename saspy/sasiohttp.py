@@ -1186,7 +1186,7 @@ class SASsessionHTTP():
          CnotB = bpc == 1
 
       if type(char_lengths) is not dict:
-         charlens = self._sb.df_col_lengths(df, encode_errors, char_lengths)
+         charlens = self._sb.df_char_lengths(df, encode_errors, char_lengths)
       else:
          charlens = char_lengths 
 
