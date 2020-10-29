@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 3.5.4 documentation</title>
+  <title>API Reference &mdash; saspy 3.6.0 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.5.4 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.6.0 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.5.4
+                3.6.0
               </div>
             
           
@@ -373,7 +373,7 @@ is the text of the last warning message generated in the SAS log.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.dataframe2sasdata">
-<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em>, <em>outencoding: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em>, <em>outdsopts: dict = {}</em>, <em>encode_errors=None</em>, <em>char_lengths=None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -414,7 +414,24 @@ is the text of the last warning message generated in the SAS log.</p>
 <li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  &#8216; &#8216;</li>
 <li><strong>datetimes</strong> &#8211; dict with column names as keys and values of &#8216;date&#8217; or &#8216;time&#8217; to create SAS date or times instead of datetimes</li>
 <li><strong>outfmts</strong> &#8211; dict with column names and SAS formats to assign to the new SAS data set</li>
-<li><strong>outencoding</strong> &#8211; the SAS encoding value to use to write out the table, if not the session encoding.</li>
+<li><strong>outdsopts</strong> &#8211; <p>a dictionary containing output data set options for the table being created                           for instance, compress=, encoding=, index=, outrep=, replace=, rename= ...                           the options will be generated simply as key=value, so if a value needs quotes or parentheses, provide them in the value</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;compress&#39;</span> <span class="p">:</span> <span class="s1">&#39;yes&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;encoding&#39;</span> <span class="p">:</span> <span class="s1">&#39;latin9&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;replace&#39;</span>  <span class="p">:</span> <span class="s1">&#39;NO&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;rename&#39;</span>   <span class="p">:</span> <span class="s2">&quot;(col1 = Column_one  col2 = &#39;Column Two&#39;n)&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><strong>encode_errors</strong> &#8211; &#8216;fail&#8217;, &#8216;replace&#8217; or &#8216;ignore&#8217; - default is to &#8216;fail&#8217;, other choice is to &#8216;replace&#8217;                               invalid chars with the replacement char. &#8216;ignore&#8217; doesn&#8217;t try to transcode in python, so you                               get whatever happens in SAS based upon the data you send over. Note &#8216;ignore&#8217; is only valid for IOM and HTTP</li>
+<li><strong>char_lengths</strong> &#8211; <p>How to determine (and declare) lengths for CHAR variables in the output SAS data set                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)</p>
+<ul>
+<li>&#8216;exact&#8217;  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding,                          required for the longest actual value. This is slowest but most accurate. For big data, this can                          take excessive time. If SAS is running in a single byte encoding then this defaults to &#8216;1&#8217; (see below),                          but you can override even that by explicitly specifying &#8216;exact&#8217; when SAS is a single byte encoding.</li>
+<li>&#8216;safe&#8217;   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte                          encoding. This is much faster, but could declare SAS Char variables longer than absolutely required                          for multibyte SAS encodings. If SAS is running in a single byte encoding then &#8216;1&#8217; (see below) is used.                          Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these.                          ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it&#8217;s variable</li>
+<li>[1|2|3|4]- this is &#8216;safe&#8217; except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the                          default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default                          used, since characters can only be 1 byte long so char len == byte len                          For UTF-8 SAS session, 4 is the BPC, so if you know you don&#8217;t have many actual unicode characters                          you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead                          of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.</li>
+<li>dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates                            runmning the code to calculate the lengths, and goes strainght to transferring the data</li>
+</ul>
+</li>
 </ul>
 </td>
 </tr>
@@ -443,7 +460,7 @@ is the text of the last warning message generated in the SAS log.</p>
 
 <dl class="method">
 <dt id="saspy.SASsession.df2sd">
-<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em>, <em>outencoding: str = ''</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
+<code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em>, <em>outdsopts: dict = {}</em>, <em>encode_errors=None</em>, <em>char_lengths=None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;dataframe2sasdata&#8217;. Why type all that?</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -484,7 +501,55 @@ is the text of the last warning message generated in the SAS log.</p>
 <li><strong>colrep</strong> &#8211; the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  &#8216; &#8216;</li>
 <li><strong>datetimes</strong> &#8211; dict with column names as keys and values of &#8216;date&#8217; or &#8216;time&#8217; to create SAS date or times instead of datetimes</li>
 <li><strong>outfmts</strong> &#8211; dict with column names and SAS formats to assign to the new SAS data set</li>
-<li><strong>outencoding</strong> &#8211; the SAS encoding value to use to write out the table, if not the session encoding.</li>
+<li><strong>outdsopts</strong> &#8211; <p>a dictionary containing output data set options for the table being created                           for instance, compress=, encoding=, index=, outrep=, replace=, rename= ...                           the options will be generated simply as key=value, so if a value needs quotes or parentheses, provide them in the value</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;compress&#39;</span> <span class="p">:</span> <span class="s1">&#39;yes&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;encoding&#39;</span> <span class="p">:</span> <span class="s1">&#39;latin9&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;replace&#39;</span>  <span class="p">:</span> <span class="s1">&#39;NO&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;rename&#39;</span>   <span class="p">:</span> <span class="s2">&quot;(col1 = Column_one  col2 = &#39;Column Two&#39;n)&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><strong>encode_errors</strong> &#8211; &#8216;fail&#8217;, &#8216;replace&#8217; or &#8216;ignore&#8217; - default is to &#8216;fail&#8217;, other choice is to &#8216;replace&#8217;                               invalid chars with the replacement char. &#8216;ignore&#8217; doesn&#8217;t try to transcode in python, so you                               get whatever happens in SAS based upon the data you send over. Note &#8216;ignore&#8217; is only valid for IOM and HTTP</li>
+<li><strong>char_lengths</strong> &#8211; <p>How to determine (and declare) lengths for CHAR variables in the output SAS data set                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)</p>
+<ul>
+<li>&#8216;exact&#8217;  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding,                          required for the longest actual value. This is slowest but most accurate. For big data, this can                          take excessive time. If SAS is running in a single byte encoding then this defaults to &#8216;1&#8217; (see below),                          but you can override even that by explicitly specifying &#8216;exact&#8217; when SAS is a single byte encoding.</li>
+<li>&#8216;safe&#8217;   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte                          encoding. This is much faster, but could declare SAS Char variables longer than absolutely required                          for multibyte SAS encodings. If SAS is running in a single byte encoding then &#8216;1&#8217; (see below) is used.                          Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these.                          ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it&#8217;s variable</li>
+<li>[1|2|3|4]- this is &#8216;safe&#8217; except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the                          default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default                          used, since characters can only be 1 byte long so char len == byte len                          For UTF-8 SAS session, 4 is the BPC, so if you know you don&#8217;t have many actual unicode characters                          you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead                          of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.</li>
+<li>dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates                            runmning the code to calculate the lengths, and goes strainght to transferring the data</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SASdata object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.df_char_lengths">
+<code class="descname">df_char_lengths</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>encode_errors=None</em>, <em>char_lengths=None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#saspy.SASsession.df_char_lengths" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a utility method for df2sd, use to get the character columns lengths from a dataframe to use to
+create a SAS data set. This can be called by the user and the returned dict can be passed in to df2sd via
+the char_lengths= option. For big data frames, this can take a long time, so this can be used to do it once,
+and then the dictionary returned can be provided to df2sd each time it&#8217;s called to avoid recalculating this again.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; <code class="xref py py-class docutils literal"><span class="pre">pandas.DataFrame</span></code> Pandas Data Frame to import to a SAS Data Set</li>
+<li><strong>encode_errors</strong> &#8211; &#8216;fail&#8217;, &#8216;replace&#8217; - default is to &#8216;fail&#8217;, other choice is to &#8216;replace&#8217;                               invalid chars with the replacement char. This is only when calculating byte lengths,                               which is dependent upon the value of char_lengths=. When calculating char lengths, this                               parameter is ignored in this method (encoding is deferred to the data transfer step in df2sd).</li>
+<li><strong>char_lengths</strong> &#8211; <p>How to determine (and declare) lengths for CHAR variables in the output SAS data set                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)</p>
+<ul>
+<li>&#8216;exact&#8217;  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding,                          required for the longest actual value. This is slowest but most accurate. For big data, this can                          take excessive time. If SAS is running in a single byte encoding then this defaults to &#8216;1&#8217; (see below),                          but you can override even that by explicitly specifying &#8216;exact&#8217; when SAS is a single byte encoding.</li>
+<li>&#8216;safe&#8217;   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte                          encoding. This is much faster, but could declare SAS Char variables longer than absolutely required                          for multibyte SAS encodings. If SAS is running in a single byte encoding then &#8216;1&#8217; (see below) is used.                          Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these.                          ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it&#8217;s variable</li>
+<li>[1|2|3|4]- this is &#8216;safe&#8217; except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the                          default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default                          used, since characters can only be 1 byte long so char len == byte len                          For UTF-8 SAS session, 4 is the BPC, so if you know you don&#8217;t have many actual unicode characters                          you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead                          of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.</li>
+</ul>
+</li>
 </ul>
 </td>
 </tr>
@@ -1277,8 +1342,7 @@ as either HTML or TEXT, depending upon results. The method= parameter allows you
 <li><strong>file</strong> &#8211; the OS filesystem path of the file to be created (exported from the SAS Data Set)</li>
 <li><strong>table</strong> &#8211; the name of the SAS Data Set you want to export to a CSV file</li>
 <li><strong>libref</strong> &#8211; the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</li>
-<li><strong>dsopts</strong> &#8211; a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)</li>
-<li><strong>opts</strong> &#8211; <p>a dictionary containing any of the following Proc Export options(delimiter, putnames)</p>
+<li><strong>dsopts</strong> &#8211; <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)</p>
 <ul>
 <li>where is a string</li>
 <li>keep are strings or list of strings.</li>
@@ -4365,7 +4429,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.5.4',
+            VERSION:'3.6.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
