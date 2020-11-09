@@ -139,7 +139,7 @@ class SASconfigIOM:
             self.classpath = incp
 
       if self.classpath is None:
-         import importlib
+         import importlib.util
          sep   = '\\' if os.name == 'nt' else '/'
          delim = ';'  if os.name == 'nt' else ':'
 
