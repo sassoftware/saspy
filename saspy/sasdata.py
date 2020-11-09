@@ -314,6 +314,7 @@ class SASdata:
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
         else:
+            le = self._is_valid()
             if self.HTML:
                 if not le:
                     ll = self.sas._io.submit(code)
