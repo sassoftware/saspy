@@ -1221,7 +1221,7 @@ class SASsession():
                        return None
                  else:
                     col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
-              if col_l == 0:
+              if not col_l > 0:
                  col_l = 8
               ret[colname] = col_l
 

@@ -1586,7 +1586,7 @@ Will use HTML5 for this SASsession.""")
 
       if not server:
          if sel.select([sock],[],[],10)[0] == []:
-            print("error occured in SAS during upload. Check the returned LOG for issues.")
+            print("error occured in SAS during data transfer. Check the LOG for issues.")
             sock.close()
             ll = self.submit("", 'text')
             return {'Success' : False, 
@@ -1602,6 +1602,7 @@ Will use HTML5 for this SASsession.""")
             except:
                pass
             sock.close()
+            print("error occured in SAS during data transfer. Check the LOG for issues.")
             ll = self.submit("", 'text')
             return {'Success' : False, 
                     'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
