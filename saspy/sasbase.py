@@ -47,6 +47,7 @@ import sys
 import datetime
 import getpass
 import importlib
+import re
 import shutil
 import tempfile
 
@@ -2273,6 +2274,61 @@ class SASsession():
                 return ll
              else:
                 print(ll['LST'])
+    
+    def validvarname(self, df: 'pandas.DataFrame', version: str = "v7" )  -> 'pandas.DataFrame':
+        """
+        Creates a copy of a Data Frame with SAS compatible column names. The version= parameter allows 
+        you to choose the compatability setting to use.
+
+        :param df:      a Pandas Data Frame whose column names you wish to make SAS compatible.
+        :param version: select the validvarname version using SAS convention.
+
+            - V7: ensures the following conditions are met:
+                - up to 32 mixed case alphanumeric characters are allowed.
+                - names must begin with alphabetic characters or an underscore.
+                - non SAS characters are mapped to underscores.
+                - any column name that is not unique when normalized is made unique by appending a counter (0,1,2,...) to the name.
+            - V6:     like V7, but column names truncated to 8 characters.
+            - upcase: like V7, but columns names will be uppercase. 
+            - any:    any characters are valid, but column names truncated to 32 characters.
+
+        :return: a Pandas DataFrame whose column names are SAS compatible according to the selected version.
+        """
+        if version.lower() not in ['v6', 'v7', 'upcase', 'any']:
+           print("The specified version is not valid. Using the default: 'V7'")
+           version = 'v7'
+
+        max_length = 8 if version.lower() == 'v6' else 32
+
+        names = {}
+        
+        # normalize variable names
+        for col_name in df.columns:
+            new_name = col_name[:max_length]
+
+            if version.lower() != 'any':
+                new_name = re.sub(r'[^\d\w]+', r'_'  , new_name)
+                new_name = re.sub(r'^(\d+)',   r'_\1', new_name)
+
+            if version.lower() == 'upcase':
+                new_name = new_name.upper()
+
+            names[col_name] = new_name
+
+        # serialize duplicates in normalized variable names
+        for col_name in df.columns:
+            duplicate_keys = [key for key in names.keys()
+                                if names[key].upper() == names[col_name].upper() ]
+            duplicate_count = len(duplicate_keys)-1
+            if duplicate_count>0:
+                count = 0
+                padding = len(str(duplicate_count))
+                for val in df.columns:
+                    if val in duplicate_keys:
+                        names[val] =  "{}{}".format(names[val][:max_length-padding], count)
+                        count += 1
+
+        return df.rename(columns=names)
 
 
 if __name__ == "__main__":
