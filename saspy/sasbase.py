@@ -533,34 +533,37 @@ class SASsession():
         self.workpath = vlist[2].rpartition('WORKPATHEND=')[0].strip().replace('\n','') 
 
         # validate encoding
-        try:
-           self.pyenc = sas_encoding_mapping[self.sascei]
-        except KeyError:
-           print("Invalid response from SAS on inital submission. printing the SASLOG as diagnostic")
-           print(self._io._log)
-           raise
-
-        if self.pyenc is not None:
-           if self._io.sascfg.encoding != '':
-              if self._io.sascfg.encoding.lower() not in self.pyenc:
-                 print("The encoding value provided doesn't match the SAS session encoding.")
-                 print("SAS encoding is "+self.sascei+". Specified encoding is "+self._io.sascfg.encoding+".")
-                 print("Using encoding "+self.pyenc[1]+" instead to avoid transcoding problems.")
+        if self.sascfg.mode != 'HTTP':
+           try:
+              self.pyenc = sas_encoding_mapping[self.sascei]
+           except KeyError:
+              print("Invalid response from SAS on inital submission. printing the SASLOG as diagnostic")
+              print(self._io._log)
+              raise
+           
+           if self.pyenc is not None:
+              if self._io.sascfg.encoding != '':
+                 if self._io.sascfg.encoding.lower() not in self.pyenc:
+                    print("The encoding value provided doesn't match the SAS session encoding.")
+                    print("SAS encoding is "+self.sascei+". Specified encoding is "+self._io.sascfg.encoding+".")
+                    print("Using encoding "+self.pyenc[1]+" instead to avoid transcoding problems.")
+                    self._io.sascfg.encoding = self.pyenc[1]
+                    print("You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.")
+                    print("""If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it.\n""")
+              else:
                  self._io.sascfg.encoding = self.pyenc[1]
-                 print("You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.")
-                 print("""If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it.\n""")
+                 if self._io.sascfg.verbose:
+                    print("No encoding value provided. Will try to determine the correct encoding.")
+                    print("Setting encoding to "+self.pyenc[1]+" based upon the SAS session encoding value of "+self.sascei+".\n")
            else:
-              self._io.sascfg.encoding = self.pyenc[1]
-              if self._io.sascfg.verbose:
-                 print("No encoding value provided. Will try to determine the correct encoding.")
-                 print("Setting encoding to "+self.pyenc[1]+" based upon the SAS session encoding value of "+self.sascei+".\n")
+              print("The SAS session encoding for this session ("+self.sasce+") doesn't have a known Python equivalent encoding.")
+              if self._io.sascfg.encoding == '':
+                 self._io.sascfg.encoding  = 'utf_8'
+                 print("Proceeding using the default encoding of 'utf_8', though you may encounter transcoding problems.\n")
+              else:
+                 print("Proceeding using the specified encoding of "+self._io.sascfg.encoding+", though you may encounter transcoding problems.\n")
         else:
-           print("The SAS session encoding for this session ("+self.sasce+") doesn't have a known Python equivalent encoding.")
-           if self._io.sascfg.encoding == '':
-              self._io.sascfg.encoding  = 'utf_8'
-              print("Proceeding using the default encoding of 'utf_8', though you may encounter transcoding problems.\n")
-           else:
-              print("Proceeding using the specified encoding of "+self._io.sascfg.encoding+", though you may encounter transcoding problems.\n")
+           self.pyenc = sas_encoding_mapping['utf-8']
 
         if self.hostsep == 'WIN':
             self.hostsep = '\\'

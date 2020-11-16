@@ -144,7 +144,7 @@ class SASconfigHTTP:
             print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.encoding = inencoding   
-      if not self.encoding:
+      if not self.encoding or self.encoding != 'utf_8':
          self.encoding = 'utf_8'
 
       inlrecl = kwargs.get('lrecl', None)
