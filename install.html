@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.6.0 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.6.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.6.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.6.2 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.6.0
+                3.6.2
               </div>
             
           
@@ -981,17 +981,9 @@ prompt you for which one to use.</dd>
 <dt>options -</dt>
 <dd>(Optional) SAS options to include when connecting. These <strong>must</strong> be a Python list.</dd>
 <dt>encoding -</dt>
-<dd><p class="first">(Optional)
-NOTE: you no longer need to set the encoding. SASpy
-will determine the SAS session encoding and map that to the Python encoding for you.</p>
-<p class="last">This is the Python encoding value that matches the SAS session encoding
-of the SAS session to which you are connecting. The Python encoding
-values can be found at <a class="reference external" href="https://docs.python.org/3.5/library/codecs.html#encodings-and-unicode">encodings-and-unicode</a>.
-The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
-default encodings for running SAS in Unicode, on Unix, and on Windows,
-respectively. Those map to Python encoding values: utf8, latin1, and
-windows-1252, respectively.</p>
-</dd>
+<dd>(Ignored)
+Unlike the other access methods, the HTTP API to the Compute Service uses UTF-8 for all calls.
+So, no transcoding is necessary, nor done, on the Python side, so this option is not needed and ignored.</dd>
 <dt>autoexec -</dt>
 <dd>(Optional) This is a string of SAS code that will be submitted upon establishing a connection.
 You can use this to preassign libraries you always want available, or whatever you want.
@@ -1066,7 +1058,7 @@ If you want to run saspy in Zeppelin, set this in your configuration definition:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.6.0',
+            VERSION:'3.6.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

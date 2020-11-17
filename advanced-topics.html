@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced topics &mdash; saspy 3.6.0 documentation</title>
+  <title>Advanced topics &mdash; saspy 3.6.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.6.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.6.2 documentation" href="index.html"/>
         <link rel="next" title="Contributing new methods" href="adding-procedures.html"/>
         <link rel="prev" title="API Reference" href="api.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.6.0
+                3.6.2
               </div>
             
           
@@ -102,6 +102,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#prompting">Prompting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#moving-values-between-python-variables-and-sas-macro-variables">Moving values between Python Variables and SAS Macro Variables</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#slow-performance-loading-a-dataframe-into-a-sas-data-set-df2sd">Slow performance loading a DataFrame into a SAS data set; df2sd()</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#disconnecting-from-an-iom-session-and-reconnecting-back-to-it">Disconnecting from an IOM session and reconnecting back to it.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">Configuring Grid Option Sets to have saspy run on a specific Queue.</a></li>
@@ -366,6 +367,144 @@ SAS to saspy and written to disk locally for the read_csv() method. This is stil
 to_df_DISK() and sd2df_DISK(). This mehtod uses the same code as MEMORY to get the data, but stores it in a file, like the CSV method, so
 that reading it into a dataframe w/ Pandas performs much better. This method allows better control over things like embedded delimiters
 and newlines, which Pandas can have parsing problem with reading CSV file created from proc export.</p>
+</div>
+<div class="section" id="slow-performance-loading-a-dataframe-into-a-sas-data-set-df2sd">
+<h2>Slow performance loading a DataFrame into a SAS data set; df2sd()<a class="headerlink" href="#slow-performance-loading-a-dataframe-into-a-sas-data-set-df2sd" title="Permalink to this headline">¶</a></h2>
+<p>df2sd (dataframe2sasdata) has two main steps, which were both done internal to the method. The second is transferring the data
+but the first is figureing out the necessary metadata to be able to correctly define the SAS Data Set being created. This requires
+identifying each column: it&#8217;s name, data type, length (this is the crux here), required conversion type (date/time/datetime), ...</p>
+<p>This metadata gathering step becomes slower the larger the data gets, only due to character columns. In SAS, I have to declare the
+length in bytes, of the SAS session encoding, that the column requires to fit the data. DataFrames have no metadata about how long
+any char columns are (they aren&#8217;t char they are simply objects), so there&#8217;s no way to know how long to declare these in SAS, other
+than to apply a lanbda len function to each of these columns (transcoding to bytes in the SAS encoding), and taking the max value,
+for each char column. That&#8217;s all cute and nifty when the data doesn&#8217;t have millions of rows and hunfreds of char columns. So, as
+of V3.6.0, I&#8217;ve made some changes to accomodate data this large.</p>
+<p>First, I&#8217;ve pulled the char length calculation code out of df2sd, into a public method (df_char_lengths()). df2sd calls this itself,
+by default, so it&#8217;s the same as before if you do nothing new. But, you can call that method, with a number of different paramerters
+that can make it faster; calculate char length, not encoded byte lenghts (which is faster), and just multiply by the BPC (bytes per
+char) of the SAS encoding (which I have defaults for or you can override and probvide your own BPC). This routine returns a dict with
+each char column name and the length. df2sd can be passed these same parameters, so when it calls this method, it can do the same thing.</p>
+<p>df2sd also can now take the dict that this routine will produce, or just a dict you code up with the lengths, skipping this whole
+disconvery process all together. So, you can code the lengths yourself, have df2sd do it but with some better performance, or call
+the method to calculate them and pass in that dict. This is good when you run df2sd on the same data more then once; figure out the
+lengths once and just pass in the dict all the times and never have to specd time recalculating.</p>
+<p>Here are a few example cases showing this.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="c1"># For this case SAS is running in UTF-8</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span>
+<span class="n">Access</span> <span class="n">Method</span>         <span class="o">=</span> <span class="n">IOM</span>
+<span class="n">SAS</span> <span class="n">Config</span> <span class="n">name</span>       <span class="o">=</span> <span class="n">iomj</span>
+<span class="n">SAS</span> <span class="n">Config</span> <span class="nb">file</span>       <span class="o">=</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span>
+<span class="n">WORK</span> <span class="n">Path</span>             <span class="o">=</span> <span class="o">/</span><span class="n">sastmp</span><span class="o">/</span><span class="n">SAS_work528B00001B2F_tom64</span><span class="o">-</span><span class="mi">5</span><span class="o">/</span><span class="n">SAS_work8B1F00001B2F_tom64</span><span class="o">-</span><span class="mi">5</span><span class="o">/</span>
+<span class="n">SAS</span> <span class="n">Version</span>           <span class="o">=</span> <span class="mf">9.04</span><span class="o">.</span><span class="mo">01</span><span class="n">M4D11092016</span>
+<span class="n">SASPy</span> <span class="n">Version</span>         <span class="o">=</span> <span class="mf">3.6</span><span class="o">.</span><span class="mi">0</span>
+<span class="n">Teach</span> <span class="n">me</span> <span class="n">SAS</span>          <span class="o">=</span> <span class="bp">False</span>
+<span class="n">Batch</span>                 <span class="o">=</span> <span class="bp">False</span>
+<span class="n">Results</span>               <span class="o">=</span> <span class="n">Pandas</span>
+<span class="n">SAS</span> <span class="n">Session</span> <span class="n">Encoding</span>  <span class="o">=</span> <span class="n">utf</span><span class="o">-</span><span class="mi">8</span>
+<span class="n">Python</span> <span class="n">Encoding</span> <span class="n">value</span> <span class="o">=</span> <span class="n">utf_8</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">Pid</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">6959</span>
+
+<span class="c1"># Create a dataframe of all CHAR columns from the cars dataset</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cars</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasdata</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span><span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span> <span class="o">=</span> <span class="n">cars</span><span class="o">.</span><span class="n">to_df_DISK</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
+<span class="n">Make</span>           <span class="nb">object</span>
+<span class="n">Model</span>          <span class="nb">object</span>
+<span class="n">Type</span>           <span class="nb">object</span>
+<span class="n">Origin</span>         <span class="nb">object</span>
+<span class="n">DriveTrain</span>     <span class="nb">object</span>
+<span class="n">MSRP</span>           <span class="nb">object</span>
+<span class="n">Invoice</span>        <span class="nb">object</span>
+<span class="n">EngineSize</span>     <span class="nb">object</span>
+<span class="n">Cylinders</span>      <span class="nb">object</span>
+<span class="n">Horsepower</span>     <span class="nb">object</span>
+<span class="n">MPG_City</span>       <span class="nb">object</span>
+<span class="n">MPG_Highway</span>    <span class="nb">object</span>
+<span class="n">Weight</span>         <span class="nb">object</span>
+<span class="n">Wheelbase</span>      <span class="nb">object</span>
+<span class="n">Length</span>         <span class="nb">object</span>
+<span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
+
+<span class="c1"># Let&#39;s call the new method to get the char column lengths.</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d1</span> <span class="o">=</span>  <span class="n">sas</span><span class="o">.</span><span class="n">df_char_lengths</span><span class="p">(</span><span class="n">df</span><span class="p">);</span> <span class="n">d1</span>
+<span class="p">{</span><span class="s1">&#39;Length&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Invoice&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;Wheelbase&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="mi">39</span><span class="p">,</span> <span class="s1">&#39;Make&#39;</span><span class="p">:</span> <span class="mi">13</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+ <span class="s1">&#39;DriveTrain&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;MSRP&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;MPG_City&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;MPG_Highway&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+ <span class="s1">&#39;Origin&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;EngineSize&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span>
+
+<span class="c1"># we can call df2sd on this DF and pass in the char col lengths so we skip that in df2sd</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span> <span class="o">=</span>  <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">char_lengths</span><span class="o">=</span><span class="n">d1</span><span class="p">);</span> <span class="n">sd</span>
+<span class="n">Libref</span>  <span class="o">=</span> <span class="n">WORK</span>
+<span class="n">Table</span>   <span class="o">=</span> <span class="n">_df</span>
+<span class="n">Dsopts</span>  <span class="o">=</span> <span class="p">{}</span>
+<span class="n">Results</span> <span class="o">=</span> <span class="n">Pandas</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span><span class="o">.</span><span class="n">columnInfo</span><span class="p">()</span>
+    <span class="n">Member</span>  <span class="n">Num</span>     <span class="n">Variable</span>  <span class="n">Type</span>  <span class="n">Len</span>  <span class="n">Pos</span>
+<span class="mi">0</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>    <span class="mi">9</span>    <span class="n">Cylinders</span>  <span class="n">Char</span>    <span class="mi">3</span>   <span class="mi">84</span>
+<span class="mi">1</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>    <span class="mi">5</span>   <span class="n">DriveTrain</span>  <span class="n">Char</span>    <span class="mi">5</span>   <span class="mi">64</span>
+<span class="mi">2</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>    <span class="mi">8</span>   <span class="n">EngineSize</span>  <span class="n">Char</span>    <span class="mi">3</span>   <span class="mi">81</span>
+<span class="mi">3</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>   <span class="mi">10</span>   <span class="n">Horsepower</span>  <span class="n">Char</span>    <span class="mi">3</span>   <span class="mi">87</span>
+<span class="mi">4</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>    <span class="mi">7</span>      <span class="n">Invoice</span>  <span class="n">Char</span>    <span class="mi">6</span>   <span class="mi">75</span>
+<span class="mi">5</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>   <span class="mi">15</span>       <span class="n">Length</span>  <span class="n">Char</span>    <span class="mi">3</span>  <span class="mi">101</span>
+<span class="mi">6</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>   <span class="mi">11</span>     <span class="n">MPG_City</span>  <span class="n">Char</span>    <span class="mi">2</span>   <span class="mi">90</span>
+<span class="mi">7</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>   <span class="mi">12</span>  <span class="n">MPG_Highway</span>  <span class="n">Char</span>    <span class="mi">2</span>   <span class="mi">92</span>
+<span class="mi">8</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>    <span class="mi">6</span>         <span class="n">MSRP</span>  <span class="n">Char</span>    <span class="mi">6</span>   <span class="mi">69</span>
+<span class="mi">9</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>    <span class="mi">1</span>         <span class="n">Make</span>  <span class="n">Char</span>   <span class="mi">13</span>    <span class="mi">0</span>
+<span class="mi">10</span>  <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>    <span class="mi">2</span>        <span class="n">Model</span>  <span class="n">Char</span>   <span class="mi">39</span>   <span class="mi">13</span>
+<span class="mi">11</span>  <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>    <span class="mi">4</span>       <span class="n">Origin</span>  <span class="n">Char</span>    <span class="mi">6</span>   <span class="mi">58</span>
+<span class="mi">12</span>  <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>    <span class="mi">3</span>         <span class="n">Type</span>  <span class="n">Char</span>    <span class="mi">6</span>   <span class="mi">52</span>
+<span class="mi">13</span>  <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>   <span class="mi">13</span>       <span class="n">Weight</span>  <span class="n">Char</span>    <span class="mi">4</span>   <span class="mi">94</span>
+<span class="mi">14</span>  <span class="n">WORK</span><span class="o">.</span><span class="n">B</span>   <span class="mi">14</span>    <span class="n">Wheelbase</span>  <span class="n">Char</span>    <span class="mi">3</span>   <span class="mi">98</span>
+<span class="o">&gt;&gt;&gt;</span>
+
+<span class="c1"># you can just create your own dict with lengths you want, also, and skip the discovery step altogether.</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d1</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+<span class="o">...</span>    <span class="n">d1</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>  <span class="o">=</span> <span class="mi">10</span>
+<span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d1</span><span class="p">[</span><span class="s1">&#39;Make&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="mi">15</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d1</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">d1</span>
+<span class="p">{</span><span class="s1">&#39;MSRP&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;Type&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;Length&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;MPG_City&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;Invoice&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span> <span class="s1">&#39;DriveTrain&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;Horsepower&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;Make&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span> <span class="s1">&#39;Wheelbase&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;EngineSize&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;Origin&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;Cylinders&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;MPG_Highway&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;Weight&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span> <span class="o">=</span>  <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">char_lengths</span><span class="o">=</span><span class="n">d1</span><span class="p">);</span> <span class="n">sd</span>
+<span class="n">Libref</span>  <span class="o">=</span> <span class="n">WORK</span>
+<span class="n">Table</span>   <span class="o">=</span> <span class="n">_df</span>
+<span class="n">Dsopts</span>  <span class="o">=</span> <span class="p">{}</span>
+<span class="n">Results</span> <span class="o">=</span> <span class="n">Pandas</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span><span class="o">.</span><span class="n">columnInfo</span><span class="p">()</span>
+      <span class="n">Member</span>  <span class="n">Num</span>     <span class="n">Variable</span>  <span class="n">Type</span>  <span class="n">Len</span>  <span class="n">Pos</span>
+<span class="mi">0</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>    <span class="mi">9</span>    <span class="n">Cylinders</span>  <span class="n">Char</span>   <span class="mi">10</span>  <span class="mi">115</span>
+<span class="mi">1</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>    <span class="mi">5</span>   <span class="n">DriveTrain</span>  <span class="n">Char</span>   <span class="mi">10</span>   <span class="mi">75</span>
+<span class="mi">2</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>    <span class="mi">8</span>   <span class="n">EngineSize</span>  <span class="n">Char</span>   <span class="mi">10</span>  <span class="mi">105</span>
+<span class="mi">3</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>   <span class="mi">10</span>   <span class="n">Horsepower</span>  <span class="n">Char</span>   <span class="mi">10</span>  <span class="mi">125</span>
+<span class="mi">4</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>    <span class="mi">7</span>      <span class="n">Invoice</span>  <span class="n">Char</span>   <span class="mi">10</span>   <span class="mi">95</span>
+<span class="mi">5</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>   <span class="mi">15</span>       <span class="n">Length</span>  <span class="n">Char</span>   <span class="mi">10</span>  <span class="mi">175</span>
+<span class="mi">6</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>   <span class="mi">11</span>     <span class="n">MPG_City</span>  <span class="n">Char</span>   <span class="mi">10</span>  <span class="mi">135</span>
+<span class="mi">7</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>   <span class="mi">12</span>  <span class="n">MPG_Highway</span>  <span class="n">Char</span>   <span class="mi">10</span>  <span class="mi">145</span>
+<span class="mi">8</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>    <span class="mi">6</span>         <span class="n">MSRP</span>  <span class="n">Char</span>   <span class="mi">10</span>   <span class="mi">85</span>
+<span class="mi">9</span>   <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>    <span class="mi">1</span>         <span class="n">Make</span>  <span class="n">Char</span>   <span class="mi">15</span>    <span class="mi">0</span>
+<span class="mi">10</span>  <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>    <span class="mi">2</span>        <span class="n">Model</span>  <span class="n">Char</span>   <span class="mi">40</span>   <span class="mi">15</span>
+<span class="mi">11</span>  <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>    <span class="mi">4</span>       <span class="n">Origin</span>  <span class="n">Char</span>   <span class="mi">10</span>   <span class="mi">65</span>
+<span class="mi">12</span>  <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>    <span class="mi">3</span>         <span class="n">Type</span>  <span class="n">Char</span>   <span class="mi">10</span>   <span class="mi">55</span>
+<span class="mi">13</span>  <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>   <span class="mi">13</span>       <span class="n">Weight</span>  <span class="n">Char</span>   <span class="mi">10</span>  <span class="mi">155</span>
+<span class="mi">14</span>  <span class="n">WORK</span><span class="o">.</span><span class="n">_DF</span>   <span class="mi">14</span>    <span class="n">Wheelbase</span>  <span class="n">Char</span>   <span class="mi">10</span>  <span class="mi">165</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+    <span class="n">Make</span>           <span class="n">Model</span>   <span class="n">Type</span> <span class="n">Origin</span> <span class="n">DriveTrain</span>   <span class="n">MSRP</span> <span class="n">Invoice</span> <span class="n">EngineSize</span> <span class="n">Cylinders</span> <span class="n">Horsepower</span> <span class="n">MPG_City</span> <span class="n">MPG_Highway</span> <span class="n">Weight</span> <span class="n">Wheelbase</span> <span class="n">Length</span>
+<span class="mi">0</span>  <span class="n">Acura</span>             <span class="n">MDX</span>    <span class="n">SUV</span>   <span class="n">Asia</span>        <span class="n">All</span>  <span class="mi">36945</span>   <span class="mi">33337</span>        <span class="mf">3.5</span>         <span class="mi">6</span>        <span class="mi">265</span>       <span class="mi">17</span>          <span class="mi">23</span>   <span class="mi">4451</span>       <span class="mi">106</span>    <span class="mi">189</span>
+<span class="mi">1</span>  <span class="n">Acura</span>  <span class="n">RSX</span> <span class="n">Type</span> <span class="n">S</span> <span class="mi">2</span><span class="n">dr</span>  <span class="n">Sedan</span>   <span class="n">Asia</span>      <span class="n">Front</span>  <span class="mi">23820</span>   <span class="mi">21761</span>          <span class="mi">2</span>         <span class="mi">4</span>        <span class="mi">200</span>       <span class="mi">24</span>          <span class="mi">31</span>   <span class="mi">2778</span>       <span class="mi">101</span>    <span class="mi">172</span>
+<span class="mi">2</span>  <span class="n">Acura</span>         <span class="n">TSX</span> <span class="mi">4</span><span class="n">dr</span>  <span class="n">Sedan</span>   <span class="n">Asia</span>      <span class="n">Front</span>  <span class="mi">26990</span>   <span class="mi">24647</span>        <span class="mf">2.4</span>         <span class="mi">4</span>        <span class="mi">200</span>       <span class="mi">22</span>          <span class="mi">29</span>   <span class="mi">3230</span>       <span class="mi">105</span>    <span class="mi">183</span>
+<span class="mi">3</span>  <span class="n">Acura</span>          <span class="n">TL</span> <span class="mi">4</span><span class="n">dr</span>  <span class="n">Sedan</span>   <span class="n">Asia</span>      <span class="n">Front</span>  <span class="mi">33195</span>   <span class="mi">30299</span>        <span class="mf">3.2</span>         <span class="mi">6</span>        <span class="mi">270</span>       <span class="mi">20</span>          <span class="mi">28</span>   <span class="mi">3575</span>       <span class="mi">108</span>    <span class="mi">186</span>
+<span class="mi">4</span>  <span class="n">Acura</span>      <span class="mf">3.5</span> <span class="n">RL</span> <span class="mi">4</span><span class="n">dr</span>  <span class="n">Sedan</span>   <span class="n">Asia</span>      <span class="n">Front</span>  <span class="mi">43755</span>   <span class="mi">39014</span>        <span class="mf">3.5</span>         <span class="mi">6</span>        <span class="mi">225</span>       <span class="mi">18</span>          <span class="mi">24</span>   <span class="mi">3880</span>       <span class="mi">115</span>    <span class="mi">197</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">
 <h2>Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports<a class="headerlink" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports" title="Permalink to this headline">¶</a></h2>
@@ -721,7 +860,7 @@ an Object type, will be a character variable in SAS, with the str() of the objec
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.6.0',
+            VERSION:'3.6.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
