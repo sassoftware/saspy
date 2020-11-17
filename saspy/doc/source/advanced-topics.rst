@@ -243,6 +243,154 @@ that reading it into a dataframe w/ Pandas performs much better. This method all
 and newlines, which Pandas can have parsing problem with reading CSV file created from proc export.
 
 
+
+*****************************************************************
+Slow performance loading a DataFrame into a SAS data set; df2sd() 
+*****************************************************************
+
+df2sd (dataframe2sasdata) has two main steps, which were both done internal to the method. The second is transferring the data
+but the first is figureing out the necessary metadata to be able to correctly define the SAS Data Set being created. This requires
+identifying each column: it's name, data type, length (this is the crux here), required conversion type (date/time/datetime), ...
+
+This metadata gathering step becomes slower the larger the data gets, only due to character columns. In SAS, I have to declare the
+length in bytes, of the SAS session encoding, that the column requires to fit the data. DataFrames have no metadata about how long
+any char columns are (they aren't char they are simply objects), so there's no way to know how long to declare these in SAS, other
+than to apply a lanbda len function to each of these columns (transcoding to bytes in the SAS encoding), and taking the max value,
+for each char column. That's all cute and nifty when the data doesn't have millions of rows and hunfreds of char columns. So, as
+of V3.6.0, I've made some changes to accomodate data this large.
+
+First, I've pulled the char length calculation code out of df2sd, into a public method (df_char_lengths()). df2sd calls this itself,
+by default, so it's the same as before if you do nothing new. But, you can call that method, with a number of different paramerters
+that can make it faster; calculate char length, not encoded byte lenghts (which is faster), and just multiply by the BPC (bytes per
+char) of the SAS encoding (which I have defaults for or you can override and probvide your own BPC). This routine returns a dict with
+each char column name and the length. df2sd can be passed these same parameters, so when it calls this method, it can do the same thing.
+
+df2sd also can now take the dict that this routine will produce, or just a dict you code up with the lengths, skipping this whole 
+disconvery process all together. So, you can code the lengths yourself, have df2sd do it but with some better performance, or call 
+the method to calculate them and pass in that dict. This is good when you run df2sd on the same data more then once; figure out the 
+lengths once and just pass in the dict all the times and never have to specd time recalculating.
+
+Here are a few example cases showing this.
+
+.. code-block:: ipython3
+
+    # For this case SAS is running in UTF-8
+
+    >>> sas
+    Access Method         = IOM
+    SAS Config name       = iomj
+    SAS Config file       = /opt/tom/github/saspy/saspy/sascfg_personal.py
+    WORK Path             = /sastmp/SAS_work528B00001B2F_tom64-5/SAS_work8B1F00001B2F_tom64-5/
+    SAS Version           = 9.04.01M4D11092016
+    SASPy Version         = 3.6.0
+    Teach me SAS          = False
+    Batch                 = False
+    Results               = Pandas
+    SAS Session Encoding  = utf-8
+    Python Encoding value = utf_8
+    SAS process Pid value = 6959
+    
+    # Create a dataframe of all CHAR columns from the cars dataset 
+
+    >>> cars = sas.sasdata('cars','sashelp', results='text')
+    >>> df = cars.to_df_DISK(dtype=str)
+    >>> df.dtypes
+    Make           object
+    Model          object
+    Type           object
+    Origin         object
+    DriveTrain     object
+    MSRP           object
+    Invoice        object
+    EngineSize     object
+    Cylinders      object
+    Horsepower     object
+    MPG_City       object
+    MPG_Highway    object
+    Weight         object
+    Wheelbase      object
+    Length         object
+    dtype: object
+
+    # Let's call the new method to get the char column lengths.
+
+    >>> d1 =  sas.df_char_lengths(df); d1
+    {'Length': 3, 'Invoice': 6, 'Wheelbase': 3, 'Model': 39, 'Make': 13, 'Cylinders': 3, 
+     'DriveTrain': 5, 'Type': 6, 'MSRP': 6, 'MPG_City': 2, 'Weight': 4, 'MPG_Highway': 2,
+     'Origin': 6, 'EngineSize': 3, 'Horsepower': 3}
+    >>>
+    
+    # we can call df2sd on this DF and pass in the char col lengths so we skip that in df2sd
+
+    >>> sd =  sas.df2sd(df, char_lengths=d1); sd
+    Libref  = WORK
+    Table   = _df
+    Dsopts  = {}
+    Results = Pandas
+    
+    >>> sd.columnInfo()
+        Member  Num     Variable  Type  Len  Pos
+    0   WORK.B    9    Cylinders  Char    3   84
+    1   WORK.B    5   DriveTrain  Char    5   64
+    2   WORK.B    8   EngineSize  Char    3   81
+    3   WORK.B   10   Horsepower  Char    3   87
+    4   WORK.B    7      Invoice  Char    6   75
+    5   WORK.B   15       Length  Char    3  101
+    6   WORK.B   11     MPG_City  Char    2   90
+    7   WORK.B   12  MPG_Highway  Char    2   92
+    8   WORK.B    6         MSRP  Char    6   69
+    9   WORK.B    1         Make  Char   13    0
+    10  WORK.B    2        Model  Char   39   13
+    11  WORK.B    4       Origin  Char    6   58
+    12  WORK.B    3         Type  Char    6   52
+    13  WORK.B   13       Weight  Char    4   94
+    14  WORK.B   14    Wheelbase  Char    3   98
+    >>>
+    
+    # you can just create your own dict with lengths you want, also, and skip the discovery step altogether. 
+
+    >>> d1 = {}
+    >>> for col in df.columns:
+    ...    d1[col]  = 10
+    ...
+    >>> d1['Make']  = 15
+    >>> d1['Model'] = 40
+    >>> d1
+    {'MSRP': 10, 'Type': 10, 'Length': 10, 'MPG_City': 10, 'Invoice': 10, 'Model': 40, 'DriveTrain': 10, 'Horsepower': 10, 'Make': 15, 'Wheelbase': 10, 'EngineSize': 10, 'Origin': 10, 'Cylinders': 10, 'MPG_Highway': 10, 'Weight': 10}
+    >>> sd =  sas.df2sd(df, char_lengths=d1); sd
+    Libref  = WORK
+    Table   = _df
+    Dsopts  = {}
+    Results = Pandas
+    
+    >>> sd.columnInfo()
+          Member  Num     Variable  Type  Len  Pos
+    0   WORK._DF    9    Cylinders  Char   10  115
+    1   WORK._DF    5   DriveTrain  Char   10   75
+    2   WORK._DF    8   EngineSize  Char   10  105
+    3   WORK._DF   10   Horsepower  Char   10  125
+    4   WORK._DF    7      Invoice  Char   10   95
+    5   WORK._DF   15       Length  Char   10  175
+    6   WORK._DF   11     MPG_City  Char   10  135
+    7   WORK._DF   12  MPG_Highway  Char   10  145
+    8   WORK._DF    6         MSRP  Char   10   85
+    9   WORK._DF    1         Make  Char   15    0
+    10  WORK._DF    2        Model  Char   40   15
+    11  WORK._DF    4       Origin  Char   10   65
+    12  WORK._DF    3         Type  Char   10   55
+    13  WORK._DF   13       Weight  Char   10  155
+    14  WORK._DF   14    Wheelbase  Char   10  165
+    >>> sd.head()
+        Make           Model   Type Origin DriveTrain   MSRP Invoice EngineSize Cylinders Horsepower MPG_City MPG_Highway Weight Wheelbase Length
+    0  Acura             MDX    SUV   Asia        All  36945   33337        3.5         6        265       17          23   4451       106    189
+    1  Acura  RSX Type S 2dr  Sedan   Asia      Front  23820   21761          2         4        200       24          31   2778       101    172
+    2  Acura         TSX 4dr  Sedan   Asia      Front  26990   24647        2.4         4        200       22          29   3230       105    183
+    3  Acura          TL 4dr  Sedan   Asia      Front  33195   30299        3.2         6        270       20          28   3575       108    186
+    4  Acura      3.5 RL 4dr  Sedan   Asia      Front  43755   39014        3.5         6        225       18          24   3880       115    197
+    >>>
+
+
+
 *****************************************************************************
 Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports
 *****************************************************************************

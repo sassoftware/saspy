@@ -910,18 +910,9 @@ options -
     (Optional) SAS options to include when connecting. These **must** be a Python list.
 
 encoding -
-    (Optional)
-    NOTE: you no longer need to set the encoding. SASpy
-    will determine the SAS session encoding and map that to the Python encoding for you.
-
-    This is the Python encoding value that matches the SAS session encoding
-    of the SAS session to which you are connecting. The Python encoding 
-    values can be found at `encodings-and-unicode <https://docs.python.org/
-    3.5/library/codecs.html#encodings-and-unicode>`_.
-    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the 
-    default encodings for running SAS in Unicode, on Unix, and on Windows,
-    respectively. Those map to Python encoding values: utf8, latin1, and
-    windows-1252, respectively. 
+    (Ignored)
+    Unlike the other access methods, the HTTP API to the Compute Service uses UTF-8 for all calls.
+    So, no transcoding is necessary, nor done, on the Python side, so this option is not needed and ignored. 
 
 autoexec -
     (Optional) This is a string of SAS code that will be submitted upon establishing a connection.
