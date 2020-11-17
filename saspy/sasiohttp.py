@@ -1619,8 +1619,10 @@ class SASsessionHTTP():
 
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
 
-      my_fmts = kwargs.pop('my_fmts', False)
-      k_dts   = kwargs.pop('dtype',   None)
+      idx_col = kwargs.pop('index_col', False)
+      eng     = kwargs.pop('engine',    'c')
+      my_fmts = kwargs.pop('my_fmts',   False)
+      k_dts   = kwargs.pop('dtype',     None)
       if k_dts is None and my_fmts:
          print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
          my_fmts = False
@@ -1664,7 +1666,7 @@ class SASsessionHTTP():
 
       ll = self.download(tmpcsv, self._sb.workpath+"_tomodsx")
 
-      df = pd.read_csv(tmpcsv, index_col=False, engine='c', dtype=dts, **kwargs)
+      df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
 
       if tmpdir:
          tmpdir.cleanup()
@@ -1771,8 +1773,10 @@ class SASsessionHTTP():
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
-      my_fmts = kwargs.pop('my_fmts', False)
-      k_dts   = kwargs.pop('dtype',   None)
+      idx_col = kwargs.pop('index_col', False)
+      eng     = kwargs.pop('engine',    'c')
+      my_fmts = kwargs.pop('my_fmts',   False)
+      k_dts   = kwargs.pop('dtype',     None)
       if k_dts is None and my_fmts:
          print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
          my_fmts = False
@@ -1844,7 +1848,7 @@ class SASsessionHTTP():
 
       quoting = kwargs.pop('quoting', 3)
 
-      df = pd.read_csv(tmpcsv, index_col=False, engine='c', header=None, names=varlist, 
+      df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, header=None, names=varlist, 
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
                        encoding=self.sascfg.encoding, quoting=quoting, **kwargs)
 
