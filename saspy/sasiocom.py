@@ -771,6 +771,8 @@ class SASSessionCOM(object):
             for col in meta.keys():
                if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
                   df[col] = pd.to_datetime(df[col], errors='coerce')
+               elif meta[col]['DATA_TYPE'] == 5:
+                  df[col] = pd.to_numeric(df[col], errors='coerce')
 
         return df
 
