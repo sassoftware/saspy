@@ -733,7 +733,7 @@ m5dsbug -
 
 .. code-block:: ipython3
 
-    # Windows client and Local Windows IOM server
+    # Windows client and Local Windows SAS Install
     winlocal    = {'java'      : 'java',
                   }
 
