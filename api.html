@@ -1332,6 +1332,45 @@ as either HTML or TEXT, depending upon results. The method= parameter allows you
 </dd></dl>
 
 <dl class="method">
+<dt id="saspy.SASsession.validvarname">
+<code class="descname">validvarname</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>version: str = 'v7'</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.validvarname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a copy of a Data Frame with SAS compatible column names. The version= parameter allows 
+you to choose the compatability setting to use.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>df</strong> &#8211; a Pandas Data Frame whose column names you wish to make SAS compatible.</li>
+<li><strong>version</strong> &#8211; <p>select the validvarname version using SAS convention.</p>
+<ul>
+<li><dl class="first docutils">
+<dt>V7: ensures the following conditions are met:</dt>
+<dd><ul class="first last">
+<li>up to 32 mixed case alphanumeric characters are allowed.</li>
+<li>names must begin with alphabetic characters or an underscore.</li>
+<li>non SAS characters are mapped to underscores.</li>
+<li>any column name that is not unique when normalized is made unique by appending a counter (0,1,2,...) to the name.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li>V6:     like V7, but column names truncated to 8 characters.</li>
+<li>upcase: like V7, but columns names will be uppercase.</li>
+<li>any:    any characters are valid, but column names truncated to 32 characters.</li>
+</ul>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">a Pandas DataFrame whose column names are SAS compatible according to the selected version.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="saspy.SASsession.write_csv">
 <code class="descname">write_csv</code><span class="sig-paren">(</span><em>file: str</em>, <em>table: str</em>, <em>libref: str = ''</em>, <em>dsopts: dict = None</em>, <em>opts: dict = None</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#saspy.SASsession.write_csv" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
