@@ -844,6 +844,13 @@ or you can submit the options statement from your python code after making a con
 <span class="n">ll</span>  <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="s1">&#39;options filesystem=hfs;&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Or better yet, use the autoexec configuration option so it&#8217;s always set and you don&#8217;t have to think about it!</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">IOM_MVS</span>     <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;java&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;autoexec&#39;</span>  <span class="p">:</span> <span class="s1">&#39;options filesystem=hfs;&#39;</span><span class="p">,</span>
+               <span class="o">...</span>
+              <span class="p">}</span>
+</pre></div>
+</div>
 <p>The other thing is to set the encoding correctly for this to work. MVS is an EBCDIC system, not ASCII. For the most part,
 this is all handled in IOM for you, but there is a small amount of transcoding required internally in this module. The
 default encoding on MVS is OPEN_ED-1047, although it can be set to any number of other EBCDIC encodings. The default Python
