@@ -763,6 +763,18 @@ or you can submit the options statement from your python code after making a con
     ll  = sas.submit('options filesystem=hfs;')
 
 
+Or better yet, use the autoexec configuration option so it's always set and you don't have to think about it!
+
+
+::
+
+    IOM_MVS     = {'java'      : 'java',
+                   'autoexec'  : 'options filesystem=hfs;',
+                   ...
+                  }
+
+
+
 The other thing is to set the encoding correctly for this to work. MVS is an EBCDIC system, not ASCII. For the most part,
 this is all handled in IOM for you, but there is a small amount of transcoding required internally in this module. The 
 default encoding on MVS is OPEN_ED-1047, although it can be set to any number of other EBCDIC encodings. The default Python
