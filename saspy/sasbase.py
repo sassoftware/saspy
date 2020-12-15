@@ -2210,6 +2210,35 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return res
 
+    def delete(self, filepath, fileref: str = '_spfinfo', quiet: bool = False) -> dict:
+        """
+        This method deletes an external file or directory on the SAS server side
+        """
+        lastlog = len(self._io._log)
+
+        code  = "data _null_;\n  rc=filename('"+fileref+"', '"+filepath+"');\n"
+        code += " if rc = 0 and fexist('"+fileref+"') then do;\n"
+        code += "    rc = fdelete('"+fileref+"');\n"
+        code += "    put 'FILEREF_EXISTS= ' rc 'FILE_EXTEND=';\n"
+        code += " end; else do;\n"
+        code += "    put 'FILEREF_EXISTS= -1 FILE_EXTEND=';\n"
+        code += " end; run;\n"
+      
+        if self.nosub:
+            print(code)
+            return None
+        else:
+           ll = self._io.submit(code, results='text')
+   
+        exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
+   
+        if exists != 0:
+           if not quiet:
+              print('The filepath provided does not exist')
+   
+        self._lastlog = self._io._log[lastlog:]
+        return {'Success' : not bool(exists), 'LOG' : ll['LOG']}
+
     def cat(self, path) -> str:
        """
        Like Linux 'cat' - open and print the contents of a file
