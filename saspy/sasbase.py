@@ -2216,7 +2216,7 @@ class SASsession():
         """
         lastlog = len(self._io._log)
 
-        code  = "data _null_;\n  rc=filename('"+fileref+"', '"+filepath+"');\n"
+        code  = "data _null_;\n rc=filename('"+fileref+"', '"+filepath+"');\n"
         code += " if rc = 0 and fexist('"+fileref+"') then do;\n"
         code += "    rc = fdelete('"+fileref+"');\n"
         code += "    put 'FILEREF_EXISTS= ' rc 'FILE_EXTEND=';\n"
