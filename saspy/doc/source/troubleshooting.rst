@@ -514,6 +514,9 @@ Scroll down based upon the number to see an example of that error and help on wh
 6) **The application could not log on to the server "localhost:0".  Integrated Windows authentication failed.**
 
 
+7) **The application could not create a tunnel to the server "127.0.0.1:55517".**
+
+
 Here are examples of each of the above problems:
 
 
@@ -636,6 +639,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
 
 
 
+
     Be sure the path to sspiauth.dll is in your System PATH
     
     No SAS process attached. SAS process has terminated unexpectedly.
@@ -691,6 +695,58 @@ which failed. If I quote both of the paths in that parameter, then it works.
 
     No SAS process attached. SAS process has terminated unexpectedly.
 
+
+7) The application could not create a tunnel to the server "127.0.0.1:55517"  (the port number will vary)
+
+   This is an error that can occur trying to make a Local IOM connection to local SAS on your Windows machine.
+   This one was recently reported in issue 354. Turns out it's a problem with having the SAS_IOM_PROXYLIST environment variable set.
+   This is needed sometimes for connecting to remote IOM servers when there are firewalls in the way, or something about that. Either
+   way, it's not needed and can cause a failure trying to use a local SAS install over IOM Local saspy connection. Luckilly it's easy
+   to resolve. You can simply unset that variable in your Python session before trying to get your SASsession. You can do this inline
+   if you need this set for remote IOM connections from saspy, or put it in your sascfg_personal.py file if you only connect to local
+   SAS from saspy bu tneed the variable set for other applications that need it. 
+
+.. code-block:: ipython3
+
+    >>> import os
+    >>> os.environ['SAS_IOM_PROXYLIST']='https://www.sas.com'
+    >>> os.environ['SAS_IOM_PROXYLIST']
+    'https://www.sas.com'
+    >>>
+    >>> import saspy; sas = saspy.SASsession(cfgname='winlocal'); sas
+    We failed in getConnection
+    The application could not create a tunnel to the server "127.0.0.1:54243".
+    SAS process has terminated unexpectedly. RC from wait was: 4294967290
+    
+    
+    >>> # unset the variable here now. You can do this in your config file it you need it all the time
+    >>> del(os.environ['SAS_IOM_PROXYLIST'])
+
+    >>> os.environ['SAS_IOM_PROXYLIST']
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "C:\ProgramData\Anaconda3\lib\os.py", line 669, in __getitem__
+        raise KeyError(key) from None
+    KeyError: 'SAS_IOM_PROXYLIST'
+    >>> # it's been unset now
+    >>>
+    >>> import saspy; sas = saspy.SASsession(cfgname='winlocal'); sas
+    SAS Connection established. Subprocess id is 37100
+    
+    Access Method         = IOM
+    SAS Config name       = winlocal
+    SAS Config file       = C:\ProgramData\Anaconda3\lib\site-packages\saspy\sascfg_personal.py
+    WORK Path             = C:\Users\sastpw\AppData\Local\Temp\SAS Temporary Files\_TD17980_d10a626_\Prc2\
+    SAS Version           = 9.04.01M5P09132017
+    SASPy Version         = 3.6.2
+    Teach me SAS          = False
+    Batch                 = False
+    Results               = Pandas
+    SAS Session Encoding  = wlatin1
+    Python Encoding value = cp1252
+    SAS process Pid value = 17980
+    >>>
+    
 
 
 So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn't
