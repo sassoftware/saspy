@@ -13,8 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-import fcntl
 import os
+if os.name != 'nt':
+   import fcntl
 import signal
 import subprocess
 import tempfile as tf
@@ -28,6 +29,10 @@ try:
    import numpy  as np
 except ImportError:
    pass
+
+if os.name == 'nt':
+   from queue     import Queue, Empty
+   from threading import Thread
 
 class SASconfigSTDIO:
    """
@@ -44,6 +49,7 @@ class SASconfigSTDIO:
       self.options  = cfg.get('options', [])
       self.ssh      = cfg.get('ssh', '')
       self.identity = cfg.get('identity', None)
+      self.luser    = cfg.get('luser', None)
       self.tunnel   = cfg.get('tunnel', None)
       self.rtunnel  = cfg.get('rtunnel', None)
       self.port     = cfg.get('port', None)
@@ -102,6 +108,13 @@ class SASconfigSTDIO:
             print("Parameter 'identity' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.identity = inident
+
+      inluser = kwargs.get('luser', None)
+      if inluser is not None:
+         if lock:
+            print("Parameter 'luser' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.luser = inluser
 
       intunnel = kwargs.get('tunnel', None)
       if intunnel is not None:
@@ -203,12 +216,12 @@ class SASsessionSTDIO():
       self.sascfg   = SASconfigSTDIO(self, **kwargs)
 
       self._startsas()
+      return
 
    def __del__(self):
       if self.pid:
          self._endsas()
       self._sb.SASpid = None
-      return
 
    def _logcnt(self, next=True):
        if next == True:
@@ -233,7 +246,10 @@ class SASsessionSTDIO():
          if sascfg.rtunnel:
             parms += ["-L", '%d:localhost:%d' % (sascfg.rtunnel,sascfg.rtunnel)]
 
-         parms += [sascfg.host, sascfg.saspath]
+         if sascfg.luser:
+            parms += [sascfg.luser+'@'+sascfg.host, sascfg.saspath]
+         else:
+            parms += [sascfg.host, sascfg.saspath]
 
          if sascfg.output.lower() == 'html':
             print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg_personal.py).
@@ -269,7 +285,6 @@ Will use HTML5 for this SASsession.""")
       return [pgm, parms]
 
    def _startsas(self):
-      #import pdb;pdb.set_trace()
       if self.pid:
          return self.pid
 
@@ -279,73 +294,109 @@ Will use HTML5 for this SASsession.""")
       for i in range(len(parms)):
             s += parms[i]+' '
 
-      PIPE_READ  = 0
-      PIPE_WRITE = 1
-
-      pin  = os.pipe()
-      pout = os.pipe()
-      perr = os.pipe()
-
-      try:
-         pidpty = os.forkpty()
-      except:
-         import pty
-         pidpty = pty.fork()
-
-      if pidpty[0]:
-         # we are the parent
-
-         pid = pidpty[0]
-         os.close(pin[PIPE_READ])
-         os.close(pout[PIPE_WRITE])
-         os.close(perr[PIPE_WRITE])
-
-      else:
-         # we are the child
-         signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-         os.close(0)
-         os.close(1)
-         os.close(2)
-
-         os.dup2(pin[PIPE_READ],   0)
-         os.dup2(pout[PIPE_WRITE], 1)
-         os.dup2(perr[PIPE_WRITE], 2)
-
-         os.close(pin[PIPE_READ])
-         os.close(pin[PIPE_WRITE])
-         os.close(pout[PIPE_READ])
-         os.close(pout[PIPE_WRITE])
-         os.close(perr[PIPE_READ])
-         os.close(perr[PIPE_WRITE])
-
+      if os.name == 'nt':
          try:
-            #sleep(5)
-            os.execv(pgm, parms)
+            self.pid = subprocess.Popen(parms, bufsize=0, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            pid = self.pid.pid
          except OSError as e:
             print("The OS Error was:\n"+e.strerror+'\n')
             print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
             print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
             print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
-            os._exit(-6)
+            return None
+      else:
+         PIPE_READ  = 0
+         PIPE_WRITE = 1
+
+         pin  = os.pipe()
+         pout = os.pipe()
+         perr = os.pipe()
+
+         try:
+            pidpty = os.forkpty()
          except:
+            import pty
+            pidpty = pty.fork()
+
+         if pidpty[0]:
+            # we are the parent
+
+            pid = pidpty[0]
+            os.close(pin[PIPE_READ])
+            os.close(pout[PIPE_WRITE])
+            os.close(perr[PIPE_WRITE])
+
+         else:
+            # we are the child
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+            os.close(0)
+            os.close(1)
+            os.close(2)
+
+            os.dup2(pin[PIPE_READ],   0)
+            os.dup2(pout[PIPE_WRITE], 1)
+            os.dup2(perr[PIPE_WRITE], 2)
+
+            os.close(pin[PIPE_READ])
+            os.close(pin[PIPE_WRITE])
+            os.close(pout[PIPE_READ])
+            os.close(pout[PIPE_WRITE])
+            os.close(perr[PIPE_READ])
+            os.close(perr[PIPE_WRITE])
+
+            try:
+               #sleep(5)
+               os.execv(pgm, parms)
+            except OSError as e:
+               print("The OS Error was:\n"+e.strerror+'\n')
+               print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
+               print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
+               print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
+               os._exit(-6)
+            except:
+               print("Subprocess failed to start. Double check your settings in sascfg_personal.py file.\n")
+               os._exit(-6)
+
+      if os.name == 'nt':
+         try:
+            self.pid.wait(1)
+
+            error  = self.pid.stderr.read(4096).decode()+'\n'
+            error += self.pid.stdout.read(4096).decode()
+            print("Java Error:\n"+error)
+
             print("Subprocess failed to start. Double check your settings in sascfg_personal.py file.\n")
-            os._exit(-6)
+            print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
+            print("If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
+            self.pid = None
+            return None
+         except:
+            # lame windows can't do non-blocking I/O
+            self.stdout = Queue()
+            self.stderr = Queue()
+            self.to = Thread(target=self._read_out, args=())
+            self.te = Thread(target=self._read_err, args=())
+            self.to.daemon = True
+            self.te.daemon = True
+            self.to.start()
+            self.te.start()
+            self.stdin  = self.pid.stdin
+      else:
+         self.pid    = pidpty[0]
+         self.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
+         self.stderr = os.fdopen(perr[PIPE_READ], mode='rb')
+         self.stdout = os.fdopen(pout[PIPE_READ], mode='rb')
 
-      self.pid    = pidpty[0]
-      self.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
-      self.stderr = os.fdopen(perr[PIPE_READ], mode='rb')
-      self.stdout = os.fdopen(pout[PIPE_READ], mode='rb')
+         fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
+         fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
 
-      fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
-      fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
-
-      rc = os.waitpid(self.pid, os.WNOHANG)
-      if rc[0] != 0:
-         self.pid = None
-         self._sb.SASpid = None
-         lst = self.stdout.read1(4096)
-         print("stdout from subprocess is:\n"+lst.decode())
+         rc = os.waitpid(self.pid, os.WNOHANG)
+         if rc[0] != 0:
+            self.pid = None
+            self._sb.SASpid = None
+            lst = self.stdout.read1(4096)
+            print("stdout from subprocess is:\n"+lst.decode())
 
       if self.pid is None:
          print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
@@ -368,6 +419,21 @@ Will use HTML5 for this SASsession.""")
          print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")
       return self.pid
 
+   if os.name == 'nt':
+      def _read_out(self):
+         while True:
+            lst = self.pid.stdout.read(4096)
+            if lst == b'':
+               break
+            self.stdout.put(lst)
+            
+      def _read_err(self):
+         while True:
+            log = self.pid.stderr.read(4096)
+            if log == b'':
+               break
+            self.stderr.put(log)
+   
    def _endsas(self):
       rc  = 0
       ret = None
@@ -380,26 +446,37 @@ Will use HTML5 for this SASsession.""")
             #self._asubmit(code,'text')
          sleep(1)
          if self.pid:
-            pid = self.pid
-            x = 5
-            while True:
-               rc = os.waitpid(self.pid, os.WNOHANG)
-               if rc[0] != 0:
-                  break
-               x = x - 1
-               if x < 1:
-                  break
-               sleep(1)
-           
-            if rc[0] != 0:
-               pass
+            if os.name == 'nt':
+               pid = self.pid.pid
+               try:
+                  rc = self.pid.wait(5)
+               except (subprocess.TimeoutExpired):
+                  if self.sascfg.verbose:
+                     print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+                  self.pid.kill()
+               self.to.join(5)
+               self.te.join(5)
             else:
-               if self.sascfg.verbose:
-                  print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
-               os.kill(self.pid, signal.SIGKILL)
+               pid = self.pid
+               x = 5
+               while True:
+                  rc = os.waitpid(self.pid, os.WNOHANG)
+                  if rc[0] != 0:
+                     break
+                  x = x - 1
+                  if x < 1:
+                     break
+                  sleep(1)
+              
+               if rc[0] != 0:
+                  pass
+               else:
+                  if self.sascfg.verbose:
+                     print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+                  os.kill(self.pid, signal.SIGKILL)
 
          if self.sascfg.verbose:
-            print("SAS Connection terminated. Subprocess id was "+str(self.pid))
+            print("SAS Connection terminated. Subprocess id was "+str(pid))
          self.pid        = None
          self._sb.SASpid = None
       return ret
@@ -410,14 +487,28 @@ Will use HTML5 for this SASsession.""")
       logn   = self._logcnt(False)
       code1  = "%put E3969440A681A24088859985"+logn+";\nE3969440A681A24088859985"+logn
 
-      rc = os.waitpid(self.pid, os.WNOHANG)
-      if rc[0] != 0:
-         self.pid = None
-         self._sb.SASpid = None
-         return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
+      if os.name == 'nt':
+         try:
+            rc = self.pid.wait(0)
+            self.pid = None
+            return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+         except:
+            pass
+      else:
+         rc = os.waitpid(self.pid, os.WNOHANG)
+         if rc[0] != 0:
+            self.pid = None
+            self._sb.SASpid = None
+            return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       while True:
-         log = self.stderr.read1(4096)
+         if os.name == 'nt':
+            try:
+               log = self.stderr.get_nowait()
+            except Empty:
+               log = b''
+         else:
+            log = self.stderr.read1(4096)
          if len(log) > 0:
             logf += log
          else:
@@ -432,11 +523,19 @@ Will use HTML5 for this SASsession.""")
       if self.pid == None:
          self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitpid(self.pid, os.WNOHANG)
-      if rc[0] != 0:
-         self.pid = None
-         self._sb.SASpid = None
-         return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
+      if os.name == 'nt':
+         try:
+            rc = self.pid.wait(0)
+            self.pid = None
+            return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+         except:
+            pass
+      else:
+         rc = os.waitpid(self.pid, os.WNOHANG)
+         if rc[0] != 0:
+            self.pid = None
+            self._sb.SASpid = None
+            return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       return x
 
@@ -448,7 +547,13 @@ Will use HTML5 for this SASsession.""")
       lenf = 0
 
       while True:
-         lst = self.stdout.read1(4096)
+         if os.name == 'nt':
+            try:
+               lst = self.stdout.get_nowait()
+            except Empty:
+               lst = b''
+         else:
+            lst = self.stdout.read1(4096)
          if len(lst) > 0:
             lstf += lst
 
@@ -472,11 +577,20 @@ Will use HTML5 for this SASsession.""")
       if self.pid == None:
          self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitpid(self.pid, os.WNOHANG)
-      if rc[0] != 0:
-         self.pid = None
-         self._sb.SASpid = None
-         return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
+
+      if os.name == 'nt':
+         try:
+            rc = self.pid.wait(0)
+            self.pid = None
+            return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+         except:
+            pass
+      else:
+         rc = os.waitpid(self.pid, os.WNOHANG)
+         if rc[0] != 0:
+            self.pid = None
+            self._sb.SASpid = None
+            return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       if eof:
          return lstf.decode(errors='replace')
@@ -491,7 +605,13 @@ Will use HTML5 for this SASsession.""")
       self._asubmit("data _null_;file print;put 'Tom was here';run;", "text")
 
       while True:
-         lst = self.stdout.read1(4096)
+         if os.name == 'nt':
+            try:
+               lst = self.stdout.get_nowait()
+            except Empty:
+               lst = b''
+         else:
+            lst = self.stdout.read1(4096)
          if len(lst) > 0:
             lstf += lst
 
@@ -508,11 +628,20 @@ Will use HTML5 for this SASsession.""")
       if self.pid == None:
          self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
-      rc = os.waitpid(self.pid, os.WNOHANG)
-      if rc[0] != 0:
-         self.pid = None
-         self._sb.SASpid = None
-         return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
+
+      if os.name == 'nt':
+         try:
+            rc = self.pid.wait(0)
+            self.pid = None
+            return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+         except:
+            pass
+      else:
+         rc = os.waitpid(self.pid, os.WNOHANG)
+         if rc[0] != 0:
+            self.pid = None
+            self._sb.SASpid = None
+            return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       return lst.replace(chr(12), '\n')
 
@@ -599,11 +728,19 @@ Will use HTML5 for this SASsession.""")
          print("No SAS process attached. SAS process has terminated unexpectedly.")
          return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
 
-      rc = os.waitpid(self.pid, os.WNOHANG)
-      if rc[0] != 0:
-         self.pid = None
-         self._sb.SASpid = None
-         return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+      if os.name == 'nt':
+         try:
+            rc = self.pid.wait(0)
+            self.pid = None
+            return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+         except:
+            pass
+      else:
+         rc = os.waitpid(self.pid, os.WNOHANG)
+         if rc[0] != 0:
+            self.pid = None
+            self._sb.SASpid = None
+            return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
 
       # to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
       # removing this and adding comment in _asubmit to use _getlst[txt] so this will never be necessary; delete later
@@ -646,12 +783,19 @@ Will use HTML5 for this SASsession.""")
 
       out = self.stdin.write(undo+logcodei.encode(self.sascfg.encoding)+b'\n')
       self.stdin.flush()
-
       while not done:
          try:
-             while True:
-                 rc = os.waitpid(self.pid, os.WNOHANG)
-                 if rc[0] != 0:
+            while True:
+               if os.name == 'nt':
+                  try:
+                     rc = self.pid.wait(0)
+                     self.pid = None
+                     return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+                  except:
+                     pass
+               else:
+                  rc = os.waitpid(self.pid, os.WNOHANG)
+                  if rc[0] != 0:
                      log = b''
                      try:
                         log = self.stderr.read1(4096)
@@ -664,65 +808,82 @@ Will use HTML5 for this SASsession.""")
                      self._sb.SASpid = None
                      return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
                                  str(rc)+'\n'+logf.decode(self.sascfg.encoding, errors='replace'), LST='')
-                 if bail:
-                     eof -= 1
-                 if eof < 0:
-                     break
-                 if ods:
-                    lst = self.stdout.read1(4096)
-                 else:
-                    lst = self.stdout.read1(4096)
-                 if len(lst) > 0:
-                     lstf += lst
-                 else:
+               if bail:
+                  eof -= 1
+               if eof < 0:
+                  break
+               if os.name == 'nt':
+                  try:
+                     lst = self.stdout.get_nowait()
+                  except Empty:
+                     lst = b''
+                  #lst = self.stdout.recv(4096)
+               else:
+                  lst = self.stdout.read1(4096)
+               if len(lst) > 0:
+                  lstf += lst
+               else:
+                  if os.name == 'nt':
+                     try:
+                        log = self.stderr.get_nowait()
+                     except Empty:
+                        log = b''
+                     #log = self.stderr.recv(4096)
+                  else:
                      log = self.stderr.read1(4096)
-                     if len(log) > 0:
-                         logf += log
-                         if logf.count(logcodeo) >= 1:
-                             bail = True
-                         if not bail and bc:
-                             self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
-                             self.stdin.flush()
-                             bc = False
-             done = True
+                  if len(log) > 0:
+                      logf += log
+                      if logf.count(logcodeo) >= 1:
+                         bail = True
+                      if not bail and bc:
+                         self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
+                         self.stdin.flush()
+                         bc = False
+            done = True
 
          except (ConnectionResetError):
-             log = ''
-             try:
-                log = self.stderr.read1(4096)
-                if len(log) > 0:
-                   logf += log
-                self._log += logf.decode(self.sascfg.encoding, errors='replace')
-             except:
-                pass
-             rc = 0
-             rc = os.waitpid(self.pid, 0)
-             self.pid = None
-             self._sb.SASpid = None
-             log = logf.partition(logcodeo)[0]+b'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc).encode()+b'\n'+logf
-             return dict(LOG=log.encode(), LST='')
+            log = ''
+            try:
+               log = self.stderr.read1(4096)
+               if len(log) > 0:
+                  logf += log
+               self._log += logf.decode(self.sascfg.encoding, errors='replace')
+            except:
+               pass
+            rc = 0
+            if os.name == 'nt':
+               try:
+                  rc = self.pid.wait(0)
+               except:
+                  pass
+            else:
+               rc = os.waitpid(self.pid, 0)
+            self.pid = None
+            self._sb.SASpid = None
+            log = logf.partition(logcodeo)[0]+b'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc).encode()+b'\n'+logf
+            return dict(LOG=log.encode(), LST='')
 
          except (KeyboardInterrupt, SystemExit):
-             if not self._sb.sascfg.prompt:
-                raise KeyboardInterrupt("Interupt handling is disabled due to prompting being disabled.")
+            if not self._sb.sascfg.prompt:
+               raise KeyboardInterrupt("Interupt handling is disabled due to prompting being disabled.")
 
-             print('Exception caught!')
-             ll = self._breakprompt(logcodeo)
+            print('Exception caught!')
+            ll = self._breakprompt(logcodeo)
 
-             if ll.get('ABORT', False):
-                return ll
+            if ll.get('ABORT', False):
+               return ll
 
-             logf += ll['LOG']
-             lstf += ll['LST']
-             bc    = ll['BC']
+            logf += ll['LOG']
+            lstf += ll['LST']
+            bc    = ll['BC']
 
-             if not bc:
-                print('Exception handled :)\n')
-             else:
-                print('Exception ignored, continuing to process...\n')
+            if not bc:
+               print('Exception handled :)\n')
+            else:
+               print('Exception ignored, continuing to process...\n')
 
-             self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
-             self.stdin.flush()
+            self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
+            self.stdin.flush()
 
       if ods:
          try:
@@ -762,7 +923,7 @@ Will use HTML5 for this SASsession.""")
 
         if self.pid is None:
             self._sb.SASpid = None
-            return dict(LOG=b"No SAS process attached. SAS process has terminated unexpectedly.", LST=b'', ABORT=True)
+            return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='', ABORT=True)
 
         if self.sascfg.ssh:
            response = self.sascfg._prompt(
@@ -774,18 +935,30 @@ Will use HTML5 for this SASsession.""")
                  break
               response = self.sascfg._prompt("Please enter (T) to terminate SAS or (C) to continue.")
 
-        interrupt = signal.SIGINT
-        os.kill(self.pid, interrupt)
+        if os.name == 'nt':
+           self.pid.kill()
+        else:
+           interrupt = signal.SIGINT
+           os.kill(self.pid, interrupt)
         sleep(.25)
 
         while True:
-            rc = os.waitpid(self.pid, os.WNOHANG)
-            if rc[0] != 0:
-                self.pid = None
-                self._sb.SASpid = None
-                outrc = str(rc)
-                return dict(LOG=b'SAS process has terminated unexpectedly. Pid State= '+outrc.encode(), LST=b'',ABORT=True)
-
+            if os.name == 'nt':
+               try:
+                  rc = self.pid.wait(0)
+               except:
+                  pass
+               self.pid = None
+               self._sb.SASpid = None
+               return dict(LOG='SAS process has terminated unexpectedly. RC from wait was: '+str(rc), LST='',ABORT=True)
+            else:
+               rc = os.waitpid(self.pid, os.WNOHANG)
+               if rc[0] != 0:
+                  self.pid = None
+                  self._sb.SASpid = None
+                  outrc = str(rc)
+                  return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+outrc, LST='',ABORT=True)
+              
             lst = self.stdout.read1(4096)
             lstf += lst
             if len(lst) > 0:
