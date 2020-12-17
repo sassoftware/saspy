@@ -51,24 +51,22 @@ import re
 import shutil
 import tempfile
 
+from saspy.sasiostdio    import SASsessionSTDIO
 from saspy.sasioiom      import SASsessionIOM
+from saspy.sasiohttp     import SASsessionHTTP
 from saspy.sasiocom      import SASSessionCOM
-from saspy.sasets        import SASets
-from saspy.sasexceptions import (SASIONotSupportedError, SASConfigNotValidError,
-                                SASConfigNotFoundError)
+
+from saspy.sasdata       import SASdata
 from saspy.sasml         import SASml
+from saspy.sasets        import SASets
 from saspy.sasqc         import SASqc
 from saspy.sasstat       import SASstat
 from saspy.sasutil       import SASutil
 from saspy.sasViyaML     import SASViyaML
-from saspy.sasdata       import SASdata
 
+from saspy.sasexceptions import (SASIONotSupportedError, SASConfigNotValidError,
+                                SASConfigNotFoundError)
 _cfgfile_cnt = 0
-
-if os.name != 'nt':
-   from saspy.sasiostdio import SASsessionSTDIO
-
-from saspy.sasiohttp import SASsessionHTTP
 
 try:
    from IPython.display import HTML
@@ -490,7 +488,7 @@ class SASsession():
             return
 
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
-            if os.name != 'nt':
+            if os.name != 'nt' or self.sascfg.mode == 'SSH':
                 self._io = SASsessionSTDIO(sascfgname=self.sascfg.name, sb=self, **kwargs)
             else:
                 raise SASIONotSupportedError(self.sascfg.mode, alts=['IOM'])
