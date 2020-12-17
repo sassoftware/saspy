@@ -609,6 +609,7 @@ Scroll down based upon the number to see an example of that error and help on wh
 <li><strong>The application could not find a command to launch a SAS Workspace Server.</strong></li>
 <li><strong>The application could not log on to the server. The server process did not start.</strong></li>
 <li><strong>The application could not log on to the server &#8220;localhost:0&#8221;.  Integrated Windows authentication failed.</strong></li>
+<li><strong>The application could not create a tunnel to the server &#8220;127.0.0.1:55517&#8221;.</strong></li>
 </ol>
 <p>Here are examples of each of the above problems:</p>
 <ol class="arabic">
@@ -718,6 +719,7 @@ The work around for this is to use the &#8216;javaparms&#8217; option on the con
 
 
 
+
 <span class="n">Be</span> <span class="n">sure</span> <span class="n">the</span> <span class="n">path</span> <span class="n">to</span> <span class="n">sspiauth</span><span class="o">.</span><span class="n">dll</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">System</span> <span class="n">PATH</span>
 
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
@@ -764,6 +766,57 @@ which failed. If I quote both of the paths in that parameter, then it works.</p>
 <span class="n">Be</span> <span class="n">sure</span> <span class="n">the</span> <span class="n">path</span> <span class="n">to</span> <span class="n">sspiauth</span><span class="o">.</span><span class="n">dll</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">System</span> <span class="n">PATH</span>
 
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
+</pre></div>
+</div>
+<ol class="arabic" start="7">
+<li><p class="first">The application could not create a tunnel to the server &#8220;127.0.0.1:55517&#8221;  (the port number will vary)</p>
+<p>This is an error that can occur trying to make a Local IOM connection to local SAS on your Windows machine.
+This one was recently reported in issue 354. Turns out it&#8217;s a problem with having the SAS_IOM_PROXYLIST environment variable set.
+This is needed sometimes for connecting to remote IOM servers when there are firewalls in the way, or something about that. Either
+way, it&#8217;s not needed and can cause a failure trying to use a local SAS install over IOM Local saspy connection. Luckilly it&#8217;s easy
+to resolve. You can simply unset that variable in your Python session before trying to get your SASsession. You can do this inline
+if you need this set for remote IOM connections from saspy, or put it in your sascfg_personal.py file if you only connect to local
+SAS from saspy bu tneed the variable set for other applications that need it.</p>
+</li>
+</ol>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">os</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SAS_IOM_PROXYLIST&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;https://www.sas.com&#39;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SAS_IOM_PROXYLIST&#39;</span><span class="p">]</span>
+<span class="s1">&#39;https://www.sas.com&#39;</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span><span class="p">;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;winlocal&#39;</span><span class="p">);</span> <span class="n">sas</span>
+<span class="n">We</span> <span class="n">failed</span> <span class="ow">in</span> <span class="n">getConnection</span>
+<span class="n">The</span> <span class="n">application</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">create</span> <span class="n">a</span> <span class="n">tunnel</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span> <span class="s2">&quot;127.0.0.1:54243&quot;</span><span class="o">.</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span> <span class="nn">wait</span> <span class="nn">was</span><span class="p">:</span> <span class="mi">4294967290</span>
+
+
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># unset the variable here now. You can do this in your config file it you need it all the time</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">del</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SAS_IOM_PROXYLIST&#39;</span><span class="p">])</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SAS_IOM_PROXYLIST&#39;</span><span class="p">]</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+  <span class="n">File</span> <span class="s2">&quot;C:\ProgramData\Anaconda3\lib\os.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">669</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__getitem__</span>
+    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="kn">from</span> <span class="bp">None</span>
+<span class="ne">KeyError</span><span class="p">:</span> <span class="s1">&#39;SAS_IOM_PROXYLIST&#39;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># it&#39;s been unset now</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span><span class="p">;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;winlocal&#39;</span><span class="p">);</span> <span class="n">sas</span>
+<span class="n">SAS</span> <span class="n">Connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="ow">is</span> <span class="mi">37100</span>
+
+<span class="n">Access</span> <span class="n">Method</span>         <span class="o">=</span> <span class="n">IOM</span>
+<span class="n">SAS</span> <span class="n">Config</span> <span class="n">name</span>       <span class="o">=</span> <span class="n">winlocal</span>
+<span class="n">SAS</span> <span class="n">Config</span> <span class="nb">file</span>       <span class="o">=</span> <span class="n">C</span><span class="p">:</span>\<span class="n">ProgramData</span>\<span class="n">Anaconda3</span>\<span class="n">lib</span>\<span class="n">site</span><span class="o">-</span><span class="n">packages</span>\<span class="n">saspy</span>\<span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span>
+<span class="n">WORK</span> <span class="n">Path</span>             <span class="o">=</span> <span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">sastpw</span>\<span class="n">AppData</span>\<span class="n">Local</span>\<span class="n">Temp</span>\<span class="n">SAS</span> <span class="n">Temporary</span> <span class="n">Files</span>\<span class="n">_TD17980_d10a626_</span>\<span class="n">Prc2</span>\
+<span class="n">SAS</span> <span class="n">Version</span>           <span class="o">=</span> <span class="mf">9.04</span><span class="o">.</span><span class="mo">01</span><span class="n">M5P09132017</span>
+<span class="n">SASPy</span> <span class="n">Version</span>         <span class="o">=</span> <span class="mf">3.6</span><span class="o">.</span><span class="mi">2</span>
+<span class="n">Teach</span> <span class="n">me</span> <span class="n">SAS</span>          <span class="o">=</span> <span class="bp">False</span>
+<span class="n">Batch</span>                 <span class="o">=</span> <span class="bp">False</span>
+<span class="n">Results</span>               <span class="o">=</span> <span class="n">Pandas</span>
+<span class="n">SAS</span> <span class="n">Session</span> <span class="n">Encoding</span>  <span class="o">=</span> <span class="n">wlatin1</span>
+<span class="n">Python</span> <span class="n">Encoding</span> <span class="n">value</span> <span class="o">=</span> <span class="n">cp1252</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">Pid</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">17980</span>
+<span class="o">&gt;&gt;&gt;</span>
 </pre></div>
 </div>
 <p>So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn&#8217;t
