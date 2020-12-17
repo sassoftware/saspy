@@ -720,6 +720,7 @@ The work around for this is to use the &#8216;javaparms&#8217; option on the con
 
 
 
+
 <span class="n">Be</span> <span class="n">sure</span> <span class="n">the</span> <span class="n">path</span> <span class="n">to</span> <span class="n">sspiauth</span><span class="o">.</span><span class="n">dll</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">System</span> <span class="n">PATH</span>
 
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
@@ -776,7 +777,7 @@ This is needed sometimes for connecting to remote IOM servers when there are fir
 way, it&#8217;s not needed and can cause a failure trying to use a local SAS install over IOM Local saspy connection. Luckilly it&#8217;s easy
 to resolve. You can simply unset that variable in your Python session before trying to get your SASsession. You can do this inline
 if you need this set for remote IOM connections from saspy, or put it in your sascfg_personal.py file if you only connect to local
-SAS from saspy bu tneed the variable set for other applications that need it.</p>
+SAS from saspy but need the variable set for other applications that need it.</p>
 </li>
 </ol>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">os</span>
