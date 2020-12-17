@@ -640,6 +640,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
 
 
 
+
     Be sure the path to sspiauth.dll is in your System PATH
     
     No SAS process attached. SAS process has terminated unexpectedly.
@@ -704,7 +705,7 @@ which failed. If I quote both of the paths in that parameter, then it works.
    way, it's not needed and can cause a failure trying to use a local SAS install over IOM Local saspy connection. Luckilly it's easy
    to resolve. You can simply unset that variable in your Python session before trying to get your SASsession. You can do this inline
    if you need this set for remote IOM connections from saspy, or put it in your sascfg_personal.py file if you only connect to local
-   SAS from saspy bu tneed the variable set for other applications that need it. 
+   SAS from saspy but need the variable set for other applications that need it. 
 
 .. code-block:: ipython3
 
