@@ -304,7 +304,10 @@ will use and thus what your configuration definition will contain.
                 1. Client Linux
                     a. STDIO - over SSH if not the same machine
                 2. Client Windows
-                    a. Can't get there from here
+                    a. prior to V3.6.3
+                      -  Can't get there from here
+                    b. as of V3.6.3
+                      -  STDIO over SSH! 
             ii. On Windows
                 1. Client Linux
                     a. Can't get there from here
@@ -398,8 +401,12 @@ m5dsbug -
 
 STDIO over SSH
 ==============
+NEW in V3.6.3, you can use this method from a Windows Client to connect to a
+stand alone SAS install on a remote Linux machine. Before that, it was only supported
+from a Linux client.
+
 This is the remote version of the original connection method. This also works 
-with Unix only, and it supports passwordless SSH to the Unix machine where SAS
+with Unix SAS only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
 SSH configured between the two systems. Google it, it's not that difficult.
 
@@ -439,8 +446,15 @@ following optional keys:
 identity -
     (Optional: string) The path to the identity file to use. A .pem file.
 
+luser -
+    (Optional: string) New in V3.6.3 for Win support. Linux user name to use for the connection. This will generate
+    'ssh -xyz user@linux.host.com' instead of 'ssh -xyz linux.host.com' in case your windows userid isn't
+    the same as the Linux id on the SAS server (mine's not); if it is, you don't need this. You could use the identity option,
+    above, too. Just another choice.
+
 port -
-    (Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the ``-p`` option)
+    (Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the ``-p`` option).
+    Obviously, 22 is the default
 
 tunnel -
     (Optional: integer) Certain methods of saspy require opening a local port and accepting a connection and data 

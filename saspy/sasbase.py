@@ -1124,7 +1124,7 @@ class SASsession():
         :param remotefile: path to remote file to create or overwrite
         :param overwrite: overwrite the output file if it exists?
         :param permission: permissions to set on the new file. See SAS Filename Statement Doc for syntax
-        :return: SAS Log
+        :return: dict with 2 keys {'Success' : bool, 'LOG' : str}
         """
         lastlog = len(self._io._log)
         if self.nosub:
@@ -1143,7 +1143,7 @@ class SASsession():
         :param localfile: path to the local file to create or overwrite
         :param remotefile: path to remote file
         :param overwrite: overwrite the output file if it exists?
-        :return: SAS Log
+        :return: dict with 2 keys {'Success' : bool, 'LOG' : str}
         """
         lastlog = len(self._io._log)
         if self.nosub:
@@ -2211,6 +2211,12 @@ class SASsession():
     def file_delete(self, filepath, fileref: str = '_spfinfo', quiet: bool = False) -> dict:
         """
         This method deletes an external file or directory on the SAS server side
+
+        :param filepath: path to the remote file to delete
+        :param fileref: fileref to use on the generated filename stmt
+        :param quiet: print any messages or not
+
+        :return: dict with 2 keys {'Success' : bool, 'LOG' : str}
         """
         lastlog = len(self._io._log)
 
@@ -2239,7 +2245,14 @@ class SASsession():
 
     def file_copy(self, source_path, dest_path, fileref: str = '_spfinf', quiet: bool = False) -> dict:
         """
-        This method copies one external file to another
+        This method copies one external file to another on the SAS server side
+
+        :param source_path: path to the remote source file to copy 
+        :param dest_path: path for the remote file write to
+        :param fileref: fileref (first 7 chars of one) to use on the two generated filename stmts
+        :param quiet: print any messages or not
+
+        :return: dict with 2 keys {'Success' : bool, 'LOG' : str}
         """
         lastlog = len(self._io._log)
 
