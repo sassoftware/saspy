@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.6.2 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.6.3 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.6.2 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.6.3 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Overview" href="overview.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.6.2
+                3.6.3
               </div>
             
           
@@ -438,7 +438,10 @@ will use and thus what your configuration definition will contain.</p>
             1. Client Linux
                 a. STDIO - over SSH if not the same machine
             2. Client Windows
-                a. Can&#39;t get there from here
+                a. prior to V3.6.3
+                  -  Can&#39;t get there from here
+                b. as of V3.6.3
+                  -  STDIO over SSH!
         ii. On Windows
             1. Client Linux
                 a. Can&#39;t get there from here
@@ -525,8 +528,11 @@ keys in the configuration definition.</p>
 </div>
 <div class="section" id="stdio-over-ssh">
 <h3>STDIO over SSH<a class="headerlink" href="#stdio-over-ssh" title="Permalink to this headline">¶</a></h3>
+<p>NEW in V3.6.3, you can use this method from a Windows Client to connect to a
+stand alone SAS install on a remote Linux machine. Before that, it was only supported
+from a Linux client.</p>
 <p>This is the remote version of the original connection method. This also works
-with Unix only, and it supports passwordless SSH to the Unix machine where SAS
+with Unix SAS only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
 SSH configured between the two systems. Google it, it&#8217;s not that difficult.</p>
 <p>If you don&#8217;t already have this set up, you need to generate rsa keys. Starting
@@ -562,8 +568,14 @@ following optional keys:</p>
 <dl class="docutils">
 <dt>identity -</dt>
 <dd>(Optional: string) The path to the identity file to use. A .pem file.</dd>
+<dt>luser -</dt>
+<dd>(Optional: string) New in V3.6.3 for Win support. Linux user name to use for the connection. This will generate
+&#8216;ssh -xyz <a class="reference external" href="mailto:user&#37;&#52;&#48;linux&#46;host&#46;com">user<span>&#64;</span>linux<span>&#46;</span>host<span>&#46;</span>com</a>&#8216; instead of &#8216;ssh -xyz linux.host.com&#8217; in case your windows userid isn&#8217;t
+the same as the Linux id on the SAS server (mine&#8217;s not); if it is, you don&#8217;t need this. You could use the identity option,
+above, too. Just another choice.</dd>
 <dt>port -</dt>
-<dd>(Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the <code class="docutils literal"><span class="pre">-p</span></code> option)</dd>
+<dd>(Optional: integer) The ssh port of the remote machine (equivalent to invoking ssh with the <code class="docutils literal"><span class="pre">-p</span></code> option).
+Obviously, 22 is the default</dd>
 <dt>tunnel -</dt>
 <dd>(Optional: integer) Certain methods of saspy require opening a local port and accepting a connection and data
 streamed from the SAS instance to saspy. If the remote SAS server would not be able to reach ports on your client machine
@@ -1065,7 +1077,7 @@ If you want to run saspy in Zeppelin, set this in your configuration definition:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.6.2',
+            VERSION:'3.6.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

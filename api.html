@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 3.6.2 documentation</title>
+  <title>API Reference &mdash; saspy 3.6.3 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.6.2 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.6.3 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.6.2
+                3.6.3
               </div>
             
           
@@ -588,7 +588,7 @@ See the Advanced topics section of the doc for details</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SAS Log</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dict with 2 keys {&#8216;Success&#8217; : bool, &#8216;LOG&#8217; : str}</p>
 </td>
 </tr>
 </tbody>
@@ -619,6 +619,51 @@ See the Advanced topics section of the doc for details</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.file_copy">
+<code class="descname">file_copy</code><span class="sig-paren">(</span><em>source_path</em>, <em>dest_path</em>, <em>fileref: str = '_spfinf'</em>, <em>quiet: bool = False</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#saspy.SASsession.file_copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method copies one external file to another on the SAS server side</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source_path</strong> &#8211; path to the remote source file to copy</li>
+<li><strong>dest_path</strong> &#8211; path for the remote file write to</li>
+<li><strong>fileref</strong> &#8211; fileref (first 7 chars of one) to use on the two generated filename stmts</li>
+<li><strong>quiet</strong> &#8211; print any messages or not</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dict with 2 keys {&#8216;Success&#8217; : bool, &#8216;LOG&#8217; : str}</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="saspy.SASsession.file_delete">
+<code class="descname">file_delete</code><span class="sig-paren">(</span><em>filepath</em>, <em>fileref: str = '_spfinfo'</em>, <em>quiet: bool = False</em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#saspy.SASsession.file_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method deletes an external file or directory on the SAS server side</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filepath</strong> &#8211; path to the remote file to delete</li>
+<li><strong>fileref</strong> &#8211; fileref to use on the generated filename stmt</li>
+<li><strong>quiet</strong> &#8211; print any messages or not</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dict with 2 keys {&#8216;Success&#8217; : bool, &#8216;LOG&#8217; : str}</p>
 </td>
 </tr>
 </tbody>
@@ -1324,7 +1369,7 @@ as either HTML or TEXT, depending upon results. The method= parameter allows you
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">SAS Log</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dict with 2 keys {&#8216;Success&#8217; : bool, &#8216;LOG&#8217; : str}</p>
 </td>
 </tr>
 </tbody>
@@ -4468,7 +4513,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.6.2',
+            VERSION:'3.6.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
