@@ -2210,7 +2210,7 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return res
 
-    def delete(self, filepath, fileref: str = '_spfinfo', quiet: bool = False) -> dict:
+    def file_delete(self, filepath, fileref: str = '_spfinfo', quiet: bool = False) -> dict:
         """
         This method deletes an external file or directory on the SAS server side
         """
@@ -2235,6 +2235,36 @@ class SASsession():
         if exists != 0:
            if not quiet:
               print('The filepath provided does not exist')
+   
+        self._lastlog = self._io._log[lastlog:]
+        return {'Success' : not bool(exists), 'LOG' : ll['LOG']}
+
+    def file_copy(self, source_path, dest_path, fileref: str = '_spfinf', quiet: bool = False) -> dict:
+        """
+        This method copies one external file to another
+        """
+        lastlog = len(self._io._log)
+
+        code  = "filename {} '{}' recfm=n;\n".format(fileref[:7]+'s', source_path) 
+        code += "filename {} '{}' recfm=n;\n".format(fileref[:7]+'d', dest_path) 
+        code += "data _null_;\n"
+        code += "   rc = fcopy('{}', '{}');\n".format(fileref[:7]+'s',fileref[:7]+'d')
+        code += "   put 'FILEREF_EXISTS= ' rc 'FILE_EXTEND=';\n"
+        code += "run;\n"
+        code += "filename {} clear;\n".format(fileref[:7]+'s')
+        code += "filename {} clear;\n".format(fileref[:7]+'d') 
+      
+        if self.nosub:
+            print(code)
+            return None
+        else:
+           ll = self._io.submit(code, results='text')
+   
+        exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
+   
+        if exists != 0:
+           if not quiet:
+              print('Non Zero return code. Check the SASLOG for messages')
    
         self._lastlog = self._io._log[lastlog:]
         return {'Success' : not bool(exists), 'LOG' : ll['LOG']}
