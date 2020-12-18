@@ -843,13 +843,19 @@ Will use HTML5 for this SASsession.""")
 
          except (ConnectionResetError):
             log = ''
-            try:
-               log = self.stderr.read1(4096)
-               if len(log) > 0:
-                  logf += log
-               self._log += logf.decode(self.sascfg.encoding, errors='replace')
-            except:
-               pass
+            if os.name == 'nt':
+               try:
+                  log = self.stderr.get_nowait()
+               except Empty:
+                  log = b''
+            else:
+               try:
+                  log = self.stderr.read1(4096)
+                  if len(log) > 0:
+                     logf += log
+                  self._log += logf.decode(self.sascfg.encoding, errors='replace')
+               except:
+                  pass
             rc = 0
             if os.name == 'nt':
                try:
@@ -1875,7 +1881,14 @@ Will use HTML5 for this SASsession.""")
                send -= sent
             code = ""
           
-            log = self.stderr.read1(4096)
+            if os.name == 'nt':
+               try:
+                  log = self.stderr.get_nowait()
+               except Empty:
+                  log = b''
+            else:
+               log = self.stderr.read1(4096)
+
             if len(log) > 0:
                self._log += log.decode(self.sascfg.encoding, errors='replace')
 
@@ -2141,7 +2154,14 @@ Will use HTML5 for this SASsession.""")
             self.stdin.flush()
             code = ""
           
-            log = self.stderr.read1(4096)
+            if os.name == 'nt':
+               try:
+                  log = self.stderr.get_nowait()
+               except Empty:
+                  log = b''
+            else:
+               log = self.stderr.read1(4096)
+
             if len(log) > 0:
                self._log += log.decode(self.sascfg.encoding, errors='replace')
 
