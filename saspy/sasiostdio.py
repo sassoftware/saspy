@@ -2880,7 +2880,7 @@ Will use HTML5 for this SASsession.""")
          code += "run;"
 
       if self.sascfg.ssh or self._sb.m5dsbug:
-         csv = open(tmpcsv, mode='w')
+         csv = open(tmpcsv, mode='w', encoding=enc)
          sock.listen(1)
          self._asubmit(code, 'text')
 

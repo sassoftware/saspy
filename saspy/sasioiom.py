@@ -2363,7 +2363,7 @@ Will use HTML5 for this SASsession.""")
       datar = b""
 
       if not local:
-         csv = open(tmpcsv, mode='w')
+         csv = open(tmpcsv, mode='w', encoding=enc)
          while not done:
                 while True:
                     if os.name == 'nt':
