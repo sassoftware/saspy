@@ -471,7 +471,8 @@ class SASsessionHTTP():
             break
 
       if not uri:
-         raise SASHTTPconnectionError(msg="Link to POST compute server not found in context info\n{}".format(self.sascfg.ctx))
+         raise SASHTTPconnectionError(msg=
+         "POST uri not found in context info. You may not have permission to use this context.\n{}".format(self.sascfg.ctx))
 
       conn = self.sascfg.HTTPConn; conn.connect()
       d1 = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":'+options+'}}'
