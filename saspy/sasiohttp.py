@@ -332,6 +332,9 @@ class SASconfigHTTP:
             self.ctx = contexts[i]
             break
 
+      if self.ctx == {}:
+         raise SASHTTPconnectionError(msg="No context information returned for context {}\n{}".format(self.ctxname, contexts))
+
       return
 
    def _authenticate(self, user, pw):
@@ -461,10 +464,14 @@ class SASsessionHTTP():
          options = '[]'
 
       # POST Session
+      uri = None
       for ld in self.sascfg.ctx.get('links'):
          if ld.get('method') == 'POST':
             uri = ld.get('uri')
             break
+
+      if not uri:
+         raise SASHTTPconnectionError(msg="Link to POST compute server not found in context info\n{}".format(self.sascfg.ctx))
 
       conn = self.sascfg.HTTPConn; conn.connect()
       d1 = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":'+options+'}}'
