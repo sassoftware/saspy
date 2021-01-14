@@ -1062,7 +1062,7 @@ class SASsessionHTTP():
 
          code = "filename _sp_updn;"
       else:
-         log1 = ''
+         logf = ''
          code = """
             filename _sp_updn '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
             data _null_;
