@@ -679,17 +679,18 @@ class SASsession():
         This method is a convenience wrapper around the submit() method. It executes the submit then renders the LST that was returned,
         as either HTML or TEXT, depending upon results. The method= parameter allows you to adjust what gets returned to suit your needs.
 
-           - listonly   - this is the default, and returns the LST (will be empty if no output was produced by what you submitted) 
-           - listorlog  - this returns the LST, unless it's empty, then it returns the LOG instead (one or the other). Useful in case there's an ERROR.
+           - listorlog  - this is the default as of V3.6.5. returns the LST, unless it's empty, then it returns the LOG instead \
+                          (one or the other). Useful in case there's an ERROR.
+           - listonly   - this was the default, and returns the LST (will be empty if no output was produced by what you submitted) 
            - listandlog - as you might guess, this returns both. The LST followed by the LOG
            - logandlist - as you might guess, this returns both. The LOG followed by the LST
         '''
         if method is None:
-           method = 'listonly'
+           method = 'listorlog'
 
         if method.lower() not in ['listonly', 'listorlog', 'listandlog', 'logandlist']:
-           print("The specified method is not valid. Using the default: 'listonly'")
-           method = 'listonly'
+           print("The specified method is not valid. Using the default: 'listorlog'")
+           method = 'listorlog'
 
         if results == '':
            if self.results.upper() == 'PANDAS':

@@ -844,12 +844,12 @@ class SASsessionHTTP():
 
       conn.close()
 
-      logd = self._getlog(jobid)
+      logd = self._getlog(jobid).replace(chr(12), chr(10))
 
       if ods:
-         lstd = self._getlst(jobid)
+         lstd = self._getlst(jobid).replace(chr(12), chr(10))
       else:
-         lstd = self._getlsttxt(jobid)
+         lstd = self._getlsttxt(jobid).replace(chr(12), chr(10))
 
       trip = lstd.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 200:

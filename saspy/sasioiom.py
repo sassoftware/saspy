@@ -965,7 +965,7 @@ Will use HTML5 for this SASsession.""")
       z = final[0].rpartition(chr(10))
       prev = '%08d' %  (self._log_cnt - 1)
       zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
-      logd = zz[2].replace(mj.decode(), '')
+      logd = zz[2].replace(mj.decode(), '').replace(chr(12), chr(10))
 
       lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                     '<body class="l body">').replace("font-size: x-small;",

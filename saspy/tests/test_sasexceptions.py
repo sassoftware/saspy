@@ -93,16 +93,6 @@ class TestSASExceptions(unittest.TestCase):
         with self.assertRaises(saspy.SASIONotSupportedError):
             sas = saspy.SASsession(cfgfile=self.config_stdio)
 
-    @mock.patch('os.name', 'nt')
-    def test_raises_SASIONotSupportedError_ssh(self):
-        """
-        Test passing STDIO config option on Windows raises
-        SASIONotSupportedError. Patch os.name to always return 'nt'
-        even on non-Windows systems.
-        """
-        with self.assertRaises(saspy.SASIONotSupportedError):
-            sas = saspy.SASsession(cfgfile=self.config_ssh)
-
     def test_raises_SASConfigNotValidError_invalid(self):
         """
         Test that passing an invalid config raises SASConfigNotValidError.

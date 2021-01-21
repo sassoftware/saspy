@@ -59,7 +59,9 @@ Proc Printto has an 'undo' version where you can reset the LOG and LST back to t
 successfully use Proc Printto within a saspy submit() method, you are simply required to submit
 'Proc Printto;run;' (undo) in your code (presumably at the end) that you run within a submit() method. This will
 return the LOG and LST back to saspy which will then continue to function correctly. Of course, you won't get
-any part of the log or any results that happened while the redirection was enabled, but you knew that. 
+any part of the log or any results that happened while the redirection was enabled, but you knew that. Keep reading
+to see, below, that 'you' don't have to do this, there's an option on submit(..., printto=True) which will do this
+for you. 
 
 One parting though on this is that you can use saspy's download() method to pull the file(s) you redirected things
 to back to the client and then access them in saspy. Don't know why you would, but you could. Maybe there's a use
