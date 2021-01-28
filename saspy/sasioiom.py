@@ -1686,8 +1686,8 @@ Will use HTML5 for this SASsession.""")
       else:
          tabname = "'"+table.strip()+"'n "
 
-      code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
-      code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
+      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
       code += "length var $256;\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
@@ -1720,7 +1720,8 @@ Will use HTML5 for this SASsession.""")
       topts.pop('firstobs', None)
       topts.pop('obs', None)
    
-      code  = "data work._n_u_l_l_;output;run;\n"
+      code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+      code += "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
    
       for i in range(nvars):
@@ -1955,8 +1956,8 @@ Will use HTML5 for this SASsession.""")
       else:
          tmpcsv  = tempfile
 
-      code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
-      code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
+      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
       code += "length var $256;\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
@@ -1989,7 +1990,8 @@ Will use HTML5 for this SASsession.""")
       topts.pop('firstobs', None)
       topts.pop('obs', None)
    
-      code  = "data work._n_u_l_l_;output;run;\n"
+      code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+      code += "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
    
       for i in range(nvars):
@@ -2003,7 +2005,7 @@ Will use HTML5 for this SASsession.""")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      code = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
+      code = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
 
       idx_col = kwargs.pop('index_col', False)
       eng     = kwargs.pop('engine',    'c')
@@ -2052,10 +2054,9 @@ Will use HTML5 for this SASsession.""")
          outname = self._tomods1.decode()
          code    = ''
 
-      #code += "options nosource;\n"
-      code += "proc export data=sasdata2dataframe outfile="+outname+" dbms=csv replace;\n"
+      code += "proc export data=work.sasdata2dataframe outfile="+outname+" dbms=csv replace;\n"
       code += self._sb._expopts(opts)+" run;\n"
-      #code += "options source;\n"
+      code += "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
 
       ll = self._asubmit(code, 'text')
 
@@ -2213,8 +2214,8 @@ Will use HTML5 for this SASsession.""")
       else:
          tmpcsv  = tempfile
 
-      code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
-      code += "data _null_; file LOG; d = open('sasdata2dataframe');\n"
+      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
       code += "length var $256;\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
@@ -2247,7 +2248,8 @@ Will use HTML5 for this SASsession.""")
       topts.pop('firstobs', None)
       topts.pop('obs', None)
    
-      code  = "data work._n_u_l_l_;output;run;\n"
+      code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+      code += "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
 
       for i in range(nvars):

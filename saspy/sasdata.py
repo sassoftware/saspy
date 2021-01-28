@@ -350,10 +350,12 @@ class SASdata:
         code  = "%let lastobs=-1;\n"
         if not force:
            code += "proc sql;select count(*) format best32. into :lastobs from "+ self.libref + ".'" + self.table + "'n " + self._dsopts() + ";"
+           code += "%put lastobs=&lastobs lastobsend=;\nquit;"
         else:
-           code += "data sasdata2dataframe / view=sasdata2dataframe; set "+ self.libref + ".'" + self.table + "'n " + self._dsopts() +";run;\n"
-           code += "proc sql;select count(*) format best32. into :lastobs from sasdata2dataframe;"
-        code += "%put lastobs=&lastobs lastobsend=;\nquit;"
+           code += "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+ self.libref + ".'" + self.table + "'n " + self._dsopts() +";run;\n"
+           code += "proc sql;select count(*) format best32. into :lastobs from work.sasdata2dataframe;"
+           code += "%put lastobs=&lastobs lastobsend=;\nquit;\n"
+           code += "proc delete data=work.sasdata2dataframe(memtype=view);run;"
 
         if self.sas.nosub:
             print(code)

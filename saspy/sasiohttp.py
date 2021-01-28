@@ -1391,7 +1391,7 @@ class SASsessionHTTP():
       else:
          tabname = "'"+table.strip()+"'n "
 
-      code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
 
       ll = self.submit(code, "text")
 
@@ -1428,12 +1428,13 @@ class SASsessionHTTP():
       topts.pop('firstobs', None)
       topts.pop('obs', None)
    
-      code  = "data work._n_u_l_l_;output;run;\n"
+      code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+      code += "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
    
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "stop;\nrun;\n"
+      code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
    
       ll = self.submit(code, "text")
 
@@ -1442,7 +1443,7 @@ class SASsessionHTTP():
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      code  = "data work.saspy_ds2df / view=work.saspy_ds2df; set "+tabname+self._sb._dsopts(dsopts)+";\n"
+      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\n"
       for i in range(nvars):
          if vartype[i] == 'FLOAT':
             code += "format '"+varlist[i]+"'n "
@@ -1464,7 +1465,7 @@ class SASsessionHTTP():
 
       conn = self.sascfg.HTTPConn; conn.connect()
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
-      uri = "/compute/sessions/"+self.pid+"/data/work/saspy_ds2df/rows"
+      uri = "/compute/sessions/"+self.pid+"/data/work/sasdata2dataframe/rows"
 
       r     = []
       df    = None
@@ -1538,6 +1539,8 @@ class SASsessionHTTP():
          else:
             df = tdf
 
+      ll = self.submit("proc delete data=work.sasdata2dataframe(memtype=view);run;", "text")
+
       return df
 
 
@@ -1574,7 +1577,7 @@ class SASsessionHTTP():
       else:
          tmpcsv  = tempfile
 
-      code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
 
       ll = self.submit(code, "text")
 
@@ -1616,7 +1619,7 @@ class SASsessionHTTP():
    
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "stop;\nrun;\n"
+      code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
    
       ll = self.submit(code, "text")
 
@@ -1625,7 +1628,8 @@ class SASsessionHTTP():
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
+      code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+      code += "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
 
       idx_col = kwargs.pop('index_col', False)
       eng     = kwargs.pop('engine',    'c')
@@ -1664,11 +1668,10 @@ class SASsessionHTTP():
       else:
          dts = k_dts
 
-      #code += "options nosource;\n"
       code  = "filename _tomodsx '"+self._sb.workpath+"_tomodsx' lrecl="+str(self.sascfg.lrecl)+" recfm=v  encoding='utf-8';\n"
       code += "proc export data=work.sasdata2dataframe outfile=_tomodsx dbms=csv replace;\n"
       code += self._sb._expopts(opts)+" run;\n"
-      #code += "options source;\n"
+      code += "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
 
       ll = self.submit(code, 'text')
 
@@ -1727,7 +1730,7 @@ class SASsessionHTTP():
       else:
          tmpcsv  = tempfile
 
-      code  = "data sasdata2dataframe / view=sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
 
       ll = self.submit(code, "text")
 
@@ -1764,12 +1767,13 @@ class SASsessionHTTP():
       topts.pop('firstobs', None)
       topts.pop('obs', None)
    
-      code  = "data work._n_u_l_l_;output;run;\n"
+      code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;"
+      code += "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
    
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "stop;\nrun;\n"
+      code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
    
       ll = self.submit(code, "text")
 

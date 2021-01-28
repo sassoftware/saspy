@@ -2064,6 +2064,7 @@ class SASsession():
 
         if results != 'list':
            res = self.sd2df('_saspy_lib_list', 'work')
+           ll = self._io.submit("proc delete data=work._saspy_lib_list;run;", results='text')
            self._lastlog = self._io._log[lastlog:]
            return res
            
@@ -2077,6 +2078,7 @@ class SASsession():
            if last then
               put 'MEMEND=';
         run;
+        proc delete data=work._saspy_lib_list;run;
         """
         
         ll  = self._io.submit(code, results='text')
@@ -2145,6 +2147,7 @@ class SASsession():
               ll  = self._io.submit(code, results='text')
    
            res = self.sd2df('_SASPY_FILE_INFO', 'work')
+           ll  = self._io.submit("proc delete data=work._SASPY_FILE_INFO;run;", results='text')
 
            self._lastlog = self._io._log[lastlog:]
            return res
