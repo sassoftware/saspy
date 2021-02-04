@@ -222,7 +222,9 @@ if needed, while addressing this restriction is possible. This would be consider
 successfully use Proc Printto within a saspy submit() method, you are simply required to submit
 &#8216;Proc Printto;run;&#8217; (undo) in your code (presumably at the end) that you run within a submit() method. This will
 return the LOG and LST back to saspy which will then continue to function correctly. Of course, you won&#8217;t get
-any part of the log or any results that happened while the redirection was enabled, but you knew that.</p>
+any part of the log or any results that happened while the redirection was enabled, but you knew that. Keep reading
+to see, below, that &#8216;you&#8217; don&#8217;t have to do this, there&#8217;s an option on submit(..., printto=True) which will do this
+for you.</p>
 <p>One parting though on this is that you can use saspy&#8217;s download() method to pull the file(s) you redirected things
 to back to the client and then access them in saspy. Don&#8217;t know why you would, but you could. Maybe there&#8217;s a use
 case where that makes sense.</p>
