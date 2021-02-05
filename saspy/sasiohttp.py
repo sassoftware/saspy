@@ -815,34 +815,45 @@ class SASsessionHTTP():
             uri = ld.get('uri')
             break
 
-      conn    = self.sascfg.HTTPConn; conn.connect()
+      conn    = self.sascfg.HTTPConn;
       headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
       done    = False
+
+      delay   = kwargs.get('GETstatusDelay'  , 0.5)
+      excpcnt = kwargs.get('GETstatusFailcnt',   5)
 
       while not done:
          try:
             while True:
                # GET Status for JOB
+               conn.connect()
                conn.request('GET', uri, headers=headers)
                req = conn.getresponse()
                resp = req.read()
+               conn.close()
                if resp not in [b'running', b'pending']:
                   done = True
                   break
-               sleep(.5)
+               sleep(delay)
+
          except (KeyboardInterrupt, SystemExit):
+            conn.close()
             print('Exception caught!')
             response = self.sascfg._prompt(
                       "SAS attention handling not yet supported over HTTP. Please enter (Q) to Quit waiting for results or (C) to continue waiting.")
             while True:
                if response is None or response.upper() == 'Q':
-                  conn.close()
                   return dict(LOG='', LST='', BC=True)
                if response.upper() == 'C':
                   break
                response = self.sascfg._prompt("Please enter (Q) to Quit waiting for results or (C) to continue waiting.")
 
-      conn.close()
+         except hc.RemoteDisconnected as Dis:
+            conn.close()
+            print('RemoteDisconnected Exception caught!\n'+str(Dis))
+            excpcnt -= 1
+            if excpcnt < 0:
+               raise
 
       logd = self._getlog(jobid).replace(chr(12), chr(10))
 

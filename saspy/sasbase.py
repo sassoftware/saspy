@@ -668,13 +668,13 @@ class SASsession():
 
         return self._io._asubmit(code, results)
 
-    def submitLOG(self, code, results: str = '', prompt: dict = None, printto=False):
+    def submitLOG(self, code, results: str = '', prompt: dict = None, printto=False, **kwargs):
         '''
         This method is a convenience wrapper around the submit() method. It executes the submit then prints the LOG that was returned.
         '''
-        print(self.submit(code, results, prompt, printto)['LOG'])
+        print(self.submit(code, results, prompt, printto, **kwargs)['LOG'])
 
-    def submitLST(self, code, results: str = '', prompt: dict = None, method: str = None, printto=False):
+    def submitLST(self, code, results: str = '', prompt: dict = None, method: str = None, printto=False, **kwargs):
         '''
         This method is a convenience wrapper around the submit() method. It executes the submit then renders the LST that was returned,
         as either HTML or TEXT, depending upon results. The method= parameter allows you to adjust what gets returned to suit your needs.
@@ -698,7 +698,7 @@ class SASsession():
            else:
               results = self.results
 
-        ll  = self.submit(code, results, prompt, printto)
+        ll  = self.submit(code, results, prompt, printto, **kwargs)
 
         if results.upper() == 'HTML':
            if   method.lower() == 'listonly':
@@ -725,7 +725,7 @@ class SASsession():
            else:
               print(ll['LOG']+"\n"+ll['LST'])
 
-    def submit(self, code: str, results: str = '', prompt: dict = None, printto=False) -> dict:
+    def submit(self, code: str, results: str = '', prompt: dict = None, printto=False, **kwargs) -> dict:
         '''
         This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
 
@@ -774,7 +774,7 @@ class SASsession():
             else:
                 results = self.results
 
-        ll = self._io.submit(code, results, prompt, undo=printto)
+        ll = self._io.submit(code, results, prompt, undo=printto, **kwargs)
 
         return ll
 
