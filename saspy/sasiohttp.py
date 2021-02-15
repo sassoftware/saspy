@@ -538,7 +538,11 @@ class SASsessionHTTP():
       resp = req.read()
       conn.close()
 
-      jobid = json.loads(resp.decode(self.sascfg.encoding))
+      try:
+         jobid = json.loads(resp.decode(self.sascfg.encoding))
+      except:
+         jobid = None
+
       if not jobid or status > 299:
          print("Compute server had issues starting:\n")
          for key in jobid:
@@ -595,10 +599,12 @@ class SASsessionHTTP():
          resp = req.read()
          conn.close()
 
-         js  = json.loads(resp.decode(self.sascfg.encoding))
-         log = js.get('items')
-
-         lines = len(log)
+         try:
+            js    = json.loads(resp.decode(self.sascfg.encoding))
+            log   = js.get('items')
+            lines = len(log)
+         except:
+            lines = None
 
          if not lines:
             break
@@ -634,8 +640,11 @@ class SASsessionHTTP():
       resp = req.read()
       conn.close()
 
-      js = json.loads(resp.decode(self.sascfg.encoding))
-      results = js.get('items')
+      try:
+         js = json.loads(resp.decode(self.sascfg.encoding))
+         results = js.get('items')
+      except:
+         results = []
 
       conn = self.sascfg.HTTPConn; conn.connect()
       headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
@@ -679,10 +688,12 @@ class SASsessionHTTP():
          resp = req.read()
          conn.close()
 
-         js  = json.loads(resp.decode(self.sascfg.encoding))
-         lst = js.get('items')
-
-         lines = len(lst)
+         try:
+            js    = json.loads(resp.decode(self.sascfg.encoding))
+            lst   = js.get('items')
+            lines = len(lst)
+         except:
+            lines = None
 
          if not lines:
             break
