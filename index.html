@@ -38,7 +38,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="saspy 3.6.5 documentation" href="#"/>
-        <link rel="next" title="Overview" href="overview.html"/> 
+        <link rel="next" title="Installation and configuration" href="install.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -92,7 +92,6 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -166,21 +165,40 @@
             
   <div class="section" id="module-saspy">
 <span id="saspy"></span><h1>SASPy<a class="headerlink" href="#module-saspy" title="Permalink to this headline">¶</a></h1>
-<p><strong>Date</strong>: Feb 15, 2021 <strong>Version</strong>: 3.6.5</p>
-<p><strong>Binary Installers:</strong> <a class="reference external" href="http://github.com/sassoftware/saspy/releases">http://github.com/sassoftware/saspy/releases</a></p>
+<p><strong>Date</strong>: Mar 01, 2021 <strong>Version</strong>: 3.6.5</p>
 <p><strong>Source Repository:</strong> <a class="reference external" href="http://github.com/sassoftware/saspy">http://github.com/sassoftware/saspy</a></p>
 <p><strong>Issues and Ideas:</strong> <a class="reference external" href="https://github.com/sassoftware/saspy/issues">https://github.com/sassoftware/saspy/issues</a></p>
-<p>This project provides Python APIs to the SAS system. You can start a
+<p><strong>Example Repo:</strong> <a class="reference external" href="https://github.com/sassoftware/saspy-examples">https://github.com/sassoftware/saspy-examples</a></p>
+</div>
+<div class="section" id="what-is-this">
+<h1>What is this?<a class="headerlink" href="#what-is-this" title="Permalink to this headline">¶</a></h1>
+<p>This module provides Python APIs to the SAS system. You can start a
 SAS session and run analytics from Python through a combination of
-object-oriented methods and Python magics.</p>
+object-oriented methods or explicit SAS code submission. You can move
+data between SAS data sets and Pandas dataframes and exchange values between
+python vaiables and SAS macro variables.</p>
+<p>The APIs provide interfaces for the following:</p>
+<ul class="simple">
+<li>Start a SAS session on the same host as Python or a remote host.</li>
+<li>Exchange data between SAS data sets and Pandas data frames.</li>
+<li>Use familiar methods such as <code class="docutils literal"><span class="pre">describe()</span></code> and <code class="docutils literal"><span class="pre">head()</span></code> to work with data.</li>
+</ul>
+<p>Additional functionality such as machine learning, econometrics, and quality
+control are organized in Python classes.</p>
+<p>See <a class="reference internal" href="getting-started.html"><span class="doc">Getting started</span></a> for programming examples.</p>
+</div>
+<div class="section" id="dependencies">
+<h1>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li>Python3.4 or higher.</li>
+<li>SAS 9.4 or higher. SAS Viya 3.1 or higher is also supported.</li>
+<li>To use the integrated object method (IOM) access method (one of four connection methods)
+requires Java 7 or higher on the client.</li>
+</ul>
+<p>You can connect to SAS on any platform that is supported for the specified SAS
+releases.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#what-is-this">What is this?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#dependencies">Dependencies</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#jupyter-magics">Jupyter magics</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="install.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#configuration">Configuration</a><ul>
@@ -257,6 +275,7 @@ object-oriented methods and Python magics.</p>
 <li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">Configuring Grid Option Sets to have saspy run on a specific Queue.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#dates-times-and-datetimes-oh-my">Dates, Times and Datetimes, Oh my!</a></li>
 <li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#advanced-sd2df-and-df2sd-techniques">Advanced sd2df and df2sd techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#jupyter-magics">Jupyter magics</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a><ul>
@@ -326,7 +345,7 @@ object-oriented methods and Python magics.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="overview.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation and configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

@@ -93,7 +93,6 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
@@ -108,6 +107,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">Configuring Grid Option Sets to have saspy run on a specific Queue.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dates-times-and-datetimes-oh-my">Dates, Times and Datetimes, Oh my!</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#advanced-sd2df-and-df2sd-techniques">Advanced sd2df and df2sd techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#jupyter-magics">Jupyter magics</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
@@ -813,6 +813,81 @@ use the datetimes= to create date or time SAS variables from a full datetime, an
 an Object type, will be a character variable in SAS, with the str() of the object as the value.</p>
 <p>There&#8217;s more interesting reading about this on the issue that started it. Take a look at
 <a class="reference external" href="https://github.com/sassoftware/saspy/issues/279">https://github.com/sassoftware/saspy/issues/279</a> to see where this fuctionality came from.</p>
+</div>
+<div class="section" id="jupyter-magics">
+<h2>Jupyter magics<a class="headerlink" href="#jupyter-magics" title="Permalink to this headline">¶</a></h2>
+<p>Jupyter Notebooks have what they call Magics, which let you submit code from a diferent language
+than the kernel of the notebook, or provide other functionality. SASPy supports a few magics that
+you can use if you are in a Jupyter Notebook. They simply allow you to submit explicit SAS code
+from a cell. There is a submitLST() method on the SASsession object which does the same thing as the <code class="docutils literal"><span class="pre">%%SAS</span></code>
+magic, and it works in all Python (UIs, IDEs, command prompt, ...) interfaces. So, using it instead
+of the magic makes your code run anywhere, not just in a Jupyter notebook, but you can use these if you like.</p>
+<p>The magics that are available with the package enable you to bypass Python
+and submit programming statements to your SAS session.</p>
+<p>The <code class="docutils literal"><span class="pre">%%SAS</span></code> magic enables you to submit the contents of a cell to your SAS
+session. The cell magic executes the contents of the cell and returns any
+results.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">SAS</span>
+<span class="n">proc</span> <span class="nb">print</span> <span class="n">data</span><span class="o">=</span><span class="n">sashelp</span><span class="o">.</span><span class="n">class</span><span class="p">;</span>
+<span class="n">run</span><span class="p">;</span>
+
+<span class="n">data</span> <span class="n">work</span><span class="o">.</span><span class="n">a</span><span class="p">;</span>
+  <span class="nb">set</span> <span class="n">sashelp</span><span class="o">.</span><span class="n">cars</span><span class="p">;</span>
+<span class="n">run</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>If you are also invoking <code class="docutils literal"><span class="pre">saspy</span></code> methods directly in other cells within the
+same notebook, you may indicate that a <code class="docutils literal"><span class="pre">%%SAS</span></code> cell should share the same
+SAS session by passing your existing session as a parameter.</p>
+<p>In a prior cell in the notebook:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">saspy</span>
+<span class="n">my_session</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
+
+<span class="c1"># sending a dataset to SAS as &#39;mydata&#39;</span>
+<span class="n">mydata</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">some_pandas_dataframe</span><span class="p">,</span> <span class="s1">&#39;mydata&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then later, invoke a SAS cell and pass your existing session so that the remote data
+set is accessible:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">SAS</span> <span class="n">my_session</span>
+<span class="n">proc</span> <span class="nb">print</span> <span class="n">data</span><span class="o">=</span><span class="n">work</span><span class="o">.</span><span class="n">mydata</span><span class="p">;</span>
+<span class="n">run</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">%%IML</span></code> magic enables you to submit the contents of a cell to your SAS
+session for processing with PROC IML. The cell magic executes the contents
+of the cell and returns any results. The PROC IML statement and the trailing
+QUIT; statement are submitted automatically.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">IML</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">I</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span> <span class="o">*</span> <span class="mi">6</span><span class="n">x6</span> <span class="n">identity</span> <span class="n">matrix</span><span class="p">;</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">j</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span> <span class="o">*</span><span class="mi">5</span><span class="n">x5</span> <span class="n">matrix</span> <span class="n">of</span> <span class="mi">0</span><span class="s1">&#39;s;</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">j</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span> <span class="o">*</span><span class="mi">6</span><span class="n">x1</span> <span class="n">column</span> <span class="n">vector</span> <span class="n">of</span> <span class="mi">1</span><span class="s1">&#39;s;</span>
+<span class="n">d</span><span class="o">=</span><span class="n">diag</span><span class="p">({</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">4</span><span class="p">});</span>
+<span class="n">e</span><span class="o">=</span><span class="n">diag</span><span class="p">({</span><span class="mi">1</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="mi">4</span><span class="p">});</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">%%OPTMODEL</span></code> magic enables you to submit the contents of a cell to your SAS
+session for processing with PROC OPTMODEL. The cell magic executes the contents
+of the cell and returns any results. The PROC OPTMODEL statement and the
+trailing QUIT; statement are submitted automatically.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">OPTMODEL</span>
+<span class="o">/*</span> <span class="n">declare</span> <span class="n">variables</span> <span class="o">*/</span>
+<span class="n">var</span> <span class="n">choco</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">toffee</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="o">/*</span> <span class="n">maximize</span> <span class="n">objective</span> <span class="n">function</span> <span class="p">(</span><span class="n">profit</span><span class="p">)</span> <span class="o">*/</span>
+<span class="n">maximize</span> <span class="n">profit</span> <span class="o">=</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">choco</span> <span class="o">+</span> <span class="mf">0.75</span><span class="o">*</span><span class="n">toffee</span><span class="p">;</span>
+
+<span class="o">/*</span> <span class="n">subject</span> <span class="n">to</span> <span class="n">constraints</span> <span class="o">*/</span>
+<span class="n">con</span> <span class="n">process1</span><span class="p">:</span>    <span class="mi">15</span><span class="o">*</span><span class="n">choco</span> <span class="o">+</span><span class="mi">40</span><span class="o">*</span><span class="n">toffee</span> <span class="o">&lt;=</span> <span class="mi">27000</span><span class="p">;</span>
+<span class="n">con</span> <span class="n">process2</span><span class="p">:</span>           <span class="mf">56.25</span><span class="o">*</span><span class="n">toffee</span> <span class="o">&lt;=</span> <span class="mi">27000</span><span class="p">;</span>
+<span class="n">con</span> <span class="n">process3</span><span class="p">:</span> <span class="mf">18.75</span><span class="o">*</span><span class="n">choco</span>            <span class="o">&lt;=</span> <span class="mi">27000</span><span class="p">;</span>
+<span class="n">con</span> <span class="n">process4</span><span class="p">:</span>    <span class="mi">12</span><span class="o">*</span><span class="n">choco</span> <span class="o">+</span><span class="mi">50</span><span class="o">*</span><span class="n">toffee</span> <span class="o">&lt;=</span> <span class="mi">27000</span><span class="p">;</span>
+<span class="o">/*</span> <span class="n">solve</span> <span class="n">LP</span> <span class="n">using</span> <span class="n">primal</span> <span class="n">simplex</span> <span class="n">solver</span> <span class="o">*/</span>
+<span class="n">solve</span> <span class="k">with</span> <span class="n">lp</span> <span class="o">/</span> <span class="n">solver</span> <span class="o">=</span> <span class="n">primal_spx</span><span class="p">;</span>
+<span class="o">/*</span> <span class="n">display</span> <span class="n">solution</span> <span class="o">*/</span>
+<span class="nb">print</span> <span class="n">choco</span> <span class="n">toffee</span><span class="p">;</span>
+</pre></div>
+</div>
 </div>
 </div>
 

@@ -93,7 +93,6 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation and configuration</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#initial-import">Initial import</a></li>
@@ -221,7 +220,6 @@ The direct link to it is: <a class="reference external" href="https://github.com
 If you have not, refer to that section for more information.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">saspy</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
 </pre></div>
 </div>
 </div>
@@ -350,22 +348,22 @@ complete list.</p>
 <p>The proceeding examples demonstrate commonly used Python
 methods that are available with this module.</p>
 <p>If you encounter a situation where you need to submit SAS
-statements directly to the SAS system, the submit method can
-accomplish that. The following example creates a side-by-side
+statements directly to the SAS system, you can use any of the 3 submit* methods
+to accomplish that. The following example creates a side-by-side
 panel plot to compare employees who have left versus employees
 still working at the company, based on their business unit,
 median performance rating, and satisfaction level.</p>
 <p>The submit method returns a dictionary with two keys: LOG and LST.
-The LST has the results to display and the LOG has the portion
-of the SAS log for the code submission.</p>
-<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+You can print() the LOG and sas.HTML() the LST. Or you can use the
+submitLST() method or the submitLOG() methods which automatically
+render the respective output for you.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submitLST</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="s2">proc sgpanel data=work._csv;</span>
 <span class="s2">    PANELBY left;</span>
 <span class="s2">    hbar sales / response=last_evaluation    stat=median;</span>
 <span class="s2">    hbar sales / response=satisfaction_level stat=median;</span>
 <span class="s2">run;</span>
 <span class="s2">&quot;&quot;&quot;</span><span class="p">)</span>
-<span class="n">HTML</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">&#39;LST&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 </div>
