@@ -765,3 +765,81 @@ There's more interesting reading about this on the issue that started it. Take a
 https://github.com/sassoftware/saspy/issues/279 to see where this fuctionality came from.
 
     
+**************
+Jupyter magics
+**************
+Jupyter Notebooks have what they call Magics, which let you submit code from a diferent language
+than the kernel of the notebook, or provide other functionality. SASPy supports a few magics that
+you can use if you are in a Jupyter Notebook. They simply allow you to submit explicit SAS code
+from a cell. There is a submitLST() method on the SASsession object which does the same thing as the ``%%SAS``
+magic, and it works in all Python (UIs, IDEs, command prompt, ...) interfaces. So, using it instead
+of the magic makes your code run anywhere, not just in a Jupyter notebook, but you can use these if you like.
+
+The magics that are available with the package enable you to bypass Python 
+and submit programming statements to your SAS session.
+
+The ``%%SAS`` magic enables you to submit the contents of a cell to your SAS
+session. The cell magic executes the contents of the cell and returns any 
+results. ::
+
+  %%SAS
+  proc print data=sashelp.class;
+  run;
+
+  data work.a;
+    set sashelp.cars;
+  run;
+
+If you are also invoking ``saspy`` methods directly in other cells within the 
+same notebook, you may indicate that a ``%%SAS`` cell should share the same 
+SAS session by passing your existing session as a parameter.
+
+In a prior cell in the notebook: ::
+
+  import saspy
+  my_session = saspy.SASsession()
+  
+  # sending a dataset to SAS as 'mydata'
+  mydata = sas.df2sd(some_pandas_dataframe, 'mydata')
+
+Then later, invoke a SAS cell and pass your existing session so that the remote data 
+set is accessible: ::
+
+  %%SAS my_session
+  proc print data=work.mydata;
+  run;
+
+The ``%%IML`` magic enables you to submit the contents of a cell to your SAS
+session for processing with PROC IML. The cell magic executes the contents
+of the cell and returns any results. The PROC IML statement and the trailing
+QUIT; statement are submitted automatically. ::
+
+  %%IML
+  a = I(6); * 6x6 identity matrix;
+  b = j(5,5,0); *5x5 matrix of 0's;
+  c = j(6,1); *6x1 column vector of 1's;
+  d=diag({1 2 4});
+  e=diag({1 2, 3 4});
+
+The ``%%OPTMODEL`` magic enables you to submit the contents of a cell to your SAS
+session for processing with PROC OPTMODEL. The cell magic executes the contents
+of the cell and returns any results. The PROC OPTMODEL statement and the 
+trailing QUIT; statement are submitted automatically. ::
+
+  %%OPTMODEL
+  /* declare variables */
+  var choco >= 0, toffee >= 0;
+
+  /* maximize objective function (profit) */
+  maximize profit = 0.25*choco + 0.75*toffee;
+
+  /* subject to constraints */
+  con process1:    15*choco +40*toffee <= 27000;
+  con process2:           56.25*toffee <= 27000;
+  con process3: 18.75*choco            <= 27000;
+  con process4:    12*choco +50*toffee <= 27000;
+  /* solve LP using primal simplex solver */
+  solve with lp / solver = primal_spx;
+  /* display solution */
+  print choco toffee;
+

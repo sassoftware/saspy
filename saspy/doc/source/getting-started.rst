@@ -47,7 +47,6 @@ If you have not, refer to that section for more information.
 
     import saspy
     import pandas as pd
-    from IPython.display import HTML
 
 
 Start a SAS session
@@ -197,26 +196,26 @@ methods that are available with this module.
 
 
 If you encounter a situation where you need to submit SAS
-statements directly to the SAS system, the submit method can
-accomplish that. The following example creates a side-by-side
+statements directly to the SAS system, you can use any of the 3 submit* methods
+to accomplish that. The following example creates a side-by-side
 panel plot to compare employees who have left versus employees
 still working at the company, based on their business unit,
 median performance rating, and satisfaction level.
 
 The submit method returns a dictionary with two keys: LOG and LST.
-The LST has the results to display and the LOG has the portion 
-of the SAS log for the code submission.
+You can print() the LOG and sas.HTML() the LST. Or you can use the
+submitLST() method or the submitLOG() methods which automatically
+render the respective output for you.
 
 .. code-block:: ipython3
 
-    c = sas.submit("""
+    c = sas.submitLST("""
     proc sgpanel data=work._csv;
         PANELBY left;
         hbar sales / response=last_evaluation    stat=median;
         hbar sales / response=satisfaction_level stat=median;
     run;
     """)
-    HTML(c['LST'])
 
 
 Split the data into training and test
