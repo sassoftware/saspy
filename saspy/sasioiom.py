@@ -1320,7 +1320,7 @@ Will use HTML5 for this SASsession.""")
       remotefile - path to remote file tp dpwnload
       overwrite  - overwrite the output file if it exists?
       """
-      logf     = ''
+      logf     = b''
       logn     = self._logcnt()
       logcodei = "%put E3969440A681A24088859985" + logn + ";"
       logcodeo = "\nE3969440A681A24088859985" + logn
@@ -1353,7 +1353,6 @@ Will use HTML5 for this SASsession.""")
       code = "filename _sp_updn '"+remotefile+"' recfm=F encoding=binary lrecl=4096;"
 
       ll = self.submit(code, "text")
-      logf  = ll['LOG']
 
       self.stdin[0].send(b'tom says EOL=DNLOAD                          \n')
       self.stdin[0].send(b'\ntom says EOL='+logcodeb+b'\n')
@@ -1398,13 +1397,13 @@ Will use HTML5 for this SASsession.""")
              else:
                 sleep(0.1)
                 try:
-                   log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+                   log = self.stderr[0].recv(4096)
                 except (BlockingIOError):
                    log = b''
 
                 if len(log) > 0:
                    logf += log
-                   if logf.count(logcodeo) >= 1:
+                   if logf.count(logcodeb) >= 1:
                       bail = True
          done = True
 
@@ -1412,7 +1411,8 @@ Will use HTML5 for this SASsession.""")
       fd.flush()
       fd.close()
 
-      self._log += logf
+      logf = logf.decode(errors='replace')
+      self._log += ll['LOG'] + logf
       final = logf.partition(logcodei)
       z = final[0].rpartition(chr(10))
       prev = '%08d' %  (self._log_cnt - 1)
@@ -1675,7 +1675,7 @@ Will use HTML5 for this SASsession.""")
          if k_dts is not None:
             print("'dtype=' is only used with the CSV or DISK version of this method. option ignored.")
 
-      logf     = ''
+      logf     = b''
       logn     = self._logcnt()
       logcodei = "%put E3969440A681A24088859985" + logn + ";"
       logcodeo = "\nE3969440A681A24088859985" + logn
@@ -1853,7 +1853,7 @@ Will use HTML5 for this SASsession.""")
                    first = False
 
                 datar += data
-                data   = datar.rpartition(rsep.encode())
+                data   = datar.rpartition(rsep.encode(self.sascfg.encoding))
                 datap  = data[0]+data[1]
                 datar  = data[2]
 
@@ -1884,16 +1884,16 @@ Will use HTML5 for this SASsession.""")
              else:
                 sleep(0.1)
                 try:
-                   log = self.stderr[0].recv(4096).decode(self.sascfg.encoding, errors='replace')
+                   log = self.stderr[0].recv(4096)
                 except (BlockingIOError):
                    log = b''
 
                 if len(log) > 0:
                    logf += log
-                   if logf.count(logcodeo) >= 1:
+                   if logf.count(logcodeb) >= 1:
                       bail = True
          done = True
-         self._log += logf
+         self._log += logf.decode(errors='replace')
 
       if len(r) > 0 or df is None:
          tdf = pd.DataFrame.from_records(r, columns=varlist)
@@ -1936,12 +1936,13 @@ Will use HTML5 for this SASsession.""")
       dsopts = dsopts if dsopts is not None else {}
       opts   = opts   if   opts is not None else {}
 
-      logf     = ''
-      lstf     = ''
+      logf     = b''
+      lstf     = b''
       logn     = self._logcnt()
       logcodei = "%put E3969440A681A24088859985" + logn + ";"
       lstcodeo =   "E3969440A681A24088859985" + logn
-      logcodeo = "\nE3969440A681A24088859985" + logn
+      logcodeo = "\nE3969440A681A24088859985" + logn   
+      logcodeb = logcodeo.encode()
 
       if libref:
          tabname = libref+".'"+table.strip()+"'n "
@@ -2101,7 +2102,7 @@ Will use HTML5 for this SASsession.""")
 
                        if datap.count(lstcodeo.encode()) >= 1:
                           done  = True
-                          datar = datap.rpartition(logcodeo.encode())
+                          datar = datap.rpartition(logcodeb)
                           datap = datar[0]
 
                        csv.write(datap.decode(self.sascfg.encoding, errors='replace').encode())
@@ -2114,42 +2115,42 @@ Will use HTML5 for this SASsession.""")
                           break
                        sleep(0.1)
                        try:
-                          log = self.stderr[0].recv(4096).decode(errors='replace')
+                          log = self.stderr[0].recv(4096)
                        except (BlockingIOError):
                           log = b''
 
                        if len(log) > 0:
                           logf += log
-                          if logf.count(logcodeo) >= 1:
+                          if logf.count(logcodeb) >= 1:
                              bail = True
                 done = True
-                self._log += logf
+                self._log += logf.decode(errors='replace')
 
          csv.close()
          df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
       else:
          while True:
             try:
-               lst = self.stdout[0].recv(4096).decode(errors='replace')
+               lst = self.stdout[0].recv(4096)
             except (BlockingIOError):
                lst = b''
 
             if len(lst) > 0:
                lstf += lst
-               if lstf.count(lstcodeo) >= 1:
+               if lstf.count(lstcodeo.encode()) >= 1:
                   done = True;
 
             try:
-               log = self.stderr[0].recv(4096).decode(errors='replace')
+               log = self.stderr[0].recv(4096)
             except (BlockingIOError):
                sleep(0.1)
                log = b''
 
             if len(log) > 0:
                logf += log
-               if logf.count(logcodeo) >= 1:
+               if logf.count(logcodeb) >= 1:
                   bail = True;
-                  self._log += logf
+                  self._log += logf.decode(errors='replace')
 
             if done and bail:
                break
@@ -2194,12 +2195,13 @@ Will use HTML5 for this SASsession.""")
       """
       dsopts = dsopts if dsopts is not None else {}
 
-      logf     = ''
-      lstf     = ''
+      logf     = b''
+      lstf     = b''
       logn     = self._logcnt()
       logcodei = "%put E3969440A681A24088859985" + logn + ";"
       lstcodeo =   "E3969440A681A24088859985" + logn
       logcodeo = "\nE3969440A681A24088859985" + logn
+      logcodeb = logcodeo.encode()
 
       if libref:
          tabname = libref+".'"+table.strip()+"'n "
@@ -2357,8 +2359,8 @@ Will use HTML5 for this SASsession.""")
          code += "run;"
 
       ll = self._asubmit(code, "text")
-      self.stdin[0].send(b'\ntom says EOL='+logcodeo.encode())
-      #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeo.encode())
+      self.stdin[0].send(b'\ntom says EOL='+logcodeb)
+      #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb)
 
       done  = False
       bail  = False
@@ -2392,13 +2394,13 @@ Will use HTML5 for this SASsession.""")
 
                     if len(data) > 0:
                        datar += data
-                       data   = datar.rpartition(rsep.encode())
+                       data   = datar.rpartition(rsep.encode(self.sascfg.encoding))
                        datap  = data[0]+data[1]
                        datar  = data[2]
 
                        if datap.count(lstcodeo.encode()) >= 1:
                           done  = True
-                          datar = datap.rpartition(logcodeo.encode())
+                          datar = datap.rpartition(logcodeb)
                           datap = datar[0]
 
                        if not self._sb.m5dsbug:
@@ -2414,41 +2416,41 @@ Will use HTML5 for this SASsession.""")
                           break
                        sleep(0.1)
                        try:
-                          log = self.stderr[0].recv(4096).decode(errors='replace')
+                          log = self.stderr[0].recv(4096)
                        except (BlockingIOError):
                           log = b''
 
                        if len(log) > 0:
                           logf += log
-                          if logf.count(logcodeo) >= 1:
+                          if logf.count(logcodeb) >= 1:
                              bail = True
                 done = True
-                self._log += logf
+                self._log += logf.decode(errors='replace')
 
          csv.close()
       else:
          while True:
             try:
-               lst = self.stdout[0].recv(4096).decode(errors='replace')
+               lst = self.stdout[0].recv(4096)
             except (BlockingIOError):
                lst = b''
 
             if len(lst) > 0:
                lstf += lst
-               if lstf.count(lstcodeo) >= 1:
+               if lstf.count(lstcodeo.encode()) >= 1:
                   done = True;
 
             try:
-               log = self.stderr[0].recv(4096).decode(errors='replace')
+               log = self.stderr[0].recv(4096)
             except (BlockingIOError):
                sleep(0.1)
                log = b''
 
             if len(log) > 0:
                logf += log
-               if logf.count(logcodeo) >= 1:
+               if logf.count(logcodeb) >= 1:
                   bail = True;
-                  self._log += logf
+                  self._log += logf.decode(errors='replace')
 
             if done and bail:
                break

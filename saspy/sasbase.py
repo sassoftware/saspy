@@ -555,7 +555,7 @@ class SASsession():
                     print("No encoding value provided. Will try to determine the correct encoding.")
                     print("Setting encoding to "+self.pyenc[1]+" based upon the SAS session encoding value of "+self.sascei+".\n")
            else:
-              print("The SAS session encoding for this session ("+self.sasce+") doesn't have a known Python equivalent encoding.")
+              print("The SAS session encoding for this session ("+self.sascei+") doesn't have a known Python equivalent encoding.")
               if self._io.sascfg.encoding == '':
                  self._io.sascfg.encoding  = 'utf_8'
                  print("Proceeding using the default encoding of 'utf_8', though you may encounter transcoding problems.\n")
@@ -2596,7 +2596,7 @@ sas_encoding_mapping = {
 'msdos720':None,
 'open_ed-037':None,
 'open_ed-1025':None,
-'open_ed-1047':None,
+'open_ed-1047':[1, 'cp500', 'cp1047'],  # :None,   - take into account MVS since validating cei's  
 'open_ed-1112':None,
 'open_ed-1122':None,
 'open_ed-1130':None,
