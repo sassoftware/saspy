@@ -20,6 +20,7 @@ from time import sleep
 import socket as socks
 import tempfile as tf
 import codecs
+import warnings
 
 try:
    import pandas as pd
@@ -954,7 +955,7 @@ Will use HTML5 for this SASsession.""")
          except UnicodeDecodeError:
             lstf = lstf.decode(errors='replace')
 
-      logf = logf.decode(errors='replace')
+      logf = logf.decode(errors='replace').replace(chr(12), chr(10))
 
       trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 200:
@@ -970,6 +971,10 @@ Will use HTML5 for this SASsession.""")
       lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                     '<body class="l body">').replace("font-size: x-small;",
                                                                                      "font-size:  normal;")
+      if logd.count('ERROR:') > 0:
+         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+         self._sb.check_error_log = True
+
       self._sb._lastlog = logd
       return dict(LOG=logd, LST=lstd)
 
@@ -1511,7 +1516,8 @@ Will use HTML5 for this SASsession.""")
                input  += "~ "
             dts.append('C')
             if embedded_newlines:
-               xlate += " '"+colname+"'n = translate('"+colname+"'n, '0A'x, "+lf+");\n"
+               nl     = "'"+'%02x' % ord('\n'.encode(self.sascfg.encoding))+"'x".upper() # for MVS support
+               xlate += " '"+colname+"'n = translate('"+colname+"'n, "+nl+", "+lf+");\n"
                xlate += " '"+colname+"'n = translate('"+colname+"'n, '0D'x, "+cr+");\n"
          else:
             if df.dtypes[name].kind in ('M'):
@@ -1893,7 +1899,12 @@ Will use HTML5 for this SASsession.""")
                    if logf.count(logcodeb) >= 1:
                       bail = True
          done = True
-         self._log += logf.decode(errors='replace')
+
+      logd = logf.decode(errors='replace')
+      self._log += logd
+      if logd.count('ERROR:') > 0:
+         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+         self._sb.check_error_log = True
 
       if len(r) > 0 or df is None:
          tdf = pd.DataFrame.from_records(r, columns=varlist)
@@ -2124,7 +2135,6 @@ Will use HTML5 for this SASsession.""")
                           if logf.count(logcodeb) >= 1:
                              bail = True
                 done = True
-                self._log += logf.decode(errors='replace')
 
          csv.close()
          df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
@@ -2150,13 +2160,18 @@ Will use HTML5 for this SASsession.""")
                logf += log
                if logf.count(logcodeb) >= 1:
                   bail = True;
-                  self._log += logf.decode(errors='replace')
 
             if done and bail:
                break
 
          df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
 
+      logd = logf.decode(errors='replace')
+      self._log += logd
+      if logd.count('ERROR:') > 0:
+         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+         self._sb.check_error_log = True
+ 
       if tmpdir:
          tmpdir.cleanup()
       else:
@@ -2425,7 +2440,6 @@ Will use HTML5 for this SASsession.""")
                           if logf.count(logcodeb) >= 1:
                              bail = True
                 done = True
-                self._log += logf.decode(errors='replace')
 
          csv.close()
       else:
@@ -2450,11 +2464,16 @@ Will use HTML5 for this SASsession.""")
                logf += log
                if logf.count(logcodeb) >= 1:
                   bail = True;
-                  self._log += logf.decode(errors='replace')
 
             if done and bail:
                break
 
+      logd = logf.decode(errors='replace')
+      self._log += logd
+      if logd.count('ERROR:') > 0:
+         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+         self._sb.check_error_log = True
+ 
       if k_dts is None:
          dts = {}
          for i in range(nvars):

@@ -764,6 +764,120 @@ an Object type, will be a character variable in SAS, with the str() of the objec
 There's more interesting reading about this on the issue that started it. Take a look at 
 https://github.com/sassoftware/saspy/issues/279 to see where this fuctionality came from.
 
+
+
+****************************************************************
+Automatic checking for ERROR: in the LOG and the warnings module
+****************************************************************
+
+Based upon an enhancement request, as of version 3.6.7, SASPy now checks for 'ERROR:' and issues a message via the warnings module
+to inform you that you should take a look at the log and see if there was a problem. SASPy methods won't blindly fail just by finding
+the word ERROR in the log, because that doesn't always mean what was being done failed. Nor does not having that in the log mean everything
+worked perfectly. SAS isn't that straight forward, unfortunately. Most methods verify what happened, when they can, but particularly on the
+data transfer methods, there are any number of things that can happen, so querying the log after these, especially when first developing
+workflows, is always a good thing. You can use the lastlog() method to see the log for the last method run or saslog() to see the entire
+session log. 
+
+There is also a new attribute on the SASsession object (my SASsession variable is 'sas' in the examples). This variable is a boolean
+set to True when one of these warnings is issued (regardless of how you've configured warnings; I set it every time). The name is 'check_error_log'.
+You can use this to programmatically check to see if there was an ERROR in the log. One catch is that it's up to you to reset the attribute 
+to False (it is Fales when the session is created). So, if you are going to check it after running a SASPy method, you should set it to False
+before running that method. I can't reset it since many methods submit multiple sets of SAS code, and I need to leave it set so it's set when
+all the code for a given method has completed. There's no good place where I can explicitly reset it. It's easy enough to set and check though,
+when you need to use it.  
+
+Here are some examples of the warnings messages and some ways to configure them. For a full explanation of what you can do with 
+warnings, refer to the Python documentation. Warnings is part of the Python Standard Library.
+
+
+.. code-block:: ipython3
+
+    >>> # I had a table which was giving an ERROR in the log, though any error from any method would do the same
+    >>>
+    >>> sas.saslib('x', path='~')
+    >>>
+    >>> sas.check_error_log
+    False
+    >>>
+    >>>
+    >>> sas.list_tables('x')
+    /opt/tom/github/saspy/saspy/sasioiom.py:976: UserWarning: Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem
+      warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+    [('3 BAD NAME', 'DATA'), ('A', 'DATA'), ('AF', 'DATA'), ('CARSFR', 'DATA'), ('CHARF', 'DATA'), ('PRDSALE', 'DATA')]
+    >>>
+    >>> # we can check the attribut to programmatically see there was an error and do whatever we want to do in the program with that info
+    >>> sas.check_error_log
+    True
+    >>> # and we should reset it to False before checking it again; usually right before a method we check it after.
+    >>> sas.check_error_log = False
+    >>>
+    >>> # so, look at the log to see why there was an error - I'm only showing the line with the error to save space here
+    >>>
+    >>> print(sas.lastlog())
+    
+    [...]
+    ERROR: Some character data was lost during transcoding in the dataset X.PRDSALE. Either the data contains characters that are not
+           representable in the new encoding or truncation occurred during transcoding.
+    [...]
+    >>>
+    >>> # Interesting, but that wasn't an error that kept my program from working
+    >>>
+    >>> # with warnings, the default I observe is that a specific warning only gets issued once; this same error is in the log each time
+    >>>
+    >>> sas.list_tables('x')
+    [('3 BAD NAME', 'DATA'), ('A', 'DATA'), ('AF', 'DATA'), ('CARSFR', 'DATA'), ('CHARF', 'DATA'), ('PRDSALE', 'DATA')]
+    >>> sas.list_tables('x')
+    [('3 BAD NAME', 'DATA'), ('A', 'DATA'), ('AF', 'DATA'), ('CARSFR', 'DATA'), ('CHARF', 'DATA'), ('PRDSALE', 'DATA')]
+    >>>
+    >>> # and again, even though warnings didn't display a message, sas.check_error_log is set because there still was an ERROR in the log
+    >>> sas.check_error_log
+    True
+    >>>
+    >>>
+    >>> # You can change the behavior to have the warning issued every time, or some number of times, or even make it throw an exception
+    >>>
+    >>> import warnings
+    >>> warnings.filterwarnings("always",module='saspy')
+    >>> sas.list_tables('x')
+    /opt/tom/github/saspy/saspy/sasioiom.py:976: UserWarning: Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem
+      warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+    [('3 BAD NAME', 'DATA'), ('A', 'DATA'), ('AF', 'DATA'), ('CARSFR', 'DATA'), ('CHARF', 'DATA'), ('PRDSALE', 'DATA')]
+    >>> sas.list_tables('x')
+    /opt/tom/github/saspy/saspy/sasioiom.py:976: UserWarning: Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem
+      warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+    [('3 BAD NAME', 'DATA'), ('A', 'DATA'), ('AF', 'DATA'), ('CARSFR', 'DATA'), ('CHARF', 'DATA'), ('PRDSALE', 'DATA')]
+    >>> sas.list_tables('x')
+    /opt/tom/github/saspy/saspy/sasioiom.py:976: UserWarning: Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem
+      warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+    [('3 BAD NAME', 'DATA'), ('A', 'DATA'), ('AF', 'DATA'), ('CARSFR', 'DATA'), ('CHARF', 'DATA'), ('PRDSALE', 'DATA')]
+    >>>
+    >>>
+    >>>
+    >>> warnings.filterwarnings("error",module='saspy')
+    >>> sas.list_tables('x')
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "/opt/tom/github/saspy/saspy/sasbase.py", line 2064, in list_tables
+        ll = self._io.submit(code, results='text')
+      File "/opt/tom/github/saspy/saspy/sasioiom.py", line 976, in submit
+        warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+    UserWarning: Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem
+    >>> sas.list_tables('x')
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "/opt/tom/github/saspy/saspy/sasbase.py", line 2064, in list_tables
+        ll = self._io.submit(code, results='text')
+      File "/opt/tom/github/saspy/saspy/sasioiom.py", line 976, in submit
+        warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+    UserWarning: Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem
+    >>>
+    >>>
+    >>> warnings.resetwarnings()
+
+
+Hopefully you will find this enhancement useful. It would be great if each thing done in SAS returned a clean return code to check, but that's
+not the case. So, checking the log is something that's necessary sometimes. Hopefully this warning when an ERROR is seen, will make this easier.
+
     
 **************
 Jupyter magics

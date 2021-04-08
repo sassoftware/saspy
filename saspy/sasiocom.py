@@ -21,6 +21,7 @@ import numbers
 import os
 import shlex
 import sys
+import warnings
 
 try:
     from win32com.client import dynamic
@@ -297,6 +298,10 @@ class SASSessionCOM(object):
 
         # Store flush result in running log
         self._log += result
+
+        if result.count('ERROR:') > 0:
+           warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+           self._sb.check_error_log = True
 
         return result
 

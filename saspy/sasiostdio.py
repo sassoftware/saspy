@@ -23,6 +23,7 @@ from   time import sleep
 import socket as socks
 import codecs
 import select as sel
+import warnings
 
 try:
    import pandas as pd
@@ -520,6 +521,10 @@ Will use HTML5 for this SASsession.""")
       x = logf.decode(self.sascfg.encoding, errors='replace').replace(code1, " ")
       self._log += x
 
+      if x.count('ERROR:') > 0:
+         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+         self._sb.check_error_log = True
+
       if self.pid == None:
          self._sb.SASpid = None
          return "No SAS process attached. SAS process has terminated unexpectedly."
@@ -902,7 +907,7 @@ Will use HTML5 for this SASsession.""")
       else:
          lstf = lstf.decode(self.sascfg.encoding, errors='replace')
 
-      logf = logf.decode(self.sascfg.encoding, errors='replace')
+      logf = logf.decode(self.sascfg.encoding, errors='replace').replace(chr(12), chr(10))
 
       trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 200:
@@ -918,6 +923,10 @@ Will use HTML5 for this SASsession.""")
       lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                     '<body class="l body">').replace("font-size: x-small;",
                                                                                      "font-size:  normal;")
+      if logd.count('ERROR:') > 0:
+         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+         self._sb.check_error_log = True
+
       self._sb._lastlog = logd
       return dict(LOG=logd, LST=lstd)
 
@@ -1787,6 +1796,7 @@ Will use HTML5 for this SASsession.""")
                     'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
          ssock = newsock[0]
 
+      logf  = b''
       first = True
       fail  = False
       blksz = int(kwargs.get('blocksize', 32767))
@@ -1839,6 +1849,13 @@ Will use HTML5 for this SASsession.""")
                   except:
                      pass
                   sock.close()
+
+                  logd = logf.decode(self.sascfg.encoding, errors='replace')
+                  self._log += logd
+                  if logd.count('ERROR:') > 0:
+                     warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+                     self._sb.check_error_log = True
+
                   ll = self.submit("", 'text')
                   print("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
                   print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
@@ -1890,8 +1907,14 @@ Will use HTML5 for this SASsession.""")
                log = self.stderr.read1(4096)
 
             if len(log) > 0:
-               self._log += log.decode(self.sascfg.encoding, errors='replace')
+               logf += log
 
+      logd = logf.decode(self.sascfg.encoding, errors='replace')
+      self._log += logd
+      if logd.count('ERROR:') > 0:
+         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+         self._sb.check_error_log = True
+ 
       if len(code):
          if encode_errors != 'replace':
             try:
@@ -2103,6 +2126,7 @@ Will use HTML5 for this SASsession.""")
       code += "else do;\n input "+input+";\n"+xlate+";\nend;\ndatalines4;"
       self._asubmit(code, "text")
 
+      logf  = b''
       blksz = int(kwargs.get('blocksize', 32767))
       row_num = 0
       code = ""
@@ -2163,8 +2187,14 @@ Will use HTML5 for this SASsession.""")
                log = self.stderr.read1(4096)
 
             if len(log) > 0:
-               self._log += log.decode(self.sascfg.encoding, errors='replace')
+               logf += log
 
+      logd = logf.decode(self.sascfg.encoding, errors='replace')
+      self._log += logd
+      if logd.count('ERROR:') > 0:
+         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+         self._sb.check_error_log = True
+ 
       if len(code):
          if encode_errors != 'replace':
             try:

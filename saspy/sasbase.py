@@ -482,6 +482,7 @@ class SASsession():
         self.DISPLAY           = self.sascfg.DISPLAY
         self.HTML              = self.sascfg.HTML
         self.logoffset         = 0
+        self.check_error_log   = False
 
         if not self.sascfg.valid:
             self._io = None
@@ -2507,6 +2508,7 @@ sas_encoding_mapping = {
 'msdos737':    [1, 'cp737'],
 'msdos775':    [1, 'cp775', 'ibm775'],
 'open_ed-1026':[1, 'cp1026', 'ibm1026'],
+'open_ed-1047':[1, 'cp1047'],              # Though this isn't available in base python, it's 3rd party
 'open_ed-1140':[1, 'cp1140', 'ibm1140'],
 'open_ed-424': [1, 'cp424', 'ebcdic-cp-he', 'ibm424'],
 'open_ed-875': [1, 'cp875'],
@@ -2596,7 +2598,6 @@ sas_encoding_mapping = {
 'msdos720':None,
 'open_ed-037':None,
 'open_ed-1025':None,
-'open_ed-1047':[1, 'cp500', 'cp1047'],  # :None,   - take into account MVS since validating cei's  
 'open_ed-1112':None,
 'open_ed-1122':None,
 'open_ed-1130':None,

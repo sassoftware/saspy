@@ -20,6 +20,7 @@ import os
 import ssl
 import sys
 import urllib
+import warnings
 
 import tempfile as tf
 from time import sleep
@@ -615,7 +616,11 @@ class SASsessionHTTP():
              logr += line+'\n'
 
       if jobid != None:   
-         self._log += logr
+         self._log += logr.replace(chr(12), chr(10))
+
+      if logr.count('ERROR:') > 0:
+         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+         self._sb.check_error_log = True
 
       return logr
 
@@ -891,6 +896,10 @@ class SASsessionHTTP():
          status = req.status
          resp = req.read()
          conn.close()
+
+      if logd.count('ERROR:') > 0:
+         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+         self._sb.check_error_log = True
 
       return dict(LOG=logd, LST=lstd)
 

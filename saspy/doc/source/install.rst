@@ -788,17 +788,11 @@ Or better yet, use the autoexec configuration option so it's always set and you 
                   }
 
 
-
 The other thing is to set the encoding correctly for this to work. MVS is an EBCDIC system, not ASCII. For the most part,
-this is all handled in IOM for you, but there is a small amount of transcoding required internally in this module. The 
-default encoding on MVS is OPEN_ED-1047, although it can be set to any number of other EBCDIC encodings. The default Python
-encodings do not include the 1047 code page. I did find a 'cp1047' code page in a separate pip installable module which
-seems to match the OPEN_ED-1047 code page. 
-
-At the time of this writing, the only transcoding I need to do in python for this to work can be accomplished using the
-'cp500' encoding which is part of the default set, so you don't have to install other modules. It's possible this could
-change in the future, but I don't have any expectations of that for now, so using 'cp500' is ok if you don't want to
-install other non-standard python modules. 
+this is all handled in IOM for you, but for data transfer routines, transcoding is required. The default encoding on MVS
+is OPEN_ED-1047, although it can be set to any number of other EBCDIC encodings. The default Python encodings do not include
+the 1047 code page. I did find a 'cp1047' code page in a separate pip installable module which seems to match the OPEN_ED-1047
+code page. So if you're running with that encoding, you can install the cp1047 to use. 
 
 
 IOM using COM
