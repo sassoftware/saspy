@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.6.5 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.6.7 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.6.5 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.6.7 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="SASPy" href="index.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.6.5
+                3.6.7
               </div>
             
           
@@ -863,14 +863,10 @@ or you can submit the options statement from your python code after making a con
 </pre></div>
 </div>
 <p>The other thing is to set the encoding correctly for this to work. MVS is an EBCDIC system, not ASCII. For the most part,
-this is all handled in IOM for you, but there is a small amount of transcoding required internally in this module. The
-default encoding on MVS is OPEN_ED-1047, although it can be set to any number of other EBCDIC encodings. The default Python
-encodings do not include the 1047 code page. I did find a &#8216;cp1047&#8217; code page in a separate pip installable module which
-seems to match the OPEN_ED-1047 code page.</p>
-<p>At the time of this writing, the only transcoding I need to do in python for this to work can be accomplished using the
-&#8216;cp500&#8217; encoding which is part of the default set, so you don&#8217;t have to install other modules. It&#8217;s possible this could
-change in the future, but I don&#8217;t have any expectations of that for now, so using &#8216;cp500&#8217; is ok if you don&#8217;t want to
-install other non-standard python modules.</p>
+this is all handled in IOM for you, but for data transfer routines, transcoding is required. The default encoding on MVS
+is OPEN_ED-1047, although it can be set to any number of other EBCDIC encodings. The default Python encodings do not include
+the 1047 code page. I did find a &#8216;cp1047&#8217; code page in a separate pip installable module which seems to match the OPEN_ED-1047
+code page. So if you&#8217;re running with that encoding, you can install the cp1047 to use.</p>
 </div>
 </div>
 <div class="section" id="iom-using-com">
@@ -1076,7 +1072,7 @@ If you want to run saspy in Zeppelin, set this in your configuration definition:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.6.5',
+            VERSION:'3.6.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

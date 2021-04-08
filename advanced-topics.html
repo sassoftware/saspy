@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced topics &mdash; saspy 3.6.5 documentation</title>
+  <title>Advanced topics &mdash; saspy 3.6.7 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.6.5 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.6.7 documentation" href="index.html"/>
         <link rel="next" title="Contributing new methods" href="adding-procedures.html"/>
         <link rel="prev" title="API Reference" href="api.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.6.5
+                3.6.7
               </div>
             
           
@@ -107,6 +107,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">Configuring Grid Option Sets to have saspy run on a specific Queue.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dates-times-and-datetimes-oh-my">Dates, Times and Datetimes, Oh my!</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#advanced-sd2df-and-df2sd-techniques">Advanced sd2df and df2sd techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automatic-checking-for-error-in-the-log-and-the-warnings-module">Automatic checking for ERROR: in the LOG and the warnings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#jupyter-magics">Jupyter magics</a></li>
 </ul>
 </li>
@@ -814,6 +815,110 @@ an Object type, will be a character variable in SAS, with the str() of the objec
 <p>There&#8217;s more interesting reading about this on the issue that started it. Take a look at
 <a class="reference external" href="https://github.com/sassoftware/saspy/issues/279">https://github.com/sassoftware/saspy/issues/279</a> to see where this fuctionality came from.</p>
 </div>
+<div class="section" id="automatic-checking-for-error-in-the-log-and-the-warnings-module">
+<h2>Automatic checking for ERROR: in the LOG and the warnings module<a class="headerlink" href="#automatic-checking-for-error-in-the-log-and-the-warnings-module" title="Permalink to this headline">¶</a></h2>
+<p>Based upon an enhancement request, as of version 3.6.7, SASPy now checks for &#8216;ERROR:&#8217; and issues a message via the warnings module
+to inform you that you should take a look at the log and see if there was a problem. SASPy methods won&#8217;t blindly fail just by finding
+the word ERROR in the log, because that doesn&#8217;t always mean what was being done failed. Nor does not having that in the log mean everything
+worked perfectly. SAS isn&#8217;t that straight forward, unfortunately. Most methods verify what happened, when they can, but particularly on the
+data transfer methods, there are any number of things that can happen, so querying the log after these, especially when first developing
+workflows, is always a good thing. You can use the lastlog() method to see the log for the last method run or saslog() to see the entire
+session log.</p>
+<p>There is also a new attribute on the SASsession object (my SASsession variable is &#8216;sas&#8217; in the examples). This variable is a boolean
+set to True when one of these warnings is issued (regardless of how you&#8217;ve configured warnings; I set it every time). The name is &#8216;check_error_log&#8217;.
+You can use this to programmatically check to see if there was an ERROR in the log. One catch is that it&#8217;s up to you to reset the attribute
+to False (it is Fales when the session is created). So, if you are going to check it after running a SASPy method, you should set it to False
+before running that method. I can&#8217;t reset it since many methods submit multiple sets of SAS code, and I need to leave it set so it&#8217;s set when
+all the code for a given method has completed. There&#8217;s no good place where I can explicitly reset it. It&#8217;s easy enough to set and check though,
+when you need to use it.</p>
+<p>Here are some examples of the warnings messages and some ways to configure them. For a full explanation of what you can do with
+warnings, refer to the Python documentation. Warnings is part of the Python Standard Library.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="c1"># I had a table which was giving an ERROR in the log, though any error from any method would do the same</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">saslib</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">check_error_log</span>
+<span class="bp">False</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">list_tables</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sasioiom</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">976</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Noticed</span> <span class="s1">&#39;ERROR:&#39;</span> <span class="ow">in</span> <span class="n">LOG</span><span class="p">,</span> <span class="n">you</span> <span class="n">ought</span> <span class="n">to</span> <span class="n">take</span> <span class="n">a</span> <span class="n">look</span> <span class="ow">and</span> <span class="n">see</span> <span class="k">if</span> <span class="n">there</span> <span class="n">was</span> <span class="n">a</span> <span class="n">problem</span>
+  <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Noticed &#39;ERROR:&#39; in LOG, you ought to take a look and see if there was a problem&quot;</span><span class="p">)</span>
+<span class="p">[(</span><span class="s1">&#39;3 BAD NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;AF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CARSFR&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CHARF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;PRDSALE&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">)]</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># we can check the attribut to programmatically see there was an error and do whatever we want to do in the program with that info</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">check_error_log</span>
+<span class="bp">True</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># and we should reset it to False before checking it again; usually right before a method we check it after.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">check_error_log</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># so, look at the log to see why there was an error - I&#39;m only showing the line with the error to save space here</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">print</span><span class="p">(</span><span class="n">sas</span><span class="o">.</span><span class="n">lastlog</span><span class="p">())</span>
+
+<span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">Some</span> <span class="n">character</span> <span class="n">data</span> <span class="n">was</span> <span class="n">lost</span> <span class="n">during</span> <span class="n">transcoding</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">dataset</span> <span class="n">X</span><span class="o">.</span><span class="n">PRDSALE</span><span class="o">.</span> <span class="n">Either</span> <span class="n">the</span> <span class="n">data</span> <span class="n">contains</span> <span class="n">characters</span> <span class="n">that</span> <span class="n">are</span> <span class="ow">not</span>
+       <span class="n">representable</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">new</span> <span class="n">encoding</span> <span class="ow">or</span> <span class="n">truncation</span> <span class="n">occurred</span> <span class="n">during</span> <span class="n">transcoding</span><span class="o">.</span>
+<span class="p">[</span><span class="o">...</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># Interesting, but that wasn&#39;t an error that kept my program from working</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># with warnings, the default I observe is that a specific warning only gets issued once; this same error is in the log each time</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">list_tables</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="p">[(</span><span class="s1">&#39;3 BAD NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;AF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CARSFR&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CHARF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;PRDSALE&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">)]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">list_tables</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="p">[(</span><span class="s1">&#39;3 BAD NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;AF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CARSFR&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CHARF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;PRDSALE&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">)]</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># and again, even though warnings didn&#39;t display a message, sas.check_error_log is set because there still was an ERROR in the log</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">check_error_log</span>
+<span class="bp">True</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># You can change the behavior to have the warning issued every time, or some number of times, or even make it throw an exception</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;always&quot;</span><span class="p">,</span><span class="n">module</span><span class="o">=</span><span class="s1">&#39;saspy&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">list_tables</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sasioiom</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">976</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Noticed</span> <span class="s1">&#39;ERROR:&#39;</span> <span class="ow">in</span> <span class="n">LOG</span><span class="p">,</span> <span class="n">you</span> <span class="n">ought</span> <span class="n">to</span> <span class="n">take</span> <span class="n">a</span> <span class="n">look</span> <span class="ow">and</span> <span class="n">see</span> <span class="k">if</span> <span class="n">there</span> <span class="n">was</span> <span class="n">a</span> <span class="n">problem</span>
+  <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Noticed &#39;ERROR:&#39; in LOG, you ought to take a look and see if there was a problem&quot;</span><span class="p">)</span>
+<span class="p">[(</span><span class="s1">&#39;3 BAD NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;AF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CARSFR&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CHARF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;PRDSALE&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">)]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">list_tables</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sasioiom</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">976</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Noticed</span> <span class="s1">&#39;ERROR:&#39;</span> <span class="ow">in</span> <span class="n">LOG</span><span class="p">,</span> <span class="n">you</span> <span class="n">ought</span> <span class="n">to</span> <span class="n">take</span> <span class="n">a</span> <span class="n">look</span> <span class="ow">and</span> <span class="n">see</span> <span class="k">if</span> <span class="n">there</span> <span class="n">was</span> <span class="n">a</span> <span class="n">problem</span>
+  <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Noticed &#39;ERROR:&#39; in LOG, you ought to take a look and see if there was a problem&quot;</span><span class="p">)</span>
+<span class="p">[(</span><span class="s1">&#39;3 BAD NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;AF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CARSFR&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CHARF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;PRDSALE&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">)]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">list_tables</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sasioiom</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">976</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Noticed</span> <span class="s1">&#39;ERROR:&#39;</span> <span class="ow">in</span> <span class="n">LOG</span><span class="p">,</span> <span class="n">you</span> <span class="n">ought</span> <span class="n">to</span> <span class="n">take</span> <span class="n">a</span> <span class="n">look</span> <span class="ow">and</span> <span class="n">see</span> <span class="k">if</span> <span class="n">there</span> <span class="n">was</span> <span class="n">a</span> <span class="n">problem</span>
+  <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Noticed &#39;ERROR:&#39; in LOG, you ought to take a look and see if there was a problem&quot;</span><span class="p">)</span>
+<span class="p">[(</span><span class="s1">&#39;3 BAD NAME&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;AF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CARSFR&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;CHARF&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;PRDSALE&#39;</span><span class="p">,</span> <span class="s1">&#39;DATA&#39;</span><span class="p">)]</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;error&quot;</span><span class="p">,</span><span class="n">module</span><span class="o">=</span><span class="s1">&#39;saspy&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">list_tables</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+  <span class="n">File</span> <span class="s2">&quot;/opt/tom/github/saspy/saspy/sasbase.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">2064</span><span class="p">,</span> <span class="ow">in</span> <span class="n">list_tables</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_io</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+  <span class="n">File</span> <span class="s2">&quot;/opt/tom/github/saspy/saspy/sasioiom.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">976</span><span class="p">,</span> <span class="ow">in</span> <span class="n">submit</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Noticed &#39;ERROR:&#39; in LOG, you ought to take a look and see if there was a problem&quot;</span><span class="p">)</span>
+<span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Noticed</span> <span class="s1">&#39;ERROR:&#39;</span> <span class="ow">in</span> <span class="n">LOG</span><span class="p">,</span> <span class="n">you</span> <span class="n">ought</span> <span class="n">to</span> <span class="n">take</span> <span class="n">a</span> <span class="n">look</span> <span class="ow">and</span> <span class="n">see</span> <span class="k">if</span> <span class="n">there</span> <span class="n">was</span> <span class="n">a</span> <span class="n">problem</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">list_tables</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+  <span class="n">File</span> <span class="s2">&quot;/opt/tom/github/saspy/saspy/sasbase.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">2064</span><span class="p">,</span> <span class="ow">in</span> <span class="n">list_tables</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_io</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+  <span class="n">File</span> <span class="s2">&quot;/opt/tom/github/saspy/saspy/sasioiom.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">976</span><span class="p">,</span> <span class="ow">in</span> <span class="n">submit</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Noticed &#39;ERROR:&#39; in LOG, you ought to take a look and see if there was a problem&quot;</span><span class="p">)</span>
+<span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Noticed</span> <span class="s1">&#39;ERROR:&#39;</span> <span class="ow">in</span> <span class="n">LOG</span><span class="p">,</span> <span class="n">you</span> <span class="n">ought</span> <span class="n">to</span> <span class="n">take</span> <span class="n">a</span> <span class="n">look</span> <span class="ow">and</span> <span class="n">see</span> <span class="k">if</span> <span class="n">there</span> <span class="n">was</span> <span class="n">a</span> <span class="n">problem</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">warnings</span><span class="o">.</span><span class="n">resetwarnings</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Hopefully you will find this enhancement useful. It would be great if each thing done in SAS returned a clean return code to check, but that&#8217;s
+not the case. So, checking the log is something that&#8217;s necessary sometimes. Hopefully this warning when an ERROR is seen, will make this easier.</p>
+</div>
 <div class="section" id="jupyter-magics">
 <h2>Jupyter magics<a class="headerlink" href="#jupyter-magics" title="Permalink to this headline">¶</a></h2>
 <p>Jupyter Notebooks have what they call Magics, which let you submit code from a diferent language
@@ -935,7 +1040,7 @@ trailing QUIT; statement are submitted automatically.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.6.5',
+            VERSION:'3.6.7',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
