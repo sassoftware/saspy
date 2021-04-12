@@ -1648,6 +1648,9 @@ Will use HTML5 for this SASsession.""")
 
       charlens = {k.upper():v for k,v in charlens.items()}
 
+      if type(df.index) != pd.RangeIndex:
+         warnings.warn("Note that Indexes are not transferred over as columns. Only actual coulmns are transferred")
+
       for name in df.columns:
          colname = str(name)
          input  += "'"+colname+"'n "

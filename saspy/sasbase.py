@@ -1243,6 +1243,10 @@ class SASsession():
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
+        Also note that dataframe indexes (row label) are not transferred over as columns, as they aren't actualy in df.columns.
+        You can simpley use df.reset_index() before this method and df.set_index() after to have the index be a column which
+        is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.  
+
         :param df: :class:`pandas.DataFrame` Pandas Data Frame to import to a SAS Data Set
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
@@ -1270,6 +1274,7 @@ class SASsession():
                              {'compress' : 'yes' ,
                               'encoding' : 'latin9' ,
                               'replace'  : 'NO' ,
+                              'index'    : 'coli' ,
                               'rename'   : "(col1 = Column_one  col2 = 'Column Two'n)"
                              }
 
@@ -1316,6 +1321,10 @@ class SASsession():
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
+        Also note that dataframe indexes (row label) are not transferred over as columns, as they aren't actualy in df.columns.
+        You can simpley use df.reset_index() before this method and df.set_index() after to have the index be a column which
+        is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.  
+
         :param df: Pandas Data Frame to import to a SAS Data Set
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
@@ -1343,6 +1352,7 @@ class SASsession():
                              {'compress' : 'yes' ,
                               'encoding' : 'latin9' ,
                               'replace'  : 'NO' ,
+                              'index'    : 'coli' ,
                               'rename'   : "(col1 = Column_one  col2 = 'Column Two'n)"
                              }
 
