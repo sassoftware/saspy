@@ -374,6 +374,9 @@ is the text of the last warning message generated in the SAS log.</p>
 <dt id="saspy.SASsession.dataframe2sasdata">
 <code class="descname">dataframe2sasdata</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em>, <em>outdsopts: dict = {}</em>, <em>encode_errors=None</em>, <em>char_lengths=None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
+<p>Also note that dataframe indexes (row label) are not transferred over as columns, as they aren&#8217;t actualy in df.columns.
+You can simpley use df.reset_index() before this method and df.set_index() after to have the index be a column which
+is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -417,6 +420,7 @@ is the text of the last warning message generated in the SAS log.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;compress&#39;</span> <span class="p">:</span> <span class="s1">&#39;yes&#39;</span> <span class="p">,</span>
  <span class="s1">&#39;encoding&#39;</span> <span class="p">:</span> <span class="s1">&#39;latin9&#39;</span> <span class="p">,</span>
  <span class="s1">&#39;replace&#39;</span>  <span class="p">:</span> <span class="s1">&#39;NO&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;index&#39;</span>    <span class="p">:</span> <span class="s1">&#39;coli&#39;</span> <span class="p">,</span>
  <span class="s1">&#39;rename&#39;</span>   <span class="p">:</span> <span class="s2">&quot;(col1 = Column_one  col2 = &#39;Column Two&#39;n)&quot;</span>
 <span class="p">}</span>
 </pre></div>
@@ -461,6 +465,9 @@ is the text of the last warning message generated in the SAS log.</p>
 <dt id="saspy.SASsession.df2sd">
 <code class="descname">df2sd</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>table: str = '_df'</em>, <em>libref: str = ''</em>, <em>results: str = ''</em>, <em>keep_outer_quotes: bool = False</em>, <em>embedded_newlines: bool = True</em>, <em>LF: str = '\x01'</em>, <em>CR: str = '\x02'</em>, <em>colsep: str = '\x03'</em>, <em>colrep: str = ' '</em>, <em>datetimes: dict = {}</em>, <em>outfmts: dict = {}</em>, <em>labels: dict = {}</em>, <em>outdsopts: dict = {}</em>, <em>encode_errors=None</em>, <em>char_lengths=None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &#x2192; saspy.sasdata.SASdata<a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for &#8216;dataframe2sasdata&#8217;. Why type all that?</p>
+<p>Also note that dataframe indexes (row label) are not transferred over as columns, as they aren&#8217;t actualy in df.columns.
+You can simpley use df.reset_index() before this method and df.set_index() after to have the index be a column which
+is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -504,6 +511,7 @@ is the text of the last warning message generated in the SAS log.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;compress&#39;</span> <span class="p">:</span> <span class="s1">&#39;yes&#39;</span> <span class="p">,</span>
  <span class="s1">&#39;encoding&#39;</span> <span class="p">:</span> <span class="s1">&#39;latin9&#39;</span> <span class="p">,</span>
  <span class="s1">&#39;replace&#39;</span>  <span class="p">:</span> <span class="s1">&#39;NO&#39;</span> <span class="p">,</span>
+ <span class="s1">&#39;index&#39;</span>    <span class="p">:</span> <span class="s1">&#39;coli&#39;</span> <span class="p">,</span>
  <span class="s1">&#39;rename&#39;</span>   <span class="p">:</span> <span class="s2">&quot;(col1 = Column_one  col2 = &#39;Column Two&#39;n)&quot;</span>
 <span class="p">}</span>
 </pre></div>
