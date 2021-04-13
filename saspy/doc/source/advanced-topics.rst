@@ -787,7 +787,8 @@ all the code for a given method has completed. There's no good place where I can
 when you need to use it.  
 
 Here are some examples of the warnings messages and some ways to configure them. For a full explanation of what you can do with 
-warnings, refer to the Python documentation. Warnings is part of the Python Standard Library.
+warnings, refer to the Python documentation. Warnings is part of the Python Standard Library. BTW, to supress these, so it's as it was
+before adding this enhancement, you can simply import warnings and then submit warnings.filterwarnings("ignore",module='saspy')
 
 
 .. code-block:: ipython3
