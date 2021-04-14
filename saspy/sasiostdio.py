@@ -417,7 +417,8 @@ Will use HTML5 for this SASsession.""")
             return None
 
       if self.sascfg.verbose:
-         print("SAS Connection established. Subprocess id is "+str(self.pid)+"\n")
+         pid = self.pid if os.name != 'nt' else self.pid.pid
+         print("SAS Connection established. Subprocess id is "+str(pid)+"\n")
       return self.pid
 
    if os.name == 'nt':
