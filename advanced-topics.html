@@ -832,7 +832,11 @@ before running that method. I can&#8217;t reset it since many methods submit mul
 all the code for a given method has completed. There&#8217;s no good place where I can explicitly reset it. It&#8217;s easy enough to set and check though,
 when you need to use it.</p>
 <p>Here are some examples of the warnings messages and some ways to configure them. For a full explanation of what you can do with
-warnings, refer to the Python documentation. Warnings is part of the Python Standard Library.</p>
+warnings, refer to the Python documentation. Warnings is part of the Python Standard Library. BTW, to supress these, so it&#8217;s as it was
+before adding this enhancement, you can simply import warnings and then submit warnings.filterwarnings(&#8220;ignore&#8221;,module=&#8217;saspy&#8217;). Remember
+also that since sascfg_personal is an imported module, you can add the import and filterwarnings statement to it if you want to default this and
+then you won&#8217;t need it in your individual programs, though you can then still change the filerwarnings setting in any program by just
+submitting it in the program, which will override what was in the config file.</p>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="c1"># I had a table which was giving an ERROR in the log, though any error from any method would do the same</span>
 <span class="o">&gt;&gt;&gt;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">saslib</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
