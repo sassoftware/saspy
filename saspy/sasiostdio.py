@@ -789,6 +789,7 @@ Will use HTML5 for this SASsession.""")
 
       out = self.stdin.write(undo+logcodei.encode(self.sascfg.encoding)+b'\n')
       self.stdin.flush()
+      bof = False
       while not done:
          try:
             while True:
@@ -823,28 +824,34 @@ Will use HTML5 for this SASsession.""")
                      lst = self.stdout.get_nowait()
                   except Empty:
                      lst = b''
-                  #lst = self.stdout.recv(4096)
                else:
                   lst = self.stdout.read1(4096)
                if len(lst) > 0:
                   lstf += lst
+                  if ods and not bof and lstf.count(b"<!DOCTYPE html>", 0, 20) > 0:
+                     bof = True
                else:
                   if os.name == 'nt':
                      try:
                         log = self.stderr.get_nowait()
                      except Empty:
                         log = b''
-                     #log = self.stderr.recv(4096)
                   else:
                      log = self.stderr.read1(4096)
                   if len(log) > 0:
                       logf += log
-                      if logf.count(logcodeo) >= 1:
-                         bail = True
                       if not bail and bc:
                          self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
                          self.stdin.flush()
                          bc = False
+                  if not bail and logf.count(logcodeo) >= 1:
+                      if ods:
+                         lenf = len(lstf)
+                         if lenf > 20 and bof:
+                            if lstf.count(b"</html>", (lenf - 15), lenf):
+                               bail = True
+                      else: 
+                         bail = True
             done = True
 
          except (ConnectionResetError):

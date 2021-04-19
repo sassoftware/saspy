@@ -788,7 +788,10 @@ when you need to use it.
 
 Here are some examples of the warnings messages and some ways to configure them. For a full explanation of what you can do with 
 warnings, refer to the Python documentation. Warnings is part of the Python Standard Library. BTW, to supress these, so it's as it was
-before adding this enhancement, you can simply import warnings and then submit warnings.filterwarnings("ignore",module='saspy')
+before adding this enhancement, you can simply import warnings and then submit warnings.filterwarnings("ignore",module='saspy'). Remember
+also that since sascfg_personal is an imported module, you can add the import and filterwarnings statement to it if you want to default this and
+then you won't need it in your individual programs, though you can then still change the filerwarnings setting in any program by just
+submitting it in the program, which will override what was in the config file.
 
 
 .. code-block:: ipython3
