@@ -1,8 +1,10 @@
 import logging
-
+import inspect
+import sys
 from functools import wraps
-from saspy.sasproccommons import SASProcCommons
-from pdb import set_trace as bp
+import warnings
+from .sasproccommons import SASProcCommons
+# from pdb import set_trace as bp
 
 class procDecorator:
     def __init__(self):
@@ -30,7 +32,8 @@ class procDecorator:
                     kwargs['ODSGraphics'] = kwargs.get('ODSGraphics', False)
                 if proc == 'hpcluster':
                     proc = 'hpclus'
-                legal_set = set(kwargs.keys())
+                # read the signature for the proc and use that as the legal set - kwargs and args
+                legal_set = set(inspect.signature(self.__getattribute__(proc)).parameters.keys() - {'kwargs', 'args'})
                 self.logger.debug(legal_set)
                 return SASProcCommons._run_proc(self, proc, req_set, legal_set, **kwargs)
             return inner
@@ -63,7 +66,7 @@ class procDecorator:
                 doc_str = ': [str, list, dict] = None,'
             if i.lower() == 'score':
                 doc_str = ": [str, bool, 'SASdata' ] = True,"
-            if i.lower() in ['output','out']:
+            if i.lower() in ['output', 'out']:
                 doc_str = ": [str, bool, 'SASdata' ] = None,"
                 doc_mstr = ''.join([':parm ', i,
                                     ': The {} variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".'.format(i)])
@@ -74,7 +77,7 @@ class procDecorator:
             if i.lower() in ['id', 'by']:
                 doc_mstr = ''.join([':parm ', i, ': The {} variable can be a string or list type. '.format(i)])
                 doc_str = ': [str, list] = None,'
-            if i.lower() in ['level', 'irregular', 'slope', 'estimate' ]:
+            if i.lower() in ['level', 'irregular', 'slope', 'estimate']:
                 doc_str = ": [str, bool] = True,"
 
             doc_list.append(''.join([i, doc_str, '\n']))
@@ -90,7 +93,7 @@ class procDecorator:
 
         doc_markup.insert(0, ''.join([':param data: SASdata object or string. This parameter is required..', '\n']))
         first_line = ''.join(["data: ['SASdata', str] = None,", '\n'])
-        if len(proc):
+        if len(proc) > 0:
             first_line = ''.join(["def {}(self, data: ['SASdata', str] = None,".format(proc), '\n'])
             doc_markup.insert(0, ''.join(['Python method to call the {} procedure.\n'.format(proc.upper()),
                                           '\n', 'Documentation link:', '\n\n']))

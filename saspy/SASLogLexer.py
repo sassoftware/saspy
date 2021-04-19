@@ -30,7 +30,7 @@ class SASLogStyle(Style):
 
 class SASLogLexer(RegexLexer):
     __all__ = ['SASLogLexer']
-    name = 'Lexer to Color SAS Logs equivilent to DMS'
+    name = 'Lexer to Color SAS Logs equivalent to DMS'
     tokens = {
         'root': [
             (r'^\d+.*((\n|\t|\n\t)[ ]([^WEN].*)(.*))*', pygments.token.String),

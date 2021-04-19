@@ -607,7 +607,9 @@ class SASProcCommons:
         if required_set is None:
             required_set = {}
         objtype = procname.lower()
-        if {'model'}.intersection(required_set) and 'target' in kwargs.keys() and 'model' not in kwargs.keys():
+        # add caller to process nominals from pipefitter
+        caller = kwargs.pop('caller', None)
+        if ({'model'}.intersection(required_set) and 'target' in kwargs.keys() and 'model' not in kwargs.keys()) or (caller == 'pipefitter' and 'nominals' in kwargs.keys()) :
             kwargs = SASProcCommons._processNominals(self, kwargs, data)
             t_str, tcls_str = SASProcCommons._target_stmt(self, kwargs['target'])
             i_str, icls_str = SASProcCommons._input_stmt(self, kwargs['input'])
