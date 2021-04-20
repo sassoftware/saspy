@@ -59,6 +59,7 @@ class SASconfigIOM:
       self.javaparms = cfg.get('javaparms', '')
       self.lrecl     = cfg.get('lrecl', None)
       self.reconnect = cfg.get('reconnect', True)
+      self.reconuri  = cfg.get('reconuri', None)
       self.logbufsz  = cfg.get('logbufsz', None)
 
       try:
@@ -220,6 +221,13 @@ class SASconfigIOM:
          else:
             self.reconnect = bool(inrecon)
 
+      inruri = kwargs.get('reconuri', None)
+      if inruri is not None:
+         if lock and self.reconuri:
+            print("Parameter 'reconuri' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.reconuri = inruri
+
       inlogsz = kwargs.get('logbufsz', None)
       if inlogsz:
          if inlogsz < 32:
@@ -264,6 +272,7 @@ class SASsessionIOM():
       self.sascfg   = SASconfigIOM(self, **kwargs)
 
       self._startsas()
+      self._sb.reconuri = None
 
    def __del__(self):
       if self.pid:
@@ -375,6 +384,8 @@ Will use HTML5 for this SASsession.""")
       parms += ["-lrecl", str(self.sascfg.lrecl)]
       if self.sascfg.logbufsz is not None:
          parms += ["-logbufsz", str(self.sascfg.logbufsz)]
+      if self.sascfg.reconuri is not None:
+         parms += ["-uri", self.sascfg.reconuri]
       parms += ['']
 
       s = ''
@@ -493,7 +504,7 @@ Will use HTML5 for this SASsession.""")
       self.stdout[0].setblocking(False)
       self.stderr[0].setblocking(False)
 
-      if not zero:
+      if not zero and not self.sascfg.reconuri:
          if not self.sascfg.sspi:
             while len(pw) == 0:
                pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
@@ -1094,8 +1105,10 @@ Will use HTML5 for this SASsession.""")
             if log.count("DISCONNECT") >= 1:
                break
 
-      return log.rstrip("DISCONNECT")
+      res = log.rpartition("DISCONNECT")
+      self._sb.reconuri = res[2].rstrip("END_DISCON")
 
+      return res[0]
 
    def exist(self, table: str, libref: str ="") -> bool:
       """

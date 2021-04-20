@@ -68,6 +68,7 @@ public class saspy2j
    static String               uuid1     = null;
    static SASURI               uri       = null;
    static String               uriStr    = null;
+   static String               reconStr  = null;
    static boolean              reconnect = false;
 
    static org.omg.CORBA.StringHolder qualUserNameHolder = null;
@@ -162,6 +163,8 @@ public class saspy2j
             lrecl = Integer.parseInt(args[x + 1]);
          else if (args[x].equalsIgnoreCase("-logbufsz"))
             logsz = Integer.parseInt(args[x + 1]);
+         else if (args[x].equalsIgnoreCase("-uri"))
+             reconStr = args[x + 1];
          }
 
       iomhosts = iomhost.split(";");
@@ -214,7 +217,7 @@ public class saspy2j
          }
       else
          {
-         if (! spn)
+         if (! spn && uriStr == null)
             omrpw = inp.readLine();
          connect(false, false, false);
          }
@@ -392,9 +395,13 @@ public class saspy2j
                         {
                         cx.close();
                         errp.write("Succesfully disconnected. Be sure to have a valid network connection before submitting anything else.DISCONNECT");
+                        errp.write(uriStr+"END_DISCON");
                         }
                      else
+                        {
                         errp.write("This workspace server is not configured for reconnecting. Did not disconnect.DISCONNECT");
+                        errp.write("END_DISCON");
+                        }
 
                      errp.flush();
                      pgm = pgm.substring(idx + 13 + 33);
@@ -707,6 +714,13 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
     VariableArray2dOfLongHolder   engineAttrs        = new VariableArray2dOfLongHolder();
     VariableArray2dOfStringHolder infoPropertyNames  = new VariableArray2dOfStringHolder();
     VariableArray2dOfStringHolder infoPropertyValues = new VariableArray2dOfStringHolder();
+
+    if (reconStr != null)
+       {
+       uri      = SASURI.create(reconStr);
+       recon    = true;
+       reconStr = null;
+       }
 
     if (! zero)
        {
