@@ -510,6 +510,15 @@ the next thing you submit will reconnect to that same workspace server and run.
     do more saspy work
 
 
+New as of Version 3.6.7, based upon a customer request, after disconnecting, a reconnection URI is
+storred off of the SASsesion object, in an attribute named 'reconuri'. This is the token that is automatically
+used to reconnect when your next saspy method is invoked. But, now you can terminate your python process, after
+getting this reconuti value, and use it to reconnect from a new Python process by specifying it in the SASsession()
+nethod: sas = saspy.SASsession(reconuri=''). This isn'y a usual use case, and this can only be used to connect from
+a single process, and ecah time a disconnect happens a new toke is created. But, a user wanted this feature for a
+specific case, so it is now available.
+
+
 *******************************************************************
 Configuring Grid Option Sets to have saspy run on a specific Queue.
 *******************************************************************

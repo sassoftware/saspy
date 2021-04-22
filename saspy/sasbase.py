@@ -422,6 +422,8 @@ class SASsession():
     :param sspi: Boolean for using IWA to connect to a workspace server configured to use IWA
     :param javaparms: for specifying java command line options if necessary
     :param logbufsz: see issue 266 for details on this. not needed normally
+    :param reconuri: the uri (token) for connecting back to the workspace server after you've disconnected. \
+                     not needed unless connecting back from a different Python process.  
 
     **COM**
 
@@ -448,10 +450,14 @@ class SASsession():
     - sasver - string of the SAS Version for the SAS server connected to
     - version - string of the saspy version you?re running
     - nosub - Boolean for current value of the teach_me_SAS() setting. 
-    - batch - Boolean for current value of the set_batch() setting. 
-    - results - Boolean for current value of the set_results() setting. 
+    - batch - Boolean for current value of the batch setting. use set_batch() to change value.
+    - results - string showing current value of for session results setting. use set_results() to change value. 
     - sascei - string for the SAS Session Encoding this SAS server is using
     - SASpid - The SAS processes id, or None if no SAS session connected
+    - hostsep - simply '/' for linux systems and '\' on windows clients
+    - check_error_log - Boolean that identifies an ERROR has been found in the SASLOG
+    - reconuri - the uri (token) for connecting back to the workspace server after you've disconnected. \
+                 not needed unless connecting back from a different Python process.  
 
     """
     # SAS Epoch: 1960-01-01
