@@ -454,7 +454,7 @@ class SASsession():
     - results - string showing current value of for session results setting. use set_results() to change value. 
     - sascei - string for the SAS Session Encoding this SAS server is using
     - SASpid - The SAS processes id, or None if no SAS session connected
-    - hostsep - simply '/' for linux systems and '\' on windows clients
+    - hostsep - simply '/' for linux systems and '\\' on windows clients
     - check_error_log - Boolean that identifies an ERROR has been found in the SASLOG
     - reconuri - the uri (token) for connecting back to the workspace server after you've disconnected. \
                  not needed unless connecting back from a different Python process.  
