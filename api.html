@@ -306,7 +306,7 @@ session encoding of the IOM server</li>
 <p><strong>Common SASsession attributes</strong></p>
 <p>The values of the following attributes will be displayed if you submit a SASsession object. 
 These can be referenced programmatically in you code. For the Booleans, you should use the provided methods to set them, 
-or change their value. The others you should change NOT for obvious reasons.</p>
+or change their value. The others you should NOT change, for obvious reasons.</p>
 <ul class="simple">
 <li>workpath - string containing the WORK libref?s filesystem path.</li>
 <li>sasver - string of the SAS Version for the SAS server connected to</li>
@@ -316,9 +316,12 @@ or change their value. The others you should change NOT for obvious reasons.</p>
 <li>results - string showing current value of for session results setting. use set_results() to change value.</li>
 <li>sascei - string for the SAS Session Encoding this SAS server is using</li>
 <li>SASpid - The SAS processes id, or None if no SAS session connected</li>
+</ul>
+<p>Other attrritubes of the SASsession object that you may use for various purposes.</p>
+<ul class="simple">
 <li>hostsep - simply a forward slash for linux systems and a backslash on windows clients; just for convenience</li>
-<li>check_error_log - Boolean that identifies an ERROR has been found in the SASLOG</li>
-<li>reconuri - the uri (token) for connecting back to the workspace server after you&#8217;ve disconnected.                  not needed unless connecting back from a different Python process.</li>
+<li>check_error_log - Boolean that identifies an ERROR has been found in the SASLOG. You should set this to False prior                  to running a saspy method that where you check it after. saspy does not reset it to False for you.</li>
+<li>reconuri - the uri (token) for connecting back to the workspace server after you&#8217;ve disconnected.                  not needed unless connecting back from a different Python process; not the usual case.</li>
 </ul>
 <dl class="method">
 <dt id="saspy.SASsession.SYSERR">
