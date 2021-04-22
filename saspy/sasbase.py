@@ -444,7 +444,7 @@ class SASsession():
 
     The values of the following attributes will be displayed if you submit a SASsession object. 
     These can be referenced programmatically in you code. For the Booleans, you should use the provided methods to set them, 
-    or change their value. The others you should change NOT for obvious reasons.
+    or change their value. The others you should NOT change, for obvious reasons.
 
     - workpath - string containing the WORK libref?s filesystem path.
     - sasver - string of the SAS Version for the SAS server connected to
@@ -454,10 +454,14 @@ class SASsession():
     - results - string showing current value of for session results setting. use set_results() to change value. 
     - sascei - string for the SAS Session Encoding this SAS server is using
     - SASpid - The SAS processes id, or None if no SAS session connected
+
+    Other attrritubes of the SASsession object that you may use for various purposes. 
+
     - hostsep - simply a forward slash for linux systems and a backslash on windows clients; just for convenience
-    - check_error_log - Boolean that identifies an ERROR has been found in the SASLOG
+    - check_error_log - Boolean that identifies an ERROR has been found in the SASLOG. You should set this to False prior \
+                 to running a saspy method that where you check it after. saspy does not reset it to False for you.
     - reconuri - the uri (token) for connecting back to the workspace server after you've disconnected. \
-                 not needed unless connecting back from a different Python process.  
+                 not needed unless connecting back from a different Python process; not the usual case.  
 
     """
     # SAS Epoch: 1960-01-01
