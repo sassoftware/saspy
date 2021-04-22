@@ -276,6 +276,7 @@ valid values are [&#8216;jupyter&#8217;, &#8216;zeppelin&#8217;, &#8216;databric
 <li><strong>sspi</strong> &#8211; Boolean for using IWA to connect to a workspace server configured to use IWA</li>
 <li><strong>javaparms</strong> &#8211; for specifying java command line options if necessary</li>
 <li><strong>logbufsz</strong> &#8211; see issue 266 for details on this. not needed normally</li>
+<li><strong>reconuri</strong> &#8211; the uri (token) for connecting back to the workspace server after you&#8217;ve disconnected.                      not needed unless connecting back from a different Python process.</li>
 </ul>
 </td>
 </tr>
@@ -311,10 +312,13 @@ or change their value. The others you should change NOT for obvious reasons.</p>
 <li>sasver - string of the SAS Version for the SAS server connected to</li>
 <li>version - string of the saspy version you?re running</li>
 <li>nosub - Boolean for current value of the teach_me_SAS() setting.</li>
-<li>batch - Boolean for current value of the set_batch() setting.</li>
-<li>results - Boolean for current value of the set_results() setting.</li>
+<li>batch - Boolean for current value of the batch setting. use set_batch() to change value.</li>
+<li>results - string showing current value of for session results setting. use set_results() to change value.</li>
 <li>sascei - string for the SAS Session Encoding this SAS server is using</li>
 <li>SASpid - The SAS processes id, or None if no SAS session connected</li>
+<li>hostsep - simply &#8216;/&#8217; for linux systems and &#8216;&#8217; on windows clients</li>
+<li>check_error_log - Boolean that identifies an ERROR has been found in the SASLOG</li>
+<li>reconuri - the uri (token) for connecting back to the workspace server after you&#8217;ve disconnected.                  not needed unless connecting back from a different Python process.</li>
 </ul>
 <dl class="method">
 <dt id="saspy.SASsession.SYSERR">
