@@ -173,7 +173,7 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         """
         Test method sasdata2dataframe using `method=disk` and arguments
         """
-
+        self.skipTest("test hangs on PC")
         data = [
         [442.5, '"quoted\x01 string"', 'non\t\tquoted string',44.4,'"leading quote string',    '"leading"and embed\x0Aded string','''"all' "over' 'the "place"''',0],
         [132.5, '"quoted\x02 string"', 'non quoted string',   41.4,'"leading quote string',    '"leading"and embed\x0Dded string','''"all' "over' 'the "place"''',20.7],

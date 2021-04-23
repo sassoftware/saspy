@@ -691,7 +691,7 @@ class SASProcCommons:
                 totSet = legalSet | reqSet
             else:
                 totSet = legalSet
-            generalSet = {'ODSGraphics', 'stmtpassthrough', 'targOpts', 'procopts', 'out'}
+            generalSet = {'ODSGraphics', 'stmtpassthrough', 'targOpts', 'procopts', 'out', 'output'}
             extraSet = set(stmt.keys() - generalSet).difference(totSet)  # find keys not in legal or required sets
             if extraSet:
                 self.logger.debug("extraSet: {}".format(extraSet))
