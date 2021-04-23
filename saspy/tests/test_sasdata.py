@@ -1,6 +1,6 @@
 from saspy.sasdata import SASdata
 from saspy.sasresults import SASresults
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 from tempfile import TemporaryDirectory
 import unittest
 import saspy
