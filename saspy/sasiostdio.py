@@ -2539,14 +2539,6 @@ Will use HTML5 for this SASsession.""")
       else:
          tabname = "'"+table.strip()+"'n "
 
-      tmpdir  = None
-
-      if tempfile is None:
-         tmpdir = tf.TemporaryDirectory()
-         tmpcsv = tmpdir.name+os.sep+"tomodsx"
-      else:
-         tmpcsv  = tempfile
-
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
       code += "data _null_; file STDERR;d = open('work.sasdata2dataframe');\n"
       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
@@ -2595,27 +2587,22 @@ Will use HTML5 for this SASsession.""")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      if self.sascfg.ssh:
-         try:
-            sock = socks.socket()
-            if self.sascfg.tunnel:
-               sock.bind(('localhost', port))
-            else:
-               sock.bind(('', port))
-            port = sock.getsockname()[1]
-         except OSError:
-            print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
-            return None
-
-         if not self.sascfg.tunnel:
-            host = self.sascfg.hostip  #socks.gethostname()
+      try:
+         sock = socks.socket()
+         if self.sascfg.tunnel:
+            sock.bind(('localhost', port))
          else:
-            host = 'localhost'
-         code  = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v encoding='utf-8';\n"
-      else:
-         host = ''
-         code = "filename sock '"+tmpcsv+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v encoding='utf-8';\n"
+            sock.bind(('', port))
+         port = sock.getsockname()[1]
+      except OSError:
+         print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
+         return None
 
+      if not self.sascfg.tunnel:
+         host = self.sascfg.hostip  #socks.gethostname()
+      else:
+         host = 'localhost'
+      code  = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v encoding='utf-8';\n"
       code += "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
 
       idx_col = kwargs.pop('index_col', False)
@@ -2661,62 +2648,40 @@ Will use HTML5 for this SASsession.""")
       code += self._sb._expopts(opts)+" run;\n"
       code += "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
 
-      if self.sascfg.ssh:
-         csv = open(tmpcsv, mode='wb')
-         sock.listen(1)
-         self._asubmit(code, 'text')
+      sock.listen(1)
+      self._asubmit(code, 'text')
 
-         if wait > 0 and sel.select([sock],[],[],wait)[0] == []:
-            print("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
-            sock.close()
-            ll = self.submit("", 'text')
-            return ll['LOG']
-         
-         newsock = (0,0)
-         try:
-            newsock = sock.accept()
-            while True:
-               data = newsock[0].recv(4096)
-
-               if not len(data):
-                  break
-
-               csv.write(data)
-         except (KeyboardInterrupt, Exception) as e:
-            print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
-            try:
-               if newsock[0]:
-                  newsock[0].shutdown(socks.SHUT_RDWR)
-                  newsock[0].close()
-            except:
-               pass
-            sock.close()
-            ll = self.submit("", 'text')
-            return str(e)+"\n\n"+ll['LOG']
-
-         newsock[0].shutdown(socks.SHUT_RDWR)
-         newsock[0].close()
+      if wait > 0 and sel.select([sock],[],[],wait)[0] == []:
+         print("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
          sock.close()
          ll = self.submit("", 'text')
+         return ll['LOG']
+      
+      newsock = (0,0)
+      try:
+         newsock = sock.accept()
 
-         csv.close()
-         df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
-      else:
-         ll = self.submit(code, "text")
+         sockout = _read_sock(newsock=newsock, method='CSV', rowsep='\n')
+
+         df = pd.read_csv(sockout, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
+
+      except (KeyboardInterrupt, Exception) as e:
+         print("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
          try:
-            df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
-         except FileNotFoundError:
-            print("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
-            if tmpdir:
-               tmpdir.cleanup()
-            return ll['LOG']
+            if newsock[0]:
+               newsock[0].shutdown(socks.SHUT_RDWR)
+               newsock[0].close()
+         except:
+            pass
+         sock.close()
+         ll = self.submit("", 'text')
+         return str(e)+"\n\n"+ll['LOG']
 
-      if tmpdir:
-         tmpdir.cleanup()
-      else:
-         if not tempkeep:
-            os.remove(tmpcsv)
-
+      newsock[0].shutdown(socks.SHUT_RDWR)
+      newsock[0].close()
+      sock.close()
+      ll = self.submit("", 'text')
+      
       if k_dts is None:  # don't override these if user provided their own dtypes
          for i in range(nvars):
             if vartype[i] == 'N':
@@ -2825,7 +2790,7 @@ Will use HTML5 for this SASsession.""")
       else:
          host = 'localhost'
 
-      code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=S encoding=utf8;\n"
+      code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=S encoding='utf-8';\n"
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
@@ -2912,7 +2877,7 @@ Will use HTML5 for this SASsession.""")
       try:
          newsock = sock.accept()
 
-         sockout = _read_sock(newsock=newsock, colsep=colsep, rowsep=rowsep)
+         sockout = _read_sock(newsock=newsock, method='DISK', colsep=colsep, rowsep=rowsep)
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
                           sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
@@ -2946,17 +2911,20 @@ Will use HTML5 for this SASsession.""")
 
 class _read_sock(io.StringIO):
    def __init__(self, **kwargs):
-     self.newsock  = kwargs.get('newsock')
-     self.colsep   = kwargs.get('colsep').encode()
-     self.rowsep   = kwargs.get('rowsep').encode()
-     self.datar    = b""
+      self.newsock  = kwargs.get('newsock')
+      self.method   = kwargs.get('method')
+      self.rowsep   = kwargs.get('rowsep').encode()
+      self.datar    = b""
 
+      if self.method == 'DISK':
+         self.colsep   = kwargs.get('colsep').encode()
 
    def read(self, size=4096):
       #print("LEN =",str(size))
       datl    = 0
       size    = max(size, 4096)
       notarow = True
+      DISK    = self.method == 'DISK'
 
       while datl < size or notarow:
          data = self.newsock[0].recv(size)
@@ -2964,8 +2932,11 @@ class _read_sock(io.StringIO):
          dl = len(data)
    
          if dl:
-            datl       += dl
-            self.datar += data.replace(b' '+self.colsep, self.colsep).replace(b' '+self.rowsep, self.rowsep)
+            datl += dl
+            if DISK:
+               self.datar += data.replace(b' '+self.colsep, self.colsep).replace(b' '+self.rowsep, self.rowsep)
+            else:
+               self.datar += data
             if notarow:
                notarow = self.datar.count(self.rowsep) <= 0
          else:
