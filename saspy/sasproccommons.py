@@ -72,8 +72,8 @@ class Codegen(object):
                     .format(self._key, self.objname, "fit", "importance", "model", "nodestats", "rules" )
             elif self._key in ['out', 'output']:
                 if not len(self.outmeth):
-                    return "output out={}.{};\n".format(self.objname, '_output')
-                return '{}.{}'.format(self.objname, '_output')
+                    return "output out={}.{};\n".format(self.objname, 'output_ds')
+                return '{}.{}'.format(self.objname, 'output_ds')
 
         elif isinstance(self._args, dict):
             try:
@@ -97,7 +97,7 @@ class Codegen(object):
                             length += len(v)
                         c += "{0} {1} /level={2};\n".format(self._key, " ".join(self._args[k]), keystr)
 
-                if self._key.casefold() == 'target' and not length==1:
+                if self._key.casefold() == 'target' and length!=1:
                     raise SyntaxError
                 return c
             except SyntaxError:
@@ -691,7 +691,7 @@ class SASProcCommons:
                 totSet = legalSet | reqSet
             else:
                 totSet = legalSet
-            generalSet = {'ODSGraphics', 'stmtpassthrough', 'targOpts', 'procopts'}
+            generalSet = {'ODSGraphics', 'stmtpassthrough', 'targOpts', 'procopts', 'out', 'output'}
             extraSet = set(stmt.keys() - generalSet).difference(totSet)  # find keys not in legal or required sets
             if extraSet:
                 self.logger.debug("extraSet: {}".format(extraSet))

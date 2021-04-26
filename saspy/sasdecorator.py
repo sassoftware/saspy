@@ -33,6 +33,7 @@ class procDecorator:
                 if proc == 'hpcluster':
                     proc = 'hpclus'
                 # read the signature for the proc and use that as the legal set - kwargs and args
+                # legal_set = set(kwargs.keys())
                 legal_set = set(inspect.signature(self.__getattribute__(proc)).parameters.keys() - {'kwargs', 'args'})
                 self.logger.debug(legal_set)
                 return SASProcCommons._run_proc(self, proc, req_set, legal_set, **kwargs)
