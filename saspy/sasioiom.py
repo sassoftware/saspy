@@ -2289,23 +2289,6 @@ Will use HTML5 for this SASsession.""")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
-         tmpdir  = None
-
-         if tempfile is None:
-            tmpdir = tf.TemporaryDirectory()
-            tmpcsv = tmpdir.name+os.sep+"tomodsx"
-         else:
-            tmpcsv  = tempfile
-
-         local   = True
-         outname = "_tomodsx"
-         code    = "filename _tomodsx '"+tmpcsv+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=NL encoding='utf-8';\n"
-      else:
-         local   = False
-         outname = self._tomods1.decode()
-         code    = ""
-
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
 
@@ -2317,7 +2300,7 @@ Will use HTML5 for this SASsession.""")
          print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
          my_fmts = False
 
-      code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
+      code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
 
       if not my_fmts:
          for i in range(nvars):
@@ -2337,25 +2320,25 @@ Will use HTML5 for this SASsession.""")
                if i % 10 == 0:
                   code +='\n'
 
-         code += "\nfile "+outname+" lrecl="+str(self.sascfg.lrecl)+" dlm="+cdelim+" recfm=v termstr=NL encoding='utf-8';\n"
-         for i in range(nvars):
-            if vartype[i] != 'N':
-               code += "'"+varlist[i]+"'n = translate('"
-               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
-                           '%02x%02x' %                               \
-                           (ord(rowrep.encode(self.sascfg.encoding)), \
-                            ord(colrep.encode(self.sascfg.encoding))),
-                           '%02x%02x' %                               \
-                           (ord(rowsep.encode(self.sascfg.encoding)), \
-                            ord(colsep.encode(self.sascfg.encoding))))
-               if i % 10 == 0:
-                  code +='\n'
-         code += "\nput "
-         for i in range(nvars):
-            code += " '"+varlist[i]+"'n "
+      code += "\nfile "+self._tomods1.decode()+" lrecl="+str(self.sascfg.lrecl)+" dlm="+cdelim+" recfm=v termstr=NL encoding='utf-8';\n"
+      for i in range(nvars):
+         if vartype[i] != 'N':
+            code += "'"+varlist[i]+"'n = translate('"
+            code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                        '%02x%02x' %                               \
+                        (ord(rowrep.encode(self.sascfg.encoding)), \
+                         ord(colrep.encode(self.sascfg.encoding))),
+                        '%02x%02x' %                               \
+                        (ord(rowsep.encode(self.sascfg.encoding)), \
+                         ord(colsep.encode(self.sascfg.encoding))))
             if i % 10 == 0:
                code +='\n'
-         code += rdelim+";\nrun;"
+      code += "\nput "
+      for i in range(nvars):
+         code += " '"+varlist[i]+"'n "
+         if i % 10 == 0:
+            code +='\n'
+      code += rdelim+";\nrun;"
 
       if k_dts is None:
          dts = {}
@@ -2378,78 +2361,34 @@ Will use HTML5 for this SASsession.""")
       self.stdin[0].send(b'\ntom says EOL='+logcodeb)
       #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb)
 
-      done  = False
-      bail  = False
+      try:
 
-      if not local:
-         try:
+         sockout = _read_sock(io=self, method='DISK', colsep=colsep.encode(), rowsep=rowsep.encode(),
+                              lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
 
-            sockout = _read_sock(io=self, method='DISK', colsep=colsep.encode(), rowsep=rowsep.encode(),
-                                 lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
+         df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
+                          sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
+                          encoding='utf-8', quoting=quoting, **kwargs)
 
-            df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
-                             sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
-                             encoding='utf-8', quoting=quoting, **kwargs)
-
-         except:
-            if os.name == 'nt':
-               try:
-                  rc = self.pid.wait(0)
-                  self.pid = None
-                  self._sb.SASpid = None
-                  print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                  return None
-               except:
-                  pass
-            else:
-               rc = os.waitpid(self.pid, os.WNOHANG)
-               if rc[1]:
-                   self.pid = None
-                   self._sb.SASpid = None
-                   print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                   return None
-
-      else:
-         while True:
+      except:
+         if os.name == 'nt':
             try:
-               lst = self.stdout[0].recv(4096)
-            except (BlockingIOError):
-               lst = b''
-
-            if len(lst) > 0:
-               lstf += lst
-               if lstf.count(lstcodeo.encode()) >= 1:
-                  done = True;
-
-            try:
-               log = self.stderr[0].recv(4096)
-            except (BlockingIOError):
-               sleep(0.1)
-               log = b''
-
-            if len(log) > 0:
-               logf += log
-               if logf.count(logcodeb) >= 1:
-                  bail = True;
-
-            if done and bail:
-               df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, header=None, names=varlist, 
-                                sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
-                                encoding='utf-8', quoting=quoting, **kwargs)
-               break
-
-         if tmpdir:
-            tmpdir.cleanup()
+               rc = self.pid.wait(0)
+               self.pid = None
+               self._sb.SASpid = None
+               print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+               return None
+            except:
+               pass
          else:
-            if not tempkeep:
-               os.remove(tmpcsv)
+            rc = os.waitpid(self.pid, os.WNOHANG)
+            if rc[1]:
+                self.pid = None
+                self._sb.SASpid = None
+                print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                return None
+         raise
 
-         logd = logf.decode(errors='replace')
-         self._log += logd
-         if logd.count('ERROR:') > 0:
-            warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
-            self._sb.check_error_log = True
- 
       if k_dts is None:  # don't override these if user provided their own dtypes
          for i in range(nvars):
             if vartype[i] == 'N':
