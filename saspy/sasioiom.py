@@ -21,6 +21,7 @@ import socket as socks
 import tempfile as tf
 import codecs
 import warnings
+import io
 
 try:
    import pandas as pd
@@ -2239,14 +2240,6 @@ Will use HTML5 for this SASsession.""")
       else:
          tabname = "'"+table.strip()+"'n "
 
-      tmpdir  = None
-
-      if tempfile is None:
-         tmpdir = tf.TemporaryDirectory()
-         tmpcsv = tmpdir.name+os.sep+"tomodsx"
-      else:
-         tmpcsv  = tempfile
-
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
       code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
       code += "length var $256;\n"
@@ -2296,17 +2289,20 @@ Will use HTML5 for this SASsession.""")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
-      if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1') and not self._sb.m5dsbug:
-         local   = True
-         enc     = self.sascfg.encoding
-         outname = "_tomodsx"
-         if self._sb.m5dsbug:
-            code    = "filename _tomodsx '"+tmpcsv+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=NL;\n"
+      if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
+         tmpdir  = None
+
+         if tempfile is None:
+            tmpdir = tf.TemporaryDirectory()
+            tmpcsv = tmpdir.name+os.sep+"tomodsx"
          else:
-            code    = "filename _tomodsx '"+tmpcsv+"' lrecl=1 recfm=f encoding=binary;\n"
+            tmpcsv  = tempfile
+
+         local   = True
+         outname = "_tomodsx"
+         code    = "filename _tomodsx '"+tmpcsv+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=NL encoding='utf-8';\n"
       else:
          local   = False
-         enc     = 'utf_8'
          outname = self._tomods1.decode()
          code    = ""
 
@@ -2341,9 +2337,7 @@ Will use HTML5 for this SASsession.""")
                if i % 10 == 0:
                   code +='\n'
 
-      if self._sb.m5dsbug:
-         rsep = colsep+rowsep+'\n'
-         code += "\nfile "+outname+" dlm="+cdelim+" termstr=NL;\n"
+         code += "\nfile "+outname+" lrecl="+str(self.sascfg.lrecl)+" dlm="+cdelim+" recfm=v termstr=NL encoding='utf-8';\n"
          for i in range(nvars):
             if vartype[i] != 'N':
                code += "'"+varlist[i]+"'n = translate('"
@@ -2362,32 +2356,23 @@ Will use HTML5 for this SASsession.""")
             if i % 10 == 0:
                code +='\n'
          code += rdelim+";\nrun;"
-      else:
-         rsep = rowsep
-         code += "\nfile "+outname+" lrecl=1 recfm=f encoding=binary;\n"
+
+      if k_dts is None:
+         dts = {}
          for i in range(nvars):
-            if vartype[i] != 'N':
-               code += "'"+varlist[i]+"'n = translate('"
-               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
-                           '%02x%02x' %                               \
-                           (ord(rowrep.encode(self.sascfg.encoding)), \
-                            ord(colrep.encode(self.sascfg.encoding))),
-                           '%02x%02x' %                               \
-                           (ord(rowsep.encode(self.sascfg.encoding)), \
-                            ord(colsep.encode(self.sascfg.encoding))))
-               if i % 10 == 0:
-                  code +='\n'
-         code += "\n"
-         last  = len(varlist)-1
-         for i in range(nvars):
-            code += "put '"+varlist[i]+"'n "
-            if i != last:
-               code += cdelim+'; '
+            if vartype[i] == 'N':
+               if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                  dts[varlist[i]] = 'float'
+               else:
+                  dts[varlist[i]] = 'str'
             else:
-               code += rdelim+'; '
-            if i % 10 == 0:
-               code +='\n'
-         code += "run;"
+               dts[varlist[i]] = 'str'
+      else:
+         dts = k_dts
+
+      miss = ['.', ' ']
+
+      quoting = kwargs.pop('quoting', 3)
 
       ll = self._asubmit(code, "text")
       self.stdin[0].send(b'\ntom says EOL='+logcodeb)
@@ -2395,69 +2380,35 @@ Will use HTML5 for this SASsession.""")
 
       done  = False
       bail  = False
-      datar = b""
 
       if not local:
-         csv = open(tmpcsv, mode='w', encoding=enc)
-         while not done:
-                while True:
-                    if os.name == 'nt':
-                       try:
-                          rc = self.pid.wait(0)
-                          self.pid = None
-                          self._sb.SASpid = None
-                          print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                          return None
-                       except:
-                          pass
-                    else:
-                       rc = os.waitpid(self.pid, os.WNOHANG)
-                       if rc[1]:
-                           self.pid = None
-                           self._sb.SASpid = None
-                           print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                           return None
+         try:
 
-                    try:
-                       data = self.stdout[0].recv(4096)
-                    except (BlockingIOError):
-                       data = b''
+            sockout = _read_sock(io=self, method='DISK', colsep=colsep.encode(), rowsep=rowsep.encode(),
+                                 lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
 
-                    if len(data) > 0:
-                       datar += data
-                       data   = datar.rpartition(rsep.encode(self.sascfg.encoding))
-                       datap  = data[0]+data[1]
-                       datar  = data[2]
+            df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
+                             sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
+                             encoding='utf-8', quoting=quoting, **kwargs)
 
-                       if datap.count(lstcodeo.encode()) >= 1:
-                          done  = True
-                          datar = datap.rpartition(logcodeb)
-                          datap = datar[0]
+         except:
+            if os.name == 'nt':
+               try:
+                  rc = self.pid.wait(0)
+                  self.pid = None
+                  self._sb.SASpid = None
+                  print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                  return None
+               except:
+                  pass
+            else:
+               rc = os.waitpid(self.pid, os.WNOHANG)
+               if rc[1]:
+                   self.pid = None
+                   self._sb.SASpid = None
+                   print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                   return None
 
-                       if not self._sb.m5dsbug:
-                          csv.write(datap.decode(self.sascfg.encoding, errors='replace'))
-                       else:
-                          csv.write(datap.decode(self.sascfg.encoding, errors='replace').replace(rsep,rowsep))
-                       if bail and done:
-                          break
-                    else:
-                       if datar.count(lstcodeo.encode()) >= 1:
-                          done = True
-                       if bail and done:
-                          break
-                       sleep(0.1)
-                       try:
-                          log = self.stderr[0].recv(4096)
-                       except (BlockingIOError):
-                          log = b''
-
-                       if len(log) > 0:
-                          logf += log
-                          if logf.count(logcodeb) >= 1:
-                             bail = True
-                done = True
-
-         csv.close()
       else:
          while True:
             try:
@@ -2482,41 +2433,23 @@ Will use HTML5 for this SASsession.""")
                   bail = True;
 
             if done and bail:
+               df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, header=None, names=varlist, 
+                                sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
+                                encoding='utf-8', quoting=quoting, **kwargs)
                break
 
-      logd = logf.decode(errors='replace')
-      self._log += logd
-      if logd.count('ERROR:') > 0:
-         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
-         self._sb.check_error_log = True
+         if tmpdir:
+            tmpdir.cleanup()
+         else:
+            if not tempkeep:
+               os.remove(tmpcsv)
+
+         logd = logf.decode(errors='replace')
+         self._log += logd
+         if logd.count('ERROR:') > 0:
+            warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+            self._sb.check_error_log = True
  
-      if k_dts is None:
-         dts = {}
-         for i in range(nvars):
-            if vartype[i] == 'N':
-               if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  dts[varlist[i]] = 'float'
-               else:
-                  dts[varlist[i]] = 'str'
-            else:
-               dts[varlist[i]] = 'str'
-      else:
-         dts = k_dts
-
-      miss = ['.', ' ']
-
-      quoting = kwargs.pop('quoting', 3)
-
-      df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, header=None, names=varlist, 
-                       sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
-                       encoding=enc, quoting=quoting, **kwargs)
-
-      if tmpdir:
-         tmpdir.cleanup()
-      else:
-         if not tempkeep:
-            os.remove(tmpcsv)
-
       if k_dts is None:  # don't override these if user provided their own dtypes
          for i in range(nvars):
             if vartype[i] == 'N':
@@ -2524,3 +2457,76 @@ Will use HTML5 for this SASsession.""")
                   df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
 
       return df
+
+class _read_sock(io.StringIO):
+   def __init__(self, **kwargs):
+      self._io      = kwargs.get('io')
+      self.method   = kwargs.get('method')
+      self.rowsep   = kwargs.get('rowsep')
+      self.lstcodeo = kwargs.get('lstcodeo')
+      self.logcodeb = kwargs.get('logcodeb')
+      self.datar    = b""
+      self.logf     = b""
+      self.doneLST  = False
+      self.doneLOG  = False
+
+      if self.method == 'DISK':
+         self.colsep   = kwargs.get('colsep')
+
+   def read(self, size=4096):
+      #print("LEN =",str(size))
+      datl    = 0
+      size    = max(size, 4096)
+      notarow = True
+      DISK    = self.method == 'DISK'
+
+      while datl < size or notarow:
+         try:
+            data = self._io.stdout[0].recv(4096)
+         except (BlockingIOError):
+            data = b''
+         #print("read was ",str(len(data)))
+         dl = len(data)
+   
+         if dl:
+            datl += dl
+            if DISK:
+               self.datar += data.replace(self.rowsep+b'\n', self.rowsep)
+            else:
+               self.datar += data
+            if notarow:
+               notarow = self.datar.count(self.rowsep) <= 0
+
+            if self.datar.count(self.lstcodeo) >= 1:
+               self.doneLST = True
+               self.datar   = self.datar.rpartition(b'\n'+self.lstcodeo)[0]
+         else:
+            #print("At EOF datar was ",str(len(self.datar)))
+            if self.doneLST and self.doneLOG:
+               if len(self.datar) <= 0:
+                  return ''
+               else:
+                  break
+            try:
+               log = self._io.stderr[0].recv(4096)
+            except (BlockingIOError):
+               log = b''
+
+            if len(log) > 0:
+               self.logf += log
+               if self.logf.count(self.logcodeb) >= 1:
+                  self.doneLOG = True   
+
+                  logd = self.logf.decode(errors='replace')
+                  self._io._log += logd
+                  if logd.count('ERROR:') > 0:
+                     warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+                     self._io._sb.check_error_log = True
+ 
+
+      data        = self.datar.rpartition(self.rowsep)
+      datap       = data[0]+data[1]
+      self.datar  = data[2]
+
+      return datap.decode()
+

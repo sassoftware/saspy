@@ -2661,7 +2661,7 @@ Will use HTML5 for this SASsession.""")
       try:
          newsock = sock.accept()
 
-         sockout = _read_sock(newsock=newsock, method='CSV', rowsep='\n')
+         sockout = _read_sock(newsock=newsock, method='CSV', rowsep=b'\n')
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
 
@@ -2790,7 +2790,7 @@ Will use HTML5 for this SASsession.""")
       else:
          host = 'localhost'
 
-      code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=S encoding='utf-8';\n"
+      code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v encoding='utf-8';\n"
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
@@ -2877,7 +2877,7 @@ Will use HTML5 for this SASsession.""")
       try:
          newsock = sock.accept()
 
-         sockout = _read_sock(newsock=newsock, method='DISK', colsep=colsep, rowsep=rowsep)
+         sockout = _read_sock(newsock=newsock, method='DISK', colsep=colsep.encode(), rowsep=rowsep.encode())
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
                           sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
@@ -2913,11 +2913,11 @@ class _read_sock(io.StringIO):
    def __init__(self, **kwargs):
       self.newsock  = kwargs.get('newsock')
       self.method   = kwargs.get('method')
-      self.rowsep   = kwargs.get('rowsep').encode()
+      self.rowsep   = kwargs.get('rowsep')
       self.datar    = b""
 
       if self.method == 'DISK':
-         self.colsep   = kwargs.get('colsep').encode()
+         self.colsep   = kwargs.get('colsep')
 
    def read(self, size=4096):
       #print("LEN =",str(size))
@@ -2934,7 +2934,7 @@ class _read_sock(io.StringIO):
          if dl:
             datl += dl
             if DISK:
-               self.datar += data.replace(b' '+self.colsep, self.colsep).replace(b' '+self.rowsep, self.rowsep)
+               self.datar += data.replace(self.rowsep+b'\n', self.rowsep)
             else:
                self.datar += data
             if notarow:
