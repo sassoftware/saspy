@@ -2589,7 +2589,7 @@ Will use HTML5 for this SASsession.""")
 
       try:
          sock = socks.socket()
-         if self.sascfg.tunnel:
+         if not self.sascfg.ssh or self.sascfg.tunnel:
             sock.bind(('localhost', port))
          else:
             sock.bind(('', port))
@@ -2598,7 +2598,7 @@ Will use HTML5 for this SASsession.""")
          print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
          return None
 
-      if not self.sascfg.tunnel:
+      if self.sascfg.ssh and not self.sascfg.tunnel:
          host = self.sascfg.hostip  #socks.gethostname()
       else:
          host = 'localhost'
@@ -2776,7 +2776,7 @@ Will use HTML5 for this SASsession.""")
 
       try:
          sock = socks.socket()
-         if self.sascfg.tunnel:
+         if not self.sascfg.ssh or self.sascfg.tunnel:
             sock.bind(('localhost', port))
          else:
             sock.bind(('', port))
@@ -2785,7 +2785,7 @@ Will use HTML5 for this SASsession.""")
          print('Error try to open a socket in the sasdata2dataframe method. Call failed.')
          return None
 
-      if not self.sascfg.tunnel:
+      if self.sascfg.ssh and not self.sascfg.tunnel:
          host = self.sascfg.hostip  #socks.gethostname()
       else:
          host = 'localhost'
