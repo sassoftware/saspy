@@ -2434,7 +2434,7 @@ class _read_sock(io.StringIO):
       self.datar  = data[2]
 
       if self.enc is None:
-         return datap.decode()
+         return datap.decode(errors='replace')
       else:
-         return datap.decode(self._io.sascfg.encoding, errors='replace')
+         return datap.decode(self._io.sascfg.encoding)
 
