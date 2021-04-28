@@ -1686,7 +1686,8 @@ Will use HTML5 for this SASsession.""")
       method = kwargs.pop('method', None)
       if   method and method.lower() == 'csv':
          return self.sasdata2dataframeCSV(table, libref, dsopts, **kwargs)
-      elif method and method.lower() == 'disk':
+      #elif method and method.lower() == 'disk':
+      else:
          return self.sasdata2dataframeDISK(table, libref, dsopts, rowsep, colsep,
                                            rowrep, colrep, **kwargs)
 
