@@ -2330,7 +2330,7 @@ Will use HTML5 for this SASsession.""")
 
       try:
 
-         sockout = _read_sock(io=self, method='DISK', rowsep=rowsep.encode(),
+         sockout = _read_sock(io=self, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(),
                               lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
@@ -2368,6 +2368,7 @@ class _read_sock(io.StringIO):
    def __init__(self, **kwargs):
       self._io      = kwargs.get('io')
       self.method   = kwargs.get('method')
+      self.rsep     = kwargs.get('rsep', None)
       self.rowsep   = kwargs.get('rowsep')
       self.lstcodeo = kwargs.get('lstcodeo')
       self.logcodeb = kwargs.get('logcodeb')
@@ -2395,7 +2396,7 @@ class _read_sock(io.StringIO):
          if dl:
             datl += dl
             if DISK:
-               self.datar += data.replace(self.rowsep+b'\n', self.rowsep)
+               self.datar += data.replace(self.rsep, self.rowsep)
             else:
                self.datar += data
             if notarow:
@@ -2435,5 +2436,5 @@ class _read_sock(io.StringIO):
       if self.enc is None:
          return datap.decode()
       else:
-         return datap.decode(self._io.sascfg.encoding)
+         return datap.decode(self._io.sascfg.encoding, errors='replace')
 
