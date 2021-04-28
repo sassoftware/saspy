@@ -1977,14 +1977,6 @@ Will use HTML5 for this SASsession.""")
       else:
          tabname = "'"+table.strip()+"'n "
 
-      tmpdir  = None
-
-      if tempfile is None:
-         tmpdir = tf.TemporaryDirectory()
-         tmpcsv = tmpdir.name+os.sep+"tomodsx"
-      else:
-         tmpcsv  = tempfile
-
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
       code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
       code += "length var $256;\n"
@@ -2075,6 +2067,14 @@ Will use HTML5 for this SASsession.""")
          dts = k_dts
 
       if self.sascfg.iomhost.lower() in ('', 'localhost', '127.0.0.1'):
+         tmpdir  = None
+     
+         if tempfile is None:
+            tmpdir = tf.TemporaryDirectory()
+            tmpcsv = tmpdir.name+os.sep+"tomodsx"
+         else:
+            tmpcsv  = tempfile
+
          local   = True
          outname = "_tomodsx"
          code    = "filename _tomodsx '"+tmpcsv+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v  encoding='utf-8';\n"
@@ -2094,67 +2094,33 @@ Will use HTML5 for this SASsession.""")
 
       done  = False
       bail  = False
-      datar = b""
 
       if not local:
-         csv = open(tmpcsv, mode='wb')
-         while not done:
-                while True:
-                    if os.name == 'nt':
-                       try:
-                          rc = self.pid.wait(0)
-                          self.pid = None
-                          self._sb.SASpid = None
-                          print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                          return None
-                       except:
-                          pass
-                    else:
-                       rc = os.waitpid(self.pid, os.WNOHANG)
-                       if rc[1]:
-                           self.pid = None
-                           self._sb.SASpid = None
-                           print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                           return None
-
-                    try:
-                       data = self.stdout[0].recv(4096)
-                    except (BlockingIOError):
-                       data = b''
-
-                    if len(data) > 0:
-                       datar += data
-                       data   = datar.rpartition(b'\n')
-                       datap  = data[0]+data[1]
-                       datar  = data[2]
-
-                       if datap.count(lstcodeo.encode()) >= 1:
-                          done  = True
-                          datar = datap.rpartition(logcodeb)
-                          datap = datar[0]
-
-                       csv.write(datap.decode(self.sascfg.encoding, errors='replace').encode())
-                       if bail and done:
-                          break
-                    else:
-                       if datar.count(lstcodeo.encode()) >= 1:
-                          done = True
-                       if bail and done:
-                          break
-                       sleep(0.1)
-                       try:
-                          log = self.stderr[0].recv(4096)
-                       except (BlockingIOError):
-                          log = b''
-
-                       if len(log) > 0:
-                          logf += log
-                          if logf.count(logcodeb) >= 1:
-                             bail = True
-                done = True
-
-         csv.close()
-         df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
+         try:
+         
+            sockout = _read_sock(io=self, method='CSV', rowsep=b'\n', encoding=self.sascfg.encoding,
+                                 lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
+         
+            df = pd.read_csv(sockout, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
+         
+         except:
+            if os.name == 'nt':
+               try:
+                  rc = self.pid.wait(0)
+                  self.pid = None
+                  self._sb.SASpid = None
+                  print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                  return None
+               except:
+                  pass
+            else:
+               rc = os.waitpid(self.pid, os.WNOHANG)
+               if rc[1]:
+                   self.pid = None
+                   self._sb.SASpid = None
+                   print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                   return None
+            raise
       else:
          while True:
             try:
@@ -2183,18 +2149,18 @@ Will use HTML5 for this SASsession.""")
 
          df = pd.read_csv(tmpcsv, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
 
-      logd = logf.decode(errors='replace')
-      self._log += logd
-      if logd.count('ERROR:') > 0:
-         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
-         self._sb.check_error_log = True
- 
-      if tmpdir:
-         tmpdir.cleanup()
-      else:
-         if not tempkeep:
-            os.remove(tmpcsv)
-
+         logd = logf.decode(errors='replace')
+         self._log += logd.replace(chr(12), chr(10))
+         if logd.count('ERROR:') > 0:
+            warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+            self._sb.check_error_log = True
+      
+         if tmpdir:
+            tmpdir.cleanup()
+         else:
+            if not tempkeep:
+               os.remove(tmpcsv)
+      
       if k_dts is None:  # don't override these if user provided their own dtypes
          for i in range(nvars):
             if vartype[i] == 'N':
@@ -2363,7 +2329,7 @@ Will use HTML5 for this SASsession.""")
 
       try:
 
-         sockout = _read_sock(io=self, method='DISK', colsep=colsep.encode(), rowsep=rowsep.encode(),
+         sockout = _read_sock(io=self, method='DISK', rowsep=rowsep.encode(),
                               lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
@@ -2404,13 +2370,11 @@ class _read_sock(io.StringIO):
       self.rowsep   = kwargs.get('rowsep')
       self.lstcodeo = kwargs.get('lstcodeo')
       self.logcodeb = kwargs.get('logcodeb')
+      self.enc      = kwargs.get('encoding', None)
       self.datar    = b""
       self.logf     = b""
       self.doneLST  = False
       self.doneLOG  = False
-
-      if self.method == 'DISK':
-         self.colsep   = kwargs.get('colsep')
 
    def read(self, size=4096):
       #print("LEN =",str(size))
@@ -2438,7 +2402,7 @@ class _read_sock(io.StringIO):
 
             if self.datar.count(self.lstcodeo) >= 1:
                self.doneLST = True
-               self.datar   = self.datar.rpartition(b'\n'+self.lstcodeo)[0]
+               self.datar   = self.datar.rpartition(self.logcodeb)[0]
          else:
             #print("At EOF datar was ",str(len(self.datar)))
             if self.doneLST and self.doneLOG:
@@ -2457,7 +2421,7 @@ class _read_sock(io.StringIO):
                   self.doneLOG = True   
 
                   logd = self.logf.decode(errors='replace')
-                  self._io._log += logd
+                  self._io._log += logd.replace(chr(12), chr(10))
                   if logd.count('ERROR:') > 0:
                      warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
                      self._io._sb.check_error_log = True
@@ -2467,5 +2431,8 @@ class _read_sock(io.StringIO):
       datap       = data[0]+data[1]
       self.datar  = data[2]
 
-      return datap.decode()
+      if self.enc is None:
+         return datap.decode()
+      else:
+         return datap.decode(self._io.sascfg.encoding)
 

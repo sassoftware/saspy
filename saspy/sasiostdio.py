@@ -2877,7 +2877,7 @@ Will use HTML5 for this SASsession.""")
       try:
          newsock = sock.accept()
 
-         sockout = _read_sock(newsock=newsock, method='DISK', colsep=colsep.encode(), rowsep=rowsep.encode())
+         sockout = _read_sock(newsock=newsock, method='DISK', rowsep=rowsep.encode())
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
                           sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
@@ -2915,9 +2915,6 @@ class _read_sock(io.StringIO):
       self.method   = kwargs.get('method')
       self.rowsep   = kwargs.get('rowsep')
       self.datar    = b""
-
-      if self.method == 'DISK':
-         self.colsep   = kwargs.get('colsep')
 
    def read(self, size=4096):
       #print("LEN =",str(size))
