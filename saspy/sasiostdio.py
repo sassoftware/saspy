@@ -2790,7 +2790,7 @@ Will use HTML5 for this SASsession.""")
       else:
          host = 'localhost'
 
-      code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v encoding='utf-8';\n"
+      code = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v termstr=LF encoding='utf-8';\n"
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
@@ -2823,7 +2823,7 @@ Will use HTML5 for this SASsession.""")
                if i % 10 == 0:
                   code +='\n'
 
-      code += "\nfile sock;\n"
+      code += "\nfile sock dlm="+cdelim+";\n"
       for i in range(nvars):
          if vartype[i] != 'N':
             code += "'"+varlist[i]+"'n = translate('"
@@ -2837,17 +2837,12 @@ Will use HTML5 for this SASsession.""")
             if i % 10 == 0:
                code +='\n'
       code += "\nput "
-      last  = len(varlist)-1
       for i in range(nvars):
          code += " '"+varlist[i]+"'n "
-         if i != last:
-            code += cdelim+' '
-         else:
-            code += rdelim+'; '
          if i % 10 == 0:
             code +='\n'
-      code += "run;"
-      
+      code += rdelim+";\nrun;"
+
       if k_dts is None:
          dts = {}
          for i in range(nvars):
@@ -2877,7 +2872,7 @@ Will use HTML5 for this SASsession.""")
       try:
          newsock = sock.accept()
 
-         sockout = _read_sock(newsock=newsock, method='DISK', rowsep=rowsep.encode())
+         sockout = _read_sock(newsock=newsock, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode())
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
                           sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
@@ -2913,6 +2908,7 @@ class _read_sock(io.StringIO):
    def __init__(self, **kwargs):
       self.newsock  = kwargs.get('newsock')
       self.method   = kwargs.get('method')
+      self.rsep     = kwargs.get('rsep', None)
       self.rowsep   = kwargs.get('rowsep')
       self.datar    = b""
 
@@ -2931,7 +2927,7 @@ class _read_sock(io.StringIO):
          if dl:
             datl += dl
             if DISK:
-               self.datar += data.replace(self.rowsep+b'\n', self.rowsep)
+              self.datar += data.replace(self.rsep, self.rowsep)
             else:
                self.datar += data
             if notarow:
