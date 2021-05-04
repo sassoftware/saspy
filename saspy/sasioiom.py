@@ -2099,7 +2099,7 @@ Will use HTML5 for this SASsession.""")
       if not local:
          try:
          
-            sockout = _read_sock(io=self, method='CSV', rowsep=b'\n', encoding=self.sascfg.encoding,
+            sockout = _read_sock(io=self, rowsep=b'\n', encoding=self.sascfg.encoding,
                                  lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
          
             df = pd.read_csv(sockout, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
@@ -2367,9 +2367,9 @@ Will use HTML5 for this SASsession.""")
 class _read_sock(io.StringIO):
    def __init__(self, **kwargs):
       self._io      = kwargs.get('io')
-      self.method   = kwargs.get('method')
-      self.rsep     = kwargs.get('rsep', None)
+      self.method   = kwargs.get('method', 'CSV')
       self.rowsep   = kwargs.get('rowsep')
+      self.rsep     = kwargs.get('rsep', self.rowsep)
       self.lstcodeo = kwargs.get('lstcodeo')
       self.logcodeb = kwargs.get('logcodeb')
       self.enc      = kwargs.get('encoding', None)
@@ -2379,34 +2379,27 @@ class _read_sock(io.StringIO):
       self.doneLOG  = False
 
    def read(self, size=4096):
-      #print("LEN =",str(size))
       datl    = 0
       size    = max(size, 4096)
       notarow = True
-      DISK    = self.method == 'DISK'
 
       while datl < size or notarow:
          try:
             data = self._io.stdout[0].recv(4096)
          except (BlockingIOError):
             data = b''
-         #print("read was ",str(len(data)))
          dl = len(data)
    
          if dl:
-            datl += dl
-            if DISK:
-               self.datar += data.replace(self.rsep, self.rowsep)
-            else:
-               self.datar += data
+            datl       += dl
+            self.datar += data
             if notarow:
-               notarow = self.datar.count(self.rowsep) <= 0
+               notarow = self.datar.count(self.rsep) <= 0
 
             if self.datar.count(self.lstcodeo) >= 1:
                self.doneLST = True
                self.datar   = self.datar.rpartition(self.logcodeb)[0]
          else:
-            #print("At EOF datar was ",str(len(self.datar)))
             if self.doneLST and self.doneLOG:
                if len(self.datar) <= 0:
                   return ''
@@ -2429,8 +2422,11 @@ class _read_sock(io.StringIO):
                      self._io._sb.check_error_log = True
  
 
-      data        = self.datar.rpartition(self.rowsep)
-      datap       = data[0]+data[1]
+      data        = self.datar.rpartition(self.rsep)
+      if self.method == 'DISK':
+         datap    = (data[0]+data[1]).replace(self.rsep, self.rowsep)
+      else:
+         datap    = data[0]+data[1]
       self.datar  = data[2]
 
       if self.enc is None:

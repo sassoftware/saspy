@@ -2922,7 +2922,7 @@ class _read_sock(io.StringIO):
          dl = len(data)
    
          if dl:
-            datl += dl
+            datl       += dl
             self.datar += data
             if notarow:
                notarow = self.datar.count(self.rowsep) <= 0
