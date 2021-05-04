@@ -1691,259 +1691,6 @@ Will use HTML5 for this SASsession.""")
          return self.sasdata2dataframeDISK(table, libref, dsopts, rowsep, colsep,
                                            rowrep, colrep, **kwargs)
 
-      my_fmts = kwargs.pop('my_fmts', False)
-      k_dts   = kwargs.pop('dtype',   None)
-      if self.sascfg.verbose:
-         if my_fmts != False:
-            print("'my_fmts=' is only used with the CSV or DISK version of this method. option ignored.")
-         if k_dts is not None:
-            print("'dtype=' is only used with the CSV or DISK version of this method. option ignored.")
-
-      logf     = b''
-      logn     = self._logcnt()
-      logcodei = "%put E3969440A681A24088859985" + logn + ";"
-      logcodeo = "\nE3969440A681A24088859985" + logn
-      logcodeb =  logcodeo.encode()
-
-      if libref:
-         tabname = libref+".'"+table.strip()+"'n "
-      else:
-         tabname = "'"+table.strip()+"'n "
-
-      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
-      code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
-      code += "length var $256;\n"
-      code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
-      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
-      code += "put lr lrecl; put vn nvars; put vl;\n"
-      code += "do i = 1 to nvars; var = compress(varname(d, i), '00'x); put var; end;\n"
-      code += "put vt;\n"
-      code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
-      code += "run;"
-
-      ll = self.submit(code, "text")
-
-      l2 = ll['LOG'].rpartition("LRECL= ")
-      l2 = l2[2].partition("\n")
-      lrecl = int(l2[0])
-
-      l2 = l2[2].partition("VARNUMS= ")
-      l2 = l2[2].partition("\n")
-      nvars = int(l2[0])
-
-      l2 = l2[2].partition("\n")
-      varlist = l2[2].split("\n", nvars)
-      del varlist[nvars]
-
-      l2 = l2[2].partition("VARTYPE=")
-      l2 = l2[2].partition("\n")
-      vartype = l2[2].split("\n", nvars)
-      del vartype[nvars]
-
-      topts = dict(dsopts)
-      topts.pop('firstobs', None)
-      topts.pop('obs', None)
-   
-      code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
-      code += "data work._n_u_l_l_;output;run;\n"
-      code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
-   
-      for i in range(nvars):
-         code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
-      code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
-   
-      ll = self.submit(code, "text")
-   
-      l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")
-      varcat = l2[2].split("\n", nvars)
-      del varcat[nvars]
-
-      rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
-      cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
-
-      code  = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
-      for i in range(nvars):
-         if vartype[i] == 'N':
-            code += "format '"+varlist[i]+"'n "
-            if varcat[i] in self._sb.sas_date_fmts:
-               code += 'E8601DA10.'
-            else:
-               if varcat[i] in self._sb.sas_time_fmts:
-                  code += 'E8601TM15.6'
-               else:
-                  if varcat[i] in self._sb.sas_datetime_fmts:
-                     code += 'E8601DT26.6'
-                  else:
-                     code += 'best32.'
-            code += '; '
-            if i % 10 == 0:
-               code +='\n'
-
-      if self._sb.m5dsbug:
-         rsep = colsep+rowsep+'\n'
-         code += "\nfile "+self._tomods1.decode()+" dlm="+cdelim+" termstr=NL;\n"
-         for i in range(nvars):
-            if vartype[i] != 'N':
-               code += "'"+varlist[i]+"'n = translate('"
-               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
-                           '%02x%02x' %                               \
-                           (ord(rowrep.encode(self.sascfg.encoding)), \
-                            ord(colrep.encode(self.sascfg.encoding))),
-                           '%02x%02x' %                               \
-                           (ord(rowsep.encode(self.sascfg.encoding)), \
-                            ord(colsep.encode(self.sascfg.encoding))))
-               if i % 10 == 0:
-                  code +='\n'
-         code += "\nput "
-         for i in range(nvars):
-            code += " '"+varlist[i]+"'n "
-            if i % 10 == 0:
-               code +='\n'
-         code += rdelim+";\nrun;"
-      else:
-         rsep = rowsep+rowsep
-         code += "\nfile "+self._tomods1.decode()+" lrecl=1 recfm=f encoding=binary;\n"
-         for i in range(nvars):
-            if vartype[i] != 'N':
-               code += "'"+varlist[i]+"'n = translate('"
-               code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
-                           '%02x%02x' %                               \
-                           (ord(rowrep.encode(self.sascfg.encoding)), \
-                            ord(colrep.encode(self.sascfg.encoding))),
-                           '%02x%02x' %                               \
-                           (ord(rowsep.encode(self.sascfg.encoding)), \
-                            ord(colsep.encode(self.sascfg.encoding))))
-               if i % 10 == 0:
-                  code +='\n'
-         code += "\n"
-         last  = len(varlist)-1
-         for i in range(nvars):
-            code += "put '"+varlist[i]+"'n "
-            if i != last:
-               code += cdelim+'; '
-            else:
-               code += rdelim+rdelim+'; '
-            if i % 10 == 0:
-               code +='\n'
-         code += "run;"
-
-      ll = self._asubmit(code, 'text')
-      self.stdin[0].send(b'\ntom says EOL='+logcodeb+b'\n')
-      #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb+b'\n')
-     
-      BOM   = "\ufeff".encode()
-      done  = False
-      first = True
-      datar = b''
-      bail  = False
-      r     = []
-      df    = None
-      trows = kwargs.get('trows', None)
-      if not trows:
-         trows = 100000
-
-      while not done:
-         while True:
-             if os.name == 'nt':
-                try:
-                   rc = self.pid.wait(0)
-                   self.pid = None
-                   self._sb.SASpid = None
-                   print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                   return None
-                except:
-                   pass
-             else:
-                rc = os.waitpid(self.pid, os.WNOHANG)
-                if rc[1]:
-                    self.pid = None
-                    self._sb.SASpid = None
-                    print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                    return None
-
-             if bail:
-                if datar.count(logcodeb) >= 1:
-                   break
-             try:
-                data = self.stdout[0].recv(4096)
-             except (BlockingIOError):
-                data = b''
-
-             if len(data) > 0:
-                if first:
-                   if data[0:3] == BOM:
-                      data = data[3:len(data)]
-                   first = False
-
-                datar += data
-                data   = datar.rpartition(rsep.encode(self.sascfg.encoding))
-                datap  = data[0]+data[1]
-                datar  = data[2]
-
-                datap = datap.decode(self.sascfg.encoding, errors='replace')
-                for i in datap.split(sep=rsep):
-                   if i != '':
-                      r.append(tuple(i.split(sep=colsep)))
-
-                if len(r) > trows:
-                   tdf = pd.DataFrame.from_records(r, columns=varlist)
-
-                   for i in range(nvars):
-                      if vartype[i] == 'N':
-                         if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                            if tdf.dtypes[tdf.columns[i]].kind not in ('f','u','i','b','B','c','?'):
-                               tdf[varlist[i]] = pd.to_numeric(tdf[varlist[i]], errors='coerce')
-                         else:
-                            if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
-                               tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
-                      else:
-                         tdf[varlist[i]].replace(' ', np.NaN, True)
-
-                   if df is not None:
-                      df = df.append(tdf, ignore_index=True)
-                   else:
-                      df = tdf
-                   r = []
-             else:
-                sleep(0.1)
-                try:
-                   log = self.stderr[0].recv(4096)
-                except (BlockingIOError):
-                   log = b''
-
-                if len(log) > 0:
-                   logf += log
-                   if logf.count(logcodeb) >= 1:
-                      bail = True
-         done = True
-
-      logd = logf.decode(errors='replace')
-      self._log += logd
-      if logd.count('ERROR:') > 0:
-         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
-         self._sb.check_error_log = True
-
-      if len(r) > 0 or df is None:
-         tdf = pd.DataFrame.from_records(r, columns=varlist)
-
-         for i in range(nvars):
-            if vartype[i] == 'N':
-               if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  if tdf.dtypes[tdf.columns[i]].kind not in ('f','u','i','b','B','c','?'):
-                     tdf[varlist[i]] = pd.to_numeric(tdf[varlist[i]], errors='coerce')
-               else:
-                  if tdf.dtypes[tdf.columns[i]].kind not in ('M'):
-                     tdf[varlist[i]] = pd.to_datetime(tdf[varlist[i]], errors='coerce')
-            else:
-               tdf[varlist[i]].replace(' ', np.NaN, True)
-
-         if df is not None:
-            df = df.append(tdf, ignore_index=True)
-         else:
-            df = tdf
-
-      return df
 
    def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, opts: dict = None, 
                             tempfile: str=None, tempkeep: bool=False, **kwargs) -> '<Pandas Data Frame object>':
@@ -1954,7 +1701,8 @@ Will use HTML5 for this SASsession.""")
       dsopts   - data set options for the input SAS Data Set
       opts     - a dictionary containing any of the following Proc Export options(delimiter, putnames)
       tempfile - file to use to store CSV, else temporary file will be used.
-      tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+      tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it \
+                 tempkeep and tempfile are only use with Local connections as of V3.7.0
 
       These two options are for advanced usage. They override how saspy imports data. For more info
       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
@@ -2102,7 +1850,7 @@ Will use HTML5 for this SASsession.""")
             sockout = _read_sock(io=self, rowsep=b'\n', encoding=self.sascfg.encoding,
                                  lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
          
-            df = pd.read_csv(sockout, index_col=idx_col, engine=eng, dtype=dts, **kwargs)
+            df = pd.read_csv(sockout, index_col=idx_col, encoding='utf8', engine=eng, dtype=dts, **kwargs)
          
          except:
             if os.name == 'nt':
@@ -2183,8 +1931,8 @@ Will use HTML5 for this SASsession.""")
       colsep   - the column seperator character to use; defaults to '\x02'
       rowrep  - the char to convert to for any embedded rowsep chars, defaults to  ' '
       colrep  - the char to convert to for any embedded colsep chars, defaults to  ' '
-      tempfile - file to use to store CSV, else temporary file will be used.
-      tempkeep - if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+      tempfile - DEPRECATED
+      tempkeep - DEPRECATED
 
       These two options are for advanced usage. They override how saspy imports data. For more info
       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
@@ -2192,6 +1940,9 @@ Will use HTML5 for this SASsession.""")
       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
+      tmp = kwargs.pop('tempfile', None)
+      tmp = kwargs.pop('tempkeep', None)
+
       dsopts = dsopts if dsopts is not None else {}
 
       logf     = b''
@@ -2430,7 +2181,7 @@ class _read_sock(io.StringIO):
       self.datar  = data[2]
 
       if self.enc is None:
-         return datap.decode(errors='replace')
+         return datap.decode()
       else:
          return datap.decode(self._io.sascfg.encoding)
 
