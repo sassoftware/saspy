@@ -1442,14 +1442,6 @@ class SASsessionHTTP():
       else:
          tabname = "'"+table.strip()+"'n "
 
-      tmpdir  = None
-
-      if tempfile is None:
-         tmpdir = tf.TemporaryDirectory()
-         tmpcsv = tmpdir.name+os.sep+"tomodsx"
-      else:
-         tmpcsv  = tempfile
-
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
 
       ll = self.submit(code, "text")
@@ -1771,7 +1763,7 @@ class _read_sock(io.StringIO):
    def __init__(self, **kwargs):
       self.req      = kwargs.get('req')
       self.method   = kwargs.get('method', 'CSV')
-      self.rowsep   = kwargs.get('rowsep')
+      self.rowsep   = kwargs.get('rowsep', b'\n')
       self.rsep     = kwargs.get('rsep', self.rowsep)
       self.datar    = b""
 

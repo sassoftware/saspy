@@ -176,7 +176,6 @@ class SASconfig(object):
         self.display  = cfg.get('display',  '')
         self.results  = cfg.get('results')
         self.autoexec = cfg.get('autoexec')
-        self.m5dsbug  = cfg.get('m5dsbug')
 
         indisplay = kwargs.get('display', '')
         if len(indisplay) > 0:
@@ -207,10 +206,6 @@ class SASconfig(object):
                 print("Parameter 'autoexec' passed to SAS_session was ignored due to configuration restriction.")
             else:
                 self.autoexec = inautoexec
-
-        inm5dsbug = kwargs.get('m5dsbug', None)
-        if inm5dsbug is not None:
-           self.m5dsbug = inm5dsbug
 
         inurl = kwargs.get('url', None)             
         if inurl:
@@ -584,19 +579,6 @@ class SASsession():
         if self.sascfg.autoexec:
             self._io.submit(self.sascfg.autoexec)
 
-        if self.sascfg.m5dsbug is None:
-           if self.sasver[:9] in ['9.04.01M5'] and self.sascei in ['utf-8', 'euc-cn', 'euc-jp', 'euc-kr', 'shift-jis', 'big5']:
-           #if self.sasver[:9] in ['9.04.01M5']: #, 'V.03.04M0', 'V.03.03M0']: couldn't reproduce on SPRE
-              self.m5dsbug = True
-              print("There is a known bug in the Data Step in 9.40M5 with multibyte encodings. This session is connected to that version") 
-              print("running with a multibyte encoding. Setting 'm5dsbug' to True to use alternate code to work around this bug.") 
-              print("You can eliminate this message by setting {'m5dsbug' : True} (or to False if the deployment has been hotfixed)")
-              print("in your configuration definition for this connection, or on SASsession(m5dsbug = [True | False]).\n")
-           else:
-              self.m5dsbug = False
-        else:
-           self.m5dsbug = self.sascfg.m5dsbug
-                 
         # this is to support parsing the log to fring log records w/ 'ERROR' when diagnostic logging is enabled.
         # in thi scase the log can have prefix and/or suffix info so the 'regular' log data is in the middle, not left justified
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
