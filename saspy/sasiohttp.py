@@ -582,13 +582,13 @@ class SASsessionHTTP():
 
       # GET Log
       if jobid:
-         lines = 9999999 #jobid.get('logInfo').get('lineCount')
+         lines = 1000 #jobid.get('logInfo').get('lineCount')
          for ld in jobid.get('links'):
             if ld.get('method') == 'GET' and ld.get('rel') == 'log':
                uri = ld.get('uri')
                break
       else:
-         lines = 9999999 #self._session.get('logStatistics').get('lineCount')
+         lines = 1000 #self._session.get('logStatistics').get('lineCount')
          uri   = self._uri_log
 
       while True:
@@ -680,9 +680,9 @@ class SASsessionHTTP():
             if ld.get('method') == 'GET' and ld.get('rel') == 'listing':
                uri = ld.get('uri')
                break
-         lines = 9999999 #jobid.get('listInfo').get('lineCount')
+         lines = 1000 #jobid.get('listInfo').get('lineCount')
       else:
-         lines = 9999999 #self._session.get('listingStatistics').get('lineCount')
+         lines = 1000 #self._session.get('listingStatistics').get('lineCount')
          uri   = self._uri_lst
 
       while True:
