@@ -39,13 +39,12 @@ class SASconfigHTTP:
    This object is not intended to be used directly. Instantiate a SASsession object instead 
    '''
    def __init__(self, session, **kwargs):
-      self._kernel  = kwargs.get('kernel', None)   
-      self._token   = None
-
+      self._kernel   = kwargs.get('kernel', None)   
       SAScfg         = session._sb.sascfg.SAScfg
       self.name      = session._sb.sascfg.name
       cfg            = getattr(SAScfg, self.name)
 
+      self._token    = cfg.get('authtoken', None)
       self.url       = cfg.get('url', '')
       self.ip        = cfg.get('ip', '')
       self.port      = cfg.get('port', None)
@@ -149,6 +148,13 @@ class SASconfigHTTP:
       if not self.encoding or self.encoding != 'utf_8':
          self.encoding = 'utf_8'
 
+      inautht = kwargs.get('authtoken', None)
+      if inautht:
+         if lock and self._token:
+            print("Parameter 'authtoken' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self._token = inautht
+
       inlrecl = kwargs.get('lrecl', None)
       if inlrecl:
          if lock and self.lrecl:
@@ -246,21 +252,22 @@ class SASconfigHTTP:
             # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifyable
             try:
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout)
-               self._token = self._authenticate(user, pw)
+               if not self._token:
+                  self._token = self._authenticate(user, pw)
             except ssl.SSLError as e:
                print("SSL certificate verification failed, creating an unverified SSL connection. Error was:"+str(e))
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
                print("You can set 'verify=False' to get rid of this message ")
-               self._token   = self._authenticate(user, pw)
+               if not self._token:
+                  self._token   = self._authenticate(user, pw)
          else:
             self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
-            self._token = self._authenticate(user, pw)
+            if not self._token:
+               self._token = self._authenticate(user, pw)
       else:
          self.HTTPConn = hc.HTTPConnection(self.ip, self.port, timeout=self.timeout)
-         self._token   = self._authenticate(user, pw)
-
-      # get AuthToken
-      #self._token = self._authenticate(user, pw)
+         if not self._token:
+            self._token   = self._authenticate(user, pw)
 
       if not self._token:
          print("Could not acquire an Authentication Token")

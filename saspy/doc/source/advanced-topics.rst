@@ -217,6 +217,18 @@ https://github.com/sassoftware/saspy-examples/blob/master/SAS_contrib/Using_SYMG
 Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )
 ******************************************************************************
 
+UPDATE!!! As of Version 3.7.0, the MEMORY (default) version of sasdata2dataframe now outperforms all of the various methods.
+So, effectively, the CSV and DISK versions are no longer needed (though, of course they are still there; can't break your code).
+But, MEMORY and DISK are now actually one in the same. They do not use disk space on the client side, rather stream the data
+directly into pandas read_csv() method. Therfor, 'tempfile' and 'tempkeep' no longer have meaning and are ignored. But, you
+can now use kwargs for pandas on the MEM version like you could on the DISK version (advanced feature, you probably don't use anyway).
+For the CSV version, the same is true that the CSV file being streamed over from the SAS session is feed directly into read_csv()
+so no file is created on the client side; except for the Local IOM case. In this one case, it's still faster to have the csv file SAS
+wrote out locally directly read by pandas. And that one case may be slightly faster then MEM or DISK, but not by much if so. Performance
+result vary, so it depends. But, in general, you can simple use sd2df() in all cases and have good performance instead of needing the
+CSV and DISK versions. So now you can ignore the rest of this section :)
+ENDUPDATE!!!
+
 Transferring data from SAS into Python (and the reverse) has been in this module from the beginning. As usage of this has grown, 
 larger sized data sets have been shown to be much slower to load and consume lots of memory. After investigations, this has to do with
 trying to build out the dataframes 'in memory'. This works fine up to a point, but the memory consumption and CPU usage doesn't scale.
