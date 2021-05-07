@@ -197,55 +197,56 @@ class SASconfigHTTP:
          else:
             port = 80
 
-      found = False
-      if self.authkey:
-         if os.name == 'nt': 
-            pwf = os.path.expanduser('~')+os.sep+'_authinfo'
-         else:
-            pwf = os.path.expanduser('~')+os.sep+'.authinfo'
-         try:
-            fid = open(pwf, mode='r')
-            for line in fid:
-               if line.startswith(self.authkey): 
-                  user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                  pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                  found = True
-                  break
-            fid.close()
-         except OSError as e:
-            print('Error trying to read authinfo file:'+pwf+'\n'+str(e))
-            pass
-         except:
-            pass
+      if not self._token:
+         found = False
+         if self.authkey:
+            if os.name == 'nt': 
+               pwf = os.path.expanduser('~')+os.sep+'_authinfo'
+            else:
+               pwf = os.path.expanduser('~')+os.sep+'.authinfo'
+            try:
+               fid = open(pwf, mode='r')
+               for line in fid:
+                  if line.startswith(self.authkey): 
+                     user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                     pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                     found = True
+                     break
+               fid.close()
+            except OSError as e:
+               print('Error trying to read authinfo file:'+pwf+'\n'+str(e))
+               pass
+            except:
+               pass
+      
+            if not found:
+               print('Did not find key '+self.authkey+' in authinfo file:'+pwf+'\n')
    
-         if not found:
-            print('Did not find key '+self.authkey+' in authinfo file:'+pwf+'\n')
-
-      inuser = kwargs.get('user', '')              
-      if len(inuser) > 0:
-         if lock and len(user):
-            print("Parameter 'user' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            user = inuser
-
-      inpw = kwargs.get('pw', '')                  
-      if len(inpw) > 0:
-         if lock and len(pw):
-            print("Parameter 'pw' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            pw = inpw
-
-      while len(user) == 0:
-         user = self._prompt("Please enter userid: ")
-         if user is None:
-            self._token = None
-            raise RuntimeError("No userid provided.") 
-
-      while len(pw) == 0:
-         pw = self._prompt("Please enter password: ", pw = True)
-         if pw is None:
-            self._token = None
-            raise RuntimeError("No password provided.") 
+         inuser = kwargs.get('user', '')              
+         if len(inuser) > 0:
+            if lock and len(user):
+               print("Parameter 'user' passed to SAS_session was ignored due to configuration restriction.")
+            else:
+               user = inuser
+   
+         inpw = kwargs.get('pw', '')                  
+         if len(inpw) > 0:
+            if lock and len(pw):
+               print("Parameter 'pw' passed to SAS_session was ignored due to configuration restriction.")
+            else:
+               pw = inpw
+   
+         while len(user) == 0:
+            user = self._prompt("Please enter userid: ")
+            if user is None:
+               self._token = None
+               raise RuntimeError("No userid provided.") 
+   
+         while len(pw) == 0:
+            pw = self._prompt("Please enter password: ", pw = True)
+            if pw is None:
+               self._token = None
+               raise RuntimeError("No password provided.") 
 
       if self.ssl:
          if self.verify:
