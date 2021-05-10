@@ -590,20 +590,18 @@ class SASsessionHTTP():
 
       # GET Log
       if jobid:
-         lines = 1000 #jobid.get('logInfo').get('lineCount')
          for ld in jobid.get('links'):
             if ld.get('method') == 'GET' and ld.get('rel') == 'log':
                uri = ld.get('uri')
                break
       else:
-         lines = 1000 #self._session.get('logStatistics').get('lineCount')
          uri   = self._uri_log
 
       while True:
          # GET Log
          conn = self.sascfg.HTTPConn; conn.connect()
          headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
-         conn.request('GET', uri+"?start="+str(start)+"&limit="+str(lines+1), headers=headers)
+         conn.request('GET', uri+"?start="+str(start)+"&limit="+str(start+1000), headers=headers)
          req = conn.getresponse()
          status = req.status
          resp = req.read()
@@ -620,9 +618,8 @@ class SASsessionHTTP():
             break
          start += lines
 
-         for i in range(len(log)):
-             line = dict(log[i]).get('line')
-             logr += line+'\n'
+         for line in log:
+             logr += line.get('line')+'\n'
 
       if jobid != None:   
          self._log += logr.replace(chr(12), chr(10))
@@ -688,15 +685,13 @@ class SASsessionHTTP():
             if ld.get('method') == 'GET' and ld.get('rel') == 'listing':
                uri = ld.get('uri')
                break
-         lines = 1000 #jobid.get('listInfo').get('lineCount')
       else:
-         lines = 1000 #self._session.get('listingStatistics').get('lineCount')
          uri   = self._uri_lst
 
       while True:
          conn = self.sascfg.HTTPConn; conn.connect()
          headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
-         conn.request('GET', uri+"?start="+str(start)+"&limit="+str(lines+1), headers=headers)
+         conn.request('GET', uri+"?start="+str(start)+"&limit="+str(start+1000), headers=headers)
          req = conn.getresponse()
          status = req.status
          resp = req.read()
@@ -713,9 +708,8 @@ class SASsessionHTTP():
             break
          start += lines
 
-         for i in range(len(lst)):
-             line = dict(lst[i]).get('line')
-             lstr += line+'\n'
+         for line in lst:
+             lstr += line.get('line')+'\n'
 
       return lstr
 
