@@ -56,6 +56,9 @@ class SASconfigHTTP:
       self.timeout   = cfg.get('timeout', None)
       user           = cfg.get('user', '')
       pw             = cfg.get('pw', '')
+      client_id      = cfg.get('client_id', 'SASPy')
+      client_secret  = cfg.get('client_secret', '')
+      authcode       = cfg.get('authcode', None)
       self.encoding  = cfg.get('encoding', '')
       self.authkey   = cfg.get('authkey', '')
       self._prompt   = session._sb.sascfg._prompt
@@ -149,14 +152,35 @@ class SASconfigHTTP:
          self.encoding = 'utf_8'
 
       inautht = kwargs.get('authtoken', None)
-      if inautht:
+      if inautht is not None:
          if lock and self._token:
             print("Parameter 'authtoken' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self._token = inautht
 
+      inauthc = kwargs.get('authcode', None)
+      if inauthc is not None:
+         if lock and authcode:
+            print("Parameter 'authcode' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            authcode = inauthc
+
+      incis = kwargs.get('client_secret', None)
+      if incis is not None:
+         if lock and client_secret:
+            print("Parameter 'client_secret' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            client_secret = incis
+
+      incid = kwargs.get('client_id', None)
+      if incid is not None:
+         if lock and client_id:
+            print("Parameter 'client_id' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            client_id = incid
+
       inlrecl = kwargs.get('lrecl', None)
-      if inlrecl:
+      if inlrecl is not None:
          if lock and self.lrecl:
             print("Parameter 'lrecl' passed to SAS_session was ignored due to configuration restriction.")
          else:
@@ -197,7 +221,7 @@ class SASconfigHTTP:
          else:
             port = 80
 
-      if not self._token:
+      if not self._token and not authcode:
          found = False
          if self.authkey:
             if os.name == 'nt': 
@@ -235,18 +259,34 @@ class SASconfigHTTP:
                print("Parameter 'pw' passed to SAS_session was ignored due to configuration restriction.")
             else:
                pw = inpw
-   
-         while len(user) == 0:
-            user = self._prompt("Please enter userid: ")
-            if user is None:
+
+         code_pw = ''
+         if len(user) == 0:
+            msg  = "To connect to Viya you need either an authcode or a userid/pw. Neither were provided.\n"
+            msg += "Please enter which one you want to enter next. Type one of these now: [authcode | userid]" 
+            while code_pw.lower() not in ['userid','authcode']:
+               code_pw = self._prompt(msg)
+               if code_pw is None:
+                  self._token = None
+                  raise RuntimeError("Neither authcode nor userid provided.") 
+
+         if code_pw.lower() == 'authcode':
+            authcode = self._prompt("Please enter authcode: ")
+            if authcode is None:
                self._token = None
-               raise RuntimeError("No userid provided.") 
-   
-         while len(pw) == 0:
-            pw = self._prompt("Please enter password: ", pw = True)
-            if pw is None:
-               self._token = None
-               raise RuntimeError("No password provided.") 
+               raise RuntimeError("No authcode provided.") 
+         else:
+            while len(user) == 0:
+               user = self._prompt("Please enter userid: ")
+               if user is None:
+                  self._token = None
+                  raise RuntimeError("No userid provided.") 
+        
+            while len(pw) == 0:
+               pw = self._prompt("Please enter password: ", pw = True)
+               if pw is None:
+                  self._token = None
+                  raise RuntimeError("No password provided.") 
 
       if self.ssl:
          if self.verify:
@@ -254,21 +294,21 @@ class SASconfigHTTP:
             try:
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout)
                if not self._token:
-                  self._token = self._authenticate(user, pw)
+                  self._token = self._authenticate(user, pw, authcode, client_id, client_secret)
             except ssl.SSLError as e:
                print("SSL certificate verification failed, creating an unverified SSL connection. Error was:"+str(e))
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
                print("You can set 'verify=False' to get rid of this message ")
                if not self._token:
-                  self._token   = self._authenticate(user, pw)
+                  self._token   = self._authenticate(user, pw, authcode, client_id, client_secret)
          else:
             self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
             if not self._token:
-               self._token = self._authenticate(user, pw)
+               self._token = self._authenticate(user, pw, authcode, client_id, client_secret)
       else:
          self.HTTPConn = hc.HTTPConnection(self.ip, self.port, timeout=self.timeout)
          if not self._token:
-            self._token   = self._authenticate(user, pw)
+            self._token   = self._authenticate(user, pw, authcode, client_id, client_secret)
 
       if not self._token:
          print("Could not acquire an Authentication Token")
@@ -347,18 +387,25 @@ class SASconfigHTTP:
 
       return
 
-   def _authenticate(self, user, pw):
+   def _authenticate(self, user, pw, authcode, client_id, client_secret):
       #import pdb; pdb.set_trace()
-      uuser = urllib.parse.quote(user)
-      upw   = urllib.parse.quote(pw)
+      if authcode:
+         uauthcode      = urllib.parse.quote(authcode)
+         uclient_id     = urllib.parse.quote(client_id)
+         uclient_secret = urllib.parse.quote(client_secret)
+         d1 = ("grant_type=authorization_code&code="+uauthcode+"&client_id="+uclient_id+"&client_secret="+uclient_secret).encode(self.encoding)
+         headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded"} 
+      else:
+         uuser = urllib.parse.quote(user)
+         upw   = urllib.parse.quote(pw)
+         d1 = ("grant_type=password&username="+uuser+"&password="+upw).encode(self.encoding)
+         basic = base64.encodebytes("sas.tkmtrb:".encode(self.encoding))
+         authheader = '%s' % basic.splitlines()[0].decode(self.encoding)
+         headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
+                  "Authorization":"Basic "+authheader}
       
       # POST AuthToken
       conn = self.HTTPConn; conn.connect()
-      d1 = ("grant_type=password&username="+uuser+"&password="+upw).encode(self.encoding)
-      basic = base64.encodebytes("sas.tkmtrb:".encode(self.encoding))
-      authheader = '%s' % basic.splitlines()[0].decode(self.encoding)
-      headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
-               "Authorization":"Basic "+authheader}
       try:
          conn.request('POST', "/SASLogon/oauth/token", body=d1, headers=headers)
          req = conn.getresponse()
