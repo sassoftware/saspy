@@ -220,7 +220,7 @@ Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )
 UPDATE!!! As of Version 3.7.0, the MEMORY (default) version of sasdata2dataframe now outperforms all of the various methods.
 So, effectively, the CSV and DISK versions are no longer needed (though, of course they are still there; can't break your code).
 But, MEMORY and DISK are now actually one in the same. They do not use disk space on the client side, rather stream the data
-directly into pandas read_csv() method. Therfor, 'tempfile' and 'tempkeep' no longer have meaning and are ignored. But, you
+directly into pandas read_csv() method. Therfore, 'tempfile' and 'tempkeep' no longer have meaning and are ignored. But, you
 can now use kwargs for pandas on the MEM version like you could on the DISK version (advanced feature, you probably don't use anyway).
 For the CSV version, the same is true that the CSV file being streamed over from the SAS session is feed directly into read_csv()
 so no file is created on the client side; except for the Local IOM case. In this one case, it's still faster to have the csv file SAS
