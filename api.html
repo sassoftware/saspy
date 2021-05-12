@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 3.7.0 documentation</title>
+  <title>API Reference &mdash; saspy 3.7.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.7.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.7.1 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.7.0
+                3.7.1
               </div>
             
           
@@ -277,6 +277,33 @@ valid values are [&#8216;jupyter&#8217;, &#8216;zeppelin&#8217;, &#8216;databric
 <li><strong>javaparms</strong> &#8211; for specifying java command line options if necessary</li>
 <li><strong>logbufsz</strong> &#8211; see issue 266 for details on this. not needed normally</li>
 <li><strong>reconuri</strong> &#8211; the uri (token) for connecting back to the workspace server after you&#8217;ve disconnected.                      not needed unless connecting back from a different Python process.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>HTTP</strong></p>
+<p>and for the HTTP Access Method to to connect to SAS in Viya</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>url</strong> &#8211; The URL to Viya, of the form: http[s]://host.identifier[:port]</li>
+<li><strong>verify</strong> &#8211; Flag to have http try to verify the certificate or not</li>
+<li><strong>client_id</strong> &#8211; [for SSO Viya configurations] client_id to use for authenticating to Viya (defaults to &#8216;SASPy&#8217;)</li>
+<li><strong>client_secret</strong> &#8211; [for SSO Viya configurations] client_secret to use for authenticating to Viya (defaults to &#8216;&#8217;)</li>
+<li><strong>authcode</strong> &#8211; [for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth servide            where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]i&amp;response_type=code            so perhapse: <a class="reference external" href="https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code">https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code</a></li>
+<li><strong>authkey</strong> &#8211; Key value for finding credentials in .authfile</li>
+<li><strong>user</strong> &#8211; userid for connecting to Viya (Not valid if Viya is configured for SSO - Single Sign On)</li>
+<li><strong>pw</strong> &#8211; password for connecting to Viya (Not valid if Viya is configured for SSO - Single Sign On)</li>
+<li><strong>context</strong> &#8211; The Compute Server Context to connect to</li>
+<li><strong>options</strong> &#8211; SAS options to include when connecting</li>
+<li><strong>encoding</strong> &#8211; [depecated] The Compute Service interface only works in UTF-8, regardless of the SAS encoding</li>
+<li><strong>timeout</strong> &#8211; This is passed to the HTTPConnection (http.client) and has nothing to do with Viya or Compute</li>
+<li><strong>ip</strong> &#8211; [deprecated] The resolvable host name, or IP address to the Viya (use url instead)</li>
+<li><strong>port</strong> &#8211; [depecated] The port to use to connect to Viya (use url instead)</li>
+<li><strong>ssl</strong> &#8211; [depecated] Boolean identifying whether to use HTTPS (ssl=True) or just HTTP (use url instead)</li>
 </ul>
 </td>
 </tr>
@@ -4527,7 +4554,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.7.0',
+            VERSION:'3.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

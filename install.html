@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.7.0 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.7.1 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.7.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.7.1 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="SASPy" href="index.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.7.0
+                3.7.1
               </div>
             
           
@@ -109,8 +109,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#iom-to-mvs-sas">IOM to MVS SAS</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#iom-using-com">IOM using COM</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#http">HTTP</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#iom-using-com">IOM using COM</a></li>
 </ul>
 </li>
 </ul>
@@ -230,16 +230,16 @@ SSH configured for your Linux user account.</dd>
 This method can make a local Windows connection and it is also the way to connect
 to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
 Server on any supported SAS platform.</dd>
-<dt><a class="reference internal" href="#iom-using-com">IOM using COM</a></dt>
-<dd>This connection method is for Windows clients connecting to a remote SAS 9.4 host. This
-method takes advantage of the IOM access method, but does not require a Java dependency.
-SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS Support)
-is required to install the SAS COM library on your client system.</dd>
 <dt><a class="reference internal" href="#http">HTTP</a></dt>
 <dd>This access mehtod uses http[s] to connect to the Compute Service (a micro service) of a Viya
 instalation. This does not connet to SAS 9.4 via http. The Compute Service will start a
 Compute Server using the SPRE image of MVA SAS that is installed in the Viya deployment.
 This is roughly equivalent to a Workspace server via IOM, but in Viya with no SAS 9.4.</dd>
+<dt><a class="reference internal" href="#iom-using-com">IOM using COM</a></dt>
+<dd>This connection method is for Windows clients connecting to a remote SAS 9.4 host. This
+method takes advantage of the IOM access method, but does not require a Java dependency.
+SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS Support)
+is required to install the SAS COM library on your client system.</dd>
 </dl>
 <p>Though there are several connection methods available, a single configuration file
 can be used to enable all the connection methods. The sample config file contains instructions and
@@ -869,6 +869,87 @@ the 1047 code page. I did find a &#8216;cp1047&#8217; code page in a separate pi
 code page. So if you&#8217;re running with that encoding, you can install the cp1047 to use.</p>
 </div>
 </div>
+<div class="section" id="http">
+<h3>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h3>
+<p>This is the access method for Viya. It does not connect to SAS 9.4. This access method accesses the Compute (micro) Service
+of a SAS Viya deployment. The Compute Service launches Compute Servers, which are MVA SAS sessions found in the SPRE deployment
+of the Viya installation. This is the equivalent of an IOM Workspace server, but in a Viya deployment.
+So, it is still connecting to MVA SAS and all of the methods behave the same as they would with any other saspy access method.</p>
+<p>The keys for this configuration definition dictionary are:</p>
+<dl class="docutils">
+<dt>url -</dt>
+<dd>(Required if ip not specified) The URL to Viya, of the form &#8216;http[s]://host.identifier[:port]&#8217;. When this is specified,
+ip= will not be used, as the host&#8217;s ip is retrieved from the url. Also, ssl= is set based upon http or https and port=
+is also parsed from the url, if provided, else defaulted based upon the derived ssl= value. So neither ip, port nor ssl
+are needed when url= is used.</dd>
+<dt>ip -</dt>
+<dd>[Deprecated] (Required if url not specified) The resolvable host name, or IP address to the Viya Compute Service</dd>
+<dt>port -</dt>
+<dd>[Deprecated] The port to use to connect to the Compute Service. This will default to either 80 or 443 based upon the ssl key.</dd>
+<dt>ssl -</dt>
+<dd>[Deprecated] (Optional) Boolean identifying whether to use HTTPS (ssl=True) or just HTTP. The default is True and will default to port 443 if
+the port is not specified. If set to False, it will default to port 80, if the port is not specified.
+Note that depending upon the version of python, certificate verification may or may not be required, later version are more strict.
+See the python doc for your version if this is a concern.</dd>
+<dt>verify -</dt>
+<dd>(Optional) Also note that if Viya uses the default self signed ssl certificates it ships with, you will not be able to verify them,
+but that can be fine, and you can still use an ssl connection. You can use set &#8216;verify&#8217; : False, in your config to
+turn off verification for this case.</dd>
+<dt>authkey -</dt>
+<dd>(Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection. See the IOM using Java above for more info.</dd>
+<dt>client_id -</dt>
+<dd>[for SSO Viya configurations] client_id to use for authenticating to Viya (defaults to &#8216;SASPy&#8217;)</dd>
+<dt>client_secret -</dt>
+<dd>[for SSO Viya configurations] client_secret to use for authenticating to Viya (defaults to &#8216;&#8217;)</dd>
+<dt>authcode -</dt>
+<dd>[for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth servide
+where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]&amp;response_type=code
+so perhapse:        <a class="reference external" href="https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code">https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code</a></dd>
+<dt>user -</dt>
+<dd>(<strong>Discouraged</strong>)  The user ID is required but if this field is left blank,
+the user is <strong>prompted</strong> for a user ID at runtime, unless it&#8217;s found in the authinfo file.</dd>
+<dt>pw  -</dt>
+<dd>(<strong>Strongly discouraged</strong>) A password is required but if this field is left
+blank, the user is <strong>prompted</strong> for a password at runtime, unless it&#8217;s found in the authinfo file.</dd>
+<dt>context -</dt>
+<dd>(Optional) The Compute Service has different Contexts that you can connect to. Think Appserver in IOM.
+if you don&#8217;t provide one here, saspy will query the Service upon connecting and get a list of available Contexts and
+prompt you for which one to use.</dd>
+<dt>timeout -</dt>
+<dd>HTTPConnection timeout value, in seconds. Defaults to None.</dd>
+<dt>options -</dt>
+<dd>(Optional) SAS options to include when connecting. These <strong>must</strong> be a Python list.</dd>
+<dt>encoding -</dt>
+<dd>(Ignored)
+Unlike the other access methods, the HTTP API to the Compute Service uses UTF-8 for all calls.
+So, no transcoding is necessary, nor done, on the Python side, so this option is not needed and ignored.</dd>
+<dt>autoexec -</dt>
+<dd>(Optional) This is a string of SAS code that will be submitted upon establishing a connection.
+You can use this to preassign libraries you always want available, or whatever you want.
+Don&#8217;t confuse this with the autoexec option of SAS which specifies a sas program file to be run.
+That is different. This is a string of SAS code saspy will submit after the session is created,
+which would be after SAS already included any autoexec file if there was one.</dd>
+<dt>lrecl -</dt>
+<dd>(Optional) An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
+<dt>display -</dt>
+<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;,
+or, as of version 3.1.7, &#8216;databricks&#8217;. The default when this is not specified is &#8216;jupyter&#8217;.
+Jupyter uses IPython to render HTML, which is how saspy has always worked.
+To support other Notebooks display methods, different display interface have to be added to saspy.
+If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
+</dl>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">httpsviya</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ip&#39;</span>      <span class="p">:</span> <span class="s1">&#39;sastpw.rndk8s.openstack.sas.com&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;context&#39;</span> <span class="p">:</span> <span class="s1">&#39;Data Mining compute context&#39;</span>
+             <span class="s1">&#39;authkey&#39;</span> <span class="p">:</span> <span class="s1">&#39;viya_user-pw&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fullstimer&quot;</span><span class="p">,</span> <span class="s2">&quot;memsize=1G&quot;</span><span class="p">]</span>
+             <span class="p">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Having the <code class="docutils literal"><span class="pre">'url'</span></code> (or <code class="docutils literal"><span class="pre">'ip'</span></code>) key is the trigger to use the HTTP access method.</p>
+</div>
+</div>
 <div class="section" id="iom-using-com">
 <h3>IOM using COM<a class="headerlink" href="#iom-using-com" title="Permalink to this headline">¶</a></h3>
 <p>New in 3.1.0, this user contributed access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method,
@@ -952,79 +1033,6 @@ absence of the <code class="docutils literal"><span class="pre">'iomhost'</span>
 session instead of remote IOM (it is a different connection type).</p>
 </div>
 </div>
-<div class="section" id="http">
-<h3>HTTP<a class="headerlink" href="#http" title="Permalink to this headline">¶</a></h3>
-<p>This is the access method for Viya. It does not connect to SAS 9.4. This access method accesses the Compute (micro) Service
-of a SAS Viya deployment. The Compute Service launches Compute Servers, which are MVA SAS sessions found in the SPRE deployment
-of the Viya installation. This is the equivalent of an IOM Workspace server, but in a Viya deployment.
-So, it is still connecting to MVA SAS and all of the methods behave the same as they would with any other saspy access method.</p>
-<p>The keys for this configuration definition dictionary are:</p>
-<dl class="docutils">
-<dt>url -</dt>
-<dd>(Required if ip not specified) The URL to Viya, of the form &#8216;http[s]://host.idenifier[:port]&#8217;. When this is specified,
-ip= will not be used, as the host&#8217;s ip is retrieved from the url. Also, ssl= is set based upon http or https and port=
-is also parsed from the url, if provided, else defaulted based upon the derived ssl= value. So neither ip, port nor ssl
-are needed when url= is used.</dd>
-<dt>ip -</dt>
-<dd>(Required if url not specified) The resolvable host name, or IP address to the Viya Compute Service</dd>
-<dt>port -</dt>
-<dd>The port to use to connect to the Compute Service. This will default to either 80 or 443 based upon the ssl key.</dd>
-<dt>ssl -</dt>
-<dd>(Optional) Boolean identifying whether to use HTTPS (ssl=True) or just HTTP. The default is True and will default to port 443 if
-the port is not specified. If set to False, it will default to port 80, if the port is not specified.
-Note that depending upon the version of python, certificate verification may or may not be required, later version are more strict.
-See the python doc for your version if this is a concern.</dd>
-<dt>verify -</dt>
-<dd>(Optional) Also note that if Viya uses the default self signed ssl certificates it ships with, you will not be able to verify them,
-but that can be fine, and you can still use an ssl connection. You can use set &#8216;verify&#8217; : False, in your config to
-turn off verification for this case.</dd>
-<dt>authkey -</dt>
-<dd>(Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection. See the IOM using Java above for more info.</dd>
-<dt>user -</dt>
-<dd>(<strong>Discouraged</strong>)  The user ID is required but if this field is left blank,
-the user is <strong>prompted</strong> for a user ID at runtime, unless it&#8217;s found in the authinfo file.</dd>
-<dt>pw  -</dt>
-<dd>(<strong>Strongly discouraged</strong>) A password is required but if this field is left
-blank, the user is <strong>prompted</strong> for a password at runtime, unless it&#8217;s found in the authinfo file.</dd>
-<dt>context -</dt>
-<dd>(Optional) The Compute Service has different Contexts that you can connect to. Think Appserver in IOM.
-if you don&#8217;t provide one here, saspy will query the Service upon connecting and get a list of available Contexts and
-prompt you for which one to use.</dd>
-<dt>timeout -</dt>
-<dd>HTTPConnection timeout value, in seconds. Defaults to None.</dd>
-<dt>options -</dt>
-<dd>(Optional) SAS options to include when connecting. These <strong>must</strong> be a Python list.</dd>
-<dt>encoding -</dt>
-<dd>(Ignored)
-Unlike the other access methods, the HTTP API to the Compute Service uses UTF-8 for all calls.
-So, no transcoding is necessary, nor done, on the Python side, so this option is not needed and ignored.</dd>
-<dt>autoexec -</dt>
-<dd>(Optional) This is a string of SAS code that will be submitted upon establishing a connection.
-You can use this to preassign libraries you always want available, or whatever you want.
-Don&#8217;t confuse this with the autoexec option of SAS which specifies a sas program file to be run.
-That is different. This is a string of SAS code saspy will submit after the session is created,
-which would be after SAS already included any autoexec file if there was one.</dd>
-<dt>lrecl -</dt>
-<dd>(Optional) An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</dd>
-<dt>display -</dt>
-<dd>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either &#8216;jupyter&#8217; or &#8216;zeppelin&#8217;,
-or, as of version 3.1.7, &#8216;databricks&#8217;. The default when this is not specified is &#8216;jupyter&#8217;.
-Jupyter uses IPython to render HTML, which is how saspy has always worked.
-To support other Notebooks display methods, different display interface have to be added to saspy.
-If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
-</dl>
-<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">httpsviya</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ip&#39;</span>      <span class="p">:</span> <span class="s1">&#39;sastpw.rndk8s.openstack.sas.com&#39;</span><span class="p">,</span>
-             <span class="s1">&#39;context&#39;</span> <span class="p">:</span> <span class="s1">&#39;Data Mining compute context&#39;</span>
-             <span class="s1">&#39;authkey&#39;</span> <span class="p">:</span> <span class="s1">&#39;viya_user-pw&#39;</span><span class="p">,</span>
-             <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;fullstimer&quot;</span><span class="p">,</span> <span class="s2">&quot;memsize=1G&quot;</span><span class="p">]</span>
-             <span class="p">}</span>
-</pre></div>
-</div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Having the <code class="docutils literal"><span class="pre">'ip'</span></code> key is the trigger to use the HTTP access method.</p>
-</div>
-</div>
 </div>
 </div>
 
@@ -1072,7 +1080,7 @@ If you want to run saspy in Zeppelin, set this in your configuration definition:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.7.0',
+            VERSION:'3.7.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
