@@ -420,6 +420,28 @@ class SASsession():
     :param reconuri: the uri (token) for connecting back to the workspace server after you've disconnected. \
                      not needed unless connecting back from a different Python process.  
 
+    **HTTP**
+
+    and for the HTTP Access Method to to connect to SAS in Viya
+
+    :param url: The URL to Viya, of the form: http[s]://host.identifier[:port] 
+    :param verify: Flag to have http try to verify the certificate or not
+    :param client_id: [for SSO Viya configurations] client_id to use for authenticating to Viya (defaults to 'SASPy')
+    :param client_secret: [for SSO Viya configurations] client_secret to use for authenticating to Viya (defaults to '')
+    :param authcode: [for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth servide \
+           where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]i&response_type=code \
+           so perhapse: https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&response_type=code
+    :param authkey: Key value for finding credentials in .authfile
+    :param user: userid for connecting to Viya (Not valid if Viya is configured for SSO - Single Sign On)
+    :param pw: password for connecting to Viya (Not valid if Viya is configured for SSO - Single Sign On)
+    :param context: The Compute Server Context to connect to 
+    :param options: SAS options to include when connecting
+    :param encoding: [depecated] The Compute Service interface only works in UTF-8, regardless of the SAS encoding
+    :param timeout: This is passed to the HTTPConnection (http.client) and has nothing to do with Viya or Compute
+    :param ip: [deprecated] The resolvable host name, or IP address to the Viya (use url instead)
+    :param port: [depecated] The port to use to connect to Viya (use url instead)
+    :param ssl: [depecated] Boolean identifying whether to use HTTPS (ssl=True) or just HTTP (use url instead)
+
     **COM**
 
     and for IOM IO via COM

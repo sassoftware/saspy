@@ -86,36 +86,36 @@ class SASconfigHTTP:
       self.verbose = self.cfgopts.get('verbose', True)
       self.verbose = kwargs.get('verbose', self.verbose)
 
-      inurl = kwargs.get('url', '')             
-      if len(inurl) > 0:
+      inurl = kwargs.get('url', None)             
+      if inurl is not None:
          if lock and len(self.url):
             print("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.url = inurl   
 
-      inip = kwargs.get('ip', '')             
-      if len(inip) > 0:
+      inip = kwargs.get('ip', None)             
+      if inip is not None:
          if lock and len(self.ip):
             print("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.ip = inip   
 
       inport = kwargs.get('port', None)         
-      if inport:
+      if inport is not None:
          if lock and self.port:
             print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.port = inport
 
-      inctxname = kwargs.get('context', '')   
-      if len(inctxname) > 0:
+      inctxname = kwargs.get('context', None)   
+      if inctxname is not None:
          if lock and len(self.ctxname):
             print("Parameter 'context' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.ctxname = inctxname
 
-      inoptions = kwargs.get('options', [])   
-      if len(inoptions) > 0:
+      inoptions = kwargs.get('options', None)   
+      if inoptions is not None:
          if lock and len(self.options):
            print("Parameter 'options' passed to SAS_session was ignored due to configuration restriction.")
          else:
@@ -217,9 +217,9 @@ class SASconfigHTTP:
 
       if not self.port:
          if self.ssl:
-            port = 443
+            self.port = 443
          else:
-            port = 80
+            self.port = 80
 
       if not self._token and not authcode:
          found = False
@@ -263,7 +263,7 @@ class SASconfigHTTP:
          code_pw = ''
          if len(user) == 0:
             msg  = "To connect to Viya you need either an authcode or a userid/pw. Neither were provided.\n"
-            msg += "Please enter which one you want to enter next. Type one of these now: [authcode | userid]" 
+            msg += "Please enter which one you want to enter next. Type one of these now: [authcode | userid]: " 
             while code_pw.lower() not in ['userid','authcode']:
                code_pw = self._prompt(msg)
                if code_pw is None:
@@ -271,7 +271,14 @@ class SASconfigHTTP:
                   raise RuntimeError("Neither authcode nor userid provided.") 
 
          if code_pw.lower() == 'authcode':
-            authcode = self._prompt("Please enter authcode: ")
+            purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code".format(client_id)
+            if len(self.url) > 0:
+               purl = self.url+purl
+            else:
+               purl = "http{}://{}:{}{}".format('s' if self.ssl else '', self.ip, self.port, purl)
+            msg  = "The default url to authenticate with would be {}\n".format(purl)
+            msg += "Please enter authcode: "
+            authcode = self._prompt(msg)
             if authcode is None:
                self._token = None
                raise RuntimeError("No authcode provided.") 
