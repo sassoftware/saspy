@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced topics &mdash; saspy 3.6.7 documentation</title>
+  <title>Advanced topics &mdash; saspy 3.7.0 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.6.7 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.7.0 documentation" href="index.html"/>
         <link rel="next" title="Contributing new methods" href="adding-procedures.html"/>
         <link rel="prev" title="API Reference" href="api.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.6.7
+                3.7.0
               </div>
             
           
@@ -350,6 +350,17 @@ the macro variable name, and providing the python variable continaing the value.
 </div>
 <div class="section" id="slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">
 <h2>Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )<a class="headerlink" href="#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df" title="Permalink to this headline">¶</a></h2>
+<p>UPDATE!!! As of Version 3.7.0, the MEMORY (default) version of sasdata2dataframe now outperforms all of the various methods.
+So, effectively, the CSV and DISK versions are no longer needed (though, of course they are still there; can&#8217;t break your code).
+But, MEMORY and DISK are now actually one in the same. They do not use disk space on the client side, rather stream the data
+directly into pandas read_csv() method. Therfor, &#8216;tempfile&#8217; and &#8216;tempkeep&#8217; no longer have meaning and are ignored. But, you
+can now use kwargs for pandas on the MEM version like you could on the DISK version (advanced feature, you probably don&#8217;t use anyway).
+For the CSV version, the same is true that the CSV file being streamed over from the SAS session is feed directly into read_csv()
+so no file is created on the client side; except for the Local IOM case. In this one case, it&#8217;s still faster to have the csv file SAS
+wrote out locally directly read by pandas. And that one case may be slightly faster then MEM or DISK, but not by much if so. Performance
+result vary, so it depends. But, in general, you can simple use sd2df() in all cases and have good performance instead of needing the
+CSV and DISK versions. So now you can ignore the rest of this section :)
+ENDUPDATE!!!</p>
 <p>Transferring data from SAS into Python (and the reverse) has been in this module from the beginning. As usage of this has grown,
 larger sized data sets have been shown to be much slower to load and consume lots of memory. After investigations, this has to do with
 trying to build out the dataframes &#8216;in memory&#8217;. This works fine up to a point, but the memory consumption and CPU usage doesn&#8217;t scale.</p>
@@ -1051,7 +1062,7 @@ trailing QUIT; statement are submitted automatically.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.6.7',
+            VERSION:'3.7.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
