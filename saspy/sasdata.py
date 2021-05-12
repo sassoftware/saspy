@@ -1168,7 +1168,8 @@ class SASdata:
         """
         Export this SAS Data Set to a Pandas Data Frame
 
-        :param method: defaults to MEMORY:
+        :param method: defaults to MEMORY; As of V3.7.0 all 3 of these now stream directly into read_csv() with no disk I/O\
+                       and have much improved performance. MEM, the default, is now as fast as the others.
 
            - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
