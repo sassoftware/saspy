@@ -1444,7 +1444,8 @@ class SASsession():
                              }
 
 
-        :param method: defaults to MEMORY;
+        :param method: defaults to MEMORY; As of V3.7.0 all 3 of these now stream directly into read_csv() with no disk I/O\
+                       and have much improved performance. MEM, the default, is now as fast as the others.
 
            - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
@@ -1453,10 +1454,11 @@ class SASsession():
                     has problems with 
 
 
-        For the CSV and DISK methods, the following 2 parameters are also available
+        For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream \
+        directly into read_csv() with no disk I/O and have much improved performance. MEM, the default, is now as fast as the others.
 
-        :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
-        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        :param tempfile: [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
+        :param tempkeep: [deprecated] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
         For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method
 
@@ -1504,8 +1506,9 @@ class SASsession():
                              }
 
 
-        :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
-        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        :param tempfile: [deprecated except for Local IOM] [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
+        :param tempkeep: [deprecated except for Local IOM] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+
         :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames)
 
             - delimiter is a single character
@@ -1557,8 +1560,8 @@ class SASsession():
                               'encoding' : 'latin9'
                              }
 
-        :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
-        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        :param tempfile: [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
+        :param tempkeep: [deprecated] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
         :param rowsep: the row seperator character to use; defaults to hex(1)
         :param colsep: the column seperator character to use; defaults to hex(2)
@@ -1604,7 +1607,8 @@ class SASsession():
                               'encoding' : 'latin9'
                              }
 
-        :param method: defaults to MEMORY:
+        :param method: defaults to MEMORY; As of V3.7.0 all 3 of these now stream directly into read_csv() with no disk I/O\
+                       and have much improved performance. MEM, the default, is now as fast as the others.
 
            - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
@@ -1613,10 +1617,11 @@ class SASsession():
                     has problems with 
 
 
-        For the CSV and DISK methods, the following 2 parameters are also available
+        For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream \
+        directly into read_csv() with no disk I/O and have much improved performance. MEM, the default, is now as fast as the others.
 
-        :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
-        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        :param tempfile: [deprecated except for Local IOM] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
+        :param tempkeep: [deprecated except for Local IOM] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
         For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method
 

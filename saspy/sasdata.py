@@ -1177,10 +1177,11 @@ class SASdata:
                     has problems with 
 
 
-        For the CSV and DISK methods, the following 2 parameters are also available
+        For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream \
+        directly into read_csv() with no disk I/O and have much improved performance. MEM, the default, is now as fast as the others.
 
-        :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
-        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        :param tempfile: [deprecated except for Local IOM] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
+        :param tempkeep: [deprecated except for Local IOM] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
         For the MEMORY and DISK methods the following 4 parameters are also available, depending upon access method
 
@@ -1213,8 +1214,8 @@ class SASdata:
         """
         This is an alias for 'to_df' specifying method='CSV'.
 
-        :param tempfile: [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
-        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        :param tempfile: [deprecated except for Local IOM] [optional] an OS path for a file to use for the local CSV file; default it a temporary file that's cleaned up
+        :param tempkeep: [deprecated except for Local IOM] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param opts: a dictionary containing any of the following Proc Export options(delimiter, putnames)
 
             - delimiter is a single character
@@ -1242,8 +1243,8 @@ class SASdata:
         """
         This is an alias for 'to_df' specifying method='DISK'.
 
-        :param tempfile: [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
-        :param tempkeep: if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
+        :param tempfile: [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
+        :param tempkeep: [deprecated] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param rowsep: the row seperator character to use; defaults to hex(1)
         :param colsep: the column seperator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
