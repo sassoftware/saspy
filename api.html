@@ -2048,7 +2048,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>method</strong> &#8211; <p>defaults to MEMORY:</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>method</strong> &#8211; <p>defaults to MEMORY; As of V3.7.0 all 3 of these now stream directly into read_csv() with no disk I/O                       and have much improved performance. MEM, the default, is now as fast as the others.</p>
 <ul class="simple">
 <li>MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory</li>
 <li>CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data</li>
