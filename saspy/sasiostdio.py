@@ -60,6 +60,7 @@ class SASconfigSTDIO:
       self.metapw   = cfg.get('metapw', '')
       self.lrecl    = cfg.get('lrecl', None)
       self.iomc     = cfg.get('iomc', '')
+      localhost     = cfg.get('localhost', None)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -139,6 +140,13 @@ class SASconfigSTDIO:
          else:
             self.port = inport
 
+      inloc = kwargs.get('localhost', None)
+      if inloc is not None:
+         if lock and localhost is not None:
+            print("Parameter 'localhost' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            localhost = inloc
+
       inhost = kwargs.get('host', '')
       if len(inhost) > 0:
          if lock and len(self.host):
@@ -174,19 +182,22 @@ class SASconfigSTDIO:
 
       self._prompt = session._sb.sascfg._prompt
 
-      self.hostip = socks.gethostname()
-      try:
-         x  = subprocess.Popen(('nslookup', self.hostip), stdout=subprocess.PIPE)
-         z  = x.stdout.read()
-         ip = z.rpartition(b'Address:')[2].strip().decode()
+      if localhost is not None:
+         self.hostip = localhost
+      else:
+         self.hostip = socks.gethostname()
          try:
-            socks.gethostbyaddr(ip)
-            self.hostip = ip
+            x  = subprocess.Popen(('nslookup', self.hostip), stdout=subprocess.PIPE)
+            z  = x.stdout.read()
+            ip = z.rpartition(b'Address:')[2].strip().decode()
+            try:
+               socks.gethostbyaddr(ip)
+               self.hostip = ip
+            except:
+               pass
+            x.terminate()
          except:
             pass
-         x.terminate()
-      except:
-         pass
 
       return
 
