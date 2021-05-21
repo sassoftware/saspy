@@ -13,11 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-from __future__ import print_function
 from IPython.display import HTML
 import IPython.core.magic as ipym
 import re
 from saspy.SASLogLexer import SASLogStyle, SASLogLexer
+from saspy.sasbase import SASsession
 from pygments.formatters import HtmlFormatter
 from pygments import highlight
 
@@ -31,10 +31,9 @@ class SASMagic(ipym.Magics):
 
     def __init__(self, shell):
         super(SASMagic, self).__init__(shell)
-        import saspy as saspy
         self.lst_len = -99  # initialize the length to a negative number to trigger function
-        self.mva = saspy.SASsession(kernel=None)
-        if self.lst_len < 0:
+        self.mva = None
+        if self.lst_len < 0 and isinstance(self.mva, SASsession) :
             self._get_lst_len()
 
     @ipym.cell_magic
@@ -54,22 +53,54 @@ class SASMagic(ipym.Magics):
             run;
         """
         
+        mva = self.mva
+        if len(line):  # session supplied
+            names = line.split('.')
+            _mva = None
+            for i,name in enumerate(names):
+                if i==0:
+                    if name in self.shell.user_ns:
+                        _mva = self.shell.user_ns[name]
+                    else:
+                        break
+                else:
+                    try:
+                        _mva = getattr(_mva, name)
+                    except Exception as e:
+                        print(e)
+                        break
+
+            if isinstance(_mva, SASsession):
+                mva = _mva
+            else:
+                return 'Invalid SAS Session object supplied'
+        elif len(line) and not line in self.shell.user_ns:  # string supplied but not a session
+            return 'Invalid SAS Session object supplied'
+        else:  # no string should default to unnamed session
+            try:
+                if mva is None:
+                    mva = SASsession()
+                    self.mva = mva  # save the session for reuse
+                else:
+                    mva = self.mva
+            except:
+                return "this shouldn't happen"
         saveOpts="proc optsave out=__jupyterSASKernel__; run;"
         restoreOpts="proc optload data=__jupyterSASKernel__; run;"
         if len(line)>0:  # Save current SAS Options
-            self.mva.submit(saveOpts)
+            mva.submit(saveOpts)
 
         if line.lower()=='smalllog':
-            self.mva.submit("options nosource nonotes;")
+            mva.submit("options nosource nonotes;")
 
         elif line is not None and line.startswith('option'):
-            self.mva.submit(line + ';')
+            mva.submit(line + ';')
 
-        res = self.mva.submit(cell)
-        dis = self._which_display(res['LOG'], res['LST'])
+        res = mva.submit(cell)
+        dis = self._which_display(mva, res['LOG'], res['LST'])
 
         if len(line)>0:  # Restore SAS options 
-            self.mva.submit(restoreOpts)
+            mva.submit(restoreOpts)
 
         return dis
 
@@ -93,7 +124,7 @@ class SASMagic(ipym.Magics):
 
         """
         res = self.mva.submit("proc iml; " + cell + " quit;")
-        dis = self._which_display(res['LOG'], res['LST'])
+        dis = self._which_display(self.mva, res['LOG'], res['LST'])
         return dis
 
     @ipym.cell_magic
@@ -127,7 +158,7 @@ class SASMagic(ipym.Magics):
 
         """
         res = self.mva.submit("proc optmodel; " + cell + " quit;")
-        dis = self._which_display(res['LOG'], res['LST'])
+        dis = self._which_display(self.mva, res['LOG'], res['LST'])
         return dis
 
     def _get_lst_len(self):
@@ -139,7 +170,7 @@ class SASMagic(ipym.Magics):
         return
 
     @staticmethod
-    def _which_display(log, output):
+    def _which_display(mva, log, output):
         lst_len = 30762
         lines = re.split(r'[\n]\s*', log)
         i = 0
@@ -147,7 +178,7 @@ class SASMagic(ipym.Magics):
         for line in lines:
             i += 1
             e = []
-            if line.startswith('ERROR'):
+            if line[mva.logoffset:].startswith('ERROR'):
                 e = lines[(max(i - 15, 0)):(min(i + 16, len(lines)))]
             elog = elog + e
         if len(elog) == 0 and len(output) > lst_len:   # no error and LST output

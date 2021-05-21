@@ -15,17 +15,15 @@
 #  limitations under the License.
 #
 
+exec(open('./saspy/version.py').read())
 
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
-from saspy import __version__
-
 with open('README.md') as f:
     readme = f.read()
-
 
 setup(name='saspy',
       version = __version__,
@@ -36,8 +34,9 @@ setup(name='saspy',
       url = 'https://github.com/sassoftware/saspy',
       packages = ['saspy'],
       cmdclass = {},
-      package_data = {'': ['*.js', '*.md', '*.yaml', '*.css', '*.rst'], 'saspy': ['*.sas', 'java/*.*', 'java/pyioim/*.*']},
-      install_requires = ['pygments', 'ipython>=4.0.0', 'pre-commit'],
+      package_data = {'': ['*.js', '*.md', '*.yaml', '*.css', '*.rst'], 'saspy': ['*.sas', 'java/*.*', 'java/pyiom/*.*', 'java/iomclient/*.*', 'java/thirdparty/*.*']},
+      install_requires = [],
+      extras_require = {'iomcom': ['pypiwin32'], 'colorLOG': ['pygments']},
       classifiers = [
         'Programming Language :: Python :: 3',
         "Programming Language :: Python :: 3.4",

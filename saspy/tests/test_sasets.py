@@ -1,30 +1,22 @@
 import unittest
 
 import saspy
+from saspy.tests.util import Utilities
 
 
 class TestSASets(unittest.TestCase):
-    def setUp(self):
-        # Use the first entry in the configuration list
-        self.sas = saspy.SASsession() #cfgname=saspy.SAScfg.SAS_config_names[0])
-        self.assertIsInstance(self.sas, saspy.SASsession, msg="sas = saspy.SASsession(...) failed")
-        procNeeded=['arima']
-        if not self.procFound(procNeeded):
-            self.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
+    @classmethod
+    def setUpClass(cls):
+        cls.sas = saspy.SASsession()
+        util = Utilities()
+        procNeeded = ['arima', 'timeseries', 'ucm', 'esm', 'timeid', 'timedata']
+        if not util.procFound(procNeeded):
+            cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
-    def tearDown(self):
-        if self.sas:
-            self.sas._endsas()
-    
-    def procFound(self, plist: list) -> bool:
-        assert isinstance(plist, list)
-        for proc in plist:
-            res = self.sas.submit("proc %s; run;" % proc)
-            log = res['LOG'].splitlines()
-            for line in log:
-                if line=='ERROR: Procedure %s not found.' % proc.upper():
-                    return False
-        return True
+    @classmethod
+    def tearDownClass(cls):
+        if cls.sas:
+            cls.sas._endsas()
 
     def test_smokeTimeseries(self):
         # Basic model returns objects
@@ -67,7 +59,7 @@ class TestSASets(unittest.TestCase):
                 run;
                 """)
         air = self.sas.sasdata('seriesG', 'work')
-        b = ets.ucm(data=air, id = 'date interval=month', model='logair',
+        b = ets.ucm(data=air, id='date interval=month', model='logair',
                     irregular='',
                     level='',
                     slope='',
@@ -79,11 +71,41 @@ class TestSASets(unittest.TestCase):
              'FILTEREDALLEXCEPTIRREGPLOT', 'FILTEREDALLEXCEPTIRREGVARPLOT', 'FILTEREDSEASONPLOT', 'FITSTATISTICS',
              'FITSUMMARY', 'FORECASTS', 'FORECASTSONLYPLOT', 'FORECASTSPAN', 'FORECASTSPLOT', 'INITIALPARAMETERS',
              'LOG', 'MODELPLOT', 'OUTLIERSUMMARY', 'PANELRESIDUALPLOT', 'PARAMETERESTIMATES', 'RESIDUALLOESSPLOT',
-             'SEASONDESCRIPTION', 'SMOOTHEDALLEXCEPTIRREG', 'SMOOTHEDALLEXCEPTIRREGPLOT', 'SMOOTHEDALLEXCEPTIRREGVARPLOT',
+             'SEASONDESCRIPTION', 'SMOOTHEDALLEXCEPTIRREG', 'SMOOTHEDALLEXCEPTIRREGPLOT',
+             'SMOOTHEDALLEXCEPTIRREGVARPLOT',
              'SMOOTHEDSEASON', 'SMOOTHEDSEASONPLOT']
-        self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
-                             str(a), str(b)))
+        self.assertTrue(set(a) < set(b.__dir__()),
+                        msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(str(a),
+                                                                                                             str(b)))
+
+    def test_smokeUCM2(self):
+        # Basic model returns objects
+        ets = self.sas.sasets()
+        self.sas.submit("""
+                data work.seriesG;
+                    set sashelp.air;
+                    logair = log( air );
+                run;
+                """)
+        air = self.sas.sasdata('seriesG', 'work')
+        b = ets.ucm(data=air, id='date interval=month', model='logair',
+                    irregular='',
+                    level=True,
+                    slope=True,
+                    season='length=12 type=trig print=smooth',
+                    estimate='',
+                    forecast='lead=24 print=decomp')
+        a = ['ANNUALSEASONPLOT', 'COMPONENTSIGNIFICANCE', 'CONVERGENCESTATUS', 'CUSUMPLOT', 'CUSUMSQPLOT',
+             'DATASET', 'ERRORPLOT', 'ERRORWHITENOISELOGPROBPLOT', 'ESTIMATIONSPAN',
+             'FILTEREDALLEXCEPTIRREGPLOT', 'FILTEREDALLEXCEPTIRREGVARPLOT', 'FILTEREDSEASONPLOT', 'FITSTATISTICS',
+             'FITSUMMARY', 'FORECASTS', 'FORECASTSONLYPLOT', 'FORECASTSPAN', 'FORECASTSPLOT', 'INITIALPARAMETERS',
+             'LOG', 'MODELPLOT', 'OUTLIERSUMMARY', 'PANELRESIDUALPLOT', 'PARAMETERESTIMATES', 'RESIDUALLOESSPLOT',
+             'SEASONDESCRIPTION', 'SMOOTHEDALLEXCEPTIRREG', 'SMOOTHEDALLEXCEPTIRREGPLOT',
+             'SMOOTHEDALLEXCEPTIRREGVARPLOT',
+             'SMOOTHEDSEASON', 'SMOOTHEDSEASONPLOT']
+        self.assertTrue(set(a) < set(b.__dir__()),
+                        msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(str(a),
+                                                                                                             str(b)))
 
     def test_UCM2(self):
         # Basic model returns objects
@@ -95,7 +117,7 @@ class TestSASets(unittest.TestCase):
                 run;
                 """)
         air = self.sas.sasdata('seriesG', 'work')
-        b = ets.ucm(data=air, id = 'date interval=month', model='logair',
+        b = ets.ucm(data=air, id='date interval=month', model='logair',
                     irregular=True,
                     level=True,
                     slope=True,
@@ -107,11 +129,12 @@ class TestSASets(unittest.TestCase):
              'FILTEREDALLEXCEPTIRREGPLOT', 'FILTEREDALLEXCEPTIRREGVARPLOT', 'FILTEREDSEASONPLOT', 'FITSTATISTICS',
              'FITSUMMARY', 'FORECASTS', 'FORECASTSONLYPLOT', 'FORECASTSPAN', 'FORECASTSPLOT', 'INITIALPARAMETERS',
              'LOG', 'MODELPLOT', 'OUTLIERSUMMARY', 'PANELRESIDUALPLOT', 'PARAMETERESTIMATES', 'RESIDUALLOESSPLOT',
-             'SEASONDESCRIPTION', 'SMOOTHEDALLEXCEPTIRREG', 'SMOOTHEDALLEXCEPTIRREGPLOT', 'SMOOTHEDALLEXCEPTIRREGVARPLOT',
+             'SEASONDESCRIPTION', 'SMOOTHEDALLEXCEPTIRREG', 'SMOOTHEDALLEXCEPTIRREGPLOT',
+             'SMOOTHEDALLEXCEPTIRREGVARPLOT',
              'SMOOTHEDSEASON', 'SMOOTHEDSEASONPLOT']
-        self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u"model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
-                             str(a), str(b)))
+        self.assertTrue(set(a) < set(b.__dir__()),
+                        msg=u"model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                            str(a), str(b)))
 
     def test_smokeESM(self):
         # Basic model returns objects
@@ -126,7 +149,8 @@ class TestSASets(unittest.TestCase):
         b = ets.esm(data=air, id='date interval=daily', forecast='_numeric_')
         a = ['DATASET', 'ERRORACFNORMPLOT', 'ERRORACFPLOT', 'ERRORHISTOGRAM', 'ERRORIACFNORMPLOT', 'ERRORIACFPLOT',
              'ERRORPACFNORMPLOT', 'ERRORPACFPLOT', 'ERRORPERIODOGRAM', 'ERRORPLOT', 'ERRORSPECTRALDENSITYPLOT',
-             'ERRORWHITENOISELOGPROBPLOT', 'ERRORWHITENOISEPROBPLOT', 'FORECASTSONLYPLOT', 'FORECASTSPLOT', 'LEVELSTATEPLOT',
+             'ERRORWHITENOISELOGPROBPLOT', 'ERRORWHITENOISEPROBPLOT', 'FORECASTSONLYPLOT', 'FORECASTSPLOT',
+             'LEVELSTATEPLOT',
              'LOG', 'MODELFORECASTSPLOT', 'MODELPLOT', 'VARIABLE']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
@@ -212,15 +236,16 @@ class TestSASets(unittest.TestCase):
         d = self.sas.sasdata('air', 'sashelp')
         b = ets.arima(data=d, by='novar', identify='var=air(1,12)', crosscorr='date', decomp='air')
         a = ets.arima(data=d, by='novar', identify='var=air(1,12)')
-        self.assertEqual(a.__dir__(), b.__dir__(), msg=u"Extra Statements not being ignored expected:{0:s}  returned:{1:s}".format(
-            str(a), str(b)))
+        self.assertEqual(a.__dir__(), b.__dir__(),
+                         msg=u"Extra Statements not being ignored expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
 
     def test_outputDset(self):
         ets = self.sas.sasets()
         air = self.sas.sasdata('air', 'sashelp')
         outAir = self.sas.sasdata('air')
         ets.arima(data=air, identify='var=air(1,12)', out=outAir)
-        self.assertIsInstance(outAir, saspy.SASdata, msg="out= dataset not created properly")
+        self.assertIsInstance(outAir, saspy.sasdata.SASdata, msg="out= dataset not created properly")
 
     def test_overridePlot(self):
         # Test that user can override plot options
@@ -229,5 +254,6 @@ class TestSASets(unittest.TestCase):
         outAir = self.sas.sasdata('air')
         b = ets.arima(data=air, identify='var=air(1,12)', out=outAir, procopts='plots=none')
         a = ['CHISQAUTO', 'DESCSTATS', 'LOG']
-        self.assertEqual(sorted(a), sorted(b.__dir__()), msg=u"plots overridden and disabled expected:{0:s}  returned:{1:s}".format(
-            str(a), str(b)))
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u"plots overridden and disabled expected:{0:s}  returned:{1:s}".format(
+                             str(a), str(b)))
