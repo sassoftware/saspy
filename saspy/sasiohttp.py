@@ -261,7 +261,7 @@ class SASconfigHTTP:
                pw = inpw
 
          code_pw = ''
-         if len(user) == 0 and authcode is None:
+         if len(user) == 0:
             msg  = "To connect to Viya you need either an authcode or a userid/pw. Neither were provided.\n"
             msg += "Please enter which one you want to enter next. Type one of these now: [default=authcode | userid]: " 
             while code_pw.lower() not in ['userid','authcode']:
@@ -272,30 +272,30 @@ class SASconfigHTTP:
                   self._token = None
                   raise RuntimeError("Neither authcode nor userid provided.") 
          
-            if code_pw.lower() == 'authcode':
-               purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code".format(client_id)
-               if len(self.url) > 0:
-                  purl = self.url+purl
-               else:
-                  purl = "http{}://{}:{}{}".format('s' if self.ssl else '', self.ip, self.port, purl)
-               msg  = "The default url to authenticate with would be {}\n".format(purl)
-               msg += "Please enter authcode: "
-               authcode = self._prompt(msg)
-               if authcode is None:
-                  self._token = None
-                  raise RuntimeError("No authcode provided.") 
+         if code_pw.lower() == 'authcode':
+            purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code".format(client_id)
+            if len(self.url) > 0:
+               purl = self.url+purl
             else:
-               while len(user) == 0:
-                  user = self._prompt("Please enter userid: ")
-                  if user is None:
-                     self._token = None
-                     raise RuntimeError("No userid provided.") 
-         
-               while len(pw) == 0:
-                  pw = self._prompt("Please enter password: ", pw = True)
-                  if pw is None:
-                     self._token = None
-                     raise RuntimeError("No password provided.") 
+               purl = "http{}://{}:{}{}".format('s' if self.ssl else '', self.ip, self.port, purl)
+            msg  = "The default url to authenticate with would be {}\n".format(purl)
+            msg += "Please enter authcode: "
+            authcode = self._prompt(msg)
+            if authcode is None:
+               self._token = None
+               raise RuntimeError("No authcode provided.") 
+         else:
+            while len(user) == 0:
+               user = self._prompt("Please enter userid: ")
+               if user is None:
+                  self._token = None
+                  raise RuntimeError("No userid provided.") 
+      
+            while len(pw) == 0:
+               pw = self._prompt("Please enter password: ", pw = True)
+               if pw is None:
+                  self._token = None
+                  raise RuntimeError("No password provided.")
 
       if self.ssl:
          if self.verify:
