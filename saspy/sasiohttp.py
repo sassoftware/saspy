@@ -263,9 +263,11 @@ class SASconfigHTTP:
          code_pw = ''
          if len(user) == 0:
             msg  = "To connect to Viya you need either an authcode or a userid/pw. Neither were provided.\n"
-            msg += "Please enter which one you want to enter next. Type one of these now: [authcode | userid]: " 
+            msg += "Please enter which one you want to enter next. Type one of these now: [default=authcode | userid]: " 
             while code_pw.lower() not in ['userid','authcode']:
                code_pw = self._prompt(msg)
+               if code_pw == '':
+                  code_pw = 'authcode'
                if code_pw is None:
                   self._token = None
                   raise RuntimeError("Neither authcode nor userid provided.") 
@@ -288,12 +290,12 @@ class SASconfigHTTP:
                if user is None:
                   self._token = None
                   raise RuntimeError("No userid provided.") 
-        
+      
             while len(pw) == 0:
                pw = self._prompt("Please enter password: ", pw = True)
                if pw is None:
                   self._token = None
-                  raise RuntimeError("No password provided.") 
+                  raise RuntimeError("No password provided.")
 
       if self.ssl:
          if self.verify:
