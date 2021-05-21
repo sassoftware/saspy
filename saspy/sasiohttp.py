@@ -271,7 +271,7 @@ class SASconfigHTTP:
                if code_pw is None:
                   self._token = None
                   raise RuntimeError("Neither authcode nor userid provided.") 
-         
+
          if code_pw.lower() == 'authcode':
             purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code".format(client_id)
             if len(self.url) > 0:
