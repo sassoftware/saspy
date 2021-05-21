@@ -37,7 +37,7 @@
 #
 
 import os
-from typing import Union
+import typing
 # from pdb import set_trace as bp
 import logging
 
@@ -517,7 +517,7 @@ class SASsession():
                     "Table " + sd.libref + '.' + sd.table + " does not exist. This SASdata object will not be useful until the data set is created.")
         return sd
 
-    def saslib(self, libref: str, engine: str = ' ', path: Union[str, list] = '',
+    def saslib(self, libref: str, engine: str = ' ', path: typing.Union[str, list] = '',
                options: str = ' ', prompt: dict = []) -> str:
         """
 
