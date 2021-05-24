@@ -50,6 +50,7 @@ import importlib
 import re
 import shutil
 import tempfile
+import typing
 
 from saspy.sasiostdio    import SASsessionSTDIO
 from saspy.sasioiom      import SASsessionIOM
@@ -1002,21 +1003,23 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return sd
 
-    def saslib(self, libref: str, engine: str = ' ', path: str = '',
+    def saslib(self, libref: str, engine: str = ' ', path: typing.Union[str, list] = '',
                options: str = ' ', prompt: dict = None) -> str:
         """
 
         :param libref:  the libref to be assigned
         :param engine:  the engine name used to access the SAS Library (engine defaults to BASE, per SAS)
-        :param path:    path to the library (for engines that take a path parameter)
+        :param path:    path or list of paths to the library (for engines that take a path parameter)
         :param options: other engine or engine supervisor options
         :return: SAS log
         """
         prompt = prompt if prompt is not None else {}
 
         code = "libname " + libref + " " + engine + " "
-        if len(path) > 0:
+        if type(path) == str and len(path) > 0:
             code += " '" + path + "' "
+        if type(path) == list and len(path) > 0:
+            code += "(" + ','.join("'" + p + "'" for p in path) + ")"
         code += options + ";"
 
         if self.nosub:
