@@ -30,7 +30,7 @@
 # IO modules can be seamlessly plugged in, if needed, in the future.
 #
 # The expected use is to simply import this package and establish a SAS session, then use the methods:
-#
+#~
 # import saspy
 # sas = saspy.SASsession()
 # sas.[have_at_it]()
@@ -50,6 +50,7 @@ import importlib
 import re
 import shutil
 import tempfile
+import typing
 
 from saspy.sasiostdio    import SASsessionSTDIO
 from saspy.sasioiom      import SASsessionIOM
@@ -1002,7 +1003,7 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return sd
 
-    def saslib(self, libref: str, engine: str = ' ', path: str = '',
+    def saslib(self, libref: str, engine: str = ' ', path: typing.Union[str, list] = '',
                options: str = ' ', prompt: dict = None) -> str:
         """
 
@@ -1015,8 +1016,10 @@ class SASsession():
         prompt = prompt if prompt is not None else {}
 
         code = "libname " + libref + " " + engine + " "
-        if len(path) > 0:
+        if type(path) == str and len(path) > 0:
             code += " '" + path + "' "
+        if type(path) == list and len(path) > 0:
+            code += "(" + ','.join("'" + p + "'" for p in path) + ")"
         code += options + ";"
 
         if self.nosub:
