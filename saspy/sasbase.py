@@ -36,11 +36,11 @@
 # sas.[have_at_it]()
 #
 
-#so the doc will generate for df methods
+# so the doc will generate for df methods
 try:
-   import pandas
+    import pandas
 except Exception as e:
-   pass
+    pass
 
 import os
 import sys
@@ -52,61 +52,72 @@ import shutil
 import tempfile
 import typing
 
-from saspy.sasiostdio    import SASsessionSTDIO
-from saspy.sasioiom      import SASsessionIOM
-from saspy.sasiohttp     import SASsessionHTTP
-from saspy.sasiocom      import SASSessionCOM
+from saspy.sasiostdio import SASsessionSTDIO
+from saspy.sasioiom import SASsessionIOM
+from saspy.sasiohttp import SASsessionHTTP
+from saspy.sasiocom import SASSessionCOM
 
-from saspy.sasdata       import SASdata
-from saspy.sasml         import SASml
-from saspy.sasets        import SASets
-from saspy.sasqc         import SASqc
-from saspy.sasstat       import SASstat
-from saspy.sasutil       import SASutil
-from saspy.sasViyaML     import SASViyaML
+from saspy.sasdata import SASdata
+from saspy.sasml import SASml
+from saspy.sasets import SASets
+from saspy.sasqc import SASqc
+from saspy.sasstat import SASstat
+from saspy.sasutil import SASutil
+from saspy.sasViyaML import SASViyaML
 
 from saspy.sasexceptions import (SASIONotSupportedError, SASConfigNotValidError,
-                                SASConfigNotFoundError)
+                                 SASConfigNotFoundError)
+
 _cfgfile_cnt = 0
 
 try:
-   from IPython.display import HTML
-   from IPython.display import display as DISPLAY
+    from IPython.display import HTML
+    from IPython.display import display as DISPLAY
 except ImportError:
-   def DISPLAY(x): print(x)
-   def HTML(x):    return "IPython didn't import. Can't render HTML"
+    def DISPLAY(x):
+        print(x)
+
+
+    def HTML(x):
+        return "IPython didn't import. Can't render HTML"
+
 
 def zepDISPLAY(x):
-   print(x)
+    print(x)
+
 
 def zepHTML(x):
-   return("%html "+x)
+    return ("%html " + x)
+
 
 def dbDISPLAY(x):
-   displayHTML(x)
+    displayHTML(x)
+
 
 def dbHTML(x):
-   return(x)
+    return (x)
+
 
 def list_configs() -> list:
-   cfg   = []
-   sp    = []
-   sp[:] = sys.path
-   sp[0] = os.path.abspath(sp[0])
-   sp.insert(1, os.path.expanduser('~/.config/saspy'))
-   sp.insert(0, __file__.rsplit(os.sep+'sasbase.py')[0])
+    cfg = []
+    sp = []
+    sp[:] = sys.path
+    sp[0] = os.path.abspath(sp[0])
+    sp.insert(1, os.path.expanduser('~/.config/saspy'))
+    sp.insert(0, __file__.rsplit(os.sep + 'sasbase.py')[0])
 
-   for dir in sp:
-      f1 = dir+os.sep+'sascfg_personal.py'
-      if os.path.isfile(f1):
-         cfg.append(f1)
+    for dir in sp:
+        f1 = dir + os.sep + 'sascfg_personal.py'
+        if os.path.isfile(f1):
+            cfg.append(f1)
 
-   if len(cfg) == 0:
-      f1 =__file__.rsplit('sasbase.py')[0]+'sascfg.py'
-      if os.path.isfile(f1):
-         cfg.append(f1)
+    if len(cfg) == 0:
+        f1 = __file__.rsplit('sasbase.py')[0] + 'sascfg.py'
+        if os.path.isfile(f1):
+            cfg.append(f1)
 
-   return cfg
+    return cfg
+
 
 class SASconfig(object):
     """
@@ -116,16 +127,16 @@ class SASconfig(object):
 
     def __init__(self, **kwargs):
         self._kernel = kwargs.get('kernel', None)
-        self.valid   = True
-        self.mode    = ''
-        self.origin  = ''
-        configs      = []
+        self.valid = True
+        self.mode = ''
+        self.origin = ''
+        configs = []
 
         try:
-           import pandas
-           self.pandas  = None
+            import pandas
+            self.pandas = None
         except Exception as e:
-           self.pandas  = e
+            self.pandas = e
 
         SAScfg = self._find_config(cfg_override=kwargs.get('cfgfile'))
         self.SAScfg = SAScfg
@@ -163,43 +174,43 @@ class SASconfig(object):
                 "The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: " +
                 str(configs) + " ")
             if cfgname is None:
-                raise RuntimeError("No SAS Config name provided.") 
+                raise RuntimeError("No SAS Config name provided.")
 
         self.name = cfgname
         cfg = getattr(SAScfg, cfgname)
 
-        ip            = cfg.get('ip')
-        url           = cfg.get('url')
-        ssh           = cfg.get('ssh')
-        path          = cfg.get('saspath')
-        java          = cfg.get('java')
-        provider      = cfg.get('provider')
-        self.display  = cfg.get('display',  '')
-        self.results  = cfg.get('results')
+        ip = cfg.get('ip')
+        url = cfg.get('url')
+        ssh = cfg.get('ssh')
+        path = cfg.get('saspath')
+        java = cfg.get('java')
+        provider = cfg.get('provider')
+        self.display = cfg.get('display', '')
+        self.results = cfg.get('results')
         self.autoexec = cfg.get('autoexec')
 
         indisplay = kwargs.get('display', '')
         if len(indisplay) > 0:
-           if lock and len(self.display):
-              print("Parameter 'display' passed to SAS_session was ignored due to configuration restriction.")
-           else:
-              self.display = indisplay
+            if lock and len(self.display):
+                print("Parameter 'display' passed to SAS_session was ignored due to configuration restriction.")
+            else:
+                self.display = indisplay
         if self.display == '':
-           self.display = 'jupyter'
+            self.display = 'jupyter'
         else:
-           if self.display.lower() not in ['zeppelin', 'jupyter', 'databricks']:
-              print("Invalid value specified for 'display'. Using the default of 'jupyter'")
-              self.display = 'jupyter'
+            if self.display.lower() not in ['zeppelin', 'jupyter', 'databricks']:
+                print("Invalid value specified for 'display'. Using the default of 'jupyter'")
+                self.display = 'jupyter'
 
-        if   self.display.lower() == 'zeppelin':
-           self.DISPLAY = zepDISPLAY
-           self.HTML    = zepHTML
+        if self.display.lower() == 'zeppelin':
+            self.DISPLAY = zepDISPLAY
+            self.HTML = zepHTML
         elif self.display.lower() == 'databricks':
-           self.DISPLAY = dbDISPLAY
-           self.HTML    = dbHTML
+            self.DISPLAY = dbDISPLAY
+            self.HTML = dbHTML
         else:
-           self.DISPLAY = DISPLAY
-           self.HTML    = HTML
+            self.DISPLAY = DISPLAY
+            self.HTML = HTML
 
         inautoexec = kwargs.get('autoexec', None)
         if inautoexec:
@@ -208,47 +219,47 @@ class SASconfig(object):
             else:
                 self.autoexec = inautoexec
 
-        inurl = kwargs.get('url', None)             
+        inurl = kwargs.get('url', None)
         if inurl:
-           if lock and url is not None:
-              print("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
-           else:
-              url = inurl   
+            if lock and url is not None:
+                print("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
+            else:
+                url = inurl
 
-        inip = kwargs.get('ip', None)             
+        inip = kwargs.get('ip', None)
         if inip:
-           if lock and ip is not None:
-              print("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
-           else:
-              ip = inip   
+            if lock and ip is not None:
+                print("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
+            else:
+                ip = inip
 
         inssh = kwargs.get('ssh', None)
         if inssh:
-           if lock and ssh is not None:
-              print("Parameter 'ssh' passed to SAS_session was ignored due to configuration restriction.")
-           else:
-              ssh = inssh
+            if lock and ssh is not None:
+                print("Parameter 'ssh' passed to SAS_session was ignored due to configuration restriction.")
+            else:
+                ssh = inssh
 
         insaspath = kwargs.get('saspath', None)
         if insaspath:
-           if lock and path is not None:
-              print("Parameter 'saspath' passed to SAS_session was ignored due to configuration restriction.")
-           else:
-              path = insaspath
+            if lock and path is not None:
+                print("Parameter 'saspath' passed to SAS_session was ignored due to configuration restriction.")
+            else:
+                path = insaspath
 
         injava = kwargs.get('java', None)
         if injava:
-           if lock and java is not None:
-              print("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
-           else:
-              java = injava
+            if lock and java is not None:
+                print("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
+            else:
+                java = injava
 
         inprov = kwargs.get('provider', None)
         if inprov:
-           if lock and provider is not None:
-              print("Parameter 'provider' passed to SAS_session was ignored due to configuration restriction.")
-           else:
-              provider = inprov
+            if lock and provider is not None:
+                print("Parameter 'provider' passed to SAS_session was ignored due to configuration restriction.")
+            else:
+                provider = inprov
 
         if java is not None:
             self.mode = 'IOM'
@@ -265,7 +276,7 @@ class SASconfig(object):
         else:
             raise SASConfigNotValidError(cfgname)
 
-    def _find_config(self, cfg_override: str=None):
+    def _find_config(self, cfg_override: str = None):
         """
         Locate the user's preferred configuration file if possible, falling
         back through a hierarchy of configuration file locations. The heirarchy
@@ -301,13 +312,13 @@ class SASconfig(object):
 
             global _cfgfile_cnt
             _cfgfile_cnt += 1
-            tempdir       = tempfile.TemporaryDirectory()
-            tempname      = "sascfg"+'%03d' % _cfgfile_cnt
-            
-            shutil.copyfile(cfg_expand, os.path.join(tempdir.name, tempname+'.py'))
+            tempdir = tempfile.TemporaryDirectory()
+            tempname = "sascfg" + '%03d' % _cfgfile_cnt
+
+            shutil.copyfile(cfg_expand, os.path.join(tempdir.name, tempname + '.py'))
             sys.path.append(tempdir.name)
 
-            #import sascfgfile as SAScfg
+            # import sascfgfile as SAScfg
             SAScfg = importlib.import_module(tempname)
 
             sys.path.remove(tempdir.name)
@@ -320,14 +331,14 @@ class SASconfig(object):
             cfg_path = os.path.expanduser(self.DOTCONFIG)
             sys.path.insert(1, cfg_path)
 
-            mod_path = __file__.replace(os.sep+'sasbase.py', '')
+            mod_path = __file__.replace(os.sep + 'sasbase.py', '')
             sys.path.insert(0, mod_path)
 
             try:
                 # Option 2, 3, 4
                 import sascfg_personal as SAScfg
             except ImportError:
-                # Option 5 
+                # Option 5
                 import sascfg as SAScfg
             finally:
                 sys.path.remove(cfg_path)
@@ -338,25 +349,26 @@ class SASconfig(object):
 
     def _prompt(self, prompt, pw=False):
         if self.prompt:
-           if self._kernel is None:
-               if not pw:
-                   try:
-                       return input(prompt)
-                   except KeyboardInterrupt:
-                       return None
-               else:
-                   try:
-                       return getpass.getpass(prompt)
-                   except KeyboardInterrupt:
-                       return None
-           else:
-               try:
-                   return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
-                                                      password=pw)
-               except KeyboardInterrupt:
-                   return None
+            if self._kernel is None:
+                if not pw:
+                    try:
+                        return input(prompt)
+                    except KeyboardInterrupt:
+                        return None
+                else:
+                    try:
+                        return getpass.getpass(prompt)
+                    except KeyboardInterrupt:
+                        return None
+            else:
+                try:
+                    return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
+                                                       password=pw)
+                except KeyboardInterrupt:
+                    return None
         else:
-           return None 
+            return None
+
 
 class SASsession():
     """
@@ -419,13 +431,13 @@ class SASsession():
     :param javaparms: for specifying java command line options if necessary
     :param logbufsz: see issue 266 for details on this. not needed normally
     :param reconuri: the uri (token) for connecting back to the workspace server after you've disconnected. \
-                     not needed unless connecting back from a different Python process.  
+                     not needed unless connecting back from a different Python process.
 
     **HTTP**
 
     and for the HTTP Access Method to to connect to SAS in Viya
 
-    :param url: The URL to Viya, of the form: http[s]://host.identifier[:port] 
+    :param url: The URL to Viya, of the form: http[s]://host.identifier[:port]
     :param verify: Flag to have http try to verify the certificate or not
     :param client_id: [for SSO Viya configurations] client_id to use for authenticating to Viya (defaults to 'SASPy')
     :param client_secret: [for SSO Viya configurations] client_secret to use for authenticating to Viya (defaults to '')
@@ -435,7 +447,7 @@ class SASsession():
     :param authkey: Key value for finding credentials in .authfile
     :param user: userid for connecting to Viya (Not valid if Viya is configured for SSO - Single Sign On)
     :param pw: password for connecting to Viya (Not valid if Viya is configured for SSO - Single Sign On)
-    :param context: The Compute Server Context to connect to 
+    :param context: The Compute Server Context to connect to
     :param options: SAS options to include when connecting
     :param encoding: [depecated] The Compute Service interface only works in UTF-8, regardless of the SAS encoding
     :param timeout: This is passed to the HTTPConnection (http.client) and has nothing to do with Viya or Compute
@@ -460,26 +472,26 @@ class SASsession():
 
     **Common SASsession attributes**
 
-    The values of the following attributes will be displayed if you submit a SASsession object. 
-    These can be referenced programmatically in you code. For the Booleans, you should use the provided methods to set them, 
+    The values of the following attributes will be displayed if you submit a SASsession object.
+    These can be referenced programmatically in you code. For the Booleans, you should use the provided methods to set them,
     or change their value. The others you should NOT change, for obvious reasons.
 
     - workpath - string containing the WORK libref?s filesystem path.
     - sasver - string of the SAS Version for the SAS server connected to
     - version - string of the saspy version you?re running
-    - nosub - Boolean for current value of the teach_me_SAS() setting. 
+    - nosub - Boolean for current value of the teach_me_SAS() setting.
     - batch - Boolean for current value of the batch setting. use set_batch() to change value.
-    - results - string showing current value of for session results setting. use set_results() to change value. 
+    - results - string showing current value of for session results setting. use set_results() to change value.
     - sascei - string for the SAS Session Encoding this SAS server is using
     - SASpid - The SAS processes id, or None if no SAS session connected
 
-    Other attrritubes of the SASsession object that you may use for various purposes. 
+    Other attrritubes of the SASsession object that you may use for various purposes.
 
     - hostsep - simply a forward slash for linux systems and a backslash on windows clients; just for convenience
     - check_error_log - Boolean that identifies an ERROR has been found in the SASLOG. You should set this to False prior \
                  to running a saspy method that where you check it after. saspy does not reset it to False for you.
     - reconuri - the uri (token) for connecting back to the workspace server after you've disconnected. \
-                 not needed unless connecting back from a different Python process; not the usual case.  
+                 not needed unless connecting back from a different Python process; not the usual case.
 
     """
     # SAS Epoch: 1960-01-01
@@ -487,30 +499,30 @@ class SASsession():
 
     # def __init__(self, cfgname: str ='', kernel: 'SAS_kernel' =None, saspath :str ='', options: list =[]) -> 'SASsession':
     def __init__(self, **kwargs):
-        self._loaded_macros    = False
-        self._obj_cnt          = 0
-        self.nosub             = False
-        self.sascfg            = SASconfig(**kwargs)
-        self.batch             = False
-        self.results           = kwargs.get('results', self.sascfg.results)
+        self._loaded_macros = False
+        self._obj_cnt = 0
+        self.nosub = False
+        self.sascfg = SASconfig(**kwargs)
+        self.batch = False
+        self.results = kwargs.get('results', self.sascfg.results)
         if not self.results:
-           self.results        = 'Pandas'
+            self.results = 'Pandas'
         if self.sascfg.pandas and self.results.lower() == 'pandas':
-           self.results        = 'HTML'
-           print('Pandas module not available. Setting results to HTML')
-        self.workpath          = ''
-        self.sasver            = ''
-        self.version           = sys.modules['saspy'].__version__
-        self.sascei            = ''
-        self.SASpid            = None
-        self.HTML_Style        = "HTMLBlue"
-        self.sas_date_fmts     = sas_date_fmts
-        self.sas_time_fmts     = sas_time_fmts
+            self.results = 'HTML'
+            print('Pandas module not available. Setting results to HTML')
+        self.workpath = ''
+        self.sasver = ''
+        self.version = sys.modules['saspy'].__version__
+        self.sascei = ''
+        self.SASpid = None
+        self.HTML_Style = "HTMLBlue"
+        self.sas_date_fmts = sas_date_fmts
+        self.sas_time_fmts = sas_time_fmts
         self.sas_datetime_fmts = sas_datetime_fmts
-        self.DISPLAY           = self.sascfg.DISPLAY
-        self.HTML              = self.sascfg.HTML
-        self.logoffset         = 0
-        self.check_error_log   = False
+        self.DISPLAY = self.sascfg.DISPLAY
+        self.HTML = self.sascfg.HTML
+        self.logoffset = 0
+        self.check_error_log = False
 
         if not self.sascfg.valid:
             self._io = None
@@ -529,9 +541,9 @@ class SASsession():
             self._io = SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
         # gather some session info
-        sysvars  = "data _null_; length x $ 4096;"
+        sysvars = "data _null_; length x $ 4096;"
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
-           sysvars += " file STDERR;"
+            sysvars += " file STDERR;"
         sysvars += """
                x = resolve('%sysfunc(pathname(work))');  put 'WORKPATH=' x 'WORKPATHEND=';
                x = resolve('&SYSENCODING');              put 'ENCODING=' x 'ENCODINGEND=';
@@ -545,53 +557,60 @@ class SASsession():
         # this one call
         enc = self._io.sascfg.encoding
         if enc == '':
-           self._io.sascfg.encoding = 'utf_8'
+            self._io.sascfg.encoding = 'utf_8'
         res = self._io.submit(sysvars, "text")['LOG']
         self._io.sascfg.encoding = enc
 
-        vlist         = res.rpartition('SYSSCP=')
-        self.hostsep  = vlist[2].partition(' SYSSCPEND=')[0]
-        vlist         = res.rpartition('SYSJOBID=')
-        self.SASpid   = vlist[2].partition(' SYSJOBIDEND=')[0]
-        vlist         = res.rpartition('SYSVLONG=')
-        self.sasver   = vlist[2].partition(' SYSVLONGEND=')[0]
-        vlist         = res.rpartition('ENCODING=')
-        self.sascei   = vlist[2].partition(' ENCODINGEND=')[0]
-        vlist         = res.rpartition('WORKPATH=')
-        self.workpath = vlist[2].rpartition('WORKPATHEND=')[0].strip().replace('\n','') 
+        vlist = res.rpartition('SYSSCP=')
+        self.hostsep = vlist[2].partition(' SYSSCPEND=')[0]
+        vlist = res.rpartition('SYSJOBID=')
+        self.SASpid = vlist[2].partition(' SYSJOBIDEND=')[0]
+        vlist = res.rpartition('SYSVLONG=')
+        self.sasver = vlist[2].partition(' SYSVLONGEND=')[0]
+        vlist = res.rpartition('ENCODING=')
+        self.sascei = vlist[2].partition(' ENCODINGEND=')[0]
+        vlist = res.rpartition('WORKPATH=')
+        self.workpath = vlist[2].rpartition('WORKPATHEND=')[0].strip().replace('\n', '')
 
         # validate encoding
         if self.sascfg.mode != 'HTTP':
-           try:
-              self.pyenc = sas_encoding_mapping[self.sascei]
-           except KeyError:
-              print("Invalid response from SAS on inital submission. printing the SASLOG as diagnostic")
-              print(self._io._log)
-              raise
-           
-           if self.pyenc is not None:
-              if self._io.sascfg.encoding != '':
-                 if self._io.sascfg.encoding.lower() not in self.pyenc:
-                    print("The encoding value provided doesn't match the SAS session encoding.")
-                    print("SAS encoding is "+self.sascei+". Specified encoding is "+self._io.sascfg.encoding+".")
-                    print("Using encoding "+self.pyenc[1]+" instead to avoid transcoding problems.")
+            try:
+                self.pyenc = sas_encoding_mapping[self.sascei]
+            except KeyError:
+                print("Invalid response from SAS on inital submission. printing the SASLOG as diagnostic")
+                print(self._io._log)
+                raise
+
+            if self.pyenc is not None:
+                if self._io.sascfg.encoding != '':
+                    if self._io.sascfg.encoding.lower() not in self.pyenc:
+                        print("The encoding value provided doesn't match the SAS session encoding.")
+                        print(
+                            "SAS encoding is " + self.sascei + ". Specified encoding is " + self._io.sascfg.encoding + ".")
+                        print("Using encoding " + self.pyenc[1] + " instead to avoid transcoding problems.")
+                        self._io.sascfg.encoding = self.pyenc[1]
+                        print(
+                            "You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.")
+                        print(
+                            """If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it.\n""")
+                else:
                     self._io.sascfg.encoding = self.pyenc[1]
-                    print("You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.")
-                    print("""If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it.\n""")
-              else:
-                 self._io.sascfg.encoding = self.pyenc[1]
-                 if self._io.sascfg.verbose:
-                    print("No encoding value provided. Will try to determine the correct encoding.")
-                    print("Setting encoding to "+self.pyenc[1]+" based upon the SAS session encoding value of "+self.sascei+".\n")
-           else:
-              print("The SAS session encoding for this session ("+self.sascei+") doesn't have a known Python equivalent encoding.")
-              if self._io.sascfg.encoding == '':
-                 self._io.sascfg.encoding  = 'utf_8'
-                 print("Proceeding using the default encoding of 'utf_8', though you may encounter transcoding problems.\n")
-              else:
-                 print("Proceeding using the specified encoding of "+self._io.sascfg.encoding+", though you may encounter transcoding problems.\n")
+                    if self._io.sascfg.verbose:
+                        print("No encoding value provided. Will try to determine the correct encoding.")
+                        print("Setting encoding to " + self.pyenc[
+                            1] + " based upon the SAS session encoding value of " + self.sascei + ".\n")
+            else:
+                print(
+                    "The SAS session encoding for this session (" + self.sascei + ") doesn't have a known Python equivalent encoding.")
+                if self._io.sascfg.encoding == '':
+                    self._io.sascfg.encoding = 'utf_8'
+                    print(
+                        "Proceeding using the default encoding of 'utf_8', though you may encounter transcoding problems.\n")
+                else:
+                    print(
+                        "Proceeding using the specified encoding of " + self._io.sascfg.encoding + ", though you may encounter transcoding problems.\n")
         else:
-           self.pyenc = sas_encoding_mapping['utf-8']
+            self.pyenc = sas_encoding_mapping['utf-8']
 
         if self.hostsep == 'WIN':
             self.hostsep = '\\'
@@ -605,16 +624,15 @@ class SASsession():
         # this is to support parsing the log to fring log records w/ 'ERROR' when diagnostic logging is enabled.
         # in thi scase the log can have prefix and/or suffix info so the 'regular' log data is in the middle, not left justified
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
-           ll = self._io.submit("""data _null_; file STDERR; put %upcase('col0REG='); 
+            ll = self._io.submit("""data _null_; file STDERR; put %upcase('col0REG='); 
                                data _null_; put %upcase('col0LOG=');run;""", results='text')
-           regoff = len(ll['LOG'].rpartition('COL0REG=')[0].rpartition('\n')[2])
-           logoff = len(ll['LOG'].rpartition('COL0LOG=')[0].rpartition('\n')[2])
+            regoff = len(ll['LOG'].rpartition('COL0REG=')[0].rpartition('\n')[2])
+            logoff = len(ll['LOG'].rpartition('COL0LOG=')[0].rpartition('\n')[2])
 
-           if regoff == 0 and logoff > 0:
-              self.logoffset = logoff
+            if regoff == 0 and logoff > 0:
+                self.logoffset = logoff
 
         self._lastlog = self._io._log
-
 
     def __repr__(self):
         """
@@ -626,9 +644,9 @@ class SASsession():
             if self.sascfg.cfgopts.get('verbose', True):
                 print("This SASsession object is not valid\n")
         else:
-           pyenc = self._io.sascfg.encoding
+            pyenc = self._io.sascfg.encoding
 
-        x  = "Access Method         = %s\n" % self.sascfg.mode
+        x = "Access Method         = %s\n" % self.sascfg.mode
         x += "SAS Config name       = %s\n" % self.sascfg.name
         x += "SAS Config file       = %s\n" % self.sascfg.origin
         x += "WORK Path             = %s\n" % self.workpath
@@ -646,7 +664,7 @@ class SASsession():
 
     def __del__(self):
         if getattr(self, '_io', None) is not None:
-           return self._io.__del__()
+            return self._io.__del__()
 
     def _objcnt(self):
         self._obj_cnt += 1
@@ -664,7 +682,7 @@ class SASsession():
     def _endsas(self):
         self.SASpid = None
         if self._io:
-           return self._io._endsas()
+            return self._io._endsas()
 
     def _getlog(self, **kwargs):
         return self._io._getlog(**kwargs)
@@ -697,49 +715,49 @@ class SASsession():
 
            - listorlog  - this is the default as of V3.6.5. returns the LST, unless it's empty, then it returns the LOG instead \
                           (one or the other). Useful in case there's an ERROR.
-           - listonly   - this was the default, and returns the LST (will be empty if no output was produced by what you submitted) 
+           - listonly   - this was the default, and returns the LST (will be empty if no output was produced by what you submitted)
            - listandlog - as you might guess, this returns both. The LST followed by the LOG
            - logandlist - as you might guess, this returns both. The LOG followed by the LST
         '''
         if method is None:
-           method = 'listorlog'
+            method = 'listorlog'
 
         if method.lower() not in ['listonly', 'listorlog', 'listandlog', 'logandlist']:
-           print("The specified method is not valid. Using the default: 'listorlog'")
-           method = 'listorlog'
+            print("The specified method is not valid. Using the default: 'listorlog'")
+            method = 'listorlog'
 
         if results == '':
-           if self.results.upper() == 'PANDAS':
-              results = 'HTML'
-           else:
-              results = self.results
+            if self.results.upper() == 'PANDAS':
+                results = 'HTML'
+            else:
+                results = self.results
 
-        ll  = self.submit(code, results, prompt, printto, **kwargs)
+        ll = self.submit(code, results, prompt, printto, **kwargs)
 
         if results.upper() == 'HTML':
-           if   method.lower() == 'listonly':
-              self.DISPLAY(self.HTML(ll['LST']))
-           elif method.lower() == 'listorlog':
-              if len(ll['LST']) > 0:
-                 self.DISPLAY(self.HTML(ll['LST']))
-              else:
-                 self.DISPLAY(self.HTML("<pre>"+ll['LOG']+"</pre>"))
-           elif method.lower() == 'listandlog':
-              self.DISPLAY(self.HTML(ll['LST']+"\n<pre>"+ll['LOG']+"</pre>"))
-           else:
-              self.DISPLAY(self.HTML("<pre>"+ll['LOG']+"\n</pre>"+ll['LST']))
+            if method.lower() == 'listonly':
+                self.DISPLAY(self.HTML(ll['LST']))
+            elif method.lower() == 'listorlog':
+                if len(ll['LST']) > 0:
+                    self.DISPLAY(self.HTML(ll['LST']))
+                else:
+                    self.DISPLAY(self.HTML("<pre>" + ll['LOG'] + "</pre>"))
+            elif method.lower() == 'listandlog':
+                self.DISPLAY(self.HTML(ll['LST'] + "\n<pre>" + ll['LOG'] + "</pre>"))
+            else:
+                self.DISPLAY(self.HTML("<pre>" + ll['LOG'] + "\n</pre>" + ll['LST']))
         else:
-           if   method.lower() == 'listonly':
-              print(ll['LST'])
-           elif method.lower() == 'listorlog':
-              if len(ll['LST']) > 0:
-                 print(ll['LST'])
-              else:
-                 print(ll['LOG'])
-           elif method.lower() == 'listandlog':
-              print(ll['LST']+"\n"+ll['LOG'])
-           else:
-              print(ll['LOG']+"\n"+ll['LST'])
+            if method.lower() == 'listonly':
+                print(ll['LST'])
+            elif method.lower() == 'listorlog':
+                if len(ll['LST']) > 0:
+                    print(ll['LST'])
+                else:
+                    print(ll['LOG'])
+            elif method.lower() == 'listandlog':
+                print(ll['LST'] + "\n" + ll['LOG'])
+            else:
+                print(ll['LOG'] + "\n" + ll['LST'])
 
     def submit(self, code: str, results: str = '', prompt: dict = None, printto=False, **kwargs) -> dict:
         '''
@@ -957,7 +975,7 @@ class SASsession():
         if len(ll['LST']) > 0:
             self.DISPLAY(self.HTML(ll['LST']))
         else:
-            self.DISPLAY(self.HTML("<pre> NO HTML TO RENDER. LOG IS:\n"+ll['LOG']+" </pre>"))
+            self.DISPLAY(self.HTML("<pre> NO HTML TO RENDER. LOG IS:\n" + ll['LOG'] + " </pre>"))
 
     def sasdata(self, table: str, libref: str = '', results: str = '', dsopts: dict = None) -> 'SASdata':
         """
@@ -990,7 +1008,7 @@ class SASsession():
         :return: SASdata object
         """
         lastlog = len(self._io._log)
-        dsopts  = dsopts if dsopts is not None else {}
+        dsopts = dsopts if dsopts is not None else {}
 
         if results == '':
             results = self.results
@@ -1007,14 +1025,12 @@ class SASsession():
                options: str = ' ', prompt: dict = None) -> str:
         """
 
-        :param libref:  the libref to be assigned
+        :param libref:  the libref for be assigned
         :param engine:  the engine name used to access the SAS Library (engine defaults to BASE, per SAS)
         :param path:    path to the library (for engines that take a path parameter)
         :param options: other engine or engine supervisor options
         :return: SAS log
         """
-        prompt = prompt if prompt is not None else {}
-
         code = "libname " + libref + " " + engine + " "
         if type(path) == str and len(path) > 0:
             code += " '" + path + "' "
@@ -1040,24 +1056,24 @@ class SASsession():
         """
         code = "proc datasets"
         if libref:
-           code += " dd=" + libref
+            code += " dd=" + libref
         code += "; quit;"
 
         if self.nosub:
-           print(code)
+            print(code)
         else:
-           if self.results.lower() == 'html':
-              ll = self._io.submit(code, "html")
-              if not self.batch:
-                 self._render_html_or_log(ll)
-              else:
-                 return ll
-           else:
-              ll = self._io.submit(code, "text")
-              if self.batch:
-                 return ll['LOG'].rsplit(";*\';*\";*/;\n")[0]
-              else:
-                 print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0])
+            if self.results.lower() == 'html':
+                ll = self._io.submit(code, "html")
+                if not self.batch:
+                    self._render_html_or_log(ll)
+                else:
+                    return ll
+            else:
+                ll = self._io.submit(code, "text")
+                if self.batch:
+                    return ll['LOG'].rsplit(";*\';*\";*/;\n")[0]
+                else:
+                    print(ll['LOG'].rsplit(";*\';*\";*/;\n")[0])
 
     def read_csv(self, file: str, table: str = '_csv', libref: str = '', results: str = '',
                  opts: dict = None) -> 'SASdata':
@@ -1070,7 +1086,7 @@ class SASsession():
         :return: SASdata object
         """
         lastlog = len(self._io._log)
-        opts    = opts if opts is not None else {}
+        opts = opts if opts is not None else {}
 
         if results == '':
             results = self.results
@@ -1080,7 +1096,7 @@ class SASsession():
         if self.exist(table, libref):
             sd = SASdata(self, libref, table, results)
         else:
-            sd =None
+            sd = None
 
         self._lastlog = self._io._log[lastlog:]
         return sd
@@ -1121,7 +1137,7 @@ class SASsession():
 
             .. code-block:: python
 
-                             {'delimiter' : '~',  
+                             {'delimiter' : '~',
                               'putnames'  : True
                              }
         :return: SAS log
@@ -1139,7 +1155,7 @@ class SASsession():
         """
         This method uploads a local file to the SAS servers file system.
 
-        :param localfile: path to the local file 
+        :param localfile: path to the local file
         :param remotefile: path to remote file to create or overwrite
         :param overwrite: overwrite the output file if it exists?
         :param permission: permissions to set on the new file. See SAS Filename Statement Doc for syntax
@@ -1151,7 +1167,7 @@ class SASsession():
             return None
         else:
             log = self._io.upload(localfile, remotefile, overwrite, permission, **kwargs)
-     
+
         self._lastlog = self._io._log[lastlog:]
         return log
 
@@ -1170,17 +1186,17 @@ class SASsession():
             return None
         else:
             log = self._io.download(localfile, remotefile, overwrite, **kwargs)
-     
+
         self._lastlog = self._io._log[lastlog:]
         return log
-     
-    def df_char_lengths(self, df: 'pandas.DataFrame', encode_errors = None, char_lengths = None,
+
+    def df_char_lengths(self, df: 'pandas.DataFrame', encode_errors=None, char_lengths=None,
                         **kwargs) -> dict:
         """
         This is a utility method for df2sd, use to get the character columns lengths from a dataframe to use to
         create a SAS data set. This can be called by the user and the returned dict can be passed in to df2sd via
         the char_lengths= option. For big data frames, this can take a long time, so this can be used to do it once,
-        and then the dictionary returned can be provided to df2sd each time it's called to avoid recalculating this again. 
+        and then the dictionary returned can be provided to df2sd each time it's called to avoid recalculating this again.
 
         :param df: :class:`pandas.DataFrame` Pandas Data Frame to import to a SAS Data Set
 
@@ -1202,67 +1218,69 @@ class SASsession():
                          for multibyte SAS encodings. If SAS is running in a single byte encoding then '1' (see below) is used. \
                          Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these. \
                          ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it's variable
-                 
+
             - [1|2|3|4]- this is 'safe' except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the \
                          default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default \
                          used, since characters can only be 1 byte long so char len == byte len \
                          For UTF-8 SAS session, 4 is the BPC, so if you know you don't have many actual unicode characters \
                          you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead \
                          of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
-                         chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC. 
+                         chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.
 
         :return: SASdata object
         """
         ret = {}
         if encode_errors is None:
-           encode_errors = 'fail'
+            encode_errors = 'fail'
 
         bpc = self.pyenc[0]
 
-        if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
-           bpc = int(char_lengths)
-      
+        if char_lengths and str(char_lengths).strip() in ['1', '2', '3', '4']:
+            bpc = int(char_lengths)
+
         if char_lengths and str(char_lengths) == 'exact':
-           CnotB = False
+            CnotB = False
         else:
-           CnotB = bpc == 1
+            CnotB = bpc == 1
 
         for name in df.columns:
-           colname = str(name)
-           if df.dtypes[name].kind in ('O','S','U','V'):
-              if CnotB:  # calc max Chars not Bytes
-                 col_l = df[name].astype(str).map(len).max() * bpc 
-              else:
-                 if encode_errors == 'fail':
-                    try: 
-                       col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding))).max()
-                    except Exception as e:
-                       print("Transcoding error encountered.")
-                       print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
-                       return None
-                 else:
-                    col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
-              if not col_l > 0:
-                 col_l = 8
-              ret[colname] = col_l
+            colname = str(name)
+            if df.dtypes[name].kind in ('O', 'S', 'U', 'V'):
+                if CnotB:  # calc max Chars not Bytes
+                    col_l = df[name].astype(str).map(len).max() * bpc
+                else:
+                    if encode_errors == 'fail':
+                        try:
+                            col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding))).max()
+                        except Exception as e:
+                            print("Transcoding error encountered.")
+                            print(
+                                "DataFrame contains characters that can't be transcoded into the SAS session encoding.\n" + str(
+                                    e))
+                            return None
+                    else:
+                        col_l = df[name].astype(str).apply(
+                            lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
+                if not col_l > 0:
+                    col_l = 8
+                ret[colname] = col_l
 
         return ret
 
-
     def df2sd(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '',
               results: str = '', keep_outer_quotes: bool = False,
-                                 embedded_newlines: bool = True, 
+              embedded_newlines: bool = True,
               LF: str = '\x01', CR: str = '\x02',
               colsep: str = '\x03', colrep: str = ' ',
-              datetimes: dict={}, outfmts: dict={}, labels: dict={},
-              outdsopts: dict={}, encode_errors = None, char_lengths = None,
+              datetimes: dict = {}, outfmts: dict = {}, labels: dict = {},
+              outdsopts: dict = {}, encode_errors=None, char_lengths=None,
               **kwargs) -> 'SASdata':
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
         Also note that dataframe indexes (row label) are not transferred over as columns, as they aren't actualy in df.columns.
         You can simpley use df.reset_index() before this method and df.set_index() after to have the index be a column which
-        is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.  
+        is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.
 
         :param df: :class:`pandas.DataFrame` Pandas Data Frame to import to a SAS Data Set
         :param table: the name of the SAS Data Set to create
@@ -1311,36 +1329,37 @@ class SASsession():
                          for multibyte SAS encodings. If SAS is running in a single byte encoding then '1' (see below) is used. \
                          Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these. \
                          ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it's variable
- 
+
             - [1|2|3|4]- this is 'safe' except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the \
                          default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default \
                          used, since characters can only be 1 byte long so char len == byte len \
                          For UTF-8 SAS session, 4 is the BPC, so if you know you don't have many actual unicode characters \
                          you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead \
                          of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
-                         chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC. 
+                         chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.
 
             - dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates \
                            runmning the code to calculate the lengths, and goes strainght to transferring the data \
-                             
+
         :return: SASdata object
         """
-        return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
+        return self.dataframe2sasdata(df, table, libref, results, keep_outer_quotes, embedded_newlines, LF, CR, colsep,
+                                      colrep,
                                       datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths, **kwargs)
 
-    def dataframe2sasdata(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '', 
+    def dataframe2sasdata(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '',
                           results: str = '', keep_outer_quotes: bool = False,
-                                             embedded_newlines: bool = True, 
+                          embedded_newlines: bool = True,
                           LF: str = '\x01', CR: str = '\x02',
                           colsep: str = '\x03', colrep: str = ' ',
-                          datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                          outdsopts: dict={}, encode_errors = None, char_lengths = None, **kwargs) -> 'SASdata':
+                          datetimes: dict = {}, outfmts: dict = {}, labels: dict = {},
+                          outdsopts: dict = {}, encode_errors=None, char_lengths=None, **kwargs) -> 'SASdata':
         """
         This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
         Also note that dataframe indexes (row label) are not transferred over as columns, as they aren't actualy in df.columns.
         You can simpley use df.reset_index() before this method and df.set_index() after to have the index be a column which
-        is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.  
+        is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.
 
         :param df: Pandas Data Frame to import to a SAS Data Set
         :param table: the name of the SAS Data Set to create
@@ -1354,9 +1373,9 @@ class SASsession():
 
         colrep is new as of version 3.5.0
 
-        :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1) 
-        :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2) 
-        :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3) 
+        :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)
+        :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)
+        :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
@@ -1375,7 +1394,7 @@ class SASsession():
 
         :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail', other choice is to 'replace' \
                               invalid chars with the replacement char. 'ignore' doesn't try to transcode in python, so you \
-                              get whatever happens in SAS based upon the data you send over. Note 'ignore' is only valid for IOM and HTTP 
+                              get whatever happens in SAS based upon the data you send over. Note 'ignore' is only valid for IOM and HTTP
         :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
 
@@ -1389,58 +1408,60 @@ class SASsession():
                          for multibyte SAS encodings. If SAS is running in a single byte encoding then '1' (see below) is used. \
                          Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these. \
                          ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it's variable
- 
+
             - [1|2|3|4]- this is 'safe' except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the \
                          default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default \
                          used, since characters can only be 1 byte long so char len == byte len \
                          For UTF-8 SAS session, 4 is the BPC, so if you know you don't have many actual unicode characters \
                          you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead \
                          of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode \
-                         chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC. 
+                         chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.
 
             - dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates \
                            runmning the code to calculate the lengths, and goes strainght to transferring the data \
-                           
+
 
         :return: SASdata object
         """
         lastlog = len(self._io._log)
         if self.sascfg.pandas:
-           raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
+            raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
 
         if libref != '':
-           if libref.upper() not in self.assigned_librefs():
-              print("The libref specified is not assigned in this SAS Session.")
-              return None
+            if libref.upper() not in self.assigned_librefs():
+                print("The libref specified is not assigned in this SAS Session.")
+                return None
 
         # support oringinal implementation of outencoding - should have done it as a ds option to begin with
         outencoding = kwargs.pop('outencoding', None)
         if outencoding:
-           outdsopts['encoding'] = outencoding
+            outdsopts['encoding'] = outencoding
 
         if results == '':
-           results = self.results
+            results = self.results
         if self.nosub:
-           print("too complicated to show the code, read the source :), sorry.")
-           return None
+            print("too complicated to show the code, read the source :), sorry.")
+            return None
         else:
-           rc = self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
-                                            datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths, **kwargs)
+            rc = self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, LF, CR, colsep,
+                                            colrep,
+                                            datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths,
+                                            **kwargs)
         if rc is None:
-           if self.exist(table, libref):
-              dsopts = {}
-              if outencoding:
-                 dsopts['encoding'] = outencoding
-              sd = SASdata(self, libref, table, results, dsopts)
-           else:
-              sd = None
+            if self.exist(table, libref):
+                dsopts = {}
+                if outencoding:
+                    dsopts['encoding'] = outencoding
+                sd = SASdata(self, libref, table, results, dsopts)
+            else:
+                sd = None
         else:
-           sd = None
+            sd = None
 
         self._lastlog = self._io._log[lastlog:]
         return sd
 
-    def sd2df(self, table: str, libref: str = '', dsopts: dict = None, 
+    def sd2df(self, table: str, libref: str = '', dsopts: dict = None,
               method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'sasdata2dataframe'. Why type all that?
@@ -1476,7 +1497,7 @@ class SASsession():
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
            - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import. \
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV \
-                    has problems with 
+                    has problems with
 
 
         For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream \
@@ -1502,7 +1523,7 @@ class SASsession():
         dsopts = dsopts if dsopts is not None else {}
         return self.sasdata2dataframe(table, libref, dsopts, method, **kwargs)
 
-    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None, 
+    def sd2df_CSV(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None,
                   tempkeep: bool = False, opts: dict = None, **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'sasdata2dataframe' specifying method='CSV'. Why type all that?
@@ -1541,7 +1562,7 @@ class SASsession():
 
             .. code-block:: python
 
-                             {'delimiter' : '~',  
+                             {'delimiter' : '~',
                               'putnames'  : True
                              }
 
@@ -1552,13 +1573,13 @@ class SASsession():
         :return: Pandas data frame
         """
         dsopts = dsopts if dsopts is not None else {}
-        opts   =   opts if   opts is not None else {}
+        opts = opts if opts is not None else {}
         return self.sasdata2dataframe(table, libref, dsopts, method='CSV', tempfile=tempfile, tempkeep=tempkeep,
                                       opts=opts, **kwargs)
 
-    def sd2df_DISK(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None, 
-                  tempkeep: bool = False, rowsep: str = '\x01', colsep: str = '\x02',
-                  rowrep: str = ' ', colrep: str = ' ', **kwargs) -> 'pandas.DataFrame':
+    def sd2df_DISK(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None,
+                   tempkeep: bool = False, rowsep: str = '\x01', colsep: str = '\x02',
+                   rowrep: str = ' ', colrep: str = ' ', **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'sasdata2dataframe' specifying method='DISK'. Why type all that?
 
@@ -1604,7 +1625,7 @@ class SASsession():
         return self.sasdata2dataframe(table, libref, dsopts, method='DISK', tempfile=tempfile, tempkeep=tempkeep,
                                       rowsep=rowsep, colsep=colsep, rowrep=rowrep, colrep=colrep, **kwargs)
 
-    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None, 
+    def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None,
                           method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
         This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -1639,7 +1660,7 @@ class SASsession():
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
            - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.  \
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV \
-                    has problems with 
+                    has problems with
 
 
         For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream \
@@ -1664,7 +1685,7 @@ class SASsession():
         """
         lastlog = len(self._io._log)
         if self.sascfg.pandas:
-           raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
+            raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
 
         if method.lower() not in ['memory', 'csv', 'disk']:
             print("The specified method is not valid. Supported methods are MEMORY, CSV and DISK")
@@ -1694,7 +1715,7 @@ class SASsession():
             - obs is a numbers - either string or int
             - first obs is a numbers - either string or int
             - format is a string or dictionary { var: format }
-            - encoding is a string 
+            - encoding is a string
 
             .. code-block:: python
 
@@ -1755,7 +1776,7 @@ class SASsession():
                         else:
                             raise TypeError("Bad key type. {} must be a str or dict type".format(key))
                     else:
-                        opts += key+'='+str(dsopts[key]) + ' '
+                        opts += key + '=' + str(dsopts[key]) + ' '
 
             if len(opts):
                 opts = '(' + opts + ')'
@@ -1846,45 +1867,45 @@ class SASsession():
 
         """
         if quoting:
-           ll = self._io.submit("%let " + name + "=%" + quoting.upper() + "(" + str(value) + ");\n", results='text')
+            ll = self._io.submit("%let " + name + "=%" + quoting.upper() + "(" + str(value) + ");\n", results='text')
         else:
-           ll = self._io.submit("%let " + name + "=" + str(value) + ";\n", results='text')
+            ll = self._io.submit("%let " + name + "=" + str(value) + ";\n", results='text')
 
     def symget(self, name: str, outtype=None):
         """
         :param name:    [required] name of the macro varable to get
         :param outtype: [optional] desired output type of the python variable; valid types are [int, float, str] \
-                        provide an object of the type [1, 1.0, ' '] or a string of 'int', 'float' or 'str' 
+                        provide an object of the type [1, 1.0, ' '] or a string of 'int', 'float' or 'str'
 
         """
-        ll = self._io.submit("%put " + name + "BEGIN=&" + name + " "+ name+"END=;\n", results='text')
-        l2 = ll['LOG'].rpartition(name + "BEGIN=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
+        ll = self._io.submit("%put " + name + "BEGIN=&" + name + " " + name + "END=;\n", results='text')
+        l2 = ll['LOG'].rpartition(name + "BEGIN=")[2].rpartition(name + "END=")[0].strip().replace('\n', '')
 
         if outtype is not None:
-           if   outtype == 'int':
-              outtype = 1
-           elif outtype == 'float':
-              outtype = 1.0
+            if outtype == 'int':
+                outtype = 1
+            elif outtype == 'float':
+                outtype = 1.0
 
         if outtype is not None and type(outtype) not in [int, float, str]:
-           print("invalid type specified. supported are [int, float, str], will return default type")
-           outtype=None
+            print("invalid type specified. supported are [int, float, str], will return default type")
+            outtype = None
 
         if outtype is not None:
-           if   type(outtype) == int:
-              var = int(l2)
-           elif type(outtype) == float:
-              var = float(l2)
-           elif type(outtype) == str:
-              var = l2
+            if type(outtype) == int:
+                var = int(l2)
+            elif type(outtype) == float:
+                var = float(l2)
+            elif type(outtype) == str:
+                var = l2
         else:
-           try:
-              var = int(l2)
-           except:
-              try:
-                 var = float(l2)
-              except:
-                 var = l2
+            try:
+                var = int(l2)
+            except:
+                try:
+                    var = float(l2)
+                except:
+                    var = l2
 
         return var
 
@@ -1894,8 +1915,8 @@ class SASsession():
 
         :return: bool
         """
-        ll = self._io.submit("%put " + name + "BEGIN=%symexist(" + name + ") "+ name+"END=;\n")
-        l2 = ll['LOG'].rpartition(name + "BEGIN=")[2].rpartition(name+"END=")[0].strip().replace('\n','') 
+        ll = self._io.submit("%put " + name + "BEGIN=%symexist(" + name + ") " + name + "END=;\n")
+        l2 = ll['LOG'].rpartition(name + "BEGIN=")[2].rpartition(name + "END=")[0].strip().replace('\n', '')
 
         var = int(l2)
 
@@ -1977,17 +1998,16 @@ class SASsession():
             print(code)
             return None
         else:
-           ll = self._io.submit(code, results='text')
+            ll = self._io.submit(code, results='text')
 
         librefs = []
         log = ll['LOG'].rpartition('LIBREFSEND=')[0].rpartition('LIBREFSSTART=')
-                                                                                  
-        for i in range(log[2].count('LIB=')):                                    
-           log = log[2].partition('LIB=')[2].partition(' LIBEND=')                    
-           librefs.append(log[0])                                                         
-                                                                                  
-        return librefs
 
+        for i in range(log[2].count('LIB=')):
+            log = log[2].partition('LIB=')[2].partition(' LIBEND=')
+            librefs.append(log[0])
+
+        return librefs
 
     def dirlist(self, path) -> dict:
         """
@@ -2008,13 +2028,13 @@ class SASsession():
                   name = dread(did, memcount);
                   memcount = memcount - 1;
 
-                  qname = spd || '"""+self.hostsep+"""' || name;
+                  qname = spd || '""" + self.hostsep + """' || name;
 
                   rc = filename('saspydq', qname);
                   dq = dopen('saspydq');
                   if dq NE 0 then
                      do;
-                        dname = strip(name) || '"""+self.hostsep+"""';
+                        dname = strip(name) || '""" + self.hostsep + """';
                         put %upcase('DIR_file=') dname %upcase('fileEND=');
                         rc = dclose(dq);
                      end;
@@ -2040,7 +2060,7 @@ class SASsession():
             print(code)
             return None
         else:
-           ll = self._io.submit(code, results='text')
+            ll = self._io.submit(code, results='text')
 
         dirlist = []
 
@@ -2049,10 +2069,10 @@ class SASsession():
 
         dirlist = []
         log = ll['LOG'].rpartition('MEMEND=')[0].rpartition('MEMCOUNTEND=')
-                                                                                  
-        for i in range(log[2].count('FILE=')):                                    
-           log = log[2].partition('FILE=')[2].partition(' FILEEND=')                    
-           dirlist.append(log[0])                                                         
+
+        for i in range(log[2].count('FILE=')):
+            log = log[2].partition('FILE=')[2].partition(' FILEEND=')
+            dirlist.append(log[0])
 
         if memcount != len(dirlist):
             print("Some problem parsing list. Should be " + str(memcount) + " entries but got " + str(
@@ -2060,8 +2080,7 @@ class SASsession():
 
         return dirlist
 
-
-    def list_tables(self, libref: str='work', results: str = 'list') -> list:
+    def list_tables(self, libref: str = 'work', results: str = 'list') -> list:
         """
         This method returns a list of tuples containing MEMNAME, MEMTYPE of members in the library of memtype data or view
 
@@ -2070,20 +2089,20 @@ class SASsession():
         lastlog = len(self._io._log)
 
         if not self.nosub:
-           ll = self._io.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+")) LIB_EXT_END=;")
+            ll = self._io.submit("%put LIBREF_EXISTS=%sysfunc(libref(" + libref + ")) LIB_EXT_END=;")
 
-           exists = int(ll['LOG'].rpartition('LIBREF_EXISTS=')[2].rpartition('LIB_EXT_END=')[0])
+            exists = int(ll['LOG'].rpartition('LIBREF_EXISTS=')[2].rpartition('LIB_EXT_END=')[0])
 
-           if exists != 0:
-              print('Libref provided is not assigned')
-              return None
+            if exists != 0:
+                print('Libref provided is not assigned')
+                return None
 
         code = """
         proc datasets dd=librefx nodetails nolist noprint;
            contents memtype=(data view) nodetails 
               dir out=work._saspy_lib_list(keep=memname memtype) data=_all_ noprint;
         run;
-        
+
         proc sql;
            create table work._saspy_lib_list as select distinct * from work._saspy_lib_list;
         quit;
@@ -2093,14 +2112,14 @@ class SASsession():
             print(code)
             return None
         else:
-           ll = self._io.submit(code, results='text')
+            ll = self._io.submit(code, results='text')
 
         if results != 'list':
-           res = self.sd2df('_saspy_lib_list', 'work')
-           ll = self._io.submit("proc delete data=work._saspy_lib_list;run;", results='text')
-           self._lastlog = self._io._log[lastlog:]
-           return res
-           
+            res = self.sd2df('_saspy_lib_list', 'work')
+            ll = self._io.submit("proc delete data=work._saspy_lib_list;run;", results='text')
+            self._lastlog = self._io._log[lastlog:]
+            return res
+
         code = """
         data _null_;
            set work._saspy_lib_list end=last curobs=first;
@@ -2113,22 +2132,21 @@ class SASsession():
         run;
         proc delete data=work._saspy_lib_list;run;
         """
-        
-        ll  = self._io.submit(code, results='text')
-        
+
+        ll = self._io.submit(code, results='text')
+
         log = ll['LOG'].rpartition('MEMEND=')[0].rpartition('MEMSTART=')
-                                                                                  
+
         tablist = []
-        for i in range(log[2].count('MEMNAME=')):                                    
-           log = log[2].partition('MEMNAME=')[2].partition(' MEMNAMEEND=')                    
-           key = log[0]
-           log = log[2].partition('MEMTYPE=')[2].partition(' MEMTYPEEND=')                     
-           val = log[0]
-           tablist.append(tuple((key, val)))                                                         
-                                                                               
+        for i in range(log[2].count('MEMNAME=')):
+            log = log[2].partition('MEMNAME=')[2].partition(' MEMNAMEEND=')
+            key = log[0]
+            log = log[2].partition('MEMTYPE=')[2].partition(' MEMTYPEEND=')
+            val = log[0]
+            tablist.append(tuple((key, val)))
+
         self._lastlog = self._io._log[lastlog:]
         return tablist
-
 
     def file_info(self, filepath, results: str = 'dict', fileref: str = '_spfinfo', quiet: bool = False) -> dict:
         """
@@ -2139,21 +2157,21 @@ class SASsession():
         lastlog = len(self._io._log)
 
         if not self.nosub:
-           code  = "filename "+fileref+" '"+filepath+"';\n"
-           code += "%put FILEREF_EXISTS=%sysfunc(fexist("+fileref+")) FILE_EXTEND=;"
-   
-           ll = self._io.submit(code)
-   
-           exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
-   
-           if exists != 1:
-              if not quiet:
-                 print('The filepath provided does not exist')
-              ll = self._io.submit("filename "+fileref+" clear;")
-              return None
+            code = "filename " + fileref + " '" + filepath + "';\n"
+            code += "%put FILEREF_EXISTS=%sysfunc(fexist(" + fileref + ")) FILE_EXTEND=;"
+
+            ll = self._io.submit(code)
+
+            exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
+
+            if exists != 1:
+                if not quiet:
+                    print('The filepath provided does not exist')
+                ll = self._io.submit("filename " + fileref + " clear;")
+                return None
 
         if results != 'dict':
-           code="""
+            code = """
            proc delete data=work._SASPY_FILE_INFO;run;
            data work._SASPY_FILE_INFO;
               length infoname $256 infoval $4096;
@@ -2172,27 +2190,26 @@ class SASsession():
               rc = filename('filerefx');
            run;
            """.replace('filerefx', fileref)
-   
-           if self.nosub:
-               print(code)
-               return None
-           else:
-              ll  = self._io.submit(code, results='text')
-   
-           res = self.sd2df('_SASPY_FILE_INFO', 'work')
-           ll  = self._io.submit("proc delete data=work._SASPY_FILE_INFO;run;", results='text')
 
-           self._lastlog = self._io._log[lastlog:]
-           return res
+            if self.nosub:
+                print(code)
+                return None
+            else:
+                ll = self._io.submit(code, results='text')
 
+            res = self.sd2df('_SASPY_FILE_INFO', 'work')
+            ll = self._io.submit("proc delete data=work._SASPY_FILE_INFO;run;", results='text')
 
-        code="""options nosource;
+            self._lastlog = self._io._log[lastlog:]
+            return res
+
+        code = """options nosource;
         data _null_;
            length infoname $256 infoval $4096;
         """
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
-           code +=" file STDERR; "
-        code +="""
+            code += " file STDERR; "
+        code += """
            drop rc fid infonum i close;
            put 'INFOSTART=';
            fid=fopen('filerefx');
@@ -2216,32 +2233,32 @@ class SASsession():
             print(code)
             return None
         else:
-           ll  = self._io.submit(code, results='text')
+            ll = self._io.submit(code, results='text')
 
-        vi = len(ll['LOG'].rpartition('INFOEND=')[0].rpartition('\n')[2])                          
- 
+        vi = len(ll['LOG'].rpartition('INFOEND=')[0].rpartition('\n')[2])
+
         res = {}
         log = ll['LOG'].rpartition('INFOEND=')[0].rpartition('INFOSTART=')
-                                                                                  
+
         if vi > 0:
-           for i in range(log[2].count('INFONAME=')):                                    
-              log = log[2].partition('INFONAME=')[2].partition(' INFONAMEEND=')                    
-              key = log[0]
-              log = log[2].partition('INFOVAL=')[2].partition('INFOVALEND=')
-                    
-              vx = log[0].split('\n')                                    
-              val = vx[0]                                                                   
-              for x in vx[1:]:                                                                        
-                 val += x[vi:]                                                              
-              res[key] = val.strip()                                                         
+            for i in range(log[2].count('INFONAME=')):
+                log = log[2].partition('INFONAME=')[2].partition(' INFONAMEEND=')
+                key = log[0]
+                log = log[2].partition('INFOVAL=')[2].partition('INFOVALEND=')
+
+                vx = log[0].split('\n')
+                val = vx[0]
+                for x in vx[1:]:
+                    val += x[vi:]
+                res[key] = val.strip()
         else:
-           for i in range(log[2].count('INFONAME=')):                                    
-              log = log[2].partition('INFONAME=')[2].partition(' INFONAMEEND=')                    
-              key = log[0]
-              log = log[2].partition('INFOVAL=')[2].partition('INFOVALEND=')
-              val = log[0].replace('\n', '').strip()
-              res[key] = val                                                         
-                                                                                  
+            for i in range(log[2].count('INFONAME=')):
+                log = log[2].partition('INFONAME=')[2].partition(' INFONAMEEND=')
+                key = log[0]
+                log = log[2].partition('INFOVAL=')[2].partition('INFOVALEND=')
+                val = log[0].replace('\n', '').strip()
+                res[key] = val
+
         self._lastlog = self._io._log[lastlog:]
         return res
 
@@ -2257,34 +2274,34 @@ class SASsession():
         """
         lastlog = len(self._io._log)
 
-        code  = "data _null_;\n rc=filename('"+fileref+"', '"+filepath+"');\n"
-        code += " if rc = 0 and fexist('"+fileref+"') then do;\n"
-        code += "    rc = fdelete('"+fileref+"');\n"
+        code = "data _null_;\n rc=filename('" + fileref + "', '" + filepath + "');\n"
+        code += " if rc = 0 and fexist('" + fileref + "') then do;\n"
+        code += "    rc = fdelete('" + fileref + "');\n"
         code += "    put 'FILEREF_EXISTS= ' rc 'FILE_EXTEND=';\n"
         code += " end; else do;\n"
         code += "    put 'FILEREF_EXISTS= -1 FILE_EXTEND=';\n"
         code += " end; run;\n"
-      
+
         if self.nosub:
             print(code)
             return None
         else:
-           ll = self._io.submit(code, results='text')
-   
+            ll = self._io.submit(code, results='text')
+
         exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
-   
+
         if exists != 0:
-           if not quiet:
-              print('The filepath provided does not exist')
-   
+            if not quiet:
+                print('The filepath provided does not exist')
+
         self._lastlog = self._io._log[lastlog:]
-        return {'Success' : not bool(exists), 'LOG' : ll['LOG']}
+        return {'Success': not bool(exists), 'LOG': ll['LOG']}
 
     def file_copy(self, source_path, dest_path, fileref: str = '_spfinf', quiet: bool = False) -> dict:
         """
         This method copies one external file to another on the SAS server side
 
-        :param source_path: path to the remote source file to copy 
+        :param source_path: path to the remote source file to copy
         :param dest_path: path for the remote file write to
         :param fileref: fileref (first 7 chars of one) to use on the two generated filename stmts
         :param quiet: print any messages or not
@@ -2293,101 +2310,101 @@ class SASsession():
         """
         lastlog = len(self._io._log)
 
-        code  = "filename {} '{}' recfm=n;\n".format(fileref[:7]+'s', source_path) 
-        code += "filename {} '{}' recfm=n;\n".format(fileref[:7]+'d', dest_path) 
+        code = "filename {} '{}' recfm=n;\n".format(fileref[:7] + 's', source_path)
+        code += "filename {} '{}' recfm=n;\n".format(fileref[:7] + 'd', dest_path)
         code += "data _null_;\n"
-        code += "   rc = fcopy('{}', '{}');\n".format(fileref[:7]+'s',fileref[:7]+'d')
+        code += "   rc = fcopy('{}', '{}');\n".format(fileref[:7] + 's', fileref[:7] + 'd')
         code += "   put 'FILEREF_EXISTS= ' rc 'FILE_EXTEND=';\n"
         code += "run;\n"
-        code += "filename {} clear;\n".format(fileref[:7]+'s')
-        code += "filename {} clear;\n".format(fileref[:7]+'d') 
-      
+        code += "filename {} clear;\n".format(fileref[:7] + 's')
+        code += "filename {} clear;\n".format(fileref[:7] + 'd')
+
         if self.nosub:
             print(code)
             return None
         else:
-           ll = self._io.submit(code, results='text')
-   
+            ll = self._io.submit(code, results='text')
+
         exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
-   
+
         if exists != 0:
-           if not quiet:
-              print('Non Zero return code. Check the SASLOG for messages')
-   
+            if not quiet:
+                print('Non Zero return code. Check the SASLOG for messages')
+
         self._lastlog = self._io._log[lastlog:]
-        return {'Success' : not bool(exists), 'LOG' : ll['LOG']}
+        return {'Success': not bool(exists), 'LOG': ll['LOG']}
 
     def cat(self, path) -> str:
-       """
-       Like Linux 'cat' - open and print the contents of a file
-       """
-       fd = open(path, 'r')
-       dat = fd.read()
-       fd.close()
-       print(dat)
-
+        """
+        Like Linux 'cat' - open and print the contents of a file
+        """
+        fd = open(path, 'r')
+        dat = fd.read()
+        fd.close()
+        print(dat)
 
     def sil(self, life=None, rate=None, amount=None, payment=None, out: object = None, out_summary: object = None):
-       """
-       Alias for simple_interest_loan
-       """
-       return self.simple_interest_loan(life, rate, amount, payment, out, out_summary)
-      
-    def simple_interest_loan(self, life=None, rate=None, amount=None, payment=None, out: object = None, out_summary: object = None):
-       """
-       Calculate the amortization schedule of a simple interest load given 3 of the 4 variables
-       You must specify 3 of the for variables, to solve for the 4th.
-
-       :param life:    length of loan in months
-       :param rate:    interest rate as a decimal percent: .03 is 3% apr 
-       :param amount:  amount of loan
-       :param payment: monthly payment amount
-       :return: SAS Lst showing the amortization schule calculated for the missing variable
-       """
-       vars = 0
-
-       code  = "proc mortgage"
-       if life is not None:
-          code += " life="+str(life)
-          vars += 1
-       if rate is not None:
-          code += " rate="+str(rate)
-          vars += 1
-       if amount is not None:
-          code += " amount="+str(amount)
-          vars += 1
-       if payment is not None:
-          code += " payment="+str(payment)
-          vars += 1
-       if out is not None:
-          code += " out="+out.libref + ".'" + out.table +"'n " + out._dsopts() 
-       if out_summary is not None:
-          code += " outsum="+out_summary.libref + ".'" + out_summary.table  +"'n " + out_summary._dsopts() 
-       code += "; run;"
-
-       if vars != 3:
-          print("Must suply 3 of the 4 variables. Only "+str(vars)+" variables provided.")
-          return None
-
-       if self.nosub:
-          print(code)
-       else:
-          if self.results.lower() == 'html':
-             ll = self._io.submit(code, "html")
-             if not self.batch:
-                self._render_html_or_log(ll)
-             else:
-                return ll
-          else:
-             ll = self._io.submit(code, "text")
-             if self.batch:
-                return ll
-             else:
-                print(ll['LST'])
-    
-    def validvarname(self, df: 'pandas.DataFrame', version: str = "v7" )  -> 'pandas.DataFrame':
         """
-        Creates a copy of a Data Frame with SAS compatible column names. The version= parameter allows 
+        Alias for simple_interest_loan
+        """
+        return self.simple_interest_loan(life, rate, amount, payment, out, out_summary)
+
+    def simple_interest_loan(self, life=None, rate=None, amount=None, payment=None, out: object = None,
+                             out_summary: object = None):
+        """
+        Calculate the amortization schedule of a simple interest load given 3 of the 4 variables
+        You must specify 3 of the for variables, to solve for the 4th.
+
+        :param life:    length of loan in months
+        :param rate:    interest rate as a decimal percent: .03 is 3% apr
+        :param amount:  amount of loan
+        :param payment: monthly payment amount
+        :return: SAS Lst showing the amortization schule calculated for the missing variable
+        """
+        vars = 0
+
+        code = "proc mortgage"
+        if life is not None:
+            code += " life=" + str(life)
+            vars += 1
+        if rate is not None:
+            code += " rate=" + str(rate)
+            vars += 1
+        if amount is not None:
+            code += " amount=" + str(amount)
+            vars += 1
+        if payment is not None:
+            code += " payment=" + str(payment)
+            vars += 1
+        if out is not None:
+            code += " out=" + out.libref + ".'" + out.table + "'n " + out._dsopts()
+        if out_summary is not None:
+            code += " outsum=" + out_summary.libref + ".'" + out_summary.table + "'n " + out_summary._dsopts()
+        code += "; run;"
+
+        if vars != 3:
+            print("Must suply 3 of the 4 variables. Only " + str(vars) + " variables provided.")
+            return None
+
+        if self.nosub:
+            print(code)
+        else:
+            if self.results.lower() == 'html':
+                ll = self._io.submit(code, "html")
+                if not self.batch:
+                    self._render_html_or_log(ll)
+                else:
+                    return ll
+            else:
+                ll = self._io.submit(code, "text")
+                if self.batch:
+                    return ll
+                else:
+                    print(ll['LST'])
+
+    def validvarname(self, df: 'pandas.DataFrame', version: str = "v7") -> 'pandas.DataFrame':
+        """
+        Creates a copy of a Data Frame with SAS compatible column names. The version= parameter allows
         you to choose the compatability setting to use.
 
         :param df:      a Pandas Data Frame whose column names you wish to make SAS compatible.
@@ -2399,26 +2416,26 @@ class SASsession():
                 - non SAS characters are mapped to underscores.
                 - any column name that is not unique when normalized is made unique by appending a counter (0,1,2,...) to the name.
             - V6:     like V7, but column names truncated to 8 characters.
-            - upcase: like V7, but columns names will be uppercase. 
+            - upcase: like V7, but columns names will be uppercase.
             - any:    any characters are valid, but column names truncated to 32 characters.
 
         :return: a Pandas DataFrame whose column names are SAS compatible according to the selected version.
         """
         if version.lower() not in ['v6', 'v7', 'upcase', 'any']:
-           print("The specified version is not valid. Using the default: 'V7'")
-           version = 'v7'
+            print("The specified version is not valid. Using the default: 'V7'")
+            version = 'v7'
 
         max_length = 8 if version.lower() == 'v6' else 32
 
         names = {}
-        
+
         # normalize variable names
         for col_name in df.columns:
             new_name = col_name[:max_length]
 
             if version.lower() != 'any':
-                new_name = re.sub(r'[^\d\w]+', r'_'  , new_name)
-                new_name = re.sub(r'^(\d+)',   r'_\1', new_name)
+                new_name = re.sub(r'[^\d\w]+', r'_', new_name)
+                new_name = re.sub(r'^(\d+)', r'_\1', new_name)
 
             if version.lower() == 'upcase':
                 new_name = new_name.upper()
@@ -2428,14 +2445,14 @@ class SASsession():
         # serialize duplicates in normalized variable names
         for col_name in df.columns:
             duplicate_keys = [key for key in names.keys()
-                                if names[key].upper() == names[col_name].upper() ]
-            duplicate_count = len(duplicate_keys)-1
-            if duplicate_count>0:
+                              if names[key].upper() == names[col_name].upper()]
+            duplicate_count = len(duplicate_keys) - 1
+            if duplicate_count > 0:
                 count = 0
                 padding = len(str(duplicate_count))
                 for val in df.columns:
                     if val in duplicate_keys:
-                        names[val] =  "{}{}".format(names[val][:max_length-padding], count)
+                        names[val] = "{}{}".format(names[val][:max_length - padding], count)
                         count += 1
 
         return df.rename(columns=names)
@@ -2469,8 +2486,10 @@ sas_date_fmts = (
     'FRSDFDN', 'FRSDFDWN', 'FRSDFMN', 'FRSDFMY', 'FRSDFMY', 'FRSDFWDX', 'FRSDFWKX', 'HUNDFDD', 'HUNDFDE', 'HUNDFDE',
     'HUNDFDN', 'HUNDFDWN', 'HUNDFMN', 'HUNDFMY', 'HUNDFMY', 'HUNDFWDX', 'HUNDFWKX', 'IS8601DA', 'IS8601DA', 'ITADFDD',
     'ITADFDE', 'ITADFDE', 'ITADFDN', 'ITADFDWN', 'ITADFMN', 'ITADFMY', 'ITADFMY', 'ITADFWDX', 'ITADFWKX', 'JDATEMD',
-    'JDATEMDW', 'JDATEMNW', 'JDATEMON', 'JDATEQRW', 'JDATEQTR', 'JDATESEM', 'JDATESMW', 'JDATEWK', 'JDATEYDW', 'JDATEYM',
-    'JDATEYMD', 'JDATEYMD', 'JDATEYMW', 'JNENGO', 'JNENGO', 'JNENGOW', 'JULDATE', 'JULDAY', 'JULIAN', 'JULIAN', 'MACDFDD',
+    'JDATEMDW', 'JDATEMNW', 'JDATEMON', 'JDATEQRW', 'JDATEQTR', 'JDATESEM', 'JDATESMW', 'JDATEWK', 'JDATEYDW',
+    'JDATEYM',
+    'JDATEYMD', 'JDATEYMD', 'JDATEYMW', 'JNENGO', 'JNENGO', 'JNENGOW', 'JULDATE', 'JULDAY', 'JULIAN', 'JULIAN',
+    'MACDFDD',
     'MACDFDE', 'MACDFDE', 'MACDFDN', 'MACDFDWN', 'MACDFMN', 'MACDFMY', 'MACDFMY', 'MACDFWDX', 'MACDFWKX', 'MINGUO',
     'MINGUO', 'MMDDYY', 'MMDDYY', 'MMDDYYB', 'MMDDYYC', 'MMDDYYD', 'MMDDYYN', 'MMDDYYP', 'MMDDYYS', 'MMYY', 'MMYYC',
     'MMYYD', 'MMYYN', 'MMYYP', 'MMYYS', 'MONNAME', 'MONTH', 'MONYY', 'MONYY', 'ND8601DA', 'NENGO', 'NENGO', 'NLDATE',
@@ -2484,8 +2503,10 @@ sas_date_fmts = (
     'RUSDFMY', 'RUSDFMY', 'RUSDFWDX', 'RUSDFWKX', 'SLODFDD', 'SLODFDE', 'SLODFDE', 'SLODFDN', 'SLODFDWN', 'SLODFMN',
     'SLODFMY', 'SLODFMY', 'SLODFWDX', 'SLODFWKX', 'SVEDFDD', 'SVEDFDE', 'SVEDFDE', 'SVEDFDN', 'SVEDFDWN', 'SVEDFMN',
     'SVEDFMY', 'SVEDFMY', 'SVEDFWDX', 'SVEDFWKX', 'WEEKDATE', 'WEEKDATX', 'WEEKDAY', 'WEEKU', 'WEEKU', 'WEEKV', 'WEEKV',
-    'WEEKW', 'WEEKW', 'WORDDATE', 'WORDDATX', 'XYYMMDD', 'XYYMMDD', 'YEAR', 'YYMM', 'YYMMC', 'YYMMD', 'YYMMDD', 'YYMMDD',
-    'YYMMDDB', 'YYMMDDC', 'YYMMDDD', 'YYMMDDN', 'YYMMDDP', 'YYMMDDS', 'YYMMN', 'YYMMN', 'YYMMP', 'YYMMS', 'YYMON', 'YYQ',
+    'WEEKW', 'WEEKW', 'WORDDATE', 'WORDDATX', 'XYYMMDD', 'XYYMMDD', 'YEAR', 'YYMM', 'YYMMC', 'YYMMD', 'YYMMDD',
+    'YYMMDD',
+    'YYMMDDB', 'YYMMDDC', 'YYMMDDD', 'YYMMDDN', 'YYMMDDP', 'YYMMDDS', 'YYMMN', 'YYMMN', 'YYMMP', 'YYMMS', 'YYMON',
+    'YYQ',
     'YYQ', 'YYQC', 'YYQD', 'YYQN', 'YYQP', 'YYQR', 'YYQRC', 'YYQRD', 'YYQRN', 'YYQRP', 'YYQRS', 'YYQS', 'YYQZ', 'YYQZ',
     'YYWEEKU', 'YYWEEKV', 'YYWEEKW',
 )
@@ -2506,177 +2527,178 @@ sas_datetime_fmts = (
     'IS8601DN', 'IS8601DT', 'IS8601DT', 'IS8601DZ', 'IS8601DZ', 'ITADFDT', 'ITADFDT', 'JDATEYT', 'JDATEYTW', 'JNENGOT',
     'JNENGOTW', 'MACDFDT', 'MACDFDT', 'MDYAMPM', 'MDYAMPM', 'ND8601DN', 'ND8601DT', 'ND8601DZ', 'NLDATM', 'NLDATM',
     'NLDATMAP', 'NLDATMAP', 'NLDATMDT', 'NLDATML', 'NLDATMM', 'NLDATMMD', 'NLDATMMDL', 'NLDATMMDM', 'NLDATMMDS',
-    'NLDATMMN', 'NLDATMS', 'NLDATMTM', 'NLDATMTZ', 'NLDATMW', 'NLDATMW', 'NLDATMWN', 'NLDATMWZ', 'NLDATMYM', 'NLDATMYML',
+    'NLDATMMN', 'NLDATMS', 'NLDATMTM', 'NLDATMTZ', 'NLDATMW', 'NLDATMW', 'NLDATMWN', 'NLDATMWZ', 'NLDATMYM',
+    'NLDATMYML',
     'NLDATMYMM', 'NLDATMYMS', 'NLDATMYQ', 'NLDATMYQL', 'NLDATMYQM', 'NLDATMYQS', 'NLDATMYR', 'NLDATMYW', 'NLDATMZ',
     'NLDDFDT', 'NLDDFDT', 'NORDFDT', 'NORDFDT', 'POLDFDT', 'POLDFDT', 'PTGDFDT', 'PTGDFDT', 'RUSDFDT', 'RUSDFDT',
     'SLODFDT', 'SLODFDT', 'SVEDFDT', 'SVEDFDT', 'TWMDY', 'YMDDTTM',
 )
 
 sas_encoding_mapping = {
-'arabic':      [1, 'iso8859_6', 'iso-8859-6', 'arabic'],
-'big5':        [2, 'big5', 'big5-tw', 'csbig5'],
-'cyrillic':    [1, 'iso8859_5', 'iso-8859-5', 'cyrillic'],
-'ebcdic037':   [1, 'cp037', 'ibm037', 'ibm039'],
-'ebcdic273':   [1, 'cp273', '273', 'ibm273', 'csibm273'],
-'ebcdic500':   [1, 'cp500', 'ebcdic-cp-be', 'ebcdic-cp-ch', 'ibm500'],
-'euc-cn':      [2, 'gb2312', 'chinese', 'csiso58gb231280', 'euc-cn', 'euccn', 'eucgb2312-cn', 'gb2312-1980', 'gb2312-80', 'iso-ir-58'],
-'euc-jp':      [4, 'euc_jis_2004', 'jisx0213', 'eucjis2004'],
-'euc-kr':      [4, 'euc_kr', 'euckr', 'korean', 'ksc5601', 'ks_c-5601', 'ks_c-5601-1987', 'ksx1001', 'ks_x-1001'],
-'greek':       [1, 'iso8859_7', 'iso-8859-7', 'greek', 'greek8'],
-'hebrew':      [1, 'iso8859_8', 'iso-8859-8', 'hebrew'],
-'ibm-949':     [1, 'cp949', '949', 'ms949', 'uhc'],
-'kz1048':      [1, 'kz1048', 'kz_1048', 'strk1048_2002', 'rk1048'],
-'latin10':     [1, 'iso8859_16', 'iso-8859-16', 'latin10', 'l10'],
-'latin1':      [1, 'latin_1', 'iso-8859-1', 'iso8859-1', '8859', 'cp819', 'latin', 'latin1', 'l1'],
-'latin2':      [1, 'iso8859_2', 'iso-8859-2', 'latin2', 'l2'],
-'latin3':      [1, 'iso8859_3', 'iso-8859-3', 'latin3', 'l3'],
-'latin4':      [1, 'iso8859_4', 'iso-8859-4', 'latin4', 'l4'],
-'latin5':      [1, 'iso8859_9', 'iso-8859-9', 'latin5', 'l5'],
-'latin6':      [1, 'iso8859_10', 'iso-8859-10', 'latin6', 'l6'],
-'latin7':      [1, 'iso8859_13', 'iso-8859-13', 'latin7', 'l7'],
-'latin8':      [1, 'iso8859_14', 'iso-8859-14', 'latin8', 'l8'],
-'latin9':      [1, 'iso8859_15', 'iso-8859-15', 'latin9', 'l9'],
-'ms-932':      [2, 'cp932', '932', 'ms932', 'mskanji', 'ms-kanji'],
-'msdos737':    [1, 'cp737'],
-'msdos775':    [1, 'cp775', 'ibm775'],
-'open_ed-1026':[1, 'cp1026', 'ibm1026'],
-'open_ed-1047':[1, 'cp1047'],              # Though this isn't available in base python, it's 3rd party
-'open_ed-1140':[1, 'cp1140', 'ibm1140'],
-'open_ed-424': [1, 'cp424', 'ebcdic-cp-he', 'ibm424'],
-'open_ed-875': [1, 'cp875'],
-'pcoem437':    [1, 'cp437', '437', 'ibm437'],
-'pcoem850':    [1, 'cp850', '850', 'ibm850'],
-'pcoem852':    [1, 'cp852', '852', 'ibm852'],
-'pcoem857':    [1, 'cp857', '857', 'ibm857'],
-'pcoem858':    [1, 'cp858', '858', 'ibm858'],
-'pcoem860':    [1, 'cp860', '860', 'ibm860'],
-'pcoem862':    [1, 'cp862', '862', 'ibm862'],
-'pcoem863':    [1, 'cp863'],
-'pcoem864':    [1, 'cp864', 'ibm864'],
-'pcoem865':    [1, 'cp865', '865', 'ibm865'],
-'pcoem866':    [1, 'cp866', '866', 'ibm866'],
-'pcoem869':    [1, 'cp869', '869', 'cp-gr', 'ibm869'],
-'pcoem874':    [1, 'cp874'],
-'shift-jis':   [2, 'shift_jis', 'csshiftjis', 'shiftjis', 'sjis', 's_jis'],
-'thai':        [1, 'iso8859_11', 'so-8859-11', 'thai'],
-'us-ascii':    [1, 'ascii', '646', 'us-ascii'],
-'utf-8':       [4, 'utf_8', 'u8', 'utf', 'utf8', 'utf-8'],
-'warabic':     [1, 'cp1256', 'windows-1256'],
-'wbaltic':     [1, 'cp1257', 'windows-1257'],
-'wcyrillic':   [1, 'cp1251', 'windows-1251'],
-'wgreek':      [1, 'cp1253', 'windows-1253'],
-'whebrew':     [1, 'cp1255', 'windows-1255'],
-'wlatin1':     [1, 'cp1252', 'windows-1252'],
-'wlatin2':     [1, 'cp1250', 'windows-1250'],
-'wturkish':    [1, 'cp1254', 'windows-1254'],
-'wvietnamese': [1, 'cp1258', 'windows-1258'],
-'any':None,
-'dec-cn':None,
-'dec-jp':None,
-'dec-tw':None,
-'ebcdic1025':None,
-'ebcdic1026':None,
-'ebcdic1047':None,
-'ebcdic1112':None,
-'ebcdic1122':None,
-'ebcdic1130':None,
-'ebcdic1137':None,
-'ebcdic1140':None,
-'ebcdic1141':None,
-'ebcdic1142':None,
-'ebcdic1143':None,
-'ebcdic1144':None,
-'ebcdic1145':None,
-'ebcdic1146':None,
-'ebcdic1147':None,
-'ebcdic1148':None,
-'ebcdic1149':None,
-'ebcdic1153':None,
-'ebcdic1154':None,
-'ebcdic1155':None,
-'ebcdic1156':None,
-'ebcdic1157':None,
-'ebcdic1158':None,
-'ebcdic1160':None,
-'ebcdic1164':None,
-'ebcdic275':None,
-'ebcdic277':None,
-'ebcdic278':None,
-'ebcdic280':None,
-'ebcdic284':None,
-'ebcdic285':None,
-'ebcdic297':None,
-'ebcdic424':None,
-'ebcdic425':None,
-'ebcdic838':None,
-'ebcdic870':None,
-'ebcdic875':None,
-'ebcdic905':None,
-'ebcdic924':None,
-'ebcdic-any':None,
-'euc-tw':None,
-'hp15-tw':None,
-'ibm-930':None,
-'ibm-933':None,
-'ibm-935':None,
-'ibm-937':None,
-'ibm-939e':None,
-'ibm-939':None,
-'ibm-942':None,
-'ibm-950':None,
-'ms-936':None,
-'ms-949':None,
-'ms-950':None,
-'msdos720':None,
-'open_ed-037':None,
-'open_ed-1025':None,
-'open_ed-1112':None,
-'open_ed-1122':None,
-'open_ed-1130':None,
-'open_ed-1137':None,
-'open_ed-1141':None,
-'open_ed-1142':None,
-'open_ed-1143':None,
-'open_ed-1144':None,
-'open_ed-1145':None,
-'open_ed-1146':None,
-'open_ed-1147':None,
-'open_ed-1148':None,
-'open_ed-1149':None,
-'open_ed-1153':None,
-'open_ed-1154':None,
-'open_ed-1155':None,
-'open_ed-1156':None,
-'open_ed-1157':None,
-'open_ed-1158':None,
-'open_ed-1160':None,
-'open_ed-1164':None,
-'open_ed-1166':None,
-'open_ed-273':None,
-'open_ed-275':None,
-'open_ed-277':None,
-'open_ed-278':None,
-'open_ed-280':None,
-'open_ed-284':None,
-'open_ed-285':None,
-'open_ed-297':None,
-'open_ed-425':None,
-'open_ed-500':None,
-'open_ed-838':None,
-'open_ed-870':None,
-'open_ed-905':None,
-'open_ed-924':None,
-'open_ed-930':None,
-'open_ed-933':None,
-'open_ed-935':None,
-'open_ed-937':None,
-'open_ed-939e':None,
-'open_ed-939':None,
-'pc1098':None,
-'pciscii806':None,
-'pcoem1129':None,
-'pcoem921':None,
-'pcoem922':None,
-'roman8':None
+    'arabic': [1, 'iso8859_6', 'iso-8859-6', 'arabic'],
+    'big5': [2, 'big5', 'big5-tw', 'csbig5'],
+    'cyrillic': [1, 'iso8859_5', 'iso-8859-5', 'cyrillic'],
+    'ebcdic037': [1, 'cp037', 'ibm037', 'ibm039'],
+    'ebcdic273': [1, 'cp273', '273', 'ibm273', 'csibm273'],
+    'ebcdic500': [1, 'cp500', 'ebcdic-cp-be', 'ebcdic-cp-ch', 'ibm500'],
+    'euc-cn': [2, 'gb2312', 'chinese', 'csiso58gb231280', 'euc-cn', 'euccn', 'eucgb2312-cn', 'gb2312-1980', 'gb2312-80',
+               'iso-ir-58'],
+    'euc-jp': [4, 'euc_jis_2004', 'jisx0213', 'eucjis2004'],
+    'euc-kr': [4, 'euc_kr', 'euckr', 'korean', 'ksc5601', 'ks_c-5601', 'ks_c-5601-1987', 'ksx1001', 'ks_x-1001'],
+    'greek': [1, 'iso8859_7', 'iso-8859-7', 'greek', 'greek8'],
+    'hebrew': [1, 'iso8859_8', 'iso-8859-8', 'hebrew'],
+    'ibm-949': [1, 'cp949', '949', 'ms949', 'uhc'],
+    'kz1048': [1, 'kz1048', 'kz_1048', 'strk1048_2002', 'rk1048'],
+    'latin10': [1, 'iso8859_16', 'iso-8859-16', 'latin10', 'l10'],
+    'latin1': [1, 'latin_1', 'iso-8859-1', 'iso8859-1', '8859', 'cp819', 'latin', 'latin1', 'l1'],
+    'latin2': [1, 'iso8859_2', 'iso-8859-2', 'latin2', 'l2'],
+    'latin3': [1, 'iso8859_3', 'iso-8859-3', 'latin3', 'l3'],
+    'latin4': [1, 'iso8859_4', 'iso-8859-4', 'latin4', 'l4'],
+    'latin5': [1, 'iso8859_9', 'iso-8859-9', 'latin5', 'l5'],
+    'latin6': [1, 'iso8859_10', 'iso-8859-10', 'latin6', 'l6'],
+    'latin7': [1, 'iso8859_13', 'iso-8859-13', 'latin7', 'l7'],
+    'latin8': [1, 'iso8859_14', 'iso-8859-14', 'latin8', 'l8'],
+    'latin9': [1, 'iso8859_15', 'iso-8859-15', 'latin9', 'l9'],
+    'ms-932': [2, 'cp932', '932', 'ms932', 'mskanji', 'ms-kanji'],
+    'msdos737': [1, 'cp737'],
+    'msdos775': [1, 'cp775', 'ibm775'],
+    'open_ed-1026': [1, 'cp1026', 'ibm1026'],
+    'open_ed-1047': [1, 'cp1047'],  # Though this isn't available in base python, it's 3rd party
+    'open_ed-1140': [1, 'cp1140', 'ibm1140'],
+    'open_ed-424': [1, 'cp424', 'ebcdic-cp-he', 'ibm424'],
+    'open_ed-875': [1, 'cp875'],
+    'pcoem437': [1, 'cp437', '437', 'ibm437'],
+    'pcoem850': [1, 'cp850', '850', 'ibm850'],
+    'pcoem852': [1, 'cp852', '852', 'ibm852'],
+    'pcoem857': [1, 'cp857', '857', 'ibm857'],
+    'pcoem858': [1, 'cp858', '858', 'ibm858'],
+    'pcoem860': [1, 'cp860', '860', 'ibm860'],
+    'pcoem862': [1, 'cp862', '862', 'ibm862'],
+    'pcoem863': [1, 'cp863'],
+    'pcoem864': [1, 'cp864', 'ibm864'],
+    'pcoem865': [1, 'cp865', '865', 'ibm865'],
+    'pcoem866': [1, 'cp866', '866', 'ibm866'],
+    'pcoem869': [1, 'cp869', '869', 'cp-gr', 'ibm869'],
+    'pcoem874': [1, 'cp874'],
+    'shift-jis': [2, 'shift_jis', 'csshiftjis', 'shiftjis', 'sjis', 's_jis'],
+    'thai': [1, 'iso8859_11', 'so-8859-11', 'thai'],
+    'us-ascii': [1, 'ascii', '646', 'us-ascii'],
+    'utf-8': [4, 'utf_8', 'u8', 'utf', 'utf8', 'utf-8'],
+    'warabic': [1, 'cp1256', 'windows-1256'],
+    'wbaltic': [1, 'cp1257', 'windows-1257'],
+    'wcyrillic': [1, 'cp1251', 'windows-1251'],
+    'wgreek': [1, 'cp1253', 'windows-1253'],
+    'whebrew': [1, 'cp1255', 'windows-1255'],
+    'wlatin1': [1, 'cp1252', 'windows-1252'],
+    'wlatin2': [1, 'cp1250', 'windows-1250'],
+    'wturkish': [1, 'cp1254', 'windows-1254'],
+    'wvietnamese': [1, 'cp1258', 'windows-1258'],
+    'any': None,
+    'dec-cn': None,
+    'dec-jp': None,
+    'dec-tw': None,
+    'ebcdic1025': None,
+    'ebcdic1026': None,
+    'ebcdic1047': None,
+    'ebcdic1112': None,
+    'ebcdic1122': None,
+    'ebcdic1130': None,
+    'ebcdic1137': None,
+    'ebcdic1140': None,
+    'ebcdic1141': None,
+    'ebcdic1142': None,
+    'ebcdic1143': None,
+    'ebcdic1144': None,
+    'ebcdic1145': None,
+    'ebcdic1146': None,
+    'ebcdic1147': None,
+    'ebcdic1148': None,
+    'ebcdic1149': None,
+    'ebcdic1153': None,
+    'ebcdic1154': None,
+    'ebcdic1155': None,
+    'ebcdic1156': None,
+    'ebcdic1157': None,
+    'ebcdic1158': None,
+    'ebcdic1160': None,
+    'ebcdic1164': None,
+    'ebcdic275': None,
+    'ebcdic277': None,
+    'ebcdic278': None,
+    'ebcdic280': None,
+    'ebcdic284': None,
+    'ebcdic285': None,
+    'ebcdic297': None,
+    'ebcdic424': None,
+    'ebcdic425': None,
+    'ebcdic838': None,
+    'ebcdic870': None,
+    'ebcdic875': None,
+    'ebcdic905': None,
+    'ebcdic924': None,
+    'ebcdic-any': None,
+    'euc-tw': None,
+    'hp15-tw': None,
+    'ibm-930': None,
+    'ibm-933': None,
+    'ibm-935': None,
+    'ibm-937': None,
+    'ibm-939e': None,
+    'ibm-939': None,
+    'ibm-942': None,
+    'ibm-950': None,
+    'ms-936': None,
+    'ms-949': None,
+    'ms-950': None,
+    'msdos720': None,
+    'open_ed-037': None,
+    'open_ed-1025': None,
+    'open_ed-1112': None,
+    'open_ed-1122': None,
+    'open_ed-1130': None,
+    'open_ed-1137': None,
+    'open_ed-1141': None,
+    'open_ed-1142': None,
+    'open_ed-1143': None,
+    'open_ed-1144': None,
+    'open_ed-1145': None,
+    'open_ed-1146': None,
+    'open_ed-1147': None,
+    'open_ed-1148': None,
+    'open_ed-1149': None,
+    'open_ed-1153': None,
+    'open_ed-1154': None,
+    'open_ed-1155': None,
+    'open_ed-1156': None,
+    'open_ed-1157': None,
+    'open_ed-1158': None,
+    'open_ed-1160': None,
+    'open_ed-1164': None,
+    'open_ed-1166': None,
+    'open_ed-273': None,
+    'open_ed-275': None,
+    'open_ed-277': None,
+    'open_ed-278': None,
+    'open_ed-280': None,
+    'open_ed-284': None,
+    'open_ed-285': None,
+    'open_ed-297': None,
+    'open_ed-425': None,
+    'open_ed-500': None,
+    'open_ed-838': None,
+    'open_ed-870': None,
+    'open_ed-905': None,
+    'open_ed-924': None,
+    'open_ed-930': None,
+    'open_ed-933': None,
+    'open_ed-935': None,
+    'open_ed-937': None,
+    'open_ed-939e': None,
+    'open_ed-939': None,
+    'pc1098': None,
+    'pciscii806': None,
+    'pcoem1129': None,
+    'pcoem921': None,
+    'pcoem922': None,
+    'roman8': None
 }
-
