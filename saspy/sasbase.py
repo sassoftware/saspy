@@ -30,7 +30,7 @@
 # IO modules can be seamlessly plugged in, if needed, in the future.
 #
 # The expected use is to simply import this package and establish a SAS session, then use the methods:
-#
+#~
 # import saspy
 # sas = saspy.SASsession()
 # sas.[have_at_it]()
@@ -1022,7 +1022,7 @@ class SASsession():
         return sd
 
     def saslib(self, libref: str, engine: str = ' ', path: typing.Union[str, list] = '',
-               options: str = ' ', prompt: dict = []) -> str:
+               options: str = ' ', prompt: dict = None) -> str:
         """
 
         :param libref:  the libref for be assigned
