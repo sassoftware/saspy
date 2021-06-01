@@ -439,6 +439,7 @@ class SASsession():
     :param options: SAS options to include when connecting
     :param encoding: [depecated] The Compute Service interface only works in UTF-8, regardless of the SAS encoding
     :param timeout: This is passed to the HTTPConnection (http.client) and has nothing to do with Viya or Compute
+    :param inactive: This is Inactivity Timeout, in minutes, for the SAS Compute Session. It defaults to 120 minutes. 
     :param ip: [deprecated] The resolvable host name, or IP address to the Viya (use url instead)
     :param port: [depecated] The port to use to connect to Viya (use url instead)
     :param ssl: [depecated] Boolean identifying whether to use HTTPS (ssl=True) or just HTTP (use url instead)

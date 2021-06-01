@@ -849,7 +849,15 @@ context -
     prompt you for which one to use.
 
 timeout -
-    HTTPConnection timeout value, in seconds. Defaults to None.
+    (Optional) HTTPConnection timeout value, in seconds. Defaults to None. This is passed to HTTPConnection;
+    it's not part of the Viya API but rather the http.client API.
+
+inactive -
+    (Optional) An integer specifying the Inactive Time Out in minutes for the Compute Session. This is a SAS
+    Compute Service option and controls when the Compute Service self terminates based upon inactivity. The regular
+    Compute Session default timeout is 15 minutes, but for SASPy, I default this to 120 minutes. So, you likely won't
+    need to provide this yourself. The Session is explicitly terminates when your Python process ends or you issue endsas()
+
 options -
     (Optional) SAS options to include when connecting. These **must** be a Python list.
 
