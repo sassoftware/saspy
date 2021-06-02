@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.7.1 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.7.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.7.1 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.7.2 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="SASPy" href="index.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.7.1
+                3.7.2
               </div>
             
           
@@ -587,6 +587,12 @@ data streamed to the SAS server from saspy; the Reverse of the tunnel case. In t
 a port for the SAS server to use to accept a connection so data can be streamed to the SAs server.
 This is simply the reverse of the tunnel case, where SAS creates the socket and saspy connects. This will use
 the <code class="docutils literal"><span class="pre">-L</span></code> ssh option so that the saspy can connect to the remote SAS server on this port.</dd>
+<dt>localhost -</dt>
+<dd>This is a rarely needed options for providing the ip of the client machine (where SASPy/python is running).
+Normally this is resolved by gethostname() but in the case where the ip from that isn&#8217;t correct, you can
+override it by providing the ip here. The only case this has been seen is on a home network with no domains
+nor dns, such that a local machine name (&#8216;MyPC&#8217;) ends up resolved to some arbitrary internet ip
+(i.e.: 128.64.32.16), not the actual local ip (i.e.: 10.0.0.10).</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">ssh</span>      <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span> <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
             <span class="s1">&#39;ssh&#39;</span>     <span class="p">:</span> <span class="s1">&#39;/usr/bin/ssh&#39;</span><span class="p">,</span>
@@ -916,7 +922,13 @@ blank, the user is <strong>prompted</strong> for a password at runtime, unless i
 if you don&#8217;t provide one here, saspy will query the Service upon connecting and get a list of available Contexts and
 prompt you for which one to use.</dd>
 <dt>timeout -</dt>
-<dd>HTTPConnection timeout value, in seconds. Defaults to None.</dd>
+<dd>(Optional) HTTPConnection timeout value, in seconds. Defaults to None. This is passed to HTTPConnection;
+it&#8217;s not part of the Viya API but rather the http.client API.</dd>
+<dt>inactive -</dt>
+<dd>(Optional) An integer specifying the Inactive Time Out in minutes for the Compute Session. This is a SAS
+Compute Service option and controls when the Compute Service self terminates based upon inactivity. The regular
+Compute Session default timeout is 15 minutes, but for SASPy, I default this to 120 minutes. So, you likely won&#8217;t
+need to provide this yourself. The Session is already explicitly terminated when your Python process ends or you issue endsas()</dd>
 <dt>options -</dt>
 <dd>(Optional) SAS options to include when connecting. These <strong>must</strong> be a Python list.</dd>
 <dt>encoding -</dt>
@@ -1080,7 +1092,7 @@ session instead of remote IOM (it is a different connection type).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.7.1',
+            VERSION:'3.7.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
