@@ -21,6 +21,11 @@ or, for a given branch (put the name of the branch after @)::
 
     pip install git+https://git@github.com/sassoftware/saspy.git@branchname
 
+Also, if you prefer conda install, you can use install with that from conda-forge:
+
+    see: https://github.com/conda-forge/saspy-feedstock#installing-saspy
+
+
 To use this module after installation, you need to copy the example sascfg.py file to a 
 sascfg_personal.py and edit sascfg_personal.py per the instructions in the next section.
 
