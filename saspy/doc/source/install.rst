@@ -21,7 +21,7 @@ or, for a given branch (put the name of the branch after @)::
 
     pip install git+https://git@github.com/sassoftware/saspy.git@branchname
 
-Also, if you prefer conda install, you can use install with that from conda-forge:
+Also, if you prefer conda install, you can use that from the conda-forge channel:
 
     see: https://github.com/conda-forge/saspy-feedstock#installing-saspy
 
@@ -326,12 +326,12 @@ will use and thus what your configuration definition will contain.
         c. SAS Viya install
             i. On Linux
                 1. Client Linux
-                    a. HTTP - must have compute service configured and running
-                    b. STDIO - over SSH if not the same machine
+                    a. HTTP - must have compute service configured and running (Viya V3.5 and V4)
+                    b. STDIO - over SSH if not the same machine (this was for Viya V3 before Compute Service existed, not for V4)
                 2. Client Windows
-                    a. HTTP - must have compute service configured and running
+                    a. HTTP - must have compute service configured and running (Viya V3.5 and V4)
             ii. On Windows
-                1. HTTP - must have compute service configured and running
+                1. HTTP - must have compute service configured and running (Viya V3.5 and V4)
 
              
 Now you can go to the access method specific configuration below to
