@@ -387,6 +387,7 @@ m5dsbug -
     key to True will cause different code to be generated to work around this problem. See the description
     of V3.1.9 here for more info: https://github.com/sassoftware/saspy/releases/tag/v3.1.9
 
+
 .. code-block:: ipython3
 
     default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
@@ -469,6 +470,13 @@ rtunnel -
     a port for the SAS server to use to accept a connection so data can be streamed to the SAs server.
     This is simply the reverse of the tunnel case, where SAS creates the socket and saspy connects. This will use
     the ``-L`` ssh option so that the saspy can connect to the remote SAS server on this port.
+
+localhost -
+    This is a rarely needed options for providing the ip of the client machine (where SASPy/python is running).
+    Normally this is resolved by gethostname() but in the case where the ip from that isn't correct, you can
+    override it by providing the ip here. The only case this has been seen is on a home network with no domains
+    nor dns, such that a local machine name ('MyPC') ends up resolved to some arbitrary internet ip
+    (i.e.: 128.64.32.16), not the actual local ip (i.e.: 10.0.0.10).   
 
 
 .. code-block:: ipython3
@@ -856,7 +864,7 @@ inactive -
     (Optional) An integer specifying the Inactive Time Out in minutes for the Compute Session. This is a SAS
     Compute Service option and controls when the Compute Service self terminates based upon inactivity. The regular
     Compute Session default timeout is 15 minutes, but for SASPy, I default this to 120 minutes. So, you likely won't
-    need to provide this yourself. The Session is explicitly terminates when your Python process ends or you issue endsas()
+    need to provide this yourself. The Session is already explicitly terminated when your Python process ends or you issue endsas()
 
 options -
     (Optional) SAS options to include when connecting. These **must** be a Python list.

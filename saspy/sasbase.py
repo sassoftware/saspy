@@ -1283,6 +1283,7 @@ class SASsession():
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
+        :param labels: dict with column names and labels to assign to the new SAS data set
         :param outdsopts: a dictionary containing output data set options for the table being created \
                           for instance, compress=, encoding=, index=, outrep=, replace=, rename= ... \
                           the options will be generated simply as key=value, so if a value needs quotes or parentheses, provide them in the value
@@ -1361,6 +1362,7 @@ class SASsession():
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
+        :param labels: dict with column names and labels to assign to the new SAS data set
         :param outdsopts: a dictionary containing output data set options for the table being created \
                           for instance, compress=, encoding=, index=, outrep=, replace=, rename= ... \
                           the options will be generated simply as key=value, so if a value needs quotes or parentheses, provide them in the value
