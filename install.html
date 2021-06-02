@@ -203,7 +203,7 @@ installations.  To install the latest version using <cite>pip</cite>, you execut
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sassoftware</span><span class="o">/</span><span class="n">saspy</span><span class="o">.</span><span class="n">git</span><span class="nd">@branchname</span>
 </pre></div>
 </div>
-<p>Also, if you prefer conda install, you can use install with that from conda-forge:</p>
+<p>Also, if you prefer conda install, you can use that from the conda-forge channel:</p>
 <blockquote>
 <div>see: <a class="reference external" href="https://github.com/conda-forge/saspy-feedstock#installing-saspy">https://github.com/conda-forge/saspy-feedstock#installing-saspy</a></div></blockquote>
 <p>To use this module after installation, you need to copy the example sascfg.py file to a
@@ -457,12 +457,12 @@ will use and thus what your configuration definition will contain.</p>
     c. SAS Viya install
         i. On Linux
             1. Client Linux
-                a. HTTP - must have compute service configured and running
-                b. STDIO - over SSH if not the same machine
+                a. HTTP - must have compute service configured and running (Viya V3.5 and V4)
+                b. STDIO - over SSH if not the same machine (this was for Viya V3 before Compute Service existed, not for V4)
             2. Client Windows
-                a. HTTP - must have compute service configured and running
+                a. HTTP - must have compute service configured and running (Viya V3.5 and V4)
         ii. On Windows
-            1. HTTP - must have compute service configured and running
+            1. HTTP - must have compute service configured and running (Viya V3.5 and V4)
 </pre></div>
 </div>
 <p>Now you can go to the access method specific configuration below to
