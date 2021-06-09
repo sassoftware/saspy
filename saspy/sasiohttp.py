@@ -64,6 +64,8 @@ class SASconfigHTTP:
       self._prompt   = session._sb.sascfg._prompt
       self.lrecl     = cfg.get('lrecl', None)
       self.inactive  = cfg.get('inactive', 120)
+      sasbinder      = cfg.get('sasbinder', False)
+      sasbinderURL   = cfg.get('sasbinderURL', None)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -271,11 +273,15 @@ class SASconfigHTTP:
          code_pw = ''
          if len(user) == 0:
             msg  = "To connect to Viya you need either an authcode or a userid/pw. Neither were provided.\n"
-            msg += "Please enter which one you want to enter next. Type one of these now: [default=authcode | userid]: " 
+            msg += "Please enter which one you want to enter next. Type one of these now: [authcode | userid]: " 
+            if sasbinder:
+               msg = ("\033[1m\033[91mOn first usage, you need to register with the application before requesting an authcode. After registration, ignore this message.\033[0m\n"
+                      "Visit \033[4m{}\033[0m to register.".format(sasbinderURL))
+               print(msg)
+               code_pw = 'authcode'
+
             while code_pw.lower() not in ['userid','authcode']:
                code_pw = self._prompt(msg)
-               if code_pw == '':
-                  code_pw = 'authcode'
                if code_pw is None:
                   self._token = None
                   raise RuntimeError("Neither authcode nor userid provided.") 
@@ -286,7 +292,7 @@ class SASconfigHTTP:
                purl = self.url+purl
             else:
                purl = "http{}://{}:{}{}".format('s' if self.ssl else '', self.ip, self.port, purl)
-            msg  = "The default url to authenticate with would be {}\n".format(purl)
+            msg  = "The default url to authenticate is {}\n".format(purl)
             msg += "Please enter authcode: "
             authcode = self._prompt(msg)
             if authcode is None:
