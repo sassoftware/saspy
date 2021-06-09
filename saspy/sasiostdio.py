@@ -1,4 +1,4 @@
-#             
+#
 # Copyright SAS Institute
 #
 #  Licensed under the Apache License, Version 2.0 (the License);
@@ -440,14 +440,14 @@ Will use HTML5 for this SASsession.""")
             if lst == b'':
                break
             self.stdout.put(lst)
-            
+
       def _read_err(self):
          while True:
             log = self.pid.stderr.read(4096)
             if log == b'':
                break
             self.stderr.put(log)
-   
+
    def _endsas(self):
       rc  = 0
       ret = None
@@ -481,7 +481,7 @@ Will use HTML5 for this SASsession.""")
                   if x < 1:
                      break
                   sleep(1)
-              
+
                if rc[0] != 0:
                   pass
                else:
@@ -776,7 +776,7 @@ Will use HTML5 for this SASsession.""")
             while not gotit:
                var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
                if var is None:
-                  raise RuntimeError("No value for prompted macro variable provided.") 
+                  raise RuntimeError("No value for prompted macro variable provided.")
                if len(var) > 0:
                   gotit = True
                else:
@@ -862,7 +862,7 @@ Will use HTML5 for this SASsession.""")
                          if lenf > 20 and bof:
                             if lstf.count(b"</html>", (lenf - 15), lenf):
                                bail = True
-                      else: 
+                      else:
                          bail = True
             done = True
 
@@ -993,7 +993,7 @@ Will use HTML5 for this SASsession.""")
                   self._sb.SASpid = None
                   outrc = str(rc)
                   return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+outrc, LST='',ABORT=True)
-              
+
             lst = self.stdout.read1(4096)
             lstf += lst
             if len(lst) > 0:
@@ -1214,7 +1214,7 @@ Will use HTML5 for this SASsession.""")
    def upload_slow(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
       """
       This method uploads a local file to the SAS servers file system.
-      localfile  - path to the local file to upload 
+      localfile  - path to the local file to upload
       remotefile - path to remote file to create or overwrite
       overwrite  - overwrite the output file if it exists?
       permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
@@ -1229,25 +1229,25 @@ Will use HTML5 for this SASsession.""")
          else:
             remf = remotefile
             if overwrite == False:
-               return {'Success' : False, 
+               return {'Success' : False,
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
 
       try:
          fd = open(localfile, 'rb')
       except OSError as e:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
 
       code = """
          filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
          data _null_;
-         file saspydir; 
+         file saspydir;
          infile datalines;
          input;
          lin = length(_infile_);
          outdata = inputc(_infile_, '$hex.', lin);
          lout = lin/2;
-         put outdata $varying80. lout; 
+         put outdata $varying80. lout;
          datalines4;"""
 
       buf = fd.read1(40)
@@ -1264,7 +1264,7 @@ Will use HTML5 for this SASsession.""")
 
          ll = self.submit(code, 'text')
          fd.close()
-         return {'Success' : True, 
+         return {'Success' : True,
                  'LOG'     : ll['LOG']}
 
       while len(buf):
@@ -1278,19 +1278,19 @@ Will use HTML5 for this SASsession.""")
       ll = self.submit("run;\nfilename saspydir;", 'text')
       fd.close()
 
-      return {'Success' : True, 
+      return {'Success' : True,
               'LOG'     : ll['LOG']}
- 
+
    def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
       """
       This method uploads a local file to the SAS servers file system.
-      localfile  - path to the local file to upload 
+      localfile  - path to the local file to upload
       remotefile - path to remote file to create or overwrite
       overwrite  - overwrite the output file if it exists?
       permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
       """
       valid = self._sb.file_info(remotefile, quiet = True)
-      
+
       if valid is None:
          remf = remotefile
       else:
@@ -1299,7 +1299,7 @@ Will use HTML5 for this SASsession.""")
          else:
             remf = remotefile
             if overwrite == False:
-               return {'Success' : False, 
+               return {'Success' : False,
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
 
       port =  kwargs.get('port', 0)
@@ -1314,7 +1314,7 @@ Will use HTML5 for this SASsession.""")
       try:
          fd = open(localfile, 'rb')
       except OSError as e:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
 
       code = """
@@ -1322,7 +1322,7 @@ Will use HTML5 for this SASsession.""")
          filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=S lrecl=4096;
 
          data _null_; nb = -1;
-         infile sock nbyte=nb; 
+         infile sock nbyte=nb;
          file saspydir;
          input;
          put _infile_;
@@ -1370,23 +1370,23 @@ Will use HTML5 for this SASsession.""")
             sock.close()
             fd.close()
             ll = self.submit("", 'text')
-            return {'Success' : False, 
+            return {'Success' : False,
                     'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
-        
+
       ll = self.submit("", 'text')
-      return {'Success' : True, 
+      return {'Success' : True,
               'LOG'     : ll['LOG']}
- 
+
    def _upload_client(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
       """
       This method uploads a local file to the SAS servers file system.
-      localfile  - path to the local file to upload 
+      localfile  - path to the local file to upload
       remotefile - path to remote file to create or overwrite
       overwrite  - overwrite the output file if it exists?
       permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
       """
       valid = self._sb.file_info(remotefile, quiet = True)
-      
+
       if valid is None:
          remf = remotefile
       else:
@@ -1395,7 +1395,7 @@ Will use HTML5 for this SASsession.""")
          else:
             remf = remotefile
             if overwrite == False:
-               return {'Success' : False, 
+               return {'Success' : False,
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
 
       port =  kwargs.get('port', 0)
@@ -1415,7 +1415,7 @@ Will use HTML5 for this SASsession.""")
       try:
          fd = open(localfile, 'rb')
       except OSError as e:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
 
       try:
@@ -1426,7 +1426,7 @@ Will use HTML5 for this SASsession.""")
             sock.bind(('', port))
          port = sock.getsockname()[1]
       except OSError:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "Error try to open a socket in the upload method. Call failed."}
 
       code = """
@@ -1435,7 +1435,7 @@ Will use HTML5 for this SASsession.""")
          /* filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary lrecl=4096; */
 
          data _null_; nb = -1;
-         infile sock nbyte=nb; 
+         infile sock nbyte=nb;
          file saspydir;
          input;
          put _infile_;
@@ -1452,9 +1452,9 @@ Will use HTML5 for this SASsession.""")
          sock.close()
          fd.close()
          ll = self.submit("", 'text')
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "Failure in upload.\n"+ll['LOG']}
-         
+
       newsock = (0,0)
       try:
          newsock = sock.accept()
@@ -1487,13 +1487,13 @@ Will use HTML5 for this SASsession.""")
          sock.close()
          fd.close()
          ll = self.submit("", 'text')
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
       ll = self.submit("", 'text')
-      return {'Success' : True, 
+      return {'Success' : True,
               'LOG'     : ll['LOG']}
- 
+
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
       This method downloads a remote file from the SAS servers file system.
@@ -1504,11 +1504,11 @@ Will use HTML5 for this SASsession.""")
       valid = self._sb.file_info(remotefile, quiet = True)
 
       if valid is None:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "File "+str(remotefile)+" does not exist."}
 
       if valid == {}:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "File "+str(remotefile)+" is a directory."}
 
       if os.path.isdir(localfile):
@@ -1519,7 +1519,7 @@ Will use HTML5 for this SASsession.""")
       try:
          fd = open(locf, 'wb')
       except OSError as e:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "File "+str(locf)+" could not be opened. Error was: "+str(e)}
 
       port =  kwargs.get('port', 0)
@@ -1536,7 +1536,7 @@ Will use HTML5 for this SASsession.""")
             sock.bind(('', port))
          port = sock.getsockname()[1]
       except OSError:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "Error try to open a socket in the download method. Call failed."}
 
       if self.sascfg.ssh:
@@ -1566,9 +1566,9 @@ Will use HTML5 for this SASsession.""")
          sock.close()
          fd.close()
          ll = self.submit("", 'text')
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "Failure in download.\n"+ll['LOG']}
-         
+
       datar = b''
       newsock = (0,0)
       try:
@@ -1595,7 +1595,7 @@ Will use HTML5 for this SASsession.""")
          sock.close()
          fd.close()
          ll = self.submit("filename saspydir;", 'text')
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
       newsock[0].shutdown(socks.SHUT_RDWR)
@@ -1606,9 +1606,9 @@ Will use HTML5 for this SASsession.""")
       fd.close()
 
       ll = self.submit("filename saspydir;", 'text')
-      return {'Success' : True, 
+      return {'Success' : True,
               'LOG'     : ll['LOG']}
- 
+
    def _getbytelenF(self, x):
       return len(x.encode(self.sascfg.encoding))
 
@@ -1638,7 +1638,7 @@ Will use HTML5 for this SASsession.""")
       labels  - dict with column names and SAS Labels to assign to the new SAS data set
       outdsopts - a dictionary containing output data set options for the table being created
       encode_errors - 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char
-      char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set 
+      char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set
       """
       input   = ""
       xlate   = ""
@@ -1651,40 +1651,45 @@ Will use HTML5 for this SASsession.""")
       lf      = "'"+'%02x' % ord(LF.encode(self.sascfg.encoding))+"'x"
       cr      = "'"+'%02x' % ord(CR.encode(self.sascfg.encoding))+"'x "
       delim   = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
-      dtkeys  = datetimes.keys()
-      fmtkeys = outfmts.keys()
-      labkeys = labels.keys()
+
+      dts_upper = {k.upper():v for k,v in datetimes.items()}
+      dts_keys  = dts_upper.keys()
+      fmt_upper = {k.upper():v for k,v in outfmts.items()}
+      fmt_keys  = fmt_upper.keys()
+      lab_upper = {k.upper():v for k,v in labels.items()}
+      lab_keys  = lab_upper.keys()
 
       if encode_errors is None:
          encode_errors = 'fail'
 
-      if type(char_lengths) is not dict:
+      if type(char_lengths) is not dict or len(char_lengths) < ncols:
          charlens = self._sb.df_char_lengths(df, encode_errors, char_lengths)
       else:
-         charlens = char_lengths 
+         charlens = char_lengths
 
       if charlens is None:
          return -1
 
-      charlens = {k.upper():v for k,v in charlens.items()}
+      chr_upper = {k.upper():v for k,v in charlens.items()}
 
       if type(df.index) != pd.RangeIndex:
          warnings.warn("Note that Indexes are not transferred over as columns. Only actual coulmns are transferred")
 
       for name in df.columns:
          colname = str(name)
+         col_up  = colname.upper()
          input  += "'"+colname+"'n "
-         if colname in labkeys:
-            label += "label '"+colname+"'n ="+labels[colname]+";\n"
+         if col_up in lab_keys:
+            label += "label '"+colname+"'n ="+lab_upper[col_up]+";\n"
+         if col_up in fmt_keys:
+            format += "'"+colname+"'n "+fmt_upper[col_up]+" "
 
          if df.dtypes[name].kind in ('O','S','U','V'):
             try:
-               length += " '"+colname+"'n $"+str(charlens[colname.upper()])
+               length += " '"+colname+"'n $"+str(chr_upper[col_up])
             except KeyError as e:
                print("Dictionary provided as char_lengths is missing column: "+colname)
                raise e
-            if colname in fmtkeys:
-               format += "'"+colname+"'n "+outfmts[colname]+" "
             if keep_outer_quotes:
                input  += "~ "
             dts.append('C')
@@ -1695,36 +1700,26 @@ Will use HTML5 for this SASsession.""")
             if df.dtypes[name].kind in ('M'):
                length += " '"+colname+"'n 8"
                input  += ":B8601DT26.6 "
-               if colname not in dtkeys:
-                  if colname in fmtkeys:
-                     format += "'"+colname+"'n "+outfmts[colname]+" "
-                  else:
+               if col_up not in dts_keys:
+                  if col_up not in fmt_keys:
                      format += "'"+colname+"'n E8601DT26.6 "
                else:
-                  if datetimes[colname].lower() == 'date':
-                     if colname in fmtkeys:
-                        format += "'"+colname+"'n "+outfmts[colname]+" "
-                     else:
+                  if dts_upper[col_up].lower() == 'date':
+                     if col_up not in fmt_keys:
                         format += "'"+colname+"'n E8601DA. "
                      xlate  += " '"+colname+"'n = datepart('"+colname+"'n);\n"
                   else:
-                     if datetimes[colname].lower() == 'time':
-                        if colname in fmtkeys:
-                           format += "'"+colname+"'n "+outfmts[colname]+" "
-                        else:
+                     if dts_upper[col_up].lower() == 'time':
+                        if col_up not in fmt_keys:
                            format += "'"+colname+"'n E8601TM. "
                         xlate  += " '"+colname+"'n = timepart('"+colname+"'n);\n"
                      else:
                         print("invalid value for datetimes for column "+colname+". Using default.")
-                        if colname in fmtkeys:
-                           format += "'"+colname+"'n "+outfmts[colname]+" "
-                        else:
+                        if col_up not in fmt_keys:
                            format += "'"+colname+"'n E8601DT26.6 "
                dts.append('D')
             else:
                length += " '"+colname+"'n 8"
-               if colname in fmtkeys:
-                  format += "'"+colname+"'n "+outfmts[colname]+" "
                if df.dtypes[name] == 'bool':
                   dts.append('B')
                else:
@@ -1743,7 +1738,7 @@ Will use HTML5 for this SASsession.""")
          if port==0 and self.sascfg.tunnel:
             # we are using a tunnel; default to that port
             port = self.sascfg.tunnel
-       
+
          if self.sascfg.ssh:
             if not self.sascfg.tunnel:
                host = self.sascfg.hostip #socks.gethostname()
@@ -1762,7 +1757,7 @@ Will use HTML5 for this SASsession.""")
          except OSError as e:
             raise e
          code  = """filename sock socket '"""+host+""":"""+str(port)+"""' recfm=V termstr=LF;\n"""
-   
+
       code += "data "
       if len(libref):
          code += libref+"."
@@ -1800,7 +1795,7 @@ Will use HTML5 for this SASsession.""")
             print("error occured in SAS during data transfer. Check the LOG for issues.")
             sock.close()
             ll = self.submit("", 'text')
-            return {'Success' : False, 
+            return {'Success' : False,
                     'LOG'     : "Failure in upload.\n"+ll['LOG']}
          newsock = (0,0)
          try:
@@ -1815,7 +1810,7 @@ Will use HTML5 for this SASsession.""")
             sock.close()
             print("error occured in SAS during data transfer. Check the LOG for issues.")
             ll = self.submit("", 'text')
-            return {'Success' : False, 
+            return {'Success' : False,
                     'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
          ssock = newsock[0]
 
@@ -1920,7 +1915,7 @@ Will use HTML5 for this SASsession.""")
                   pass
                send -= sent
             code = ""
-          
+
             if os.name == 'nt':
                try:
                   log = self.stderr.get_nowait()
@@ -1937,7 +1932,7 @@ Will use HTML5 for this SASsession.""")
       if logd.count('ERROR:') > 0:
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
- 
+
       if len(code):
          if encode_errors != 'replace':
             try:
@@ -2030,7 +2025,7 @@ Will use HTML5 for this SASsession.""")
       labels  - dict with column names and SAS Labels to assign to the new SAS data set
       outdsopts - a dictionary containing output data set options for the table being created
       encode_errors - 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char
-      char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set 
+      char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set
       """
       input   = ""
       xlate   = ""
@@ -2061,7 +2056,7 @@ Will use HTML5 for this SASsession.""")
       if type(char_lengths) is not dict:
          charlens = self._sb.df_char_lengths(df, encode_errors, char_lengths)
       else:
-         charlens = char_lengths 
+         charlens = char_lengths
 
       if charlens is None:
          return -1
@@ -2200,7 +2195,7 @@ Will use HTML5 for this SASsession.""")
             os.write(self.pin, code+b'\n')
             self.stdin.flush()
             code = ""
-          
+
             if os.name == 'nt':
                try:
                   log = self.stderr.get_nowait()
@@ -2217,7 +2212,7 @@ Will use HTML5 for this SASsession.""")
       if logd.count('ERROR:') > 0:
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
- 
+
       if len(code):
          if encode_errors != 'replace':
             try:
@@ -2240,7 +2235,7 @@ Will use HTML5 for this SASsession.""")
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
                          rowsep: str = '\x01', colsep: str = '\x02',
-                         rowrep: str = ' ',    colrep: str = ' ', 
+                         rowrep: str = ' ',    colrep: str = ' ',
                          port: int=0, wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -2264,7 +2259,7 @@ Will use HTML5 for this SASsession.""")
                                            rowrep, colrep, port=port, wait=wait, **kwargs)
 
 
-   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, opts: dict = None, 
+   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, opts: dict = None,
                             port: int=0, wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -2279,7 +2274,7 @@ Will use HTML5 for this SASsession.""")
 
       These two options are for advanced usage. They override how saspy imports data. For more info
       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
- 
+
       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
@@ -2330,7 +2325,7 @@ Will use HTML5 for this SASsession.""")
       topts = dict(dsopts)
       topts.pop('firstobs', None)
       topts.pop('obs', None)
-   
+
       code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
       code += "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; file STDERR; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
@@ -2415,7 +2410,7 @@ Will use HTML5 for this SASsession.""")
          sock.close()
          ll = self.submit("", 'text')
          return ll['LOG']
-      
+
       newsock = (0,0)
       try:
          newsock = sock.accept()
@@ -2440,7 +2435,7 @@ Will use HTML5 for this SASsession.""")
       newsock[0].close()
       sock.close()
       ll = self.submit("", 'text')
-      
+
       if k_dts is None:  # don't override these if user provided their own dtypes
          for i in range(nvars):
             if vartype[i] == 'N':
@@ -2449,9 +2444,9 @@ Will use HTML5 for this SASsession.""")
 
       return df
 
-   def sasdata2dataframeDISK(self, table: str, libref: str ='', dsopts: dict = None,  
+   def sasdata2dataframeDISK(self, table: str, libref: str ='', dsopts: dict = None,
                              rowsep: str = '\x01', colsep: str = '\x02',
-                             rowrep: str = ' ',    colrep: str = ' ', port: int=0, 
+                             rowrep: str = ' ',    colrep: str = ' ', port: int=0,
                              wait: int=10, **kwargs) -> '<Pandas Data Frame object>':
       """
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -2469,7 +2464,7 @@ Will use HTML5 for this SASsession.""")
 
       These two options are for advanced usage. They override how saspy imports data. For more info
       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
- 
+
       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
@@ -2519,7 +2514,7 @@ Will use HTML5 for this SASsession.""")
       topts = dict(dsopts)
       topts.pop('firstobs', None)
       topts.pop('obs', None)
-   
+
       code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
       code += "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; file STDERR; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
@@ -2583,7 +2578,7 @@ Will use HTML5 for this SASsession.""")
                code += '; '
                if i % 10 == 0:
                   code +='\n'
-      
+
       code += "\nfile sock dlm="+cdelim+";\n"
       for i in range(nvars):
          if vartype[i] != 'N':
@@ -2603,7 +2598,7 @@ Will use HTML5 for this SASsession.""")
          if i % 10 == 0:
             code +='\n'
       code += rdelim+";\nrun;"
-     
+
       if k_dts is None:
          dts = {}
          for i in range(nvars):
@@ -2616,7 +2611,7 @@ Will use HTML5 for this SASsession.""")
                dts[varlist[i]] = 'str'
       else:
          dts = k_dts
- 
+
       miss = ['.', ' ', '. ']
       quoting = kwargs.pop('quoting', 3)
 
@@ -2628,14 +2623,14 @@ Will use HTML5 for this SASsession.""")
          sock.close()
          ll = self.submit("", 'text')
          return ll['LOG']
-      
+
       newsock = (0,0)
       try:
          newsock = sock.accept()
 
          sockout = _read_sock(newsock=newsock, rowsep=rowsep.encode())
 
-         df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
+         df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist,
                           sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
                           encoding='utf8', quoting=quoting, **kwargs)
 
@@ -2679,7 +2674,7 @@ class _read_sock(io.StringIO):
       while datl < size or notarow:
          data = self.newsock[0].recv(size)
          dl = len(data)
-   
+
          if dl:
             datl       += dl
             self.datar += data
@@ -2690,10 +2685,10 @@ class _read_sock(io.StringIO):
                return ''
             else:
                break
-   
+
       data        = self.datar.rpartition(self.rowsep)
       datap       = data[0]+data[1]
       self.datar  = data[2]
 
       return datap.decode()
-   
+

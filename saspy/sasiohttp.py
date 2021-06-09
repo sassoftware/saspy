@@ -36,10 +36,10 @@ except ImportError:
 
 class SASconfigHTTP:
    '''
-   This object is not intended to be used directly. Instantiate a SASsession object instead 
+   This object is not intended to be used directly. Instantiate a SASsession object instead
    '''
    def __init__(self, session, **kwargs):
-      self._kernel   = kwargs.get('kernel', None)   
+      self._kernel   = kwargs.get('kernel', None)
       SAScfg         = session._sb.sascfg.SAScfg
       self.name      = session._sb.sascfg.name
       cfg            = getattr(SAScfg, self.name)
@@ -56,7 +56,7 @@ class SASconfigHTTP:
       self.timeout   = cfg.get('timeout', None)
       user           = cfg.get('user', '')
       pw             = cfg.get('pw', '')
-      client_id      = cfg.get('client_id', 'SASPy')
+      client_id      = cfg.get('client_id', None)
       client_secret  = cfg.get('client_secret', '')
       authcode       = cfg.get('authcode', None)
       self.encoding  = cfg.get('encoding', '')
@@ -87,49 +87,49 @@ class SASconfigHTTP:
       self.verbose = self.cfgopts.get('verbose', True)
       self.verbose = kwargs.get('verbose', self.verbose)
 
-      inurl = kwargs.get('url', None)             
+      inurl = kwargs.get('url', None)
       if inurl is not None:
          if lock and len(self.url):
             print("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.url = inurl   
+            self.url = inurl
 
-      inip = kwargs.get('ip', None)             
+      inip = kwargs.get('ip', None)
       if inip is not None:
          if lock and len(self.ip):
             print("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.ip = inip   
+            self.ip = inip
 
-      inport = kwargs.get('port', None)         
+      inport = kwargs.get('port', None)
       if inport is not None:
          if lock and self.port:
             print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.port = inport
 
-      inctxname = kwargs.get('context', None)   
+      inctxname = kwargs.get('context', None)
       if inctxname is not None:
          if lock and len(self.ctxname):
             print("Parameter 'context' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.ctxname = inctxname
 
-      inoptions = kwargs.get('options', None)   
+      inoptions = kwargs.get('options', None)
       if inoptions is not None:
          if lock and len(self.options):
            print("Parameter 'options' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.options = inoptions
 
-      inssl = kwargs.get('ssl', None)         
+      inssl = kwargs.get('ssl', None)
       if inssl is not None:
          if lock and self.ssl:
             print("Parameter 'ssl' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.ssl = bool(inssl)
 
-      inver = kwargs.get('verify', None)         
+      inver = kwargs.get('verify', None)
       if inver is not None:
          if lock and self.verify:
             print("Parameter 'verify' passed to SAS_session was ignored due to configuration restriction.")
@@ -148,7 +148,7 @@ class SASconfigHTTP:
          if lock and len(self.encoding):
             print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.encoding = inencoding   
+            self.encoding = inencoding
       if not self.encoding or self.encoding != 'utf_8':
          self.encoding = 'utf_8'
 
@@ -179,6 +179,11 @@ class SASconfigHTTP:
             print("Parameter 'client_id' passed to SAS_session was ignored due to configuration restriction.")
          else:
             client_id = incid
+      if client_id is None:
+         client_id    = 'SASPy'
+         use_authcode = False
+      else:
+         use_authcode = True
 
       inlrecl = kwargs.get('lrecl', None)
       if inlrecl is not None:
@@ -201,7 +206,7 @@ class SASconfigHTTP:
          if lock and len(self.authkey):
             print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.authkey = inak   
+            self.authkey = inak
 
       if len(self.url) > 0:
          http = self.url.split('://')
@@ -218,10 +223,10 @@ class SASconfigHTTP:
             self.ip = self._prompt("Please enter the host (ip address) you are trying to connect to: ")
             if self.ip is None:
                self._token = None
-               raise RuntimeError("No IP address provided.") 
+               raise RuntimeError("No IP address provided.")
          else:
             print("In lockdown mode and missing ip adress in the config named: "+cfgname )
-            raise RuntimeError("No IP address provided.") 
+            raise RuntimeError("No IP address provided.")
 
       if not self.port:
          if self.ssl:
@@ -232,14 +237,14 @@ class SASconfigHTTP:
       if not self._token and not authcode:
          found = False
          if self.authkey:
-            if os.name == 'nt': 
+            if os.name == 'nt':
                pwf = os.path.expanduser('~')+os.sep+'_authinfo'
             else:
                pwf = os.path.expanduser('~')+os.sep+'.authinfo'
             try:
                fid = open(pwf, mode='r')
                for line in fid:
-                  if line.startswith(self.authkey): 
+                  if line.startswith(self.authkey):
                      user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
                      pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
                      found = True
@@ -250,35 +255,38 @@ class SASconfigHTTP:
                pass
             except:
                pass
-      
+
             if not found:
                print('Did not find key '+self.authkey+' in authinfo file:'+pwf+'\n')
-   
-         inuser = kwargs.get('user', '')              
+
+         inuser = kwargs.get('user', '')
          if len(inuser) > 0:
             if lock and len(user):
                print("Parameter 'user' passed to SAS_session was ignored due to configuration restriction.")
             else:
                user = inuser
-   
-         inpw = kwargs.get('pw', '')                  
+
+         inpw = kwargs.get('pw', '')
          if len(inpw) > 0:
             if lock and len(pw):
                print("Parameter 'pw' passed to SAS_session was ignored due to configuration restriction.")
             else:
                pw = inpw
 
-         code_pw = ''
-         if len(user) == 0:
-            msg  = "To connect to Viya you need either an authcode or a userid/pw. Neither were provided.\n"
-            msg += "Please enter which one you want to enter next. Type one of these now: [default=authcode | userid]: " 
-            while code_pw.lower() not in ['userid','authcode']:
-               code_pw = self._prompt(msg)
-               if code_pw == '':
-                  code_pw = 'authcode'
-               if code_pw is None:
-                  self._token = None
-                  raise RuntimeError("Neither authcode nor userid provided.") 
+         if use_authcode:
+            code_pw = 'authcode'
+         else:
+            code_pw = ''
+            if len(user) == 0:
+               msg  = "To connect to Viya you need either an authcode or a userid/pw. Neither were provided.\n"
+               msg += "Please enter which one you want to enter next. Type one of these now: [default=authcode | userid]: "
+               while code_pw.lower() not in ['userid','authcode']:
+                  code_pw = self._prompt(msg)
+                  if code_pw == '':
+                     code_pw = 'authcode'
+                  if code_pw is None:
+                     self._token = None
+                     raise RuntimeError("Neither authcode nor userid provided.")
 
          if code_pw.lower() == 'authcode':
             purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code".format(client_id)
@@ -291,14 +299,14 @@ class SASconfigHTTP:
             authcode = self._prompt(msg)
             if authcode is None:
                self._token = None
-               raise RuntimeError("No authcode provided.") 
+               raise RuntimeError("No authcode provided.")
          else:
             while len(user) == 0:
                user = self._prompt("Please enter userid: ")
                if user is None:
                   self._token = None
-                  raise RuntimeError("No userid provided.") 
-      
+                  raise RuntimeError("No userid provided.")
+
             while len(pw) == 0:
                pw = self._prompt("Please enter password: ", pw = True)
                if pw is None:
@@ -331,7 +339,7 @@ class SASconfigHTTP:
          print("Could not acquire an Authentication Token")
          return
 
-      # GET Contexts 
+      # GET Contexts
       contexts = self._get_contexts()
       if contexts == None:
          self._token = None
@@ -355,12 +363,12 @@ class SASconfigHTTP:
                                       str(ctxnames)+" ")
                if ctxname is None:
                   self._token = None
-                  raise RuntimeError("No SAS Context provided.") 
+                  raise RuntimeError("No SAS Context provided.")
                else:
                   self.ctxname = ctxname
             except:
                raise SASHTTPconnectionError(msg=
-                  "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " + 
+                  "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " +
                    str(ctxnames)+" ")
 
       while self.ctxname not in ctxnames:
@@ -374,25 +382,25 @@ class SASconfigHTTP:
             '''
             try:
                ctxname = self._prompt(
-                   "SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: " + 
+                   "SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: " +
                     str(ctxnames)+" ")
                if ctxname is None:
                   self._token = None
                   raise SASHTTPconnectionError(msg=
-                      "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " + 
+                      "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " +
                        str(ctxnames)+" ")
                else:
                   self.ctxname = ctxname
             except:
                raise SASHTTPconnectionError(msg=
-                   "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " + 
+                   "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " +
                     str(ctxnames)+" ")
          else:
-            msg  = "SAS Context specified in the SASconfig ("+self.ctxname+") was not found on this server, and because " 
+            msg  = "SAS Context specified in the SASconfig ("+self.ctxname+") was not found on this server, and because "
             msg += "the SASconfig is in lockdown mode, there is no prompting for other contexts. No connection established."
             print(msg)
             self._token = None
-            raise RuntimeError("No SAS Context provided.") 
+            raise RuntimeError("No SAS Context provided.")
 
       for i in range(len(contexts)):
          if contexts[i].get('name') == self.ctxname:
@@ -411,7 +419,7 @@ class SASconfigHTTP:
          uclient_id     = urllib.parse.quote(client_id)
          uclient_secret = urllib.parse.quote(client_secret)
          d1 = ("grant_type=authorization_code&code="+uauthcode+"&client_id="+uclient_id+"&client_secret="+uclient_secret).encode(self.encoding)
-         headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded"} 
+         headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded"}
       else:
          uuser = urllib.parse.quote(user)
          upw   = urllib.parse.quote(pw)
@@ -420,7 +428,7 @@ class SASconfigHTTP:
          authheader = '%s' % basic.splitlines()[0].decode(self.encoding)
          headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
                   "Authorization":"Basic "+authheader}
-      
+
       # POST AuthToken
       conn = self.HTTPConn; conn.connect()
       try:
@@ -449,7 +457,7 @@ class SASconfigHTTP:
    def _get_contexts(self):
       #import pdb; pdb.set_trace()
 
-      # GET Contexts 
+      # GET Contexts
       conn = self.HTTPConn; conn.connect()
       headers={"Accept":"application/vnd.sas.collection+json",
                "Accept-Item":"application/vnd.sas.compute.context.summary+json",
@@ -470,7 +478,7 @@ class SASconfigHTTP:
       return contexts
 
    def _create_context(self, user):
-      # GET Contexts 
+      # GET Contexts
       conn = self.HTTPConn; conn.connect()
       d1  = '{"name": "SASPy","version": 1,"description": "SASPy Context","attributes": {"sessionInactiveTimeout": 60 },'
       d1 += '"launchContext": {"contextName": "'+self.ctxname+'"},"launchType": "service","authorizedUsers": ["'+user+'"]}'
@@ -491,7 +499,7 @@ class SASconfigHTTP:
       contexts = self._get_contexts()
       return contexts
 
-                   
+
 class SASsessionHTTP():
    '''
    The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
@@ -501,11 +509,11 @@ class SASsessionHTTP():
    pw        - pw for the userid being used to connect to Compute Service
    ip        - overrides IP      Dict entry of cfgname in sascfg.py file
    port      - overrides Port    Dict entry of cfgname in sascfg.py file
-   context   - overrides Context Dict entry of cfgname in sascfg.py file 
+   context   - overrides Context Dict entry of cfgname in sascfg.py file
    options   - overrides Options Dict entry of cfgname in sascfg.py file
    encoding  - This is the python encoding value that matches the SAS session encoding of the Compute Server you are connecting to
    '''
-   #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, user: str ='', pw: str ='', 
+   #def __init__(self, cfgname: str ='', kernel: '<SAS_kernel object>' =None, user: str ='', pw: str ='',
    #                   ip: str ='', port: int ='', context: str ='', options: list =[]) -> '<SASsession object>':
    def __init__(self, **kwargs):
       self.pid        = None
@@ -533,7 +541,7 @@ class SASsessionHTTP():
          options = '[';
          for opt in self.sascfg.options:
             options += '"'+opt+'", '
-         options = (options.rpartition(','))[0]+']'                                
+         options = (options.rpartition(','))[0]+']'
       else:
          options = '[]'
 
@@ -578,7 +586,7 @@ class SASsessionHTTP():
       if self._session == None:
          print("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
          return None
-      
+
       #GET Session uri's once
       for ld in self._session.get('links'):
          if   ld.get('method') == 'GET'     and ld.get('rel') == 'log':
@@ -627,7 +635,7 @@ class SASsessionHTTP():
 
       ll = self.submit("options svgtitle='svgtitle'; options validvarname=any validmemname=extend pagesize=max nosyntaxcheck; ods graphics on;", "text")
       if self.sascfg.verbose:
-         print("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self.pid)       
+         print("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self.pid)
 
       return self.pid
 
@@ -643,7 +651,7 @@ class SASsessionHTTP():
          conn.close()
 
          if self.sascfg.verbose:
-            print("SAS server terminated for SESSION_ID="+self._session.get('id'))       
+            print("SAS server terminated for SESSION_ID="+self._session.get('id'))
          self._session   = None
          self.pid        = None
          self._sb.SASpid = None
@@ -687,7 +695,7 @@ class SASsessionHTTP():
          for line in log:
              logr += line.get('line')+'\n'
 
-      if jobid != None:   
+      if jobid != None:
          self._log += logr.replace(chr(12), chr(10))
 
       if logr.count('ERROR:') > 0:
@@ -740,11 +748,11 @@ class SASsessionHTTP():
                                                    '<body class="l body">').replace("font-size: x-small;",
                                                                                     "font-size:  normal;")
       return lstd
-   
+
    def _getlsttxt(self, jobid=None):
       start = 0
       lstr = ''
-   
+
       # GET Log
       if jobid:
          for ld in jobid.get('links'):
@@ -791,7 +799,7 @@ class SASsessionHTTP():
          ods = False
          odsopen  = '""'
          odsclose = '""'
-   
+
       # POST Job
       conn = self.sascfg.HTTPConn; conn.connect()
       jcode = json.dumps(code)
@@ -809,7 +817,7 @@ class SASsessionHTTP():
 
    def submit(self, code: str, results: str ="html", prompt: dict = None, **kwargs) -> dict:
       '''
-      code    - the SAS statements you want to execute 
+      code    - the SAS statements you want to execute
       results - format of results, HTML is default, TEXT is the alternative
       prompt  - dict of names:flags to prompt for; create marco variables (used in submitted code), then keep or delete
                 The keys are the names of the macro variables and the boolean flag is to either hide what you type and delete
@@ -829,7 +837,7 @@ class SASsessionHTTP():
       NOTE: to view HTML results in the ipykernel, issue: from IPython.display import HTML  and use HTML() instead of print()
       i.e,: results = sas.submit("data a; x=1; run; proc print;run')
             print(results['LOG'])
-            HTML(results['LST']) 
+            HTML(results['LST'])
       '''
       prompt  = prompt if prompt is not None else {}
       printto = kwargs.pop('undo', False)
@@ -852,7 +860,7 @@ class SASsessionHTTP():
          ods = False
          odsopen  = '""'
          odsclose = '""'
-   
+
       if len(prompt):
          pcodei += 'options nosource nonotes;\n'
          pcodeo += 'options nosource nonotes;\n'
@@ -861,7 +869,7 @@ class SASsessionHTTP():
             while not gotit:
                var = self.sascfg._prompt('Please enter value for macro variable '+key+' ', pw=prompt[key])
                if var is None:
-                  raise RuntimeError("No value for prompted macro variable provided.") 
+                  raise RuntimeError("No value for prompted macro variable provided.")
                if len(var) > 0:
                   gotit = True
                else:
@@ -994,7 +1002,7 @@ class SASsessionHTTP():
          req = conn.getresponse()
          status = req.status
          conn.close()
-    
+
          if status == 200:
             libref = 'USER'
          else:
@@ -1015,7 +1023,7 @@ class SASsessionHTTP():
       exists = int(l2[0])
 
       return bool(exists)
-   
+
       """
       # HEAD Data Table
       conn = self.sascfg.HTTPConn; conn.connect()
@@ -1029,10 +1037,10 @@ class SASsessionHTTP():
          exists = True
       else:
          exists = False
-   
+
       return exists
       """
-   
+
    def read_csv(self, file: str, table: str, libref: str ="", nosub: bool=False, opts: dict ={}) -> '<SASdata object>':
       '''
       This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
@@ -1042,21 +1050,21 @@ class SASsessionHTTP():
       opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
       '''
       code  = "filename x "
-   
+
       if file.lower().startswith("http"):
          code += "url "
-   
+
       code += "\""+file+"\";\n"
       code += "proc import datafile=x out="
       if len(libref):
          code += libref+"."
       code += "'"+table.strip()+"'n dbms=csv replace; "+self._sb._impopts(opts)+" run;"
-   
+
       if nosub:
          print(code)
       else:
          ll = self.submit(code, "text")
-   
+
    def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict ={}, opts: dict ={}) -> 'The LOG showing the results of the step':
       '''
       This method will export a SAS Data Set to a file in CCSV format.
@@ -1085,7 +1093,7 @@ class SASsessionHTTP():
    def upload(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
       """
       This method uploads a local file to the SAS servers file system.
-      localfile  - path to the local file to upload 
+      localfile  - path to the local file to upload
       remotefile - path to remote file to create or overwrite
       overwrite  - overwrite the output file if it exists?
       permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
@@ -1100,13 +1108,13 @@ class SASsessionHTTP():
          else:
             remf = remotefile
             if overwrite == False:
-               return {'Success' : False, 
+               return {'Success' : False,
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
 
       try:
          fd = open(localfile, 'rb')
       except OSError as e:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
 
       fsize = os.path.getsize(localfile)
@@ -1177,9 +1185,9 @@ class SASsessionHTTP():
       logf += ll['LOG']
       fd.close()
 
-      return {'Success' : True, 
+      return {'Success' : True,
               'LOG'     : logf}
- 
+
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
       This method downloads a remote file from the SAS servers file system.
@@ -1190,11 +1198,11 @@ class SASsessionHTTP():
       valid = self._sb.file_info(remotefile, quiet = True)
 
       if valid is None:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "File "+str(remotefile)+" does not exist."}
 
       if valid == {}:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "File "+str(remotefile)+" is a directory."}
 
       if os.path.isdir(localfile):
@@ -1208,7 +1216,7 @@ class SASsessionHTTP():
          fd.close()
          fd = open(locf, 'wb')
       except OSError as e:
-         return {'Success' : False, 
+         return {'Success' : False,
                  'LOG'     : "File "+str(locf)+" could not be opened or written to. Error was: "+str(e)}
 
       code = "filename _sp_updn '"+remotefile+"' recfm=F encoding=binary lrecl=4096;"
@@ -1231,17 +1239,17 @@ class SASsessionHTTP():
 
       ll = self.submit("filename _sp_updn;", 'text')
       logf += ll['LOG']
-      
-      return {'Success' : True, 
+
+      return {'Success' : True,
               'LOG'     : logf}
- 
+
    def _getbytelenF(self, x):
       return len(x.encode(self.sascfg.encoding))
 
    def _getbytelenR(self, x):
       return len(x.encode(self.sascfg.encoding, errors='replace'))
 
-   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a', 
+   def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a',
                          libref: str ="", keep_outer_quotes: bool=False,
                                           embedded_newlines: bool=True,
                          LF: str = '\x01', CR: str = '\x02',
@@ -1265,7 +1273,7 @@ class SASsessionHTTP():
       outdsopts - a dictionary containing output data set options for the table being created
       encode_errors - 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char \
                       'ignore' will not  transcode n Python, so you get whatever happens with your data and SAS
-      char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set 
+      char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set
       '''
       input   = ""
       xlate   = ""
@@ -1278,9 +1286,13 @@ class SASsessionHTTP():
       lf      = "'"+'%02x' % ord(LF.encode(self.sascfg.encoding))+"'x"
       cr      = "'"+'%02x' % ord(CR.encode(self.sascfg.encoding))+"'x "
       delim   = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
-      dtkeys  = datetimes.keys()
-      fmtkeys = outfmts.keys()
-      labkeys = labels.keys()
+
+      dts_upper = {k.upper():v for k,v in datetimes.items()}
+      dts_keys  = dts_upper.keys()
+      fmt_upper = {k.upper():v for k,v in outfmts.items()}
+      fmt_keys  = fmt_upper.keys()
+      lab_upper = {k.upper():v for k,v in labels.items()}
+      lab_keys  = lab_upper.keys()
 
       if encode_errors is None:
          encode_errors = 'fail'
@@ -1293,33 +1305,34 @@ class SASsessionHTTP():
       else:
          CnotB = bpc == 1
 
-      if type(char_lengths) is not dict:
+      if type(char_lengths) is not dict or len(char_lengths) < ncols:
          charlens = self._sb.df_char_lengths(df, encode_errors, char_lengths)
       else:
-         charlens = char_lengths 
+         charlens = char_lengths
 
       if charlens is None:
          return -1
 
-      charlens = {k.upper():v for k,v in charlens.items()}
+      chr_upper = {k.upper():v for k,v in charlens.items()}
 
       if type(df.index) != pd.RangeIndex:
          warnings.warn("Note that Indexes are not transferred over as columns. Only actual coulmns are transferred")
 
       for name in df.columns:
          colname = str(name)
+         col_up  = colname.upper()
          input  += "'"+colname+"'n "
-         if colname in labkeys:
-            label += "label '"+colname+"'n ="+labels[colname]+";\n"
+         if col_up in lab_keys:
+            label += "label '"+colname+"'n ="+lab_upper[col_up]+";\n"
+         if col_up in fmt_keys:
+            format += "'"+colname+"'n "+fmt_upper[col_up]+" "
 
          if df.dtypes[name].kind in ('O','S','U','V'):
             try:
-               length += " '"+colname+"'n $"+str(charlens[colname.upper()])
+               length += " '"+colname+"'n $"+str(chr_upper[col_up])
             except KeyError as e:
                print("Dictionary provided as char_lengths is missing column: "+colname)
                raise e
-            if colname in fmtkeys:
-               format += "'"+colname+"'n "+outfmts[colname]+" "
             if keep_outer_quotes:
                input  += "~ "
             dts.append('C')
@@ -1330,36 +1343,26 @@ class SASsessionHTTP():
             if df.dtypes[name].kind in ('M'):
                length += " '"+colname+"'n 8"
                input  += ":B8601DT26.6 "
-               if colname not in dtkeys:
-                  if colname in fmtkeys:
-                     format += "'"+colname+"'n "+outfmts[colname]+" "
-                  else:
+               if col_up not in dts_keys:
+                  if col_up not in fmt_keys:
                      format += "'"+colname+"'n E8601DT26.6 "
                else:
-                  if datetimes[colname].lower() == 'date':
-                     if colname in fmtkeys:
-                        format += "'"+colname+"'n "+outfmts[colname]+" "
-                     else:
+                  if dts_upper[col_up].lower() == 'date':
+                     if col_up not in fmt_keys:
                         format += "'"+colname+"'n E8601DA. "
                      xlate  += " '"+colname+"'n = datepart('"+colname+"'n);\n"
                   else:
-                     if datetimes[colname].lower() == 'time':
-                        if colname in fmtkeys:
-                           format += "'"+colname+"'n "+outfmts[colname]+" "
-                        else:
+                     if dts_upper[col_up].lower() == 'time':
+                        if col_up not in fmt_keys:
                            format += "'"+colname+"'n E8601TM. "
                         xlate  += " '"+colname+"'n = timepart('"+colname+"'n);\n"
                      else:
                         print("invalid value for datetimes for column "+colname+". Using default.")
-                        if colname in fmtkeys:
-                           format += "'"+colname+"'n "+outfmts[colname]+" "
-                        else:
+                        if col_up not in fmt_keys:
                            format += "'"+colname+"'n E8601DT26.6 "
                dts.append('D')
             else:
                length += " '"+colname+"'n 8"
-               if colname in fmtkeys:
-                  format += "'"+colname+"'n "+outfmts[colname]+" "
                if df.dtypes[name] == 'bool':
                   dts.append('B')
                else:
@@ -1420,7 +1423,7 @@ class SASsessionHTTP():
             card = card.replace('\n', LF).replace('\r', CR)
 
          code += card+"\n"
- 
+
          if len(code) > blksz:
             if not noencode:
                if encode_errors == 'fail':
@@ -1482,7 +1485,7 @@ class SASsessionHTTP():
                                            rowrep, colrep, **kwargs)
 
 
-   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict =None, opts: dict = None, 
+   def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict =None, opts: dict = None,
                             **kwargs) -> '<Pandas Data Frame object>':
       '''
       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
@@ -1495,7 +1498,7 @@ class SASsessionHTTP():
 
       These two options are for advanced usage. They override how saspy imports data. For more info
       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
- 
+
       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       '''
@@ -1546,18 +1549,18 @@ class SASsessionHTTP():
       topts = dict(dsopts)
       topts.pop('firstobs', None)
       topts.pop('obs', None)
-   
+
       code  = "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
-   
+
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
-   
+
       ll = self.submit(code, "text")
 
       l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")              
+      l2 = l2[2].partition("\n")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
@@ -1657,7 +1660,7 @@ class SASsessionHTTP():
 
       These two options are for advanced usage. They override how saspy imports data. For more info
       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
- 
+
       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       '''
@@ -1707,19 +1710,19 @@ class SASsessionHTTP():
       topts = dict(dsopts)
       topts.pop('firstobs', None)
       topts.pop('obs', None)
-   
+
       code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;"
       code += "data work._n_u_l_l_;output;run;\n"
       code += "data _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
-   
+
       for i in range(nvars):
          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
       code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
-   
+
       ll = self.submit(code, "text")
 
       l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")              
+      l2 = l2[2].partition("\n")
       varcat = l2[2].split("\n", nvars)
       del varcat[nvars]
 
@@ -1810,7 +1813,7 @@ class SASsessionHTTP():
 
       sockout = _read_sock(req=req, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode())
 
-      df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist, 
+      df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist,
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
                        encoding='utf-8', quoting=quoting, **kwargs)
 
@@ -1824,7 +1827,7 @@ class SASsessionHTTP():
 
       ll = self.submit("filename _sp_updn;", 'text')
       logf += ll['LOG']
-      
+
       return df
 
 class _read_sock(io.StringIO):
@@ -1843,7 +1846,7 @@ class _read_sock(io.StringIO):
       while datl < size or notarow:
          data = self.req.read(size)
          dl = len(data)
-   
+
          if dl:
             datl       += dl
             self.datar += data
@@ -1854,7 +1857,7 @@ class _read_sock(io.StringIO):
                return ''
             else:
                break
-   
+
       data        = self.datar.rpartition(self.rsep)
       if self.method == 'DISK':
          datap    = (data[0]+data[1]).replace(self.rsep, self.rowsep)

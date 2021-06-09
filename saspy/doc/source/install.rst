@@ -26,7 +26,7 @@ Also, if you prefer conda install, you can use that from the conda-forge channel
     see: https://github.com/conda-forge/saspy-feedstock#installing-saspy
 
 
-To use this module after installation, you need to copy the example sascfg.py file to a 
+To use this module after installation, you need to copy the example sascfg.py file to a
 sascfg_personal.py and edit sascfg_personal.py per the instructions in the next section.
 
 * If you run into any problems, see :doc:`troubleshooting`.
@@ -38,7 +38,7 @@ sascfg_personal.py and edit sascfg_personal.py per the instructions in the next 
 Configuration
 ===============
 
-This module can connect and start different kinds of SAS sessions. It can connect to SAS 
+This module can connect and start different kinds of SAS sessions. It can connect to SAS
 on Unix, Mainframe, and Windows. It can connect to a local SAS session or remote session.
 Because of the wide range of connection types, there are a number of different access methods
 which are used to connect to different kinds of SAS sessions.
@@ -46,7 +46,7 @@ which are used to connect to different kinds of SAS sessions.
 The current set of connection methods are as follows:
 
 `STDIO`_
-  This connection method is available on the Linux platform only. This 
+  This connection method is available on the Linux platform only. This
   method enables you to connect to SAS on the same host as your Python process.
 
 `STDIO over SSH`_
@@ -56,7 +56,7 @@ The current set of connection methods are as follows:
 
 `IOM using Java`_
   The integrated object method (IOM) connection method supports SAS on any platform.
-  This method can make a local Windows connection and it is also the way to connect 
+  This method can make a local Windows connection and it is also the way to connect
   to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
   Server on any supported SAS platform.
 
@@ -66,29 +66,29 @@ The current set of connection methods are as follows:
   Compute Server using the SPRE image of MVA SAS that is installed in the Viya deployment.
   This is roughly equivalent to a Workspace server via IOM, but in Viya with no SAS 9.4.
 
-`IOM using COM`_ 
+`IOM using COM`_
   This connection method is for Windows clients connecting to a remote SAS 9.4 host. This
   method takes advantage of the IOM access method, but does not require a Java dependency.
   SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS Support)
   is required to install the SAS COM library on your client system.
-    
+
 Though there are several connection methods available, a single configuration file
 can be used to enable all the connection methods. The sample config file contains instructions and
 examples, but this section goes into more detail to explain how to configure each
 type of connection.
 
-Depending upon how you did your installation, the sample sascfg.py file may be in different 
+Depending upon how you did your installation, the sample sascfg.py file may be in different
 locations on the file system:
 
-* In a regular pip install, it is under the site-packages directory in the Python 
-  installation. 
-* If you cloned the repo or downloaded and extraced the repo to some directory and then installed, 
+* In a regular pip install, it is under the site-packages directory in the Python
+  installation.
+* If you cloned the repo or downloaded and extraced the repo to some directory and then installed,
   it will be in that directory and maybe also copied to site-packages.
- 
+
 If you are not sure where to look, then there is a very simple way to determine the location
 of your saspy installation.
 
-After installing, start Python and ``import saspy``. Then, simply submit ``saspy``. 
+After installing, start Python and ``import saspy``. Then, simply submit ``saspy``.
 Python will show you where it found the module (it will show the __init__.py file in that directory).
 It is the directory that is the module, so the sascfg.py file is in that directory, same as __init__.py.
 
@@ -103,7 +103,7 @@ It is the directory that is the module, so the sascfg.py file is in that directo
     >>> saspy
     <module 'saspy' from 'C:\\ProgramData\\Anaconda3\\lib\\site-packages\\saspy\\__init__.py'>
     >>>
-    So sascfg.py is: C:\ProgramData\Anaconda3\lib\site-packages\saspy\sascfg.py 
+    So sascfg.py is: C:\ProgramData\Anaconda3\lib\site-packages\saspy\sascfg.py
 
 
     # this is an example of a repo install on Linux:
@@ -138,7 +138,7 @@ sascfg_personal.py
 Originally, sascfg.py was the config file saspy used. But, since the saspy.cfg file is in the saspy repo, it can be updated
 on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
 you've in your installation. If you used that file for your configuration, then you would need to keep
-a copy elsewhere and then replace the new one with your copy after upgrading or pulling, if yours was replaced. 
+a copy elsewhere and then replace the new one with your copy after upgrading or pulling, if yours was replaced.
 
 So, the sascfg.py file bacame the exampls file, and sascfg_personal.py is config file to edit and use.
 This file doesn't exist in the repo, so it will never be overwritten when you upgrade or pull.
@@ -156,11 +156,11 @@ That includes being in the repo directory, of course, which is the most convenie
 If it's location isn't in the python path, you can use the cfgfile='' parm on the SASsession() method to point to it.
 
 **New in 3.1.6**: You can now place a sascfg_personal.py configuration file in your home directory. The following
-path "~/.config/saspy/" will be searched for a sascfg_personal.py file. 
+path "~/.config/saspy/" will be searched for a sascfg_personal.py file.
 
 The new search order will basically be the same as it has been, but with this new home config directory inserted
 after the current dir and before the rest of the python path. The following will be the order in which the config file will
-be found. 
+be found.
 
 If you don't specify cfgfile= on SASsession, then sascfg_personal.py will be found:
 
@@ -174,7 +174,7 @@ Note that once this has been imported it will be the one config file used for th
 so it will be cached and that is what will be used even if imported again.
 
 If you use the cfgfile= to specify a specific file, then that file will be used and no search path will matter.
-Note that in the case of cfgfile=, you can use different files for different SASsession()'s in the python session. 
+Note that in the case of cfgfile=, you can use different files for different SASsession()'s in the python session.
 Whatever file you specify for a given SASsession will be used as the config file for that session.
 
 
@@ -185,7 +185,7 @@ If the configuration file is in the search path described above, you can just cr
     sas = saspy.SASsession()
 
 
-If, however, it is not in any of those directories, then you can use the cfgfile= parameter in your SASsession() invocation to 
+If, however, it is not in any of those directories, then you can use the cfgfile= parameter in your SASsession() invocation to
 specify its location:
 
 .. code-block:: ipython3
@@ -193,7 +193,7 @@ specify its location:
     sas = saspy.SASsession(cfgfile='/some/path/to/your/config/sascfg_personal.py')
 
 
-The python search path can be found by looking at the PYTHONPATH environment variable (if it's set), 
+The python search path can be found by looking at the PYTHONPATH environment variable (if it's set),
 but more definitively by submitting the following:
 
 .. code-block:: ipython3
@@ -203,16 +203,16 @@ but more definitively by submitting the following:
 
 
 There are also some new convenience methods and attributes in 3.1.6 to help in the case where you have multiple
-sascfg_personal.py files. 
+sascfg_personal.py files.
 
 First is the saspy.SAScfg attribute which will show you the sascfg_personal.py file that would be used
-if you submitted SASsession(). This is found and set when you import saspy. 
+if you submitted SASsession(). This is found and set when you import saspy.
 
 There is also a saspy.list_configs() method which shows you what sascfg_personal.py files are found in the
 search order listed above, in that order.
 
 Here's an example showing these (I have one in the saspy install dir, current dir and the new ~/.config/saspy dir):
-  
+
 
 .. code-block:: ipython3
 
@@ -238,7 +238,7 @@ Here's an example showing these (I have one in the saspy install dir, current di
     >>>
 
 
-        
+
 sascfg_personal.py details
 ==========================
 There are three main parts to this configuration file.
@@ -247,7 +247,7 @@ There are three main parts to this configuration file.
         2) SAS_config_options  # this dictionary isn't required unless you want to change a default
         3) Configuration definitions
 
-In reverse order, the configuration definitions are Python dictionaries. Each dictionary 
+In reverse order, the configuration definitions are Python dictionaries. Each dictionary
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
 These values are defined in the following sections.
 
@@ -256,20 +256,20 @@ users' ability to override settings in the configuration definitions by passing 
 on the ``SASsession()``. Each of the keys in the configuration definition can be passed in at
 run time on the SASsession(). If lock_down is set to True, any keys defined in the configuration
 definition cannot be overridden in SASsession(), Keys that are not specified in the Config Def, can be
-specified at run time on the SASsession(). If set to False, any config def key can be specified 
-on the SASsession(). 
+specified at run time on the SASsession(). If set to False, any config def key can be specified
+on the SASsession().
 
 The second (verbose) controls the printing of some debug type messages. While the third, 'prompt'
 defines whether saspy can prompt the user if necessary. You would set this to False, if running a
 script in the background, where no input could be provided and if a prompt were to be issued, the
 process would hang waiting on input. Prompt= can also be provided on the SASsession() as a parameter,
-though not in the configuration definition, as most prompting that can happen has to do with, and 
+though not in the configuration definition, as most prompting that can happen has to do with, and
 happens prior to parsing, the configuration definition.
 
 SAS_config_names is the list of configuration definition names to make available to an
-end user at connection time. Any configuration definitions that are not listed in 
+end user at connection time. Any configuration definitions that are not listed in
 SAS_config_names are simply inaccessible by an end user. You can add several configuration
-definitions in the file but not make them available by simply excluding the names from 
+definitions in the file but not make them available by simply excluding the names from
 the list. Also note that these names can be anything you want. The names of the example
 configuration definitions we chosen to be self-documenting. There nothing special about 'winlocal',
 it could be named Bob. But then it wouldn't be obvious that it's for a WINdows install running a LOCAL copy of SAS.
@@ -312,7 +312,7 @@ will use and thus what your configuration definition will contain.
                     a. prior to V3.6.3
                       -  Can't get there from here
                     b. as of V3.6.3
-                      -  STDIO over SSH! 
+                      -  STDIO over SSH!
             ii. On Windows
                 1. Client Linux
                     a. Can't get there from here
@@ -333,7 +333,7 @@ will use and thus what your configuration definition will contain.
             ii. On Windows
                 1. HTTP - must have compute service configured and running (Viya V3.5 and V4)
 
-             
+
 Now you can go to the access method specific configuration below to
 see what you'll need for your configuration definition.There are also example
 configuration definitions in the example configuration file, sascfg.py, showing each of these
@@ -343,12 +343,12 @@ STDIO
 =====
 This is the original access method. This works with Unix only,
 because SAS on Windows platforms does not support line-mode style connections
-(through stdin, stdout, stderr). This connection method is for a local 
+(through stdin, stdout, stderr). This connection method is for a local
 connection to SAS that is installed on the same host as Python.
 
 There are only four keys for this configuration definition dictionary:
 
-saspath - 
+saspath -
     (Required) Path to SAS startup script
 
 options -
@@ -360,13 +360,13 @@ encoding -
     will determine the SAS session encoding and map that to the Python encoding for you.
 
     This is the Python encoding value that matches the SAS session encoding
-    of the SAS session to which you are connecting. The Python encoding 
+    of the SAS session to which you are connecting. The Python encoding
     values can be found at `encodings-and-unicode <https://docs.python.org/
     3.5/library/codecs.html#encodings-and-unicode>`_.
-    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the 
+    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and
-    windows-1252, respectively. 
+    windows-1252, respectively.
 
 autoexec -
     This is a string of SAS code that will be submitted upon establishing a connection.
@@ -380,10 +380,10 @@ lrecl -
 
 display -
     This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
-    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'. 
-    Jupyter uses IPython to render HTML, which is how saspy has always worked. 
+    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'.
+    Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
-    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
+    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
 
 m5dsbug -
     This is a new key, as of version 3.1.9, to address a bug in the data step in the M5 maintenance release.
@@ -411,7 +411,7 @@ NEW in V3.6.3, you can use this method from a Windows Client to connect to a
 stand alone SAS install on a remote Linux machine. Before that, it was only supported
 from a Linux client.
 
-This is the remote version of the original connection method. This also works 
+This is the remote version of the original connection method. This also works
 with Unix SAS only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
 SSH configured between the two systems. Google it, it's not that difficult.
@@ -423,16 +423,16 @@ If you have any trouble with this, you will find that adding -vvv to the command
 trys to run (run that yourself from a shell with -vvv added) will provide significant
 diagnostics about how ssh is trying to authenticate. Something like the following:
 
-/usr/bin/ssh -vvv hostname.to.connect.to 
+/usr/bin/ssh -vvv hostname.to.connect.to
 
 In addition to the keys for STDIO, there are two more keys to configure:
 
-ssh - 
+ssh -
     (Required) The ssh command to run (Linux execv requires a fully qualified
     path. Even if the command is found in the PATH variable, it won't be used.
     Enter the fully qualified path.)
 
-host - 
+host -
     (Required) The host to connect to. Enter a resolvable host name or IP address.
 
 .. code-block:: ipython3
@@ -446,7 +446,7 @@ host -
 .. note:: The ``'ssh'`` key is the trigger to use the STDIO over SSH connection
           method.
 
-To accomodate alternative SSH configurations, you may also provide any of the 
+To accomodate alternative SSH configurations, you may also provide any of the
 following optional keys:
 
 identity -
@@ -463,14 +463,14 @@ port -
     Obviously, 22 is the default
 
 tunnel -
-    (Optional: integer) Certain methods of saspy require opening a local port and accepting a connection and data 
-    streamed from the SAS instance to saspy. If the remote SAS server would not be able to reach ports on your client machine 
+    (Optional: integer) Certain methods of saspy require opening a local port and accepting a connection and data
+    streamed from the SAS instance to saspy. If the remote SAS server would not be able to reach ports on your client machine
     due to a firewall or other security configuration, you may pass a port number to used for SAS to connect to on
     the remote side, which will be forwarded to the local side (using the ``-R`` ssh option) so that the remote SAS
     server can connect using this port.
 
 rtunnel -
-    (Optional: integer) Certain methods of saspy require opening a remote port and allowing a connection to be made and 
+    (Optional: integer) Certain methods of saspy require opening a remote port and allowing a connection to be made and
     data streamed to the SAS server from saspy; the Reverse of the tunnel case. In these cases, saspy needs to provide
     a port for the SAS server to use to accept a connection so data can be streamed to the SAs server.
     This is simply the reverse of the tunnel case, where SAS creates the socket and saspy connects. This will use
@@ -481,7 +481,7 @@ localhost -
     Normally this is resolved by gethostname() but in the case where the ip from that isn't correct, you can
     override it by providing the ip here. The only case this has been seen is on a home network with no domains
     nor dns, such that a local machine name ('MyPC') ends up resolved to some arbitrary internet ip
-    (i.e.: 128.64.32.16), not the actual local ip (i.e.: 10.0.0.10).   
+    (i.e.: 128.64.32.16), not the actual local ip (i.e.: 10.0.0.10).
 
 
 .. code-block:: ipython3
@@ -498,9 +498,9 @@ localhost -
 
 IOM using Java
 ==============
-This connection method opens many connectivity options. This method enables you to 
+This connection method opens many connectivity options. This method enables you to
 connect to any Workspace server on any supported platform. It requires Java 7 or higher
-installed on your Client machine (where you're running SASPy) 
+installed on your Client machine (where you're running SASPy)
 
 You can also use `SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__
 to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
@@ -515,7 +515,7 @@ on any supported platform.
 ATTN, as of saspy version 3.3.3, the classpath is no longer required!
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The 4 required IOM Java client jars are now included in the saspy repo, and they, along with the saspyiom.jar and the 
+The 4 required IOM Java client jars are now included in the saspy repo, and they, along with the saspyiom.jar and the
 thirdparty CORBA jars will be automatically provided as the calsspath by saspy. This is generally all that is needed.
 If you require the 3 encryption jars, shown below, they still need to be acquired from your SAS deployment, and then
 put in the saspy/java/iomclient directory of the saspy install (where the 4 included jars are) so they will be included
@@ -529,7 +529,7 @@ The 3 encryption jars, if needed, can be found in a SAS deployment in a location
     $SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil.nls_904600.0.0.20181017190000_v940m6/sas.rutil.nls.jar
     $SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_20121211183517/sastpj.rutil.jar
 
-    
+
 The .authinfo file (_authinfo on Windows)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -538,7 +538,7 @@ instead of prompting for it. On linux, the file is named .authinfo and on window
 as follows. The first value is the authkey value you specify for `authkey`. Next is the 'user' key followed by the value (the user id)
 and then 'password' key followed by its value (the user's password). Note that there are permission rules for this file. On linux the file must
 have permissions of 600, only the user can read or write the file. On Windows, the file should be equally locked down to where only the owner
-can read and write it.  
+can read and write it.
 
 ::
 
@@ -551,7 +551,7 @@ So, for a Configuration Definition that specifies the following authkey:
     'authkey' : 'IOM_Prod_Grid1',
 
 The authinfo file in the home directory for user Bob, with a password of BobsPW1 would have a line in it as follows:
- 
+
 ::
 
     IOM_Prod_Grid1 user Bob password BobsPW1
@@ -559,34 +559,34 @@ The authinfo file in the home directory for user Bob, with a password of BobsPW1
 
 Remote
 ~~~~~~
-A remote connection is defined as a connection to any Workspace Server on any SAS platform 
+A remote connection is defined as a connection to any Workspace Server on any SAS platform
 from either a Unix or Windows client. This module does not connect to a SAS Metadata Server (OMR),
 but rather connects directly to an Object Spawner to get access to a Workspace Server. If you already
 access these with other SAS clients, like Enterprise Guide (EG), you may already be familiar with
 connecting to OMR, but not directly to the others by host/port. There is information in the
-:doc:`advanced-topics` section about using Proc iomoperate to find Object Spawners and Workspace 
+:doc:`advanced-topics` section about using Proc iomoperate to find Object Spawners and Workspace
 Server to get values for the three keys defined below (iomhost, iomport, appserver).
 
 The following keys are available for the configuration definition dictionary:
 
-java    - 
+java    -
     (Required) The path to the Java executable to use. For Linux, use a fully qualifed
     path. On Windows, you might be able to simply enter ``java``. If that is not successful,
     enter the fully qualified path.
-iomhost - 
+iomhost -
     (Required) The resolvable host name, or IP address to the IOM object spawner.
     New in 2.1.6; this can be a list of all the object spawners hosts if you have load balanced object spawners.
     This provides Grid HA (High Availability)
-iomport - 
+iomport -
     (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
-classpath - 
-    (No longer Required) As of V3.3.3 this is no longer required. See instuctions above (ATTN, as of saspy version 3.3.3, the classpath is no longer required!) 
+classpath -
+    (No longer Required) As of V3.3.3 this is no longer required. See instuctions above (ATTN, as of saspy version 3.3.3, the classpath is no longer required!)
 authkey -
     The keyword that starts a line in the authinfo file containing user and or password for this connection.
-omruser - 
+omruser -
     (**Discouraged**)  The user ID is required but if this field is left blank,
     the user is **prompted** for a user ID at runtime, unless it's found in the authinfo file.
-omrpw  - 
+omrpw  -
     (**Strongly discouraged**) A password is required but if this field is left
     blank, the user is **prompted** for a password at runtime, unless it's found in the authinfo file.
 encoding  -
@@ -594,14 +594,14 @@ encoding  -
     will determine the SAS session encoding and map that to the Python encoding for you.
     You can set this to eliminate the message, at connection time, about what encoding was determined.
 
-    This is the Python encoding value that matches the SAS session encoding of 
-    the IOM server to which you are connecting. The Python encoding values can be 
+    This is the Python encoding value that matches the SAS session encoding of
+    the IOM server to which you are connecting. The Python encoding values can be
     found at `encodings-and-unicode <https://docs.python.org/3.5/
     library/codecs.html#encodings-and-unicode>`_.
-    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the 
+    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
     default encodings for running SAS in Unicode, on Unix, and on Windows,
-    respectively. Those map to Python encoding values: utf8, latin1, and 
-    windows-1252, respectively. 
+    respectively. Those map to Python encoding values: utf8, latin1, and
+    windows-1252, respectively.
 timeout -
     Timeout value for establishing connection to workspace server
 appserver -
@@ -630,10 +630,10 @@ lrecl -
 
 display -
     This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
-    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'. 
-    Jupyter uses IPython to render HTML, which is how saspy has always worked. 
+    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'.
+    Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
-    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
+    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
 
 logbufsz -
     see issue 266 for details on this. not needed normally
@@ -687,22 +687,22 @@ A local connection is defined as a connection to SAS that is running on the same
 Windows machine. You only need the following configuration definition keys. (Do not
 specify any of the others).
 
-**There is one additional requirement.** The sspiauth.dll file--also included in 
-your SAS installation--must be in your system PATH environment variable, your 
-java.library.path, or in the home directory of your Java client. You can search 
+**There is one additional requirement.** The sspiauth.dll file--also included in
+your SAS installation--must be in your system PATH environment variable, your
+java.library.path, or in the home directory of your Java client. You can search
 for this file in your SAS deployment, though it is likely
 in SASHome\\SASFoundation\\9.4\\core\\sasext.
 
-If you add this to the system PATH environment variable, only list the path to 
+If you add this to the system PATH environment variable, only list the path to
 the directory--do not include the file itself. For example:
 
 ::
 
-    C:\Program Files\SASHome\SASFoundation\9.4\core\sasext 
+    C:\Program Files\SASHome\SASFoundation\9.4\core\sasext
 
 An alternative to puting this directory in your PATH, is to add it at runtime. You can add this
 to your sascfg_personal.py file, or even submit it before importing saspy and trying to make a conection.
-Obviously, use the correct path for your system: 
+Obviously, use the correct path for your system:
 
 ::
 
@@ -711,22 +711,22 @@ Obviously, use the correct path for your system:
 
 
 
-java      - 
-    (Required) The path to the Java executable to use. 
-classpath - 
+java      -
+    (Required) The path to the Java executable to use.
+classpath -
     (No longer Required) As of V3.3.3 this is no longer required.
 encoding  -
     NOTE: as of saspy V2.4.2, you no longer need to set the encoding. SASpy
     will determine the SAS session encoding and map that to the Python encoding for you.
 
-    This is the Python encoding value that matches the SAS session encoding of 
-    the IOM server to which you are connecting. The Python encoding values can be 
+    This is the Python encoding value that matches the SAS session encoding of
+    the IOM server to which you are connecting. The Python encoding values can be
     found at `encodings-and-unicode <https://docs.python.org/3.5/
     library/codecs.html#encodings-and-unicode>`_.
-    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the 
+    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
     default encodings for running SAS in Unicode, on Unix, and on Windows,
-    respectively. Those map to Python encoding values: utf8, latin1, and 
-    windows-1252, respectively. 
+    respectively. Those map to Python encoding values: utf8, latin1, and
+    windows-1252, respectively.
 autoexec -
     This is a string of SAS code that will be submitted upon establishing a connection.
     You can use this to preassign libraries you always want available, or whatever you want.
@@ -743,10 +743,10 @@ lrecl -
 
 display -
     This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
-    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'. 
-    Jupyter uses IPython to render HTML, which is how saspy has always worked. 
+    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'.
+    Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
-    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
+    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
 
 logbufsz -
     see issue 266 for details on this. not needed normally
@@ -765,7 +765,7 @@ m5dsbug -
                   }
 
 .. note:: Having the ``'java'`` key is the trigger to use the IOM access method.
-.. note:: When using the IOM access method (``'java'`` key specified), the 
+.. note:: When using the IOM access method (``'java'`` key specified), the
          absence of the ``'iomhost'`` key is the trigger to use a local Windows
          session instead of remote IOM (it is a different connection type).
 
@@ -773,7 +773,7 @@ m5dsbug -
 
 IOM to MVS SAS
 ~~~~~~~~~~~~~~
-Yes, you can even connect to a SAS server running on MVS (Mainframe SAS). 
+Yes, you can even connect to a SAS server running on MVS (Mainframe SAS).
 There are a couple of requirements for this to work right. First, you need version 2.1.5 or higher of this module.
 There were a couple tweaks I needed to make to the IOM access method and those are in 2.1.5.
 
@@ -781,7 +781,7 @@ Also, you need to use the HFS file system for the WORK (and/or USER) library and
 system to HFS so temporary files used by this module use HFS instead of the native MVS file system. You can still access
 the native file system in the code you run, but for internal use, this module needs to access the HFS file system.
 To set the default file system (options filesystem=hfs;) you can either set it in the workspace severs config file,
-or you can submit the options statement from your python code after making a connection: 
+or you can submit the options statement from your python code after making a connection:
 
 
 ::
@@ -805,7 +805,7 @@ The other thing is to set the encoding correctly for this to work. MVS is an EBC
 this is all handled in IOM for you, but for data transfer routines, transcoding is required. The default encoding on MVS
 is OPEN_ED-1047, although it can be set to any number of other EBCDIC encodings. The default Python encodings do not include
 the 1047 code page. I did find a 'cp1047' code page in a separate pip installable module which seems to match the OPEN_ED-1047
-code page. So if you're running with that encoding, you can install the cp1047 to use. 
+code page. So if you're running with that encoding, you can install the cp1047 to use.
 
 
 
@@ -819,16 +819,16 @@ So, it is still connecting to MVA SAS and all of the methods behave the same as 
 
 The keys for this configuration definition dictionary are:
 
-url - 
+url -
     (Required if ip not specified) The URL to Viya, of the form 'http[s]://host.identifier[:port]'. When this is specified,
     ip= will not be used, as the host's ip is retrieved from the url. Also, ssl= is set based upon http or https and port=
     is also parsed from the url, if provided, else defaulted based upon the derived ssl= value. So neither ip, port nor ssl
-    are needed when url= is used. 
-ip - 
+    are needed when url= is used.
+ip -
     [Deprecated] (Required if url not specified) The resolvable host name, or IP address to the Viya Compute Service
-port - 
+port -
     [Deprecated] The port to use to connect to the Compute Service. This will default to either 80 or 443 based upon the ssl key.
-ssl - 
+ssl -
     [Deprecated] (Optional) Boolean identifying whether to use HTTPS (ssl=True) or just HTTP. The default is True and will default to port 443 if
     the port is not specified. If set to False, it will default to port 80, if the port is not specified.
     Note that depending upon the version of python, certificate verification may or may not be required, later version are more strict.
@@ -836,7 +836,7 @@ ssl -
 verify -
     (Optional) Also note that if Viya uses the default self signed ssl certificates it ships with, you will not be able to verify them,
     but that can be fine, and you can still use an ssl connection. You can use set 'verify' : False, in your config to
-    turn off verification for this case. 
+    turn off verification for this case.
 authkey -
     (Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection. See the IOM using Java above for more info.
 
@@ -845,14 +845,14 @@ client_id -
 client_secret -
     [for SSO Viya configurations] client_secret to use for authenticating to Viya (defaults to '')
 authcode -
-    [for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth servide
+    [for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth service
     where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]&response_type=code
     so perhapse:        https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&response_type=code
 
-user - 
+user -
     (**Discouraged**)  The user ID is required but if this field is left blank,
     the user is **prompted** for a user ID at runtime, unless it's found in the authinfo file.
-pw  - 
+pw  -
     (**Strongly discouraged**) A password is required but if this field is left
     blank, the user is **prompted** for a password at runtime, unless it's found in the authinfo file.
 
@@ -877,7 +877,7 @@ options -
 encoding -
     (Ignored)
     Unlike the other access methods, the HTTP API to the Compute Service uses UTF-8 for all calls.
-    So, no transcoding is necessary, nor done, on the Python side, so this option is not needed and ignored. 
+    So, no transcoding is necessary, nor done, on the Python side, so this option is not needed and ignored.
 
 autoexec -
     (Optional) This is a string of SAS code that will be submitted upon establishing a connection.
@@ -891,10 +891,10 @@ lrecl -
 
 display -
     This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
-    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'. 
-    Jupyter uses IPython to render HTML, which is how saspy has always worked. 
+    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'.
+    Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
-    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin', 
+    If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
 
 .. code-block:: ipython3
 
@@ -910,13 +910,13 @@ display -
 
 IOM using COM
 =============
-New in 3.1.0, this user contributed access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method, 
+New in 3.1.0, this user contributed access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method,
 but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.
 
 SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.
 
 The COM access method requires a Python module that saspy, in general, does not; pypiwin32  If you do not have this already installed before trying to use the COM
-access method, you will likely see an error similar to this when trying to establish a connection. Just install that modules to solve this. 
+access method, you will likely see an error similar to this when trying to establish a connection. Just install that modules to solve this.
 
 >>> sas=saspy.SASsession()
 Traceback (most recent call last):
@@ -942,16 +942,16 @@ prpvided on your behalf (starting in V3.1.4). The Class Identifier is a 32-chara
 
 ::
 
-    SAS Workspace Server 
-        Short type name  : Workspace 
+    SAS Workspace Server
+        Short type name  : Workspace
         Class identifier : 440196d4-90f0-11d0-9f41-00a024bb830c  /* this is a constant that doesn't change */
 
-To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id. 
+To connect to a local SAS instance, do not specify the ``iomhost`` paramter. Local connections do not require a host, port, class_id.
 Any specified port or class_id parameters will be ignored. Likewise, and provided username or password values are ignored on local connections.
 
-iomhost - 
+iomhost -
     The resolvable host name, or IP address to the IOM object spawner. Only required for remote connections. Don't specify for local connections.
-iomport - 
+iomport -
     The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!). Only required for remote connections. Don't specify for local connections.
 class_id -
     This value turns out to be a constant which hasn't changed in years and probably never will. So, you shouldn't need to specify this. The value of
@@ -961,23 +961,23 @@ provider -
     (Required) The SAS IOM Data Provider is an OLE DB data provider that supports access to SAS data sets that are managed by SAS Integrated Object Model (IOM) servers. The 'sas.iomprovider' provider is recommended.
 authkey -
     The keyword that starts a line in the authinfo file containing user and or password for this connection. See the IOM using Java above for more info.
-omruser - 
+omruser -
     (**Discouraged**) The user ID is required but if this field is left blank,
     the user is **prompted** for a user ID at runtime, unless it's found in the authinfo file.
-omrpw  - 
+omrpw  -
     (**Strongly discouraged**) A password is required but if this field is left
     blank, the user is **prompted** for a password at runtime, unless it's found in the authinfo file.
 encoding  -
     NOTE: as of saspy V2.4.2, you no longer need to set the encoding. SASpy
     will determine the SAS session encoding and map that to the Python encoding for you.
 
-    This is the Python encoding value that matches the SAS session encoding of 
-    the IOM server to which you are connecting. The Python encoding values can be 
+    This is the Python encoding value that matches the SAS session encoding of
+    the IOM server to which you are connecting. The Python encoding values can be
     found at `encodings-and-unicode <https://docs.python.org/3.5/
     library/codecs.html#encodings-and-unicode>`_.
-    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the 
+    The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
     default encodings for running SAS in Unicode, on Unix, and on Windows,
-    respectively. Those map to Python encoding values: utf8, latin1, and 
+    respectively. Those map to Python encoding values: utf8, latin1, and
     windows-1252, respectively.
 
 .. code-block:: ipython3
@@ -989,7 +989,7 @@ encoding  -
         'encoding': 'windows-1252'}
 
 .. note:: Having the ``'provider'`` key is the trigger to use the COM (IOM using COM) access method.
-.. note:: When using the COM access method (``'provider'`` key specified), the 
+.. note:: When using the COM access method (``'provider'`` key specified), the
          absence of the ``'iomhost'`` key is the trigger to use a local Windows
          session instead of remote IOM (it is a different connection type).
 
