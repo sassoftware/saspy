@@ -332,8 +332,8 @@ session encoding of the IOM server</li>
 </tbody>
 </table>
 <p><strong>Common SASsession attributes</strong></p>
-<p>The values of the following attributes will be displayed if you submit a SASsession object. 
-These can be referenced programmatically in you code. For the Booleans, you should use the provided methods to set them, 
+<p>The values of the following attributes will be displayed if you submit a SASsession object.
+These can be referenced programmatically in you code. For the Booleans, you should use the provided methods to set them,
 or change their value. The others you should NOT change, for obvious reasons.</p>
 <ul class="simple">
 <li>workpath - string containing the WORK libref?s filesystem path.</li>
@@ -560,7 +560,11 @@ is transferred over to the SAS data set. If you want to create a SAS index at th
 <li>&#8216;exact&#8217;  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding,                          required for the longest actual value. This is slowest but most accurate. For big data, this can                          take excessive time. If SAS is running in a single byte encoding then this defaults to &#8216;1&#8217; (see below),                          but you can override even that by explicitly specifying &#8216;exact&#8217; when SAS is a single byte encoding.</li>
 <li>&#8216;safe&#8217;   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte                          encoding. This is much faster, but could declare SAS Char variables longer than absolutely required                          for multibyte SAS encodings. If SAS is running in a single byte encoding then &#8216;1&#8217; (see below) is used.                          Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these.                          ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it&#8217;s variable</li>
 <li>[1|2|3|4]- this is &#8216;safe&#8217; except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the                          default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default                          used, since characters can only be 1 byte long so char len == byte len                          For UTF-8 SAS session, 4 is the BPC, so if you know you don&#8217;t have many actual unicode characters                          you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead                          of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.</li>
-<li>dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates                            runmning the code to calculate the lengths, and goes strainght to transferring the data</li>
+<li><dl class="first docutils">
+<dt>dictionary - a dictionary containing the names:lengths of a the character columns you want to specify (all or some).                            This eliminates runmning the code to calculate the lengths (if you provide them all), and goes strainght</dt>
+<dd>to transferring the data. If you only provide some columns, the others will be calculated still.                            This way you canoverride all or some of them. Also, the column names are now case independent.</dd>
+</dl>
+</li>
 </ul>
 </li>
 </ul>
@@ -592,6 +596,7 @@ and then the dictionary returned can be provided to df2sd each time it&#8217;s c
 <li>&#8216;exact&#8217;  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding,                          required for the longest actual value. This is slowest but most accurate. For big data, this can                          take excessive time. If SAS is running in a single byte encoding then this defaults to &#8216;1&#8217; (see below),                          but you can override even that by explicitly specifying &#8216;exact&#8217; when SAS is a single byte encoding.</li>
 <li>&#8216;safe&#8217;   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte                          encoding. This is much faster, but could declare SAS Char variables longer than absolutely required                          for multibyte SAS encodings. If SAS is running in a single byte encoding then &#8216;1&#8217; (see below) is used.                          Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these.                          ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it&#8217;s variable</li>
 <li>[1|2|3|4]- this is &#8216;safe&#8217; except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the                          default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default                          used, since characters can only be 1 byte long so char len == byte len                          For UTF-8 SAS session, 4 is the BPC, so if you know you don&#8217;t have many actual unicode characters                          you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead                          of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.</li>
+<li>dictionary - a dictionary containing the names:lengths of a subset of the character columns. This will calculate                            the rest of them and return the full dictionary of columns. This way you canoverride some of them.                            Also, the column names are now case independent.</li>
 </ul>
 </li>
 </ul>
@@ -1131,7 +1136,7 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 <li>delimiter is a single character</li>
 <li>putnames is a bool  [True | False]</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>  
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>
  <span class="s1">&#39;putnames&#39;</span>  <span class="p">:</span> <span class="bp">True</span>
 <span class="p">}</span>
 </pre></div>
@@ -1423,7 +1428,7 @@ as either HTML or TEXT, depending upon results. The method= parameter allows you
 <dl class="method">
 <dt id="saspy.SASsession.validvarname">
 <code class="descname">validvarname</code><span class="sig-paren">(</span><em>df: pandas.core.frame.DataFrame</em>, <em>version: str = 'v7'</em><span class="sig-paren">)</span> &#x2192; pandas.core.frame.DataFrame<a class="headerlink" href="#saspy.SASsession.validvarname" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a copy of a Data Frame with SAS compatible column names. The version= parameter allows 
+<dd><p>Creates a copy of a Data Frame with SAS compatible column names. The version= parameter allows
 you to choose the compatability setting to use.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1496,7 +1501,7 @@ you to choose the compatability setting to use.</p>
 <li>delimiter is a single character</li>
 <li>putnames is a bool  [True | False]</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>  
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>
  <span class="s1">&#39;putnames&#39;</span>  <span class="p">:</span> <span class="bp">True</span>
 <span class="p">}</span>
 </pre></div>
