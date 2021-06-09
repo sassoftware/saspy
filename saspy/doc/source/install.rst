@@ -21,6 +21,11 @@ or, for a given branch (put the name of the branch after @)::
 
     pip install git+https://git@github.com/sassoftware/saspy.git@branchname
 
+Also, if you prefer conda install, you can use that from the conda-forge channel:
+
+    see: https://github.com/conda-forge/saspy-feedstock#installing-saspy
+
+
 To use this module after installation, you need to copy the example sascfg.py file to a 
 sascfg_personal.py and edit sascfg_personal.py per the instructions in the next section.
 
@@ -321,12 +326,12 @@ will use and thus what your configuration definition will contain.
         c. SAS Viya install
             i. On Linux
                 1. Client Linux
-                    a. HTTP - must have compute service configured and running
-                    b. STDIO - over SSH if not the same machine
+                    a. HTTP - must have compute service configured and running (Viya V3.5 and V4)
+                    b. STDIO - over SSH if not the same machine (this was for Viya V3 before Compute Service existed, not for V4)
                 2. Client Windows
-                    a. HTTP - must have compute service configured and running
+                    a. HTTP - must have compute service configured and running (Viya V3.5 and V4)
             ii. On Windows
-                1. HTTP - must have compute service configured and running
+                1. HTTP - must have compute service configured and running (Viya V3.5 and V4)
 
              
 Now you can go to the access method specific configuration below to
@@ -386,6 +391,7 @@ m5dsbug -
     is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. Setting this
     key to True will cause different code to be generated to work around this problem. See the description
     of V3.1.9 here for more info: https://github.com/sassoftware/saspy/releases/tag/v3.1.9
+
 
 .. code-block:: ipython3
 
@@ -469,6 +475,13 @@ rtunnel -
     a port for the SAS server to use to accept a connection so data can be streamed to the SAs server.
     This is simply the reverse of the tunnel case, where SAS creates the socket and saspy connects. This will use
     the ``-L`` ssh option so that the saspy can connect to the remote SAS server on this port.
+
+localhost -
+    This is a rarely needed options for providing the ip of the client machine (where SASPy/python is running).
+    Normally this is resolved by gethostname() but in the case where the ip from that isn't correct, you can
+    override it by providing the ip here. The only case this has been seen is on a home network with no domains
+    nor dns, such that a local machine name ('MyPC') ends up resolved to some arbitrary internet ip
+    (i.e.: 128.64.32.16), not the actual local ip (i.e.: 10.0.0.10).   
 
 
 .. code-block:: ipython3
@@ -849,7 +862,15 @@ context -
     prompt you for which one to use.
 
 timeout -
-    HTTPConnection timeout value, in seconds. Defaults to None.
+    (Optional) HTTPConnection timeout value, in seconds. Defaults to None. This is passed to HTTPConnection;
+    it's not part of the Viya API but rather the http.client API.
+
+inactive -
+    (Optional) An integer specifying the Inactive Time Out in minutes for the Compute Session. This is a SAS
+    Compute Service option and controls when the Compute Service self terminates based upon inactivity. The regular
+    Compute Session default timeout is 15 minutes, but for SASPy, I default this to 120 minutes. So, you likely won't
+    need to provide this yourself. The Session is already explicitly terminated when your Python process ends or you issue endsas()
+
 options -
     (Optional) SAS options to include when connecting. These **must** be a Python list.
 

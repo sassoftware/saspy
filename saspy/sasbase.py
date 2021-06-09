@@ -50,6 +50,7 @@ import importlib
 import re
 import shutil
 import tempfile
+import typing
 
 from saspy.sasiostdio    import SASsessionSTDIO
 from saspy.sasioiom      import SASsessionIOM
@@ -438,6 +439,7 @@ class SASsession():
     :param options: SAS options to include when connecting
     :param encoding: [depecated] The Compute Service interface only works in UTF-8, regardless of the SAS encoding
     :param timeout: This is passed to the HTTPConnection (http.client) and has nothing to do with Viya or Compute
+    :param inactive: This is Inactivity Timeout, in minutes, for the SAS Compute Session. It defaults to 120 minutes. 
     :param ip: [deprecated] The resolvable host name, or IP address to the Viya (use url instead)
     :param port: [depecated] The port to use to connect to Viya (use url instead)
     :param ssl: [depecated] Boolean identifying whether to use HTTPS (ssl=True) or just HTTP (use url instead)
@@ -1002,21 +1004,23 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return sd
 
-    def saslib(self, libref: str, engine: str = ' ', path: str = '',
+    def saslib(self, libref: str, engine: str = ' ', path: typing.Union[str, list] = '',
                options: str = ' ', prompt: dict = None) -> str:
         """
 
         :param libref:  the libref to be assigned
         :param engine:  the engine name used to access the SAS Library (engine defaults to BASE, per SAS)
-        :param path:    path to the library (for engines that take a path parameter)
+        :param path:    path or list of paths to the library (for engines that take a path parameter)
         :param options: other engine or engine supervisor options
         :return: SAS log
         """
         prompt = prompt if prompt is not None else {}
 
         code = "libname " + libref + " " + engine + " "
-        if len(path) > 0:
+        if type(path) == str and len(path) > 0:
             code += " '" + path + "' "
+        if type(path) == list and len(path) > 0:
+            code += "(" + ','.join("'" + p + "'" for p in path) + ")"
         code += options + ";"
 
         if self.nosub:
@@ -1279,6 +1283,7 @@ class SASsession():
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
+        :param labels: dict with column names and labels to assign to the new SAS data set
         :param outdsopts: a dictionary containing output data set options for the table being created \
                           for instance, compress=, encoding=, index=, outrep=, replace=, rename= ... \
                           the options will be generated simply as key=value, so if a value needs quotes or parentheses, provide them in the value
@@ -1357,6 +1362,7 @@ class SASsession():
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
+        :param labels: dict with column names and labels to assign to the new SAS data set
         :param outdsopts: a dictionary containing output data set options for the table being created \
                           for instance, compress=, encoding=, index=, outrep=, replace=, rename= ... \
                           the options will be generated simply as key=value, so if a value needs quotes or parentheses, provide them in the value

@@ -63,6 +63,7 @@ class SASconfigHTTP:
       self.authkey   = cfg.get('authkey', '')
       self._prompt   = session._sb.sascfg._prompt
       self.lrecl     = cfg.get('lrecl', None)
+      self.inactive  = cfg.get('inactive', 120)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -187,6 +188,13 @@ class SASconfigHTTP:
             self.lrecl = inlrecl
       if not self.lrecl:
          self.lrecl = 1048576
+
+      inito = kwargs.get('inactive', None)
+      if inito is not None:
+         if lock and self.inactive:
+            print("Parameter 'inactive' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.inactive = inito
 
       inak = kwargs.get('authkey', '')
       if len(inak) > 0:
@@ -541,8 +549,10 @@ class SASsessionHTTP():
          "POST uri not found in context info. You may not have permission to use this context.\n{}".format(self.sascfg.ctx))
 
       conn = self.sascfg.HTTPConn; conn.connect()
-      d1 = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":'+options+'}}'
-      headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/vnd.sas.compute.session.request+json","Authorization":"Bearer "+self.sascfg._token}
+      d1  = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":'+options+'}'
+      d1 += ',"attributes": {"sessionInactiveTimeout": '+str(int(float(self.sascfg.inactive)*60))+'}}'
+      headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/vnd.sas.compute.session.request+json",
+               "Authorization":"Bearer "+self.sascfg._token}
 
       try:
          conn.request('POST', uri, body=d1, headers=headers)
