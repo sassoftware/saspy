@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 
+# Author: Damjan Krstajic
+
 import argparse
 import saspy
 import os.path
 import sys
 
 # Usage:
+# ./run_sas.py -s example_1.sas 
 # ./run_sas.py -s example_1.sas -l saspy.log -o saspy.lst
 
 def main():
@@ -15,14 +18,6 @@ def main():
     parser.add_argument('-o', '--lst_fname', help='name of the output LST file')
     options = parser.parse_args()
 
-    if options.log_fname is None:
-        parser.print_help()
-        sys.exit(0)
-
-    if options.lst_fname is None:
-        parser.print_help()
-        sys.exit(0)
-
     if options.sas_fname is None:
         parser.print_help()
         sys.exit(0)
@@ -31,8 +26,20 @@ def main():
         sys.exit(0)
 
     sas_fname = options.sas_fname
-    log_fname = options.log_fname
-    lst_fname = options.lst_fname
+
+    if options.log_fname is None:
+        base      = os.path.basename(sas_fname)
+        log_fname = os.path.splitext(base)[0] + ".log"
+        print("log_fname is " + log_fname )
+    else:
+        log_fname = options.log_fname
+
+    if options.lst_fname is None:
+        base      = os.path.basename(sas_fname)
+        lst_fname = os.path.splitext(base)[0] + ".lst"
+        print("lst_fname is " + lst_fname )
+    else:
+        lst_fname = options.lst_fname
 
     sas_file     = open(sas_fname,mode='r')
     sas_code_txt = sas_file.read()
