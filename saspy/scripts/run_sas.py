@@ -49,17 +49,11 @@ def main():
     
     c = sas_session.submit(sas_code_txt,results="TEXT")
 
-    original_stdout = sys.stdout
-
     with open(log_fname, 'w') as f1:
-        sys.stdout = f1
-        print(c["LOG"])
-        sys.stdout = original_stdout
+        f1.write(c["LOG"])
 
     with open(lst_fname, 'w') as f2:
-        sys.stdout = f2
-        print(c["LST"])
-        sys.stdout = original_stdout
+        f2.write(c["LST"])
 
     sas_session.endsas()
 
