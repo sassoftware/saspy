@@ -12,8 +12,8 @@ import sys
 # ./run_sas.py -s example_1.sas -l out1.log -o out1.lst
 # ./run_sas.py -s example_1.sas -r TEXT
 # ./run_sas.py -s example_1.sas -r HTML 
-# ./run_sas.py -s example_1.sas -r HTML -l out2.log -o out2.html 
-# ./run_sas.py -s example_1.sas -r TEXT -l out3.log -o out3.lst 
+# ./run_sas.py -s example_1.sas -r htMl -l out2.log -o out2.html 
+# ./run_sas.py -s example_1.sas -r teXt -l out3.log -o out3.lst 
 # ./run_sas.py -s /home/a/b/c/example_1.sas 
  
 
@@ -42,7 +42,7 @@ def main():
 
     if options.results_format is None:
         results_format = 'TEXT' 
-    elif options.results_format in ('HTML','TEXT'):
+    elif options.results_format.upper() in ('HTML','TEXT'):
         results_format = options.results_format
     else:
         parser.print_help()
