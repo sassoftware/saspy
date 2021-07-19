@@ -15,6 +15,7 @@ import sys
 # ./run_sas.py -s example_1.sas -r htMl -l out2.log -o out2.html 
 # ./run_sas.py -s example_1.sas -r teXt -l out3.log -o out3.lst 
 # ./run_sas.py -s /home/a/b/c/example_1.sas 
+# ./run_sas.py -s example_1.sas -r text -l out4.log -o out4.lst -c ssh
  
 
 def main():
@@ -23,6 +24,7 @@ def main():
     parser.add_argument('-l', '--log_fname', help='name of the output LOG file name')
     parser.add_argument('-o', '--lst_fname', help='name of the output LST file')
     parser.add_argument('-r', '--results_format', help='results format for sas_session.submit(). It may be either TEXT or HTML. If not specified it is TEXT by default')
+    parser.add_argument('-c', '--cfgname', help='name of the Configuration Definition to use for the SASsession')
     options = parser.parse_args()
 
     if options.sas_fname is None:
@@ -61,8 +63,11 @@ def main():
     sas_code_txt = sas_file.read()
     sas_file.close()
 
-    sas_session = saspy.SASsession()
-    
+    if options.cfgname is None:
+        sas_session = saspy.SASsession()   
+    else:
+        sas_session = saspy.SASsession(cfgname=options.cfgname)
+
     c = sas_session.submit(sas_code_txt,results=results_format)
 
     with open(log_fname, 'w') as f1:
