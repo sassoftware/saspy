@@ -35,8 +35,7 @@ def main():
     sas_fname = options.sas_fname
 
     if options.log_fname is None:
-        base      = os.path.basename(sas_fname)
-        log_fname = os.path.splitext(base)[0] + ".log"
+        log_fname = os.path.splitext(sas_fname)[0] + ".log"
         print("log_fname is " + log_fname )
     else:
         log_fname = options.log_fname
@@ -50,11 +49,10 @@ def main():
         sys.exit(0)
 
     if options.lst_fname is None:
-        base = os.path.basename(sas_fname)
         if results_format == 'HTML':
-            lst_fname = os.path.splitext(base)[0] + ".html"
+            lst_fname = os.path.splitext(sas_fname)[0] + ".html"
         else:
-            lst_fname = os.path.splitext(base)[0] + ".lst"
+            lst_fname = os.path.splitext(sas_fname)[0] + ".lst"
         print("lst_fname is " + lst_fname )
     else:
         lst_fname = options.lst_fname
