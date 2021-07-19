@@ -81,3 +81,14 @@ SAS Viya VDMML
 .. autoclass:: saspy.sasViyaML.SASViyaML
     :members:
 
+
+SASPy Scripts
+-------------
+
+run_sas.py
+~~~~~~~~~~
+
+This user contributed script if for executing a .sas file and writing the LOG and LST to
+files, much like running a .sas file from SAS in batch mode.
+
+
