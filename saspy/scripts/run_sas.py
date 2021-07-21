@@ -19,12 +19,12 @@ import sys
  
 
 def main():
-    parser = argparse.ArgumentParser(description="Execute SAS code using saspy.")
-    parser.add_argument('-s', '--sas_fname',help='name of the SAS file to be executed')
-    parser.add_argument('-l', '--log_fname', help='name of the output LOG file name')
-    parser.add_argument('-o', '--lst_fname', help='name of the output LST file')
-    parser.add_argument('-r', '--results_format', help='results format for sas_session.submit(). It may be either TEXT or HTML. If not specified it is TEXT by default')
-    parser.add_argument('-c', '--cfgname', help='name of the Configuration Definition to use for the SASsession')
+    parser = argparse.ArgumentParser(description="It executes SAS code using saspy.")
+    parser.add_argument('-s', '--sas_fname',help='Name of the SAS file to be executed.')
+    parser.add_argument('-l', '--log_fname', help='Name of the output LOG file name. If not specified then it is the same as the sas_fname with .sas removed and .log added.')
+    parser.add_argument('-o', '--lst_fname', help='Name of the output LST file. If not specified then it is the same as the sas_fname with .sas removed and .lst/.html added depending on the results format.')
+    parser.add_argument('-r', '--results_format', help='Results format for sas_session.submit(). It may be either TEXT or HTML. If not specified it is TEXT by default. It is case incesensitive.')
+    parser.add_argument('-c', '--cfgname', help='Name of the Configuration Definition to use for the SASsession. If not specified then just saspy.SASsession() is executed.')
     options = parser.parse_args()
 
     if options.sas_fname is None:
