@@ -2576,9 +2576,10 @@ Will use HTML5 for this SASsession.""")
                      else:
                         code += 'best32.'
                code += '; '
-               if i % 10 == 0:
+               if i % 10 == 9:
                   code +='\n'
 
+      miss  = {}
       code += "\nfile sock dlm="+cdelim+";\n"
       for i in range(nvars):
          if vartype[i] != 'N':
@@ -2590,12 +2591,16 @@ Will use HTML5 for this SASsession.""")
                         '%02x%02x' %                               \
                         (ord(rowsep.encode(self.sascfg.encoding)), \
                          ord(colsep.encode(self.sascfg.encoding))))
-            if i % 10 == 0:
-               code +='\n'
+            miss[varlist[i]] = ' '
+         else:
+            code += "if missing('"+varlist[i]+"'n) then '"+varlist[i]+"'n = '.'; "
+            miss[varlist[i]] = '.'
+         if i % 10 == 9:
+            code +='\n'
       code += "\nput "
       for i in range(nvars):
          code += " '"+varlist[i]+"'n "
-         if i % 10 == 0:
+         if i % 10 == 9:
             code +='\n'
       code += rdelim+";\nrun;"
 
@@ -2612,7 +2617,6 @@ Will use HTML5 for this SASsession.""")
       else:
          dts = k_dts
 
-      miss = ['.', ' ', '. ']
       quoting = kwargs.pop('quoting', 3)
 
       sock.listen(1)
