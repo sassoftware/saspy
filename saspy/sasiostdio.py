@@ -60,6 +60,7 @@ class SASconfigSTDIO:
       self.metapw   = cfg.get('metapw', '')
       self.lrecl    = cfg.get('lrecl', None)
       self.iomc     = cfg.get('iomc', '')
+      self.dasho    = cfg.get('dasho', None)
       localhost     = cfg.get('localhost', None)
 
       try:
@@ -132,6 +133,13 @@ class SASconfigSTDIO:
             print("Parameter 'rtunnel' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.rtunnel = inrtunnel
+
+      ino = kwargs.get('dasho', None)
+      if ino is not None:
+         if lock and self.dasho is not None:
+            print("Parameter 'dasho' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.dasho = ino
 
       inport = kwargs.get('port', None)
       if inport is not None:
@@ -246,6 +254,13 @@ class SASsessionSTDIO():
          pgm    = sascfg.ssh
          parms  = [pgm]
          parms += ["-t"]
+
+         if sascfg.dasho:
+            if type(sascfg.dasho) == list:
+               for s in sascfg.dasho:
+                  parms += ["-o", s]
+            else:
+               parms += ["-o", sascfg.dasho]
 
          if sascfg.identity:
             parms += ["-i", sascfg.identity]
