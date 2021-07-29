@@ -533,12 +533,13 @@ The 3 encryption jars, if needed, can be found in a SAS deployment in a location
 The .authinfo file (_authinfo on Windows)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The IOM access method has support for getting the required user/password from an authinfo file in the user's home directory
+The IOM and HTTP access methods have support for getting the required user/password from an authinfo file in the user's home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it's _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for `authkey`. Next is the 'user' key followed by the value (the user id)
 and then 'password' key followed by its value (the user's password). Note that there are permission rules for this file. On linux the file must
 have permissions of 600, only the user can read or write the file. On Windows, the file should be equally locked down to where only the owner
-can read and write it.
+can read and write it. Also, the encoding of this file should be UTF-8, or any encoding that has ASCII as it's low order 7-bits if you only
+use those characters in the file. It's read into Python as is, and thus is expected to be utf-8.
 
 ::
 
