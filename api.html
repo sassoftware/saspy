@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API Reference &mdash; saspy 3.7.2 documentation</title>
+  <title>API Reference &mdash; saspy 3.7.3 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.7.2 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.7.3 documentation" href="index.html"/>
         <link rel="next" title="Advanced topics" href="advanced-topics.html"/>
         <link rel="prev" title="Getting started" href="getting-started.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.7.2
+                3.7.3
               </div>
             
           
@@ -107,6 +107,10 @@
 <li class="toctree-l3"><a class="reference internal" href="#econometic-and-time-series">Econometic and Time Series</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#quality-control">Quality Control</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sas-viya-vdmml">SAS Viya VDMML</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#saspy-scripts">SASPy Scripts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#run-sas-py">run_sas.py</a></li>
 </ul>
 </li>
 </ul>
@@ -4516,6 +4520,74 @@ appropriate testing file.</p>
 
 </div>
 </div>
+<div class="section" id="saspy-scripts">
+<h2>SASPy Scripts<a class="headerlink" href="#saspy-scripts" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="run-sas-py">
+<h3>run_sas.py<a class="headerlink" href="#run-sas-py" title="Permalink to this headline">¶</a></h3>
+<p>This user contributed script if for executing a .sas file and writing the LOG and LST to
+files, much like running a .sas file from SAS in batch mode.</p>
+<dl class="docutils">
+<dt>Usage: run_sas.py [-h] [-s SAS_FNAME] [-l LOG_FNAME] [-o LST_FNAME]</dt>
+<dd>[-r RESULTS_FORMAT] [-c CFGNAME]</dd>
+<dt>Required argument:</dt>
+<dd><table class="first last docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-s <var>SAS_FNAME</var></span>, <span class="option">--sas_fname <var>SAS_FNAME</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Name of the SAS file to be executed.</td></tr>
+</tbody>
+</table>
+</dd>
+<dt>Optional arguments:</dt>
+<dd><table class="first last docutils option-list" frame="void" rules="none">
+<col class="option" />
+<col class="description" />
+<tbody valign="top">
+<tr><td class="option-group">
+<kbd><span class="option">-h</span>, <span class="option">--help</span></kbd></td>
+<td>show this help message and exit</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-l <var>LOG_FNAME</var></span>, <span class="option">--log_fname <var>LOG_FNAME</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Name of the output LOG file name. If not specified
+then it is the same as the sas_fname with .sas removed
+and .log added.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-o <var>LST_FNAME</var></span>, <span class="option">--lst_fname <var>LST_FNAME</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Name of the output LST file. If not specified then it
+is the same as the sas_fname with .sas removed and
+.lst/.html added depending on the results format.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-r <var>RESULTS_FORMAT</var></span>, <span class="option">--results_format <var>RESULTS_FORMAT</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Results format for sas_session.submit(). It may be
+either TEXT or HTML. If not specified it is TEXT by
+default. It is case incesensitive.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-c <var>CFGNAME</var></span>, <span class="option">--cfgname <var>CFGNAME</var></span></kbd></td>
+</tr>
+<tr><td>&#160;</td><td>Name of the Configuration Definition to use for the
+SASsession. If not specified then just
+saspy.SASsession() is executed.</td></tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p>Examples:
+./run_sas.py -s example_1.sas
+./run_sas.py -s example_1.sas -l out1.log -o out1.lst
+./run_sas.py -s example_1.sas -r TEXT
+./run_sas.py -s example_1.sas -r HTML
+./run_sas.py -s example_1.sas -r htMl -l out2.log -o out2.html
+./run_sas.py -s example_1.sas -r teXt -l out3.log -o out3.lst
+./run_sas.py -s /home/a/b/c/example_1.sas
+./run_sas.py -s example_1.sas -r text -l out4.log -o out4.lst -c ssh</p>
+</div>
+</div>
 </div>
 
 
@@ -4562,7 +4634,7 @@ appropriate testing file.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.7.2',
+            VERSION:'3.7.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,

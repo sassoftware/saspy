@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation and configuration &mdash; saspy 3.7.2 documentation</title>
+  <title>Installation and configuration &mdash; saspy 3.7.3 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.7.2 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.7.3 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="SASPy" href="index.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.7.2
+                3.7.3
               </div>
             
           
@@ -636,12 +636,13 @@ $SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_2012
 </div>
 <div class="section" id="the-authinfo-file-authinfo-on-windows">
 <h4>The .authinfo file (_authinfo on Windows)<a class="headerlink" href="#the-authinfo-file-authinfo-on-windows" title="Permalink to this headline">¶</a></h4>
-<p>The IOM access method has support for getting the required user/password from an authinfo file in the user&#8217;s home directory
+<p>The IOM and HTTP access methods have support for getting the required user/password from an authinfo file in the user&#8217;s home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it&#8217;s _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for <cite>authkey</cite>. Next is the &#8216;user&#8217; key followed by the value (the user id)
 and then &#8216;password&#8217; key followed by its value (the user&#8217;s password). Note that there are permission rules for this file. On linux the file must
 have permissions of 600, only the user can read or write the file. On Windows, the file should be equally locked down to where only the owner
-can read and write it.</p>
+can read and write it. Also, the encoding of this file should be UTF-8, or any encoding that has ASCII as it&#8217;s low order 7-bits if you only
+use those characters in the file. It&#8217;s read into Python as is, and thus is expected to be utf-8.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">authkey</span> <span class="n">user</span> <span class="n">omr_user_id</span> <span class="n">password</span> <span class="n">omr_user_password</span>
 </pre></div>
 </div>
@@ -1095,7 +1096,7 @@ session instead of remote IOM (it is a different connection type).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.7.2',
+            VERSION:'3.7.3',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
