@@ -848,7 +848,7 @@ client_secret -
 authcode -
     [for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth service
     where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]&response_type=code
-    so perhapse:        https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&response_type=code
+    so perhaps:        https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&response_type=code
 
 user -
     (**Discouraged**)  The user ID is required but if this field is left blank,
@@ -858,7 +858,7 @@ pw  -
     blank, the user is **prompted** for a password at runtime, unless it's found in the authinfo file.
 
 context -
-    (Optional) The Compute Service has different Contexts that you can connect to. Think Appserver in IOM.
+    The Compute Service has different Contexts that you can connect to. Think Appserver in IOM.
     if you don't provide one here, saspy will query the Service upon connecting and get a list of available Contexts and
     prompt you for which one to use.
 
@@ -896,6 +896,15 @@ display -
     Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
+
+authtoken -
+    The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.
+    Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can pass it in.
+
+jwt -
+    A JWT that can be used to acquire a SASLogon authorization token. This would be something like an Azure
+    token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.
+
 
 .. code-block:: ipython3
 
