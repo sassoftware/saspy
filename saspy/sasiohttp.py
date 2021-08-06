@@ -728,6 +728,8 @@ class SASsessionHTTP():
       try:
          js = json.loads(resp.decode(self.sascfg.encoding))
          results = js.get('items')
+         if not results:
+            results = []
       except:
          results = []
 
