@@ -419,21 +419,22 @@ class SASconfigHTTP:
          uclient_secret = urllib.parse.quote(client_secret)
          d1             = ("grant_type=authorization_code&code="+uauthcode+
                           "&client_id="+uclient_id+"&client_secret="+uclient_secret).encode(self.encoding)
-         headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded"}
+         headers        = {"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded"}
       elif jwt:
-         ujwt       = urllib.parse.quote(jwt)
-         d1         = "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion="+ujwt
-         client     = "Basic "+base64.encodebytes((client_id+":").encode(self.encoding)).splitlines()[0].decode(self.encoding)
-         headers    = {"Accept":"application/vnd.sas.compute.session+json",
-                       "Content-Type":"application/x-www-form-urlencoded",
-                       "Authorization":client}
+         ujwt           = urllib.parse.quote(jwt)
+         d1             = "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion="+ujwt
+         client         = "Basic "+base64.encodebytes((client_id+":").encode(self.encoding)).splitlines()[0].decode(self.encoding)
+         headers        = {"Accept":"application/vnd.sas.compute.session+json",
+                           "Content-Type":"application/x-www-form-urlencoded",
+                           "Authorization":client}
       else:
-         uuser  = urllib.parse.quote(user)
-         upw    = urllib.parse.quote(pw)
-         d1     = ("grant_type=password&username="+uuser+"&password="+upw).encode(self.encoding)
-         client = "Basic "+base64.encodebytes((client_id+":").encode(self.encoding)).splitlines()[0].decode(self.encoding)
-         headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
-                  "Authorization":client}
+         uuser          = urllib.parse.quote(user)
+         upw            = urllib.parse.quote(pw)
+         d1             = ("grant_type=password&username="+uuser+"&password="+upw).encode(self.encoding)
+         client         = "Basic "+base64.encodebytes("sas.tkmtrb:".encode(self.encoding)).splitlines()[0].decode(self.encoding)
+         #client        = "Basic "+base64.encodebytes((client_id+":").encode(self.encoding)).splitlines()[0].decode(self.encoding)
+         headers        = {"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
+                           "Authorization":client}
 
       # POST AuthToken
       conn = self.HTTPConn; conn.connect()
