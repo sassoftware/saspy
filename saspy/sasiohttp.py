@@ -1330,7 +1330,7 @@ class SASsessionHTTP():
 
       for name in df.columns:
          colname = str(name).replace("'", "''")
-         col_up  = colname.upper()
+         col_up  = str(name).upper()
          input  += "'"+colname+"'n "
          if col_up in lab_keys:
             label += "label '"+colname+"'n ="+lab_upper[col_up]+";\n"
@@ -1650,7 +1650,7 @@ class SASsessionHTTP():
          for i in range(nvars):
             if vartype[i] == 'FLOAT':
                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
+                  df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce')
 
       ll = self.submit("filename _sp_updn;", 'text')
       logf += ll['LOG']
@@ -1788,10 +1788,10 @@ class SASsessionHTTP():
                         '%02x%02x' %                               \
                         (ord(rowsep.encode(self.sascfg.encoding)), \
                          ord(colsep.encode(self.sascfg.encoding))))
-            miss[varlist[i]] = ' '
+            miss[dvarlist[i]] = ' '
          else:
-            code += "if missing('"+varlist[i]+"'n) then '"+varlist[i]+"'n = '.'; "
-            miss[varlist[i]] = '.'
+            code += "if missing('"+varlist[i]+"'n) then '"+varlist[i]+"'n = .; "
+            miss[dvarlist[i]] = '.'
          if i % 10 == 9:
             code +='\n'
       code += "\nput "
@@ -1844,7 +1844,7 @@ class SASsessionHTTP():
          for i in range(nvars):
             if vartype[i] == 'FLOAT':
                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  df[varlist[i]] = pd.to_datetime(df[varlist[i]], errors='coerce')
+                  df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce')
 
       ll = self.submit("filename _sp_updn;", 'text')
       logf += ll['LOG']
