@@ -443,6 +443,11 @@ class SASsession():
     :param ip: [deprecated] The resolvable host name, or IP address to the Viya (use url instead)
     :param port: [depecated] The port to use to connect to Viya (use url instead)
     :param ssl: [depecated] Boolean identifying whether to use HTTPS (ssl=True) or just HTTP (use url instead)
+    :param authtoken: The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt. \
+           Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can pass it in.
+    :param jwt: A JWT that can be used to acquire a SASLogon authorization token. This would be something like an Azure \
+           token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.
+
 
     **COM**
 
