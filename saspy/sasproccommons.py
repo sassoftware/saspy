@@ -120,7 +120,7 @@ class Codegen(object):
                 if self.objtype.lower() == 'nnet' and self._key.casefold() == 'train':
                     return "{0} {1};\n".format(self._key, ' '.join('{}={}'.format(key, val) for key, val in self._args.items()))
                 if self._key.casefold() == 'out' and not len(self.outmeth):
-                    return "output out={}.'{}'n\n;".format(self._args.libref, self._args.table)
+                    return "output out={}.'{}'n\n;".format(self._args.libref, self._args.table.replace("'", "''"))
 
                 if self._key.casefold() == 'save' and self.objtype == 'treeboost':
                     return '{} %s ;\n'.format(self._key) % ' '.join('{} = {}'.format(key, val) for key, val in self._args.items())
@@ -145,21 +145,21 @@ class Codegen(object):
 
         elif isinstance(self._args, SASdata):
             key = "{} =".format(self._key)
-            args = "{}.'{}'n".format(self._args.libref, self._args.table)
+            args = "{}.'{}'n".format(self._args.libref, self._args.table.replace("'", "''"))
             if self._key in ['out','output']:
-                return "output out={}.'{}'n\n;".format(self._args.libref, self._args.table)
+                return "output out={}.'{}'n\n;".format(self._args.libref, self._args.table.replace("'", "''"))
             if self._key == 'score':
                 if self.objtype.casefold() == 'hp4score':
-                    return "score out={}.'{}'n\n;".format(self._args.libref, self._args.table)
+                    return "score out={}.'{}'n\n;".format(self._args.libref, self._args.table.replace("'", "''"))
                 elif self.objtype.casefold() == 'tpspline':
-                    return "score data={0}.'{1}'n out={2}.'{3}'n\n;".format(self.data.libref, self.data.table, self._args.libref, self._args.table)
-                return "score out={}.'{}'n\n;".format(self._args.libref, self._args.table)
+                    return "score data={0}.'{1}'n out={2}.'{3}'n\n;".format(self.data.libref, self.data.table.replace("'", "''"), self._args.libref, self._args.table.replace("'", "''"))
+                return "score out={}.'{}'n\n;".format(self._args.libref, self._args.table.replace("'", "''"))
             elif self._key == 'savestate':
-                return "{} rstore = {}.'{}'n\n;".format(key, self._args.libref, self._args.table)
+                return "{} rstore = {}.'{}'n\n;".format(key, self._args.libref, self._args.table.replace("'", "''"))
             elif self._key in ['output', 'out']:
                 if len(self.outmeth):
                     return "{} out = {};\n".format(self._key, args)
-                return "{}.'{}'n".format(self._args.libref, self._args.table)
+                return "{}.'{}'n".format(self._args.libref, self._args.table.replace("'", "''"))
         if self._key in ['stmtpassthrough', 'prog_stmts']:
             return "{0} ;\n".format(args)
         if self._key =='cls':
@@ -258,10 +258,10 @@ class SASProcCommons:
             plot = args['plot']
         if len(outmeth) and not outds == None:
             code += "proc %s data=%s.'%s'n %s %s %s=%s %s ;\n" % (
-                objtype, data.libref, data.table, data._dsopts(), plot, outmeth, outstr, procopts)
+                objtype, data.libref, data.table.replace("'", "''"), data._dsopts(), plot, outmeth, outstr, procopts)
         else:
             code += "proc %s data=%s.'%s'n %s %s %s ;\n" % (
-            objtype, data.libref, data.table, data._dsopts(), plot, procopts)
+            objtype, data.libref, data.table.replace("'", "''"), data._dsopts(), plot, procopts)
             if outds is not None:
                 args['output'] = outds
         self.logger.debug("args value: " + str(args))
@@ -295,7 +295,7 @@ class SASProcCommons:
                 debug_code += gen.debug
 
         code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,'%s'n);" % (objname, objtype, data.table)
+        code += "%%mangobj(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
         if self.logger.level == 10:
             print("Proc code submission:\n " + str(code))
             print("\n\n\n" + debug_code)
@@ -325,10 +325,10 @@ class SASProcCommons:
 
         objlist = []
         log = res['LOG'].rpartition('METHLISTEND=')[0].rpartition('METHLIST=')
-                                                                                  
-        for i in range(log[2].count('METH=')):                                    
-           log = log[2].partition('METH=')[2].partition(' METHEND=')                    
-           objlist.append(log[0].strip())                                                         
+
+        for i in range(log[2].count('METH=')):
+           log = log[2].partition('METH=')[2].partition(' METHEND=')
+           objlist.append(log[0].strip())
 
         self.logger.debug("PROC attr list: " + str(objlist))
         return objlist
@@ -358,15 +358,15 @@ class SASProcCommons:
         # ignore teach_me_SAS mode to run contents
         nosub = self.sas.nosub
         self.sas.nosub = False
-        ll = self.sas._io.submit(char_string.format(data.libref, data.table + data._dsopts()))
+        ll = self.sas._io.submit(char_string.format(data.libref, data.table.replace("'", "''") + data._dsopts()))
         self.sas.nosub = nosub
 
         charlist = []
         log = ll['LOG'].rpartition('VARLISTEND=')[0].rpartition('VARLIST=')
-                                                                                  
-        for i in range(log[2].count('VAR=')):                                    
-           log = log[2].partition('VAR=')[2].partition(' VAREND=')                    
-           charlist.append(log[0].strip())                                                         
+
+        for i in range(log[2].count('VAR=')):
+           log = log[2].partition('VAR=')[2].partition(' VAREND=')
+           charlist.append(log[0].strip())
 
         charlist = [x.casefold() for x in charlist]
         return charlist

@@ -1120,14 +1120,15 @@ Will use HTML5 for this SASsession.""")
 
       Returns True it the Data Set exists and False if it does not
       """
+      sd = table.strip().replace("'", "''")
       code  = 'data _null_; e = exist("'
       if len(libref):
          code += libref+"."
-      code += "'"+table.strip()+"'n"+'"'+");\n"
+      code += "'"+sd+"'n"+'"'+");\n"
       code += 'v = exist("'
       if len(libref):
          code += libref+"."
-      code += "'"+table.strip()+"'n"+'"'+", 'VIEW');\n if e or v then e = 1;\n"
+      code += "'"+sd+"'n"+'"'+", 'VIEW');\n if e or v then e = 1;\n"
       code += "te='TABLE_EXISTS='; put te e;run;\n"
 
       ll = self.submit(code, "text")
@@ -1157,7 +1158,7 @@ Will use HTML5 for this SASsession.""")
       code += "proc import datafile=x out="
       if len(libref):
          code += libref+"."
-      code += "'"+table.strip()+"'n dbms=csv replace; "+self._sb._impopts(opts)+" run;"
+      code += "'"+table.strip().replace("'", "''")+"'n dbms=csv replace; "+self._sb._impopts(opts)+" run;"
 
       if nosub:
          print(code)
@@ -1183,7 +1184,7 @@ Will use HTML5 for this SASsession.""")
       if len(libref):
          code += libref+"."
 
-      code += "'"+table.strip()+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
+      code += "'"+table.strip().replace("'", "''")+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
       code += self._sb._expopts(opts)+" run\n;"
       code += "options source;\n"
 
@@ -1522,7 +1523,7 @@ Will use HTML5 for this SASsession.""")
          warnings.warn("Note that Indexes are not transferred over as columns. Only actual coulmns are transferred")
 
       for name in df.columns:
-         colname = str(name)
+         colname = str(name).replace("'", "''")
          col_up  = colname.upper()
          input  += "'"+colname+"'n "
          if col_up in lab_keys:
@@ -1575,7 +1576,7 @@ Will use HTML5 for this SASsession.""")
       code = "data "
       if len(libref):
          code += libref+"."
-      code += "'"+table.strip()+"'n"
+      code += "'"+table.strip().replace("'", "''")+"'n"
 
       if len(outdsopts):
          code += '('
@@ -1719,9 +1720,9 @@ Will use HTML5 for this SASsession.""")
       logcodeb = logcodeo.encode()
 
       if libref:
-         tabname = libref+".'"+table.strip()+"'n "
+         tabname = libref+".'"+table.strip().replace("'", "''")+"'n "
       else:
-         tabname = "'"+table.strip()+"'n "
+         tabname = "'"+table.strip().replace("'", "''")+"'n "
 
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
       code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
@@ -1747,6 +1748,10 @@ Will use HTML5 for this SASsession.""")
       l2 = l2[2].partition("\n")
       varlist = l2[2].split("\n", nvars)
       del varlist[nvars]
+
+      dvarlist = list(varlist)
+      for i in range(len(varlist)):
+         varlist[i] = varlist[i].replace("'", "''")
 
       l2 = l2[2].partition("VARTYPE=")
       l2 = l2[2].partition("\n")
@@ -1804,11 +1809,11 @@ Will use HTML5 for this SASsession.""")
          for i in range(nvars):
             if vartype[i] == 'N':
                if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  dts[varlist[i]] = 'float'
+                  dts[dvarlist[i]] = 'float'
                else:
-                  dts[varlist[i]] = 'str'
+                  dts[dvarlist[i]] = 'str'
             else:
-               dts[varlist[i]] = 'str'
+               dts[dvarlist[i]] = 'str'
       else:
          dts = k_dts
 
@@ -1951,9 +1956,9 @@ Will use HTML5 for this SASsession.""")
       logcodeb = logcodeo.encode()
 
       if libref:
-         tabname = libref+".'"+table.strip()+"'n "
+         tabname = libref+".'"+table.strip().replace("'", "''")+"'n "
       else:
-         tabname = "'"+table.strip()+"'n "
+         tabname = "'"+table.strip().replace("'", "''")+"'n "
 
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
       code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
@@ -1979,6 +1984,10 @@ Will use HTML5 for this SASsession.""")
       l2 = l2[2].partition("\n")
       varlist = l2[2].split("\n", nvars)
       del varlist[nvars]
+
+      dvarlist = list(varlist)
+      for i in range(len(varlist)):
+         varlist[i] = varlist[i].replace("'", "''")
 
       l2 = l2[2].partition("VARTYPE=")
       l2 = l2[2].partition("\n")
@@ -2065,11 +2074,11 @@ Will use HTML5 for this SASsession.""")
          for i in range(nvars):
             if vartype[i] == 'N':
                if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  dts[varlist[i]] = 'float'
+                  dts[dvarlist[i]] = 'float'
                else:
-                  dts[varlist[i]] = 'str'
+                  dts[dvarlist[i]] = 'str'
             else:
-               dts[varlist[i]] = 'str'
+               dts[dvarlist[i]] = 'str'
       else:
          dts = k_dts
 
@@ -2084,7 +2093,7 @@ Will use HTML5 for this SASsession.""")
          sockout = _read_sock(io=self, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(),
                               lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
 
-         df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist,
+         df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=dvarlist,
                           sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
                           encoding='utf-8', quoting=quoting, **kwargs)
 

@@ -996,6 +996,7 @@ class SASsessionHTTP():
       Returns True it the Data Set exists and False if it does not
       '''
       #can't have an empty libref, so check for user or work
+      sd = table.strip().replace("'", "''")
       if not libref:
          # HEAD Libref USER
          conn = self.sascfg.HTTPConn; conn.connect()
@@ -1012,10 +1013,10 @@ class SASsessionHTTP():
 
       code  = 'data _null_; e = exist("'
       code += libref+"."
-      code += "'"+table.strip()+"'n"+'"'+");\n"
+      code += "'"+sd+"'n"+'"'+");\n"
       code += 'v = exist("'
       code += libref+"."
-      code += "'"+table.strip()+"'n"+'"'+", 'VIEW');\n if e or v then e = 1;\n"
+      code += "'"+sd+"'n"+'"'+", 'VIEW');\n if e or v then e = 1;\n"
       code += "te='TABLE_EXISTS='; put te e;run;\n"
 
       ll = self.submit(code, "text")
@@ -1060,7 +1061,7 @@ class SASsessionHTTP():
       code += "proc import datafile=x out="
       if len(libref):
          code += libref+"."
-      code += "'"+table.strip()+"'n dbms=csv replace; "+self._sb._impopts(opts)+" run;"
+      code += "'"+table.strip().replace("'", "''")+"'n dbms=csv replace; "+self._sb._impopts(opts)+" run;"
 
       if nosub:
          print(code)
@@ -1082,7 +1083,7 @@ class SASsessionHTTP():
       if len(libref):
          code += libref+"."
 
-      code += "'"+table.strip()+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
+      code += "'"+table.strip().replace("'", "''")+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
       code += self._sb._expopts(opts)+" run\n;"
       code += "options source;\n"
 
@@ -1321,7 +1322,7 @@ class SASsessionHTTP():
          warnings.warn("Note that Indexes are not transferred over as columns. Only actual coulmns are transferred")
 
       for name in df.columns:
-         colname = str(name)
+         colname = str(name).replace("'", "''")
          col_up  = colname.upper()
          input  += "'"+colname+"'n "
          if col_up in lab_keys:
@@ -1373,7 +1374,7 @@ class SASsessionHTTP():
       code = "data "
       if len(libref):
          code += libref+"."
-      code += "'"+table.strip()+"'n"
+      code += "'"+table.strip().replace("'", "''")+"'n"
 
       if len(outdsopts):
          code += '('
@@ -1511,9 +1512,9 @@ class SASsessionHTTP():
       opts   = opts   if   opts is not None else {}
 
       if libref:
-         tabname = libref+".'"+table.strip()+"'n "
+         tabname = libref+".'"+table.strip().replace("'", "''")+"'n "
       else:
-         tabname = "'"+table.strip()+"'n "
+         tabname = "'"+table.strip().replace("'", "''")+"'n "
 
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
 
@@ -1547,6 +1548,10 @@ class SASsessionHTTP():
       for i in range(len(lst)):
          varlist.append(lst[i].get('name'))
          vartype.append(lst[i].get('type'))
+
+      dvarlist = list(varlist)
+      for i in range(len(varlist)):
+         varlist[i] = varlist[i].replace("'", "''")
 
       topts = dict(dsopts)
       topts.pop('firstobs', None)
@@ -1599,11 +1604,11 @@ class SASsessionHTTP():
          for i in range(nvars):
             if vartype[i] == 'FLOAT':
                if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  dts[varlist[i]] = 'float'
+                  dts[dvarlist[i]] = 'float'
                else:
-                  dts[varlist[i]] = 'str'
+                  dts[dvarlist[i]] = 'str'
             else:
-               dts[varlist[i]] = 'str'
+               dts[dvarlist[i]] = 'str'
       else:
          dts = k_dts
 
@@ -1672,9 +1677,9 @@ class SASsessionHTTP():
       dsopts = dsopts if dsopts is not None else {}
 
       if libref:
-         tabname = libref+".'"+table.strip()+"'n "
+         tabname = libref+".'"+table.strip().replace("'", "''")+"'n "
       else:
-         tabname = "'"+table.strip()+"'n "
+         tabname = "'"+table.strip().replace("'", "''")+"'n "
 
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
 
@@ -1708,6 +1713,10 @@ class SASsessionHTTP():
       for i in range(len(lst)):
          varlist.append(lst[i].get('name'))
          vartype.append(lst[i].get('type'))
+
+      dvarlist = list(varlist)
+      for i in range(len(varlist)):
+         varlist[i] = varlist[i].replace("'", "''")
 
       topts = dict(dsopts)
       topts.pop('firstobs', None)
@@ -1792,11 +1801,11 @@ class SASsessionHTTP():
          for i in range(nvars):
             if vartype[i] == 'FLOAT':
                if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  dts[varlist[i]] = 'float'
+                  dts[dvarlist[i]] = 'float'
                else:
-                  dts[varlist[i]] = 'str'
+                  dts[dvarlist[i]] = 'str'
             else:
-               dts[varlist[i]] = 'str'
+               dts[dvarlist[i]] = 'str'
       else:
          dts = k_dts
 
@@ -1818,7 +1827,7 @@ class SASsessionHTTP():
 
       sockout = _read_sock(req=req, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode())
 
-      df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=varlist,
+      df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=dvarlist,
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
                        encoding='utf-8', quoting=quoting, **kwargs)
 

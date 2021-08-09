@@ -73,7 +73,7 @@ class SASdata:
                  from IPython.display import HTML
               except:
                  failed = 1
-              
+
               if failed and not self.sas.batch:
                   self.HTML = 0
               else:
@@ -88,10 +88,10 @@ class SASdata:
 
             code  = "%let engine=BAD;\n"
             code += "proc sql;select distinct engine into :engine from "
-            code += "sashelp.VLIBNAM where libname = '{}';".format(libref.upper()) 
+            code += "sashelp.VLIBNAM where libname = '{}';".format(libref.upper())
             code += ";%put engstart=&engine engend=;\nquit;"
             ll = self.sas._io.submit(code, "text")
-           
+
             eng = ll['LOG'].rpartition("engstart=")
             eng = eng[2].partition(" engend=")
             self.engine = eng[0].strip()
@@ -215,27 +215,27 @@ class SASdata:
         """
         lastlog = len(self.sas._io._log)
 
-        topts   = dict(self.dsopts) 
+        topts   = dict(self.dsopts)
         optkeys = self.dsopts.keys()
 
         if self.engine != 'SPDE':
            firstobs = topts.get('firstobs', 1)
-           topts['obs'] = min(topts.get('obs', firstobs+obs-1), firstobs+obs-1) 
+           topts['obs'] = min(topts.get('obs', firstobs+obs-1), firstobs+obs-1)
         else:
            firstobs = topts.get('startobs', 1)
-           topts['endobs'] = min(topts.get('endobs', topts.get('obs', firstobs+obs-1)), firstobs+obs-1) 
+           topts['endobs'] = min(topts.get('endobs', topts.get('obs', firstobs+obs-1)), firstobs+obs-1)
 
            if 'obs' in optkeys:
-              del topts['obs']  
+              del topts['obs']
 
-        code = "proc print data=" + self.libref + ".'" + self.table + "'n " + self.sas._dsopts(topts) + ";run;"
+        code = "proc print data=" + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self.sas._dsopts(topts) + ";run;"
 
         if self.sas.nosub:
             print(code)
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "data _head ; set %s.'%s'n %s; run;" % (self.libref, self.table, self.sas._dsopts(topts))
+            code = "data _head ; set %s.'%s'n %s; run;" % (self.libref, self.table.replace("'", "''"), self.sas._dsopts(topts))
             df   = self._returnPD(code, '_head')
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
@@ -246,7 +246,7 @@ class SASdata:
                 if not ll:
                     ll = self.sas._io.submit(code)
                     self.sas._lastlog = self.sas._io._log[lastlog:]
-                if not self.sas.batch:  
+                if not self.sas.batch:
                    self.sas._render_html_or_log(ll)
                 else:
                     return ll
@@ -265,7 +265,7 @@ class SASdata:
 
         :param obs: the number of rows of the table that you want to display. The default is 5
         :return:
-        """   
+        """
         lastlog = len(self.sas._io._log)
 
         nosub = self.sas.nosub
@@ -286,30 +286,30 @@ class SASdata:
            firstobs = topts.get('firstobs', 1)
            lastobs  = topts.get('obs', nobs+firstobs-1)
            firstobs = max(lastobs - obs+1, firstobs)
-   
+
            topts['obs']      = lastobs
            topts['firstobs'] = firstobs
-   
+
         else:
            firstobs = topts.get('startobs', 1)
            lastobs  = topts.get('endobs', topts.get('obs', nobs+firstobs-1))
            firstobs = max(lastobs - obs+1, firstobs)
-   
+
            topts['endobs']   = lastobs
            topts['startobs'] = firstobs
 
-           if 'obs' in optkeys: 
-              del topts['obs']  
+           if 'obs' in optkeys:
+              del topts['obs']
 
-        code  = "proc print data=" + self.libref + ".'" 
-        code += self.table + "'n " + self.sas._dsopts(topts) + ";run;"
+        code  = "proc print data=" + self.libref + ".'"
+        code += self.table.replace("'", "''") + "'n " + self.sas._dsopts(topts) + ";run;"
 
         if self.sas.nosub:
             print(code)
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "data _tail ; set %s.'%s'n %s; run;" % (self.libref, self.table, self.sas._dsopts(topts))
+            code = "data _tail ; set %s.'%s'n %s; run;" % (self.libref, self.table.replace("'", "''"), self.sas._dsopts(topts))
             df   = self._returnPD(code, '_tail')
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
@@ -349,10 +349,12 @@ class SASdata:
 
         code  = "%let lastobs=-1;\n"
         if not force:
-           code += "proc sql;select count(*) format best32. into :lastobs from "+ self.libref + ".'" + self.table + "'n " + self._dsopts() + ";"
+           code += "proc sql;select count(*) format best32. into :lastobs from "+ self.libref + ".'"
+           code +=  self.table.replace("'", "''") + "'n " + self._dsopts() + ";"
            code += "%put lastobs=&lastobs lastobsend=;\nquit;"
         else:
-           code += "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+ self.libref + ".'" + self.table + "'n " + self._dsopts() +";run;\n"
+           code += "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+ self.libref + ".'"
+           code +=  self.table.replace("'", "''") + "'n " + self._dsopts() +";run;\n"
            code += "proc sql;select count(*) format best32. into :lastobs from work.sasdata2dataframe;"
            code += "%put lastobs=&lastobs lastobsend=;\nquit;\n"
            code += "proc delete data=work.sasdata2dataframe(memtype=view);run;"
@@ -421,12 +423,12 @@ class SASdata:
             # get the list of variables
             if k == 1:
                 code += "proc hpsample data=%s.'%s'n %s out=%s.'%s'n %s samppct=%s seed=%s Partition;\n" % (
-                    self.libref, self.table, self._dsopts(), out_libref, out_table, self._dsopts(), fraction * 100,
+                    self.libref, self.table.replace("'", "''"), self._dsopts(), out_libref, out_table.replace("'", "''"), self._dsopts(), fraction * 100,
                     seed)
             else:
                 seed += 1
                 code += "proc hpsample data=%s.'%s'n %s out=%s.'%s'n %s samppct=%s seed=%s partition PARTINDNAME=_cvfold%s;\n" % (
-                    self.libref, self.table, self._dsopts(), out_libref, out_table, self._dsopts(), fraction * 100,
+                    self.libref, self.table.replace("'", "''"), self._dsopts(), out_libref, out_table.replace("'", "''"), self._dsopts(), fraction * 100,
                     seed, i)
 
             # Get variable info for stratified sampling
@@ -435,9 +437,9 @@ class SASdata:
                     num_string = """
                         data _null_; file LOG;
                           d = open("{0}.'{1}'n");
-                          nvars = attrn(d, 'NVARS'); 
+                          nvars = attrn(d, 'NVARS');
                           put 'VARLIST=';
-                          do i = 1 to nvars; 
+                          do i = 1 to nvars;
                              vart = vartype(d, i);
                              var  = varname(d, i);
                              if vart eq 'N' then
@@ -449,15 +451,15 @@ class SASdata:
                     # ignore teach_me_SAS mode to run contents
                     nosub = self.sas.nosub
                     self.sas.nosub = False
-                    ll = self.sas._io.submit(num_string.format(self.libref, self.table + self._dsopts()))
+                    ll = self.sas._io.submit(num_string.format(self.libref, self.table.replace("'", "''") + self._dsopts()))
                     self.sas.nosub = nosub
 
                     numlist = []
                     log = ll['LOG'].rpartition('VARLISTEND=')[0].rpartition('VARLIST=')
-                                                                                              
-                    for vari in range(log[2].count('VAR=')):                                    
-                       log = log[2].partition('VAR=')[2].partition(' VAREND=')                    
-                       numlist.append(log[0].strip())                                                         
+
+                    for vari in range(log[2].count('VAR=')):
+                       log = log[2].partition('VAR=')[2].partition(' VAREND=')
+                       numlist.append(log[0].strip())
 
                    # check if var is in numlist
                     if isinstance(var, str):
@@ -485,12 +487,12 @@ class SASdata:
         if not singleOut:
             split_code += 'DATA '
             for j in range(1, k + 1):
-                split_code += "\t%s.'%s%s_train'n (drop=_Partind_ _cvfold:)\n" % (out_libref, out_table, j)
-                split_code += "\t%s.'%s%s_score'n (drop=_Partind_ _cvfold:)\n" % (out_libref, out_table, j)
-            split_code += ";\n \tset %s.'%s'n;\n" % (out_libref, out_table)
+                split_code += "\t%s.'%s%s_train'n (drop=_Partind_ _cvfold:)\n" % (out_libref, out_table.replace("'", "''"), j)
+                split_code += "\t%s.'%s%s_score'n (drop=_Partind_ _cvfold:)\n" % (out_libref, out_table.replace("'", "''"), j)
+            split_code += ";\n \tset %s.'%s'n;\n" % (out_libref, out_table.replace("'", "''"))
             for z in range(1, k + 1):
-                split_code += "\tif _cvfold%s = 1 or _partind_ = 1 then output %s.'%s%s_train'n;\n" % (z, out_libref, out_table, z)
-                split_code += "\telse output %s.'%s%s_score'n;\n" % (out_libref, out_table, z)
+                split_code += "\tif _cvfold%s = 1 or _partind_ = 1 then output %s.'%s%s_train'n;\n" % (z, out_libref, out_table.replace("'", "''"), z)
+                split_code += "\telse output %s.'%s%s_score'n;\n" % (out_libref, out_table.replace("'", "''"), z)
             split_code += 'run;'
         runcode = True
         if self.sas.nosub:
@@ -527,7 +529,7 @@ class SASdata:
                 else:
                     ret = self.sas.sasdata(out_table, out_libref, self.results)
                     self.sas._lastlog = self.sas._io._log[lastlog:]
-                    return ret 
+                    return ret
             else:
                 return self
 
@@ -539,7 +541,7 @@ class SASdata:
         :return: output
         """
         lastlog = len(self.sas._io._log)
-        code = "proc contents data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";run;"
+        code = "proc contents data=" + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts() + ";run;"
 
         if self.sas.nosub:
             print(code)
@@ -549,7 +551,7 @@ class SASdata:
 
         ll = self._is_valid()
         if results == 'PANDAS':
-            code  = "proc contents data=%s.'%s'n %s ;" % (self.libref, self.table, self._dsopts())
+            code  = "proc contents data=%s.'%s'n %s ;" % (self.libref, self.table.replace("'", "''"), self._dsopts())
             code += "ods output Attributes=work._attributes;"
             code += "ods output EngineHost=work._EngineHost;"
             code += "ods output Variables=work._Variables;"
@@ -581,14 +583,14 @@ class SASdata:
         display metadata about the table, size, number of rows, columns and their data type
         """
         lastlog = len(self.sas._io._log)
-        code = "proc contents data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";ods select Variables;run;"
+        code = "proc contents data=" + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts() + ";ods select Variables;run;"
 
         if self.sas.nosub:
             print(code)
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "proc contents data=%s.'%s'n %s ;ods output Variables=work._variables ;run;" % (self.libref, self.table, self._dsopts())
+            code = "proc contents data=%s.'%s'n %s ;ods output Variables=work._variables ;run;" % (self.libref, self.table.replace("'", "''"), self._dsopts())
             df = self._returnPD(code, '_variables')
             df['Type'] = df['Type'].str.rstrip()
             self.sas._lastlog = self.sas._io._log[lastlog:]
@@ -636,7 +638,7 @@ class SASdata:
                 end;
                 do over nums;
                     ncounts(_i_) + missing(nums);
-                end;   
+                end;
             end ;
             length Variable $32 type $8. ;
             Do over chrs;
@@ -660,7 +662,7 @@ class SASdata:
         if self.sas.nosub:
             print(info_code.format(self.libref, self.table, self._dsopts()))
             return None
-        df = self._returnPD(info_code.format(self.libref, self.table, self._dsopts()), '_statsInfo')
+        df = self._returnPD(info_code.format(self.libref, self.table.replace("'", "''"), self._dsopts()), '_statsInfo')
         df = df.iloc[:, :]
         df.index.name = None
         df.name = None
@@ -684,7 +686,7 @@ class SASdata:
         lastlog = len(self.sas._io._log)
         dsopts = self._dsopts().partition(';\n\tformat')
 
-        code  = "proc means data=" + self.libref + ".'" + self.table + "'n " + dsopts[0] + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;"
+        code  = "proc means data=" + self.libref + ".'" + self.table.replace("'", "''") + "'n " + dsopts[0] + " stackodsoutput n nmiss median mean std min p25 p50 p75 max;"
         code += dsopts[1]+dsopts[2]+"run;"
 
         if self.sas.nosub:
@@ -695,7 +697,7 @@ class SASdata:
 
         if self.results.upper() == 'PANDAS':
             code = "proc means data=%s.'%s'n %s stackodsoutput n nmiss median mean std min p25 p50 p75 max; %s ods output Summary=work._summary; run;" % (
-                self.libref, self.table, dsopts[0], dsopts[1]+dsopts[2])
+                self.libref, self.table.replace("'", "''"), dsopts[0], dsopts[1]+dsopts[2])
             df = self._returnPD(code, '_summary')
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
@@ -741,14 +743,14 @@ class SASdata:
             else:
                 out_libref = out.libref
                 out_table = out.table
-            outstr = "out=%s.'%s'n" % (out_libref, out_table)
+            outstr = "out=%s.'%s'n" % (out_libref, out_table.replace("'", "''"))
 
         else:
             out_table = self.table
             out_libref = self.libref
 
         # get list of variables and types
-        varcode  = 'data _null_; d = open("' + self.libref + ".'" + self.table + "'n " + '");\n'
+        varcode  = 'data _null_; d = open("' + self.libref + ".'" + self.table.replace("'", "''") + "'n " + '");\n'
         varcode += "nvars = attrn(d, 'NVARS');\n"
         varcode += "put 'VARNUMS=' nvars 'VARNUMS_END=';\n"
         varcode += "put 'VARLIST=';\n"
@@ -759,23 +761,23 @@ class SASdata:
         varcode += "run;"
 
         ll = self.sas._io.submit(varcode, "text")
- 
-        l2 = ll['LOG'].rpartition("VARNUMS=")[2].partition("VARNUMS_END=") 
-        nvars = int(float(l2[0].strip()))                                  
-        
+
+        l2 = ll['LOG'].rpartition("VARNUMS=")[2].partition("VARNUMS_END=")
+        nvars = int(float(l2[0].strip()))
+
         varlist = []
         log = ll['LOG'].rpartition('TYPELIST=')[0].rpartition('VARLIST=')
-                                                                                  
-        for vari in range(log[2].count('VAR=')):                                    
-           log = log[2].partition('VAR=')[2].partition('VAREND=')                    
-           varlist.append(log[0].strip().upper())                                                         
+
+        for vari in range(log[2].count('VAR=')):
+           log = log[2].partition('VAR=')[2].partition('VAREND=')
+           varlist.append(log[0].strip().upper())
 
         typelist = []
         log = ll['LOG'].rpartition('END_ALL_VARS_AND_TYPES=')[0].rpartition('TYPELIST=')
-                                                                                  
-        for typei in range(log[2].count('VAR=')):                                    
-           log = log[2].partition('TYPE=')[2].partition('TYPEEND=')                    
-           typelist.append(log[0].strip().upper())                                                         
+
+        for typei in range(log[2].count('VAR=')):
+           log = log[2].partition('TYPE=')[2].partition('TYPEEND=')
+           typelist.append(log[0].strip().upper())
 
         varListType = dict(zip(varlist, typelist))
 
@@ -785,9 +787,9 @@ class SASdata:
         sqlsel = ' %s(%s),\n'
         sqlinto = ' into\n'
         if len(out_libref)>0 :
-            ds1 = "data " + out_libref + ".'" + out_table + "'n " + "; set " + self.libref + ".'" + self.table +"'n " + self._dsopts() + ";\n"
+            ds1 = "data " + out_libref + ".'" + out_table.replace("'", "''") + "'n " + "; set " + self.libref + ".'" + self.table.replace("'", "''") +"'n " + self._dsopts() + ";\n"
         else:
-            ds1 = "data '" + out_table + "'n " + "; set " + self.libref + "." + self.table + self._dsopts() + ";\n"
+            ds1 = "data '"                    + out_table.replace("'", "''") + "'n " + "; set " + self.libref + ".'" + self.table.replace("'", "''") +"'n " + self._dsopts() + ";\n"
         dsmiss = 'if missing({0}) then {1} = {2};\n'
         if replace:
             dsmiss = prefix+'{1} = {0}; if missing({0}) then %s{1} = {2};\n' % prefix
@@ -825,14 +827,14 @@ class SASdata:
                     sql += sqlsel % (key, v)
                     sqlinto += ' :imp_' + v + ',\n'
                     if key.lower == 'mode':
-                        modesql += modeq % (v, v, self.libref + ".'" + self.table + "'n " + self._dsopts() , v, v, v)
+                        modesql += modeq % (v, v, self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts() , v, v, v)
                     if varListType.get(v.upper()) == "N":
                         ds1 += dsmiss.format(v, v, '&imp_' + v + '.')
                     else:
                         ds1 += dsmiss.format(v, v, '"&imp_' + v + '."')
 
         if len(sql) > 20:
-            sql = sql.rstrip(', \n') + '\n' + sqlinto.rstrip(', \n') + '\n  from ' + self.libref + ".'" + self.table + "'n " + self._dsopts() + ';\nquit;\n'
+            sql = sql.rstrip(', \n') + '\n' + sqlinto.rstrip(', \n') + '\n  from ' + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts() + ';\nquit;\n'
         else:
             sql = ''
         ds1 += 'run;\n'
@@ -874,20 +876,20 @@ class SASdata:
                 if fn[1] == '.':
                     libref = fn[0]
                     table  = fn[2].strip()
-                    outstr = "out=%s.'%s'n" % (libref, table)
+                    outstr = "out=%s.'%s'n" % (libref, table.replace("'", "''"))
                 else:
                     libref = ''
                     table  = fn[0].strip()
-                    outstr = "out='" + table + "'n " 
+                    outstr = "out='" + table.replace("'", "''") + "'n "
             else:
                 libref = out.libref
                 table  = out.table
-                outstr = "out=%s.'%s'n" % (out.libref, out.table)
+                outstr = "out=%s.'%s'n" % (out.libref, out.table.replace("'", "''"))
 
         if 'options' in kwargs:
             options = kwargs['options']
 
-        code = "proc sort data=%s.'%s'n %s %s %s ;\n" % (self.libref, self.table, self._dsopts(), outstr, options)
+        code = "proc sort data=%s.'%s'n %s %s %s ;\n" % (self.libref, self.table.replace("'", "''"), self._dsopts(), outstr, options)
         code += "by %s;" % by
         code += "run\n;"
         runcode = True
@@ -923,7 +925,7 @@ class SASdata:
         Copy table to itesf, or to 'out=' table and add any vars if you want
 
         :param vars: REQUIRED dictionayr of variable names (keys) and assignment statement (values)
-               to maintain variable order use collections.OrderedDict Assignment statements must be valid 
+               to maintain variable order use collections.OrderedDict Assignment statements must be valid
                SAS assignment expressions.
         :param out: OPTIONAL takes a SASdata Object you create ahead of time. If not specified, replaces the existing table
                and the current SAS data object still refers to the replacement table.
@@ -932,8 +934,8 @@ class SASdata:
 
         :Example:
 
-        #. cars   = sas.sasdata('cars', 'sashelp') 
-        #. wkcars = sas.sasdata('cars') 
+        #. cars   = sas.sasdata('cars', 'sashelp')
+        #. wkcars = sas.sasdata('cars')
         #. cars.add_vars({'PW_ratio': 'weight / horsepower', 'Overhang' : 'length - wheelbase'}, wkcars)
         #. wkcars.head()
         """
@@ -944,11 +946,11 @@ class SASdata:
               print("out= needs to be a SASdata object")
               return None
            else:
-              outtab = out.libref + ".'" + out.table + "'n " + out._dsopts() 
+              outtab = out.libref + ".'" + out.table.replace("'", "''") + "'n " + out._dsopts()
         else:
-           outtab = self.libref + ".'" + self.table + "'n " + self._dsopts() 
+           outtab = self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts()
 
-        code  = "data "+outtab+"; set " + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";\n"
+        code  = "data "+outtab+"; set " + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts() + ";\n"
         for key in vars.keys():
            code += key+" = "+vars[key]+";\n"
         code += "; run;"
@@ -988,7 +990,7 @@ class SASdata:
         code = "%macro proccall(d);\n"
 
         # build parameters
-        score_table = str(self.libref + ".'" + self.table + "'n " )
+        score_table = str(self.libref + ".'" + self.table.replace("'", "''") + "'n " )
         binstats = str(objname + '.' + "ASSESSMENTSTATISTICS")
         out = str(objname + '.' + "ASSESSMENTBINSTATISTICS")
         level = 'interval'
@@ -1002,7 +1004,7 @@ class SASdata:
             except Exception:
                 print("No event was specified for a nominal target. Here are possible options:\n")
                 event_code = "proc hpdmdb data=%s.'%s'n %s classout=work._DMDBCLASSTARGET(keep=name nraw craw level frequency nmisspercent);" % (
-                    self.libref, self.table, self._dsopts())
+                    self.libref, self.table.replace("'", "''"), self._dsopts())
                 event_code += "\nclass %s ; \nrun;" % target
                 event_code += "data _null_; set work._DMDBCLASSTARGET; where ^(NRAW eq . and CRAW eq '') and lowcase(name)=lowcase('%s');" % target
                 ec = self.sas._io.submit(event_code)
@@ -1068,7 +1070,7 @@ class SASdata:
             """
             code += graphics.format(out)
         code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,'%s'n);" % (objname, objtype, self.table)
+        code += "%%mangobj(%s,%s,'%s'n);" % (objname, objtype, self.table.replace("'", "''"))
 
         if self.sas.nosub:
             print(code)
@@ -1093,7 +1095,7 @@ class SASdata:
 
             .. code-block:: python
 
-                             {'delimiter' : '~',  
+                             {'delimiter' : '~',
                               'putnames'  : True
                              }
         :return:
@@ -1111,7 +1113,7 @@ class SASdata:
             csv = self.sas.write_csv(file, self.table, self.libref, self.dsopts, opts)
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return csv
-             
+
     def score(self, file: str = '', code: str = '', out: 'SASdata' = None) -> 'SASdata':
         """
         This method is meant to update a SAS Data object with a model score file.
@@ -1129,8 +1131,8 @@ class SASdata:
             outTable = self.table
             outLibref = self.libref
         codestr = code
-        code = "data %s.'%s'n %s;" % (outLibref, outTable, self._dsopts())
-        code += "set %s.'%s'n %s;" % (self.libref, self.table, self._dsopts())
+        code = "data %s.'%s'n %s;" % (outLibref, outTable.replace("'", "''"), self._dsopts())
+        code += "set %s.'%s'n %s;" % (self.libref, self.table.replace("'", "''"), self._dsopts())
         if len(file)>0:
             code += '%%include "%s";' % file
         else:
@@ -1175,7 +1177,7 @@ class SASdata:
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
            - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.   \
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV  \
-                    has problems with 
+                    has problems with
 
 
         For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream \
@@ -1224,7 +1226,7 @@ class SASdata:
 
             .. code-block:: python
 
-                             {'delimiter' : '~',  
+                             {'delimiter' : '~',
                               'putnames'  : True
                              }
 
@@ -1238,7 +1240,7 @@ class SASdata:
         opts   =   opts if   opts is not None else {}
         return self.to_df(method='CSV', tempfile=tempfile, tempkeep=tempkeep, opts=opts, **kwargs)
 
-    def to_df_DISK(self, tempfile: str=None, tempkeep: bool=False, 
+    def to_df_DISK(self, tempfile: str=None, tempkeep: bool=False,
                    rowsep: str = '\x01', colsep: str = '\x02',
                    rowrep: str = ' ',    colrep: str = ' ', **kwargs) -> 'pandas.DataFrame':
         """
@@ -1257,7 +1259,7 @@ class SASdata:
         :return: Pandas data frame
         :rtype: 'pd.DataFrame'
         """
-        return self.to_df(method='DISK', tempfile=tempfile, tempkeep=tempkeep, 
+        return self.to_df(method='DISK', tempfile=tempfile, tempkeep=tempkeep,
                           rowsep=rowsep, colsep=colsep, rowrep=rowrep, colrep=colrep, **kwargs)
 
     def to_json(self, pretty: bool = False, sastag: bool = False, **kwargs) -> str:
@@ -1277,7 +1279,7 @@ class SASdata:
             code += " pretty "
         if not sastag:
             code += " nosastags "
-        code +=";\n  export %s.'%s'n %s;\n run;" % (self.libref, self.table, self._dsopts())
+        code +=";\n  export %s.'%s'n %s;\n run;" % (self.libref, self.table.replace("'", "''"), self._dsopts())
 
         if self.sas.nosub:
             print(code)
@@ -1319,11 +1321,11 @@ class SASdata:
         :return:
         """
         lastlog = len(self.sas._io._log)
-        code = "proc sgplot data=%s.'%s'n %s;" % (self.libref, self.table, self._dsopts())
+        code = "proc sgplot data=%s.'%s'n %s;" % (self.libref, self.table.replace("'", "''"), self._dsopts())
         if len(options):
-            code += "\n\theatmap x='%s'n y='%s'n / %s;" % (x, y, options)
+            code += "\n\theatmap x='%s'n y='%s'n / %s;" % (x.replace("'", "''"), y.replace("'", "''"), options)
         else:
-            code += "\n\theatmap x='%s'n y='%s'n;" % (x, y)
+            code += "\n\theatmap x='%s'n y='%s'n;" % (x.replace("'", "''"), y.replace("'", "''"))
 
         if len(label) > 0:
             code += " LegendLABEL='" + label + "'"
@@ -1360,14 +1362,14 @@ class SASdata:
         :return:
         """
         lastlog = len(self.sas._io._log)
-        code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts()
-        code += ";\n\thistogram '" + var + "'n / scale=count"
+        code = "proc sgplot data=" + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts()
+        code += ";\n\thistogram '" + var.replace("'", "''") + "'n / scale=count"
         if len(label) > 0:
             code += " LegendLABEL='" + label + "'"
         code += ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
-        code += "\tdensity '" + var + "'n;\nrun;\n" + "title;"
+        code += "\tdensity '" + var.replace("'", "''") + "'n;\nrun;\n" + "title;"
 
         if self.sas.nosub:
             print(code)
@@ -1397,8 +1399,8 @@ class SASdata:
         :return: Data Table
         """
         lastlog = len(self.sas._io._log)
-        code = "proc freq data=%s.'%s'n %s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
-        code += "\n\ttables '%s'n / out=tmpFreqOut;" % var
+        code = "proc freq data=%s.'%s'n %s order=%s noprint;" % (self.libref, self.table.replace("'", "''"), self._dsopts(), order)
+        code += "\n\ttables '%s'n / out=tmpFreqOut;" % var.replace("'", "''")
         code += "\nrun;"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
@@ -1411,8 +1413,8 @@ class SASdata:
 
         ll = self._is_valid()
         if self.results.upper() == 'PANDAS':
-            code = "proc freq data=%s.'%s'n %s order=%s noprint;" % (self.libref, self.table, self._dsopts(), order)
-            code += "\n\ttables '%s'n / out=tmpFreqOut;" % var
+            code = "proc freq data=%s.'%s'n %s order=%s noprint;" % (self.libref, self.table.replace("'", "''"), self._dsopts(), order)
+            code += "\n\ttables '%s'n / out=tmpFreqOut;" % var.replace("'", "''")
             code += "\nrun;"
             code += "\ndata tmpFreqOut; set tmpFreqOut(obs=%s); run;" % n
 
@@ -1448,8 +1450,8 @@ class SASdata:
         :return: graphic plot
         """
         lastlog = len(self.sas._io._log)
-        code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts()
-        code += ";\n\tvbar '" + var + "'n" 
+        code = "proc sgplot data=" + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts()
+        code += ";\n\tvbar '" + var.replace("'", "''") + "'n"
         if len(label) > 0:
             code += " / LegendLABEL='" + label + "'"
         code += ";\n"
@@ -1485,7 +1487,7 @@ class SASdata:
         """
         lastlog = len(self.sas._io._log)
 
-        code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";\n"
+        code = "proc sgplot data=" + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts() + ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
 
@@ -1496,7 +1498,7 @@ class SASdata:
             y = [y]
 
         for i in range(num):
-            code += "\tseries x='" + x + "'n y='" + str(y[i]) + "'n;\n"
+            code += "\tseries x='" + x.replace("'", "''") + "'n y='" + str(y[i]).replace("'", "''") + "'n;\n"
 
         code += 'run;\n' + 'title;'
 
@@ -1528,7 +1530,7 @@ class SASdata:
         """
         lastlog = len(self.sas._io._log)
 
-        code = "proc sgplot data=" + self.libref + ".'" + self.table + "'n " + self._dsopts() + ";\n"
+        code = "proc sgplot data=" + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts() + ";\n"
         if len(title) > 0:
             code += '\ttitle "' + title + '";\n'
 
@@ -1539,7 +1541,7 @@ class SASdata:
             y = [y]
 
         for i in range(num):
-            code += "\tscatter x='" + x + "'n y='" + y[i] + "'n;\n"
+            code += "\tscatter x='" + x.replace("'", "''") + "'n y='" + y[i].replace("'", "''") + "'n;\n"
 
         code += 'run;\n' + 'title;'
 
@@ -1573,7 +1575,7 @@ class SASdata:
        :return: SASLOG for this step
        """
        lastlog = len(self.sas._io._log)
-       code  = "proc datasets dd="+self.libref+" nolist; modify '"+self.table+"'n " 
+       code  = "proc datasets dd="+self.libref+" nolist; modify '"+self.table.replace("'", "''")+"'n "
 
        if label is not None:
           code += "(label="+label+")"
@@ -1582,25 +1584,25 @@ class SASdata:
        if formats is not None:
           code += "format"
           for var in formats:
-             code += " '"+var+"'n "+formats[var]
+             code += " '"+var.replace("'", "''")+"'n "+formats[var]
           code += ";\n"
 
        if informats is not None:
           code += "informat"
           for var in informats:
-             code += " '"+var+"'n "+informats[var]
+             code += " '"+var.replace("'", "''")+"'n "+informats[var]
           code += ";\n"
 
        if renamevars is not None:
           code += "rename"
           for var in renamevars:
-             code += " '"+var+"'n = '"+renamevars[var]+"'n" 
+             code += " '"+var.replace("'", "''")+"'n = '"+renamevars[var].replace("'", "''")+"'n"
           code += ";\n"
 
        if labelvars is not None:
           code += "label"
           for var in labelvars:
-             code += " '"+var+"'n = "+labelvars[var]
+             code += " '"+var.replace("'", "''")+"'n = "+labelvars[var]
           code += ";\n"
 
        code += ";run;quit;"
@@ -1625,7 +1627,7 @@ class SASdata:
        """
        lastlog = len(self.sas._io._log)
        code  = "proc datasets dd="+self.libref+" nolist;\n"
-       code += "change '"+self.table+"'n = '"+name+"'n;\nrun;quit;" 
+       code += "change '"+self.table.replace("'", "''")+"'n = '"+name.replace("'", "''")+"'n;\nrun;quit;"
 
        if self.sas.nosub:
           print(code)
@@ -1662,7 +1664,7 @@ class SASdata:
        :return: SASLOG for this step
        """
        lastlog = len(self.sas._io._log)
-       code  = "proc delete data="+self.libref + ".'" + self.table + "'n;run;" 
+       code  = "proc delete data="+self.libref + ".'" + self.table.replace("'", "''") + "'n;run;"
 
        if self.sas.nosub:
           print(code)
@@ -1689,7 +1691,7 @@ class SASdata:
        load the data into a SAS data Set which will then be appended to this data set.
 
        :param data: Either a SASdata object or a Pandas DataFrame
-       :param force: boolean to force appended even if anomolies exist which could cause dropping or truncating 
+       :param force: boolean to force appended even if anomolies exist which could cause dropping or truncating
        :return: SASLOG for this step
        """
        lastlog = len(self.sas._io._log)
@@ -1737,11 +1739,11 @@ class SASdata:
           else:
              return failmsg
 
-       code  = "proc append base="+self.libref+".'"+self.table+"'n\n"
-       code += "            data="+ new.libref+".'"+ new.table+"'n"+new._dsopts()
-       if force: 
-          code += "\n   force" 
-       code += ";\nrun;" 
+       code  = "proc append base="+self.libref+".'"+self.table.replace("'", "''")+"'n\n"
+       code += "            data="+ new.libref+".'"+ new.table.replace("'", "''")+"'n"+new._dsopts()
+       if force:
+          code += "\n   force"
+       code += ";\nrun;"
 
        ll = self.sas._io.submit(code, results='text')
        self.sas._lastlog = self.sas._io._log[lastlog:]

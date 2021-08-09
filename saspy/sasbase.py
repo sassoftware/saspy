@@ -2379,9 +2379,9 @@ class SASsession():
           code += " payment="+str(payment)
           vars += 1
        if out is not None:
-          code += " out="+out.libref + ".'" + out.table +"'n " + out._dsopts()
+          code += " out="+out.libref + ".'" + out.table.replace("'", "''") +"'n " + out._dsopts()
        if out_summary is not None:
-          code += " outsum="+out_summary.libref + ".'" + out_summary.table  +"'n " + out_summary._dsopts()
+          code += " outsum="+out_summary.libref + ".'" + out_summary.table.replace("'", "''")  +"'n " + out_summary._dsopts()
        code += "; run;"
 
        if vars != 3:
