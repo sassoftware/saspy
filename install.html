@@ -914,7 +914,7 @@ turn off verification for this case.</dd>
 <dt>authcode -</dt>
 <dd>[for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth service
 where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]&amp;response_type=code
-so perhapse:        <a class="reference external" href="https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code">https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code</a></dd>
+so perhaps:        <a class="reference external" href="https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code">https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code</a></dd>
 <dt>user -</dt>
 <dd>(<strong>Discouraged</strong>)  The user ID is required but if this field is left blank,
 the user is <strong>prompted</strong> for a user ID at runtime, unless it&#8217;s found in the authinfo file.</dd>
@@ -922,7 +922,7 @@ the user is <strong>prompted</strong> for a user ID at runtime, unless it&#8217;
 <dd>(<strong>Strongly discouraged</strong>) A password is required but if this field is left
 blank, the user is <strong>prompted</strong> for a password at runtime, unless it&#8217;s found in the authinfo file.</dd>
 <dt>context -</dt>
-<dd>(Optional) The Compute Service has different Contexts that you can connect to. Think Appserver in IOM.
+<dd>The Compute Service has different Contexts that you can connect to. Think Appserver in IOM.
 if you don&#8217;t provide one here, saspy will query the Service upon connecting and get a list of available Contexts and
 prompt you for which one to use.</dd>
 <dt>timeout -</dt>
@@ -953,6 +953,12 @@ or, as of version 3.1.7, &#8216;databricks&#8217;. The default when this is not 
 Jupyter uses IPython to render HTML, which is how saspy has always worked.
 To support other Notebooks display methods, different display interface have to be added to saspy.
 If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
+<dt>authtoken -</dt>
+<dd>The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.
+Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can pass it in.</dd>
+<dt>jwt -</dt>
+<dd>A JWT that can be used to acquire a SASLogon authorization token. This would be something like an Azure
+token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">httpsviya</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ip&#39;</span>      <span class="p">:</span> <span class="s1">&#39;sastpw.rndk8s.openstack.sas.com&#39;</span><span class="p">,</span>
              <span class="s1">&#39;context&#39;</span> <span class="p">:</span> <span class="s1">&#39;Data Mining compute context&#39;</span>

@@ -309,6 +309,8 @@ valid values are [&#8216;jupyter&#8217;, &#8216;zeppelin&#8217;, &#8216;databric
 <li><strong>ip</strong> &#8211; [deprecated] The resolvable host name, or IP address to the Viya (use url instead)</li>
 <li><strong>port</strong> &#8211; [depecated] The port to use to connect to Viya (use url instead)</li>
 <li><strong>ssl</strong> &#8211; [depecated] Boolean identifying whether to use HTTPS (ssl=True) or just HTTP (use url instead)</li>
+<li><strong>authtoken</strong> &#8211; The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.            Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can pass it in.</li>
+<li><strong>jwt</strong> &#8211; A JWT that can be used to acquire a SASLogon authorization token. This would be something like an Azure            token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.</li>
 </ul>
 </td>
 </tr>
@@ -1578,7 +1580,7 @@ You create a SASdata object by using the sasdata() method of the SASsession obje
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>vars</strong> &#8211; REQUIRED dictionayr of variable names (keys) and assignment statement (values)
-to maintain variable order use collections.OrderedDict Assignment statements must be valid 
+to maintain variable order use collections.OrderedDict Assignment statements must be valid
 SAS assignment expressions.</li>
 <li><strong>out</strong> &#8211; OPTIONAL takes a SASdata Object you create ahead of time. If not specified, replaces the existing table
 and the current SAS data object still refers to the replacement table.</li>
@@ -2063,7 +2065,7 @@ if assigned or a sas data object&#8217;&#8217; will sort in place if allowed</li
 <li>delimiter is a single character</li>
 <li>putnames is a bool  [True | False]</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>  
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>
  <span class="s1">&#39;putnames&#39;</span>  <span class="p">:</span> <span class="bp">True</span>
 <span class="p">}</span>
 </pre></div>
@@ -2149,7 +2151,7 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 <li>delimiter is a single character</li>
 <li>putnames is a bool  [True | False]</li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>  
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;delimiter&#39;</span> <span class="p">:</span> <span class="s1">&#39;~&#39;</span><span class="p">,</span>
  <span class="s1">&#39;putnames&#39;</span>  <span class="p">:</span> <span class="bp">True</span>
 <span class="p">}</span>
 </pre></div>
