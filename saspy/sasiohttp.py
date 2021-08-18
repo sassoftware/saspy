@@ -28,6 +28,9 @@ from time import sleep
 
 from saspy.sasexceptions import (SASHTTPauthenticateError, SASHTTPconnectionError, SASHTTPsubmissionError)
 
+import logging
+logger = logging.getLogger('saspy')
+
 try:
    import pandas as pd
    import numpy  as np
@@ -73,7 +76,7 @@ class SASconfigHTTP:
          self.output  = 'html5'
 
       if self.output.lower() not in ['html', 'html5']:
-         print("Invalid value specified for SAS_output_options. Using the default of HTML5")
+         logger.warning("Invalid value specified for SAS_output_options. Using the default of HTML5")
          self.output  = 'html5'
 
       # GET Config options
@@ -91,63 +94,63 @@ class SASconfigHTTP:
       inurl = kwargs.get('url', None)
       if inurl is not None:
          if lock and len(self.url):
-            print("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.url = inurl
 
       inip = kwargs.get('ip', None)
       if inip is not None:
          if lock and len(self.ip):
-            print("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.ip = inip
 
       inport = kwargs.get('port', None)
       if inport is not None:
          if lock and self.port:
-            print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.port = inport
 
       inctxname = kwargs.get('context', None)
       if inctxname is not None:
          if lock and len(self.ctxname):
-            print("Parameter 'context' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'context' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.ctxname = inctxname
 
       inoptions = kwargs.get('options', None)
       if inoptions is not None:
          if lock and len(self.options):
-           print("Parameter 'options' passed to SAS_session was ignored due to configuration restriction.")
+           logger.warning("Parameter 'options' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.options = inoptions
 
       inssl = kwargs.get('ssl', None)
       if inssl is not None:
          if lock and self.ssl:
-            print("Parameter 'ssl' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'ssl' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.ssl = bool(inssl)
 
       inver = kwargs.get('verify', None)
       if inver is not None:
          if lock and self.verify:
-            print("Parameter 'verify' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'verify' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.verify = bool(inver)
 
       intout = kwargs.get('timeout', None)
       if intout is not None:
          if lock and self.timeout:
-            print("Parameter 'timeout' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'timeout' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.timeout = intout
 
       inencoding = kwargs.get('encoding', 'NoOverride')
       if inencoding != 'NoOverride':
          if lock and len(self.encoding):
-            print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.encoding = inencoding
       if not self.encoding or self.encoding != 'utf_8':
@@ -168,14 +171,14 @@ class SASconfigHTTP:
       incis = kwargs.get('client_secret', None)
       if incis is not None:
          if lock and client_secret:
-            print("Parameter 'client_secret' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'client_secret' passed to SAS_session was ignored due to configuration restriction.")
          else:
             client_secret = incis
 
       incid = kwargs.get('client_id', None)
       if incid is not None:
          if lock and client_id:
-            print("Parameter 'client_id' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'client_id' passed to SAS_session was ignored due to configuration restriction.")
          else:
             client_id = incid
       if client_id is None:
@@ -187,7 +190,7 @@ class SASconfigHTTP:
       inlrecl = kwargs.get('lrecl', None)
       if inlrecl is not None:
          if lock and self.lrecl:
-            print("Parameter 'lrecl' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'lrecl' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.lrecl = inlrecl
       if not self.lrecl:
@@ -196,14 +199,14 @@ class SASconfigHTTP:
       inito = kwargs.get('inactive', None)
       if inito is not None:
          if lock and self.inactive:
-            print("Parameter 'inactive' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'inactive' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.inactive = inito
 
       inak = kwargs.get('authkey', '')
       if len(inak) > 0:
          if lock and len(self.authkey):
-            print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.authkey = inak
 
@@ -215,7 +218,7 @@ class SASconfigHTTP:
             self.port = hp[1] if len(hp) > 1 else self.port
             self.ssl  = True if 's' in http[0].lower() else False
          else:
-            print("Parameter 'url' not in recognized format. Expeting 'http[s]://host[:port]'. Ignoring parameter.")
+            logger.warning("Parameter 'url' not in recognized format. Expeting 'http[s]://host[:port]'. Ignoring parameter.")
 
       while len(self.ip) == 0:
          if not lock:
@@ -224,7 +227,7 @@ class SASconfigHTTP:
                self._token = None
                raise RuntimeError("No IP address provided.")
          else:
-            print("In lockdown mode and missing ip adress in the config named: "+cfgname )
+            logger.fatal("In lockdown mode and missing ip adress in the config named: "+cfgname )
             raise RuntimeError("No IP address provided.")
 
       if not self.port:
@@ -250,25 +253,25 @@ class SASconfigHTTP:
                      break
                fid.close()
             except OSError as e:
-               print('Error trying to read authinfo file:'+pwf+'\n'+str(e))
+               logger.warning('Error trying to read authinfo file:'+pwf+'\n'+str(e))
                pass
             except:
                pass
 
             if not found:
-               print('Did not find key '+self.authkey+' in authinfo file:'+pwf+'\n')
+               logger.warning('Did not find key '+self.authkey+' in authinfo file:'+pwf+'\n')
 
          inuser = kwargs.get('user', '')
          if len(inuser) > 0:
             if lock and len(user):
-               print("Parameter 'user' passed to SAS_session was ignored due to configuration restriction.")
+               logger.warning("Parameter 'user' passed to SAS_session was ignored due to configuration restriction.")
             else:
                user = inuser
 
          inpw = kwargs.get('pw', '')
          if len(inpw) > 0:
             if lock and len(pw):
-               print("Parameter 'pw' passed to SAS_session was ignored due to configuration restriction.")
+               logger.warning("Parameter 'pw' passed to SAS_session was ignored due to configuration restriction.")
             else:
                pw = inpw
 
@@ -320,9 +323,9 @@ class SASconfigHTTP:
                if not self._token:
                   self._token = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
             except ssl.SSLError as e:
-               print("SSL certificate verification failed, creating an unverified SSL connection. Error was:"+str(e))
+               logger.warning("SSL certificate verification failed, creating an unverified SSL connection. Error was:"+str(e))
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
-               print("You can set 'verify=False' to get rid of this message ")
+               logger.warning("You can set 'verify=False' to get rid of this message ")
                if not self._token:
                   self._token   = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
          else:
@@ -335,7 +338,7 @@ class SASconfigHTTP:
             self._token   = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
 
       if not self._token:
-         print("Could not acquire an Authentication Token")
+         logger.error("Could not acquire an Authentication Token")
          return
 
       # GET Contexts
@@ -355,7 +358,7 @@ class SASconfigHTTP:
       if len(self.ctxname) == 0:
          if len(ctxnames) == 1:
             self.ctxname = ctxnames[0]
-            print("Using SAS Context: " + self.ctxname)
+            logger.info("Using SAS Context: " + self.ctxname)
          else:
             try:
                ctxname = self._prompt("Please enter the SAS Context you wish to run. Available contexts are: " +
@@ -397,7 +400,7 @@ class SASconfigHTTP:
          else:
             msg  = "SAS Context specified in the SASconfig ("+self.ctxname+") was not found on this server, and because "
             msg += "the SASconfig is in lockdown mode, there is no prompting for other contexts. No connection established."
-            print(msg)
+            logger.error(msg)
             self._token = None
             raise RuntimeError("No SAS Context provided.")
 
@@ -500,7 +503,7 @@ class SASconfigHTTP:
       conn.close()
 
       if status > 299:
-         print("Failure in POST Context. Status="+str(status)+"\nResponse="+resp.decode(self.encoding))
+         logger.error("Failure in POST Context. Status="+str(status)+"\nResponse="+resp.decode(self.encoding))
          return None
 
       contexts = self._get_contexts()
@@ -591,7 +594,7 @@ class SASsessionHTTP():
       self._session = json.loads(resp.decode(self.sascfg.encoding))
 
       if self._session == None:
-         print("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
+         logger.error("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
          return None
 
       #GET Session uri's once
@@ -635,14 +638,14 @@ class SASsessionHTTP():
          jobid = None
 
       if not jobid or status > 299:
-         print("Compute server had issues starting:\n")
+         logger.error("Compute server had issues starting:\n")
          for key in jobid:
-            print(key+"="+str(jobid.get(key)))
+            logger.error(key+"="+str(jobid.get(key)))
          return None
 
       ll = self.submit("options svgtitle='svgtitle'; options validvarname=any validmemname=extend pagesize=max nosyntaxcheck; ods graphics on;", "text")
       if self.sascfg.verbose:
-         print("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self.pid)
+         logger.info("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self.pid)
 
       return self.pid
 
@@ -658,7 +661,7 @@ class SASsessionHTTP():
          conn.close()
 
          if self.sascfg.verbose:
-            print("SAS server terminated for SESSION_ID="+self._session.get('id'))
+            logger.info("SAS server terminated for SESSION_ID="+self._session.get('id'))
          self._session   = None
          self.pid        = None
          self._sb.SASpid = None
@@ -862,7 +865,7 @@ class SASsessionHTTP():
       pcodeo   = ''
 
       if self._session == None:
-         print("No SAS process attached. SAS process has terminated unexpectedly.")
+         logger.error("No SAS process attached. SAS process has terminated unexpectedly.")
          return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
 
       if results.upper() != "HTML":
@@ -1341,7 +1344,7 @@ class SASsessionHTTP():
             try:
                length += " '"+colname+"'n $"+str(chr_upper[col_up])
             except KeyError as e:
-               print("Dictionary provided as char_lengths is missing column: "+colname)
+               logger.error("Dictionary provided as char_lengths is missing column: "+colname)
                raise e
             if keep_outer_quotes:
                input  += "~ "
@@ -1367,7 +1370,7 @@ class SASsessionHTTP():
                            format += "'"+colname+"'n E8601TM. "
                         xlate  += " '"+colname+"'n = timepart('"+colname+"'n);\n"
                      else:
-                        print("invalid value for datetimes for column "+colname+". Using default.")
+                        logger.warning("invalid value for datetimes for column "+colname+". Using default.")
                         if col_up not in fmt_keys:
                            format += "'"+colname+"'n E8601DT26.6 "
                dts.append('D')
@@ -1443,8 +1446,8 @@ class SASsessionHTTP():
                      except Exception as e:
                         self._asubmit(";;;;\n;;;;", "text")
                         ll = self.submit("run;", 'text')
-                        print("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
-                        print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                        logger.error("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
+                        logger.error("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                         return row_num
                else:
                   code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
@@ -1460,8 +1463,8 @@ class SASsessionHTTP():
                except Exception as e:
                   self._asubmit(";;;;\n;;;;", "text")
                   ll = self.submit("run;", 'text')
-                  print("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
-                  print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                  logger.error("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
+                  logger.error("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                   return row_num
          else:
             code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
@@ -1586,7 +1589,7 @@ class SASsessionHTTP():
       my_fmts = kwargs.pop('my_fmts',   False)
       k_dts   = kwargs.pop('dtype',     None)
       if k_dts is None and my_fmts:
-         print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+         logger.warning("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
          my_fmts = False
 
       if not my_fmts:
@@ -1752,7 +1755,7 @@ class SASsessionHTTP():
       my_fmts = kwargs.pop('my_fmts',   False)
       k_dts   = kwargs.pop('dtype',     None)
       if k_dts is None and my_fmts:
-         print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+         logger.warning("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
          my_fmts = False
 
       code  = "filename _tomodsx '"+self._sb.workpath+"_tomodsx' recfm=v termstr=NL encoding='utf-8';\n"
