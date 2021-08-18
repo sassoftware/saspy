@@ -28,6 +28,12 @@ from saspy.sasresults import SASresults
 
 import os, sys
 
+import logging
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.INFO)
+logger.propagate=False
+
 def isnotebook():
     try:
         shell = get_ipython().__class__.__name__
