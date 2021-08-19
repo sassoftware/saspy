@@ -9,9 +9,9 @@ def main(cfgfile: str = None, SASHome: str = None, java: str = None):
     if os.name != 'nt':
        print('This function will only run on Windows and create a saspy config file for an IOM Local connection')
        return
-    
+
     saspydir = ac.__file__.replace('sascfg.py', '')
-    
+
     if not cfgfile:
        cfgfile = saspydir+'sascfg_personal.py'
 
@@ -46,7 +46,7 @@ def main(cfgfile: str = None, SASHome: str = None, java: str = None):
                break
             except:
                continue
-            
+
     # prompts the user to enter the version of SAS they want to use if more
     # than one are detected
     if len(dirList) == 1:
@@ -75,66 +75,13 @@ def main(cfgfile: str = None, SASHome: str = None, java: str = None):
                 print('This is not a valid SAS version for your machine.')
                 continue
 
-    # Windows commands to find deployement folders
-    p = subprocess.Popen(
-        r'dir "{}deploywiz" /AD /s/b'.format(depDir),
-        stdout=subprocess.PIPE, shell=True
-    )
-
-    # processes command output
-    cmdOut = p.stdout.read().decode('utf-8').split('\r\n')
-    cmdOut.pop()
-
-    # deployement wizard folder
-    depWiz = cmdOut[0]
-
-    # creates a set for the targets with their full path
-    targetsW = set([
-        depWiz + "\\sas.svc.connection.jar", depWiz + "\\log4j.jar",
-        depWiz + "\\sas.security.sspi.jar", depWiz + "\\sas.core.jar"
-    ])
-
-    # creates list out of the set intersection between all jars and targets
-    jarList = list(set(glob("{}\\*.jar".format(depWiz))).intersection(targetsW))
-
-    # creates saspy jar path
-    sasIOM = saspydir+'java\\saspyiom.jar'
-
-    # there are 4 required jars, if not all 4 are located the program will stop
-    if len(jarList) < len(targetsW):
-        print(
-            "The creation process could not be completed becasue not all "
-            "required jar files exist on this system."
-        )
-        return
-    # if all jars are detected cfg will be built
-    else:
-        cfg = ('SAS_config_names=["autogen_winlocal"]\n\n' +
-            'SAS_config_options = {\n\t"lock_down": False,' +
-            '\n\t"verbose"  : True\n\t}' +
-            '\n\ncpW  =  "{}"'.format(jarList[0]) +
-            '\ncpW += ";{}"'.format(jarList[1]) +
-            '\ncpW += ";{}"'.format(jarList[2]) +
-            '\ncpW += ";{}"'.format(jarList[3])
-        )
-
-    # determines if saspy jar exists and if so appends it to cfg
-    if os.path.isfile(sasIOM):
-        cfg += '\ncpW += ";{}"'.format(sasIOM)
-    # if it does not exist cfg will be written with the option to add it
-    else:
-        print(
-            "The saspyiom.jar file could not be located, you will need to "
-            "locate this file and add it to the cpW where labeled SASPYJAR"
-        )
-        cfg += '\ncpW += ";{}"'.format('SASPYJAR')
-
     # adds required config info to cfg
-    cfg += (
-        '\n\nautogen_winlocal = ' +
-        '{\n\t"java"      : "'+java+'",\n\t"encoding"  : "windows-1252",' +
-        '\n\t"classpath" : cpW\n\t}'
-    )
+    cfg = ('SAS_config_names=["autogen_winlocal"]\n\n' +
+           'SAS_config_options = {\n\t"lock_down": False,' +
+           '\n\t"verbose"  : True\n\t}' +
+           '\n\nautogen_winlocal = ' +
+           '{\n\t"java"      : "'+java+'",\n\t"encoding"  : "windows-1252"' + '}'
+          )
 
     # if dll exists
     if os.path.isfile(sspi):
