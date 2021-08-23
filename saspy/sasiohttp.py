@@ -640,6 +640,7 @@ class SASsessionHTTP():
             print(key+"="+str(jobid.get(key)))
          return None
 
+      self._sb.SESSION_ID = self.pid
       ll = self.submit("options svgtitle='svgtitle'; options validvarname=any validmemname=extend pagesize=max nosyntaxcheck; ods graphics on;", "text")
       if self.sascfg.verbose:
          print("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self.pid)
