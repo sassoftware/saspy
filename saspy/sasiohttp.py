@@ -824,6 +824,29 @@ class SASsessionHTTP():
 
       return jobid
 
+   def _jobstate(self, jobid):
+
+      uri = None
+      for ld in jobid.get('links'):
+         if ld.get('method') == 'GET' and ld.get('rel') == 'state':
+            uri = ld.get('uri')
+            break
+
+      if not uri:
+         print("No job found")
+         return None
+
+      conn    = self.sascfg.HTTPConn;
+      headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
+      conn.connect()
+      conn.request('GET', uri, headers=headers)
+      req = conn.getresponse()
+      resp = req.read()
+      conn.close()
+
+      return resp
+
+
    def submit(self, code: str, results: str ="html", prompt: dict = None, **kwargs) -> dict:
       '''
       code    - the SAS statements you want to execute
