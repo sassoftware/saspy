@@ -681,7 +681,7 @@ class SASsession():
     def _getlsttxt(self, **kwargs):
         return self._io._getlsttxt(**kwargs)
 
-    def _asubmit(self, code, results):
+    def _asubmit(self, code, results=''):
         if results == '':
             if self.results.upper() == 'PANDAS':
                 results = 'HTML'
