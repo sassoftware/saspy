@@ -21,6 +21,8 @@ except Exception as e:
    pass
 
 import logging
+logger = logging.getLogger('saspy')
+
 import re
 import saspy as sp2
 
@@ -61,7 +63,6 @@ class SASdata:
 
     def __init__(self, sassession, libref, table, results='', dsopts: dict=None):
         self.sas = sassession
-        self.logger = logging.getLogger(__name__)
 
         if results == '':
            results = sassession.results
@@ -371,11 +372,11 @@ class SASdata:
             lastobs = lastobs[2].partition(" lastobsend=")
             lastobs = int(lastobs[0])
         else:
-            print("The SASdata object is not valid. The table doesn't exist in this SAS session at this time.")
+            logger.error("The SASdata object is not valid. The table doesn't exist in this SAS session at this time.")
             lastobs = None
 
         if lastobs == -1:
-            print("The number of obs was not able to be determined. You can specify obs(force=True) to force it to be calculated")
+            logger.error("The number of obs was not able to be determined. You can specify obs(force=True) to force it to be calculated")
             #print(ll['LOG'])
             lastobs = None
 
@@ -405,7 +406,7 @@ class SASdata:
         try:
             k = int(kfold)
         except ValueError:
-            print("Kfold must be an integer")
+            logger.error("Kfold must be an integer")
         if out is None:
             out_table = self.table
             out_libref = self.libref
@@ -623,7 +624,7 @@ class SASdata:
         """
         lastlog = len(self.sas._io._log)
         if self.results.casefold() != 'pandas':
-            print("The info method only works with Pandas results")
+            logger.error("The info method only works with Pandas results")
             return None
         info_code = """
         data work._statsInfo ;
@@ -943,7 +944,7 @@ class SASdata:
 
         if out is not None:
            if not isinstance(out, SASdata):
-              print("out= needs to be a SASdata object")
+              logger.error("out= needs to be a SASdata object")
               return None
            else:
               outtab = out.libref + ".'" + out.table.replace("'", "''") + "'n " + out._dsopts()
@@ -1002,7 +1003,7 @@ class SASdata:
                 if len(event) < 1:
                     raise Exception(event)
             except Exception:
-                print("No event was specified for a nominal target. Here are possible options:\n")
+                logger.warning("No event was specified for a nominal target. Here are possible options:\n")
                 event_code = "proc hpdmdb data=%s.'%s'n %s classout=work._DMDBCLASSTARGET(keep=name nraw craw level frequency nmisspercent);" % (
                     self.libref, self.table.replace("'", "''"), self._dsopts())
                 event_code += "\nclass %s ; \nrun;" % target
@@ -1637,7 +1638,7 @@ class SASdata:
           self.sas._lastlog = self.sas._io._log[lastlog:]
           failmsg = "Data set with new name already exists. Rename failed."
           if not self.sas.batch:
-             print(failmsg)
+             logger.error(failmsg)
              return None
           else:
              return failmsg
@@ -1709,7 +1710,7 @@ class SASdata:
        if new not in ['df','sd']:
           failmsg = "The data parameter passed in must be either a SASdata object or a Pandas DataFrame. No data was appended."
           if not self.sas.batch:
-             print(failmsg)
+             logger.error(failmsg)
              return None
           else:
              return failmsg
@@ -1719,7 +1720,7 @@ class SASdata:
           if type(new) is not type(self):
              failmsg = "df2sd on input data failed. Check SASLOG for errors."
              if not self.sas.batch:
-                print(failmsg)
+                logger.error(failmsg)
                 return None
              else:
                 return failmsg
@@ -1734,7 +1735,7 @@ class SASdata:
           self.sas._lastlog = self.sas._io._log[lastlog:]
           failmsg = "Data set to be appended doesn't exist. No data was appended."
           if not self.sas.batch:
-             print(failmsg)
+             logger.error(failmsg)
              return None
           else:
              return failmsg

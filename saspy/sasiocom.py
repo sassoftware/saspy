@@ -23,6 +23,9 @@ import shlex
 import sys
 import warnings
 
+import logging
+logger = logging.getLogger('saspy')
+
 try:
     from win32com.client import dynamic
 except ImportError:
@@ -97,13 +100,13 @@ class SASConfigCOM(object):
                 authline = next(filter(lambda x: x[0] == self.authkey, parsed), None)
 
         except OSError:
-            print('Error trying to read {}'.format(authfile))
+            logger.error('Error trying to read {}'.format(authfile))
             authline = None
 
         if authline is None:
-            print('Key {} not found in authinfo file: {}'.format(self.authkey, authfile))
+            logger.error('Key {} not found in authinfo file: {}'.format(self.authkey, authfile))
         elif len(authline) < 5:
-            print('Incomplete authinfo credentials in {}; key: {}'.format(authfile, self.authkey))
+            logger.error('Incomplete authinfo credentials in {}; key: {}'.format(authfile, self.authkey))
         else:
             # Override user/pw if previously set
             # `authline` is in the following format:
@@ -122,7 +125,7 @@ class SASConfigCOM(object):
             setattr(self, attr, value)
         else:
             err = "Param '{}' was ignored due to configuration restriction".format(attr)
-            print(err, file=sys.stderr)
+            logger.warning(err, file=sys.stderr)
 
 
 class SASSessionCOM(object):
@@ -256,7 +259,7 @@ class SASSessionCOM(object):
 
         ll = self.submit("options svgtitle='svgtitle'; options validvarname=any validmemname=extend pagesize=max nosyntaxcheck; ods graphics on;", "text")
         if self.sascfg.verbose:
-            print("SAS Connection established. Workspace UniqueIdentifier is "+str(self.workspace.UniqueIdentifier)+"\n")
+            logger.info("SAS Connection established. Workspace UniqueIdentifier is "+str(self.workspace.UniqueIdentifier)+"\n")
 
         return self.workspace.UniqueIdentifier
 
@@ -268,7 +271,7 @@ class SASSessionCOM(object):
         self.keeper.RemoveObject(self.workspace)
         self.workspace.Close()
         if self.sascfg.verbose:
-            print("SAS Connection terminated. Workspace UniqueIdentifierid was "+str(self.pid))
+            logger.info("SAS Connection terminated. Workspace UniqueIdentifierid was "+str(self.pid))
 
     def _getlst(self, buf: int=2048) -> str:
         """
@@ -420,7 +423,7 @@ class SASSessionCOM(object):
             val = self.sascfg._prompt('Enter value for macro variable {} '.format(key), pw=hide)
 
             if val is None:
-               raise RuntimeError("No value for prompted macro variable provided.") 
+               raise RuntimeError("No value for prompted macro variable provided.")
 
             if val:
                 input_ok = True
@@ -539,11 +542,11 @@ class SASSessionCOM(object):
         code += "te='TABLE_EXISTS='; put te e;run;\n"
 
         ll = self.submit(code, "text")
-      
+
         l2 = ll['LOG'].rpartition("TABLE_EXISTS= ")
         l2 = l2[2].partition("\n")
         exists = int(l2[0])
-      
+
         return bool(exists)
 
 
@@ -673,23 +676,23 @@ class SASSessionCOM(object):
 
         if self.sascfg.verbose:
            if keep_outer_quotes != False:
-              print("'keep_outer_quotes=' is not used with this access method. option ignored.")
+              logger.warning("'keep_outer_quotes=' is not used with this access method. option ignored.")
            if embedded_newlines != True:
-              print("'embedded_newlines=' is not used with this access method. option ignored.")
+              logger.warning("'embedded_newlines=' is not used with this access method. option ignored.")
            if LF != '\x01' or CR != '\x02' or colsep != '\x03':
-              print("'LF=, CR= and colsep=' are not used with this access method. option(s) ignored.")
+              logger.warning("'LF=, CR= and colsep=' are not used with this access method. option(s) ignored.")
            if datetimes != {}:
-              print("'datetimes=' is not used with this access method. option ignored.")
+              logger.warning("'datetimes=' is not used with this access method. option ignored.")
            if outfmts != {}:
-              print("'outfmts=' is not used with this access method. option ignored.")
+              logger.warning("'outfmts=' is not used with this access method. option ignored.")
            if labels != {}:
-              print("'labels=' is not used with this access method. option ignored.")
+              logger.warning("'labels=' is not used with this access method. option ignored.")
            if outdsopts != {}:
-              print("'outdsopts=' is not used with this access method. option ignored.")
+              logger.warning("'outdsopts=' is not used with this access method. option ignored.")
            if encode_errors:
-              print("'encode_errors=' is not used with this access method. option ignored.")
+              logger.warning("'encode_errors=' is not used with this access method. option ignored.")
            if char_lengths:
-              print("'char_lengths=' is not used with this access method. option ignored.")
+              logger.warning("'char_lengths=' is not used with this access method. option ignored.")
 
         tablepath = self._tablepath(table, libref=libref)
 
@@ -759,7 +762,7 @@ class SASSessionCOM(object):
         colrep = kwargs.pop('colrep', ' ')
 
         if method.upper() == 'DISK':
-           print("This access method doesn't support the DISK method. Try CSV or MEMORY")
+           logger.error("This access method doesn't support the DISK method. Try CSV or MEMORY")
            return None
 
         if method.upper() == 'CSV':
@@ -769,22 +772,22 @@ class SASSessionCOM(object):
             k_dts   = kwargs.pop('dtype',   None)
             if self.sascfg.verbose:
                if my_fmts != False:
-                  print("'my_fmts=' is not supported in this access method. option ignored.")
+                  logger.warning("'my_fmts=' is not supported in this access method. option ignored.")
                if k_dts is not None:
-                  print("'dtype=' is only used with the CSV version of this method. option ignored.")
+                  logger.warning("'dtype=' is only used with the CSV version of this method. option ignored.")
 
             header, rows, meta = self.read_sasdata(table, libref, dsopts=dsopts)
             df = pd.DataFrame.from_records(rows, columns=header, **kwargs)
 
             for col in meta.keys():
-               if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
+               if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts:
                   df[col] = pd.to_datetime(df[col], errors='coerce')
                elif meta[col]['DATA_TYPE'] == 5:
                   df[col] = pd.to_numeric(df[col], errors='coerce')
 
         return df
 
-    def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None, 
+    def sasdata2dataframeCSV(self, table: str, libref: str ='', dsopts: dict = None,
                              tempfile: str=None, tempkeep: bool=False, **kwargs) -> 'pd.DataFrame':
         """
         Create a pandas data frame from a SAS dataset.
@@ -813,7 +816,7 @@ class SASSessionCOM(object):
         my_fmts = kwargs.pop('my_fmts', False)
         if self.sascfg.verbose:
            if my_fmts != False:
-              print("'my_fmts=' is not supported in this access method. option ignored.")
+              logger.warning("'my_fmts=' is not supported in this access method. option ignored.")
 
         sas_csv = '{}saspy_sd2df.csv'.format(self._sb.workpath)
         dopts = self._sb._dsopts(dsopts) if dsopts is not None else ''
@@ -850,7 +853,7 @@ class SASSessionCOM(object):
                    format=col_format,
                    length=col_length,
                    precision=col_precis)
-   
+
                fmtlist.append(full_format)
 
         export = EXPORT.format(fmt=' '.join(fmtlist),
@@ -875,7 +878,7 @@ class SASSessionCOM(object):
 
         if k_dts is None:  # don't override these if user provided their own dtypes
            for col in meta.keys():
-              if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts: 
+              if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts:
                  df[col] = pd.to_datetime(df[col], errors='coerce')
 
         return df
@@ -934,7 +937,7 @@ class SASSessionCOM(object):
             # TODO: Raise exception here instead of returning dict
             return {'Success': False,
                 'LOG': 'File {} is a directory.'.format(remote)}
-        
+
         if os.path.isdir(local) is True:
             # Parameter `local` references a directory. Default to using the
             # filename in `remote` path.

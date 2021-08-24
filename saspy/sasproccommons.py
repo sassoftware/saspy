@@ -13,7 +13,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-import logging
 import warnings
 import re
 
@@ -21,6 +20,9 @@ from collections import OrderedDict
 from saspy.sasdata import SASdata
 from saspy.sasresults import SASresults
 # from pdb import set_trace as bp
+
+import logging
+logger = logging.getLogger('saspy')
 
 class Codegen(object):
     """
@@ -101,7 +103,7 @@ class Codegen(object):
                     raise SyntaxError
                 return c
             except SyntaxError:
-                print("SyntaxError: TARGET can only have one variable")
+                logger.error("SyntaxError: TARGET can only have one variable")
             except KeyError:
                 if self._key.casefold() == 'selection':
                     if bool(self._args):  # is the dictionary empty
@@ -141,7 +143,7 @@ class Codegen(object):
                             usedVars.append(v)
                     return '\ninput ' + ' '.join(list(set(usedVars))) + ';\n' + tup_code + meth_code + 'run;'
 
-                print("KeyError: Proper keys not found for {} dictionary: {}".format(self._key, args))
+                logger.error("KeyError: Proper keys not found for {} dictionary: {}".format(self._key, args))
 
         elif isinstance(self._args, SASdata):
             key = "{} =".format(self._key)
@@ -181,11 +183,8 @@ class Codegen(object):
 
 class SASProcCommons:
     def __init__(self, session, *args, **kwargs):
-        # logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.WARN)
         self.sas = session
-        self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
+        logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     def _errorLog(self, log):
         if isinstance(log, str):
@@ -247,7 +246,7 @@ class SASProcCommons:
         outcodegen.outmeth = outmeth
         outcodegen.objname = objname
         outstr = outcodegen.codestmt
-        self.logger.debug("product caller: " + self.sasproduct.lower())
+        logger.debug("product caller: " + self.sasproduct.lower())
         debug_code= ''
         code = "%macro proccall(d);\n"
         # resolve issues withe Proc options, out= and plots=
@@ -264,8 +263,8 @@ class SASProcCommons:
             objtype, data.libref, data.table.replace("'", "''"), data._dsopts(), plot, procopts)
             if outds is not None:
                 args['output'] = outds
-        self.logger.debug("args value: " + str(args))
-        self.logger.debug("args type: " + str(type(args)))
+        logger.debug("args value: " + str(args))
+        logger.debug("args type: " + str(type(args)))
 
         # this list is largely alphabetical but there are exceptions in order to
         # satisfy the order needs of the statements for the procedures
@@ -296,9 +295,7 @@ class SASProcCommons:
 
         code += "run; quit; %mend;\n"
         code += "%%mangobj(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
-        if self.logger.level == 10:
-            print("Proc code submission:\n " + str(code))
-            print("\n\n\n" + debug_code)
+        logger.debug("Proc code submission:\n " + str(code) + "\n\n\n" + debug_code)
         return code
 
     def _objectmethods(self, obj: str, *args) -> list:
@@ -319,9 +316,9 @@ class SASProcCommons:
            run;
         """.format(obj)
 
-        self.logger.debug("Object Method macro call: " + str(code))
+        logger.debug("Object Method macro call: " + str(code))
         res = self.sas._io.submit(code, "text")
-        self.logger.debug('SAS Log: ' + res['LOG'])
+        logger.debug('SAS Log: ' + res['LOG'])
 
         objlist = []
         log = res['LOG'].rpartition('METHLISTEND=')[0].rpartition('METHLIST=')
@@ -330,7 +327,7 @@ class SASProcCommons:
            log = log[2].partition('METH=')[2].partition(' METHEND=')
            objlist.append(log[0].strip())
 
-        self.logger.debug("PROC attr list: " + str(objlist))
+        logger.debug("PROC attr list: " + str(objlist))
         return objlist
 
     def _charlist(self, data) -> list:
@@ -518,9 +515,9 @@ class SASProcCommons:
                 else:
                     raise SyntaxError
             except SyntaxError:
-                print("SyntaxError: TARGET can only have one variable")
+                logger.error("SyntaxError: TARGET can only have one variable")
             except KeyError:
-                print("KeyError: Proper keys not found for TARGET dictionary: %s" % stmt.keys())
+                logger.error("KeyError: Proper keys not found for TARGET dictionary: %s" % stmt.keys())
         else:
             raise SyntaxError("TARGET is in an unknown format: %s" % str(stmt))
         return (code, cls)
@@ -619,8 +616,8 @@ class SASProcCommons:
             legal_set.add('cls')
             drop_target = kwargs.pop('target', None)
             drop_input = kwargs.pop('input', None)
-            self.logger.debug(drop_target)
-            self.logger.debug(drop_input)
+            logger.debug(drop_target)
+            logger.debug(drop_input)
 
         elif {'target'}.intersection(required_set) and 'model' in kwargs.keys() and 'target' not in kwargs.keys():
             SASProcCommons._convert_model_to_target(self)
@@ -633,7 +630,7 @@ class SASProcCommons:
         if len(verifiedKwargs):
             objname = procname[:3].lower() + self.sas._objcnt()  # translate to a libname so needs to be less than 8
             code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, verifiedKwargs)
-            self.logger.debug(procname + " macro submission: " + str(code))
+            logger.debug(procname + " macro submission: " + str(code))
             if not self.sas.nosub:
                 ll = self.sas._io.submit(code, "text")
                 log = ll['LOG']
@@ -645,7 +642,7 @@ class SASProcCommons:
                     return SASresults(obj1, self.sas, objname, nosub, log)
                 try:
                     obj1 = SASProcCommons._objectmethods(self, objname)
-                    self.logger.debug(obj1)
+                    logger.debug(obj1)
                 except Exception:
                     pass
             else:
@@ -668,14 +665,14 @@ class SASProcCommons:
         :return: dictionary of verified statements
         """
         # debug the argument list
-        if self.logger.level == 10:
+        if logger.level == 10:
             for k, v in stmt.items():
-                print("Key: " + k + ", Value: " + str(v) + ", Type: " + str(type(v)))
+                logger.debug("Key: " + k + ", Value: " + str(v) + ", Type: " + str(type(v)))
 
         # required statements
         reqSet = req
         if len(reqSet):
-            self.logger.debug("reqSet: {}".format(reqSet))
+            logger.debug("reqSet: {}".format(reqSet))
             missing_set = reqSet.difference(set(stmt.keys()))
             if missing_set:
                 if not stmt.get(
@@ -686,7 +683,7 @@ class SASProcCommons:
         # legal statements
         legalSet = legal
         if len(legalSet):
-            self.logger.debug("legalSet: {}".format(legalSet))
+            logger.debug("legalSet: {}".format(legalSet))
             if len(reqSet):
                 totSet = legalSet | reqSet
             else:
@@ -694,10 +691,10 @@ class SASProcCommons:
             generalSet = {'ODSGraphics', 'stmtpassthrough', 'targOpts', 'procopts', 'out', 'output'}
             extraSet = set(stmt.keys() - generalSet).difference(totSet)  # find keys not in legal or required sets
             if extraSet:
-                self.logger.debug("extraSet: {}".format(extraSet))
+                logger.debug("extraSet: {}".format(extraSet))
                 for item in extraSet:
                     stmt.pop(item, None)
                 warnings.warn(
                     "The following {} statements are invalid and will be ignored:\n{}".format(len(extraSet), extraSet))
-        self.logger.debug("stmt: {}".format(stmt))
+        logger.debug("stmt: {}".format(stmt))
         return stmt

@@ -23,6 +23,9 @@ import codecs
 import warnings
 import io
 
+import logging
+logger = logging.getLogger('saspy')
+
 try:
    import pandas as pd
    import numpy  as np
@@ -70,7 +73,7 @@ class SASconfigIOM:
          self.output  = 'html5'
 
       if self.output.lower() not in ['html', 'html5']:
-         print("Invalid value specified for SAS_output_options. Using the default of HTML5")
+         logger.warning("Invalid value specified for SAS_output_options. Using the default of HTML5")
          self.output  = 'html5'
 
       # GET Config options
@@ -88,56 +91,56 @@ class SASconfigIOM:
       injava = kwargs.get('java', '')
       if len(injava) > 0:
          if lock and len(self.java):
-            print("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.java = injava
 
       inhost = kwargs.get('iomhost', '')
       if len(inhost) > 0:
          if lock and len(self.iomhost):
-            print("Parameter 'iomhost' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'iomhost' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.iomhost = inhost
 
       intout = kwargs.get('timeout', None)
       if intout is not None:
          if lock and self.timeout:
-            print("Parameter 'timeout' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'timeout' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.timeout = intout
 
       inport = kwargs.get('iomport', None)
       if inport:
          if lock and self.iomport:
-            print("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.iomport = inport
 
       inomruser = kwargs.get('omruser', '')
       if len(inomruser) > 0:
          if lock and len(self.omruser):
-            print("Parameter 'omruser' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'omruser' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.omruser = inomruser
 
       inomrpw = kwargs.get('omrpw', '')
       if len(inomrpw) > 0:
          if lock and len(self.omrpw):
-            print("Parameter 'omrpw' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'omrpw' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.omrpw = inomrpw
 
       insspi = kwargs.get('sspi', False)
       if insspi:
          if lock and self.sspi:
-            print("Parameter 'sspi' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'sspi' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.sspi = insspi
 
       incp = kwargs.get('classpath', None)
       if incp is not None:
          if lock and self.classpath is not None:
-            print("Parameter 'classpath' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'classpath' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.classpath = incp
 
@@ -173,21 +176,21 @@ class SASconfigIOM:
       inak = kwargs.get('authkey', '')
       if len(inak) > 0:
          if lock and len(self.authkey):
-            print("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.authkey = inak
 
       inapp = kwargs.get('appserver', '')
       if len(inapp) > 0:
          if lock and len(self.apserver):
-            print("Parameter 'appserver' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'appserver' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.appserver = inapp
 
       inencoding = kwargs.get('encoding', 'NoOverride')
       if inencoding != 'NoOverride':
          if lock and len(self.encoding):
-            print("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'encoding' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.encoding = inencoding
       if not self.encoding:
@@ -197,21 +200,22 @@ class SASconfigIOM:
          try:
             coinfo = codecs.lookup(self.encoding)
          except LookupError:
-            print("The encoding provided ("+self.encoding+") doesn't exist in this Python session. Setting it to ''.")
-            print("The correct encoding will attempt to be determined based upon the SAS session encoding.")
+            msg  = "The encoding provided ("+self.encoding+") doesn't exist in this Python session. Setting it to ''.\n"
+            msg += "The correct encoding will attempt to be determined based upon the SAS session encoding."
+            logger.warning(msg)
             self.encoding = ''
 
       injparms = kwargs.get('javaparms', '')
       if len(injparms) > 0:
          if lock:
-            print("Parameter 'javaparms' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'javaparms' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.javaparms = injparms
 
       inlrecl = kwargs.get('lrecl', None)
       if inlrecl:
          if lock and self.lrecl:
-            print("Parameter 'lrecl' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'lrecl' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.lrecl = inlrecl
       if not self.lrecl:
@@ -220,14 +224,14 @@ class SASconfigIOM:
       inrecon = kwargs.get('reconnect', None)
       if inrecon:
          if lock and self.reconnect:
-            print("Parameter 'reconnect' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'reconnect' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.reconnect = bool(inrecon)
 
       inruri = kwargs.get('reconuri', None)
       if inruri is not None:
          if lock and self.reconuri:
-            print("Parameter 'reconuri' passed to SAS_session was ignored due to configuration restriction.")
+            logger.warning("Parameter 'reconuri' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.reconuri = inruri
 
@@ -314,7 +318,7 @@ class SASsessionIOM():
          self.sockerr.bind(("",port))
          #self.sockerr.bind(("",32703))
       except OSError:
-         print('Error try to open a socket in the _startsas method. Call failed.')
+         logger.fatal('Error try to open a socket in the _startsas method. Call failed.')
          return None
       self.sockin.listen(1)
       self.sockout.listen(1)
@@ -322,7 +326,7 @@ class SASsessionIOM():
 
       if not zero:
          if self.sascfg.output.lower() == 'html':
-            print("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg_personal.py).
+            logger.warning("""HTML4 is only valid in 'local' mode (SAS_output_options in sascfg_personal.py).
 Please see SAS_config_names templates 'default' (STDIO) or 'winlocal' (IOM) in the sample sascfg.py.
 Will use HTML5 for this SASsession.""")
             self.sascfg.output = 'html5'
@@ -345,13 +349,13 @@ Will use HTML5 for this SASsession.""")
                         found = True
                   fid.close()
                except OSError as e:
-                  print('Error trying to read authinfo file:'+pwf+'\n'+str(e))
+                  logger.warning('Error trying to read authinfo file:'+pwf+'\n'+str(e))
                   pass
                except:
                   pass
 
                if not found:
-                  print('Did not find key '+self.sascfg.authkey+' in authinfo file:'+pwf+'\n')
+                  logger.warning('Did not find key '+self.sascfg.authkey+' in authinfo file:'+pwf+'\n')
 
             while len(user) == 0:
                user = self.sascfg._prompt("Please enter the IOM user id: ")
@@ -403,10 +407,11 @@ Will use HTML5 for this SASsession.""")
             self.pid = subprocess.Popen(parms, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             pid = self.pid.pid
          except OSError as e:
-            print("The OS Error was:\n"+e.strerror+'\n')
-            print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
-            print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
+            msg  = "The OS Error was:\n"+e.strerror+'\n'
+            msg += "SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n"
+            msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
+            msg += "If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n"
+            logger.fatal(msg)
             return None
       else:
          #signal.signal(signal.SIGCHLD, signal.SIG_IGN)
@@ -456,10 +461,11 @@ Will use HTML5 for this SASsession.""")
                #sleep(5)
                os.execv(pgm, parms)
             except OSError as e:
-               print("The OS Error was:\n"+e.strerror+'\n')
-               print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
-               print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-               print("If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n")
+               msg  = "The OS Error was:\n"+e.strerror+'\n'
+               msg += "SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n"
+               msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
+               msg += "If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n"
+               logger.fatal(msg)
                os._exit(-6)
 
       if os.name == 'nt':
@@ -468,11 +474,12 @@ Will use HTML5 for this SASsession.""")
 
             error  = self.pid.stderr.read(4096).decode()+'\n'
             error += self.pid.stdout.read(4096).decode()
-            print("Java Error:\n"+error)
+            logger.fatal("Java Error:\n"+error)
 
-            print("Subprocess failed to start. Double check your settings in sascfg_personal.py file.\n")
-            print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
+            msg  = "Subprocess failed to start. Double check your settings in sascfg_personal.py file.\n"
+            msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
+            msg += "If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n"
+            logger.fatal(msg)
             self.pid = None
             return None
          except:
@@ -494,10 +501,11 @@ Will use HTML5 for this SASsession.""")
          else:
             error  = self.stderr.read1(4096).decode()+'\n'
             error += self.stdout.read1(4096).decode()
-            print("Java Error:\n"+error)
-            print("SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check your settings in sascfg_personal.py file.\n")
-            print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
-            print("If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n")
+            logger.fatal("Java Error:\n"+error)
+            msg  = "SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check your settings in sascfg_personal.py file.\n"
+            msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
+            msg += "If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n"
+            logger.fatal(msg)
             self.pid = None
             return None
 
@@ -528,15 +536,15 @@ Will use HTML5 for this SASsession.""")
       self.sascfg.encoding = enc
 
       if self.pid is None:
-         print(ll['LOG'])
-         print("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
-         print("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
+         logger.fatal(ll['LOG'])
+         logger.fatal("SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n")
+         logger.fatal("Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n")
          if zero:
-            print("Be sure the path to sspiauth.dll is in your System PATH"+"\n")
+            logger.fatal("Be sure the path to sspiauth.dll is in your System PATH"+"\n")
          return None
 
       if self.sascfg.verbose:
-         print("SAS Connection established. Subprocess id is "+str(pid)+"\n")
+         logger.info("SAS Connection established. Subprocess id is "+str(pid)+"\n")
       return self.pid
 
    def _endsas(self):
@@ -550,7 +558,7 @@ Will use HTML5 for this SASsession.""")
                self.pid = None
             except (subprocess.TimeoutExpired):
                if self.sascfg.verbose:
-                  print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+                  logger.info("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                self.pid.kill()
          else:
             pid = self.pid
@@ -568,7 +576,7 @@ Will use HTML5 for this SASsession.""")
                pass
             else:
                if self.sascfg.verbose:
-                  print("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+                  logger.info("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                os.kill(self.pid, signal.SIGKILL)
 
 
@@ -585,7 +593,7 @@ Will use HTML5 for this SASsession.""")
          self.sockerr.close()
 
          if self.sascfg.verbose:
-            print("SAS Connection terminated. Subprocess id was "+str(pid))
+            logger.info("SAS Connection terminated. Subprocess id was "+str(pid))
          self.pid        = None
          self._sb.SASpid = None
       return
@@ -808,7 +816,7 @@ Will use HTML5 for this SASsession.""")
 
       if self.pid == None:
          self._sb.SASpid = None
-         print("No SAS process attached. SAS process has terminated unexpectedly.")
+         logger.error("No SAS process attached. SAS process has terminated unexpectedly.")
          return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
 
       if os.name == 'nt':
@@ -1535,7 +1543,7 @@ Will use HTML5 for this SASsession.""")
             try:
                length += " '"+colname+"'n $"+str(chr_upper[col_up])
             except KeyError as e:
-               print("Dictionary provided as char_lengths is missing column: "+colname)
+               logger.error("Dictionary provided as char_lengths is missing column: "+colname)
                raise e
             if keep_outer_quotes:
                input  += "~ "
@@ -1562,7 +1570,7 @@ Will use HTML5 for this SASsession.""")
                            format += "'"+colname+"'n E8601TM. "
                         xlate  += " '"+colname+"'n = timepart('"+colname+"'n);\n"
                      else:
-                        print("invalid value for datetimes for column "+colname+". Using default.")
+                        logger.warning("invalid value for datetimes for column "+colname+". Using default.")
                         if col_up not in fmt_keys:
                            format += "'"+colname+"'n E8601DT26.6 "
                dts.append('D')
@@ -1639,8 +1647,8 @@ Will use HTML5 for this SASsession.""")
                      except Exception as e:
                         self._asubmit(";;;;\n;;;;", "text")
                         ll = self.submit("quit;", 'text')
-                        print("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
-                        print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                        logger.error("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
+                        logger.error("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                         return row_num
                else:
                  code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
@@ -1656,8 +1664,8 @@ Will use HTML5 for this SASsession.""")
                except Exception as e:
                   self._asubmit(";;;;\n;;;;", "text")
                   ll = self.submit("quit;", 'text')
-                  print("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
-                  print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                  logger.error("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
+                  logger.error("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
                   return  row_num
          else:
             code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
@@ -1784,7 +1792,7 @@ Will use HTML5 for this SASsession.""")
       my_fmts = kwargs.pop('my_fmts',   False)
       k_dts   = kwargs.pop('dtype',     None)
       if k_dts is None and my_fmts:
-         print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+         logger.warning("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
          my_fmts = False
 
       if not my_fmts:
@@ -1860,7 +1868,7 @@ Will use HTML5 for this SASsession.""")
                   rc = self.pid.wait(0)
                   self.pid = None
                   self._sb.SASpid = None
-                  print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                  logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
                   return None
                except:
                   pass
@@ -1869,7 +1877,7 @@ Will use HTML5 for this SASsession.""")
                if rc[1]:
                    self.pid = None
                    self._sb.SASpid = None
-                   print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                   logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
                    return None
             raise
       else:
@@ -2021,7 +2029,7 @@ Will use HTML5 for this SASsession.""")
       my_fmts = kwargs.pop('my_fmts',   False)
       k_dts   = kwargs.pop('dtype',     None)
       if k_dts is None and my_fmts:
-         print("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+         logger.warning("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
          my_fmts = False
 
       code = "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
@@ -2103,7 +2111,7 @@ Will use HTML5 for this SASsession.""")
                rc = self.pid.wait(0)
                self.pid = None
                self._sb.SASpid = None
-               print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+               logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
                return None
             except:
                pass
@@ -2112,7 +2120,7 @@ Will use HTML5 for this SASsession.""")
             if rc[1]:
                 self.pid = None
                 self._sb.SASpid = None
-                print('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
                 return None
          raise
 

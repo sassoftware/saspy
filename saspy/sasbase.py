@@ -52,6 +52,9 @@ import shutil
 import tempfile
 import typing
 
+import logging
+logger = logging.getLogger('saspy')
+
 from saspy.sasiostdio    import SASsessionSTDIO
 from saspy.sasioiom      import SASsessionIOM
 from saspy.sasiohttp     import SASsessionHTTP
@@ -152,7 +155,7 @@ class SASconfig(object):
                 if len(configs) == 1:
                     cfgname = configs[0]
                     if self._kernel is None:
-                        print("Using SAS Config named: " + cfgname)
+                        logger.info("Using SAS Config named: " + cfgname)
                 else:
                     cfgname = self._prompt(
                         "Please enter the name of the SAS Config you wish to run. Available Configs are: " +
@@ -181,14 +184,14 @@ class SASconfig(object):
         indisplay = kwargs.get('display', '')
         if len(indisplay) > 0:
            if lock and len(self.display):
-              print("Parameter 'display' passed to SAS_session was ignored due to configuration restriction.")
+              logger.warning("Parameter 'display' passed to SAS_session was ignored due to configuration restriction.")
            else:
               self.display = indisplay
         if self.display == '':
            self.display = 'jupyter'
         else:
            if self.display.lower() not in ['zeppelin', 'jupyter', 'databricks']:
-              print("Invalid value specified for 'display'. Using the default of 'jupyter'")
+              logger.warning("Invalid value specified for 'display'. Using the default of 'jupyter'")
               self.display = 'jupyter'
 
         if   self.display.lower() == 'zeppelin':
@@ -204,49 +207,49 @@ class SASconfig(object):
         inautoexec = kwargs.get('autoexec', None)
         if inautoexec:
             if lock and self.autoexec is not None:
-                print("Parameter 'autoexec' passed to SAS_session was ignored due to configuration restriction.")
+                logger.warning("Parameter 'autoexec' passed to SAS_session was ignored due to configuration restriction.")
             else:
                 self.autoexec = inautoexec
 
         inurl = kwargs.get('url', None)
         if inurl:
            if lock and url is not None:
-              print("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
+              logger.warning("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
            else:
               url = inurl
 
         inip = kwargs.get('ip', None)
         if inip:
            if lock and ip is not None:
-              print("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
+              logger.warning("Parameter 'ip' passed to SAS_session was ignored due to configuration restriction.")
            else:
               ip = inip
 
         inssh = kwargs.get('ssh', None)
         if inssh:
            if lock and ssh is not None:
-              print("Parameter 'ssh' passed to SAS_session was ignored due to configuration restriction.")
+              logger.warning("Parameter 'ssh' passed to SAS_session was ignored due to configuration restriction.")
            else:
               ssh = inssh
 
         insaspath = kwargs.get('saspath', None)
         if insaspath:
            if lock and path is not None:
-              print("Parameter 'saspath' passed to SAS_session was ignored due to configuration restriction.")
+              logger.warning("Parameter 'saspath' passed to SAS_session was ignored due to configuration restriction.")
            else:
               path = insaspath
 
         injava = kwargs.get('java', None)
         if injava:
            if lock and java is not None:
-              print("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
+              logger.warning("Parameter 'java' passed to SAS_session was ignored due to configuration restriction.")
            else:
               java = injava
 
         inprov = kwargs.get('provider', None)
         if inprov:
            if lock and provider is not None:
-              print("Parameter 'provider' passed to SAS_session was ignored due to configuration restriction.")
+              logger.warning("Parameter 'provider' passed to SAS_session was ignored due to configuration restriction.")
            else:
               provider = inprov
 
@@ -503,7 +506,7 @@ class SASsession():
            self.results        = 'Pandas'
         if self.sascfg.pandas and self.results.lower() == 'pandas':
            self.results        = 'HTML'
-           print('Pandas module not available. Setting results to HTML')
+           logger.warning('Pandas module not available. Setting results to HTML')
         self.workpath          = ''
         self.sasver            = ''
         self.version           = sys.modules['saspy'].__version__
@@ -571,31 +574,35 @@ class SASsession():
            try:
               self.pyenc = sas_encoding_mapping[self.sascei]
            except KeyError:
-              print("Invalid response from SAS on inital submission. printing the SASLOG as diagnostic")
-              print(self._io._log)
+              logger.fatal("Invalid response from SAS on inital submission. printing the SASLOG as diagnostic")
+              logger.fatal(self._io._log)
               raise
 
            if self.pyenc is not None:
               if self._io.sascfg.encoding != '':
                  if self._io.sascfg.encoding.lower() not in self.pyenc:
-                    print("The encoding value provided doesn't match the SAS session encoding.")
-                    print("SAS encoding is "+self.sascei+". Specified encoding is "+self._io.sascfg.encoding+".")
-                    print("Using encoding "+self.pyenc[1]+" instead to avoid transcoding problems.")
+                    msg  = "The encoding value provided doesn't match the SAS session encoding.\n"
+                    msg += "SAS encoding is "+self.sascei+". Specified encoding is "+self._io.sascfg.encoding+".\n"
+                    msg += "Using encoding "+self.pyenc[1]+" instead to avoid transcoding problems.\n"
+                    logging.info(msg)
+                    msg  = "You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.\n"
+                    msg += """If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it.\n"""
+                    logging.debug(msg)
                     self._io.sascfg.encoding = self.pyenc[1]
-                    print("You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.")
-                    print("""If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it.\n""")
               else:
                  self._io.sascfg.encoding = self.pyenc[1]
                  if self._io.sascfg.verbose:
-                    print("No encoding value provided. Will try to determine the correct encoding.")
-                    print("Setting encoding to "+self.pyenc[1]+" based upon the SAS session encoding value of "+self.sascei+".\n")
+                    msg  = "No encoding value provided. Will try to determine the correct encoding.\n"
+                    msg += "Setting encoding to "+self.pyenc[1]+" based upon the SAS session encoding value of "+self.sascei+".\n"
+                    logging.info(msg)
            else:
-              print("The SAS session encoding for this session ("+self.sascei+") doesn't have a known Python equivalent encoding.")
+              msg  = "The SAS session encoding for this session ("+self.sascei+") doesn't have a known Python equivalent encoding.\n"
               if self._io.sascfg.encoding == '':
                  self._io.sascfg.encoding  = 'utf_8'
-                 print("Proceeding using the default encoding of 'utf_8', though you may encounter transcoding problems.\n")
+                 msg += "Proceeding using the default encoding of 'utf_8', though you may encounter transcoding problems.\n"
               else:
-                 print("Proceeding using the specified encoding of "+self._io.sascfg.encoding+", though you may encounter transcoding problems.\n")
+                 msg += "Proceeding using the specified encoding of "+self._io.sascfg.encoding+", though you may encounter transcoding problems.\n"
+              logger.info(msg)
         else:
            self.pyenc = sas_encoding_mapping['utf-8']
 
@@ -630,7 +637,7 @@ class SASsession():
         if self._io is None:
             pyenc = ''
             if self.sascfg.cfgopts.get('verbose', True):
-                print("This SASsession object is not valid\n")
+                logger.warning("This SASsession object is not valid\n")
         else:
            pyenc = self._io.sascfg.encoding
 
@@ -711,7 +718,7 @@ class SASsession():
            method = 'listorlog'
 
         if method.lower() not in ['listonly', 'listorlog', 'listandlog', 'logandlist']:
-           print("The specified method is not valid. Using the default: 'listorlog'")
+           logger.warning("The specified method is not valid. Using the default: 'listorlog'")
            method = 'listorlog'
 
         if results == '':
@@ -1003,8 +1010,7 @@ class SASsession():
         sd = SASdata(self, libref, table, results, dsopts)
         if not self.exist(sd.table, sd.libref):
             if not self.batch:
-                print(
-                    "Table " + sd.libref + '.' + sd.table + " does not exist. This SASdata object will not be useful until the data set is created.")
+                logger.warning("Table "+sd.libref+'.'+sd.table+" does not exist. This SASdata object will not be useful until the data set is created.")
 
         self._lastlog = self._io._log[lastlog:]
         return sd
@@ -1256,8 +1262,9 @@ class SASsession():
                        try:
                           col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding))).max()
                        except Exception as e:
-                          print("Transcoding error encountered.")
-                          print("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                          msg  = "Transcoding error encountered.\n"
+                          msg += "DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e)
+                          logger.error(msg)
                           return None
                     else:
                        col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
@@ -1434,7 +1441,7 @@ class SASsession():
 
         if libref != '':
            if libref.upper() not in self.assigned_librefs():
-              print("The libref specified is not assigned in this SAS Session.")
+              logger.error("The libref specified is not assigned in this SAS Session.")
               return None
 
         # support oringinal implementation of outencoding - should have done it as a ds option to begin with
@@ -1691,12 +1698,12 @@ class SASsession():
            raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
 
         if method.lower() not in ['memory', 'csv', 'disk']:
-            print("The specified method is not valid. Supported methods are MEMORY, CSV and DISK")
+            logger.error("The specified method is not valid. Supported methods are MEMORY, CSV and DISK")
             return None
 
         dsopts = dsopts if dsopts is not None else {}
         if self.exist(table, libref) == 0:
-            print('The SAS Data Set ' + libref + '.' + table + ' does not exist')
+            logger.error('The SAS Data Set ' + libref + '.' + table + ' does not exist')
             return None
 
         if self.nosub:
@@ -1891,7 +1898,7 @@ class SASsession():
               outtype = 1.0
 
         if outtype is not None and type(outtype) not in [int, float, str]:
-           print("invalid type specified. supported are [int, float, str], will return default type")
+           logger.warning("invalid type specified. supported are [int, float, str], will return default type")
            outtype=None
 
         if outtype is not None:
@@ -2079,8 +2086,7 @@ class SASsession():
            dirlist.append(log[0])
 
         if memcount != len(dirlist):
-            print("Some problem parsing list. Should be " + str(memcount) + " entries but got " + str(
-                len(dirlist)) + " instead.")
+            logger.warning("Some problem parsing list. Should be "+str(memcount)+" entries but got "+str(len(dirlist))+" instead.")
 
         return dirlist
 
@@ -2099,7 +2105,7 @@ class SASsession():
            exists = int(ll['LOG'].rpartition('LIBREF_EXISTS=')[2].rpartition('LIB_EXT_END=')[0])
 
            if exists != 0:
-              print('Libref provided is not assigned')
+              logger.error('Libref provided is not assigned')
               return None
 
         code = """
@@ -2172,7 +2178,7 @@ class SASsession():
 
            if exists != 1:
               if not quiet:
-                 print('The filepath provided does not exist')
+                 logger.error('The filepath provided does not exist')
               ll = self._io.submit("filename "+fileref+" clear;")
               return None
 
@@ -2299,7 +2305,7 @@ class SASsession():
 
         if exists != 0:
            if not quiet:
-              print('The filepath provided does not exist')
+              logger.error('The filepath provided does not exist')
 
         self._lastlog = self._io._log[lastlog:]
         return {'Success' : not bool(exists), 'LOG' : ll['LOG']}
@@ -2336,7 +2342,7 @@ class SASsession():
 
         if exists != 0:
            if not quiet:
-              print('Non Zero return code. Check the SASLOG for messages')
+              logger.warning('Non Zero return code. Check the SASLOG for messages')
 
         self._lastlog = self._io._log[lastlog:]
         return {'Success' : not bool(exists), 'LOG' : ll['LOG']}
@@ -2390,7 +2396,7 @@ class SASsession():
        code += "; run;"
 
        if vars != 3:
-          print("Must suply 3 of the 4 variables. Only "+str(vars)+" variables provided.")
+          logger.error("Must suply 3 of the 4 variables. Only "+str(vars)+" variables provided.")
           return None
 
        if self.nosub:
@@ -2429,7 +2435,7 @@ class SASsession():
         :return: a Pandas DataFrame whose column names are SAS compatible according to the selected version.
         """
         if version.lower() not in ['v6', 'v7', 'upcase', 'any']:
-           print("The specified version is not valid. Using the default: 'V7'")
+           logger.warning("The specified version is not valid. Using the default: 'V7'")
            version = 'v7'
 
         max_length = 8 if version.lower() == 'v6' else 32
