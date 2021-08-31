@@ -25,7 +25,7 @@ This module provides Python APIs to the SAS system. You can start a
 SAS session and run analytics from Python through a combination of
 object-oriented methods or explicit SAS code submission. You can move
 data between SAS data sets and Pandas dataframes and exchange values between
-python vaiables and SAS macro variables. 
+python variables and SAS macro variables.
 
 The APIs provide interfaces for the following:
 
@@ -55,6 +55,7 @@ releases.
 .. toctree::
 
    install
+   configuration
    getting-started
    api
    advanced-topics
