@@ -18,34 +18,34 @@ Using Batch mode
 Batch mode is meant to be used when you want to automate your code as Python scripts.
 
 In batch mode, any method that would normally display results, returns a Python dictionary
-instead and with two keys; LOG, LST. This is the same as how the submit() method works 
-normally. 
+instead and with two keys; LOG, LST. This is the same as how the submit() method works
+normally.
 
-The LOG has the SAS Log and the LST contains the results. You will likely want to set 
+The LOG has the SAS Log and the LST contains the results. You will likely want to set
 the results parameter to HTML (this was originally the default instead of Pandas). When
 you set the results to HTML, not only are plots and graphs in HTML, but also tabular results
 too.
 
-The example below shows the contents of a Python script that runs a linear regression and 
+The example below shows the contents of a Python script that runs a linear regression and
 writes all the results to a directory. You can access the directory with a web browser to
-view these results by clicking on them. Adjust the filesystem path below and you should 
+view these results by clicking on them. Adjust the filesystem path below and you should
 be able to run this code yourself.
 
 
 .. code-block:: ipython3
 
     #! /usr/bin/python3.5
-    
+
     import saspy
     sas = saspy.SASsession(results='html')
-    
+
     cars = sas.sasdata('cars', libref='sashelp')
-    
+
     sas.set_batch(True)
-    
+
     stat = sas.sasstat()
     res = stat.reg(model='horsepower = Cylinders EngineSize', data=cars)
-    
+
     for i in range(len(res._names)):
         x = res.__getattr__(res._names[i])
         if type(x) is not str:
@@ -56,14 +56,14 @@ be able to run this code yourself.
             out1 = open("C:\\Public\\saspy_demo\\"+res._names[i]+".log", mode='w+b')
             out1.write(x.encode())
             out1.close()
-    
-    
+
+
 The URL to see these results is: file:///C:/Public/saspy_demo/. Of course, you can
-imagine integrating the results into nicer web page for reporting, but with nothing more 
-than this few lines of code, you can have the results updated and refreshed by just 
+imagine integrating the results into nicer web page for reporting, but with nothing more
+than this few lines of code, you can have the results updated and refreshed by just
 re-running the script.
 
- 
+
 *********
 Prompting
 *********
@@ -71,34 +71,34 @@ Prompting
 There are two types of prompting that can be performed; meaning to stop processing and
 prompt the user for input and then resume processing.
 
-The first type of prompting is performed implicity. When you run the 
-SASsession() method, if any required parameters for the chosen connection method 
-were not specified in the configuration definition (in sascfg_personal.py), processing is interrupted 
-so that the user can be prompted for the missing parameters. In addition, when there 
-is more than one configuration definition in SAS_config_names, and cfgname is not 
-specified in the SASsession() method (or an invalid name is specified), the user will 
+The first type of prompting is performed implicity. When you run the
+SASsession() method, if any required parameters for the chosen connection method
+were not specified in the configuration definition (in sascfg_personal.py), processing is interrupted
+so that the user can be prompted for the missing parameters. In addition, when there
+is more than one configuration definition in SAS_config_names, and cfgname is not
+specified in the SASsession() method (or an invalid name is specified), the user will
 be prompted to select the configuration definition to use.
 
-The other kind of prompting is prompting that you control. The submit() method, 
-and the saslib() methods both take an optional prompt parameter. This parameter 
-is how you request to have the user prompted for input at run time. This option 
-is used in conjunction with SAS macro variable names that you enter in the SAS 
+The other kind of prompting is prompting that you control. The submit() method,
+and the saslib() methods both take an optional prompt parameter. This parameter
+is how you request to have the user prompted for input at run time. This option
+is used in conjunction with SAS macro variable names that you enter in the SAS
 code or options for the method.
 
-The prompt parameter takes a Python dictionary. The keys are the SAS macro variable 
-names and the values are True or False. The Boolean value indicates whether it 
-is to hide what the user types in or not. It also controls whether the macro variables 
-stay available to the SAS session or if they are deleted after running that code. 
+The prompt parameter takes a Python dictionary. The keys are the SAS macro variable
+names and the values are True or False. The Boolean value indicates whether it
+is to hide what the user types in or not. It also controls whether the macro variables
+stay available to the SAS session or if they are deleted after running that code.
 
 You will be prompted for the values of your keys, and those values will be assigned
-to the SAS macro variables for you in SAS. When your code runs, the macro variables will be 
-resolved. If you specified ``True``, then the value the user types is not displayed, 
-nor is the macro variable displayed in the SAS log, and the macro variable is deleted 
-from SAS so that it is not accessible after that code submission. For ``False``, the 
-user can see the value as it is type, the macro variables can be seen in the SAS log 
+to the SAS macro variables for you in SAS. When your code runs, the macro variables will be
+resolved. If you specified ``True``, then the value the user types is not displayed,
+nor is the macro variable displayed in the SAS log, and the macro variable is deleted
+from SAS so that it is not accessible after that code submission. For ``False``, the
+user can see the value as it is type, the macro variables can be seen in the SAS log
 and the variables remain available in that SAS session for later code submissions.
 
-The following are examples of how to use prompting in your programs. The first example 
+The following are examples of how to use prompting in your programs. The first example
 uses the saslib() method to assign a libref to a third-party database. This is a
 common issue--the user needs to specify credentials, but you do not want to include
 user IDs and passwords in your programs. Prompting enables the user to provide
@@ -106,7 +106,7 @@ credentials at runtime.
 
 .. code-block:: ipython3
 
-    sas.saslib('Tera', engine='Teradata', options='user=&user pw=&mypw server=teracop1', 
+    sas.saslib('Tera', engine='Teradata', options='user=&user pw=&mypw server=teracop1',
                prompt={'user': False, 'mypw': True})
 
 At runtime, the user is prompted for user and password and sees something like the
@@ -116,19 +116,19 @@ following when entering values (the user ID is visible and the password is obscu
 
     Please enter value for macro variable user sasdemo
     Please enter value for macro variable mypw ........
- 
-Another example might be that you have code that creates a table, but you want to let 
-the user choose the table name as well as the name of the column and a hidden value 
-to assign to it. By specifing ``False``, the user can see the value, and the SAS log 
-shows the non-hidden macro mariables, followed by another code submission that uses 
+
+Another example might be that you have code that creates a table, but you want to let
+the user choose the table name as well as the name of the column and a hidden value
+to assign to it. By specifing ``False``, the user can see the value, and the SAS log
+shows the non-hidden macro mariables, followed by another code submission that uses
 the previously defined non-hidden variables--which are still available.
 
 .. code-block:: ipython3
 
     ll = sas.submit('''
     data &dsname;
-      do &var1="&pw"; 
-        output; 
+      do &var1="&pw";
+        output;
       end;
     run;
     ''', prompt={'var1': False, 'pw': True, 'dsname': False})
@@ -138,18 +138,18 @@ the previously defined non-hidden variables--which are still available.
 
     Please enter value for macro variable var1 MyColumnName
     Please enter value for macro variable hidden ........
-    Please enter value for macro variable dsname TestTable1    
-    
+    Please enter value for macro variable dsname TestTable1
+
     print(ll['LOG'])
 
     103  ods listing close;ods html5 (id=saspy_internal) file=stdout options(bitmap_mode='inline') device=svg; ods graphics on /
     103! outputfmt=png;
     NOTE: Writing HTML5(SASPY_INTERNAL) Body file: STDOUT
-    104  
+    104
     105  options nosource nonotes;
     108  %let var1=MyColumnName;
     109  %let dsname=TestTable1;
-    110  
+    110
     111  data &dsname;
     112    do &var1="&hidden";
     113      output;
@@ -159,18 +159,18 @@ the previously defined non-hidden variables--which are still available.
     NOTE: DATA statement used (Total process time):
           real time           0.00 seconds
           cpu time            0.00 seconds
-          
-    116  
+
+    116
     117  proc print data=&dsname;
     118  run;
     NOTE: There were 1 observations read from the data set WORK.TESTTABLE1.
     NOTE: PROCEDURE PRINT used (Total process time):
           real time           0.00 seconds
           cpu time            0.00 seconds
-          
-    119  
+
+    119
     120  options nosource nonotes;
-    123  
+    123
     124  ods html5 (id=saspy_internal) close;ods listing;
 
 
@@ -183,8 +183,8 @@ the previously defined non-hidden variables--which are still available.
     1       cant see me
 
 
-That is a highly contrived example, but you get the idea. You can prompt users 
-at runtime for values you want to use in the code, and those values can be 
+That is a highly contrived example, but you get the idea. You can prompt users
+at runtime for values you want to use in the code, and those values can be
 kept around and used later in the code, or hidden and inaccessible afterward.
 
 
@@ -229,7 +229,7 @@ result vary, so it depends. But, in general, you can simple use sd2df() in all c
 CSV and DISK versions. So now you can ignore the rest of this section :)
 ENDUPDATE!!!
 
-Transferring data from SAS into Python (and the reverse) has been in this module from the beginning. As usage of this has grown, 
+Transferring data from SAS into Python (and the reverse) has been in this module from the beginning. As usage of this has grown,
 larger sized data sets have been shown to be much slower to load and consume lots of memory. After investigations, this has to do with
 trying to build out the dataframes 'in memory'. This works fine up to a point, but the memory consumption and CPU usage doesn't scale.
 
@@ -257,7 +257,7 @@ and newlines, which Pandas can have parsing problem with reading CSV file create
 
 
 *****************************************************************
-Slow performance loading a DataFrame into a SAS data set; df2sd() 
+Slow performance loading a DataFrame into a SAS data set; df2sd()
 *****************************************************************
 
 df2sd (dataframe2sasdata) has two main steps, which were both done internal to the method. The second is transferring the data
@@ -277,9 +277,9 @@ that can make it faster; calculate char length, not encoded byte lenghts (which 
 char) of the SAS encoding (which I have defaults for or you can override and probvide your own BPC). This routine returns a dict with
 each char column name and the length. df2sd can be passed these same parameters, so when it calls this method, it can do the same thing.
 
-df2sd also can now take the dict that this routine will produce, or just a dict you code up with the lengths, skipping this whole 
-disconvery process all together. So, you can code the lengths yourself, have df2sd do it but with some better performance, or call 
-the method to calculate them and pass in that dict. This is good when you run df2sd on the same data more then once; figure out the 
+df2sd also can now take the dict that this routine will produce, or just a dict you code up with the lengths, skipping this whole
+disconvery process all together. So, you can code the lengths yourself, have df2sd do it but with some better performance, or call
+the method to calculate them and pass in that dict. This is good when you run df2sd on the same data more then once; figure out the
 lengths once and just pass in the dict all the times and never have to specd time recalculating.
 
 Here are a few example cases showing this.
@@ -301,8 +301,8 @@ Here are a few example cases showing this.
     SAS Session Encoding  = utf-8
     Python Encoding value = utf_8
     SAS process Pid value = 6959
-    
-    # Create a dataframe of all CHAR columns from the cars dataset 
+
+    # Create a dataframe of all CHAR columns from the cars dataset
 
     >>> cars = sas.sasdata('cars','sashelp', results='text')
     >>> df = cars.to_df_DISK(dtype=str)
@@ -327,11 +327,11 @@ Here are a few example cases showing this.
     # Let's call the new method to get the char column lengths.
 
     >>> d1 =  sas.df_char_lengths(df); d1
-    {'Length': 3, 'Invoice': 6, 'Wheelbase': 3, 'Model': 39, 'Make': 13, 'Cylinders': 3, 
+    {'Length': 3, 'Invoice': 6, 'Wheelbase': 3, 'Model': 39, 'Make': 13, 'Cylinders': 3,
      'DriveTrain': 5, 'Type': 6, 'MSRP': 6, 'MPG_City': 2, 'Weight': 4, 'MPG_Highway': 2,
      'Origin': 6, 'EngineSize': 3, 'Horsepower': 3}
     >>>
-    
+
     # we can call df2sd on this DF and pass in the char col lengths so we skip that in df2sd
 
     >>> sd =  sas.df2sd(df, char_lengths=d1); sd
@@ -339,7 +339,7 @@ Here are a few example cases showing this.
     Table   = _df
     Dsopts  = {}
     Results = Pandas
-    
+
     >>> sd.columnInfo()
         Member  Num     Variable  Type  Len  Pos
     0   WORK.B    9    Cylinders  Char    3   84
@@ -358,8 +358,8 @@ Here are a few example cases showing this.
     13  WORK.B   13       Weight  Char    4   94
     14  WORK.B   14    Wheelbase  Char    3   98
     >>>
-    
-    # you can just create your own dict with lengths you want, also, and skip the discovery step altogether. 
+
+    # you can just create your own dict with lengths you want, also, and skip the discovery step altogether.
 
     >>> d1 = {}
     >>> for col in df.columns:
@@ -374,7 +374,7 @@ Here are a few example cases showing this.
     Table   = _df
     Dsopts  = {}
     Results = Pandas
-    
+
     >>> sd.columnInfo()
           Member  Num     Variable  Type  Len  Pos
     0   WORK._DF    9    Cylinders  Char   10  115
@@ -416,11 +416,11 @@ The three configuration keys are:
 
 .. code-block:: ipython3
 
-    iomhost - 
+    iomhost -
         (Required) The resolvable host name, or IP address to the IOM object spawner.
         New in 2.1.6; this can be a list of all the object spawners hosts if you have load balanced object spawners.
         This provides Grid HA (High Availability)
-    iomport - 
+    iomport -
         (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
     appserver -
         If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
@@ -459,10 +459,10 @@ Use the 'Machine name :' value for your 'iomhost' key.
 
 Next, query to find any available Workspace Servers. You would use the 'Bridge port :' value from
 this for the 'iomport' configuration key. When you have multiple Workspace Servers configured, which
-really means you have multipe SASApp's defined (see 'Server context :' value in the output below), 
+really means you have multipe SASApp's defined (see 'Server context :' value in the output below),
 you will want to set the 'appserver' configuration key to the SASApp Workspace Server that you want
 to (or have permission to) connect to. The value to use is the name shown in the output for the server;
-'SASApp - Workspace Server' in the output below.  
+'SASApp - Workspace Server' in the output below.
 
 .. code-block:: ipython3
 
@@ -487,10 +487,10 @@ Use the 'Bridge port :' value for your 'iomport' key.
 If your site has a complex setup, you may have multiple Object Spawners and/or Workspace Servers.
 If so, it's possible that the Workspace Server you want to use is only spawnable for a particular
 Object Spawner. You can correlate those by looking for the name of your Workspace Server in the
-'Spawnable server component :' of the Object Spawner output. 
+'Spawnable server component :' of the Object Spawner output.
 
 Also, if you have multiple Workspace Server that you want to be able to connect to, you can define
-a separate configuration definition (in your sascfg[_personal].py) for each one. A good naming 
+a separate configuration definition (in your sascfg[_personal].py) for each one. A good naming
 convention for these is to use the 'Server context :' value as the config name. That way it's easy
 to know which server you will be connecting to.
 
@@ -511,7 +511,7 @@ the connection to the workspace server.
 In order to have this work, before disconnecting from your current network, you submit the disconnect()
 method of the SASsession object. You can then change networks. After you have a good network connection again,
 the next thing you submit will reconnect to that same workspace server and run.
- 
+
 
 .. code-block:: ipython3
 
@@ -538,21 +538,21 @@ Configuring Grid Option Sets to have saspy run on a specific Queue.
 Working with Grid Options Sets is documented here (the 'Doc' referred to below):
 http://support.sas.com/documentation/cdl/en/gridref/67371/HTML/default/viewer.htm#n1inymfs0b7go2n147xdknz0ygpx.htm
 
-There is also a SASPy issue with details on this here: 
+There is also a SASPy issue with details on this here:
 https://github.com/sassoftware/saspy/issues/82
 
 This is specific to the IOM Access Method, as that is how saspy connects to the SAS Grid with this functionality.
-The Appname that saspy connects as is 'SASPy'; as in APPNAME=SASPy 
- 
-There are 2 steps to setting this up. The first is to define the SASPy Application in metadata and set it as Grid Capable.
-That part in the doc (link referenced above) is at the bottom, named 'Specifying That an Application Is Grid Capable'. 
+The Appname that saspy connects as is 'SASPy'; as in APPNAME=SASPy
 
-The second is to select and configure that SASPy App in the Grid Options Set Mapping Wizard; the first part of the doc. 
+There are 2 steps to setting this up. The first is to define the SASPy Application in metadata and set it as Grid Capable.
+That part in the doc (link referenced above) is at the bottom, named 'Specifying That an Application Is Grid Capable'.
+
+The second is to select and configure that SASPy App in the Grid Options Set Mapping Wizard; the first part of the doc.
 
 1) in the 'Folders' view in SMC (like in the picture in the doc link), there's a list of applications. The doc has the SAS Addin for Microsoft Office selected.
 If you right click on Applications, you can selct 'New'->'Folder.
 
-2) Do that and set the name of the new folder to SASPy. Then right click and select Properties - just like in the picture in the doc. 
+2) Do that and set the name of the new folder to SASPy. Then right click and select Properties - just like in the picture in the doc.
 Then add a Keyword-> 'isGridCapable' and save it. Just like the picture in the doc.
 
 After creating the SASPy folder (application), and setting it to grid capable, when you go back
@@ -571,7 +571,7 @@ First, SAS Formats do not transfer to a dataframe, so on the round trip the new 
 not necessarily have the same formats defined on it as the original data set. Starting in saspy
 version3.2.0, there is an option on df2sd to specify the formats you want defined on the new data
 set; outfmts={}. The keys for this are the column names and the values are the SAS formats you
-want defined.                                                                                                                     
+want defined.
 
 For example:
 df2sd(..., outfmts={'col1' : 'YYMMDD.', 'col2' : 'TIMEAMPM.', 'some_numeric_col' : 'comma32.4'})
@@ -582,11 +582,11 @@ method on that SASdata object.
 One other issue is with SAS variables having Date and Time formats, which are logically data types
 of Date or Time. SAS only really has Numeric and Character data types, but the date, time, and
 datetime formats on Numeric variables identify them as representing date, time, or datetime data
-types. Pandas dataframe, has a datetime datatype, but not a date or a time datatype. When using 
+types. Pandas dataframe, has a datetime datatype, but not a date or a time datatype. When using
 sd2df, any SAS variable with date, time or datetime formats will be created in the dataframe as a
 datetime64[ns]. It is easy enough in python to reference only the date part, or time part of a
 pandas datetime column. In fact the column can be converted to datetime.date or datetime.time
-with one python statement. For instance, given datetime columns, the following can convert to 
+with one python statement. For instance, given datetime columns, the following can convert to
 the datetime date or time:
 
 Given df_conv.dtypes:
@@ -598,16 +598,16 @@ Given df_conv.dtypes:
 
 
     convert datetime columns to date or time only type (honoring missing values)
-    
+
     nat = pd.to_datetime('')
     df_conv['dt'] = df_conv['dt'].apply(lambda x: x if x is nat else pd.Timestamp.date(x))
     df_conv['tm'] = df_conv['tm'].apply(lambda x: x if x is nat else pd.Timestamp.time(x))
 
-    
+
     convert these back to datetimes
-    
+
     df_conv['dt'] = pd.to_datetime(df_conv['dt'].astype('str'), errors='coerce')
-    df_conv['tm'] = pd.to_datetime(df_conv['tm'].astype('str'), errors='coerce')                                                                                                
+    df_conv['tm'] = pd.to_datetime(df_conv['tm'].astype('str'), errors='coerce')
 
 
 When using df2sd to transfer a dataframe to a SAS data set, with values you want to be stored as SAS
@@ -620,7 +620,7 @@ variables, and assign default date or time formats for those variables. You can,
 specific date or time formats using the outfmts={} option if you want.
 
 For example:
-df2sd(..., datetimes={'d' : 'date', 't' : 'time'}) 
+df2sd(..., datetimes={'d' : 'date', 't' : 'time'})
 
 .. code-block:: ipython3
 
@@ -632,12 +632,12 @@ df2sd(..., datetimes={'d' : 'date', 't' : 'time'})
 
     >>> sd = sas.df2sd(df, datetimes={'d' : 'date', 't' : 'time'}, results='text')
     >>> sd.head()
-    
-    
+
+
                                                                The SAS System                         11:31 Friday, January 24, 2020   2
-    
+
                                         Obs    dt                                d            t
-    
+
                                          1     1965-01-01T08:00:01.000000    1965-01-01    08:00:01
     >>>
     >>> # For 'dt' column, we still import it as a datetime, but specifying a numeric format will display it as a number (seconds since Jan 1,  1960)
@@ -646,17 +646,17 @@ df2sd(..., datetimes={'d' : 'date', 't' : 'time'})
     >>> sd = sas.df2sd(df, datetimes={'d' : 'date', 't' : 'time'}, outfmts={'dt' : 'comma32.4', 'd' : 'YYMMDD.', 't' : 'TIMEAMPM.'}, results='text')
     >>> sd.head()
                                                                The SAS System                         09:59 Friday, January 24, 2020   1
-    
+
                                      Obs                                  dt           d             t
 
                                       1                     157,881,601.0000    65-01-01    8:00:01 AM
     >>>
-    
+
 For more examples of this date, time, datetime conversion, see the example notebook here:
 https://github.com/sassoftware/saspy-examples/blob/master/Issue_examples/Issue279.ipynb
-    
-    
-    
+
+
+
 ***********************************
 Advanced sd2df and df2sd techniques
 ***********************************
@@ -672,8 +672,8 @@ Both the CSV and DISK methods of sd2df use Pandas read_csv method to create the 
 containing the SAS data. The read_csv method has many options. By default the sd2df CSV and DISK methods
 supply some of these parameters to control how the dataframe is created. There are two things in particular
 that must correlate to get the correct results in the dataframe. They are the format of the data values,
-for a given column, and the dtype specified for the creation of the column. The format of the data is 
-controlled by the SAS format being used to write the data values. The dtype is controlled by the dtype= 
+for a given column, and the dtype specified for the creation of the column. The format of the data is
+controlled by the SAS format being used to write the data values. The dtype is controlled by the dtype=
 parameter on read_csv. By default saspy controls both of these, matching them up to create the valid
 dataframe columns.
 
@@ -692,9 +692,9 @@ This can be done quite easily with just the dtype= parameter.
 
 .. code-block:: ipython3
 
-    # lets get two numerics from the cars dataset. FYI, they have formats defined as DOLLAR8. 
+    # lets get two numerics from the cars dataset. FYI, they have formats defined as DOLLAR8.
     df = sas.sd2df_DISK('cars', 'sashelp', dtype='str',      dsopts={'keep' : 'MSRP Invoice'})
-    
+
     >>> df.dtypes
     MSRP       object
     Invoice    object
@@ -715,7 +715,7 @@ same as we would see in the SAS output of the data. So, we set my_fmts=True.
 .. code-block:: ipython3
 
     df = sas.sd2df_DISK('cars', 'sashelp', dtype='str', my_fmts=True,     dsopts={'keep' : 'MSRP Invoice'})
-    
+
     >>> df.dtypes
     MSRP       object
     Invoice    object
@@ -729,14 +729,14 @@ same as we would see in the SAS output of the data. So, we set my_fmts=True.
     3  $33,195  $30,299
     4  $43,755  $39,014
     >>>
-    
+
 
 And, if you wanted to specify your own SAS format to use for this, overriding the ones defined on
 the dataset, you can specify it on the dsopts=.
 
 .. code-block:: ipython3
 
-    df = sas.sd2df_DISK('cars', 'sashelp', dtype='str', my_fmts=True, 
+    df = sas.sd2df_DISK('cars', 'sashelp', dtype='str', my_fmts=True,
                          dsopts={'keep' : 'MSRP Invoice', 'format' : {'msrp':'dollar32.2'}})
     >>> df.dtypes
     MSRP       object
@@ -751,7 +751,7 @@ the dataset, you can specify it on the dsopts=.
     3  $33,195.00  $30,299
     4  $43,755.00  $39,014
     >>>
-    
+
 The dtype= parameter can also be a dictionary for each column and type. See the Pandas doc for more
 on that. So, you can control the format and type of each column yourself, but it is then up to you
 to be sure the values can be parsed by Pandas to the types you specify. When using these options,
@@ -761,9 +761,9 @@ One last example where You only want to override one column and have the other d
 
 .. code-block:: ipython3
 
-    df = sas.sd2df_DISK('cars', 'sashelp', dtype={'invoice' : 'int'}, my_fmts=True, 
+    df = sas.sd2df_DISK('cars', 'sashelp', dtype={'invoice' : 'int'}, my_fmts=True,
                          dsopts={'keep' : 'MSRP Invoice', 'format' : {'msrp':'dollar32.2','invoice':'best32.'}})
-    
+
     >>> df.dtypes
     MSRP       object
     Invoice     int64
@@ -776,13 +776,13 @@ One last example where You only want to override one column and have the other d
     3  $33,195.00    30299
     4  $43,755.00    39014
     >>>
-    
+
 Remember, if you want to send data like this back to a SAS data set and you want the original types,
 you need to have any numerics as a numeric type, dates, times or datetimes as a datetime64 type. You can
-use the datetimes= to create date or time SAS variables from a full datetime, and anything that is 
+use the datetimes= to create date or time SAS variables from a full datetime, and anything that is
 an Object type, will be a character variable in SAS, with the str() of the object as the value.
 
-There's more interesting reading about this on the issue that started it. Take a look at 
+There's more interesting reading about this on the issue that started it. Take a look at
 https://github.com/sassoftware/saspy/issues/279 to see where this fuctionality came from.
 
 
@@ -797,17 +797,17 @@ the word ERROR in the log, because that doesn't always mean what was being done 
 worked perfectly. SAS isn't that straight forward, unfortunately. Most methods verify what happened, when they can, but particularly on the
 data transfer methods, there are any number of things that can happen, so querying the log after these, especially when first developing
 workflows, is always a good thing. You can use the lastlog() method to see the log for the last method run or saslog() to see the entire
-session log. 
+session log.
 
 There is also a new attribute on the SASsession object (my SASsession variable is 'sas' in the examples). This variable is a boolean
 set to True when one of these warnings is issued (regardless of how you've configured warnings; I set it every time). The name is 'check_error_log'.
-You can use this to programmatically check to see if there was an ERROR in the log. One catch is that it's up to you to reset the attribute 
+You can use this to programmatically check to see if there was an ERROR in the log. One catch is that it's up to you to reset the attribute
 to False (it is Fales when the session is created). So, if you are going to check it after running a SASPy method, you should set it to False
 before running that method. I can't reset it since many methods submit multiple sets of SAS code, and I need to leave it set so it's set when
 all the code for a given method has completed. There's no good place where I can explicitly reset it. It's easy enough to set and check though,
-when you need to use it.  
+when you need to use it.
 
-Here are some examples of the warnings messages and some ways to configure them. For a full explanation of what you can do with 
+Here are some examples of the warnings messages and some ways to configure them. For a full explanation of what you can do with
 warnings, refer to the Python documentation. Warnings is part of the Python Standard Library. BTW, to supress these, so it's as it was
 before adding this enhancement, you can simply import warnings and then submit warnings.filterwarnings("ignore",module='saspy'). Remember
 also that since sascfg_personal is an imported module, you can add the import and filterwarnings statement to it if you want to default this and
@@ -839,7 +839,7 @@ submitting it in the program, which will override what was in the config file.
     >>> # so, look at the log to see why there was an error - I'm only showing the line with the error to save space here
     >>>
     >>> print(sas.lastlog())
-    
+
     [...]
     ERROR: Some character data was lost during transcoding in the dataset X.PRDSALE. Either the data contains characters that are not
            representable in the new encoding or truncation occurred during transcoding.
@@ -903,7 +903,220 @@ submitting it in the program, which will override what was in the config file.
 Hopefully you will find this enhancement useful. It would be great if each thing done in SAS returned a clean return code to check, but that's
 not the case. So, checking the log is something that's necessary sometimes. Hopefully this warning when an ERROR is seen, will make this easier.
 
-    
+
+*********************************************
+saspy.logger from logging.logger as of V3.7.5
+*********************************************
+
+Per a user request to get rid of using print() for variaous messages, and use the logging facility instead, I've
+replaced all non-interactive prints() in saspy (print is still used for prompting, as it needs to be) with
+logger calls. The different messages now fall into logging categories (DEBUG, INFO, WARNING, ERROR, FATAL)
+so that you can control the level of messages you get.
+
+You can also reconfigure the logger to your wishes, so you can have it written to a file instead of, or as
+well as, STDOUT. You can change any of the defaults, including resetting them to the actual Python defaults;
+I have some of the saspy.logger defaults changed for backward compatibility. This way you still get the messages
+you always have (the Python default level is WARNING, so you would no longer get many you previously have with
+that setting). Below I'll show some examples of changing this, but you can always look at the Python logging
+module doc to see what all of your options are: https://docs.python.org/3.9/library/logging.html#module-logging
+
+First, let's look at the changes I made to the Python defaults, for saspy backward compatibility. After, I'll
+show how to reset them to the Python defaults if that's what you want.
+
+.. code-block:: ipython3
+
+    logger.addHandler(logging.StreamHandler(sys.stdout))
+    logger.setLevel(logging.INFO)
+    logger.propagate=False
+
+
+First, the logger is associated with the saspy module, so you access it as saspy.logger, after you import saspy.
+
+The first change is to route messages to STDOUT instead of STDERR (the Python default). This was because for
+Jupyter notebooks, ALL message levels (from debug to error) when sent to STDERR, are displayed in RED reverse
+video (highlighted in RED). This mean that every message is now in RED, which would be a glaring change in every
+notebook using saspy. Written to STDOUT, they show up same as before. And in non-notebook cases, the messages
+still show up where they did before (because print() goes to stdout too).
+
+The next change is to set the level to INFO instead of WARNING. Many of the messages saspy writes out under normal
+conditions are INFO level messages. So, to get the same messages you have previously gotten, setting level to INFO
+keeps backward compatibility for you programs. You can set this to whatever you like, though, of course.
+
+Setting propogate to False keeps every message from being duplicated with the name of the logger prepended. Again,
+so your output looks the same as before.
+
+Now, if you want to configure the logger your way, you can add your configuration to your sascfg_personal.py file,
+as it is imported after the logger is set up, and before any logging would happen. So doing it this way will have
+your configuration in effect every time you use saspy.
+
+Here's an example showing how you can change these back to the python defaults (again, add this in the config file).
+
+.. code-block:: ipython3
+
+    import logging
+    saspy.logger.handlers  = []
+    saspy.logger.level     = (logging.WARNING)
+    saspy.logger.propagate = True
+
+
+
+There are a lot of ways you can configure logging, from adding handlers and formaters. To add a handler to write
+messages to a log file, you can just do this:
+
+.. code-block:: ipython3
+
+    saspy.logger.addHandler(logging.FileHandler('./saspylogger.log'))
+
+
+If you want RED reverse video on all messages in a notebook, you can set the default handler I configured back to
+it's default (STDERR) and then all messages in the notebook will be RED, like any other application using logging.
+
+.. code-block:: ipython3
+
+    saspy.logger.handlers[0]=logging.StreamHandler()
+
+
+Here's just a little example of a programm showing some of this.
+
+.. code-block:: ipython3
+
+    tom64-5> python3.5
+    Python 3.5.6 (default, Nov 16 2018, 15:50:39)
+    [GCC 4.4.7 20120313 (Red Hat 4.4.7-23)] on linux
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import saspy, logging
+    >>> saspy.logger
+    <logging.Logger object at 0x7f01e9058ac8>
+    >>>
+    >>> prev = saspy.logger.level
+    >>> saspy.logger.setLevel(logging.DEBUG) # ERROR)
+    >>> cur = saspy.logger.level
+    >>> prev,cur
+    (20, 10)
+    >>>
+    >>> saspy.logger.handlers
+    [<logging.StreamHandler object at 0x7f01e92bc6a0>]
+    >>>
+    >>> saspy.logger.addHandler(logging.FileHandler('./saspylogger.log'))
+    >>>
+    >>> saspy.logger.handlers
+    [<logging.StreamHandler object at 0x7f01e92bc6a0>, <logging.FileHandler object at 0x7f01e92bc3c8>]
+    >>>
+    >>> sas = saspy.SASsession(cfgname='sdssas')
+    SAS Connection established. Subprocess id is 21595
+
+    >>> sas
+    Access Method         = STDIO
+    SAS Config name       = sdssas
+    SAS Config file       = /opt/tom/github/saspy/saspy/sascfg_personal.py
+    WORK Path             = /sastmp/SAS_work95EA00005477_tom64-5/
+    SAS Version           = 9.04.01M7D08052020
+    SASPy Version         = 3.7.4
+    Teach me SAS          = False
+    Batch                 = False
+    Results               = Pandas
+    SAS Session Encoding  = latin1
+    Python Encoding value = latin_1
+    SAS process Pid value = 21623
+
+    >>> cars = sas.sasdata('cars')
+    Table WORK.cars does not exist. This SASdata object will not be useful until the data set is created.
+    >>>
+    >>> sas.cat('./saspylogger.log')
+    SAS Connection established. Subprocess id is 21595
+
+    Table WORK.cars does not exist. This SASdata object will not be useful until the data set is created.
+
+    >>> quit()
+    >>>
+    SAS Connection terminated. Subprocess id was 21595
+
+    tom64-5> head saspylogger.log
+    SAS Connection established. Subprocess id is 21595
+
+    Table WORK.cars does not exist. This SASdata object will not be useful until the data set is created.
+    SAS Connection terminated. Subprocess id was 21595
+    tom64-5>
+
+
+
+***************************************************
+SASsession object as a context manager as of V3.7.5
+***************************************************
+
+A user contributed, via PR #401, the ability for a SASsession object to be used as a context manage
+for the 'with' statement (see https://docs.python.org/3.9/reference/datamodel.html#context-managers).
+This will effectivly issue endsas() upon completion of the with block of code. A convienient way to
+clean up if you only want the session around for that block of code. Here's an example:
+
+.. code-block:: ipython3
+
+    import saspy
+    with saspy.SASsession() as sas:
+      data_in_py = sas.sasdata('table', 'lib').to_df()
+      # do something with data_in_py
+      # then write it back to sas
+      hr = sas.df2sd(data_in_py, table="table", libref="lib")
+
+    # do something else in Python (the SASsession object 'sas', has been terminated; sas.endsas() was called)
+
+
+Here's a live example showing that the Session was terminated after the with context
+
+.. code-block:: ipython3
+
+    >>> with saspy.SASsession() as sas:
+    ...    sas.sasdata('cars','sashelp').head()
+    ...    sas
+    ...    sas.SASpid
+    ...
+    SAS Connection established. Subprocess id is 22188
+
+        Make           Model   Type Origin DriveTrain     MSRP  Invoice  EngineSize  Cylinders  Horsepower  MPG_City  MPG_Highway  Weight  Wheelbase  Length
+    0  Acura             MDX    SUV   Asia        All  36945.0  33337.0         3.5        6.0       265.0      17.0         23.0  4451.0      106.0   189.0
+    1  Acura  RSX Type S 2dr  Sedan   Asia      Front  23820.0  21761.0         2.0        4.0       200.0      24.0         31.0  2778.0      101.0   172.0
+    2  Acura         TSX 4dr  Sedan   Asia      Front  26990.0  24647.0         2.4        4.0       200.0      22.0         29.0  3230.0      105.0   183.0
+    3  Acura          TL 4dr  Sedan   Asia      Front  33195.0  30299.0         3.2        6.0       270.0      20.0         28.0  3575.0      108.0   186.0
+    4  Acura      3.5 RL 4dr  Sedan   Asia      Front  43755.0  39014.0         3.5        6.0       225.0      18.0         24.0  3880.0      115.0   197.0
+    Access Method         = STDIO
+    SAS Config name       = sdssas
+    SAS Config file       = /opt/tom/github/saspy/saspy/sascfg_personal.py
+    WORK Path             = /sastmp/SAS_workA7A9000056C8_tom64-5/
+    SAS Version           = 9.04.01M7D08052020
+    SASPy Version         = 3.7.4
+    Teach me SAS          = False
+    Batch                 = False
+    Results               = Pandas
+    SAS Session Encoding  = latin1
+    Python Encoding value = latin_1
+    SAS process Pid value = 22216
+
+
+    '22216'
+
+    SAS Connection terminated. Subprocess id was 22188
+    >>>
+    >>>
+    >>> sas.SASpid == None
+    True
+    >>> sas
+    Access Method         = STDIO
+    SAS Config name       = sdssas
+    SAS Config file       = /opt/tom/github/saspy/saspy/sascfg_personal.py
+    WORK Path             = /sastmp/SAS_workA7A9000056C8_tom64-5/
+    SAS Version           = 9.04.01M7D08052020
+    SASPy Version         = 3.7.4
+    Teach me SAS          = False
+    Batch                 = False
+    Results               = Pandas
+    SAS Session Encoding  = latin1
+    Python Encoding value = latin_1
+    SAS process Pid value = None
+
+
+    >>>
+
+
 **************
 Jupyter magics
 **************
@@ -914,11 +1127,11 @@ from a cell. There is a submitLST() method on the SASsession object which does t
 magic, and it works in all Python (UIs, IDEs, command prompt, ...) interfaces. So, using it instead
 of the magic makes your code run anywhere, not just in a Jupyter notebook, but you can use these if you like.
 
-The magics that are available with the package enable you to bypass Python 
+The magics that are available with the package enable you to bypass Python
 and submit programming statements to your SAS session.
 
 The ``%%SAS`` magic enables you to submit the contents of a cell to your SAS
-session. The cell magic executes the contents of the cell and returns any 
+session. The cell magic executes the contents of the cell and returns any
 results. ::
 
   %%SAS
@@ -929,19 +1142,19 @@ results. ::
     set sashelp.cars;
   run;
 
-If you are also invoking ``saspy`` methods directly in other cells within the 
-same notebook, you may indicate that a ``%%SAS`` cell should share the same 
+If you are also invoking ``saspy`` methods directly in other cells within the
+same notebook, you may indicate that a ``%%SAS`` cell should share the same
 SAS session by passing your existing session as a parameter.
 
 In a prior cell in the notebook: ::
 
   import saspy
   my_session = saspy.SASsession()
-  
+
   # sending a dataset to SAS as 'mydata'
   mydata = sas.df2sd(some_pandas_dataframe, 'mydata')
 
-Then later, invoke a SAS cell and pass your existing session so that the remote data 
+Then later, invoke a SAS cell and pass your existing session so that the remote data
 set is accessible: ::
 
   %%SAS my_session
@@ -962,7 +1175,7 @@ QUIT; statement are submitted automatically. ::
 
 The ``%%OPTMODEL`` magic enables you to submit the contents of a cell to your SAS
 session for processing with PROC OPTMODEL. The cell magic executes the contents
-of the cell and returns any results. The PROC OPTMODEL statement and the 
+of the cell and returns any results. The PROC OPTMODEL statement and the
 trailing QUIT; statement are submitted automatically. ::
 
   %%OPTMODEL
