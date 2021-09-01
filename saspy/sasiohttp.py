@@ -948,8 +948,8 @@ class SASsessionHTTP():
       headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
       done    = False
 
-      delay   = kwargs.get('GETstatusDelay'  , 0.5)
-      excpcnt = kwargs.get('GETstatusFailcnt',   5)
+      delay   = kwargs.get('GETstatusDelay'  , 0)
+      excpcnt = kwargs.get('GETstatusFailcnt', 5)
 
       while not done:
          try:
