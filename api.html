@@ -1291,8 +1291,7 @@ You must specify 3 of the for variables, to solve for the 4th.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>saspath</strong> &#8211; overrides saspath Dict entry of cfgname in sascfg_personal.py file</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>code</strong> &#8211; the SAS statements you want to execute</li>
 <li><strong>results</strong> &#8211; format of results. &#8216;HTML&#8217; by default, alternatively &#8216;TEXT&#8217;</li>
 <li><strong>prompt</strong> &#8211; <p>dict of names and flags to prompt for; create macro variables (used in submitted code), then keep or delete                         the keys which are the names of the macro variables. The boolean flag is to either hide what you type and                         delete the macros, or show what you type and keep the macros (they will still be available later).</p>
@@ -1308,6 +1307,27 @@ You must specify 3 of the for variables, to solve for the 4th.</p>
 </div>
 </li>
 <li><strong>printto</strong> &#8211; this option, when set to True, will cause saspy to issue a &#8216;proc printto;run;&#8217; after the code that is being                         submitted. This will &#8216;undo&#8217; any proc printto w/in the submitted code that redirected the LOG or LST, to return                         the LOG/LST back to saspy. This is explained in more detail in the doc: <a class="reference external" href="https://sassoftware.github.io/saspy/limitations.html">https://sassoftware.github.io/saspy/limitations.html</a></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>HTTP</strong></p>
+<p>These kwargs are available for the HTTP Access Method for cases where long running code is submitteds. It&#8217;s been observed
+that HTTP Disconnect failures can be returned, even though subsequent calls still work, when submitting the request to see
+if the code has finished, so the LOG and LST can then be requested.
+To work around this issue, two parameters are available; one to have a delay between polling requests, and the other the
+number of Disconect errors to ignore before returning a failure. The defaults are to delay 0 seconds (so everything doesn&#8217;t
+have a delay that slows down how things run), and 5 disconnect errors. If you submit code that runs for more then a few
+seconds, you can specify GETstatusDelay=n.n, the nunber of seconds (maybe 0.5 or 2, or 60 if you job runs for many minutes)
+to wait befor asking Compute if the code finished.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>GETstatusDelay</strong> &#8211; Number of seconds to sleep between HTTP calls to poll and see if the submitted code has finished</li>
+<li><strong>GETstatusFailcnt</strong> &#8211; Number of disconnect failures to ignore before failing, when polling to see if the submitted code has finished</li>
 </ul>
 </td>
 </tr>
