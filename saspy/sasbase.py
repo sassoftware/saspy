@@ -661,6 +661,12 @@ class SASsession():
         if getattr(self, '_io', None) is not None:
            return self._io.__del__()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.endsas()
+
     def _objcnt(self):
         self._obj_cnt += 1
         return '%04d' % self._obj_cnt
