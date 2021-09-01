@@ -764,7 +764,6 @@ class SASsession():
         '''
         This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
 
-        :param saspath: overrides saspath Dict entry of cfgname in sascfg_personal.py file
         :param code:    the SAS statements you want to execute
         :param results: format of results. 'HTML' by default, alternatively 'TEXT'
         :param prompt:  dict of names and flags to prompt for; create macro variables (used in submitted code), then keep or delete \
@@ -786,6 +785,21 @@ class SASsession():
         :param printto: this option, when set to True, will cause saspy to issue a 'proc printto;run;' after the code that is being \
                         submitted. This will 'undo' any proc printto w/in the submitted code that redirected the LOG or LST, to return \
                         the LOG/LST back to saspy. This is explained in more detail in the doc: https://sassoftware.github.io/saspy/limitations.html
+
+        **HTTP**
+
+        These kwargs are available for the HTTP Access Method for cases where long running code is submitteds. It's been observed
+        that HTTP Disconnect failures can be returned, even though subsequent calls still work, when submitting the request to see
+        if the code has finished, so the LOG and LST can then be requested.
+        To work around this issue, two parameters are available; one to have a delay between polling requests, and the other the
+        number of Disconect errors to ignore before returning a failure. The defaults are to delay 0 seconds (so everything doesn't
+        have a delay that slows down how things run), and 5 disconnect errors. If you submit code that runs for more then a few
+        seconds, you can specify GETstatusDelay=n.n, the nunber of seconds (maybe 0.5 or 2, or 60 if you job runs for many minutes)
+        to wait befor asking Compute if the code finished.
+
+        :param GETstatusDelay: Number of seconds to sleep between HTTP calls to poll and see if the submitted code has finished
+        :param GETstatusFailcnt: Number of disconnect failures to ignore before failing, when polling to see if the submitted code has finished
+
 
         :return: a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is 'results' (HTML or TEXT)
 
