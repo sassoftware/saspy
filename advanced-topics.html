@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Advanced topics &mdash; saspy 3.7.4 documentation</title>
+  <title>Advanced topics &mdash; saspy 3.7.5 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 3.7.4 documentation" href="index.html"/>
+    <link rel="top" title="saspy 3.7.5 documentation" href="index.html"/>
         <link rel="next" title="Contributing new methods" href="adding-procedures.html"/>
         <link rel="prev" title="API Reference" href="api.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                3.7.4
+                3.7.5
               </div>
             
           
@@ -109,6 +109,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#dates-times-and-datetimes-oh-my">Dates, Times and Datetimes, Oh my!</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#advanced-sd2df-and-df2sd-techniques">Advanced sd2df and df2sd techniques</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#automatic-checking-for-error-in-the-log-and-the-warnings-module">Automatic checking for ERROR: in the LOG and the warnings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#saspy-logger-from-logging-logger-as-of-v3-7-5">saspy.logger from logging.logger as of V3.7.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sassession-object-as-a-context-manager-as-of-v3-7-5">SASsession object as a context manager as of V3.7.5</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#jupyter-magics">Jupyter magics</a></li>
 </ul>
 </li>
@@ -942,6 +944,187 @@ submitting it in the program, which will override what was in the config file.</
 <p>Hopefully you will find this enhancement useful. It would be great if each thing done in SAS returned a clean return code to check, but that&#8217;s
 not the case. So, checking the log is something that&#8217;s necessary sometimes. Hopefully this warning when an ERROR is seen, will make this easier.</p>
 </div>
+<div class="section" id="saspy-logger-from-logging-logger-as-of-v3-7-5">
+<h2>saspy.logger from logging.logger as of V3.7.5<a class="headerlink" href="#saspy-logger-from-logging-logger-as-of-v3-7-5" title="Permalink to this headline">¶</a></h2>
+<p>Per a user request to get rid of using print() for variaous messages, and use the logging facility instead, I&#8217;ve
+replaced all non-interactive prints() in saspy (print is still used for prompting, as it needs to be) with
+logger calls. The different messages now fall into logging categories (DEBUG, INFO, WARNING, ERROR, FATAL)
+so that you can control the level of messages you get.</p>
+<p>You can also reconfigure the logger to your wishes, so you can have it written to a file instead of, or as
+well as, STDOUT. You can change any of the defaults, including resetting them to the actual Python defaults;
+I have some of the saspy.logger defaults changed for backward compatibility. This way you still get the messages
+you always have (the Python default level is WARNING, so you would no longer get many you previously have with
+that setting). Below I&#8217;ll show some examples of changing this, but you can always look at the Python logging
+module doc to see what all of your options are: <a class="reference external" href="https://docs.python.org/3.9/library/logging.html#module-logging">https://docs.python.org/3.9/library/logging.html#module-logging</a></p>
+<p>First, let&#8217;s look at the changes I made to the Python defaults, for saspy backward compatibility. After, I&#8217;ll
+show how to reset them to the Python defaults if that&#8217;s what you want.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">))</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">propagate</span><span class="o">=</span><span class="bp">False</span>
+</pre></div>
+</div>
+<p>First, the logger is associated with the saspy module, so you access it as saspy.logger, after you import saspy.</p>
+<p>The first change is to route messages to STDOUT instead of STDERR (the Python default). This was because for
+Jupyter notebooks, ALL message levels (from debug to error) when sent to STDERR, are displayed in RED reverse
+video (highlighted in RED). This mean that every message is now in RED, which would be a glaring change in every
+notebook using saspy. Written to STDOUT, they show up same as before. And in non-notebook cases, the messages
+still show up where they did before (because print() goes to stdout too).</p>
+<p>The next change is to set the level to INFO instead of WARNING. Many of the messages saspy writes out under normal
+conditions are INFO level messages. So, to get the same messages you have previously gotten, setting level to INFO
+keeps backward compatibility for you programs. You can set this to whatever you like, though, of course.</p>
+<p>Setting propogate to False keeps every message from being duplicated with the name of the logger prepended. Again,
+so your output looks the same as before.</p>
+<p>Now, if you want to configure the logger your way, you can add your configuration to your sascfg_personal.py file,
+as it is imported after the logger is set up, and before any logging would happen. So doing it this way will have
+your configuration in effect every time you use saspy.</p>
+<p>Here&#8217;s an example showing how you can change these back to the python defaults (again, add this in the config file).</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span>  <span class="o">=</span> <span class="p">[]</span>
+<span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">level</span>     <span class="o">=</span> <span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+<span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>There are a lot of ways you can configure logging, from adding handlers and formaters. To add a handler to write
+messages to a log file, you can just do this:</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="s1">&#39;./saspylogger.log&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>If you want RED reverse video on all messages in a notebook, you can set the default handler I configured back to
+it&#8217;s default (STDERR) and then all messages in the notebook will be RED, like any other application using logging.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Here&#8217;s just a little example of a programm showing some of this.</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">tom64</span><span class="o">-</span><span class="mi">5</span><span class="o">&gt;</span> <span class="n">python3</span><span class="o">.</span><span class="mi">5</span>
+<span class="n">Python</span> <span class="mf">3.5</span><span class="o">.</span><span class="mi">6</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Nov</span> <span class="mi">16</span> <span class="mi">2018</span><span class="p">,</span> <span class="mi">15</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mi">39</span><span class="p">)</span>
+<span class="p">[</span><span class="n">GCC</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span> <span class="mi">20120313</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">4.4</span><span class="o">.</span><span class="mi">7</span><span class="o">-</span><span class="mi">23</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
+<span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span><span class="o">,</span> <span class="nn">logging</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span>
+<span class="o">&lt;</span><span class="n">logging</span><span class="o">.</span><span class="n">Logger</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x7f01e9058ac8</span><span class="o">&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">prev</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">level</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span> <span class="c1"># ERROR)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cur</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">level</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">prev</span><span class="p">,</span><span class="n">cur</span>
+<span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x7f01e92bc6a0</span><span class="o">&gt;</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span><span class="p">(</span><span class="s1">&#39;./saspylogger.log&#39;</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span>
+<span class="p">[</span><span class="o">&lt;</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x7f01e92bc6a0</span><span class="o">&gt;</span><span class="p">,</span> <span class="o">&lt;</span><span class="n">logging</span><span class="o">.</span><span class="n">FileHandler</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x7f01e92bc3c8</span><span class="o">&gt;</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;sdssas&#39;</span><span class="p">)</span>
+<span class="n">SAS</span> <span class="n">Connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="ow">is</span> <span class="mi">21595</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span>
+<span class="n">Access</span> <span class="n">Method</span>         <span class="o">=</span> <span class="n">STDIO</span>
+<span class="n">SAS</span> <span class="n">Config</span> <span class="n">name</span>       <span class="o">=</span> <span class="n">sdssas</span>
+<span class="n">SAS</span> <span class="n">Config</span> <span class="nb">file</span>       <span class="o">=</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span>
+<span class="n">WORK</span> <span class="n">Path</span>             <span class="o">=</span> <span class="o">/</span><span class="n">sastmp</span><span class="o">/</span><span class="n">SAS_work95EA00005477_tom64</span><span class="o">-</span><span class="mi">5</span><span class="o">/</span>
+<span class="n">SAS</span> <span class="n">Version</span>           <span class="o">=</span> <span class="mf">9.04</span><span class="o">.</span><span class="mo">01</span><span class="n">M7D08052020</span>
+<span class="n">SASPy</span> <span class="n">Version</span>         <span class="o">=</span> <span class="mf">3.7</span><span class="o">.</span><span class="mi">4</span>
+<span class="n">Teach</span> <span class="n">me</span> <span class="n">SAS</span>          <span class="o">=</span> <span class="bp">False</span>
+<span class="n">Batch</span>                 <span class="o">=</span> <span class="bp">False</span>
+<span class="n">Results</span>               <span class="o">=</span> <span class="n">Pandas</span>
+<span class="n">SAS</span> <span class="n">Session</span> <span class="n">Encoding</span>  <span class="o">=</span> <span class="n">latin1</span>
+<span class="n">Python</span> <span class="n">Encoding</span> <span class="n">value</span> <span class="o">=</span> <span class="n">latin_1</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">Pid</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">21623</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">cars</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasdata</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">)</span>
+<span class="n">Table</span> <span class="n">WORK</span><span class="o">.</span><span class="n">cars</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">exist</span><span class="o">.</span> <span class="n">This</span> <span class="n">SASdata</span> <span class="nb">object</span> <span class="n">will</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">useful</span> <span class="n">until</span> <span class="n">the</span> <span class="n">data</span> <span class="nb">set</span> <span class="ow">is</span> <span class="n">created</span><span class="o">.</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="s1">&#39;./saspylogger.log&#39;</span><span class="p">)</span>
+<span class="n">SAS</span> <span class="n">Connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="ow">is</span> <span class="mi">21595</span>
+
+<span class="n">Table</span> <span class="n">WORK</span><span class="o">.</span><span class="n">cars</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">exist</span><span class="o">.</span> <span class="n">This</span> <span class="n">SASdata</span> <span class="nb">object</span> <span class="n">will</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">useful</span> <span class="n">until</span> <span class="n">the</span> <span class="n">data</span> <span class="nb">set</span> <span class="ow">is</span> <span class="n">created</span><span class="o">.</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">quit</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="n">SAS</span> <span class="n">Connection</span> <span class="n">terminated</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="n">was</span> <span class="mi">21595</span>
+
+<span class="n">tom64</span><span class="o">-</span><span class="mi">5</span><span class="o">&gt;</span> <span class="n">head</span> <span class="n">saspylogger</span><span class="o">.</span><span class="n">log</span>
+<span class="n">SAS</span> <span class="n">Connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="ow">is</span> <span class="mi">21595</span>
+
+<span class="n">Table</span> <span class="n">WORK</span><span class="o">.</span><span class="n">cars</span> <span class="n">does</span> <span class="ow">not</span> <span class="n">exist</span><span class="o">.</span> <span class="n">This</span> <span class="n">SASdata</span> <span class="nb">object</span> <span class="n">will</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">useful</span> <span class="n">until</span> <span class="n">the</span> <span class="n">data</span> <span class="nb">set</span> <span class="ow">is</span> <span class="n">created</span><span class="o">.</span>
+<span class="n">SAS</span> <span class="n">Connection</span> <span class="n">terminated</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="n">was</span> <span class="mi">21595</span>
+<span class="n">tom64</span><span class="o">-</span><span class="mi">5</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sassession-object-as-a-context-manager-as-of-v3-7-5">
+<h2>SASsession object as a context manager as of V3.7.5<a class="headerlink" href="#sassession-object-as-a-context-manager-as-of-v3-7-5" title="Permalink to this headline">¶</a></h2>
+<p>A user contributed, via PR #401, the ability for a SASsession object to be used as a context manage
+for the &#8216;with&#8217; statement (see <a class="reference external" href="https://docs.python.org/3.9/reference/datamodel.html#context-managers">https://docs.python.org/3.9/reference/datamodel.html#context-managers</a>).
+This will effectivly issue endsas() upon completion of the with block of code. A convienient way to
+clean up if you only want the session around for that block of code. Here&#8217;s an example:</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">saspy</span>
+<span class="k">with</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span> <span class="k">as</span> <span class="n">sas</span><span class="p">:</span>
+  <span class="n">data_in_py</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasdata</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="s1">&#39;lib&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span>
+  <span class="c1"># do something with data_in_py</span>
+  <span class="c1"># then write it back to sas</span>
+  <span class="n">hr</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">data_in_py</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">libref</span><span class="o">=</span><span class="s2">&quot;lib&quot;</span><span class="p">)</span>
+
+<span class="c1"># do something else in Python (the SASsession object &#39;sas&#39;, has been terminated; sas.endsas() was called)</span>
+</pre></div>
+</div>
+<p>Here&#8217;s a live example showing that the Session was terminated after the with context</p>
+<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span> <span class="k">as</span> <span class="n">sas</span><span class="p">:</span>
+<span class="o">...</span>    <span class="n">sas</span><span class="o">.</span><span class="n">sasdata</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span><span class="s1">&#39;sashelp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="o">...</span>    <span class="n">sas</span>
+<span class="o">...</span>    <span class="n">sas</span><span class="o">.</span><span class="n">SASpid</span>
+<span class="o">...</span>
+<span class="n">SAS</span> <span class="n">Connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="ow">is</span> <span class="mi">22188</span>
+
+    <span class="n">Make</span>           <span class="n">Model</span>   <span class="n">Type</span> <span class="n">Origin</span> <span class="n">DriveTrain</span>     <span class="n">MSRP</span>  <span class="n">Invoice</span>  <span class="n">EngineSize</span>  <span class="n">Cylinders</span>  <span class="n">Horsepower</span>  <span class="n">MPG_City</span>  <span class="n">MPG_Highway</span>  <span class="n">Weight</span>  <span class="n">Wheelbase</span>  <span class="n">Length</span>
+<span class="mi">0</span>  <span class="n">Acura</span>             <span class="n">MDX</span>    <span class="n">SUV</span>   <span class="n">Asia</span>        <span class="n">All</span>  <span class="mf">36945.0</span>  <span class="mf">33337.0</span>         <span class="mf">3.5</span>        <span class="mf">6.0</span>       <span class="mf">265.0</span>      <span class="mf">17.0</span>         <span class="mf">23.0</span>  <span class="mf">4451.0</span>      <span class="mf">106.0</span>   <span class="mf">189.0</span>
+<span class="mi">1</span>  <span class="n">Acura</span>  <span class="n">RSX</span> <span class="n">Type</span> <span class="n">S</span> <span class="mi">2</span><span class="n">dr</span>  <span class="n">Sedan</span>   <span class="n">Asia</span>      <span class="n">Front</span>  <span class="mf">23820.0</span>  <span class="mf">21761.0</span>         <span class="mf">2.0</span>        <span class="mf">4.0</span>       <span class="mf">200.0</span>      <span class="mf">24.0</span>         <span class="mf">31.0</span>  <span class="mf">2778.0</span>      <span class="mf">101.0</span>   <span class="mf">172.0</span>
+<span class="mi">2</span>  <span class="n">Acura</span>         <span class="n">TSX</span> <span class="mi">4</span><span class="n">dr</span>  <span class="n">Sedan</span>   <span class="n">Asia</span>      <span class="n">Front</span>  <span class="mf">26990.0</span>  <span class="mf">24647.0</span>         <span class="mf">2.4</span>        <span class="mf">4.0</span>       <span class="mf">200.0</span>      <span class="mf">22.0</span>         <span class="mf">29.0</span>  <span class="mf">3230.0</span>      <span class="mf">105.0</span>   <span class="mf">183.0</span>
+<span class="mi">3</span>  <span class="n">Acura</span>          <span class="n">TL</span> <span class="mi">4</span><span class="n">dr</span>  <span class="n">Sedan</span>   <span class="n">Asia</span>      <span class="n">Front</span>  <span class="mf">33195.0</span>  <span class="mf">30299.0</span>         <span class="mf">3.2</span>        <span class="mf">6.0</span>       <span class="mf">270.0</span>      <span class="mf">20.0</span>         <span class="mf">28.0</span>  <span class="mf">3575.0</span>      <span class="mf">108.0</span>   <span class="mf">186.0</span>
+<span class="mi">4</span>  <span class="n">Acura</span>      <span class="mf">3.5</span> <span class="n">RL</span> <span class="mi">4</span><span class="n">dr</span>  <span class="n">Sedan</span>   <span class="n">Asia</span>      <span class="n">Front</span>  <span class="mf">43755.0</span>  <span class="mf">39014.0</span>         <span class="mf">3.5</span>        <span class="mf">6.0</span>       <span class="mf">225.0</span>      <span class="mf">18.0</span>         <span class="mf">24.0</span>  <span class="mf">3880.0</span>      <span class="mf">115.0</span>   <span class="mf">197.0</span>
+<span class="n">Access</span> <span class="n">Method</span>         <span class="o">=</span> <span class="n">STDIO</span>
+<span class="n">SAS</span> <span class="n">Config</span> <span class="n">name</span>       <span class="o">=</span> <span class="n">sdssas</span>
+<span class="n">SAS</span> <span class="n">Config</span> <span class="nb">file</span>       <span class="o">=</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span>
+<span class="n">WORK</span> <span class="n">Path</span>             <span class="o">=</span> <span class="o">/</span><span class="n">sastmp</span><span class="o">/</span><span class="n">SAS_workA7A9000056C8_tom64</span><span class="o">-</span><span class="mi">5</span><span class="o">/</span>
+<span class="n">SAS</span> <span class="n">Version</span>           <span class="o">=</span> <span class="mf">9.04</span><span class="o">.</span><span class="mo">01</span><span class="n">M7D08052020</span>
+<span class="n">SASPy</span> <span class="n">Version</span>         <span class="o">=</span> <span class="mf">3.7</span><span class="o">.</span><span class="mi">4</span>
+<span class="n">Teach</span> <span class="n">me</span> <span class="n">SAS</span>          <span class="o">=</span> <span class="bp">False</span>
+<span class="n">Batch</span>                 <span class="o">=</span> <span class="bp">False</span>
+<span class="n">Results</span>               <span class="o">=</span> <span class="n">Pandas</span>
+<span class="n">SAS</span> <span class="n">Session</span> <span class="n">Encoding</span>  <span class="o">=</span> <span class="n">latin1</span>
+<span class="n">Python</span> <span class="n">Encoding</span> <span class="n">value</span> <span class="o">=</span> <span class="n">latin_1</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">Pid</span> <span class="n">value</span> <span class="o">=</span> <span class="mi">22216</span>
+
+
+<span class="s1">&#39;22216&#39;</span>
+
+<span class="n">SAS</span> <span class="n">Connection</span> <span class="n">terminated</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="n">was</span> <span class="mi">22188</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">SASpid</span> <span class="o">==</span> <span class="bp">None</span>
+<span class="bp">True</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span>
+<span class="n">Access</span> <span class="n">Method</span>         <span class="o">=</span> <span class="n">STDIO</span>
+<span class="n">SAS</span> <span class="n">Config</span> <span class="n">name</span>       <span class="o">=</span> <span class="n">sdssas</span>
+<span class="n">SAS</span> <span class="n">Config</span> <span class="nb">file</span>       <span class="o">=</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span>
+<span class="n">WORK</span> <span class="n">Path</span>             <span class="o">=</span> <span class="o">/</span><span class="n">sastmp</span><span class="o">/</span><span class="n">SAS_workA7A9000056C8_tom64</span><span class="o">-</span><span class="mi">5</span><span class="o">/</span>
+<span class="n">SAS</span> <span class="n">Version</span>           <span class="o">=</span> <span class="mf">9.04</span><span class="o">.</span><span class="mo">01</span><span class="n">M7D08052020</span>
+<span class="n">SASPy</span> <span class="n">Version</span>         <span class="o">=</span> <span class="mf">3.7</span><span class="o">.</span><span class="mi">4</span>
+<span class="n">Teach</span> <span class="n">me</span> <span class="n">SAS</span>          <span class="o">=</span> <span class="bp">False</span>
+<span class="n">Batch</span>                 <span class="o">=</span> <span class="bp">False</span>
+<span class="n">Results</span>               <span class="o">=</span> <span class="n">Pandas</span>
+<span class="n">SAS</span> <span class="n">Session</span> <span class="n">Encoding</span>  <span class="o">=</span> <span class="n">latin1</span>
+<span class="n">Python</span> <span class="n">Encoding</span> <span class="n">value</span> <span class="o">=</span> <span class="n">latin_1</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">Pid</span> <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="jupyter-magics">
 <h2>Jupyter magics<a class="headerlink" href="#jupyter-magics" title="Permalink to this headline">¶</a></h2>
 <p>Jupyter Notebooks have what they call Magics, which let you submit code from a diferent language
@@ -1063,7 +1246,7 @@ trailing QUIT; statement are submitted automatically.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'3.7.4',
+            VERSION:'3.7.5',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
