@@ -824,13 +824,13 @@ SAS from saspy but need the variable set for other applications that need it.</p
 </div>
 <ol class="arabic" start="8">
 <li><p class="first">None of the requested encryption algorithms are supported by both peers: xxx. (xxx is the method; AES)</p>
-<p>This error identifies the your Workspace server is configured to use encryption. The specific method may
+<p>This error identifies that your Workspace server is configured to use encryption. The specific method may
 show up at the end of the message; for instance AES. This means that you don&#8217;t have the 3 encryption jars
 in the iomclient directory of the saspy install. See the configuration section for IOM regarding this:
 <a class="reference external" href="https://sassoftware.github.io/saspy/configuration.html#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required">https://sassoftware.github.io/saspy/configuration.html#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required</a></p>
-<p>If this erro is for AES, then there&#8217;s another solution than having to get those 3 jars and add them to the deployment.
-Java 8 (release greater than 151), has the needed support for this in it. So you just need to upgrade an older
-Java install to this releasse or newer to solve this without needing the jars.</p>
+<p>If this error is for AES, then there&#8217;s another solution than having to get those 3 jars and add them to the deployment.
+Java 8 (release greater than 151), has the needed support for this in it. So you just need to install the current Java 8
+or higher to solve this without needing the jars.</p>
 </li>
 </ol>
 <p>So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn&#8217;t
