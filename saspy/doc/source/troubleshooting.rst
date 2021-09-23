@@ -11,22 +11,22 @@ Troubleshooting
 This chapter covers troubleshooting procedures with this module. While we don't expect you to have trouble,
 there are some cases where you might not have everything working right. We've tried to provide an easy reference
 for diagnosing and fixing those issues here.
- 
+
 
 ***********************************
 Connection and configuration issues
 ***********************************
 
 Although setup and configuration is pretty simple, if you do have something not quite right, it
-may be hard to figure out what's wrong. That's when you come to this chapter. 
+may be hard to figure out what's wrong. That's when you come to this chapter.
 
 We've added quite a bit of self diagnostics and error messages for many of the likely issues that can
-happen trying to start up a connection to SAS. Each access method has its own set of usual suspects. With a 
+happen trying to start up a connection to SAS. Each access method has its own set of usual suspects. With a
 little help and explaination here, you can probably diagnose and correct any issue you might have.
 
 Problems in this category will be when using the saspy.SASsession() method to connect to a SAS session.
-The very first thing to look at is your sascfg_personal.py file (based off the examples in sascfg.py in 
-the installation directory). This is where the configurations definition are. The sample file itself has 
+The very first thing to look at is your sascfg_personal.py file (based off the examples in sascfg.py in
+the installation directory). This is where the configurations definition are. The sample file itself has
 documentation and so does :doc:`install`.
 
 
@@ -36,12 +36,12 @@ Common diagnostics
 Although each access method has its own ways something can go wrong, there are some common diagnostics
 you will get and can use to track down the issue.
 
-The first is that if the SASsession() method fails, it will return any erros it can, as well as the 
+The first is that if the SASsession() method fails, it will return any erros it can, as well as the
 actual command it was trying to run to connect to SAS. That will vary with access method, but in each
 case, you can cut-n-paste that command into a shell on the machine where Python is running
 and that may provide more diagnostics and error messages then may have been displayed from SASsession().
 
-For instance, here's a very simple case using the STDIO access method on a local linux machine. The 
+For instance, here's a very simple case using the STDIO access method on a local linux machine. The
 Configuration Definition is nothing but a valid path which should work.
 
 .. code-block:: ipython3
@@ -57,13 +57,13 @@ When I try to run I get the following:
     >>> sas = saspy.SASsession()
 
     SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
-    
+
     Attempted to run program /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8 with the following parameters:
     ['/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8', '-nodms', '-stdio', '-terminal', '-nosyntaxcheck', '-pagesize', 'MAX', '']
-    
+
     Try running the following command (where SASPy is running) manually to see if you can get more information on what went wrong:
     /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8 -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX
-    
+
     No SAS process attached. SAS process has terminated unexpectedly.
 
 I can see from that error it didn't work, but it didn't really tell me why or what to do about it. Well,
@@ -88,7 +88,7 @@ it did say I should try running that command to see if I could get better diagno
     ERROR: (SASXKINI): PHASE 3 KERNEL INITIALIZATION FAILED.
     ERROR: Unable to initialize the SAS kernel.
 
-Well go figure. My SAS license has expired. 
+Well go figure. My SAS license has expired.
 
 The same process can be used with other access methods. Now we'll look at what can be misconfigured for the
 various connection methods, see what the errors look like, and how you can determine what the problem is.
@@ -101,16 +101,16 @@ There are only a couple of things that can go wrong here. First, this only works
 so if you're having problems getting to to work from Windows, well there you go.
 
 Second, the only thing you really need to have right is the path to the SAS startup script in your SAS
-installation. The 'saspath' value in your configuration definition needs to be correct and accessible.  
+installation. The 'saspath' value in your configuration definition needs to be correct and accessible.
 
 
 STDIO over SSH
 --------------
 
 The same issues in STDIO above are true here, with one extra component: ssh. This method is still only
-valid on Unix, not Windows (both client side and SAS side). The 'saspath' value has to be right, and 
+valid on Unix, not Windows (both client side and SAS side). The 'saspath' value has to be right, and
 it has to be right on the remote Unix machine that you are ssh'ing to. That might not be the same path
-as on your local Unix SAS deployment. 
+as on your local Unix SAS deployment.
 
 Secondly, this requires that you have passwordless SSH configured and working for each user that will
 be connecting between the local and remote machines. That can be diagnosed independant of this module and
@@ -124,17 +124,17 @@ problem there might be.
     >>> import saspy
     >>> sas = saspy.SASsession(cfgname='ssh')
     SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
-    
+
     Attempted to run program /usr/bin/ssh with the following parameters:['/usr/bin/ssh', '-t', 'tom64-2', '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en',
                                                                          '-fullstimer', '-nodms', '-stdio', '-terminal', '-nosyntaxcheck', '-pagesize', 'MAX', '']
-    
+
     Try running the following command (where saspy is running) manually to see if you can get more information on what went wrong:
     /usr/bin/ssh -t tom64-2 /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en -fullstimer -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX
 
     No SAS process attached. SAS process has terminated unexpectedly.
-   
+
 So, running that command can tell me what the problem is.
-   
+
 .. code-block:: ipython3
 
     Linux-1> /usr/bin/ssh -t Linux-2 /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en -fullstimer -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX
@@ -156,14 +156,14 @@ So, running that command can tell me what the problem is.
     Permission denied (publickey,gssapi-keyex,gssapi-with-mic,password).
 
 To diagnose ssh further, you can ad -v (-vv, -vvv) to the command line to see more diagnostic information.
-For instance, everything seems set up correctly but after running ssh it just says 'Connection closed by 10.17.12.14'   
+For instance, everything seems set up correctly but after running ssh it just says 'Connection closed by 10.17.12.14'
 
 
 .. code-block:: ipython3
 
     Linux-1> /usr/bin/ssh -t Linux-2 /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en -fullstimer -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX
     Connection closed by 10.17.12.14
-    
+
     adding in -v[v[v]] can show that in this case, I just didn't have permission to get to this host via any authentication method
 
     Linux-1> /usr/bin/ssh -vvv -t Linux-2 /opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_en -fullstimer -nodms -stdio -terminal -nosyntaxcheck -pagesize MAX
@@ -182,17 +182,17 @@ For instance, everything seems set up correctly but after running ssh it just sa
     debug1: Next authentication method: gssapi-with-mic
     debug1: Unspecified GSS failure.  Minor code may provide more information
     Credentials cache file '/tmp/krb5cc_894' not found
-    
+
     debug1: Unspecified GSS failure.  Minor code may provide more information
     Credentials cache file '/tmp/krb5cc_894' not found
-    
+
     debug1: Next authentication method: publickey
     debug1: Trying private key: /usr/home/.ssh/identity
     debug1: Offering public key: /usr/home/.ssh/id_rsa
     debug1: Server accepts key: pkalg ssh-rsa blen 277
     debug1: read PEM private key done: type RSA
     Connection closed by 10.17.12.14
-    
+
 
     As you can see, it tried multiple authentication methods, and although I have keys set up and the
     host is known, I just don't have a valid key for that system.
@@ -201,7 +201,7 @@ For instance, everything seems set up correctly but after running ssh it just sa
 IOM
 ---
 
-This access method has the most possibilities of having something misconfigured, because it has more 
+This access method has the most possibilities of having something misconfigured, because it has more
 components that all have to connect together. But, it also has the most diagnostics to help you out.
 There are basically two possibilities where something can go wrong: Java or IOM. Let's look at Java first.
 
@@ -229,30 +229,30 @@ Here an example of the first case, a bad path to the Java command. This example 
 
 .. code-block:: ipython3
 
-    sas = saspy.SASsession(cfgname='winlocal', results='HTML', java='c:\java') 
+    sas = saspy.SASsession(cfgname='winlocal', results='HTML', java='c:\java')
 
 .. parsed-literal::
 
     The OS Error was:
     The system cannot find the file specified
-    
+
     SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
-    
-    Attempted to run program c:\java with the following parameters:['c:\\java', 
+
+    Attempted to run program c:\java with the following parameters:['c:\\java',
     '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;
     C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar', 'pyiom.saspy2j',
-    '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', 
+    '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111',
     '-stderrport', '59112', '-zero', '']
 
     If no OS Error above, try running the command (where saspy is running) manually to see what is wrong:
 
-    c:\java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.ja;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59107 -stdoutport 59108 -stderrport 59109 -zero  
-    
+    c:\java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.ja;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59107 -stdoutport 59108 -stderrport 59109 -zero
+
     No SAS process attached. SAS process has terminated unexpectedly.
 
 And if we submit that command, we get a slightly different error message than SASPy received, but it shows the same problem:
-there is no c:\\java command to execute.     
-    
+there is no c:\\java command to execute.
+
 .. code-block:: ipython3
 
     C:> c:\java -classpath "C:\jars\sas.svc.connection.jar;C:\jars\log4j.jar;C:\jars\sas.security.sspi.jar;C:\jar\sas.core.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 52061 -stdoutport 52062 -stderrport 52063 -zero
@@ -275,31 +275,31 @@ These errors are descibed below:
 
 
 1) Just what a bad classpath might look like:
-    
+
 .. code-block:: ipython3
 
-    sas = saspy.SASsession(cfgname='winlocal', results='HTML', classpath='.') 
+    sas = saspy.SASsession(cfgname='winlocal', results='HTML', classpath='.')
 
 .. parsed-literal::
 
     Java Error:
     Error: Could not find or load main class pyiom.saspy2j
 
-    
-    Subprocess failed to start. Double check your settings in sascfg_personal.py file.
-    
-    Attempted to run program java with the following parameters:['java', '-classpath', 
-    '.', 'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59102', 
-    '-stdoutport', '59103', '-stderrport', '59104', '-zero', '']
-    
-    If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:
-    java -classpath "." pyiom.saspy2j -host localhost -stdinport 59102 -stdoutport 59103 -stderrport 59104 -zero  
-    
-    No SAS process attached. SAS process has terminated unexpectedly.
-    
 
-And if we submit that command, we see the same error that was reported.     
-    
+    Subprocess failed to start. Double check your settings in sascfg_personal.py file.
+
+    Attempted to run program java with the following parameters:['java', '-classpath',
+    '.', 'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59102',
+    '-stdoutport', '59103', '-stderrport', '59104', '-zero', '']
+
+    If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:
+    java -classpath "." pyiom.saspy2j -host localhost -stdinport 59102 -stdoutport 59103 -stderrport 59104 -zero
+
+    No SAS process attached. SAS process has terminated unexpectedly.
+
+
+And if we submit that command, we see the same error that was reported.
+
 .. code-block:: ipython3
 
     C:\>java -classpath "." pyiom.saspy2j -host localhost -stdinport 59102 -stdoutport 59103 -stderrport 59104 -zero
@@ -315,7 +315,7 @@ To demonstate the error for a missing JAR file, let's comment out one of the IOM
     cp += ";C:\jars\sas.security.sspi.jar"
     #cp += ";C:\jars\sas.core.jar"
     cp += ";C:\jars\saspyiom.jar"
-    
+
     sas = saspy.SASsession(cfgname='winlocal', classpath=cp)
 
     Java Error:
@@ -346,24 +346,24 @@ To demonstate the error for a missing JAR file, let's comment out one of the IOM
             at java.lang.ClassLoader.loadClass(Unknown Source)
             ... 19 more
     Error: A JNI error has occurred, please check your installation and try again
-    Exception in thread "main" 
-    
+    Exception in thread "main"
+
     Subprocess failed to start. Double check your settings in sascfg_personal.py file.
-    
+
     Attempted to run program java with the following parameters:['java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
-    
+
     If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:
-    java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.jar;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59110 -stdoutport 59111 -stderrport 59112 -zero  
-    
+    java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.jar;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59110 -stdoutport 59111 -stderrport 59112 -zero
+
     No SAS process attached. SAS process has terminated unexpectedly.
-    
+
 And if we run that command ourselves... Same error as was reported.
 
 .. code-block:: ipython3
 
-    C:\> java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.jar;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59110 -stdoutport 59111 -stderrport 59112 -zero  
-    
+    C:\> java -classpath "C:\java\sas.svc.connection.jar;C:\java\log4j.jar;C:\jars\sas.security.sspi.jar;C:\jars\saspyiom.jar" pyiom.saspy2j -host localhost -stdinport 59110 -stdoutport 59111 -stderrport 59112 -zero
+
     Error: A JNI error has occurred, please check your installation and try again
     Exception in thread "main" java.lang.NoClassDefFoundError: com/sas/util/ChainedExceptionInterface
             at java.lang.ClassLoader.defineClass1(Native Method)
@@ -391,28 +391,28 @@ And if we run that command ourselves... Same error as was reported.
             at sun.misc.Launcher$AppClassLoader.loadClass(Unknown Source)
             at java.lang.ClassLoader.loadClass(Unknown Source)
             ... 19 more
-        
+
 
 2) The problem with versions 9 Java, not having CORBA available.
 
 This problem has now been solved in a different way. I'll leave the original below for reference, but here is the
-solution to this problem, along with Java 10, 11 ... which was not able to be solved that way as they no longer 
+solution to this problem, along with Java 10, 11 ... which was not able to be solved that way as they no longer
 even had CORBA available. As of version 3.1.1, saspy now includes the following 5 jars in the java/thirdparty directory.
 Just add these jars into your classpath (as shown in the onfiguration doc for IOM) and this will work for any Java
 version.
 
-glassfish-corba-internal-api.jar  
-glassfish-corba-omgapi.jar        
-glassfish-corba-orb.jar           
-NOTICE.md                         
-pfl-basic.jar                     
-pfl-tf.jar                        
+glassfish-corba-internal-api.jar
+glassfish-corba-omgapi.jar
+glassfish-corba-orb.jar
+NOTICE.md
+pfl-basic.jar
+pfl-tf.jar
 
 
-Old answer, no longer the solution:    
+Old answer, no longer the solution:
 A new issue has been reported when using Java9. The java IOM client is dependant on CORBA, which is in Java9 but no longer in its default search path.
-This can be resolved by adding it back in, using the 'javaparms' key of your configuration definition as shown below. 
-Version 11 Java doesn't even ship CORBA, so the Java IOM client won't yet work with that version. The IOM group is currently investigating a solution to this. 
+This can be resolved by adding it back in, using the 'javaparms' key of your configuration definition as shown below.
+Version 11 Java doesn't even ship CORBA, so the Java IOM client won't yet work with that version. The IOM group is currently investigating a solution to this.
 
 If you see an error like this:
 
@@ -422,7 +422,7 @@ If you see an error like this:
     Java Error:
     Error: Unable to initialize main class pyiom.saspy2j
     Caused by: java.lang.NoClassDefFoundError: org/omg/CORBA/UserException
-   
+
 Then you can add CORBA back into the search path via the 'javaparms' key (there may be other ways you can do this, but this has been reported to work):
 
 .. code-block:: ipython3
@@ -486,12 +486,12 @@ back to the python process, which isn't running, thus the connection error. But 
             at pyiom.saspy2j.main(saspy2j.java:116)
 
 
-IOM specific errors     
+IOM specific errors
 ^^^^^^^^^^^^^^^^^^^
 
-So if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM. 
+So if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM.
 The IOM Error message will be reported, followed by the command that was trying to be run. Below
-are the usual IOM errors and what to do about them. 
+are the usual IOM errors and what to do about them.
 
 There are a few obvious misconfigurations that can happen here, and these are the likely error you may see.
 Scroll down based upon the number to see an example of that error and help on why that may occur and what to do about it.
@@ -517,13 +517,16 @@ Scroll down based upon the number to see an example of that error and help on wh
 7) **The application could not create a tunnel to the server "127.0.0.1:55517".**
 
 
+8) **None of the requested encryption algorithms are supported by both peers: xxx.**
+
+
 Here are examples of each of the above problems:
 
 
 1) The application could not log on to the server "Linux-1:333". No server is available at that port on that machine.
 
    For this error, either the 'iomhost' or 'iomport' you've specified aren't right, or the server isn't up and available to be connected to.
-   You may have specified the host or port for the metadata server instead of the host of the object spawner and 
+   You may have specified the host or port for the metadata server instead of the host of the object spawner and
    port for theworkspace server.
 
 .. code-block:: ipython3
@@ -533,12 +536,12 @@ Here are examples of each of the above problems:
     The application could not log on to the server "Linux-1:333". No server is available at that port on that machine.
     SAS process has terminated unexpectedly. Pid State= (11195, 64000)
     SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
-    
+
     Attempted to run program /usr/bin/java with the following parameters:['/usr/bin/java', '-classpath', '/jars/sas.svc.connection.jar:/jars/log4j.jar:/jars/sas.security.sspi.jar:/jars/sas.core,jar:
     /jars/saspyiom.jar', 'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '45757', '-stdoutport', '57809', '-stderrport', '33153', '-iomhost', 'Linux-1', '-iomport', '333', '-user', 'user', '']
-        
+
     No SAS process attached. SAS process has terminated unexpectedly.
-    
+
 
 2) The application could not log on to the server "Linux-1:8591". The user ID "wrong_user" or the password is incorrect.
 
@@ -554,10 +557,10 @@ Here are examples of each of the above problems:
     The application could not log on to the server "Linux-1:8591". The user ID "wrong_user" or the password is incorrect.
     SAS process has terminated unexpectedly. Pid State= (11449, 64000)
     SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
-    
+
     Attempted to run program /usr/bin/java with the following parameters:['/usr/bin/java', '-classpath', '/jars/sas.svc.connection.jar:/jars/log4j.jar:/jars/sas.security.sspi.jar:/jars/sas.core,jar:
     /jars/saspyiom.jar', 'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '49660', '-stdoutport', '46794', '-stderrport', '51907', '-iomhost', 'Linux-1', '-iomport', '8591', '-user', 'wrong_user', '']
-    
+
     No SAS process attached. SAS process has terminated unexpectedly.
 
 
@@ -571,22 +574,22 @@ Here are examples of each of the above problems:
 
     >>> import saspy
     >>> sas = saspy.SASsession()
-    
+
     The native implementation module for the security package could not be found in the path.
     SAS process has terminated unexpectedly. RC from wait was: 4294967290
     SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
-    
+
     Attempted to run program java with the following parameters:['java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
-    
+
     Be sure the path to sspiauth.dll is in your System PATH
-    
+
     No SAS process attached. SAS process has terminated unexpectedly.
-    
-    
+
+
 4) The application could not find a command to launch a SAS Workspace Server.
 
-   For Windows Local connection, the registry doesn't have the right path to the SAS start up command. 
+   For Windows Local connection, the registry doesn't have the right path to the SAS start up command.
 
 .. code-block:: ipython3
 
@@ -595,12 +598,12 @@ Here are examples of each of the above problems:
     The application could not find a command to launch a SAS Workspace Server.
     SAS process has terminated unexpectedly. RC from wait was: 4294967290
     SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
-    
+
     Attempted to run program java with the following parameters:['java', '-classpath', 'C:\\java\\sas.svc.connection.jar;C:\\java\\log4j.jar;C:\\jars\\sas.security.sspi.jar;C:\\jars\\saspyiom.jar',
     'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '59110', '-stdoutport', '59111', '-stderrport', '59112', '-zero', '']
-    
+
     Be sure the path to sspiauth.dll is in your System PATH
-    
+
     No SAS process attached. SAS process has terminated unexpectedly.
 
 
@@ -609,11 +612,11 @@ There is a workaround you can use. Oh course, having a clean SAS install should 
 The work around for this is to use the 'javaparms' option on the configuration definition to specify the command manually as follows (use the right path on your system, of course):
 
 .. code-block:: ipython3
-    
-    'javaparms' : ['-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd="C:\PROGRA~1\SASHome\SASFOU~1\9.4\SAS.EXE"']
-   
 
-    
+    'javaparms' : ['-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd="C:\PROGRA~1\SASHome\SASFOU~1\9.4\SAS.EXE"']
+
+
+
 5) The application could not log on to the server. The server process did not start.
 
    For Windows Local connection, the start up command in the registry isn't formated just right. Blanks, quotes, other.
@@ -624,15 +627,16 @@ The work around for this is to use the 'javaparms' option on the configuration d
     The application could not log on to the server. The server process did not start.
     SAS process has terminated unexpectedly. RC from wait was: 4294967290
     SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
-    
-    Attempted to run program java with the following parameters:['java', '-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd=C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\SAS.EXE -config C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\sasv9.cfg -objectserver 
-    -nologo -noinal -noprngetlist', '-classpath', 
+
+    Attempted to run program java with the following parameters:['java', '-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd=C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\SAS.EXE -config C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\sasv9.cfg -objectserver
+    -nologo -noinal -noprngetlist', '-classpath',
     'C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar;
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485___xx__sp0__1\\deploywiz\\log4j.jar;
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar;
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94485__pxx__sp0__1\\deploywiz\\sas.core.jar;
     C:\\ProgramData\\Anaconda3\\Lib\\site-packages\\saspy\\java\\saspyiom.jar',
-    'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']                                                                                                                                 
+    'pyiom.saspy2j', '-host', 'localhost', '-stdinport', '57425', '-stdoutport', '57426', '-stderrport', '57427', '-zero', '']
+
 
 
 
@@ -642,7 +646,7 @@ The work around for this is to use the 'javaparms' option on the configuration d
 
 
     Be sure the path to sspiauth.dll is in your System PATH
-    
+
     No SAS process attached. SAS process has terminated unexpectedly.
 
 
@@ -651,18 +655,18 @@ And you have what seems to be the correct start up command in your registry; key
 It may still not be formatted exactly right regaring quoted paths, or blanks in the paths, or the char8 '~' parts.
 There is a easy way to have SAS re-register this in the Windows Registry that should clean this up and make it correct.
 Run your sas.exe (you can do this from a CMD Prompt; may need fully qualified path for sas.exe) with the following option: /regserver
-    
+
 .. code-block:: ipython3
-    
+
     [C:\...\]sas.exe /regserver
 
 
 If this doesn't fix the issue, you can try the same workaround as #4 above, using the javaparms to specify the command.
 The best option is to quote all paths in that command. In the error message above, you can see that javaparms was used to specify the command,
 which failed. If I quote both of the paths in that parameter, then it works.
-    
+
 .. code-block:: ipython3
-    
+
     '-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd="C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\SAS.EXE" -config "C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\sasv9.cfg" -objectserver -nologo -noinal -noprngetlist'
 
 
@@ -677,11 +681,11 @@ which failed. If I quote both of the paths in that parameter, then it works.
     >>> sas = saspy.SASsession(cfgname='winlocal')
 
     We failed in getConnection
-    The application could not log on to the server "localhost:0". Integrated Windows authentication failed.                                                                  
+    The application could not log on to the server "localhost:0". Integrated Windows authentication failed.
     SAS process has terminated unexpectedly. RC from wait was: 4294967290
     SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.
-    
-    Attempted to run program java with the following parameters:['java', '-classpath', 
+
+    Attempted to run program java with the following parameters:['java', '-classpath',
     'C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94508__prt__xx__sp0__1\\deploywiz\\sas.svc.connection.jar;
     C:\\Program Files\\SASHome\\SASDepentManager\\9.4\\products\\deploywiz__94508__prt__xx__sp0__1\\deploywiz\\log4j.jar;
     C:\\Program Files\\SASHome\\SASDeploymentManager\\9.4\\products\\deploywiz__94508__prt__xx__sp0__1\\deploywiz\\sas.security.sspi.jar;
@@ -705,7 +709,7 @@ which failed. If I quote both of the paths in that parameter, then it works.
    way, it's not needed and can cause a failure trying to use a local SAS install over IOM Local saspy connection. Luckilly it's easy
    to resolve. You can simply unset that variable in your Python session before trying to get your SASsession. You can do this inline
    if you need this set for remote IOM connections from saspy, or put it in your sascfg_personal.py file if you only connect to local
-   SAS from saspy but need the variable set for other applications that need it. 
+   SAS from saspy but need the variable set for other applications that need it.
 
 .. code-block:: ipython3
 
@@ -718,8 +722,8 @@ which failed. If I quote both of the paths in that parameter, then it works.
     We failed in getConnection
     The application could not create a tunnel to the server "127.0.0.1:54243".
     SAS process has terminated unexpectedly. RC from wait was: 4294967290
-    
-    
+
+
     >>> # unset the variable here now. You can do this in your config file it you need it all the time
     >>> del(os.environ['SAS_IOM_PROXYLIST'])
 
@@ -733,7 +737,7 @@ which failed. If I quote both of the paths in that parameter, then it works.
     >>>
     >>> import saspy; sas = saspy.SASsession(cfgname='winlocal'); sas
     SAS Connection established. Subprocess id is 37100
-    
+
     Access Method         = IOM
     SAS Config name       = winlocal
     SAS Config file       = C:\ProgramData\Anaconda3\lib\site-packages\saspy\sascfg_personal.py
@@ -747,11 +751,22 @@ which failed. If I quote both of the paths in that parameter, then it works.
     Python Encoding value = cp1252
     SAS process Pid value = 17980
     >>>
-    
+
+
+8) None of the requested encryption algorithms are supported by both peers: xxx. (xxx is the method; AES)
+
+   This error identifies the your Workspace server is configured to use encryption. The specific method may
+   show up at the end of the message; for instance AES. This means that you don't have the 3 encryption jars
+   in the iomclient directory of the saspy install. See the configuration section for IOM regarding this:
+   https://sassoftware.github.io/saspy/configuration.html#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required
+
+   If this erro is for AES, then there's another solution than having to get those 3 jars and add them to the deployment.
+   Java 8 (release greater than 151), has the needed support for this in it. So you just need to upgrade an older
+   Java install to this releasse or newer to solve this without needing the jars.
 
 
 So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn't
-have any problems, it should just work! 
+have any problems, it should just work!
 
 
 *********************
