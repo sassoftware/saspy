@@ -755,14 +755,14 @@ which failed. If I quote both of the paths in that parameter, then it works.
 
 8) None of the requested encryption algorithms are supported by both peers: xxx. (xxx is the method; AES)
 
-   This error identifies the your Workspace server is configured to use encryption. The specific method may
+   This error identifies that your Workspace server is configured to use encryption. The specific method may
    show up at the end of the message; for instance AES. This means that you don't have the 3 encryption jars
    in the iomclient directory of the saspy install. See the configuration section for IOM regarding this:
    https://sassoftware.github.io/saspy/configuration.html#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required
 
-   If this erro is for AES, then there's another solution than having to get those 3 jars and add them to the deployment.
-   Java 8 (release greater than 151), has the needed support for this in it. So you just need to upgrade an older
-   Java install to this releasse or newer to solve this without needing the jars.
+   If this error is for AES, then there's another solution than having to get those 3 jars and add them to the deployment.
+   Java 8 (release greater than 151), has the needed support for this in it. So you just need to install the current Java 8
+   or higher to solve this without needing the jars.
 
 
 So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn't
