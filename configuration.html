@@ -596,6 +596,9 @@ thirdparty CORBA jars will be automatically provided as the calsspath by saspy. 
 If you require the 3 encryption jars, shown below, they still need to be acquired from your SAS deployment, and then
 put in the saspy/java/iomclient directory of the saspy install (where the 4 included jars are) so they will be included
 in the classpath for you.</p>
+<p>Note that for AES encryption, Java 8 (release greater than 151), has the needed support in it, so if your workspace server
+is configured for AES, just having a current version of Java 8 or higher will allow it to work, without needing the 3
+encryption jars.</p>
 <p>The 3 encryption jars, if needed, can be found in a SAS deployment in a location similar to the following.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil_904600.0.0.20181017190000_v940m6/sas.rutil.jar
 $SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil.nls_904600.0.0.20181017190000_v940m6/sas.rutil.nls.jar

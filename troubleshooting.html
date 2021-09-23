@@ -610,6 +610,7 @@ Scroll down based upon the number to see an example of that error and help on wh
 <li><strong>The application could not log on to the server. The server process did not start.</strong></li>
 <li><strong>The application could not log on to the server &#8220;localhost:0&#8221;.  Integrated Windows authentication failed.</strong></li>
 <li><strong>The application could not create a tunnel to the server &#8220;127.0.0.1:55517&#8221;.</strong></li>
+<li><strong>None of the requested encryption algorithms are supported by both peers: xxx.</strong></li>
 </ol>
 <p>Here are examples of each of the above problems:</p>
 <ol class="arabic">
@@ -721,6 +722,7 @@ The work around for this is to use the &#8216;javaparms&#8217; option on the con
 
 
 
+
 <span class="n">Be</span> <span class="n">sure</span> <span class="n">the</span> <span class="n">path</span> <span class="n">to</span> <span class="n">sspiauth</span><span class="o">.</span><span class="n">dll</span> <span class="ow">is</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">System</span> <span class="n">PATH</span>
 
 <span class="n">No</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">attached</span><span class="o">.</span> <span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span>
@@ -820,6 +822,17 @@ SAS from saspy but need the variable set for other applications that need it.</p
 <span class="o">&gt;&gt;&gt;</span>
 </pre></div>
 </div>
+<ol class="arabic" start="8">
+<li><p class="first">None of the requested encryption algorithms are supported by both peers: xxx. (xxx is the method; AES)</p>
+<p>This error identifies the your Workspace server is configured to use encryption. The specific method may
+show up at the end of the message; for instance AES. This means that you don&#8217;t have the 3 encryption jars
+in the iomclient directory of the saspy install. See the configuration section for IOM regarding this:
+<a class="reference external" href="https://sassoftware.github.io/saspy/configuration.html#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required">https://sassoftware.github.io/saspy/configuration.html#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required</a></p>
+<p>If this erro is for AES, then there&#8217;s another solution than having to get those 3 jars and add them to the deployment.
+Java 8 (release greater than 151), has the needed support for this in it. So you just need to upgrade an older
+Java install to this releasse or newer to solve this without needing the jars.</p>
+</li>
+</ol>
 <p>So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn&#8217;t
 have any problems, it should just work!</p>
 </div>
