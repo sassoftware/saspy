@@ -520,6 +520,9 @@ Scroll down based upon the number to see an example of that error and help on wh
 8) **None of the requested encryption algorithms are supported by both peers: xxx.**
 
 
+9) **An exception was thrown during the encryption key exchange.**
+
+
 Here are examples of each of the above problems:
 
 
@@ -760,9 +763,16 @@ which failed. If I quote both of the paths in that parameter, then it works.
    in the iomclient directory of the saspy install. See the configuration section for IOM regarding this:
    https://sassoftware.github.io/saspy/configuration.html#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required
 
-   If this error is for AES, then there's another solution than having to get those 3 jars and add them to the deployment.
+   If this error is for AES, then there's another solution than having to get those 3 jars and add them to the deployment,
+   but only for SAS versions prior to M7. M7 requires the encryption jars.
    Java 8 (release greater than 151), has the needed support for this in it. So you just need to install the current Java 8
    or higher to solve this without needing the jars.
+
+
+9) An exception was thrown during the encryption key exchange.
+
+   This is another possible error having to do with encryption, and is addressed by adding the 3 encryption jars to your
+   saspy deployment, as identified in number 8 just above.
 
 
 So, hopefully this has shown you how to diagnose connection and configuration problems. When you have things set up right, you shouldn't

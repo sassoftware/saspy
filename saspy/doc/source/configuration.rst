@@ -477,8 +477,8 @@ The connection can be to a local SAS installation or a remote IOM Workspace serv
 on any supported platform.
 
 
-ATTN, as of saspy version 3.3.3, the classpath is no longer required!
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The 4 required IOM Java client jars are now included in the saspy repo, and they, along with the saspyiom.jar and the
 thirdparty CORBA jars will be automatically provided as the calsspath by saspy. This is generally all that is needed.
@@ -486,11 +486,13 @@ If you require the 3 encryption jars, shown below, they still need to be acquire
 put in the saspy/java/iomclient directory of the saspy install (where the 4 included jars are) so they will be included
 in the classpath for you.
 
-Note that for AES encryption, Java 8 (release greater than 151), has the needed support in it, so if your workspace server
-is configured for AES, just having a current version of Java 8 or higher will allow it to work, without needing the 3
-encryption jars.
+Note that for AES encryption, at least prior to SAS 9.4M7, Java 8 (release greater than 151), has the needed
+support in it, so if your workspace server is configured for AES, just having a current version of Java 8 or
+higher will allow it to work, without needing the 3 encryption jars. That doesn't work w/ M7 however, so you
+would need the encryption jars when connecting to M7.
 
-The 3 encryption jars, if needed, can be found in a SAS deployment in a location similar to the following.
+The 3 encryption jars, if needed, can be found in a SAS deployment in a location similar to, but not exactly the
+sam as, the following. If you get any error about encryption, adding these 3 jars is the proper way to address it.
 
 ::
 
