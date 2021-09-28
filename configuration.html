@@ -101,7 +101,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#stdio">STDIO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#iom-using-java">IOM using Java</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required">ATTN, as of saspy version 3.3.3, the classpath is no longer required!</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file">ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-authinfo-file-authinfo-on-windows">The .authinfo file (_authinfo on Windows)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#remote">Remote</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#local">Local</a></li>
@@ -589,17 +589,19 @@ and integrates all the monitoring and administration that SAS Grid Manager provi
 <p>The IOM connection method also enables you to connect to SAS from Windows (STDIO was Linux only).
 The connection can be to a local SAS installation or a remote IOM Workspace server running
 on any supported platform.</p>
-<div class="section" id="attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required">
-<h3>ATTN, as of saspy version 3.3.3, the classpath is no longer required!<a class="headerlink" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file">
+<h3>ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!<a class="headerlink" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file" title="Permalink to this headline">¶</a></h3>
 <p>The 4 required IOM Java client jars are now included in the saspy repo, and they, along with the saspyiom.jar and the
 thirdparty CORBA jars will be automatically provided as the calsspath by saspy. This is generally all that is needed.
 If you require the 3 encryption jars, shown below, they still need to be acquired from your SAS deployment, and then
 put in the saspy/java/iomclient directory of the saspy install (where the 4 included jars are) so they will be included
 in the classpath for you.</p>
-<p>Note that for AES encryption, Java 8 (release greater than 151), has the needed support in it, so if your workspace server
-is configured for AES, just having a current version of Java 8 or higher will allow it to work, without needing the 3
-encryption jars.</p>
-<p>The 3 encryption jars, if needed, can be found in a SAS deployment in a location similar to the following.</p>
+<p>Note that for AES encryption, at least prior to SAS 9.4M7, Java 8 (release greater than 151), has the needed
+support in it, so if your workspace server is configured for AES, just having a current version of Java 8 or
+higher will allow it to work, without needing the 3 encryption jars. That doesn&#8217;t work w/ M7 however, so you
+would need the encryption jars when connecting to M7.</p>
+<p>The 3 encryption jars, if needed, can be found in a SAS deployment in a location similar to, but not exactly the
+sam as, the following. If you get any error about encryption, adding these 3 jars is the proper way to address it.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>$SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil_904600.0.0.20181017190000_v940m6/sas.rutil.jar
 $SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil.nls_904600.0.0.20181017190000_v940m6/sas.rutil.nls.jar
 $SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_20121211183517/sastpj.rutil.jar
