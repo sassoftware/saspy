@@ -679,7 +679,7 @@ which failed. If I quote both of the paths in that parameter, then it works.
 
    The security package failed while authenticating a user.
 
-   These errors implie that your hosts file doesn't have 'localhost' set as an alias for ip 127.0.0.1. Tech Support note
+   These errors imply that your hosts file doesn't have 'localhost' set as an alias for ip 127.0.0.1. Tech Support note
    55227 (http://support.sas.com/kb/55/227.html) identifies this issue.
 
 .. code-block:: ipython3
