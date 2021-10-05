@@ -15,7 +15,7 @@ The current set of connection methods are as follows:
   method enables you to connect to SAS on the same host as your Python process.
 
 `STDIO over SSH`_
-  This connection method is also available on the Linux platform only. This
+  This connection method is available from Linux or Windows (or Mac), but only to SAS on the Linux platform. This
   method can connect to SAS that is installed on a remote host, if you have passwordless
   SSH configured for your Linux user account.
 
