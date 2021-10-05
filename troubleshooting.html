@@ -602,16 +602,26 @@ The IOM Error message will be reported, followed by the command that was trying 
 are the usual IOM errors and what to do about them.</p>
 <p>There are a few obvious misconfigurations that can happen here, and these are the likely error you may see.
 Scroll down based upon the number to see an example of that error and help on why that may occur and what to do about it.</p>
-<ol class="arabic simple">
-<li><strong>The application could not log on to the server &#8220;host:port&#8221;. No server is available at that port on that machine.</strong></li>
-<li><strong>The application could not log on to the server &#8220;host:port&#8221;. The user ID &#8220;wrong_user&#8221; or the password is incorrect.</strong></li>
-<li><strong>The native implementation module for the security package could not be found in the path.</strong></li>
-<li><strong>The application could not find a command to launch a SAS Workspace Server.</strong></li>
-<li><strong>The application could not log on to the server. The server process did not start.</strong></li>
-<li><strong>The application could not log on to the server &#8220;localhost:0&#8221;.  Integrated Windows authentication failed.</strong></li>
-<li><strong>The application could not create a tunnel to the server &#8220;127.0.0.1:55517&#8221;.</strong></li>
-<li><strong>None of the requested encryption algorithms are supported by both peers: xxx.</strong></li>
-<li><strong>An exception was thrown during the encryption key exchange.</strong></li>
+<ol class="arabic">
+<li><p class="first"><strong>The application could not log on to the server &#8220;host:port&#8221;. No server is available at that port on that machine.</strong></p>
+</li>
+<li><p class="first"><strong>The application could not log on to the server &#8220;host:port&#8221;. The user ID &#8220;wrong_user&#8221; or the password is incorrect.</strong></p>
+</li>
+<li><p class="first"><strong>The native implementation module for the security package could not be found in the path.</strong></p>
+</li>
+<li><p class="first"><strong>The application could not find a command to launch a SAS Workspace Server.</strong></p>
+</li>
+<li><p class="first"><strong>The application could not log on to the server. The server process did not start.</strong></p>
+</li>
+<li><p class="first"><strong>The application could not log on to the server &#8220;localhost:0&#8221;.  Integrated Windows authentication failed.</strong>         OR</p>
+<p><strong>The security package failed while authenticating a user.</strong></p>
+</li>
+<li><p class="first"><strong>The application could not create a tunnel to the server &#8220;127.0.0.1:55517&#8221;.</strong></p>
+</li>
+<li><p class="first"><strong>None of the requested encryption algorithms are supported by both peers: xxx.</strong></p>
+</li>
+<li><p class="first"><strong>An exception was thrown during the encryption key exchange.</strong></p>
+</li>
 </ol>
 <p>Here are examples of each of the above problems:</p>
 <ol class="arabic">
@@ -744,8 +754,9 @@ which failed. If I quote both of the paths in that parameter, then it works.</p>
 </pre></div>
 </div>
 <ol class="arabic" start="6">
-<li><p class="first">The application could not log on to the server &#8220;localhost:0&#8221;.  Integrated Windows authentication failed.</p>
-<p>This error implies that your hosts file doesn&#8217;t have &#8216;localhost&#8217; set as an alias for ip 127.0.0.1. Tech Support note
+<li><p class="first">The application could not log on to the server &#8220;localhost:0&#8221;.  Integrated Windows authentication failed.        OR</p>
+<p>The security package failed while authenticating a user.</p>
+<p>These errors implie that your hosts file doesn&#8217;t have &#8216;localhost&#8217; set as an alias for ip 127.0.0.1. Tech Support note
 55227 (<a class="reference external" href="http://support.sas.com/kb/55/227.html">http://support.sas.com/kb/55/227.html</a>) identifies this issue.</p>
 </li>
 </ol>
