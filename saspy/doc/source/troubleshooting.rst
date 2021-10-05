@@ -511,7 +511,9 @@ Scroll down based upon the number to see an example of that error and help on wh
 5) **The application could not log on to the server. The server process did not start.**
 
 
-6) **The application could not log on to the server "localhost:0".  Integrated Windows authentication failed.**
+6) **The application could not log on to the server "localhost:0".  Integrated Windows authentication failed.**         OR
+
+   **The security package failed while authenticating a user.**
 
 
 7) **The application could not create a tunnel to the server "127.0.0.1:55517".**
@@ -673,9 +675,11 @@ which failed. If I quote both of the paths in that parameter, then it works.
     '-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd="C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\SAS.EXE" -config "C:\\PROGRA~1\\SASHome\\SASFOU~1\\9.4\\sasv9.cfg" -objectserver -nologo -noinal -noprngetlist'
 
 
-6) The application could not log on to the server "localhost:0".  Integrated Windows authentication failed.
+6) The application could not log on to the server "localhost:0".  Integrated Windows authentication failed.        OR
 
-   This error implies that your hosts file doesn't have 'localhost' set as an alias for ip 127.0.0.1. Tech Support note
+   The security package failed while authenticating a user.
+
+   These errors implie that your hosts file doesn't have 'localhost' set as an alias for ip 127.0.0.1. Tech Support note
    55227 (http://support.sas.com/kb/55/227.html) identifies this issue.
 
 .. code-block:: ipython3
