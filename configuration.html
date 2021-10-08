@@ -876,7 +876,8 @@ for SASPy, and I will default to that unless you provide other client info that 
 </li>
 <li><p class="first">Azure JWT (actually, any JWT perhaps, in the future)</p>
 <p>&#8216;jwt&#8217; is the key to provide that non-Viya Bearer Token, to then pass through to SASLogon to get the Viya Bearer Token to use.
-And these tokens, are just big long random strings; 3300+ bytes long (so you know you&#8217;re passing in the right thing).</p>
+And these tokens, are just big long strings; thoussnads of bytes long strings of random characters
+(so you know you&#8217;re passing in the right thing).</p>
 </li>
 <li><p class="first">SASLogon Authentication Token</p>
 <p>All of the previous authentication mechanisms are used to acquire the Viya Auth Token. You can, actually, do all of that yourself
@@ -956,12 +957,12 @@ If you want to run saspy in Zeppelin, set this in your configuration definition:
 <dt>authtoken -</dt>
 <dd>The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.
 Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can just pass it in.
-These tokens, for reference, are 3300+ bytes of jiberish; just a giant random string of chatacters; just so you know that
+These tokens, for reference, are very long strings of random chatacters; just so you know that
 you&#8217;re using the right thing :)</dd>
 <dt>jwt -</dt>
 <dd>A JWT bearer token that can be used to acquire a SASLogon authorization token. This would be something like an Azure
 token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.
-These tokens, for reference, are 3300+ bytes of jiberish; just a giant random string of chatacters; just so you know that
+These tokens, for reference, are very long strings of random chatacters; just so you know that
 you&#8217;re using the right thing :)</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">httpsviya</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ip&#39;</span>      <span class="p">:</span> <span class="s1">&#39;sastpw.rndk8s.openstack.sas.com&#39;</span><span class="p">,</span>
