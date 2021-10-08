@@ -809,7 +809,8 @@ them here, as they are mutually exclusive. You use only one of the various means
 3) Azure JWT (actually, any JWT perhaps, in the future)
 
    'jwt' is the key to provide that non-Viya Bearer Token, to then pass through to SASLogon to get the Viya Bearer Token to use.
-   And these tokens, are just big long random strings; 3300+ bytes long (so you know you're passing in the right thing).
+   And these tokens, are just big long strings; thoussnads of bytes long strings of random characters
+   (so you know you're passing in the right thing).
 
 4) SASLogon Authentication Token
 
@@ -904,13 +905,13 @@ display -
 authtoken -
     The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.
     Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can just pass it in.
-    These tokens, for reference, are 3300+ bytes of jiberish; just a giant random string of chatacters; just so you know that
+    These tokens, for reference, are very long strings of random chatacters; just so you know that
     you're using the right thing :)
 
 jwt -
     A JWT bearer token that can be used to acquire a SASLogon authorization token. This would be something like an Azure
     token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.
-    These tokens, for reference, are 3300+ bytes of jiberish; just a giant random string of chatacters; just so you know that
+    These tokens, for reference, are very long strings of random chatacters; just so you know that
     you're using the right thing :)
 
 .. code-block:: ipython3
