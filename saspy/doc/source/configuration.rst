@@ -797,18 +797,22 @@ assuming it's configured to be valid in Viya. The various configuration keys are
 them here, as they are mutually exclusive. You use only one of the various means to authenticate.
 
 1) user/pw
+
    the keys for this are either 'user' and 'pw', or use 'authkey' to identify them from in an authinfo file.
 
 2) SSO
+
    The primary key in 'authcode' which is a onetime token acquired from a call to SASLogon, as a two factor authentication scheme.
    The 'client_id' and 'client_secret' are also required, although a special client_id has been created by default in Viya deployments
    for SASPy, and I will default to that unless you provide other client info that an administrator created and provided you to use.
 
 3) Azure JWT (actually, any JWT perhaps, in the future)
+
    'jwt' is the key to provide that non-Viya Bearer Token, to then pass through to SASLogon to get the Viya Bearer Token to use.
    And these tokens, are just big long random strings; 3300+ bytes long (so you know you're passing in the right thing).
 
 4) SASLogon Authentication Token
+
    All of the previous authentication mechanisms are used to acquire the Viya Auth Token. You can, actually, do all of that yourself
    via various Rest API's. If you do that, then you can just pass in the Viya Auth Token, and I'll skip the auth process and just
    use that token; Bob's your uncle, as they say. The key for this is 'authtoken'.
