@@ -865,20 +865,24 @@ recently, an SSO method was created. More recently than that is integration w/ A
 an Azure token in, to get a Viya token. Actually, this method should allow any JWT Bearer Token to be passed in and used,
 assuming it&#8217;s configured to be valid in Viya. The various configuration keys are provided below, but I wanted to identify
 them here, as they are mutually exclusive. You use only one of the various means to authenticate.</p>
-<ol class="arabic simple">
-<li>user/pw
-the keys for this are either &#8216;user&#8217; and &#8216;pw&#8217;, or use &#8216;authkey&#8217; to identify them from in an authinfo file.</li>
-<li>SSO
-The primary key in &#8216;authcode&#8217; which is a onetime token acquired from a call to SASLogon, as a two factor authentication scheme.
+<ol class="arabic">
+<li><p class="first">user/pw</p>
+<p>the keys for this are either &#8216;user&#8217; and &#8216;pw&#8217;, or use &#8216;authkey&#8217; to identify them from in an authinfo file.</p>
+</li>
+<li><p class="first">SSO</p>
+<p>The primary key in &#8216;authcode&#8217; which is a onetime token acquired from a call to SASLogon, as a two factor authentication scheme.
 The &#8216;client_id&#8217; and &#8216;client_secret&#8217; are also required, although a special client_id has been created by default in Viya deployments
-for SASPy, and I will default to that unless you provide other client info that an administrator created and provided you to use.</li>
-<li>Azure JWT (actually, any JWT perhaps, in the future)
-&#8216;jwt&#8217; is the key to provide that non-Viya Bearer Token, to then pass through to SASLogon to get the Viya Bearer Token to use.
-And these tokens, are just big long random strings; 3300+ bytes long (so you know you&#8217;re passing in the right thing).</li>
-<li>SASLogon Authentication Token
-All of the previous authentication mechanisms are used to acquire the Viya Auth Token. You can, actually, do all of that yourself
+for SASPy, and I will default to that unless you provide other client info that an administrator created and provided you to use.</p>
+</li>
+<li><p class="first">Azure JWT (actually, any JWT perhaps, in the future)</p>
+<p>&#8216;jwt&#8217; is the key to provide that non-Viya Bearer Token, to then pass through to SASLogon to get the Viya Bearer Token to use.
+And these tokens, are just big long random strings; 3300+ bytes long (so you know you&#8217;re passing in the right thing).</p>
+</li>
+<li><p class="first">SASLogon Authentication Token</p>
+<p>All of the previous authentication mechanisms are used to acquire the Viya Auth Token. You can, actually, do all of that yourself
 via various Rest API&#8217;s. If you do that, then you can just pass in the Viya Auth Token, and I&#8217;ll skip the auth process and just
-use that token; Bob&#8217;s your uncle, as they say. The key for this is &#8216;authtoken&#8217;.</li>
+use that token; Bob&#8217;s your uncle, as they say. The key for this is &#8216;authtoken&#8217;.</p>
+</li>
 </ol>
 <p>Again, only use one of these and don&#8217;t mix using config keys from more than one for a given connection.</p>
 <p>The keys for this configuration definition dictionary are:</p>
