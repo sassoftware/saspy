@@ -859,6 +859,28 @@ code page. So if you&#8217;re running with that encoding, you can install the cp
 of a SAS Viya deployment. The Compute Service launches Compute Servers, which are MVA SAS sessions found in the SPRE deployment
 of the Viya installation. This is the equivalent of an IOM Workspace server, but in a Viya deployment.
 So, it is still connecting to MVA SAS and all of the methods behave the same as they would with any other saspy access method.</p>
+<p>Authentication:</p>
+<p>There are continuing to be new ways invented to authenticate to Viya. Originally it was user/pw like anything else. More
+recently, an SSO method was created. More recently than that is integration w/ Azure, providing the ability to pass
+an Azure token in, to get a Viya token. Actually, this method should allow any JWT Bearer Token to be passed in and used,
+assuming it&#8217;s configured to be valid in Viya. The various configuration keys are provided below, but I wanted to identify
+them here, as they are mutually exclusive. You use only one of the various means to authenticate.</p>
+<ol class="arabic simple">
+<li>user/pw
+the keys for this are either &#8216;user&#8217; and &#8216;pw&#8217;, or use &#8216;authkey&#8217; to identify them from in an authinfo file.</li>
+<li>SSO
+The primary key in &#8216;authcode&#8217; which is a onetime token acquired from a call to SASLogon, as a two factor authentication scheme.
+The &#8216;client_id&#8217; and &#8216;client_secret&#8217; are also required, although a special client_id has been created by default in Viya deployments
+for SASPy, and I will default to that unless you provide other client info that an administrator created and provided you to use.</li>
+<li>Azure JWT (actually, any JWT perhaps, in the future)
+&#8216;jwt&#8217; is the key to provide that non-Viya Bearer Token, to then pass through to SASLogon to get the Viya Bearer Token to use.
+And these tokens, are just big long random strings; 3300+ bytes long (so you know you&#8217;re passing in the right thing).</li>
+<li>SASLogon Authentication Token
+All of the previous authentication mechanisms are used to acquire the Viya Auth Token. You can, actually, do all of that yourself
+via various Rest API&#8217;s. If you do that, then you can just pass in the Viya Auth Token, and I&#8217;ll skip the auth process and just
+use that token; Bob&#8217;s your uncle, as they say. The key for this is &#8216;authtoken&#8217;.</li>
+</ol>
+<p>Again, only use one of these and don&#8217;t mix using config keys from more than one for a given connection.</p>
 <p>The keys for this configuration definition dictionary are:</p>
 <dl class="docutils">
 <dt>url -</dt>
@@ -879,8 +901,6 @@ See the python doc for your version if this is a concern.</dd>
 <dd>(Optional) Also note that if Viya uses the default self signed ssl certificates it ships with, you will not be able to verify them,
 but that can be fine, and you can still use an ssl connection. You can use set &#8216;verify&#8217; : False, in your config to
 turn off verification for this case.</dd>
-<dt>authkey -</dt>
-<dd>(Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection. See the IOM using Java above for more info.</dd>
 <dt>client_id -</dt>
 <dd>[for SSO Viya configurations] client_id to use for authenticating to Viya (defaults to &#8216;SASPy&#8217;)</dd>
 <dt>client_secret -</dt>
@@ -889,6 +909,8 @@ turn off verification for this case.</dd>
 <dd>[for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth service
 where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]&amp;response_type=code
 so perhaps:        <a class="reference external" href="https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code">https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code</a></dd>
+<dt>authkey -</dt>
+<dd>(Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection. See the IOM using Java above for more info.</dd>
 <dt>user -</dt>
 <dd>(<strong>Discouraged</strong>)  The user ID is required but if this field is left blank,
 the user is <strong>prompted</strong> for a user ID at runtime, unless it&#8217;s found in the authinfo file.</dd>
@@ -929,10 +951,14 @@ To support other Notebooks display methods, different display interface have to 
 If you want to run saspy in Zeppelin, set this in your configuration definition: &#8216;display&#8217; : &#8216;zeppelin&#8217;,</dd>
 <dt>authtoken -</dt>
 <dd>The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.
-Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can pass it in.</dd>
+Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can just pass it in.
+These tokens, for reference, are 3300+ bytes of jiberish; just a giant random string of chatacters; just so you know that
+you&#8217;re using the right thing :)</dd>
 <dt>jwt -</dt>
-<dd>A JWT that can be used to acquire a SASLogon authorization token. This would be something like an Azure
-token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.</dd>
+<dd>A JWT bearer token that can be used to acquire a SASLogon authorization token. This would be something like an Azure
+token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.
+These tokens, for reference, are 3300+ bytes of jiberish; just a giant random string of chatacters; just so you know that
+you&#8217;re using the right thing :)</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">httpsviya</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ip&#39;</span>      <span class="p">:</span> <span class="s1">&#39;sastpw.rndk8s.openstack.sas.com&#39;</span><span class="p">,</span>
              <span class="s1">&#39;context&#39;</span> <span class="p">:</span> <span class="s1">&#39;Data Mining compute context&#39;</span>
