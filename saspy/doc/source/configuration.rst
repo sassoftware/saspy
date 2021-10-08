@@ -788,6 +788,34 @@ of a SAS Viya deployment. The Compute Service launches Compute Servers, which ar
 of the Viya installation. This is the equivalent of an IOM Workspace server, but in a Viya deployment.
 So, it is still connecting to MVA SAS and all of the methods behave the same as they would with any other saspy access method.
 
+Authentication:
+
+There are continuing to be new ways invented to authenticate to Viya. Originally it was user/pw like anything else. More
+recently, an SSO method was created. More recently than that is integration w/ Azure, providing the ability to pass
+an Azure token in, to get a Viya token. Actually, this method should allow any JWT Bearer Token to be passed in and used,
+assuming it's configured to be valid in Viya. The various configuration keys are provided below, but I wanted to identify
+them here, as they are mutually exclusive. You use only one of the various means to authenticate.
+
+1) user/pw
+   the keys for this are either 'user' and 'pw', or use 'authkey' to identify them from in an authinfo file.
+
+2) SSO
+   The primary key in 'authcode' which is a onetime token acquired from a call to SASLogon, as a two factor authentication scheme.
+   The 'client_id' and 'client_secret' are also required, although a special client_id has been created by default in Viya deployments
+   for SASPy, and I will default to that unless you provide other client info that an administrator created and provided you to use.
+
+3) Azure JWT (actually, any JWT perhaps, in the future)
+   'jwt' is the key to provide that non-Viya Bearer Token, to then pass through to SASLogon to get the Viya Bearer Token to use.
+   And these tokens, are just big long random strings; 3300+ bytes long (so you know you're passing in the right thing).
+
+4) SASLogon Authentication Token
+   All of the previous authentication mechanisms are used to acquire the Viya Auth Token. You can, actually, do all of that yourself
+   via various Rest API's. If you do that, then you can just pass in the Viya Auth Token, and I'll skip the auth process and just
+   use that token; Bob's your uncle, as they say. The key for this is 'authtoken'.
+
+Again, only use one of these and don't mix using config keys from more than one for a given connection.
+
+
 
 The keys for this configuration definition dictionary are:
 
@@ -809,8 +837,6 @@ verify -
     (Optional) Also note that if Viya uses the default self signed ssl certificates it ships with, you will not be able to verify them,
     but that can be fine, and you can still use an ssl connection. You can use set 'verify' : False, in your config to
     turn off verification for this case.
-authkey -
-    (Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection. See the IOM using Java above for more info.
 
 client_id -
     [for SSO Viya configurations] client_id to use for authenticating to Viya (defaults to 'SASPy')
@@ -820,6 +846,9 @@ authcode -
     [for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth service
     where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]&response_type=code
     so perhaps:        https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&response_type=code
+
+authkey -
+    (Optional) The keyword that starts a line in the authinfo file containing user and or password for this connection. See the IOM using Java above for more info.
 
 user -
     (**Discouraged**)  The user ID is required but if this field is left blank,
@@ -870,12 +899,15 @@ display -
 
 authtoken -
     The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.
-    Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can pass it in.
+    Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can just pass it in.
+    These tokens, for reference, are 3300+ bytes of jiberish; just a giant random string of chatacters; just so you know that
+    you're using the right thing :)
 
 jwt -
-    A JWT that can be used to acquire a SASLogon authorization token. This would be something like an Azure
+    A JWT bearer token that can be used to acquire a SASLogon authorization token. This would be something like an Azure
     token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.
-
+    These tokens, for reference, are 3300+ bytes of jiberish; just a giant random string of chatacters; just so you know that
+    you're using the right thing :)
 
 .. code-block:: ipython3
 
