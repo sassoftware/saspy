@@ -1611,7 +1611,7 @@ Will use HTML5 for this SASsession.""")
          row_num += 1
          card  = ""
          for col in range(ncols):
-            var = str(row[col])
+            var = 'nan' if row[col] is None else str(row[col])
 
             if   dts[col] == 'N' and var == 'nan':
                var = '.'
