@@ -344,8 +344,8 @@ Will use HTML5 for this SASsession.""")
                   fid = open(pwf, mode='r')
                   for line in fid:
                      if line.startswith(self.sascfg.authkey):
-                        user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                        pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                        user = line.partition(' user')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                        pw   = line.partition(' password')[2].lstrip().partition(' ')[0].partition('\n')[0]
                         found = True
                   fid.close()
                except OSError as e:

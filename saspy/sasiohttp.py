@@ -247,8 +247,8 @@ class SASconfigHTTP:
                fid = open(pwf, mode='r')
                for line in fid:
                   if line.startswith(self.authkey):
-                     user = line.partition('user')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                     pw   = line.partition('password')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                     user = line.partition(' user')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                     pw   = line.partition(' password')[2].lstrip().partition(' ')[0].partition('\n')[0]
                      found = True
                      break
                fid.close()
