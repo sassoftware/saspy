@@ -1724,7 +1724,8 @@ class SASsession():
         dsopts = dsopts if dsopts is not None else {}
         if self.exist(table, libref) == 0:
             logger.error('The SAS Data Set ' + libref + '.' + table + ' does not exist')
-            return None
+            #return None
+            raise FileNotFoundError('The SAS Data Set ' + libref + '.' + table + ' does not exist')
 
         if self.nosub:
             print("too complicated to show the code, read the source :), sorry.")
