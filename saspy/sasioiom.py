@@ -153,9 +153,11 @@ class SASconfigIOM:
          cp    = cpath+"saspyiom.jar"
 
          cpath = cpath+"iomclient"+sep
+
          cp   += delim+cpath+"log4j-1.2-api-2.16.0.jar"
          cp   += delim+cpath+"log4j-api-2.16.0.jar"
          cp   += delim+cpath+"log4j-core-2.16.0.jar"
+      
          cp   += delim+cpath+"sas.security.sspi.jar"
          cp   += delim+cpath+"sas.core.jar"
          cp   += delim+cpath+"sas.svc.connection.jar"
