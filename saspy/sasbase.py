@@ -143,7 +143,7 @@ class SASconfig(object):
         # Get Config names. Fallback to empty list.
         configs = getattr(SAScfg, "SAS_config_names", [])
 
-        cfgname = kwargs.get('cfgname', '')
+        cfgname = kwargs.get('cfgname', 'default')
 
         if len(cfgname) == 0:
             if len(configs) == 0:
