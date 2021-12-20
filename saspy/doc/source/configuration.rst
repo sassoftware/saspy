@@ -486,7 +486,7 @@ to address them in a version that still supports Java 7. SASPy still provides su
 the 2.12.2 jars to maintain compatibility with Java 7. There is a new configuration definition key, 'log4j',
 that can be used to cause SASPy to use the 2.16.0 version instead. If there is another version you want to
 use, it can be done by providing the 'classpath' key to override the classpath SASPy would generate, specifying
-whichever log4j jar file you want to use (you have to provide the files themselves). Notethat if doing this, you
+whichever log4j jar file you want to use (you have to provide the files themselves). Note that if doing this, you
 should use the same classpath as SASPy generates, just replacing the log4j jar files with the ones you
 want to use.
 
