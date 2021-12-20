@@ -65,6 +65,7 @@ class SASconfigIOM:
       self.reconnect = cfg.get('reconnect', True)
       self.reconuri  = cfg.get('reconuri', None)
       self.logbufsz  = cfg.get('logbufsz', None)
+      self.log4j     = cfg.get('log4j', '2.12.2')
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -137,6 +138,13 @@ class SASconfigIOM:
          else:
             self.sspi = insspi
 
+      inl4j = kwargs.get('log4j', None)
+      if inl4j:
+         if lock and inl4j:
+            logger.warning("Parameter 'log4j' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.log4j = inl4j
+
       incp = kwargs.get('classpath', None)
       if incp is not None:
          if lock and self.classpath is not None:
@@ -154,10 +162,20 @@ class SASconfigIOM:
 
          cpath = cpath+"iomclient"+sep
 
-         cp   += delim+cpath+"log4j-1.2-api-2.16.0.jar"
-         cp   += delim+cpath+"log4j-api-2.16.0.jar"
-         cp   += delim+cpath+"log4j-core-2.16.0.jar"
-      
+         log4j  = delim+cpath+"log4j-1.2-api-2.12.2.jar"
+         log4j += delim+cpath+"log4j-api-2.12.2.jar"
+         log4j += delim+cpath+"log4j-core-2.12.2.jar"
+
+         if   self.log4j == '2.16.0':
+            log4j  = delim+cpath+"log4j-1.2-api-2.16.0.jar"
+            log4j += delim+cpath+"log4j-api-2.16.0.jar"
+            log4j += delim+cpath+"log4j-core-2.16.0.jar"
+         elif self.log4j == '2.12.2':
+            pass
+         else:
+            logger.warning("Parameter 'log4j' passed to SAS_session was invalid. Using the default of 2.12.2.")
+         cp   += log4j
+
          cp   += delim+cpath+"sas.security.sspi.jar"
          cp   += delim+cpath+"sas.core.jar"
          cp   += delim+cpath+"sas.svc.connection.jar"
