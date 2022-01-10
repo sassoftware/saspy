@@ -602,7 +602,7 @@ class SASsession():
                  msg += "Proceeding using the default encoding of 'utf_8', though you may encounter transcoding problems.\n"
               else:
                  msg += "Proceeding using the specified encoding of "+self._io.sascfg.encoding+", though you may encounter transcoding problems.\n"
-              logger.info(msg)
+              logger.warning(msg)
         else:
            self.pyenc = sas_encoding_mapping['utf-8']
 
