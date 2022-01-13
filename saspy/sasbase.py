@@ -68,6 +68,8 @@ from saspy.sasstat       import SASstat
 from saspy.sasutil       import SASutil
 from saspy.sasViyaML     import SASViyaML
 
+from saspy.version       import __version__ as SASPy_CUR_VER
+
 from saspy.sasexceptions import (SASIONotSupportedError, SASConfigNotValidError,
                                 SASConfigNotFoundError)
 _cfgfile_cnt = 0
@@ -123,6 +125,9 @@ class SASconfig(object):
         self.mode    = ''
         self.origin  = ''
         configs      = []
+
+        curver       = [int(i) for i in SASPy_CUR_VER.split('.')]
+        self.curver  = curver[0]*1000000+curver[1]*1000+curver[2]*1
 
         try:
            import pandas
@@ -180,6 +185,16 @@ class SASconfig(object):
         self.display  = cfg.get('display',  '')
         self.results  = cfg.get('results')
         self.autoexec = cfg.get('autoexec')
+
+        bcv           = kwargs.get('SAS_BCV', getattr(SAScfg, "SAS_BCV", SASPy_CUR_VER))
+        try:
+           bcv = [int(i) for i in bcv.split('.')]
+           if len(bcv) != 3 or False in [i >= 0 and i <=999 for i in bcv]:
+              raise
+           self.bcv = bcv[0]*1000000+bcv[1]*1000+bcv[2]*1
+        except:
+           logger.warning("Value provided for SAS_BCV was not valid. Using default of '3.7.8'.")
+           self.bcv = self.curver
 
         indisplay = kwargs.get('display', '')
         if len(indisplay) > 0:
@@ -1724,7 +1739,10 @@ class SASsession():
         dsopts = dsopts if dsopts is not None else {}
         if self.exist(table, libref) == 0:
             logger.error('The SAS Data Set ' + libref + '.' + table + ' does not exist')
-            return None
+            if self.sascfg.bcv < 3007009:
+               return None
+            else:
+               raise FileNotFoundError('The SAS Data Set ' + libref + '.' + table + ' does not exist')
 
         if self.nosub:
             print("too complicated to show the code, read the source :), sorry.")
