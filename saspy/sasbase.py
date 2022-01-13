@@ -186,7 +186,7 @@ class SASconfig(object):
         self.results  = cfg.get('results')
         self.autoexec = cfg.get('autoexec')
 
-        bcv           = kwargs.get('SAS_BCV', getattr(SAScfg, "SAS_BCV", '3.7.8'))
+        bcv           = kwargs.get('SAS_BCV', getattr(SAScfg, "SAS_BCV", SASPy_CUR_VER))
         try:
            bcv = [int(i) for i in bcv.split('.')]
            if len(bcv) != 3 or False in [i >= 0 and i <=999 for i in bcv]:
@@ -194,7 +194,7 @@ class SASconfig(object):
            self.bcv = bcv[0]*1000000+bcv[1]*1000+bcv[2]*1
         except:
            logger.warning("Value provided for SAS_BCV was not valid. Using default of '3.7.8'.")
-           self.bcv = 3007008
+           self.bcv = self.curver
 
         indisplay = kwargs.get('display', '')
         if len(indisplay) > 0:
