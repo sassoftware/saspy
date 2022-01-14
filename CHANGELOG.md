@@ -16,14 +16,13 @@ Set provided doesn't exist. Of course, trying to use that as a dataframe results
 you coded a check for this and conditionally didn't use it, then this change will break that code.
 A FileNotFoundError exception is now thrown, as that's the appropriate Pythonic thing to do in this situation.
 \
-If you happened to code this:
+<br>If you happened to code this:
 ```
 df = sas.sd2df('table','libref')
 if df is None:
    # do something because the data set wasn't found in the SAS session
 ```
-\
-Then you would need to change that to:
+<br>Then you would need to change that to:
 ```
 try:
    df = sas.sd2df('table','libref')
@@ -35,12 +34,12 @@ except FileNotFoundError:
 Access Method (the IOM Java client requires them to be there even though they are not used). If you recently used the new `log4j`
 configuration key in the pervious release, you may will need to update the version you're specifying.
 \
-SASPy V3.7.8 had log4j 2.12.2 and 2.16.0 jars, but now 2.12.4 and 2.17.1 are included instead.
+<br>SASPy V3.7.8 had log4j 2.12.2 and 2.16.0 jars, but now 2.12.4 and 2.17.1 are included instead.
 \
-So, if you happened to use `log4j='2.16.0'`, you need to change that to `log4j='2.17.1'` in this release. Be aware
+<br>So, if you happened to use `log4j='2.16.0'`, you need to change that to `log4j='2.17.1'` in this release. Be aware
 that this can continue to change if more vulnerabilities are found and fixed in log4j.
 \
-Note also that none of the vulnerabilities are exposed by SASPy as it doesn't use log4j, so there's no actual problem with these
+<br>Note also that none of the vulnerabilities are exposed by SASPy as it doesn't use log4j, so there's no actual problem with these
 regardless of their version. See more [here](https://sassoftware.github.io/saspy/configuration.html#attn-log4j-vulnerabilities-found-in-dec-2021)
 
 
