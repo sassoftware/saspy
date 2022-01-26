@@ -801,22 +801,17 @@ class SASsessionHTTP():
       return lstr
 
    def _asubmit(self, code, results="html"):
-      #odsopen  = json.dumps("ods listing close;ods html5 (id=saspy_internal) options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
-      #odsopen  = json.dumps("ods listing close;ods html5 (id=saspy_internal) options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n")
-      #odsclose = json.dumps("ods html5 (id=saspy_internal) close;ods listing;\n")
       odsopen  = json.dumps("ods listing close;ods "+self.sascfg.output+" (id=saspy_internal) options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style+"; ods graphics on / outputfmt=png;\n")
       odsclose = json.dumps("ods "+self.sascfg.output+" (id=saspy_internal) close;ods listing;\n")
-      ods      = True;
 
+      jcode = json.dumps(code)
       if results.upper() != "HTML":
-         ods = False
-         odsopen  = '""'
-         odsclose = '""'
+         d1 = '{"code":['+jcode+']}'
+      else:
+         d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
 
       # POST Job
       conn = self.sascfg.HTTPConn; conn.connect()
-      jcode = json.dumps(code)
-      d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
       headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json",
                "Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', self._uri_exe, body=d1, headers=headers)
@@ -878,28 +873,18 @@ class SASsessionHTTP():
       prompt  = prompt if prompt is not None else {}
       printto = kwargs.pop('undo', False)
 
-      #odsopen  = json.dumps("ods listing close;ods html5 (id=saspy_internal) options(bitmap_mode='inline') device=png; ods graphics on / outputfmt=png;\n")
-      #odsopen  = json.dumps("ods listing close;ods html5 (id=saspy_internal) options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n")
-      #odsclose = json.dumps("ods html5 (id=saspy_internal) close;ods listing;\n")
       odsopen  = json.dumps("ods listing close;ods "+self.sascfg.output+" (id=saspy_internal) options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style+"; ods graphics on / outputfmt=png;\n")
       odsclose = json.dumps("ods "+self.sascfg.output+" (id=saspy_internal) close;ods listing;\n")
       ods      = True;
-      pcodei   = ''
-      pcodeiv  = ''
-      pcodeo   = ''
 
       if self._session == None:
          logger.error("No SAS process attached. SAS process has terminated unexpectedly.")
          return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
 
-      if results.upper() != "HTML":
-         ods = False
-         odsopen  = '""'
-         odsclose = '""'
-
       if len(prompt):
-         pcodei += 'options nosource nonotes;\n'
-         pcodeo += 'options nosource nonotes;\n'
+         pcodeiv = ''
+         pcodei  = 'options nosource nonotes;\n'
+         pcodeo  = 'options nosource nonotes;\n'
          for key in prompt:
             gotit = False
             while not gotit:
@@ -918,11 +903,18 @@ class SASsessionHTTP():
                pcodeo += '%symdel '+key+';\n'
          pcodei += 'options source notes;\n'
          pcodeo += 'options source notes;\n'
+         jcode = json.dumps(pcodei+pcodeiv+code+'\n'+pcodeo)
+      else:
+         jcode = json.dumps(code)
+
+      if results.upper() != "HTML":
+         ods = False
+         d1 = '{"code":['+jcode+']}'
+      else:
+         d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
 
       # POST Job
       conn = self.sascfg.HTTPConn; conn.connect()
-      jcode = json.dumps(pcodei+pcodeiv+code+'\n'+pcodeo)
-      d1 = '{"code":['+odsopen+','+jcode+','+odsclose+']}'
       headers={"Accept":"application/json","Content-Type":"application/vnd.sas.compute.job.request+json",
                "Authorization":"Bearer "+self.sascfg._token}
       conn.request('POST', self._uri_exe, body=d1, headers=headers)
