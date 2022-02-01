@@ -1050,15 +1050,15 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return sd
 
-    def lib_path(self, libref: str) -> str or list:
+    def lib_path(self, libref: str) -> list:
         """
         :param libref:  the libref to get the path from
-        :return: the path for the libref; note that some librefs have no path, like database librefs.
+        :return: list of paths for the libref (supports concatenated libraries); note that some librefs have no path, like database librefs.
         """
 
         if libref.upper() not in self.assigned_librefs():
            logger.warning("Libref {} is not assigned in this SAS session".format(libref))
-           return ''
+           return []
 
         code = "data _null_; length x $ 4096;"
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
@@ -1072,17 +1072,17 @@ class SASsession():
 
         libpath = ll['LOG'].rpartition('LIBPATH=')[2].rpartition('LIBPATHEND=')[0].strip().replace('\n','')
 
+        libpathlist = []
         if libpath.startswith('(') and libpath.endswith(')'):
            npaths = int(libpath.count("'")/2)
-           libpathlist = []
            for i in range(npaths):
               path = libpath.partition("'")[2].partition("'")
               libpathlist.append(path[0])
               libpath = path[2]
-
-           return libpathlist
         else:
-           return libpath
+           libpathlist.append(libpath)
+
+        return libpathlist
 
     def saslib(self, libref: str, engine: str = ' ', path: typing.Union[str, list] = '',
                options: str = ' ', prompt: dict = None) -> str:
