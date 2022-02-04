@@ -961,10 +961,10 @@ IOM using COM
 New in 3.1.0, this user contributed access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method,
 but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.
 
-Please note that because this Access Method is user contributed and uses 3rd party modules to perform most of its functionality, I can't fully support all
-of the functionality and performance characteristics in this access method that I provide in the other access methods I wrote. There have been lots of improvements
-since this was contributed, many of which I couldn't factor into this method. The IOM access method is the preferred, fully supported method, but you can use
-this if it does what you need from it.
+.. note:: Please note that because this Access Method is user contributed and uses 3rd party modules to perform most of its functionality, I can't fully support all
+    of the functionality and performance characteristics in this access method that I provide in the other access methods I wrote. There have been lots of improvements
+    since this was contributed, many of which I couldn't factor into this method. The IOM access method is the preferred, fully supported method, but you can use
+    this if it does what you need from it.
 
 SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS support) is required to install the SAS COM library on your client system.
 
