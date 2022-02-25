@@ -46,6 +46,14 @@ class SASIONotSupportedError(Exception):
         return 'Cannot use {} I/O module on Windows. {}'.format(self.method, alt_text)
 
 
+class SASIOConnectionError(Exception):
+    def __init__(self, msg: str):
+        self.msg = msg
+
+    def __str__(self):
+        return 'Failure establishing SASsession.\n {}'.format(self.msg)
+
+
 class SASHTTPauthenticateError(Exception):
     def __init__(self, msg: str):
         self.msg = msg

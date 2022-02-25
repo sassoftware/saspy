@@ -71,7 +71,7 @@ from saspy.sasViyaML     import SASViyaML
 from saspy.version       import __version__ as SASPy_CUR_VER
 
 from saspy.sasexceptions import (SASIONotSupportedError, SASConfigNotValidError,
-                                SASConfigNotFoundError)
+                                SASConfigNotFoundError, SASIOConnectionError)
 _cfgfile_cnt = 0
 
 try:
@@ -586,12 +586,17 @@ class SASsession():
 
         # validate encoding
         if self.sascfg.mode != 'HTTP':
+           failed = False
            try:
               self.pyenc = sas_encoding_mapping[self.sascei]
            except KeyError:
               logger.fatal("Invalid response from SAS on inital submission. printing the SASLOG as diagnostic")
               logger.fatal(self._io._log)
-              raise
+              failed = True
+              pass
+
+           if failed:
+              raise SASIOConnectionError(res)
 
            if self.pyenc is not None:
               if self._io.sascfg.encoding != '':
