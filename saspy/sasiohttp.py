@@ -1345,7 +1345,7 @@ class SASsessionHTTP():
       chr_upper = {k.upper():v for k,v in charlens.items()}
 
       if type(df.index) != pd.RangeIndex:
-         warnings.warn("Note that Indexes are not transferred over as columns. Only actual coulmns are transferred")
+         warnings.warn("Note that Indexes are not transferred over as columns. Only actual columns are transferred")
 
       for name in df.columns:
          colname = str(name).replace("'", "''")

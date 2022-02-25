@@ -697,7 +697,7 @@ class SASSessionCOM(object):
         tablepath = self._tablepath(table, libref=libref)
 
         if type(df.index) != pd.RangeIndex:
-           warnings.warn("Note that Indexes are not transferred over as columns. Only actual coulmns are transferred")
+           warnings.warn("Note that Indexes are not transferred over as columns. Only actual columns are transferred")
 
         columns = []
         formats = {}
