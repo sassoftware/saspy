@@ -812,19 +812,22 @@ Will use HTML5 for this SASsession.""")
          pcodei += 'options source notes;\n'
          pcodeo += 'options source notes;\n'
 
+      pgm = b''
       if ods:
-         self.stdin.write(odsopen)
+         pgm += odsopen
 
-      pgm  = mj+b'\n'+pcodei.encode(self.sascfg.encoding)+pcodeiv.encode(self.sascfg.encoding)
+      pgm += mj+b'\n'+pcodei.encode(self.sascfg.encoding)+pcodeiv.encode(self.sascfg.encoding)
       pgm += code.encode(self.sascfg.encoding)+b'\n'+pcodeo.encode(self.sascfg.encoding)+b'\n'+mj
-      out  = self.stdin.write(pgm)
 
       if ods:
-         self.stdin.write(odsclose)
+         pgm += odsclose
 
-      out = self.stdin.write(undo+logcodei.encode(self.sascfg.encoding)+b'\n')
-      self.stdin.flush()
+      pgm += undo+logcodei.encode(self.sascfg.encoding)+b'\n'
+
       bof = False
+      pos = 0
+      end = len(pgm)
+
       while not done:
          try:
             while True:
@@ -850,6 +853,12 @@ Will use HTML5 for this SASsession.""")
                      self._sb.SASpid = None
                      return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
                                  str(rc)+'\n'+logf.decode(self.sascfg.encoding, errors='replace'), LST='')
+
+               if pos < end:
+                  out = self.stdin.write(pgm[pos:min(pos+4096,end)])
+                  self.stdin.flush()
+                  pos += 4096
+
                if bail:
                   eof -= 1
                if eof < 0:
@@ -861,6 +870,7 @@ Will use HTML5 for this SASsession.""")
                      lst = b''
                else:
                   lst = self.stdout.read1(4096)
+
                if len(lst) > 0:
                   lstf += lst
                   if ods and not bof and lstf.count(b"<!DOCTYPE html>", 0, 20) > 0:
@@ -873,6 +883,7 @@ Will use HTML5 for this SASsession.""")
                         log = b''
                   else:
                      log = self.stderr.read1(4096)
+
                   if len(log) > 0:
                       logf += log
                       if not bail and bc:
