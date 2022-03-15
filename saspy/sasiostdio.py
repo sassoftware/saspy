@@ -857,25 +857,30 @@ Will use HTML5 for this SASsession.""")
                if pos < end:
                   out = self.stdin.write(pgm[pos:min(pos+4096,end)])
                   self.stdin.flush()
-                  pos += 4096
+                  pos += out
 
                if bail:
                   eof -= 1
                if eof < 0:
                   break
-               if os.name == 'nt':
-                  try:
-                     lst = self.stdout.get_nowait()
-                  except Empty:
-                     lst = b''
-               else:
-                  lst = self.stdout.read1(4096)
 
-               if len(lst) > 0:
-                  lstf += lst
-                  if ods and not bof and lstf.count(b"<!DOCTYPE html>", 0, 20) > 0:
-                     bof = True
-               else:
+               while True:
+                  if os.name == 'nt':
+                     try:
+                        lst = self.stdout.get_nowait()
+                     except Empty:
+                        lst = b''
+                  else:
+                     lst = self.stdout.read1(4096)
+
+                  if len(lst) > 0:
+                     lstf += lst
+                     if ods and not bof and lstf.count(b"<!DOCTYPE html>") > 0:
+                        bof = True
+                  else:
+                     break
+
+               while True:
                   if os.name == 'nt':
                      try:
                         log = self.stderr.get_nowait()
@@ -885,20 +890,50 @@ Will use HTML5 for this SASsession.""")
                      log = self.stderr.read1(4096)
 
                   if len(log) > 0:
-                      logf += log
-                      if not bail and bc:
-                         self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
-                         self.stdin.flush()
-                         bc = False
-                  if not bail and logf.count(logcodeo) >= 1:
-                      if ods:
-                         lenf = len(lstf)
-                         if lenf > 20 and bof:
-                            if lstf.count(b"</html>", (lenf - 15), lenf):
-                               bail = True
-                      else:
-                         bail = True
+                     logf += log
+
+                  if not (pos < end):
+                     if not bail and logf.count(logcodeo) >= 1:
+                         if ods:
+                            lenf = len(lstf)
+                            if lenf > 20 and bof:
+                               if lstf.count(b"</html>"):
+                                  bail = True
+                         else:
+                            bail = True
+
+                  if not len(log) > 0:
+                     break
+
             done = True
+
+         except (KeyboardInterrupt, SystemExit):
+            if not self._sb.sascfg.prompt:
+               raise KeyboardInterrupt("Interupt handling is disabled due to prompting being disabled.")
+
+            print('Exception caught!')
+            ll = self._breakprompt(logcodeo)
+
+            if ll.get('ABORT', False):
+               return ll
+
+            logf += ll['LOG']
+            lstf += ll['LST']
+            bc    = ll['BC']
+
+            if ods and not bof and lstf.count(b"<!DOCTYPE html>") > 0:
+               bof = True
+            if not bc:
+               print('Exception handled :)\n')
+            else:
+               print('Exception ignored, continuing to process...\n')
+
+            if pos < end:
+               pgm += undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n'
+               end += len(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
+            else:
+               self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
+               self.stdin.flush()
 
          except (ConnectionResetError):
             log = ''
@@ -927,28 +962,6 @@ Will use HTML5 for this SASsession.""")
             self._sb.SASpid = None
             log = logf.partition(logcodeo)[0]+b'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc).encode()+b'\n'+logf
             return dict(LOG=log.encode(), LST='')
-
-         except (KeyboardInterrupt, SystemExit):
-            if not self._sb.sascfg.prompt:
-               raise KeyboardInterrupt("Interupt handling is disabled due to prompting being disabled.")
-
-            print('Exception caught!')
-            ll = self._breakprompt(logcodeo)
-
-            if ll.get('ABORT', False):
-               return ll
-
-            logf += ll['LOG']
-            lstf += ll['LST']
-            bc    = ll['BC']
-
-            if not bc:
-               print('Exception handled :)\n')
-            else:
-               print('Exception ignored, continuing to process...\n')
-
-            self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
-            self.stdin.flush()
 
       if ods:
          try:
@@ -1029,7 +1042,6 @@ Will use HTML5 for this SASsession.""")
                   return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+outrc, LST='',ABORT=True)
 
             lst = self.stdout.read1(4096)
-            lstf += lst
             if len(lst) > 0:
                 lsts = lst.rpartition(b'Select:')
                 if lsts[0] != b'' and lsts[1] != b'':
@@ -1041,9 +1053,8 @@ Will use HTML5 for this SASsession.""")
                        response = self.sascfg._prompt("Please enter your Response: ")
                     self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
                     self.stdin.flush()
-                    if (response == 'C' or response == 'c') and query.count("C. Cancel") >= 1:
+                    if (response == 'C' or response == 'c') and query.count(b"C. Cancel") >= 1:
                        bc = True
-                       break
                 else:
                     lsts = lst.rpartition(b'Press')
                     if lsts[0] != b'' and lsts[1] != b'':
@@ -1054,9 +1065,8 @@ Will use HTML5 for this SASsession.""")
                            response = self.sascfg._prompt("Please enter your Response: ")
                         self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
                         self.stdin.flush()
-                        if (response == 'N' or response == 'n') and query.count("N to continue") >= 1:
+                        if (response == 'N' or response == 'n') and query.count(b"N to continue") >= 1:
                            bc = True
-                           break
                     else:
                         print("******************No 'Select' or 'Press' found. Here's what was found.")
                         found = True
@@ -1064,13 +1074,16 @@ Will use HTML5 for this SASsession.""")
                         response = None
                         while response is None:
                            response = self.sascfg._prompt("Please enter your Response: or N/A only if there are no choices: ")
-                        self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
-                        self.stdin.flush()
-                        if response in ['N/A', '']:
-                           break
-                        found = True
+                        if response not in ['N/A', '']:
+                           self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
+                           self.stdin.flush()
+                        else:
+                           lstf += lst
                         bc = True
+                        break
             else:
+                if bc:
+                   break
                 log = self.stderr.read1(4096)
                 logf += log
                 self._log += log.decode(self.sascfg.encoding, errors='replace')
