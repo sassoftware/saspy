@@ -1,5 +1,35 @@
 # Changelog
 
+## [4.2.0] - 2022-03-22
+
+### Added
+
+-   `None` Nothing Added
+
+### Changed
+
+-   `Tweak` If the initial connection to SAS (a SASsession) fails then there will be a failure error provided, but there
+is also an exception thrown in subsequent code, trying to submit some of the initial code to gather info about the
+session. This was subordinate and inconsequential, yet was confusing and needed to be addressed. So, in this release, there
+is a specific exception being thrown instead of the one that happened to be thrown, which makes the problem more clear.
+
+### Fixed
+
+-   `Fix` There was an issue opened for the STDIO Access Method where if the code being submitted was longer than 128K,
+SASPy would deadlock with SAS due to both being single threaded and the way Pipes work; trying to flush STDIN would block
+in SASPy because SAS was blocked on writing to STDOUT/ERR, so they would both deadlock, not being able to read off of the
+other Pipes. I reworked how submit works in STDIO, so that there's a blocked amount of STDIN sent before trying to pull off
+of both STDOUT and STDERR, iterating till done, to circumvent this behavior. That works great, but it caused issues with
+ATTN handling that I support in that Access Method. I needed to rework that to compensate and it's handling it much better.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+# Changelog
+
 ## [4.1.0] - 2022-02-07
 
 ### Added
