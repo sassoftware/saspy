@@ -838,6 +838,7 @@ Will use HTML5 for this SASsession.""")
       while not done:
          try:
             while True:
+               wait = True
                if os.name == 'nt':
                   try:
                      rc = self.pid.wait(0)
@@ -877,6 +878,7 @@ Will use HTML5 for this SASsession.""")
 
                   if len(lst) > 0:
                      lstf += lst
+                     wait = False
                      if ods and not bof and lstf.count(b"<!DOCTYPE html>") > 0:
                         bof = True
                   else:
@@ -893,6 +895,7 @@ Will use HTML5 for this SASsession.""")
 
                   if len(log) > 0:
                      logf += log
+                     wait = False
 
                   if not bail and logf.count(logcodeo) >= 1:
                       if ods:
@@ -905,6 +908,9 @@ Will use HTML5 for this SASsession.""")
 
                   if not len(log) > 0:
                      break
+
+               if wait:
+                  sleep(0.01)
 
             done = True
 
