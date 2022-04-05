@@ -35,9 +35,8 @@ try:
 except ImportError:
    pass
 
-if os.name == 'nt':
-   from queue     import Queue, Empty
-   from threading import Thread
+from queue     import Queue, Empty
+from threading import Thread
 
 class SASconfigSTDIO:
    """
@@ -432,6 +431,10 @@ Will use HTML5 for this SASsession.""")
             lst = self.stdout.read1(4096)
             logger.error("stdout from subprocess is:\n"+lst.decode())
 
+      self.q_stdin = Queue()
+      self.t_stdin = Thread(target=self._write_in, daemon=True)
+      self.t_stdin.start()
+
       if self.pid is None:
          msg  = "SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n"
          msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
@@ -471,6 +474,12 @@ Will use HTML5 for this SASsession.""")
                break
             self.stderr.put(log)
 
+   def _write_in(self):
+      while True:
+         self.stdin.write(self.q_stdin.get())
+         self.stdin.flush()
+         self.q_stdin.task_done()
+
    def _endsas(self):
       rc  = 0
       ret = None
@@ -478,8 +487,7 @@ Will use HTML5 for this SASsession.""")
          code = b";*\';*\";*/;\n;quit;endsas;\n"
          self._getlog(wait=1)
          if self.pid:
-            out = self.stdin.write(code)
-            self.stdin.flush()
+            self.q_stdin.put(code)
             #self._asubmit(code,'text')
          sleep(1)
          if self.pid:
@@ -824,10 +832,9 @@ Will use HTML5 for this SASsession.""")
 
       pgm += undo+logcodei.encode(self.sascfg.encoding)+b'\n'
 
-      bof = False
-      pos = 0
-      end = len(pgm)
+      self.q_stdin.put(pgm)
 
+      bof = False
       while not done:
          try:
             while True:
@@ -853,11 +860,6 @@ Will use HTML5 for this SASsession.""")
                      self._sb.SASpid = None
                      return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
                                  str(rc)+'\n'+logf.decode(self.sascfg.encoding, errors='replace'), LST='')
-
-               if pos < end:
-                  out = self.stdin.write(pgm[pos:min(pos+4096,end)])
-                  self.stdin.flush()
-                  pos += out
 
                if bail:
                   eof -= 1
@@ -892,15 +894,14 @@ Will use HTML5 for this SASsession.""")
                   if len(log) > 0:
                      logf += log
 
-                  if not (pos < end):
-                     if not bail and logf.count(logcodeo) >= 1:
-                         if ods:
-                            lenf = len(lstf)
-                            if lenf > 20 and bof:
-                               if lstf.count(b"</html>"):
-                                  bail = True
-                         else:
-                            bail = True
+                  if not bail and logf.count(logcodeo) >= 1:
+                      if ods:
+                         lenf = len(lstf)
+                         if lenf > 20 and bof:
+                            if lstf.count(b"</html>"):
+                               bail = True
+                      else:
+                         bail = True
 
                   if not len(log) > 0:
                      break
@@ -928,12 +929,7 @@ Will use HTML5 for this SASsession.""")
             else:
                print('Exception ignored, continuing to process...\n')
 
-            if pos < end:
-               pgm += undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n'
-               end += len(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
-            else:
-               self.stdin.write(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
-               self.stdin.flush()
+            self.q_stdin.put(undo+odsclose+logcodei.encode(self.sascfg.encoding)+b'\n')
 
          except (ConnectionResetError):
             log = ''
@@ -1051,8 +1047,7 @@ Will use HTML5 for this SASsession.""")
                     response = None
                     while response is None:
                        response = self.sascfg._prompt("Please enter your Response: ")
-                    self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
-                    self.stdin.flush()
+                    self.q_stdin.put(response.encode(self.sascfg.encoding) + b'\n')
                     if (response == 'C' or response == 'c') and query.count(b"C. Cancel") >= 1:
                        bc = True
                 else:
@@ -1063,8 +1058,7 @@ Will use HTML5 for this SASsession.""")
                         response = None
                         while response is None:
                            response = self.sascfg._prompt("Please enter your Response: ")
-                        self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
-                        self.stdin.flush()
+                        self.q_stdin.put(response.encode(self.sascfg.encoding) + b'\n')
                         if (response == 'N' or response == 'n') and query.count(b"N to continue") >= 1:
                            bc = True
                     else:
@@ -1075,8 +1069,7 @@ Will use HTML5 for this SASsession.""")
                         while response is None:
                            response = self.sascfg._prompt("Please enter your Response: or N/A only if there are no choices: ")
                         if response not in ['N/A', '']:
-                           self.stdin.write(response.encode(self.sascfg.encoding) + b'\n')
-                           self.stdin.flush()
+                           self.q_stdin.put(response.encode(self.sascfg.encoding) + b'\n')
                         else:
                            lstf += lst
                         bc = True
@@ -2750,4 +2743,3 @@ class _read_sock(io.StringIO):
       self.datar  = data[2]
 
       return datap.decode()
-
