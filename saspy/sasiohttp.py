@@ -1565,19 +1565,25 @@ class SASsessionHTTP():
       resp = req.read()
       conn.close()
 
-      js = json.loads(resp.decode(self.sascfg.encoding))
+      try:
+         js = json.loads(resp.decode(self.sascfg.encoding))
 
-      varlist = []
-      vartype = []
-      nvars = js.get('count')
-      lst = js.get('items')
-      for i in range(len(lst)):
-         varlist.append(lst[i].get('name'))
-         vartype.append(lst[i].get('type'))
+         varlist = []
+         vartype = []
+         nvars = js.get('count')
+         lst = js.get('items')
+         for i in range(len(lst)):
+            varlist.append(lst[i].get('name'))
+            vartype.append(lst[i].get('type'))
 
-      dvarlist = list(varlist)
-      for i in range(len(varlist)):
-         varlist[i] = varlist[i].replace("'", "''")
+         dvarlist = list(varlist)
+         for i in range(len(varlist)):
+            varlist[i] = varlist[i].replace("'", "''")
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}\
+         \nPrinting the Status and Response as diagnostic\n{}\n{}".format(str(e), ll['LOG'], str(status), str(resp)))
+         return None
 
       topts = dict(dsopts)
       topts.pop('firstobs', None)
@@ -1592,10 +1598,15 @@ class SASsessionHTTP():
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")
-      varcat = l2[2].split("\n", nvars)
-      del varcat[nvars]
+      try:
+         l2 = ll['LOG'].rpartition("FMT_CATS=")
+         l2 = l2[2].partition("\n")
+         varcat = l2[2].split("\n", nvars)
+         del varcat[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
       code += "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
@@ -1730,19 +1741,25 @@ class SASsessionHTTP():
       resp = req.read()
       conn.close()
 
-      js = json.loads(resp.decode(self.sascfg.encoding))
+      try:
+         js = json.loads(resp.decode(self.sascfg.encoding))
 
-      varlist = []
-      vartype = []
-      nvars = js.get('count')
-      lst = js.get('items')
-      for i in range(len(lst)):
-         varlist.append(lst[i].get('name'))
-         vartype.append(lst[i].get('type'))
+         varlist = []
+         vartype = []
+         nvars = js.get('count')
+         lst = js.get('items')
+         for i in range(len(lst)):
+            varlist.append(lst[i].get('name'))
+            vartype.append(lst[i].get('type'))
 
-      dvarlist = list(varlist)
-      for i in range(len(varlist)):
-         varlist[i] = varlist[i].replace("'", "''")
+         dvarlist = list(varlist)
+         for i in range(len(varlist)):
+            varlist[i] = varlist[i].replace("'", "''")
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}\
+         \nPrinting the Status and Response as diagnostic\n{}\n{}".format(str(e), ll['LOG'], str(status), str(resp)))
+         return None
 
       topts = dict(dsopts)
       topts.pop('firstobs', None)
@@ -1758,10 +1775,15 @@ class SASsessionHTTP():
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")
-      varcat = l2[2].split("\n", nvars)
-      del varcat[nvars]
+      try:
+         l2 = ll['LOG'].rpartition("FMT_CATS=")
+         l2 = l2[2].partition("\n")
+         varcat = l2[2].split("\n", nvars)
+         del varcat[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "

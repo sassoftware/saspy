@@ -2352,26 +2352,31 @@ Will use HTML5 for this SASsession.""")
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("LRECL= ")
-      l2 = l2[2].partition("\n")
-      lrecl = int(l2[0])
+      try:
+         l2 = ll['LOG'].rpartition("LRECL= ")
+         l2 = l2[2].partition("\n")
+         lrecl = int(l2[0])
 
-      l2 = l2[2].partition("VARNUMS= ")
-      l2 = l2[2].partition("\n")
-      nvars = int(l2[0])
+         l2 = l2[2].partition("VARNUMS= ")
+         l2 = l2[2].partition("\n")
+         nvars = int(l2[0])
 
-      l2 = l2[2].partition("\n")
-      varlist = l2[2].split("\n", nvars)
-      del varlist[nvars]
+         l2 = l2[2].partition("\n")
+         varlist = l2[2].split("\n", nvars)
+         del varlist[nvars]
 
-      dvarlist = list(varlist)
-      for i in range(len(varlist)):
-         varlist[i] = varlist[i].replace("'", "''")
+         dvarlist = list(varlist)
+         for i in range(len(varlist)):
+            varlist[i] = varlist[i].replace("'", "''")
 
-      l2 = l2[2].partition("VARTYPE=")
-      l2 = l2[2].partition("\n")
-      vartype = l2[2].split("\n", nvars)
-      del vartype[nvars]
+         l2 = l2[2].partition("VARTYPE=")
+         l2 = l2[2].partition("\n")
+         vartype = l2[2].split("\n", nvars)
+         del vartype[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       topts = dict(dsopts)
       topts.pop('firstobs', None)
@@ -2387,10 +2392,15 @@ Will use HTML5 for this SASsession.""")
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")
-      varcat = l2[2].split("\n", nvars)
-      del varcat[nvars]
+      try:
+         l2 = ll['LOG'].rpartition("FMT_CATS=")
+         l2 = l2[2].partition("\n")
+         varcat = l2[2].split("\n", nvars)
+         del varcat[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       try:
          sock = socks.socket()
@@ -2545,26 +2555,31 @@ Will use HTML5 for this SASsession.""")
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("LRECL= ")
-      l2 = l2[2].partition("\n")
-      lrecl = int(l2[0])
+      try:
+         l2 = ll['LOG'].rpartition("LRECL= ")
+         l2 = l2[2].partition("\n")
+         lrecl = int(l2[0])
 
-      l2 = l2[2].partition("VARNUMS= ")
-      l2 = l2[2].partition("\n")
-      nvars = int(l2[0])
+         l2 = l2[2].partition("VARNUMS= ")
+         l2 = l2[2].partition("\n")
+         nvars = int(l2[0])
 
-      l2 = l2[2].partition("\n")
-      varlist = l2[2].split("\n", nvars)
-      del varlist[nvars]
+         l2 = l2[2].partition("\n")
+         varlist = l2[2].split("\n", nvars)
+         del varlist[nvars]
 
-      dvarlist = list(varlist)
-      for i in range(len(varlist)):
-         varlist[i] = varlist[i].replace("'", "''")
+         dvarlist = list(varlist)
+         for i in range(len(varlist)):
+            varlist[i] = varlist[i].replace("'", "''")
 
-      l2 = l2[2].partition("VARTYPE=")
-      l2 = l2[2].partition("\n")
-      vartype = l2[2].split("\n", nvars)
-      del vartype[nvars]
+         l2 = l2[2].partition("VARTYPE=")
+         l2 = l2[2].partition("\n")
+         vartype = l2[2].split("\n", nvars)
+         del vartype[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       topts = dict(dsopts)
       topts.pop('firstobs', None)
@@ -2580,10 +2595,15 @@ Will use HTML5 for this SASsession.""")
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")
-      varcat = l2[2].split("\n", nvars)
-      del varcat[nvars]
+      try:
+         l2 = ll['LOG'].rpartition("FMT_CATS=")
+         l2 = l2[2].partition("\n")
+         varcat = l2[2].split("\n", nvars)
+         del varcat[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       try:
          sock = socks.socket()

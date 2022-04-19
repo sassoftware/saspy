@@ -1759,26 +1759,31 @@ Will use HTML5 for this SASsession.""")
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("LRECL= ")
-      l2 = l2[2].partition("\n")
-      lrecl = int(l2[0])
+      try:
+         l2 = ll['LOG'].rpartition("LRECL= ")
+         l2 = l2[2].partition("\n")
+         lrecl = int(l2[0])
 
-      l2 = l2[2].partition("VARNUMS= ")
-      l2 = l2[2].partition("\n")
-      nvars = int(l2[0])
+         l2 = l2[2].partition("VARNUMS= ")
+         l2 = l2[2].partition("\n")
+         nvars = int(l2[0])
 
-      l2 = l2[2].partition("\n")
-      varlist = l2[2].split("\n", nvars)
-      del varlist[nvars]
+         l2 = l2[2].partition("\n")
+         varlist = l2[2].split("\n", nvars)
+         del varlist[nvars]
 
-      dvarlist = list(varlist)
-      for i in range(len(varlist)):
-         varlist[i] = varlist[i].replace("'", "''")
+         dvarlist = list(varlist)
+         for i in range(len(varlist)):
+            varlist[i] = varlist[i].replace("'", "''")
 
-      l2 = l2[2].partition("VARTYPE=")
-      l2 = l2[2].partition("\n")
-      vartype = l2[2].split("\n", nvars)
-      del vartype[nvars]
+         l2 = l2[2].partition("VARTYPE=")
+         l2 = l2[2].partition("\n")
+         vartype = l2[2].split("\n", nvars)
+         del vartype[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       topts = dict(dsopts)
       topts.pop('firstobs', None)
@@ -1794,10 +1799,15 @@ Will use HTML5 for this SASsession.""")
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")
-      varcat = l2[2].split("\n", nvars)
-      del varcat[nvars]
+      try:
+         l2 = ll['LOG'].rpartition("FMT_CATS=")
+         l2 = l2[2].partition("\n")
+         varcat = l2[2].split("\n", nvars)
+         del varcat[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       code = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
 
@@ -1870,12 +1880,10 @@ Will use HTML5 for this SASsession.""")
 
       if not local:
          try:
-
             sockout = _read_sock(io=self, rowsep=b'\n', encoding=self.sascfg.encoding,
                                  lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
 
             df = pd.read_csv(sockout, index_col=idx_col, encoding='utf8', engine=eng, dtype=dts, **kwargs)
-
          except:
             if os.name == 'nt':
                try:
@@ -1995,26 +2003,31 @@ Will use HTML5 for this SASsession.""")
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("LRECL= ")
-      l2 = l2[2].partition("\n")
-      lrecl = int(l2[0])
+      try:
+         l2 = ll['LOG'].rpartition("LRECL= ")
+         l2 = l2[2].partition("\n")
+         lrecl = int(l2[0])
 
-      l2 = l2[2].partition("VARNUMS= ")
-      l2 = l2[2].partition("\n")
-      nvars = int(l2[0])
+         l2 = l2[2].partition("VARNUMS= ")
+         l2 = l2[2].partition("\n")
+         nvars = int(l2[0])
 
-      l2 = l2[2].partition("\n")
-      varlist = l2[2].split("\n", nvars)
-      del varlist[nvars]
+         l2 = l2[2].partition("\n")
+         varlist = l2[2].split("\n", nvars)
+         del varlist[nvars]
 
-      dvarlist = list(varlist)
-      for i in range(len(varlist)):
-         varlist[i] = varlist[i].replace("'", "''")
+         dvarlist = list(varlist)
+         for i in range(len(varlist)):
+            varlist[i] = varlist[i].replace("'", "''")
 
-      l2 = l2[2].partition("VARTYPE=")
-      l2 = l2[2].partition("\n")
-      vartype = l2[2].split("\n", nvars)
-      del vartype[nvars]
+         l2 = l2[2].partition("VARTYPE=")
+         l2 = l2[2].partition("\n")
+         vartype = l2[2].split("\n", nvars)
+         del vartype[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       topts = dict(dsopts)
       topts.pop('firstobs', None)
@@ -2030,10 +2043,15 @@ Will use HTML5 for this SASsession.""")
 
       ll = self.submit(code, "text")
 
-      l2 = ll['LOG'].rpartition("FMT_CATS=")
-      l2 = l2[2].partition("\n")
-      varcat = l2[2].split("\n", nvars)
-      del varcat[nvars]
+      try:
+         l2 = ll['LOG'].rpartition("FMT_CATS=")
+         l2 = l2[2].partition("\n")
+         varcat = l2[2].split("\n", nvars)
+         del varcat[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
@@ -2111,14 +2129,12 @@ Will use HTML5 for this SASsession.""")
       #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb)
 
       try:
-
          sockout = _read_sock(io=self, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(),
                               lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=dvarlist,
                           sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
                           encoding='utf-8', quoting=quoting, **kwargs)
-
       except:
          if os.name == 'nt':
             try:
