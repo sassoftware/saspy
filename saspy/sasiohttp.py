@@ -709,7 +709,7 @@ class SASsessionHTTP():
       if jobid != None:
          self._log += logr.replace(chr(12), chr(10))
 
-      if logr.count('ERROR:') > 0:
+      if logr.count('\nERROR:') > 0:
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
 
@@ -1001,10 +1001,6 @@ class SASsessionHTTP():
          status = req.status
          resp = req.read()
          conn.close()
-
-      if logd.count('ERROR:') > 0:
-         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
-         self._sb.check_error_log = True
 
       return dict(LOG=logd, LST=lstd)
 

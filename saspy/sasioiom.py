@@ -1007,7 +1007,7 @@ Will use HTML5 for this SASsession.""")
       lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                     '<body class="l body">').replace("font-size: x-small;",
                                                                                      "font-size:  normal;")
-      if logd.count('ERROR:') > 0:
+      if logd.count('\nERROR:') > 0:
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
 
@@ -1932,7 +1932,7 @@ Will use HTML5 for this SASsession.""")
 
          logd = logf.decode(errors='replace')
          self._log += logd.replace(chr(12), chr(10))
-         if logd.count('ERROR:') > 0:
+         if logd.count('\nERROR:') > 0:
             warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
             self._sb.check_error_log = True
 
@@ -2215,7 +2215,7 @@ class _read_sock(io.StringIO):
 
                   logd = self.logf.decode(errors='replace')
                   self._io._log += logd.replace(chr(12), chr(10))
-                  if logd.count('ERROR:') > 0:
+                  if logd.count('\nERROR:') > 0:
                      warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
                      self._io._sb.check_error_log = True
 

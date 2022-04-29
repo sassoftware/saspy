@@ -25,6 +25,7 @@ import codecs
 import select as sel
 import warnings
 import io
+import re
 
 import logging
 logger = logging.getLogger('saspy')
@@ -397,11 +398,11 @@ Will use HTML5 for this SASsession.""")
 
             error  = self.pid.stderr.read(4096).decode()+'\n'
             error += self.pid.stdout.read(4096).decode()
-            logger.error("Java Error:\n"+error)
+            logger.error("SAS Startup Error:\n"+error)
 
             msg  = "Subprocess failed to start. Double check your settings in sascfg_personal.py file.\n"
             msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
-            msg += "If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n"
+            msg += "If no SAS Startup Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n"
             logger.error(msg)
             self.pid = None
             return None
@@ -518,6 +519,13 @@ Will use HTML5 for this SASsession.""")
          self._sb.SASpid = None
       return ret
 
+   def _checkLogForError(self, log):
+      lines = re.split(r'[\n]\s*', log)
+      for line in lines:
+         if line[self._sb.logoffset:].startswith('ERROR'):
+            return (True)
+      return (False)
+
    def _getlog(self, wait=5, jobid=None):
       logf   = b''
       quit   = wait * 2
@@ -557,7 +565,7 @@ Will use HTML5 for this SASsession.""")
       x = logf.decode(self.sascfg.encoding, errors='replace').replace(code1, " ")
       self._log += x
 
-      if x.count('ERROR:') > 0:
+      if self._checkLogForError(x):
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
 
@@ -702,13 +710,17 @@ Will use HTML5 for this SASsession.""")
       if results.upper() != "HTML":
          ods = False
 
-      if (ods):
-         self.stdin.write(odsopen)
-
-      out = self.stdin.write(code.encode(self.sascfg.encoding)+b'\n')
+      pgm = b''
 
       if (ods):
-         self.stdin.write(odsclose)
+         pgm += odsopen
+
+      pgm += code.encode(self.sascfg.encoding)+b'\n'
+
+      if (ods):
+         pgm += odsclose
+
+      out = self.stdin.write(pgm)
 
       self.stdin.flush()
 
@@ -831,11 +843,15 @@ Will use HTML5 for this SASsession.""")
       while not done:
          try:
             while True:
+               wait = True
                if os.name == 'nt':
                   try:
                      rc = self.pid.wait(0)
                      self.pid = None
-                     return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+                     #return 'SAS process has terminated unexpectedly. RC from wait was: '+str(rc)
+                     self._sb.SASpid = None
+                     return dict(LOG='SAS process has terminated unexpectedly. Pid State= ' +
+                                 str(rc)+'\n'+logf.decode(self.sascfg.encoding, errors='replace'), LST='')
                   except:
                      pass
                else:
@@ -874,6 +890,7 @@ Will use HTML5 for this SASsession.""")
                      lst = self.stdout.read1(4096)
 
                   if len(lst) > 0:
+                     wait = False
                      lstf += lst
                      if ods and not bof and lstf.count(b"<!DOCTYPE html>") > 0:
                         bof = True
@@ -890,6 +907,7 @@ Will use HTML5 for this SASsession.""")
                      log = self.stderr.read1(4096)
 
                   if len(log) > 0:
+                     wait = False
                      logf += log
 
                   if not (pos < end):
@@ -904,6 +922,9 @@ Will use HTML5 for this SASsession.""")
 
                   if not len(log) > 0:
                      break
+
+               if wait:
+                  sleep(0.001)
 
             done = True
 
@@ -990,7 +1011,7 @@ Will use HTML5 for this SASsession.""")
       lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                     '<body class="l body">').replace("font-size: x-small;",
                                                                                      "font-size:  normal;")
-      if logd.count('ERROR:') > 0:
+      if self._checkLogForError(logd):
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
 
@@ -1918,7 +1939,7 @@ Will use HTML5 for this SASsession.""")
 
                   logd = logf.decode(self.sascfg.encoding, errors='replace')
                   self._log += logd
-                  if logd.count('ERROR:') > 0:
+                  if self._checkLogForError(logd):
                      warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
                      self._sb.check_error_log = True
 
@@ -1977,7 +1998,7 @@ Will use HTML5 for this SASsession.""")
 
       logd = logf.decode(self.sascfg.encoding, errors='replace')
       self._log += logd
-      if logd.count('ERROR:') > 0:
+      if self._checkLogForError(logd):
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
 
@@ -2256,7 +2277,7 @@ Will use HTML5 for this SASsession.""")
 
       logd = logf.decode(self.sascfg.encoding, errors='replace')
       self._log += logd
-      if logd.count('ERROR:') > 0:
+      if self._checkLogForError(logd):
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
 
