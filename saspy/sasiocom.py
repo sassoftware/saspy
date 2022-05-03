@@ -489,7 +489,7 @@ class SASSessionCOM(object):
             lstf = self._getfile(self._gethtmlfn())
             try:
                lstf = lstf.decode()
-            except UnicodeDecodeError:
+            except UnicodeDecodeError: # older SAS used session encoding instead of utf8 like newer SAS
                try:
                   lstf = lstf.decode(self.sascfg.encoding)
                except UnicodeDecodeError:
