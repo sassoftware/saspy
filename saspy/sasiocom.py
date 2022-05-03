@@ -486,7 +486,16 @@ class SASSessionCOM(object):
             #   1. Swap \x0c for \n
             #   2. Change body class selector
             #   3. Increase font size
-            listing = self._getfile(self._gethtmlfn(), decode=True) \
+            lstf = self._getfile(self._gethtmlfn())
+            try:
+               lstf = lstf.decode()
+            except UnicodeDecodeError:
+               try:
+                  lstf = lstf.decode(self.sascfg.encoding)
+               except UnicodeDecodeError:
+                  lstf = lstf.decode(errors='replace')
+
+            listing = lstf \
                 .replace(chr(12), chr(10)) \
                 .replace('<body class="c body">', '<body class="l body">') \
                 .replace('font-size: x-small;', 'font-size: normal;')
