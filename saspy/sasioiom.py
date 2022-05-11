@@ -931,7 +931,6 @@ Will use HTML5 for this SASsession.""")
                     lst = b''
 
                  if len(lst) > 0:
-                    #print("LIST = \n"+lst)
                     lstf += lst
                  else:
                     sleep(0.1)
@@ -941,7 +940,6 @@ Will use HTML5 for this SASsession.""")
                        log = b''
 
                     if len(log) > 0:
-                       #print("LOG = \n"+log)
                        logf += log
                        if logf.count(logcodeo) >= 1:
                           bail = True

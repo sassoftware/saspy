@@ -1440,7 +1440,7 @@ Will use HTML5 for this SASsession.""")
             fd.close()
             ll = self.submit("", 'text')
             return {'Success' : False,
-                    'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
+                    'LOG'     : "Download was interrupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
       ll = self.submit("", 'text')
       return {'Success' : True,
@@ -1557,7 +1557,7 @@ Will use HTML5 for this SASsession.""")
          fd.close()
          ll = self.submit("", 'text')
          return {'Success' : False,
-                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
+                 'LOG'     : "Download was interrupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
       ll = self.submit("", 'text')
       return {'Success' : True,
@@ -1665,7 +1665,7 @@ Will use HTML5 for this SASsession.""")
          fd.close()
          ll = self.submit("filename saspydir;", 'text')
          return {'Success' : False,
-                 'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
+                 'LOG'     : "Download was interrupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
       newsock[0].shutdown(socks.SHUT_RDWR)
       newsock[0].close()
@@ -1880,7 +1880,7 @@ Will use HTML5 for this SASsession.""")
             logger.error("error occured in SAS during data transfer. Check the LOG for issues.")
             ll = self.submit("", 'text')
             return {'Success' : False,
-                    'LOG'     : "Download was interupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
+                    'LOG'     : "Download was interrupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
          ssock = newsock[0]
 
       logf  = b''
@@ -2502,7 +2502,7 @@ Will use HTML5 for this SASsession.""")
          df = pd.read_csv(sockout, index_col=idx_col, encoding='utf8', engine=eng, dtype=dts, **kwargs)
 
       except (KeyboardInterrupt, Exception) as e:
-         logger.error("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
+         logger.error("sasdata2dataframe was interrupted. Trying to return the saslog instead of a data frame.")
          try:
             if newsock[0]:
                newsock[0].shutdown(socks.SHUT_RDWR)
@@ -2736,7 +2736,7 @@ Will use HTML5 for this SASsession.""")
 
       except (KeyboardInterrupt, Exception) as e:
          logger.error(e)
-         logger.error("sasdata2dataframe was interupted. Trying to return the saslog instead of a data frame.")
+         logger.error("sasdata2dataframe was interrupted. Trying to return the saslog instead of a data frame.")
          try:
             if newsock[0]:
                newsock[0].shutdown(socks.SHUT_RDWR)
