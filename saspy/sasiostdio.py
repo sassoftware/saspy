@@ -54,6 +54,8 @@ class SASconfigSTDIO:
       self.saspath  = cfg.get('saspath', '')
       self.options  = cfg.get('options', [])
       self.ssh      = cfg.get('ssh', '')
+      self.sshpass  = cfg.get('sshpass', '')
+      self.sshpassparms = cfg.get('sshpassparms', '')
       self.identity = cfg.get('identity', None)
       self.luser    = cfg.get('luser', None)
       self.tunnel   = cfg.get('tunnel', None)
@@ -109,6 +111,20 @@ class SASconfigSTDIO:
             logger.warning("Parameter 'ssh' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.ssh = inssh
+
+      insshp = kwargs.get('sshpass', '')
+      if len(insshp) > 0:
+         if lock and len(self.sshpass):
+            logger.warning("Parameter 'sshpass' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.sshpass = insshp
+
+      insshpp = kwargs.get('sshpassparms', '')
+      if len(insshpp) > 0:
+         if lock and len(self.sshpassparms):
+            logger.warning("Parameter 'sshpassparms' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.sshpassparms = insshpp
 
       inident = kwargs.get('identity', None)
       if inident is not None:
@@ -255,8 +271,15 @@ class SASsessionSTDIO():
 
    def _buildcommand(self, sascfg):
       if sascfg.ssh:
-         pgm    = sascfg.ssh
-         parms  = [pgm]
+         if sascfg.sshpass:
+            pgm    = sascfg.sshpass
+            parms  = [pgm]
+            parms += sascfg.sshpassparms
+            parms += [sascfg.ssh]
+         else:
+            pgm    = sascfg.ssh
+            parms  = [pgm]
+
          parms += ["-t"]
 
          if sascfg.dasho:
