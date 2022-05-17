@@ -1,5 +1,44 @@
 # Changelog
 
+## [4.3.0] - 2022-05-17
+
+### Added
+
+-   `New` Per a user request, I added the ability to use sshpass with the STDIO over SSH access method.
+This allows you to authenticate with user/pw instead of having to use rsa keys (passwordless shh). There
+are now two new keys (see the doc) for providing the path to the sshpass executable and the parameters to use.
+The ssh key and other keys for this configuration stay the same.
+
+### Changed
+
+-   `Enhanced` The sd2df methods require multiple interactions (code submissions) to the SAS server and if any of these
+intermediate steps fail or have some issue, then the method invocation fails. But, I wasn't catching these intermediate
+problems which could cause non-obvious exceptions and tracebacks which were confusing. I've added code to catch failures
+for these intermediate steps and throw a more clear exception if that happens. Nothing about how the methods works has
+changed, just better error handling.
+                                                                
+-   `Enhanced` The code that checks for an 'ERROR:' in the log and issues a warning to alert you to look to see what the
+error was, wasn't only looking for it to start in column 1 of the log. So, it could pick up 'ERROR:' in a comment in the
+code or anywhere in the log. I've enhanced this to limit false positives by only flagging 'ERROR:' starting in the first
+column of the LOG.
+                                                                
+-   `Tweak` Fixed a typo in an error message.
+
+### Fixed
+
+-   `Fix` The COM Access Method had a bug where the `encoding` was being used to transcode HTML results returned to
+SASPy when it shouldn't, since the HTML results are already utf-8. Other code paths retrieving data from SAS did need to
+use the provided encoding for transcoding from SAS Session encoding to utf-8. So, this one path was changed to not try to
+transcode the HTML results. This was a fix for issue 454.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+# Changelog
+
 ## [4.2.0] - 2022-03-22
 
 ### Added

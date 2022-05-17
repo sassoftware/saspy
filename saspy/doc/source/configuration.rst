@@ -379,7 +379,9 @@ from a Linux client.
 This is the remote version of the original connection method. This also works
 with Unix SAS only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
-SSH configured between the two systems. Google it, it's not that difficult.
+SSH configured between the two systems. Starting in version 4.3.0, you can use sshpass
+on Linux to automate connecting with user/password as an option instead of apasswordless
+configuration.
 
 If you don't already have this set up, you need to generate rsa keys. Starting
 after version 2.2.9, you can specify an identity file (.pem file) instead by
@@ -448,6 +450,14 @@ localhost -
     nor dns, such that a local machine name ('MyPC') ends up resolved to some arbitrary internet ip
     (i.e.: 128.64.32.16), not the actual local ip (i.e.: 10.0.0.10).
 
+sshpass -
+    This is the fully qualified path of the sshpass command. the `ssh` key is still required, as ssh is still being
+    executed and has to be in the full command. But this allows the use of user/pw connections instead of rsa keys.
+
+sshpassparms -
+    This is a Python List containing the parms you want to use for sshpass. The three primary choinces are to provide
+    the password on the command line (it's xxx'ed out when looking at the system processes), or from a file or from an
+    environment variable. Check the man page on sshpass. ie: 'sshpassparms' : ['-f', '/file/with/pw/in/it']
 
 .. code-block:: ipython3
 
