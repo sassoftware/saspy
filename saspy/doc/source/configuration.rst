@@ -380,7 +380,7 @@ This is the remote version of the original connection method. This also works
 with Unix SAS only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
 SSH configured between the two systems. Starting in version 4.3.0, you can use sshpass
-on Linux to automate connecting with user/password as an option instead of apasswordless
+on Linux to automate connecting with user/password as an option instead of a passwordless
 configuration.
 
 If you don't already have this set up, you need to generate rsa keys. Starting
