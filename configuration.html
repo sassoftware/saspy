@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configuration &mdash; saspy 4.1.0 documentation</title>
+  <title>Configuration &mdash; saspy 4.3.0 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 4.1.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 4.3.0 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Installation" href="install.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                4.1.0
+                4.3.0
               </div>
             
           
@@ -506,7 +506,9 @@ from a Linux client.</p>
 <p>This is the remote version of the original connection method. This also works
 with Unix SAS only, and it supports passwordless SSH to the Unix machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
-SSH configured between the two systems. Google it, it&#8217;s not that difficult.</p>
+SSH configured between the two systems. Starting in version 4.3.0, you can use sshpass
+on Linux to automate connecting with user/password as an option instead of apasswordless
+configuration.</p>
 <p>If you don&#8217;t already have this set up, you need to generate rsa keys. Starting
 after version 2.2.9, you can specify an identity file (.pem file) instead by
 providing the file path on the identity key. Either of these provide passwordless access.
@@ -566,6 +568,13 @@ Normally this is resolved by gethostname() but in the case where the ip from tha
 override it by providing the ip here. The only case this has been seen is on a home network with no domains
 nor dns, such that a local machine name (&#8216;MyPC&#8217;) ends up resolved to some arbitrary internet ip
 (i.e.: 128.64.32.16), not the actual local ip (i.e.: 10.0.0.10).</dd>
+<dt>sshpass -</dt>
+<dd>This is the fully qualified path of the sshpass command. the <cite>ssh</cite> key is still required, as ssh is still being
+executed and has to be in the full command. But this allows the use of user/pw connections instead of rsa keys.</dd>
+<dt>sshpassparms -</dt>
+<dd>This is a Python List containing the parms you want to use for sshpass. The three primary choinces are to provide
+the password on the command line (it&#8217;s xxx&#8217;ed out when looking at the system processes), or from a file or from an
+environment variable. Check the man page on sshpass. ie: &#8216;sshpassparms&#8217; : [&#8216;-f&#8217;, &#8216;/file/with/pw/in/it&#8217;]</dd>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">ssh</span>      <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span> <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
             <span class="s1">&#39;ssh&#39;</span>     <span class="p">:</span> <span class="s1">&#39;/usr/bin/ssh&#39;</span><span class="p">,</span>
@@ -1140,7 +1149,7 @@ session instead of remote IOM (it is a different connection type).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'4.1.0',
+            VERSION:'4.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
