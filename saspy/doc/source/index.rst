@@ -2,6 +2,8 @@
 
 :tocdepth: 4
 
+.. image:: https://user-images.githubusercontent.com/17710182/171252212-4af121a6-72d9-4234-b6cf-2a0d31eb8bf7.png
+
 *****
 SASPy
 *****
