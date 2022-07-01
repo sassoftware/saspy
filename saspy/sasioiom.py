@@ -372,13 +372,13 @@ Will use HTML5 for this SASsession.""")
                   logger.warning('Did not find key '+self.sascfg.authkey+' in authinfo file:'+pwf+'\n')
 
             while len(user) == 0:
-               user = self.sascfg._prompt("Please enter the IOM user id: ")
+               user = self.sascfg._prompt("Please enter the OMR user id: ")
                if user is None:
                   self.sockin.close()
                   self.sockout.close()
                   self.sockerr.close()
                   self.pid = None
-                  raise RuntimeError("No SAS IOM User id provided.")
+                  raise RuntimeError("No SAS OMR User id provided.")
 
       pgm    = self.sascfg.java
       parms  = [pgm]
@@ -532,14 +532,14 @@ Will use HTML5 for this SASsession.""")
       if not zero and not self.sascfg.reconuri:
          if not self.sascfg.sspi:
             while len(pw) == 0:
-               pw = self.sascfg._prompt("Please enter the password for IOM user "+self.sascfg.omruser+": ", pw=True)
+               pw = self.sascfg._prompt("Please enter the password for OMR user "+self.sascfg.omruser+": ", pw=True)
                if pw is None:
                   if os.name == 'nt':
                      self.pid.kill()
                   else:
                      os.kill(self.pid, signal.SIGKILL)
                   self.pid = None
-                  raise RuntimeError("No SAS IOM User password provided.")
+                  raise RuntimeError("No SAS OMR User password provided.")
             pw += '\n'
             self.stdin[0].send(pw.encode())
 
