@@ -1210,8 +1210,12 @@ class SASsessionHTTP():
       logf += ll['LOG']
       fd.close()
 
-      return {'Success' : True,
-              'LOG'     : logf}
+      if status > 299:
+         return {'Success' : False,
+                 'LOG'     : "Failure in upload. Status="+str(status)+"\nResponse="+str(resp.decode())}
+
+         return {'Success' : True,
+                 'LOG'     : logf}
 
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
@@ -1257,16 +1261,25 @@ class SASsessionHTTP():
       req = conn.getresponse()
       status = req.status
 
-      fd.write(req.read())
-      fd.flush()
+      if status > 299:
+         ret = {'Success' : False,
+                'LOG'     : "Failure in download. Status="+str(status)+"\nReason="+str(req.reason)}
+      else:
+         fd.write(req.read())
+         fd.flush()
+         ret = None
+
       fd.close()
       conn.close()
 
       ll = self.submit("filename _sp_updn;", 'text')
       logf += ll['LOG']
 
-      return {'Success' : True,
-              'LOG'     : logf}
+      if ret is None:
+         ret = {'Success' : True,
+                'LOG'     : logf}
+
+      return ret
 
    def _getbytelenF(self, x):
       return len(x.encode(self.sascfg.encoding))
