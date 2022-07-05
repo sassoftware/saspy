@@ -237,7 +237,7 @@ public class saspy2j
                      {
                      flen = Long.valueOf(pgm.substring(0, idx));
                      pgm  = pgm.substring(idx + 13 + 33);
-               
+
                      bstr = null;
                      try
                         {
@@ -255,7 +255,7 @@ public class saspy2j
                         }
                      catch (GenericError e)
                         {}
-               
+
                      if (! (bstr == null))
                         {
                         while (flen > 0)
@@ -269,28 +269,14 @@ public class saspy2j
                                  bstr.Write(java.util.Arrays.copyOfRange(out, 0, slen));
                                  }
                               }
-                           catch (org.omg.CORBA.COMM_FAILURE e)
-                              {
-                              if (reconnect)
-                                 {
-                                 ods = true;
-                                 connect(true, true, false);
-                                 bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForWriting);
-                                 bstr.Write(odsdata.value);
-                                 }
-                              else
-                                 {
-                                 String msg = "We failed in Submit\n"+e.getMessage();
-                                 errp.write(msg);
-                                 errp.flush();
-                                 System.out.print(msg);
-                                 e.printStackTrace();
-                                 throw new IOException();
-                                 }
-                              }
                            catch (Exception e)
                               {
-                              slen = 0; 
+                              String msg = "We failed in Submit\n"+e.getMessage();
+                              errp.write(msg);
+                              errp.flush();
+                              System.out.print(msg);
+                              e.printStackTrace();
+                              throw new IOException();
                               }
                            }
                         bstr.Close();
@@ -299,7 +285,7 @@ public class saspy2j
                   else if (eol.contains("DNLOAD"))
                      {
                      pgm  = pgm.substring(idx + 13 + 33);
-               
+
                      bstr = null;
                      try
                         {
@@ -336,28 +322,14 @@ public class saspy2j
                                  odsout.flush();
                                  }
                               }
-                           catch (org.omg.CORBA.COMM_FAILURE e)
-                              {
-                              if (reconnect)
-                                 {
-                                 ods = true;
-                                 connect(true, true, false);
-                                 bstr = fileref.OpenBinaryStream(StreamOpenMode.StreamOpenModeForReading);
-                                 bstr.Read(blen, odsdata);
-                                 }
-                              else
-                                 {
-                                 String msg = "We failed in Submit\n"+e.getMessage();
-                                 errp.write(msg);
-                                 errp.flush();
-                                 System.out.print(msg);
-                                 e.printStackTrace();
-                                 throw new IOException();
-                                 }
-                              }
                            catch (Exception e)
                               {
-                              slen = 0; 
+                              String msg = "We failed in Submit\n"+e.getMessage();
+                              errp.write(msg);
+                              errp.flush();
+                              System.out.print(msg);
+                              e.printStackTrace();
+                              throw new IOException();
                               }
                            }
                         bstr.Close();
@@ -431,15 +403,15 @@ public class saspy2j
                               cx.close();
                               server     = (BridgeServer) Server.fromURI(uri);
                               ad         = server.getDomain();
-                    
+
                               if (appName != "")
                                  server.setServerName(appName.replace("\'", ""));
                               server.setOption(SASURI.applicationNameKey, "SASPy");
-                              
+
                               cxfConfig  = new ManualConnectionFactoryConfiguration(server);
                               cxfManager = new ConnectionFactoryManager();
                               cxf        = cxfManager.getFactory(cxfConfig);
-                              
+
                               if (spn)
                                  cx = cxf.getConnection(cred);
                               else
@@ -733,11 +705,11 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
              if (appName != "")
                 server.setServerName(appName.replace("\'", ""));
              server.setOption(SASURI.applicationNameKey, "SASPy");
-   
+
              cxfConfig  = new ManualConnectionFactoryConfiguration(server);
              cxfManager = new ConnectionFactoryManager();
              cxf        = cxfManager.getFactory(cxfConfig);
-   
+
              if (spn)
                 cx = cxf.getConnection(cred);
              else if (timeout > 0)
@@ -765,14 +737,14 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
                 if (appName != "")
                    server.setServerName(appName.replace("\'", ""));
                 server.setOption(SASURI.applicationNameKey, "SASPy");
-   
+
                 if (spn)
                    server.setSecurityPackage(Server.SECURITY_PACKAGE_NEGOTIATE);
-   
+
                 cxfConfig  = new ManualConnectionFactoryConfiguration(server);
                 cxfManager = new ConnectionFactoryManager();
                 cxf        = cxfManager.getFactory(cxfConfig);
-   
+
                 if (spn)
                    {
                    cred = SecurityPackageCredential.getInstance();
