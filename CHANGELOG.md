@@ -1,5 +1,39 @@
 # Changelog
 
+
+
+## [4.3.1] - 2022-07-xx
+
+### Added
+
+-   `Tweak` Thanks to our graphics design dept for creating a cool logo for SASPy! I added the graphic to the main repo
+page (in the readme), and to the saspy-examples repo and to the documentation page. This has nothing to do with the code
+or functionality; just a cool logo for SASPy!
+
+### Changed
+
+-   `Tweak` Changed the prompt in the IOM access method which asks for userid/pw to use 'OMR' instead of 'IOM' since the
+configuration keys for user/pw are omruser/omrpw not iomuser/iompw. This has no effect on the code or processing, just
+changing the text of the message to better correlate with the right acronym.
+
+-   `Tweak` Made a change in the java IOM client code for upload/download to propagate and return the error if there was
+a failure during the data transfer phase. Never seen this case happen before, but if it does it should be more clear.
+
+### Fixed
+
+-   `Fix` Added a check in the HTTP access method in upload and download to see if the status for the HTTP call was an error
+and return the failure. Previously it didn't check and just returned success.
+
+-   `Fix` Made a change in the HTTP access method's download method to read/write chunks of the data instead of the whole
+file to keep from running out of, or using excess, memory in the Python process.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+
 ## [4.3.0] - 2022-05-17
 
 ### Added
@@ -16,12 +50,12 @@ intermediate steps fail or have some issue, then the method invocation fails. Bu
 problems which could cause non-obvious exceptions and tracebacks which were confusing. I've added code to catch failures
 for these intermediate steps and throw a more clear exception if that happens. Nothing about how the methods works has
 changed, just better error handling.
-                                                                
+
 -   `Enhanced` The code that checks for an 'ERROR:' in the log and issues a warning to alert you to look to see what the
 error was, wasn't only looking for it to start in column 1 of the log. So, it could pick up 'ERROR:' in a comment in the
 code or anywhere in the log. I've enhanced this to limit false positives by only flagging 'ERROR:' starting in the first
 column of the LOG.
-                                                                
+
 -   `Tweak` Fixed a typo in an error message.
 
 ### Fixed
@@ -37,7 +71,6 @@ transcode the HTML results. This was a fix for issue 454.
 
 
 
-# Changelog
 
 ## [4.2.0] - 2022-03-22
 
@@ -67,7 +100,6 @@ ATTN handling that I support in that Access Method. I needed to rework that to c
 
 
 
-# Changelog
 
 ## [4.1.0] - 2022-02-07
 
