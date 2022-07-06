@@ -1213,7 +1213,7 @@ class SASsessionHTTP():
       if status > 299:
          return {'Success' : False,
                  'LOG'     : "Failure in upload. Status="+str(status)+"\nResponse="+str(resp.decode())}
-
+      else:
          return {'Success' : True,
                  'LOG'     : logf}
 
@@ -1265,7 +1265,8 @@ class SASsessionHTTP():
          ret = {'Success' : False,
                 'LOG'     : "Failure in download. Status="+str(status)+"\nReason="+str(req.reason)}
       else:
-         fd.write(req.read())
+         while not req.isclosed():
+            fd.write(req.read(1024*1024))
          fd.flush()
          ret = None
 
