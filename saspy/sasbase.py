@@ -141,6 +141,13 @@ class SASconfig(object):
         # Get Config options. Fallback to empty dict.
         self.cfgopts = getattr(SAScfg, "SAS_config_options", {})
 
+        # account for default ODS style
+        try:
+           outopts       = getattr(SAScfg, "SAS_output_options")
+           self.odsstyle = outopts.get('style', 'HTMLBlue')
+        except:
+           self.odsstyle = 'HTMLBlue'
+
         # See if we don't want to allow prompting in this environment
         prompt = self.cfgopts.get('prompt', True)
         self.prompt = kwargs.get('prompt', prompt)
@@ -527,7 +534,7 @@ class SASsession():
         self.version           = sys.modules['saspy'].__version__
         self.sascei            = ''
         self.SASpid            = None
-        self.HTML_Style        = "HTMLBlue"
+        self.HTML_Style        = self.sascfg.odsstyle
         self.sas_date_fmts     = sas_date_fmts
         self.sas_time_fmts     = sas_time_fmts
         self.sas_datetime_fmts = sas_datetime_fmts
