@@ -236,7 +236,7 @@ class SASdata:
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "data _head ; set %s.'%s'n %s; run;" % (self.libref, self.table.replace("'", "''"), self.sas._dsopts(topts))
+            code = "data work._head ; set %s.'%s'n %s; run;" % (self.libref, self.table.replace("'", "''"), self.sas._dsopts(topts))
             df   = self._returnPD(code, '_head')
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
@@ -310,7 +310,7 @@ class SASdata:
             return
 
         if self.results.upper() == 'PANDAS':
-            code = "data _tail ; set %s.'%s'n %s; run;" % (self.libref, self.table.replace("'", "''"), self.sas._dsopts(topts))
+            code = "data work._tail ; set %s.'%s'n %s; run;" % (self.libref, self.table.replace("'", "''"), self.sas._dsopts(topts))
             df   = self._returnPD(code, '_tail')
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
@@ -1415,11 +1415,11 @@ class SASdata:
         ll = self._is_valid()
         if self.results.upper() == 'PANDAS':
             code = "proc freq data=%s.'%s'n %s order=%s noprint;" % (self.libref, self.table.replace("'", "''"), self._dsopts(), order)
-            code += "\n\ttables '%s'n / out=tmpFreqOut;" % var.replace("'", "''")
+            code += "\n\ttables '%s'n / out=work._tmpFreqOut;" % var.replace("'", "''")
             code += "\nrun;"
-            code += "\ndata tmpFreqOut; set tmpFreqOut(obs=%s); run;" % n
+            code += "\ndata work._tmpFreqOut; set work._tmpFreqOut(obs=%s); run;" % n
 
-            df = self._returnPD(code, 'tmpFreqOut')
+            df = self._returnPD(code, '_tmpFreqOut')
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
         else:
