@@ -1682,8 +1682,12 @@ Will use HTML5 for this SASsession.""")
          else:
             code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
 
-      self._asubmit(code+";;;;\n;;;;", "text")
+      self._asubmit(code, "text")
+      self._asubmit(";;;;\n;;;;", "text")
       ll = self.submit("quit;", 'text')
+      if ("We failed in Submit" in ll['LOG']):
+         logger.error("Failure in the IOM client code, likely a transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
+         logger.error("Rendering the error from the Java layer:\n\n"+ll['LOG'].partition("END We failed in Submit\n")[0])
       return None
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,

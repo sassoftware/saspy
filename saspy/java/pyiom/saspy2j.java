@@ -339,7 +339,19 @@ public class saspy2j
                      {
                      try
                         {
-                        lang.Submit(pgm.substring(0, idx));
+                        try
+                           {
+                           lang.Submit(pgm.substring(0, idx));
+                           }
+                        catch (Exception e)
+                           {
+                           String msg = "We failed in Submit\n"+e.getMessage()+"END We failed in Submit\n";
+                           errp.write(msg);
+                           errp.flush();
+                           System.out.print(msg);
+                           e.printStackTrace();
+                           //throw new IOException();
+                           }
                         pgm = pgm.substring(idx + 13 + 33);
                         }
                      catch (org.omg.CORBA.COMM_FAILURE e)
@@ -443,7 +455,19 @@ public class saspy2j
                      {
                      pgm = pgm.substring(0, idx);
                      try{
-                        lang.Submit(pgm);
+                        try
+                           {
+                           lang.Submit(pgm);
+                           }
+                        catch (Exception e)
+                           {
+                           String msg = "We failed in Submit\n"+e.getMessage();
+                           errp.write(msg);
+                           errp.flush();
+                           System.out.print(msg);
+                           e.printStackTrace();
+                           //throw new IOException();
+                           }
                         if (undo)
                            lang.Submit("\nproc printto;run;\n%put "+eol.substring(1)+";\n");
                         else
@@ -834,3 +858,4 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
        }
    }
 }
+
