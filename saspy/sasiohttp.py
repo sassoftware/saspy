@@ -49,6 +49,7 @@ class SASconfigHTTP:
 
       self._token    = cfg.get('authtoken', None)
       self.url       = cfg.get('url', '')
+      self.serverid  = cfg.get('serverid', None)
       self.ip        = cfg.get('ip', '')
       self.port      = cfg.get('port', None)
       self.ctxname   = cfg.get('context', '')
@@ -97,6 +98,13 @@ class SASconfigHTTP:
             logger.warning("Parameter 'url' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.url = inurl
+
+      insid = kwargs.get('serverid', None)
+      if insid is not None:
+         if lock and self.serverid:
+            print("Parameter 'serverid' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.serverid = insid
 
       inip = kwargs.get('ip', None)
       if inip is not None:
@@ -236,7 +244,7 @@ class SASconfigHTTP:
          else:
             self.port = 80
 
-      if not self._token and not authcode and not jwt:
+      if not self._token and not authcode and not jwt and not self.serverid:
          found = False
          if self.authkey:
             if os.name == 'nt':
@@ -315,6 +323,7 @@ class SASconfigHTTP:
                   self._token = None
                   raise RuntimeError("No password provided.")
 
+      # get AuthToken
       if self.ssl:
          if self.verify:
             # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifyable
@@ -347,75 +356,82 @@ class SASconfigHTTP:
          self._token = None
          raise SASHTTPconnectionError(msg="No Contexts found on Compute Service at ip="+self.ip)
 
-      ctxnames = []
-      for i in range(len(contexts)):
-         ctxnames.append(contexts[i].get('name'))
+      if not self.serverid:
+         ctxnames = []
+         for i in range(len(contexts)):
+            ctxnames.append(contexts[i].get('name'))
 
-      if len(ctxnames) == 0:
-         self._token = None
-         raise SASHTTPconnectionError(msg="No Contexts found on Compute Service at ip="+self.ip)
+         if len(ctxnames) == 0:
+            self._token = None
+            raise SASHTTPconnectionError(msg="No Contexts found on Compute Service at ip="+self.ip)
 
-      if len(self.ctxname) == 0:
-         if len(ctxnames) == 1:
-            self.ctxname = ctxnames[0]
-            logger.info("Using SAS Context: " + self.ctxname)
-         else:
-            try:
-               ctxname = self._prompt("Please enter the SAS Context you wish to run. Available contexts are: " +
-                                      str(ctxnames)+" ")
-               if ctxname is None:
-                  self._token = None
-                  raise RuntimeError("No SAS Context provided.")
-               else:
-                  self.ctxname = ctxname
-            except:
-               raise SASHTTPconnectionError(msg=
-                  "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " +
-                   str(ctxnames)+" ")
-
-      while self.ctxname not in ctxnames:
-         if not lock:
-            '''    this was original code before compute was production. users can't create these on the fly.
-            createctx = self._prompt(
-                "SAS Context specified was not found. Do you want to create a new context named "+self.ctxname+" [Yes|No]?")
-            if createctx.upper() in ('YES', 'Y'):
-               contexts = self._create_context(user)
+         if len(self.ctxname) == 0:
+            if len(ctxnames) == 1:
+               self.ctxname = ctxnames[0]
+               logger.info("Using SAS Context: " + self.ctxname)
             else:
-            '''
-            try:
-               ctxname = self._prompt(
-                   "SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: " +
-                    str(ctxnames)+" ")
-               if ctxname is None:
-                  self._token = None
+               try:
+                  ctxname = self._prompt("Please enter the SAS Context you wish to run. Available contexts are: " +
+                                         str(ctxnames)+" ")
+                  if ctxname is None:
+                     self._token = None
+                     raise RuntimeError("No SAS Context provided.")
+                  else:
+                     self.ctxname = ctxname
+               except:
+                  raise SASHTTPconnectionError(msg=
+                     "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " +
+                      str(ctxnames)+" ")
+
+         while self.ctxname not in ctxnames:
+            if not lock:
+               '''    this was original code before compute was production. users can't create these on the fly.
+               createctx = self._prompt(
+                   "SAS Context specified was not found. Do you want to create a new context named "+self.ctxname+" [Yes|No]?")
+               if createctx.upper() in ('YES', 'Y'):
+                  contexts = self._create_context(user)
+               else:
+               '''
+               try:
+                  ctxname = self._prompt(
+                      "SAS Context specified was not found. Please enter the SAS Context you wish to run. Available contexts are: " +
+                       str(ctxnames)+" ")
+                  if ctxname is None:
+                     self._token = None
+                     raise SASHTTPconnectionError(msg=
+                         "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " +
+                          str(ctxnames)+" ")
+                  else:
+                     self.ctxname = ctxname
+               except:
                   raise SASHTTPconnectionError(msg=
                       "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " +
                        str(ctxnames)+" ")
-               else:
-                  self.ctxname = ctxname
-            except:
-               raise SASHTTPconnectionError(msg=
-                   "SAS Context specified '"+self.ctxname+"' was not found. Prompting failed. Available contexts were: " +
-                    str(ctxnames)+" ")
-         else:
-            msg  = "SAS Context specified in the SASconfig ("+self.ctxname+") was not found on this server, and because "
-            msg += "the SASconfig is in lockdown mode, there is no prompting for other contexts. No connection established."
-            logger.error(msg)
-            self._token = None
-            raise RuntimeError("No SAS Context provided.")
+            else:
+               msg  = "SAS Context specified in the SASconfig ("+self.ctxname+") was not found on this server, and because "
+               msg += "the SASconfig is in lockdown mode, there is no prompting for other contexts. No connection established."
+               logger.error(msg)
+               self._token = None
+               raise RuntimeError("No SAS Context provided.")
 
-      for i in range(len(contexts)):
-         if contexts[i].get('name') == self.ctxname:
-            self.ctx = contexts[i]
-            break
+         for i in range(len(contexts)):
+            if contexts[i].get('name') == self.ctxname:
+               self.ctx = contexts[i]
+               break
 
-      if self.ctx == {}:
-         raise SASHTTPconnectionError(msg="No context information returned for context {}\n{}".format(self.ctxname, contexts))
+         if self.ctx == {}:
+            raise SASHTTPconnectionError(msg="No context information returned for context {}\n{}".format(self.ctxname, contexts))
+      else:
+         self.ctx = contexts
+         self.ctxname = 'tom'
 
-      return
+         return
 
    def _authenticate(self, user, pw, authcode, client_id, client_secret, jwt):
-      #import pdb; pdb.set_trace()
+
+      if self.serverid:
+         return 'tom'
+
       if   authcode:
          uauthcode      = urllib.parse.quote(authcode)
          uclient_id     = urllib.parse.quote(client_id)
@@ -469,21 +485,35 @@ class SASconfigHTTP:
 
       # GET Contexts
       conn = self.HTTPConn; conn.connect()
-      headers={"Accept":"application/vnd.sas.collection+json",
-               "Accept-Item":"application/vnd.sas.compute.context.summary+json",
-               "Authorization":"Bearer "+self._token}
-      conn.request('GET', "/compute/contexts?limit=999999", headers=headers)
+
+      if not self.serverid:
+         headers={"Accept":"application/vnd.sas.collection+json",
+                  "Accept-Item":"application/vnd.sas.compute.context.summary+json",
+                  "Authorization":"Bearer "+self._token}
+         conn.request('GET', "/compute/contexts?limit=999999", headers=headers)
+      else:
+         headers={"Accept":"*/*",
+                  "Accept-Item":"application/vnd.sas.compute.context.summary+json",
+                  "Authorization":"Bearer "+self._token}
+         conn.request('GET', "/compute/servers/"+self.serverid, headers=headers)
+
       req = conn.getresponse()
       status = req.status
       resp = req.read()
       conn.close()
 
       if status > 299:
-         fmsg = "Failure in GET Contexts. Status="+str(status)+"\nResponse="+resp.decode(self.encoding)
+         if not self.serverid:
+            fmsg = "Failure in GET Contexts. Status="+str(status)+"\nResponse="+resp.decode(self.encoding)
+         else:
+            fmsg = "Failure in GET Server. Status="+str(status)+"\nResponse="+resp.decode(self.encoding)
          raise SASHTTPconnectionError(msg=fmsg)
 
       js = json.loads(resp.decode(self.encoding))
-      contexts = js.get('items')
+      if not self.serverid:
+         contexts = js.get('items')
+      else:
+         contexts = js
 
       return contexts
 
