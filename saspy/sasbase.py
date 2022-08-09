@@ -2184,9 +2184,11 @@ class SASsession():
         lastlog = len(self._io._log)
 
         if not self.nosub:
-           ll = self._io.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+")) LIB_EXT_END=;")
-
-           exists = int(ll['LOG'].rpartition('LIBREF_EXISTS=')[2].rpartition('LIB_EXT_END=')[0])
+           ll = self._io.submit("%put LIBREF_EXISTS=%sysfunc(libref("+libref+")) LIB_EXT_END=;", results='text')
+           try:
+              exists = int(ll['LOG'].rpartition('LIBREF_EXISTS=')[2].rpartition('LIB_EXT_END=')[0])
+           except:
+              exists = 1
 
            if exists != 0:
               logger.error('Libref provided is not assigned')
@@ -2256,14 +2258,16 @@ class SASsession():
            code  = "filename "+fileref+" '"+filepath+"';\n"
            code += "%put FILEREF_EXISTS=%sysfunc(fexist("+fileref+")) FILE_EXTEND=;"
 
-           ll = self._io.submit(code)
-
-           exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
+           ll = self._io.submit(code, results='text')
+           try:
+              exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
+           except:
+              exists = 0
 
            if exists != 1:
               if not quiet:
                  logger.error('The filepath provided does not exist')
-              ll = self._io.submit("filename "+fileref+" clear;")
+              ll = self._io.submit("filename "+fileref+" clear;", results='text')
               return None
 
         if results != 'dict':
@@ -2385,7 +2389,10 @@ class SASsession():
         else:
            ll = self._io.submit(code, results='text')
 
-        exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
+        try:
+           exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
+        except:
+           exists = 1
 
         if exists != 0:
            if not quiet:
@@ -2422,7 +2429,10 @@ class SASsession():
         else:
            ll = self._io.submit(code, results='text')
 
-        exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
+        try:
+           exists = int(ll['LOG'].rpartition('FILEREF_EXISTS=')[2].rpartition(' FILE_EXTEND=')[0])
+        except:
+           exists = 1
 
         if exists != 0:
            if not quiet:
