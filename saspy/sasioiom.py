@@ -1622,7 +1622,7 @@ Will use HTML5 for this SASsession.""")
                var = '.'
             elif dts[col] == 'C':
                if var == 'nan' or len(var) == 0:
-                  var = ' '
+                  var = ' '+colsep
                else:
                   var = var.replace(colsep, colrep)
             elif dts[col] == 'B':
@@ -2077,8 +2077,10 @@ Will use HTML5 for this SASsession.""")
                if i % 10 == 9:
                   code +='\n'
 
+      lreclx = max(self.sascfg.lrecl, (lrecl + nvars + 1))
+
       miss  = {}
-      code += "\nfile "+self._tomods1.decode()+" lrecl="+str(self.sascfg.lrecl)+" dlm="+cdelim+" recfm=v termstr=NL encoding='utf-8';\n"
+      code += "\nfile "+self._tomods1.decode()+" lrecl="+str(lreclx)+" dlm="+cdelim+" recfm=v termstr=NL encoding='utf-8';\n"
       for i in range(nvars):
          if vartype[i] != 'N':
             code += "'"+varlist[i]+"'n = translate('"

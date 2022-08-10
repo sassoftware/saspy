@@ -1467,7 +1467,7 @@ class SASsessionHTTP():
                var = '.'
             elif dts[col] == 'C':
                if var == 'nan' or len(var) == 0:
-                  var = ' '
+                  var = ' '+colsep
                else:
                   var = var.replace(colsep, colrep)
             elif dts[col] == 'B':
@@ -1754,8 +1754,22 @@ class SASsessionHTTP():
          tabname = "'"+table.strip().replace("'", "''")+"'n "
 
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
+      code += "lrecl = attrn(d, 'LRECL');\n"
+      code += "lr='LRECL=';\n"
+      code += "put lr lrecl;\n"
+      code += "run;"
 
       ll = self.submit(code, "text")
+
+      try:
+         l2 = ll['LOG'].rpartition("LRECL= ")
+         l2 = l2[2].partition("\n")
+         lrecl = int(l2[0])
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       ##GET Data Table Info
       #conn = self.sascfg.HTTPConn; conn.connect()
@@ -1852,8 +1866,10 @@ class SASsessionHTTP():
                if i % 10 == 9:
                   code +='\n'
 
+      lreclx = max(self.sascfg.lrecl, (lrecl + nvars + 1))
+
       miss  = {}
-      code += "\nfile _tomodsx lrecl="+str(self.sascfg.lrecl)+" dlm="+cdelim+" recfm=v termstr=NL encoding='utf-8';\n"
+      code += "\nfile _tomodsx lrecl="+str(lreclx)+" dlm="+cdelim+" recfm=v termstr=NL encoding='utf-8';\n"
       for i in range(nvars):
          if vartype[i] != 'FLOAT':
             code += "'"+varlist[i]+"'n = translate('"

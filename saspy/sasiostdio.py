@@ -1924,7 +1924,7 @@ Will use HTML5 for this SASsession.""")
                var = '.'
             elif dts[col] == 'C':
                if var == 'nan' or len(var) == 0:
-                  var = ' '
+                  var = ' '+colsep
                else:
                   var = var.replace(colsep, colrep)
             elif dts[col] == 'B':
@@ -2434,7 +2434,9 @@ Will use HTML5 for this SASsession.""")
       else:
          host = 'localhost'
 
-      code = "filename sock socket '"+host+":"+str(port)+"' recfm=s encoding='utf-8' lrecl={};\n".format(str(self.sascfg.lrecl))
+      lreclx = max(self.sascfg.lrecl, (lrecl + nvars + 1))
+
+      code = "filename sock socket '"+host+":"+str(port)+"' recfm=s encoding='utf-8' lrecl={};\n".format(str(lreclx))
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
