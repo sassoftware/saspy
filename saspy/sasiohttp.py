@@ -1366,23 +1366,12 @@ class SASsessionHTTP():
       if encode_errors is None:
          encode_errors = 'fail'
 
-      bpc = self._sb.pyenc[0]
-      if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
-         bpc = int(char_lengths)
-      if char_lengths and str(char_lengths) == 'exact':
-         CnotB = False
-      else:
-         CnotB = bpc == 1
+      CnotB = kwargs.pop('CnotB', None)
 
-      if type(char_lengths) is not dict or len(char_lengths) < ncols:
-         charlens = self._sb.df_char_lengths(df, encode_errors, char_lengths)
-      else:
-         charlens = char_lengths
-
-      if charlens is None:
+      if char_lengths is None:
          return -1
 
-      chr_upper = {k.upper():v for k,v in charlens.items()}
+      chr_upper = {k.upper():v for k,v in char_lengths.items()}
 
       if type(df.index) != pd.RangeIndex:
          warnings.warn("Note that Indexes are not transferred over as columns. Only actual columns are transferred")
@@ -1390,7 +1379,7 @@ class SASsessionHTTP():
       for name in df.columns:
          colname = str(name).replace("'", "''")
          col_up  = str(name).upper()
-         input  += "'"+colname+"'n "
+         input  += "input '"+colname+"'n "
          if col_up in lab_keys:
             label += "label '"+colname+"'n ="+lab_upper[col_up]+";\n"
          if col_up in fmt_keys:
@@ -1436,6 +1425,7 @@ class SASsessionHTTP():
                   dts.append('B')
                else:
                   dts.append('N')
+         input += ";\n"
 
       code = "data "
       if len(libref):
@@ -1455,8 +1445,13 @@ class SASsessionHTTP():
       if len(format):
          code += "format "+format+";\n"
       code += label
-      code += "infile datalines delimiter="+delim+" STOPOVER;\ninput @;\nif _infile_ = '' then delete;\ninput "+input+";\n"+xlate+";\ndatalines4;"
-      self._asubmit(code, "text")
+      code += "infile datalines delimiter="+delim+" STOPOVER;\n"
+      code += "input @;\nif _infile_ = '' then delete;\nelse do;\n"
+      code +=  input+xlate+";\n"
+      code += "end;\n"
+      code += "datalines4;"
+      jobid = self._asubmit(code, "text")
+      self._log += self._getlog(jobid).replace(chr(12), chr(10))
 
       blksz = int(kwargs.get('blocksize', 1000000))
       noencode = self._sb.sascei == 'utf-8' or encode_errors == 'ignore'
@@ -1472,7 +1467,7 @@ class SASsessionHTTP():
                var = '.'
             elif dts[col] == 'C':
                if var == 'nan' or len(var) == 0:
-                  var = ' '
+                  var = ' '+colsep
                else:
                   var = var.replace(colsep, colrep)
             elif dts[col] == 'B':
@@ -1483,15 +1478,13 @@ class SASsessionHTTP():
                else:
                   var = str(row[col].to_datetime64())[:26]
 
-            card += var
-            if col < (ncols-1):
-               card += colsep
+            if embedded_newlines:
+               var = var.replace(LF, colrep).replace(CR, colrep)
+               var = var.replace('\n', LF).replace('\r', CR)
 
-         if embedded_newlines:
-            card = card.replace(LF, colrep).replace(CR, colrep)
-            card = card.replace('\n', LF).replace('\r', CR)
+            card += var+"\n"
 
-         code += card+"\n"
+         code += card
 
          if len(code) > blksz:
             if not noencode:
@@ -1508,7 +1501,8 @@ class SASsessionHTTP():
                else:
                   code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
 
-            self._asubmit(code, "text")
+            jobid = self._asubmit(code, "text")
+            self._log += self._getlog(jobid).replace(chr(12), chr(10))
             code = ""
 
       if not noencode and len(code) > 0:
@@ -1525,7 +1519,8 @@ class SASsessionHTTP():
          else:
             code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
 
-      self._asubmit(code+";;;;\n;;;;", "text")
+      jobid = self._asubmit(code+";;;;\n;;;;", "text")
+      self._log += self._getlog(jobid).replace(chr(12), chr(10))
       ll = self.submit("quit;", 'text')
       return None
 
@@ -1759,8 +1754,22 @@ class SASsessionHTTP():
          tabname = "'"+table.strip().replace("'", "''")+"'n "
 
       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
+      code += "lrecl = attrn(d, 'LRECL');\n"
+      code += "lr='LRECL=';\n"
+      code += "put lr lrecl;\n"
+      code += "run;"
 
       ll = self.submit(code, "text")
+
+      try:
+         l2 = ll['LOG'].rpartition("LRECL= ")
+         l2 = l2[2].partition("\n")
+         lrecl = int(l2[0])
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
 
       ##GET Data Table Info
       #conn = self.sascfg.HTTPConn; conn.connect()
@@ -1857,8 +1866,10 @@ class SASsessionHTTP():
                if i % 10 == 9:
                   code +='\n'
 
+      lreclx = max(self.sascfg.lrecl, (lrecl + nvars + 1))
+
       miss  = {}
-      code += "\nfile _tomodsx lrecl="+str(self.sascfg.lrecl)+" dlm="+cdelim+" recfm=v termstr=NL encoding='utf-8';\n"
+      code += "\nfile _tomodsx lrecl="+str(lreclx)+" dlm="+cdelim+" recfm=v termstr=NL encoding='utf-8';\n"
       for i in range(nvars):
          if vartype[i] != 'FLOAT':
             code += "'"+varlist[i]+"'n = translate('"

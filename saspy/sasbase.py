@@ -1314,14 +1314,14 @@ class SASsession():
         if encode_errors is None:
            encode_errors = 'fail'
 
-        bpc = self.pyenc[0]
-
-        if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
-           bpc = int(char_lengths)
-
         if char_lengths and str(char_lengths) == 'exact':
            CnotB = False
         else:
+           if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
+              bpc = int(char_lengths)
+           else:
+              bpc = self.pyenc[0]
+
            CnotB = bpc == 1
 
         if type(char_lengths) is dict:
@@ -1535,9 +1535,34 @@ class SASsession():
         if self.nosub:
            print("too complicated to show the code, read the source :), sorry.")
            return None
+
+        ncols = len(df.columns)
+
+        if self.sascfg.mode != 'COM':
+           if char_lengths and str(char_lengths) == 'exact':
+              CnotB = False
+           else:
+              if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
+                 bpc = int(char_lengths)
+              else:
+                 bpc = self.pyenc[0]
+              CnotB = bpc == 1
+
+           if type(char_lengths) is not dict or len(char_lengths) < len(df.columns):
+              charlens = self.df_char_lengths(df, encode_errors, char_lengths)
+           else:
+              charlens = char_lengths
+
+           #lrecl = sum(charlens.values()) + (ncols - len(charlens)) * 32 + ncols + 1
+           #print("guess lrel = {}".format(str(lrecl)))
+
+           rc = self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
+                                           datetimes, outfmts, labels, outdsopts, encode_errors, charlens, CnotB=CnotB, **kwargs)
+
         else:
            rc = self._io.dataframe2sasdata(df, table, libref, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
-                                            datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths, **kwargs)
+                                           datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths, **kwargs)
+
         if rc is None:
            if self.exist(table, libref):
               dsopts = {}

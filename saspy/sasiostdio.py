@@ -1730,6 +1730,7 @@ Will use HTML5 for this SASsession.""")
       labels  - dict with column names and SAS Labels to assign to the new SAS data set
       outdsopts - a dictionary containing output data set options for the table being created
       encode_errors - 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char
+
       char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set
       """
       input   = ""
@@ -1754,15 +1755,12 @@ Will use HTML5 for this SASsession.""")
       if encode_errors is None:
          encode_errors = 'fail'
 
-      if type(char_lengths) is not dict or len(char_lengths) < ncols:
-         charlens = self._sb.df_char_lengths(df, encode_errors, char_lengths)
-      else:
-         charlens = char_lengths
+      CnotB = kwargs.pop('CnotB', None)
 
-      if charlens is None:
+      if char_lengths is None:
          return -1
 
-      chr_upper = {k.upper():v for k,v in charlens.items()}
+      chr_upper = {k.upper():v for k,v in char_lengths.items()}
 
       if type(df.index) != pd.RangeIndex:
          warnings.warn("Note that Indexes are not transferred over as columns. Only actual columns are transferred")
@@ -1770,7 +1768,7 @@ Will use HTML5 for this SASsession.""")
       for name in df.columns:
          colname = str(name).replace("'", "''")
          col_up  = str(name).upper()
-         input  += "'"+colname+"'n "
+         input  += "input '"+colname+"'n "
          if col_up in lab_keys:
             label += "label '"+colname+"'n ="+lab_upper[col_up]+";\n"
          if col_up in fmt_keys:
@@ -1816,6 +1814,7 @@ Will use HTML5 for this SASsession.""")
                   dts.append('B')
                else:
                   dts.append('N')
+         input += ';\n'
 
       port =  kwargs.get('port', 0)
 
@@ -1824,7 +1823,7 @@ Will use HTML5 for this SASsession.""")
          server = True
          port = self.sascfg.rtunnel
          host = 'localhost'
-         code = """filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=V termstr=LF;\n"""
+         code = """filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=V termstr=LF lrecl=32767;\n"""
       else:
          server = False
          if port==0 and self.sascfg.tunnel:
@@ -1848,7 +1847,7 @@ Will use HTML5 for this SASsession.""")
             port = sock.getsockname()[1]
          except OSError as e:
             raise e
-         code  = """filename sock socket '"""+host+""":"""+str(port)+"""' recfm=V termstr=LF;\n"""
+         code  = """filename sock socket '"""+host+""":"""+str(port)+"""' recfm=V termstr=LF lrecl=32767;\n"""
 
       code += "data "
       if len(libref):
@@ -1868,8 +1867,11 @@ Will use HTML5 for this SASsession.""")
       if len(format):
          code += "format "+format+";\n"
       code += label
-      code += "infile sock nbyte=nb delimiter="+delim+" STOPOVER;\ninput @;\nif _infile_ = '' then delete;\n"
-      code += "else do;\n input "+input+";\n"+xlate+";\nend;\nrun;\nfilename sock;\n"
+      code += "infile sock nbyte=nb delimiter="+delim+" STOPOVER;\n"
+      code += "input @;\nif _infile_ = '' then delete;\nelse do;\n"
+      code +=  input+xlate+";\n"
+      code += "end;\n"
+      code += "run;\nfilename sock;\n"
 
       if not server:
          sock.listen(1)
@@ -1922,7 +1924,7 @@ Will use HTML5 for this SASsession.""")
                var = '.'
             elif dts[col] == 'C':
                if var == 'nan' or len(var) == 0:
-                  var = ' '
+                  var = ' '+colsep
                else:
                   var = var.replace(colsep, colrep)
             elif dts[col] == 'B':
@@ -1933,15 +1935,13 @@ Will use HTML5 for this SASsession.""")
                else:
                   var = str(row[col].to_datetime64())[:26]
 
-            card += var
-            if col < (ncols-1):
-               card += colsep
+            if embedded_newlines:
+               var = var.replace(LF, colrep).replace(CR, colrep)
+               var = var.replace('\n', LF).replace('\r', CR)
 
-         if embedded_newlines:
-            card = card.replace(LF, colrep).replace(CR, colrep)
-            card = card.replace('\n', LF).replace('\r', CR)
+            card += var+"\n"
 
-         code += card+"\n"
+         code += card
 
          if len(code) > blksz:
             first = False
@@ -2091,237 +2091,6 @@ Will use HTML5 for this SASsession.""")
       sock.close()
 
       ll = self.submit("", 'text')
-      return None
-
-   def dataframe2sasdataORIG(self, df: '<Pandas Data Frame object>', table: str ='a',
-                         libref: str ="", keep_outer_quotes: bool=False,
-                                          embedded_newlines: bool=True,
-                         LF: str = '\x01', CR: str = '\x02',
-                         colsep: str = '\x03', colrep: str = ' ',
-                         datetimes: dict={}, outfmts: dict={}, labels: dict={},
-                         outdsopts: dict={}, encode_errors = None, char_lengths = None,
-                         **kwargs):
-      """
-      This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
-      df      - Pandas Data Frame to import to a SAS Data Set
-      table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-      keep_outer_quotes - for character columns, have SAS keep any outer quotes instead of stripping them off.
-      embedded_newlines - if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
-      LF - if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to '\x01'
-      CR - if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
-      colsep - the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
-      datetimes - dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
-      outfmts - dict with column names and SAS formats to assign to the new SAS data set
-      labels  - dict with column names and SAS Labels to assign to the new SAS data set
-      outdsopts - a dictionary containing output data set options for the table being created
-      encode_errors - 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char
-      char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set
-      """
-      input   = ""
-      xlate   = ""
-      card    = ""
-      format  = ""
-      length  = ""
-      label   = ""
-      dts     = []
-      ncols   = len(df.columns)
-      lf      = "'"+'%02x' % ord(LF.encode(self.sascfg.encoding))+"'x"
-      cr      = "'"+'%02x' % ord(CR.encode(self.sascfg.encoding))+"'x "
-      delim   = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
-      dtkeys  = datetimes.keys()
-      fmtkeys = outfmts.keys()
-      labkeys = labels.keys()
-
-      if encode_errors is None:
-         encode_errors = 'fail'
-
-      bpc = self._sb.pyenc[0]
-      if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
-         bpc = int(char_lengths)
-      if char_lengths and str(char_lengths) == 'exact':
-         CnotB = False
-      else:
-         CnotB = bpc == 1
-
-      if type(char_lengths) is not dict:
-         charlens = self._sb.df_char_lengths(df, encode_errors, char_lengths)
-      else:
-         charlens = char_lengths
-
-      if charlens is None:
-         return -1
-
-      charlens = {k.upper():v for k,v in charlens.items()}
-
-      for name in df.columns:
-         colname = str(name).replace("'", "''")
-         input  += "'"+colname+"'n "
-         if colname in labkeys:
-            label += "label '"+colname+"'n ="+labels[colname]+";\n"
-
-         if df.dtypes[name].kind in ('O','S','U','V'):
-            try:
-               length += " '"+colname+"'n $"+str(charlens[colname.upper()])
-            except KeyError as e:
-               logger.error("Dictionary provided as char_lengths is missing column: "+colname)
-               raise e
-            if colname in fmtkeys:
-               format += "'"+colname+"'n "+outfmts[colname]+" "
-            if keep_outer_quotes:
-               input  += "~ "
-            dts.append('C')
-            if embedded_newlines:
-               xlate += " '"+colname+"'n = translate('"+colname+"'n, '0A'x, "+lf+");\n"
-               xlate += " '"+colname+"'n = translate('"+colname+"'n, '0D'x, "+cr+");\n"
-         else:
-            if df.dtypes[name].kind in ('M'):
-               length += " '"+colname+"'n 8"
-               input  += ":B8601DT26.6 "
-               if colname not in dtkeys:
-                  if colname in fmtkeys:
-                     format += "'"+colname+"'n "+outfmts[colname]+" "
-                  else:
-                     format += "'"+colname+"'n E8601DT26.6 "
-               else:
-                  if datetimes[colname].lower() == 'date':
-                     if colname in fmtkeys:
-                        format += "'"+colname+"'n "+outfmts[colname]+" "
-                     else:
-                        format += "'"+colname+"'n E8601DA. "
-                     xlate  += " '"+colname+"'n = datepart('"+colname+"'n);\n"
-                  else:
-                     if datetimes[colname].lower() == 'time':
-                        if colname in fmtkeys:
-                           format += "'"+colname+"'n "+outfmts[colname]+" "
-                        else:
-                           format += "'"+colname+"'n E8601TM. "
-                        xlate  += " '"+colname+"'n = timepart('"+colname+"'n);\n"
-                     else:
-                        logger.warning("invalid value for datetimes for column "+colname+". Using default.")
-                        if colname in fmtkeys:
-                           format += "'"+colname+"'n "+outfmts[colname]+" "
-                        else:
-                           format += "'"+colname+"'n E8601DT26.6 "
-               dts.append('D')
-            else:
-               length += " '"+colname+"'n 8"
-               if colname in fmtkeys:
-                  format += "'"+colname+"'n "+outfmts[colname]+" "
-               if df.dtypes[name] == 'bool':
-                  dts.append('B')
-               else:
-                  dts.append('N')
-
-      code = "data "
-      if len(libref):
-         code += libref+"."
-      code += "'"+table.strip().replace("'", "''")+"'n"
-
-      if len(outdsopts):
-         code += '('
-         for key in outdsopts:
-            code += key+'='+str(outdsopts[key]) + ' '
-         code += ");\n"
-      else:
-         code += ";\n"
-
-      if len(length):
-         code += "length"+length+";\n"
-      if len(format):
-         code += "format "+format+";\n"
-      code += label
-      code += "infile datalines delimiter="+delim+" STOPOVER;\ninput @;\nif _infile_ = '' then delete;\n"
-      code += "else do;\n input "+input+";\n"+xlate+";\nend;\ndatalines4;"
-      self._asubmit(code, "text")
-
-      logf  = b''
-      blksz = int(kwargs.get('blocksize', 32767))
-      row_num = 0
-      code = ""
-      for row in df.itertuples(index=False):
-         row_num += 1
-         card  = ""
-         for col in range(ncols):
-            var = str(row[col])
-
-            if   dts[col] == 'N' and var == 'nan':
-               var = '.'
-            elif dts[col] == 'C':
-               if var == 'nan' or len(var) == 0:
-                  var = ' '
-               else:
-                  var = var.replace(colsep, colrep)
-            elif dts[col] == 'B':
-               var = str(int(row[col]))
-            elif dts[col] == 'D':
-               if var in ['nan', 'NaT', 'NaN']:
-                  var = '.'
-               else:
-                  var = str(row[col].to_datetime64())[:26]
-
-            card += var
-            if col < (ncols-1):
-               card += colsep
-
-         if embedded_newlines:
-            card = card.replace(LF, colrep).replace(CR, colrep)
-            card = card.replace('\n', LF).replace('\r', CR)
-
-         code += card+"\n"
-
-         if len(code) > blksz:
-            if encode_errors != 'replace':
-               try:
-                  code = code.encode(self.sascfg.encoding)
-               except Exception as e:
-                  self._asubmit(";;;;\n;;;;", "text")
-                  ll = self.submit("quit;", 'text')
-                  logger.error("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
-                  logger.error("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
-                  return row_num
-            else:
-               code = code.encode(self.sascfg.encoding, errors='replace')
-            #self.stdin.write(code+b'\n')
-            os.write(self.pin, code+b'\n')
-            self.stdin.flush()
-            code = ""
-
-            if os.name == 'nt':
-               try:
-                  log = self.stderr.get_nowait()
-               except Empty:
-                  log = b''
-            else:
-               log = self.stderr.read1(4096)
-
-            if len(log) > 0:
-               logf += log
-
-      logd = logf.decode(self.sascfg.encoding, errors='replace')
-      self._log += logd
-      if self._checkLogForError(logd):
-         warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
-         self._sb.check_error_log = True
-
-      if len(code):
-         if encode_errors != 'replace':
-            try:
-               code = code.encode(self.sascfg.encoding)
-            except Exception as e:
-               self._asubmit(";;;;\n;;;;", "text")
-               ll = self.submit("quit;", 'text')
-               logger.error("Transcoding error encountered. Data transfer stopped on row "+str(row_num))
-               logger.error("DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
-               return row_num
-         else:
-            code = code.encode(self.sascfg.encoding, errors='replace')
-         #self.stdin.write(code+b'\n')
-         os.write(self.pin, code+b'\n')
-         self.stdin.flush()
-
-      self._asubmit(";;;;\n;;;;", "text")
-      ll = self.submit("quit;", 'text')
       return None
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
@@ -2665,7 +2434,9 @@ Will use HTML5 for this SASsession.""")
       else:
          host = 'localhost'
 
-      code = "filename sock socket '"+host+":"+str(port)+"' recfm=s encoding='utf-8';\n"
+      lreclx = max(self.sascfg.lrecl, (lrecl + nvars + 1))
+
+      code = "filename sock socket '"+host+":"+str(port)+"' recfm=s encoding='utf-8' lrecl={};\n".format(str(lreclx))
 
       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
