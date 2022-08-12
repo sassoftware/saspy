@@ -14,16 +14,16 @@ The current set of connection methods are as follows:
   This connection method is available on the Linux platform only. This
   method enables you to connect to SAS on the same host as your Python process.
 
-`STDIO over SSH`_
-  This connection method is available from Linux or Windows (or Mac), but only to SAS on the Linux platform. This
-  method can connect to SAS that is installed on a remote host, if you have passwordless
-  SSH configured for your Linux user account.
+`SSH`_
+  This connection method (STDIO over SSH) is available from Linux or Windows (or Mac), but only to
+  SAS on the Linux platform. This  method can connect to SAS that is installed on a remote host,
+  if you have passwordless SSH configured for your Linux user account.
 
-`IOM using Java`_
-  The integrated object method (IOM) connection method supports SAS on any platform.
+`IOM`_
+  The Integrated Object Method (IOM) connection method (IOM using Java) supports SAS on any platform.
   This method can make a local Windows connection and it is also the way to connect
   to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
-  Server on any supported SAS platform.
+  Server on any supported SAS platform from any client.
 
 `HTTP`_
   This access mehtod uses http[s] to connect to the Compute Service (a micro service) of a Viya
@@ -31,8 +31,12 @@ The current set of connection methods are as follows:
   Compute Server using the SPRE image of MVA SAS that is installed in the Viya deployment.
   This is roughly equivalent to a Workspace server via IOM, but in Viya with no SAS 9.4.
 
-`IOM using COM`_
-  This connection method is for Windows clients connecting to a remote SAS 9.4 host. This
+
+.. note:: The COM access method is not fully supported nor as performant as the others.
+          Please use IOM in place of this, unless you aren't concerned with those issues.
+
+`COM`_
+  This connection method (IOM using COM) is for Windows clients connecting to a local or remote SAS 9.4 host. This
   method takes advantage of the IOM access method, but does not require a Java dependency.
   SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS Support)
   is required to install the SAS COM library on your client system.
@@ -290,7 +294,7 @@ will use and thus what your configuration definition will contain.
                 2. Client Windows
                     a. IOM or COM - on same machine. Can't get there if different machines
         b. Workspace server (this is SAS 9, and deployment on any platform is fine)
-            i. Client Linux
+            i. Client Linux or Mac OS
                 1. IOM - local or remote
             ii. Client Windows
                 1. IOM or COM - local or remote
@@ -376,8 +380,10 @@ m5dsbug -
           keys in the configuration definition.
 
 
-STDIO over SSH
-==============
+SSH
+====
+aka: STDIO over SSH
+
 NEW in V3.6.3, you can use this method from a Windows Client to connect to a
 stand alone SAS install on a remote Linux machine. Before that, it was only supported
 from a Linux client.
@@ -477,8 +483,10 @@ sshpassparms -
                }
 
 
-IOM using Java
-==============
+IOM
+===
+aka: IOM using Java
+
 This connection method opens many connectivity options. This method enables you to
 connect to any Workspace server on any supported platform. It requires Java 7 or higher
 installed on your Client machine (where you're running SASPy)
@@ -782,15 +790,10 @@ m5dsbug -
     winlocal    = {'java'      : 'java',
                   }
 
-.. note:: Having the ``'java'`` key is the trigger to use the IOM access method.
-.. note:: When using the IOM access method (``'java'`` key specified), the
-         absence of the ``'iomhost'`` key is the trigger to use a local Windows
-         session instead of remote IOM (it is a different connection type).
 
 
-
-IOM to MVS SAS
-~~~~~~~~~~~~~~
+Remote to MVS SAS
+~~~~~~~~~~~~~~~~~
 Yes, you can even connect to a SAS server running on MVS (Mainframe SAS).
 There are a couple of requirements for this to work right. First, you need version 2.1.5 or higher of this module.
 There were a couple tweaks I needed to make to the IOM access method and those are in 2.1.5.
@@ -826,9 +829,14 @@ the 1047 code page. I did find a 'cp1047' code page in a separate pip installabl
 code page. So if you're running with that encoding, you can install the cp1047 to use.
 
 
+.. note:: Having the ``'java'`` key is the trigger to use the IOM access method.
+.. note:: When using the IOM access method (``'java'`` key specified), the
+         absence of the ``'iomhost'`` key is the trigger to use a local Windows
+         session instead of remote IOM (it is a different connection type).
+
 
 HTTP
-=====
+====
 This is the access method for Viya. It does not connect to SAS 9.4. This access method accesses the Compute (micro) Service
 of a SAS Viya deployment. The Compute Service launches Compute Servers, which are MVA SAS sessions found in the SPRE deployment
 of the Viya installation. This is the equivalent of an IOM Workspace server, but in a Viya deployment.
@@ -972,8 +980,10 @@ jwt -
 
 
 
-IOM using COM
-=============
+COM
+===
+aka: IOM using COM
+
 New in 3.1.0, this user contributed access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method,
 but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.
 
@@ -994,7 +1004,7 @@ Traceback (most recent call last):
     self._io = SASSessionCOM(sascfgname=self.sascfg.name, sb=self, **kwargs)
   File "/opt/tom/github/saspy/saspy/sasiocom.py", line 197, in __init__
     self.pid = self._startsas()
-  File "/opt/tom/github/saspy/saspy/sasiocom.py", line 212, in _startsas
+  File "/opt/tom/gi thub/saspy/saspy/sasiocom.py", line 212, in _startsas
     factory = dynamic.Dispatch('SASObjectManager.ObjectFactoryMulti2')
 NameError: name 'dynamic' is not defined
 >>>
@@ -1053,7 +1063,6 @@ encoding  -
 
     iomcom = {'iomhost': 'mynode.mycompany.org',
         'iomport': 8591,
-        'class_id': '440196d4-90f0-11d0-9f41-00a024bb830c',
         'provider': 'sas.iomprovider',
         'encoding': 'windows-1252'}
 

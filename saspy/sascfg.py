@@ -183,7 +183,6 @@ winiomIWA  = {'java'    : 'java',
 iomcom = {
     'iomhost' : 'mynode.mycompany.org',
     'iomport' : 8591,
-    'class_id': '440196d4-90f0-11d0-9f41-00a024bb830c',
     'provider': 'sas.iomprovider',
     'encoding': 'windows-1252'}
 
@@ -206,14 +205,14 @@ iomcom = {
 #
 #
 
-httpsviya = {'ip'      : 'sastpw.rndk8s.openstack.sas.com',
+httpsviya = {'url'     : 'https://viya.deployment.com',
              'context' : 'Data Mining compute context',
              'authkey' : 'viya_user-pw',
              'options' : ["fullstimer", "memsize=1G"]
              }
 
-httpviya = {'ip'      : 'sastpw.rndk8s.openstack.sas.com',
-            'ssl'     : False,  # this will use port 80
+httpviya = {'url'     : 'https://sastpw.rndk8s.openstack.sas.com:23456',
+           #'port'    :  23456,   # can put different port here or ^ is it's not using the default port
             'context' : 'Data Mining compute context',
             'authkey' : 'viya_user-pw',
             'options' : ["fullstimer", "memsize=1G"]
