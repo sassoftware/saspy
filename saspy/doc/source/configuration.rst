@@ -16,8 +16,9 @@ The current set of connection methods are as follows:
 
 `SSH`_
   This connection method (STDIO over SSH) is available from Linux or Windows (or Mac), but only to
-  SAS on the Linux platform. This  method can connect to SAS that is installed on a remote host,
-  if you have passwordless SSH configured for your Linux user account.
+  SAS on the Linux platform. This method can connect to SAS that is installed on a remote host,
+  if you have passwordless SSH configured or, new in version V4.3.0, you can use sshpass to provide
+  user/pw.
 
 `IOM`_
   The Integrated Object Method (IOM) connection method (IOM using Java) supports SAS on any platform.
@@ -282,12 +283,13 @@ will use and thus what your configuration definition will contain.
         a. Stand-alone SAS 9 install
             i. On Linux
                 1. Client Linux
-                    a. STDIO - over SSH if not the same machine
+                    a. STDIO - if on same machine
+                    b. SSH (STDIO over SSH) if not the same machine. This works from Mac OS too.
                 2. Client Windows
                     a. prior to V3.6.3
                       -  Can't get there from here
                     b. as of V3.6.3
-                      -  STDIO over SSH!
+                      - SSH (STDIO over SSH)!
             ii. On Windows
                 1. Client Linux
                     a. Can't get there from here
@@ -388,14 +390,14 @@ NEW in V3.6.3, you can use this method from a Windows Client to connect to a
 stand alone SAS install on a remote Linux machine. Before that, it was only supported
 from a Linux client.
 
-This is the remote version of the original connection method. This also works
-with Unix SAS only, and it supports passwordless SSH to the Unix machine where SAS
+This is the remote version of the original connection method (STDIO). This also works
+with Unix SAS only, and it supports passwordless SSH to the Linux machine where SAS
 is installed. It is up to you to make sure that user accounts have passwordless
 SSH configured between the two systems. Starting in version 4.3.0, you can use sshpass
 on Linux to automate connecting with user/password as an option instead of a passwordless
 configuration.
 
-If you don't already have this set up, you need to generate rsa keys. Starting
+If you don't already have passwordless ssh set up, you need to generate rsa keys. Starting
 after version 2.2.9, you can specify an identity file (.pem file) instead by
 providing the file path on the identity key. Either of these provide passwordless access.
 If you have any trouble with this, you will find that adding -vvv to the command saspy
@@ -464,7 +466,7 @@ sshpass -
     executed and has to be in the full command. But this allows the use of user/pw connections instead of rsa keys.
 
 sshpassparms -
-    This is a Python List containing the parms you want to use for sshpass. The three primary choinces are to provide
+    This is a Python List containing the parms you want to use for sshpass. The three primary choices are to provide
     the password on the command line (it's xxx'ed out when looking at the system processes), or from a file or from an
     environment variable. Check the man page on sshpass. ie: 'sshpassparms' : ['-f', '/file/with/pw/in/it']
 
