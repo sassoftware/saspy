@@ -216,7 +216,12 @@ In reverse order, the configuration definitions are Python dictionaries. Each di
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
 These values are defined in the following sections.
 
-SAS_config_options has three options. The first option (lock_down) restricts (or allows) an end
+SAS_config_options now has a fourth option (as ov V4.3.2). This new, fourth, option is `style` and
+it's for setting the ODS Style, overriding the default. There was already an attribute you can set
+for this on the SASsession object, `HTML_style`, but that couldn't be set in a SAS_Kernel notebook,
+so I added it in the config for that case.
+
+The first option `lock_down` restricts (or allows) an end
 users' ability to override settings in the configuration definitions by passing them as parameters
 on the ``SASsession()``. Each of the keys in the configuration definition can be passed in at
 run time on the SASsession(). If lock_down is set to True, any keys defined in the configuration
@@ -224,7 +229,7 @@ definition cannot be overridden in SASsession(), Keys that are not specified in 
 specified at run time on the SASsession(). If set to False, any config def key can be specified
 on the SASsession().
 
-The second (verbose) controls the printing of some debug type messages. While the third, 'prompt'
+The second `verbose` controls the printing of some debug type messages. While the third, 'prompt'
 defines whether saspy can prompt the user if necessary. You would set this to False, if running a
 script in the background, where no input could be provided and if a prompt were to be issued, the
 process would hang waiting on input. Prompt= can also be provided on the SASsession() as a parameter,
@@ -250,7 +255,8 @@ For example, if you had SAS installed on your Linux system, your sascfg_personal
     # this is actually optional, you only have to have it to change the defaults
     #SAS_config_options = {'lock_down': False,
     #                      'verbose'  : True,
-    #                      'prompt'   : True
+    #                      'prompt'   : True,
+    #                      'style'    : 'HTMLBlue'
     #                     }
 
     mycfg              = {'saspath'  : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'

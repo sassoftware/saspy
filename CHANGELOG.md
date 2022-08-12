@@ -2,6 +2,45 @@
 
 
 
+## [4.3.2] - 2022-08-12
+
+### Added
+
+-   `Enhanced` Added another configuration key in the SAS_config_options dictionary for providing an override for the ODS type.
+This was already available tochenge as an attribute on the SASSession object, but in a SAS_Kernel notebook, there was no
+way to do that. So I added `style` to the config so it could be set when using SAS_Kernel in Jupyter.
+
+### Changed
+
+-   `Tweak` There are a number of methods which require querying SAS for information which is returned in the LOG and then
+parsed out by SASPy. If there's something wrong on the SAS side and somehow the information isn't in the LOG, it can cause
+exceptions in the method. I've added code to catch these exceptions and just handle them like an error so processing can
+continue. The methods will now just fail and you can look at the log to see what the problem was.
+
+### Fixed
+
+-   `Fix` There were a couple methods on the SASdata object which, when returning Pandas results, didn't specify the
+work library explicitly on the retrieval step. So if there was a user libref assigned, it would look there instead of
+work for the data and not find it. All better now.
+
+-   `Fix` In the IOM Access Method, the Java IOM Client code does some of the transcoding between Unicode and whatever the
+SAS Session Encoding is. If there is a transcode failure, it throws an exception which terminates the Java process and the
+SAS server process. I added code to catch this trye of failure, in my Java code, and return the failure, keeping the Java
+and SAS processes (and SASPy) going. I don't have a way to change the behavior of the client code, so catching this and
+keeping things running are what I can do, which is better than it all terminating out from under SASPy.
+
+-   `Fix` And the big fix for this release is for df2sd() and sd2df(), fixing problems when the record length is larger
+than the max (32767) for the _infile_ statement, which is used in the SAS code for these methods. This caused problems in
+df2sd() if the row length was larger than 32767. There was also an issue that could be hit w/ regards to this in sd2df()
+also, so that's addressed with this fix to. This is for all 3 access methods; STDIO, IOM and HTTP.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+
 ## [4.3.1] - 2022-07-06
 
 ### Added
