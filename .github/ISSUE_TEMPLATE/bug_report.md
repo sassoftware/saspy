@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is. Also, please run the code and provide all of the output. Also, please execute the following and provide all of the output (you only need the print statements in batch mode, not interactive):
+A clear and concise description of the bug. Then please show the code and run it providing all of the output (don't just cut snippets out of the output). Also, please execute the following and provide all of the output; you only need the print() statements if not running in interactive mode, otherwise they display their info automatically just by submitting the objects/methods:
 ```
 import saspy
 print(saspy)
@@ -30,9 +30,9 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen if it's not obvious.
 
 **Screenshots**
-If applicable, add screenshots to help explain your problem. But, paste code if it's something I will need to run; I can't cut-n-paste from pictures, and don't like to type a lot :)
+If applicable, add screenshots to help explain your problem. But, paste code if it's something I will need to run; I can't cut-n-paste from pictures, and don't like to have to transcribe code from a picture :)
 
-**Configuration information. Please provide the configuration you're trying to use (your sascfg_personal.py file) as well as what client system you are on and what kind of SAS deployment you're trying to connect to and where it's deployed. **
+**Configuration information. Please provide the configuration you're trying to use (your sascfg_personal.py file) as well as what client system you are on and what kind of SAS deployment you're trying to connect to and where it's deployed (local to the client or remote). **
 
 **Additional context**
 Add any other context about the problem here.
