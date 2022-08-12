@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Configuration &mdash; saspy 4.3.0 documentation</title>
+  <title>Configuration &mdash; saspy 4.3.2 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 4.3.0 documentation" href="index.html"/>
+    <link rel="top" title="saspy 4.3.2 documentation" href="index.html"/>
         <link rel="next" title="Getting started" href="getting-started.html"/>
         <link rel="prev" title="Installation" href="install.html"/> 
 
@@ -68,7 +68,7 @@
             
             
               <div class="version">
-                4.3.0
+                4.3.2
               </div>
             
           
@@ -99,18 +99,18 @@
 <li class="toctree-l2"><a class="reference internal" href="#sascfg-personal-py-details">sascfg_personal.py details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#choosing-an-access-method">Choosing an Access Method</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#stdio">STDIO</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#iom-using-java">IOM using Java</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ssh">SSH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#iom">IOM</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#attn-log4j-vulnerabilities-found-in-dec-2021">ATTN, log4j vulnerabilities found in Dec 2021</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file">ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-authinfo-file-authinfo-on-windows">The .authinfo file (_authinfo on Windows)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#remote">Remote</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#local">Local</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#iom-to-mvs-sas">IOM to MVS SAS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#remote-to-mvs-sas">Remote to MVS SAS</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#http">HTTP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#iom-using-com">IOM using COM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#com">COM</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
@@ -194,22 +194,29 @@ which are used to connect to different kinds of SAS sessions.</p>
 <dt><a class="reference internal" href="#stdio">STDIO</a></dt>
 <dd>This connection method is available on the Linux platform only. This
 method enables you to connect to SAS on the same host as your Python process.</dd>
-<dt><a class="reference internal" href="#stdio-over-ssh">STDIO over SSH</a></dt>
-<dd>This connection method is available from Linux or Windows (or Mac), but only to SAS on the Linux platform. This
-method can connect to SAS that is installed on a remote host, if you have passwordless
-SSH configured for your Linux user account.</dd>
-<dt><a class="reference internal" href="#iom-using-java">IOM using Java</a></dt>
-<dd>The integrated object method (IOM) connection method supports SAS on any platform.
+<dt><a class="reference internal" href="#ssh">SSH</a></dt>
+<dd>This connection method (STDIO over SSH) is available from Linux or Windows (or Mac), but only to
+SAS on the Linux platform. This  method can connect to SAS that is installed on a remote host,
+if you have passwordless SSH configured for your Linux user account.</dd>
+<dt><a class="reference internal" href="#iom">IOM</a></dt>
+<dd>The Integrated Object Method (IOM) connection method (IOM using Java) supports SAS on any platform.
 This method can make a local Windows connection and it is also the way to connect
 to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
-Server on any supported SAS platform.</dd>
+Server on any supported SAS platform from any client.</dd>
 <dt><a class="reference internal" href="#http">HTTP</a></dt>
 <dd>This access mehtod uses http[s] to connect to the Compute Service (a micro service) of a Viya
 instalation. This does not connet to SAS 9.4 via http. The Compute Service will start a
 Compute Server using the SPRE image of MVA SAS that is installed in the Viya deployment.
 This is roughly equivalent to a Workspace server via IOM, but in Viya with no SAS 9.4.</dd>
-<dt><a class="reference internal" href="#iom-using-com">IOM using COM</a></dt>
-<dd>This connection method is for Windows clients connecting to a remote SAS 9.4 host. This
+</dl>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The COM access method is not fully supported nor as performant as the others.
+Please use IOM in place of this, unless you aren&#8217;t concerned with those issues.</p>
+</div>
+<dl class="docutils">
+<dt><a class="reference internal" href="#com">COM</a></dt>
+<dd>This connection method (IOM using COM) is for Windows clients connecting to a local or remote SAS 9.4 host. This
 method takes advantage of the IOM access method, but does not require a Java dependency.
 SAS Enterprise Guide or SAS Integration Technologies Client (a free download from SAS Support)
 is required to install the SAS COM library on your client system.</dd>
@@ -363,14 +370,18 @@ search order listed above, in that order.</p>
 <p>In reverse order, the configuration definitions are Python dictionaries. Each dictionary
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
 These values are defined in the following sections.</p>
-<p>SAS_config_options has three options. The first option (lock_down) restricts (or allows) an end
+<p>SAS_config_options now has a fourth option (as ov V4.3.2). This new, fourth, option is <cite>style</cite> and
+it&#8217;s for setting the ODS Style, overriding the default. There was already an attribute you can set
+for this on the SASsession object, <cite>HTML_style</cite>, but that couldn&#8217;t be set in a SAS_Kernel notebook,
+so I added it in the config for that case.</p>
+<p>The first option <cite>lock_down</cite> restricts (or allows) an end
 users&#8217; ability to override settings in the configuration definitions by passing them as parameters
 on the <code class="docutils literal"><span class="pre">SASsession()</span></code>. Each of the keys in the configuration definition can be passed in at
 run time on the SASsession(). If lock_down is set to True, any keys defined in the configuration
 definition cannot be overridden in SASsession(), Keys that are not specified in the Config Def, can be
 specified at run time on the SASsession(). If set to False, any config def key can be specified
 on the SASsession().</p>
-<p>The second (verbose) controls the printing of some debug type messages. While the third, &#8216;prompt&#8217;
+<p>The second <cite>verbose</cite> controls the printing of some debug type messages. While the third, &#8216;prompt&#8217;
 defines whether saspy can prompt the user if necessary. You would set this to False, if running a
 script in the background, where no input could be provided and if a prompt were to be issued, the
 process would hang waiting on input. Prompt= can also be provided on the SASsession() as a parameter,
@@ -390,7 +401,8 @@ For example, if you had SAS installed on your Linux system, your sascfg_personal
 <span class="c1"># this is actually optional, you only have to have it to change the defaults</span>
 <span class="c1">#SAS_config_options = {&#39;lock_down&#39;: False,</span>
 <span class="c1">#                      &#39;verbose&#39;  : True,</span>
-<span class="c1">#                      &#39;prompt&#39;   : True</span>
+<span class="c1">#                      &#39;prompt&#39;   : True,</span>
+<span class="c1">#                      &#39;style&#39;    : &#39;HTMLBlue&#39;</span>
 <span class="c1">#                     }</span>
 
 <span class="n">mycfg</span>              <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span>  <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span>
@@ -420,7 +432,7 @@ will use and thus what your configuration definition will contain.</p>
             2. Client Windows
                 a. IOM or COM - on same machine. Can&#39;t get there if different machines
     b. Workspace server (this is SAS 9, and deployment on any platform is fine)
-        i. Client Linux
+        i. Client Linux or Mac OS
             1. IOM - local or remote
         ii. Client Windows
             1. IOM or COM - local or remote
@@ -498,8 +510,9 @@ trigger for the other access methods: not having <code class="docutils literal">
 keys in the configuration definition.</p>
 </div>
 </div>
-<div class="section" id="stdio-over-ssh">
-<h2>STDIO over SSH<a class="headerlink" href="#stdio-over-ssh" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ssh">
+<h2>SSH<a class="headerlink" href="#ssh" title="Permalink to this headline">¶</a></h2>
+<p>aka: STDIO over SSH</p>
 <p>NEW in V3.6.3, you can use this method from a Windows Client to connect to a
 stand alone SAS install on a remote Linux machine. Before that, it was only supported
 from a Linux client.</p>
@@ -587,8 +600,9 @@ environment variable. Check the man page on sshpass. ie: &#8216;sshpassparms&#82
 </pre></div>
 </div>
 </div>
-<div class="section" id="iom-using-java">
-<h2>IOM using Java<a class="headerlink" href="#iom-using-java" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="iom">
+<h2>IOM<a class="headerlink" href="#iom" title="Permalink to this headline">¶</a></h2>
+<p>aka: IOM using Java</p>
 <p>This connection method opens many connectivity options. This method enables you to
 connect to any Workspace server on any supported platform. It requires Java 7 or higher
 installed on your Client machine (where you&#8217;re running SASPy)</p>
@@ -850,19 +864,9 @@ of V3.1.9 here for more info: <a class="reference external" href="https://github
               <span class="p">}</span>
 </pre></div>
 </div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Having the <code class="docutils literal"><span class="pre">'java'</span></code> key is the trigger to use the IOM access method.</p>
 </div>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">When using the IOM access method (<code class="docutils literal"><span class="pre">'java'</span></code> key specified), the
-absence of the <code class="docutils literal"><span class="pre">'iomhost'</span></code> key is the trigger to use a local Windows
-session instead of remote IOM (it is a different connection type).</p>
-</div>
-</div>
-<div class="section" id="iom-to-mvs-sas">
-<h3>IOM to MVS SAS<a class="headerlink" href="#iom-to-mvs-sas" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="remote-to-mvs-sas">
+<h3>Remote to MVS SAS<a class="headerlink" href="#remote-to-mvs-sas" title="Permalink to this headline">¶</a></h3>
 <p>Yes, you can even connect to a SAS server running on MVS (Mainframe SAS).
 There are a couple of requirements for this to work right. First, you need version 2.1.5 or higher of this module.
 There were a couple tweaks I needed to make to the IOM access method and those are in 2.1.5.</p>
@@ -887,6 +891,16 @@ this is all handled in IOM for you, but for data transfer routines, transcoding 
 is OPEN_ED-1047, although it can be set to any number of other EBCDIC encodings. The default Python encodings do not include
 the 1047 code page. I did find a &#8216;cp1047&#8217; code page in a separate pip installable module which seems to match the OPEN_ED-1047
 code page. So if you&#8217;re running with that encoding, you can install the cp1047 to use.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Having the <code class="docutils literal"><span class="pre">'java'</span></code> key is the trigger to use the IOM access method.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">When using the IOM access method (<code class="docutils literal"><span class="pre">'java'</span></code> key specified), the
+absence of the <code class="docutils literal"><span class="pre">'iomhost'</span></code> key is the trigger to use a local Windows
+session instead of remote IOM (it is a different connection type).</p>
+</div>
 </div>
 </div>
 <div class="section" id="http">
@@ -1013,8 +1027,9 @@ you&#8217;re using the right thing :)</dd>
 <p class="last">Having the <code class="docutils literal"><span class="pre">'url'</span></code> (or <code class="docutils literal"><span class="pre">'ip'</span></code>) key is the trigger to use the HTTP access method.</p>
 </div>
 </div>
-<div class="section" id="iom-using-com">
-<h2>IOM using COM<a class="headerlink" href="#iom-using-com" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="com">
+<h2>COM<a class="headerlink" href="#com" title="Permalink to this headline">¶</a></h2>
+<p>aka: IOM using COM</p>
 <p>New in 3.1.0, this user contributed access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method,
 but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.</p>
 <div class="admonition note">
@@ -1034,7 +1049,7 @@ access method, you will likely see an error similar to this when trying to estab
     <span class="bp">self</span><span class="o">.</span><span class="n">_io</span> <span class="o">=</span> <span class="n">SASSessionCOM</span><span class="p">(</span><span class="n">sascfgname</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sascfg</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">sb</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
   File <span class="nb">&quot;/opt/tom/github/saspy/saspy/sasiocom.py&quot;</span>, line <span class="m">197</span>, in <span class="n">__init__</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_startsas</span><span class="p">()</span>
-  File <span class="nb">&quot;/opt/tom/github/saspy/saspy/sasiocom.py&quot;</span>, line <span class="m">212</span>, in <span class="n">_startsas</span>
+  File <span class="nb">&quot;/opt/tom/gi thub/saspy/saspy/sasiocom.py&quot;</span>, line <span class="m">212</span>, in <span class="n">_startsas</span>
     <span class="n">factory</span> <span class="o">=</span> <span class="n">dynamic</span><span class="o">.</span><span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;SASObjectManager.ObjectFactoryMulti2&#39;</span><span class="p">)</span>
 <span class="gr">NameError</span>: <span class="n">name &#39;dynamic&#39; is not defined</span>
 <span class="go">&gt;&gt;&gt;</span>
@@ -1087,7 +1102,6 @@ windows-1252, respectively.</p>
 </dl>
 <div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="n">iomcom</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;iomhost&#39;</span><span class="p">:</span> <span class="s1">&#39;mynode.mycompany.org&#39;</span><span class="p">,</span>
     <span class="s1">&#39;iomport&#39;</span><span class="p">:</span> <span class="mi">8591</span><span class="p">,</span>
-    <span class="s1">&#39;class_id&#39;</span><span class="p">:</span> <span class="s1">&#39;440196d4-90f0-11d0-9f41-00a024bb830c&#39;</span><span class="p">,</span>
     <span class="s1">&#39;provider&#39;</span><span class="p">:</span> <span class="s1">&#39;sas.iomprovider&#39;</span><span class="p">,</span>
     <span class="s1">&#39;encoding&#39;</span><span class="p">:</span> <span class="s1">&#39;windows-1252&#39;</span><span class="p">}</span>
 </pre></div>
@@ -1149,7 +1163,7 @@ session instead of remote IOM (it is a different connection type).</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'4.3.0',
+            VERSION:'4.3.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
