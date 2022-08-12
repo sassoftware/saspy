@@ -422,9 +422,6 @@ host -
                 'options' : ["-fullstimer"]
                }
 
-.. note:: The ``'ssh'`` key is the trigger to use the STDIO over SSH connection
-          method.
-
 To accomodate alternative SSH configurations, you may also provide any of the
 following optional keys:
 
@@ -481,6 +478,10 @@ sshpassparms -
                 'tunnel'  : 9911,
                 'rtunnel' : 9912
                }
+
+
+.. note:: The ``'ssh'`` key is the trigger to use the STDIO over SSH connection
+          method.
 
 
 IOM
