@@ -1,79 +1,36 @@
-
-
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>Limitations, restrictions and work arounds &mdash; saspy 4.3.2 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Limitations, restrictions and work arounds &mdash; saspy 4.3.3 documentation</title>
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
-  
-  
-  
-
-  
-
-  
-  
-    
-
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="saspy 4.3.2 documentation" href="index.html"/>
-        <link rel="next" title="Troubleshooting" href="troubleshooting.html"/>
-        <link rel="prev" title="Contributing new methods" href="adding-procedures.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Troubleshooting" href="troubleshooting.html" />
+    <link rel="prev" title="Contributing new methods" href="adding-procedures.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
-          
-
-          
+        <div class="wy-side-nav-search" >
             <a href="index.html" class="icon icon-home"> saspy
-          
-
-          
           </a>
-
-          
-            
-            
               <div class="version">
-                4.3.2
+                4.3.3
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -81,17 +38,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
@@ -120,68 +67,31 @@
 <li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">saspy</a>
-        
       </nav>
 
-
-      
       <div class="wy-nav-content">
         <div class="rst-content">
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html">Docs</a> &raquo;</li>
-        
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
       <li>Limitations, restrictions and work arounds</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/limitations.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="limitations-restrictions-and-work-arounds">
+             
+  <section id="limitations-restrictions-and-work-arounds">
 <h1>Limitations, restrictions and work arounds<a class="headerlink" href="#limitations-restrictions-and-work-arounds" title="Permalink to this headline">¶</a></h1>
 <p>This chapter covers specific use cases that are problematic, not allowed for some reason, or
 require special handling to be able to work correctly. Hopefully this will be a short chapter.
@@ -193,50 +103,50 @@ was designed to be a python interface to an interactive SAS session. Its many me
 SAS code, which it submits to the SAS session and then retrieves both the SASLOG (LOG) and any listing/results
 (LST) and then provides that back as objects or by directly rendering in interactive sessions.</p>
 <p>Many methods require saspy to query the SAS session to gather information about session, data, configuration,
-the environment, and other things. There is no API for these &#8216;queries&#8217;. Rather, saspy generates specific
+the environment, and other things. There is no API for these ‘queries’. Rather, saspy generates specific
 SAS code to gather this information and has it written to the LOG to then parse out on the Python side
 after retirving the LOG. That is a common mode of access. This, then, demands that saspy have access to
 the LOG. That is perhaps the first, most important requirement.</p>
 <p>SAS has no end of options, configurations, and coding possibilities that allow it to be able to do
-just about anything. saspy couldn&#8217;t possibly provide methods to do &#8216;everything&#8217;, so there is a submit()
-method which allows for running &#8216;any&#8217; SAS code needed that isn&#8217;t already provided by a saspy method.</p>
+just about anything. saspy couldn’t possibly provide methods to do ‘everything’, so there is a submit()
+method which allows for running ‘any’ SAS code needed that isn’t already provided by a saspy method.</p>
 <p>This then, is the crux of the matter. There can be SAS code submitted that would then cause problems
 for saspy to function correctly. These are the things that will be addresses in this section. saspy has
 multiple access methods, for connecting to SAS deployed in different ways. Each of these access methods
 is implemented very differently, yet they each provide the same functionality and capabilities; at least
 to the best of my ability to make that the case. Any divergences between those will also be identified here.</p>
-<div class="section" id="saslog">
+<section id="saslog">
 <h2>SASLOG<a class="headerlink" href="#saslog" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="proc-printto">
+<section id="proc-printto">
 <h3>Proc Printto<a class="headerlink" href="#proc-printto" title="Permalink to this headline">¶</a></h3>
-<p>Let&#8217;s start with the first requirement that saspy has access to the SAS Log. SAS has a procedure which
+<p>Let’s start with the first requirement that saspy has access to the SAS Log. SAS has a procedure which
 allows you to redirect the LOG and/or LST out from under the currently existing locations, to files or other locations:
 <a class="reference external" href="https://go.documentation.sas.com/?docsetId=proc&amp;docsetTarget=p1hwvc03z4tqlkn1owzhzo8e7ulu.htm&amp;docsetVersion=9.4&amp;locale=en">proc printto</a>.</p>
-<p>If this is used to redirect the LST, then you just won&#8217;t get any results back from any methods in saspy.
+<p>If this is used to redirect the LST, then you just won’t get any results back from any methods in saspy.
 Your choice, I suppose. However, if redirecting the LOG, then saspy may hang, may have any number of failures
-or exceptions in various methods, and will generally be useless other than for other submit() methods, which won&#8217;t
+or exceptions in various methods, and will generally be useless other than for other submit() methods, which won’t
 return anything.</p>
 <p>Not the intent of the design. However, intent not being everything, providing a way to allow for the use of this,
 if needed, while addressing this restriction is possible. This would be considered a work around.</p>
-<p>Proc Printto has an &#8216;undo&#8217; version where you can reset the LOG and LST back to their previous settings. So, to
+<p>Proc Printto has an ‘undo’ version where you can reset the LOG and LST back to their previous settings. So, to
 successfully use Proc Printto within a saspy submit() method, you are simply required to submit
-&#8216;Proc Printto;run;&#8217; (undo) in your code (presumably at the end) that you run within a submit() method. This will
-return the LOG and LST back to saspy which will then continue to function correctly. Of course, you won&#8217;t get
+‘Proc Printto;run;’ (undo) in your code (presumably at the end) that you run within a submit() method. This will
+return the LOG and LST back to saspy which will then continue to function correctly. Of course, you won’t get
 any part of the log or any results that happened while the redirection was enabled, but you knew that. Keep reading
-to see, below, that &#8216;you&#8217; don&#8217;t have to do this, there&#8217;s an option on submit(..., printto=True) which will do this
+to see, below, that ‘you’ don’t have to do this, there’s an option on submit(…, printto=True) which will do this
 for you.</p>
-<p>One parting though on this is that you can use saspy&#8217;s download() method to pull the file(s) you redirected things
-to back to the client and then access them in saspy. Don&#8217;t know why you would, but you could. Maybe there&#8217;s a use
+<p>One parting though on this is that you can use saspy’s download() method to pull the file(s) you redirected things
+to back to the client and then access them in saspy. Don’t know why you would, but you could. Maybe there’s a use
 case where that makes sense.</p>
-</div>
-</div>
-<div class="section" id="terminating-sas-out-from-under-saspy">
+</section>
+</section>
+<section id="terminating-sas-out-from-under-saspy">
 <h2>Terminating SAS out from under saspy<a class="headerlink" href="#terminating-sas-out-from-under-saspy" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="abort-macro-and-abort-statement">
+<section id="abort-macro-and-abort-statement">
 <h3>%abort macro and abort statement<a class="headerlink" href="#abort-macro-and-abort-statement" title="Permalink to this headline">¶</a></h3>
 <p>SAS also has statements you can submit which will cause the SAS session to immediately terminate; yes, really.
 So, if you execute one of these statements, guess what? The interactive SAS session saspy that started and is connected to
-vanishes. It&#8217;s not there anymore. saspy will no longer get any results, and won&#8217;t get the log from that submit() method
+vanishes. It’s not there anymore. saspy will no longer get any results, and won’t get the log from that submit() method
 that executed SAS :) (lol)  Well, executed the statement that terminated SAS.</p>
 <p>The SAS macro <a class="reference external" href="https://go.documentation.sas.com/?docsetId=mcrolref&amp;docsetTarget=p0f7j2zr6z71nqn1fpefnmulzazf.htm&amp;docsetVersion=9.4&amp;locale=en">%abort</a>
 and the data step statement <a class="reference external" href="https://go.documentation.sas.com/?docsetId=lestmtsref&amp;docsetTarget=p0hp2evpgqvfsfn1u223hh9ubv3g.htm&amp;docsetVersion=9.4&amp;locale=en">abort</a>
@@ -245,30 +155,30 @@ behavior can vary as well.</p>
 <p>There are two general behaviors these statements can produce. The first ts to terminate SAS. The other is to stop processing
 (some) remaining code that was submitted, but not terminate the SAS session. This second behavior is complicated by the nature of
 the SAS session itself. As termination of the SAS session is pretty cut and dry, the following will be addressing the second behavior.</p>
-</div>
-<div class="section" id="canceling-submitted-statements">
+</section>
+<section id="canceling-submitted-statements">
 <h3>Canceling submitted statements<a class="headerlink" href="#canceling-submitted-statements" title="Permalink to this headline">¶</a></h3>
 <p>There are two variations of this second behavior. The first variation is when you supply no argument to the abort statement
 or macro. In this case it only stops executing the current macro and/or data step, but any following submitted statements
 continue to be executed normally. This case is generally not a problem for any access method of saspy.</p>
-<p>The second variant is specifying the CANCEL argument: &#8216;[%]abort CANCEL;&#8217;. This version stops executing all of the following
-&#8216;submitted statements&#8217;, and the meaning of &#8216;submitted statements&#8217; varies. For both the IOM and HTTP access methods, there is
+<p>The second variant is specifying the CANCEL argument: ‘[%]abort CANCEL;’. This version stops executing all of the following
+‘submitted statements’, and the meaning of ‘submitted statements’ varies. For both the IOM and HTTP access methods, there is
 an actual API to submit code to the SAS session and that submit maps 1:1 with the saspy submit() method. In these cases, all of the
 statements you submitted in the submit() method, following the Abort CANCEL, are not executed. But, subsequent submit() methods,
 of more code, will be executed.</p>
-<p>For STDIO, there is no API of any kind, and what SAS considers to be the &#8216;following submitted statements&#8217; is effectively, all
-statements to the end of the session. There is no way to &#8216;group&#8217; sets of statements into &#8216;submissions&#8217;. The STDIN stream itself
-is a single &#8216;submit&#8217;. In this case, the SASsession is no longer functional; it will execute no more code and nothing can be done but
+<p>For STDIO, there is no API of any kind, and what SAS considers to be the ‘following submitted statements’ is effectively, all
+statements to the end of the session. There is no way to ‘group’ sets of statements into ‘submissions’. The STDIN stream itself
+is a single ‘submit’. In this case, the SASsession is no longer functional; it will execute no more code and nothing can be done but
 terminated it (endsas()). That is a SASism, and nothing that can be changed or fixed from the Python side to solve this.</p>
-</div>
-</div>
-<div class="section" id="perfect-storm">
+</section>
+</section>
+<section id="perfect-storm">
 <h2>Perfect Storm<a class="headerlink" href="#perfect-storm" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="combining-proc-printto-and-abort-cancel">
+<section id="combining-proc-printto-and-abort-cancel">
 <h3>Combining proc printto and abort cancel<a class="headerlink" href="#combining-proc-printto-and-abort-cancel" title="Permalink to this headline">¶</a></h3>
 <p>What happens if you issue a the following code, having proc printto to redirect LOG/LST, and have an abort CANCEL, which gets executed,
 and you have the undo for the proc printto (proc printto;run;) at the end of your code?</p>
-<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">submitLOG</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">submitLOG</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
 <span class="s1">    proc printto LOG=&#39;./mylogfile&#39;;run;</span>
 
 <span class="s1">    /* some SAS code */</span>
@@ -286,10 +196,10 @@ and you have the undo for the proc printto (proc printto;run;) at the end of you
 <span class="n">In</span> <span class="n">this</span> <span class="n">case</span><span class="p">,</span> <span class="n">neither</span> <span class="s1">&#39;some more SAS code&#39;</span> <span class="n">nor</span> <span class="n">the</span> <span class="n">proc</span> <span class="n">printto</span><span class="p">;</span><span class="n">run</span><span class="p">;</span> <span class="n">will</span> <span class="n">be</span> <span class="n">executed</span><span class="o">.</span>
 </pre></div>
 </div>
-<p>So, in this case, the &#8216;undo&#8217; won&#8217;t happen so saspy won&#8217;t have it&#8217;s LOG back. In this case, you could
-code it in your program before each &#8216;abort cancel;&#8217; that could execute.</p>
+<p>So, in this case, the ‘undo’ won’t happen so saspy won’t have it’s LOG back. In this case, you could
+code it in your program before each ‘abort cancel;’ that could execute.</p>
 <p>So, for IOM and HTTP, this will solve this case:</p>
-<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">submitLOG</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">submitLOG</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
 <span class="s1">    proc printto LOG=&#39;./mylogfile&#39;;run;</span>
 
 <span class="s1">    /* some SAS code */</span>
@@ -309,101 +219,59 @@ code it in your program before each &#8216;abort cancel;&#8217; that could execu
 <span class="o">&gt;&gt;&gt;</span> <span class="c1"># the rest of your Python program ...</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="printto-option-on-submit-methods">
+</section>
+<section id="printto-option-on-submit-methods">
 <h3>printto= option on submit methods<a class="headerlink" href="#printto-option-on-submit-methods" title="Permalink to this headline">¶</a></h3>
-<p>Now, odds are that if you are submitting code like this, you didn&#8217;t type it into saspy. You probably
+<p>Now, odds are that if you are submitting code like this, you didn’t type it into saspy. You probably
 are reading in some existing SAS batch script (.sas file) and just submitting it, as is. You may not
-even know what SAS code is even in it. In this case, you don&#8217;t want to have to edit the file to modify
-it as above. For this situation, I&#8217;ve added an option on the submit* mehtods; printto=[False | True].</p>
-<p>When set to True, saspy will submit the undo (&#8216;proc printto;run;&#8217;) in a second API submit (IOM and HTTP),
+even know what SAS code is even in it. In this case, you don’t want to have to edit the file to modify
+it as above. For this situation, I’ve added an option on the submit* mehtods; printto=[False | True].</p>
+<p>When set to True, saspy will submit the undo (‘proc printto;run;’) in a second API submit (IOM and HTTP),
 so that, in case there was a redirecting proc printto, and perhapse an abort cancel, the log will be
-given back to saspy and it will continue to funtion correctly. This &#8216;undo&#8217; will also be submitted in the
-STDIO access method, though it&#8217;s not a seperate API call, since, as described above, there is no API.</p>
-<p>Submitting &#8216;proc printto;run;&#8217; has no ill effects in any case; even if there had been no original proc
-printto submitted, or if there has already been &#8216;proc printo;run;&#8217; previously submitted.</p>
-<div class="highlight-ipython3"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">fd</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;MyBattchSreipt.sas&#39;</span><span class="p">);</span> <span class="n">code</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">read</span><span class="p">();</span> <span class="n">fd</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">submitLOG</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">printto</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+given back to saspy and it will continue to funtion correctly. This ‘undo’ will also be submitted in the
+STDIO access method, though it’s not a seperate API call, since, as described above, there is no API.</p>
+<p>Submitting ‘proc printto;run;’ has no ill effects in any case; even if there had been no original proc
+printto submitted, or if there has already been ‘proc printo;run;’ previously submitted.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">fd</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;MyBattchSreipt.sas&#39;</span><span class="p">);</span> <span class="n">code</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">read</span><span class="p">();</span> <span class="n">fd</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">submitLOG</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">printto</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="c1"># the rest of your Python program ...  you are covered either way</span>
 </pre></div>
 </div>
 <p>The default for the printto= option is False, as that is the existing behavior, so no regressions are possible.
 And this is actually a non-standard use case, though is can be allowed and supported by setting the option to True.</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
-           </div>
-           <div class="articleComments">
-            
            </div>
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="troubleshooting.html" class="btn btn-neutral float-right" title="Troubleshooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="adding-procedures.html" class="btn btn-neutral" title="Contributing new methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="adding-procedures.html" class="btn btn-neutral float-left" title="Contributing new methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="troubleshooting.html" class="btn btn-neutral float-right" title="Troubleshooting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2018 SAS Institute Inc. All Rights Reserved..
-
-    </p>
+    <p>&#169; Copyright 2018 SAS Institute Inc. All Rights Reserved..</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'4.3.2',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-   
+  </script> 
 
 </body>
 </html>
