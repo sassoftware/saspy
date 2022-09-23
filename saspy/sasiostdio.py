@@ -2541,7 +2541,11 @@ Will use HTML5 for this SASsession.""")
          ll = self.submit("", 'text')
          return str(e)+"\n\n"+ll['LOG']
 
-      newsock[0].shutdown(socks.SHUT_RDWR)
+      try:
+         newsock[0].shutdown(socks.SHUT_RDWR)
+      except:
+         pass
+
       newsock[0].close()
       sock.close()
       ll = self.submit("", 'text')
