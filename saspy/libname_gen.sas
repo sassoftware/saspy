@@ -15,7 +15,7 @@
 #  limitations under the License.
 #
 */
-*filename  d1 url 'http://www-bcf.usc.edu/~gareth/ISL/Advertising.csv'; 
+*filename  d1 url 'http://www-bcf.usc.edu/~gareth/ISL/Advertising.csv';
 *proc import datafile=d1 out=work.data dbms=csv replace; run;
 options pagesize=max;
 /*
@@ -43,11 +43,11 @@ options pagesize=max;
     /*end replace with code generation macro*/
     ods document close;
     /*create a libname using the document name*/
-    
+
     proc document name=&objname.;
         ods output Properties=_&objname.properties;
         list \(where=(_type_='Dir')) /levels=all;
-    quit; 
+    quit;
     filename file1 temp;
     data _null_;
         length path $1000;

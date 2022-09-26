@@ -83,13 +83,13 @@ class SASml:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def hpforest(self, data: ['SASdata', str] = None,
+    def hpforest(self, data: ('SASdata', str) = None,
                  freq: str = None,
                  id: str = None,
-                 input: [str, list, dict] = None,
+                 input: (str, list, dict) = None,
                  save: str = None,
-                 score: [str, bool, 'SASdata'] = True,
-                 target: [str, list, dict] = None,
+                 score: (str, bool, 'SASdata') = True,
+                 target: (str, list, dict) = None,
                  procopts: str = None,
                  stmtpassthrough: str = None,
                  **kwargs: dict) -> SASresults:
@@ -112,11 +112,11 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({})
-    def hp4score(self, data: ['SASdata', str] = None,
+    def hp4score(self, data: ('SASdata', str) = None,
                  id: str = None,
                  importance: str = None,
                  performance: str = None,
-                 score: [str, bool, 'SASdata'] = True,
+                 score: (str, bool, 'SASdata') = True,
                  procopts: str = None,
                  stmtpassthrough: str = None,
                  **kwargs: dict) -> SASresults:
@@ -137,11 +137,11 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({'input'})
-    def hpcluster(self, data: ['SASdata', str] = None,
+    def hpcluster(self, data: ('SASdata', str) = None,
                   freq: str = None,
-                  id: [str, list] = None,
-                  input: [str, list, dict] = None,
-                  score: [str, bool, 'SASdata'] = True,
+                  id: (str, list) = None,
+                  input: (str, list, dict) = None,
+                  score: (str, bool, 'SASdata') = True,
                   procopts: str = None,
                   stmtpassthrough: str = None,
                   **kwargs: dict) -> SASresults:
@@ -162,16 +162,16 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({'input', 'target', 'train'})
-    def hpneural(self, data: ['SASdata', str] = None,
+    def hpneural(self, data: ('SASdata', str) = None,
                  architecture: str = None,
                  code: str = None,
-                 hidden: [str, int] = None,
+                 hidden: (str, int) = None,
                  id: str = None,
-                 input: [str, list, dict] = None,
+                 input: (str, list, dict) = None,
                  partition: str = None,
-                 score: [str, bool, 'SASdata'] = True,
-                 target: [str, list, dict] = None,
-                 train: [str, dict] = None,
+                 score: (str, bool, 'SASdata') = True,
+                 target: (str, list, dict) = None,
+                 train: (str, dict) = None,
                  procopts: str = None,
                  stmtpassthrough: str = None,
                  **kwargs: dict) -> SASresults:
@@ -197,17 +197,17 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def treeboost(self, data: ['SASdata', str] = None,
+    def treeboost(self, data: ('SASdata', str) = None,
                   assess: str = None,
                   code: str = None,
                   freq: str = None,
                   importance: str = None,
-                  input: [str, list, dict] = None,
+                  input: (str, list, dict) = None,
                   performance: str = None,
-                  save: [str, bool] = True,
-                  score: [str, bool, 'SASdata'] = True,
+                  save: (str, bool) = True,
+                  score: (str, bool, 'SASdata') = True,
                   subseries: str = None,
-                  target: [str, list, dict] = None,
+                  target: (str, list, dict) = None,
                   procopts: str = None,
                   stmtpassthrough: str = None,
                   **kwargs: dict) -> SASresults:
@@ -234,15 +234,15 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def hpbnet(self, data: ['SASdata', str] = None,
+    def hpbnet(self, data: ('SASdata', str) = None,
                code: str = None,
                freq: str = None,
                id: str = None,
-               input: [str, list, dict] = None,
-               output: [str, bool, 'SASdata'] = None,
+               input: (str, list, dict) = None,
+               output: (str, bool, 'SASdata') = None,
                partition: str = None,
                performance: str = None,
-               target: [str, list, dict] = None,
+               target: (str, list, dict) = None,
                procopts: str = None,
                stmtpassthrough: str = None,
                **kwargs: dict) -> SASresults:

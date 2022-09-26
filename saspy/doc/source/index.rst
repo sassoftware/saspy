@@ -8,7 +8,7 @@
 SASPy
 *****
 
-.. module:: saspy
+.. currentmodule:: saspy
 
 **Date**: |today| **Version**: |version|
 

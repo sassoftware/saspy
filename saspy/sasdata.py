@@ -340,7 +340,7 @@ class SASdata:
     def obs(self, force: bool = False) -> int:
         """
         :param force: if nobs isn't availble, set to True to force it to be calculated; may take time
-        return the number of observations for your SASdata object
+        :return: int # the number of observations for your SASdata object
         """
         lastlog = len(self.sas._io._log)
 

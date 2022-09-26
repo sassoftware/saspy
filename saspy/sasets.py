@@ -81,14 +81,14 @@ class SASets:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({'id'})
-    def timeseries(self, data: ['SASdata', str] = None,
+    def timeseries(self, data: ('SASdata', str) = None,
                    by: str = None,
                    corr: str = None,
                    crosscorr: str = None,
                    crossvar: str = None,
                    decomp: str = None,
                    id: str = None,
-                   out: [str, 'SASdata'] = None,
+                   out: (str, 'SASdata') = None,
                    season: str = None,
                    trend: str = None,
                    var: str = None,
@@ -118,12 +118,12 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({'identify'})
-    def arima(self, data: ['SASdata', str] = None,
+    def arima(self, data: ('SASdata', str) = None,
               by: str = None,
               estimate: str = None,
               forecast: str = None,
               identify: str = None,
-              out: [str, 'SASdata'] = None,
+              out: (str, 'SASdata') = None,
               outlier: str = None,
               procopts: str = None,
               stmtpassthrough: str = None,
@@ -147,25 +147,25 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def ucm(self, data: ['SASdata', str] = None,
+    def ucm(self, data: ('SASdata', str) = None,
             autoreg: str = None,
             blockseason: str = None,
             by: str = None,
             cycle: str = None,
             deplag: str = None,
-            estimate: [str, bool] = None,
+            estimate: (str, bool) = None,
             forecast: str = None,
             id: str = None,
-            irregular: [str, bool] = None,
-            level: [str, bool] = None,
+            irregular: (str, bool) = None,
+            level: (str, bool) = None,
             model: str = None,
             nloptions: str = None,
-            out: [str, 'SASdata'] = None,
+            out: (str, 'SASdata') = None,
             outlier: str = None,
             performance: str = None,
             randomreg: str = None,
             season: str = None,
-            slope: [str, bool] = None,
+            slope: (str, bool) = None,
             splinereg: str = None,
             splineseason: str = None,
             procopts: str = None,
@@ -204,11 +204,11 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def esm(self, data: ['SASdata', str] = None,
+    def esm(self, data: ('SASdata', str) = None,
             by: str = None,
             forecast: str = None,
             id: str = None,
-            out: [str, 'SASdata'] = None,
+            out: (str, 'SASdata') = None,
             procopts: str = None,
             stmtpassthrough: str = None,
             **kwargs: dict) -> SASresults:
@@ -229,10 +229,10 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def timeid(self, data: ['SASdata', str] = None,
+    def timeid(self, data: ('SASdata', str) = None,
                by: str = None,
                id: str = None,
-               out: [str, 'SASdata'] = None,
+               out: (str, 'SASdata') = None,
                procopts: str = None,
                stmtpassthrough: str = None,
                **kwargs: dict) -> SASresults:
@@ -252,11 +252,11 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def timedata(self, data: ['SASdata', str] = None,
+    def timedata(self, data: ('SASdata', str) = None,
                  by: str = None,
                  fcmport: str = None,
                  id: str = None,
-                 out: [str, 'SASdata'] = None,
+                 out: (str, 'SASdata') = None,
                  outarrays: str = None,
                  outscalars: str = None,
                  prog_stmts: str = None,
@@ -285,20 +285,20 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def x11(self, data: ['SASdata', str] = None,
+    def x11(self, data: ('SASdata', str) = None,
             arima: str = None,
-            by: [str, list] = None,
-            id: [str, list] = None,
+            by: (str, list) = None,
+            id: (str, list) = None,
             macurves: str = None,
             monthly: str = None,
-            output: [str, bool, 'SASdata'] = None,
+            output: (str, bool, 'SASdata') = None,
             pdweights: str = None,
             quarterly: str = None,
             sspan: str = None,
             tables: str = None,
             var: str = None,
-            procopts: [str, list] = None,
-            stmtpassthrough: [str, list] = None,
+            procopts: (str, list) = None,
+            stmtpassthrough: (str, list) = None,
             **kwargs: dict) -> SASresults:
         """
         Python method to call the X11 procedure
@@ -328,20 +328,20 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def x12(self, data: ['SASdata', str] = None,
+    def x12(self, data: ('SASdata', str) = None,
             adjust: str = None,
             arima: str = None,
             automdl: str = None,
-            by: [str, list] = None,
+            by: (str, list) = None,
             check: str = None,
-            estimate: [str, bool] = True,
+            estimate: (str, bool) = True,
             event: str = None,
             forecast: str = None,
-            id: [str, list] = None,
+            id: (str, list) = None,
             identify: str = None,
-            input: [str, list, dict] = None,
+            input: (str, list, dict) = None,
             outlier: str = None,
-            output: [str, bool, 'SASdata'] = None,
+            output: (str, bool, 'SASdata') = None,
             pickmdl: str = None,
             regression: str = None,
             seatsdecomp: str = None,
@@ -387,18 +387,18 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def varmax(self, data: ['SASdata', str] = None,
+    def varmax(self, data: ('SASdata', str) = None,
                bound: str = None,
-               by: [str, list] = None,
+               by: (str, list) = None,
                causal: str = None,
                cointeg: str = None,
                condfore: str = None,
                garch: str = None,
-               id: [str, list] = None,
+               id: (str, list) = None,
                initial: str = None,
                model: str = None,
                nloptions: str = None,
-               output: [str, bool, 'SASdata'] = None,
+               output: (str, bool, 'SASdata') = None,
                restrict: str = None,
                test: str = None,
                procopts: str = None,
@@ -438,13 +438,13 @@ class SASets:
         """
 
     @procDecorator.proc_decorator({})
-    def autoreg(self, data: ['SASdata', str] = None,
-                by: [str, list] = None,
-                cls: [str, list] = None,
+    def autoreg(self, data: ('SASdata', str) = None,
+                by: (str, list) = None,
+                cls: (str, list) = None,
                 hetero: str = None,
                 model: str = None,
                 nloptions: str = None,
-                output: [str, bool, 'SASdata'] = None,
+                output: (str, bool, 'SASdata') = None,
                 restrict: str = None,
                 test: str = None,
                 procopts: str = None,
@@ -471,10 +471,10 @@ class SASets:
 
 
     @procDecorator.proc_decorator({})
-    def expand(self, data: ['SASdata', str] = None,
-               by: [str, list] = None,
+    def expand(self, data: ('SASdata', str) = None,
+               by: (str, list) = None,
                convert: str = None,
-               id: [str, list] = None,
+               id: (str, list) = None,
                procopts: str = None,
                stmtpassthrough: str = None,
                **kwargs: dict) -> SASresults:

@@ -84,19 +84,19 @@ class SASstat:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({})
-    def hpsplit(self, data: ['SASdata', str] = None,
-                cls: [str, list] = None,
+    def hpsplit(self, data: ('SASdata', str) = None,
+                cls: (str, list) = None,
                 code: str = None,
                 grow: str = None,
                 id: str = None,
-                input: [str, list, dict] = None,
+                input: (str, list, dict) = None,
                 model: str = None,
-                out: [str, bool, 'SASdata'] = None,
+                out: (str, bool, 'SASdata') = None,
                 partition: str = None,
                 performance: str = None,
                 prune: str = None,
                 rules: str = None,
-                target: [str, list, dict] = None,
+                target: (str, list, dict) = None,
                 procopts: str = None,
                 stmtpassthrough: str = None,
                 **kwargs: dict) -> SASresults:
@@ -125,14 +125,14 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def reg(self, data: ['SASdata', str] = None,
+    def reg(self, data: ('SASdata', str) = None,
             add: str = None,
             by: str = None,
             code: str = None,
             id: str = None,
             lsmeans: str = None,
             model: str = None,
-            out: [str, bool, 'SASdata'] = None,
+            out: (str, bool, 'SASdata') = None,
             random: str = None,
             repeated: str = None,
             slice: str = None,
@@ -168,16 +168,16 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def mixed(self, data: ['SASdata', str] = None,
+    def mixed(self, data: ('SASdata', str) = None,
               by: str = None,
-              cls: [str, list] = None,
+              cls: (str, list) = None,
               code: str = None,
               contrast: str = None,
               estimate: str = None,
               id: str = None,
               lsmeans: str = None,
               model: str = None,
-              out: [str, bool, 'SASdata'] = None,
+              out: (str, bool, 'SASdata') = None,
               random: str = None,
               repeated: str = None,
               slice: str = None,
@@ -212,10 +212,10 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def glm(self, data: ['SASdata', str] = None,
+    def glm(self, data: ('SASdata', str) = None,
             absorb: str = None,
             by: str = None,
-            cls: [str, list] = None,
+            cls: (str, list) = None,
             contrast: str = None,
             estimate: str = None,
             freq: str = None,
@@ -224,7 +224,7 @@ class SASstat:
             manova: str = None,
             means: str = None,
             model: str = None,
-            out: [str, bool, 'SASdata'] = None,
+            out: (str, bool, 'SASdata') = None,
             random: str = None,
             repeated: str = None,
             test: str = None,
@@ -261,9 +261,9 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def logistic(self, data: ['SASdata', str] = None,
+    def logistic(self, data: ('SASdata', str) = None,
                  by: str = None,
-                 cls: [str, list] = None,
+                 cls: (str, list) = None,
                  contrast: str = None,
                  effect: str = None,
                  effectplot: str = None,
@@ -272,9 +272,9 @@ class SASstat:
                  freq: str = None,
                  lsmeans: str = None,
                  oddsratio: str = None,
-                 out: [str, bool, 'SASdata'] = None,
+                 out: (str, bool, 'SASdata') = None,
                  roc: str = None,
-                 score: [str, bool, 'SASdata'] = True,
+                 score: (str, bool, 'SASdata') = True,
                  slice: str = None,
                  store: str = None,
                  strata: str = None,
@@ -313,13 +313,13 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def tpspline(self, data: ['SASdata', str] = None,
+    def tpspline(self, data: ('SASdata', str) = None,
                  by: str = None,
                  freq: str = None,
                  id: str = None,
                  model: str = None,
-                 output: [str, bool, 'SASdata'] = None,
-                 score: [str, bool, 'SASdata'] = True,
+                 output: (str, bool, 'SASdata') = None,
+                 score: (str, bool, 'SASdata') = True,
                  procopts: str = None,
                  stmtpassthrough: str = None,
                  **kwargs: dict) -> SASresults:
@@ -343,16 +343,16 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def hplogistic(self, data: ['SASdata', str] = None,
+    def hplogistic(self, data: ('SASdata', str) = None,
                    by: str = None,
-                   cls: [str, list] = None,
+                   cls: (str, list) = None,
                    code: str = None,
                    freq: str = None,
                    id: str = None,
                    model: str = None,
-                   out: [str, bool, 'SASdata'] = None,
+                   out: (str, bool, 'SASdata') = None,
                    partition: str = None,
-                   score: [str, bool, 'SASdata'] = True,
+                   score: (str, bool, 'SASdata') = True,
                    selection: str = None,
                    weight: str = None,
                    procopts: str = None,
@@ -382,17 +382,17 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def hpreg(self, data: ['SASdata', str] = None,
+    def hpreg(self, data: ('SASdata', str) = None,
               by: str = None,
-              cls: [str, list] = None,
+              cls: (str, list) = None,
               code: str = None,
               freq: str = None,
               id: str = None,
               model: str = None,
-              out: [str, bool, 'SASdata'] = None,
+              out: (str, bool, 'SASdata') = None,
               partition: str = None,
               performance: str = None,
-              score: [str, bool, 'SASdata'] = True,
+              score: (str, bool, 'SASdata') = True,
               selection: str = None,
               weight: str = None,
               procopts: str = None,
@@ -423,11 +423,11 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({'model'})
-    def phreg(self, data: ['SASdata', str] = None,
+    def phreg(self, data: ('SASdata', str) = None,
               assess: str = None,
               bayes: str = None,
               by: str = None,
-              cls: [str, list] = None,
+              cls: (str, list) = None,
               contrast: str = None,
               effect: str = None,
               estimate: str = None,
@@ -437,7 +437,7 @@ class SASstat:
               lsmeans: str = None,
               lsmestimate: str = None,
               model: str = None,
-              out: [str, bool, 'SASdata'] = None,
+              out: (str, bool, 'SASdata') = None,
               random: str = None,
               roc: str = None,
               slice: str = None,
@@ -482,9 +482,9 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({})
-    def ttest(self, data: ['SASdata', str] = None,
+    def ttest(self, data: ('SASdata', str) = None,
               by: str = None,
-              cls: [str, list] = None,
+              cls: (str, list) = None,
               freq: str = None,
               paired: str = None,
               var: str = None,
@@ -511,9 +511,9 @@ class SASstat:
         """
 
     @procDecorator.proc_decorator({})
-    def factor(self, data: ['SASdata', str] = None,
+    def factor(self, data: ('SASdata', str) = None,
                by: str = None,
-               cls: [str, list] = None,
+               cls: (str, list) = None,
                freq: str = None,
                paired: str = None,
                var: str = None,

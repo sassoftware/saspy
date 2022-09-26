@@ -81,7 +81,7 @@ class SASqc:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({})
-    def cusum(self, data: ['SASdata', str] = None,
+    def cusum(self, data: ('SASdata', str) = None,
               by: str = None,
               inset: str = None,
               xchart: str = None,
@@ -103,7 +103,7 @@ class SASqc:
         """
 
     @procDecorator.proc_decorator({})
-    def macontrol(self, data: ['SASdata', str] = None,
+    def macontrol(self, data: ('SASdata', str) = None,
                   ewmachart: str = None,
                   machart: str = None,
                   procopts: str = None,
@@ -124,7 +124,7 @@ class SASqc:
         """
 
     @procDecorator.proc_decorator({})
-    def capability(self, data: ['SASdata', str] = None,
+    def capability(self, data: ('SASdata', str) = None,
                    by: str = None,
                    cdfplot: str = None,
                    comphist: str = None,
@@ -133,7 +133,7 @@ class SASqc:
                    id: str = None,
                    inset: str = None,
                    intervals: str = None,
-                   output: [str, bool, 'SASdata'] = None,
+                   output: (str, bool, 'SASdata') = None,
                    ppplot: str = None,
                    probplot: str = None,
                    qqplot: str = None,
@@ -169,7 +169,7 @@ class SASqc:
         """
 
     @procDecorator.proc_decorator({})
-    def shewhart(self, data: ['SASdata', str] = None,
+    def shewhart(self, data: ('SASdata', str) = None,
                  boxchart: str = None,
                  cchart: str = None,
                  irchart: str = None,

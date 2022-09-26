@@ -2,6 +2,30 @@
 
 
 
+## [4.3.3] - 2022-09-23
+
+### Added
+
+-   `None`
+
+### Changed
+
+-   `Tweak` The analytic methods all take a SASdata object, or the name of a SAS dataset (str). The method signatures used
+['SASdata', str] to represent either/or, not a list. The current Spinx doc build no longer allows that and doesn't generate
+signatures, so I hade to replace the [] with (). No programming changes, just a tweak to get the doc to build right with the
+newer version of Spinx.
+
+### Fixed
+
+-   `Fix` Fix for issue 480. No programming changes required.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+
 ## [4.3.2] - 2022-08-12
 
 ### Added

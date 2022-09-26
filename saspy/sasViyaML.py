@@ -81,16 +81,16 @@ class SASViyaML:
         self.logger.debug("Initialization of SAS Macro: " + self.sas.saslog())
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def factmac(self, data: ['SASdata', str] = None,
+    def factmac(self, data: ('SASdata', str) = None,
                 autotune: str = None,
                 code: str = None,
                 display: str = None,
                 displayout: str = None,
                 id: str = None,
-                input: [str, list, dict] = None,
-                output: [str, bool, 'SASdata'] = None,
+                input: (str, list, dict) = None,
+                output: (str, bool, 'SASdata') = None,
                 savestate: str = None,
-                target: [str, list, dict] = None,
+                target: (str, list, dict) = None,
                 procopts: str = None,
                 stmtpassthrough: str = None,
                 **kwargs: dict) -> SASresults:
@@ -116,12 +116,12 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input', 'id'})
-    def fastknn(self, data: ['SASdata', str] = None,
+    def fastknn(self, data: ('SASdata', str) = None,
                 display: str = None,
                 displayout: str = None,
                 id: str = None,
-                input: [str, list, dict] = None,
-                output: [str, bool, 'SASdata'] = None,
+                input: (str, list, dict) = None,
+                output: (str, bool, 'SASdata') = None,
                 procopts: str = None,
                 stmtpassthrough: str = None,
                 **kwargs: dict) -> SASresults:
@@ -143,17 +143,17 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def forest(self, data: ['SASdata', str] = None,
+    def forest(self, data: ('SASdata', str) = None,
                autotune: str = None,
                code: str = None,
                crossvalidation: str = None,
                grow: str = None,
                id: str = None,
-               input: [str, list, dict] = None,
-               output: [str, bool, 'SASdata'] = None,
+               input: (str, list, dict) = None,
+               output: (str, bool, 'SASdata') = None,
                partition: str = None,
                savestate: str = None,
-               target: [str, list, dict] = None,
+               target: (str, list, dict) = None,
                viicode: str = None,
                weight: str = None,
                procopts: str = None,
@@ -184,16 +184,16 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input', 'target'})
-    def gradboost(self, data: ['SASdata', str] = None,
+    def gradboost(self, data: ('SASdata', str) = None,
                   autotune: str = None,
                   code: str = None,
                   crossvalidation: str = None,
                   id: str = None,
-                  input: [str, list, dict] = None,
-                  output: [str, bool, 'SASdata'] = None,
+                  input: (str, list, dict) = None,
+                  output: (str, bool, 'SASdata') = None,
                   partition: str = None,
                   savestate: str = None,
-                  target: [str, list, dict] = None,
+                  target: (str, list, dict) = None,
                   transferlearn: str = None,
                   viicode: str = None,
                   weight: str = None,
@@ -225,18 +225,18 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input', 'target', 'train'})
-    def nnet(self, data: ['SASdata', str] = None,
+    def nnet(self, data: ('SASdata', str) = None,
              architecture: str = None,
              autotune: str = None,
              code: str = None,
              crossvalidation: str = None,
-             hidden: [str, int] = None,
-             input: [str, list, dict] = None,
+             hidden: (str, int) = None,
+             input: (str, list, dict) = None,
              optimization: str = None,
-             output: [str, bool, 'SASdata'] = None,
+             output: (str, bool, 'SASdata') = None,
              partition: str = None,
-             target: [str, list, dict] = None,
-             train: [str, dict] = None,
+             target: (str, list, dict) = None,
+             train: (str, dict) = None,
              weight: str = None,
              procopts: str = None,
              stmtpassthrough: str = None,
@@ -266,10 +266,10 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input', 'kernel'})
-    def svdd(self, data: ['SASdata', str] = None,
+    def svdd(self, data: ('SASdata', str) = None,
              code: str = None,
              id: str = None,
-             input: [str, list, dict] = None,
+             input: (str, list, dict) = None,
              kernel: str = None,
              savestate: str = None,
              solver: str = None,
@@ -297,17 +297,17 @@ class SASViyaML:
         """
 
     @procDecorator.proc_decorator({'input'})
-    def svmachine(self, data: ['SASdata', str] = None,
+    def svmachine(self, data: ('SASdata', str) = None,
                   autotune: str = None,
                   code: str = None,
                   id: str = None,
-                  input: [str, list, dict] = None,
+                  input: (str, list, dict) = None,
                   kernel: str = None,
-                  output: [str, bool, 'SASdata'] = None,
+                  output: (str, bool, 'SASdata') = None,
                   partition: str = None,
                   savestate: str = None,
                   solver: str = None,
-                  target: [str, list, dict] = None,
+                  target: (str, list, dict) = None,
                   procopts: str = None,
                   stmtpassthrough: str = None,
                   **kwargs: dict) -> SASresults:
