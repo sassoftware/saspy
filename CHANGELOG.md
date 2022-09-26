@@ -6,7 +6,7 @@
 
 ### Added
 
--   `None`
+-   `None` Nothing Added
 
 ### Changed
 
