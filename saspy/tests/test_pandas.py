@@ -151,7 +151,8 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         df = self.test_data.to_df_CSV(tempfile=tmpcsv, tempkeep=True)
 
         if self.sas.sascfg.mode == 'IOM':
-          self.assertTrue(os.path.isfile(tmpcsv))
+          if 'iomhost' not in getattr(self.sas.sascfg.SAScfg, self.sas.sascfg.name):
+             self.assertTrue(os.path.isfile(tmpcsv))
 
         tmpdir.cleanup()
 

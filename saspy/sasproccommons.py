@@ -309,12 +309,12 @@ class SASProcCommons:
         """
         code  = """
         data _null_;
-           set _{}filelist(where=(length(method)>1)) end=last;
+           set {}._{}filelist(where=(length(method)>1)) end=last;
            if _n_=1 then put "METHLIST=";
            put %upcase("meth=") method %upcase("methEND=");
            if  last then put "METHLISTEND=";
            run;
-        """.format(obj)
+        """.format(obj,obj)
 
         logger.debug("Object Method macro call: " + str(code))
         res = self.sas._io.submit(code, "text")
@@ -325,7 +325,8 @@ class SASProcCommons:
 
         for i in range(log[2].count('METH=')):
            log = log[2].partition('METH=')[2].partition(' METHEND=')
-           objlist.append(log[0].strip())
+           if obj.upper() != log[0]:
+              objlist.append(log[0].strip())
 
         logger.debug("PROC attr list: " + str(objlist))
         return objlist

@@ -99,7 +99,7 @@ class TestSASsessionObject(unittest.TestCase):
         """
         EXPECTED = ['Libref', 'WORK']
 
-        log = self.sas.datasets()
+        log = self.sas.datasets('work')
         rows = log.splitlines()
         retrieved = [x.split() for x in rows]
 

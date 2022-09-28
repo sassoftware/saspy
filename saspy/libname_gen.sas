@@ -37,26 +37,26 @@ options pagesize=max;
     libname &objname. base "&tmpdir.";
     ods _all_ close;
 /*    ods html file="&tmpdir./&objname..html";*/
-    ods document name=&objname.(write);
+    ods document name=&objname..&objname.(write);
     /*replace with code generation macro*/
     %proccall(&d.);
     /*end replace with code generation macro*/
     ods document close;
     /*create a libname using the document name*/
 
-    proc document name=&objname.;
-        ods output Properties=_&objname.properties;
+    proc document name=&objname..&objname.;
+        ods output Properties=&objname.._&objname.properties;
         list \(where=(_type_='Dir')) /levels=all;
     quit;
     filename file1 temp;
     data _null_;
         length path $1000;
-        set _&objname.properties end=last;
+        set &objname.._&objname.properties end=last;
         file file1;
         if _n_=1 then do;
             put "libname _&objname. sasedoc (";
         end;
-        p=cat('"\&objname.', catt(path) , '"');
+        p=cat('"\&objname..&objname.', catt(path) , '"');
         put p;
         if last then do;
             put ');';
@@ -65,7 +65,7 @@ options pagesize=max;
     /* concatenate all the directories in the ods document to the top level directory */
     %include file1;
     /* Create a table of all the datasets using sashelp.vmember */
-    data _&objname.filelist;
+    data &objname.._&objname.filelist;
         length objtype $32 objname $32.;
         set sashelp.vmember(where=(lower(libname)=lower("_&objname.")))
             sashelp.vmember(where=(lower(libname)=lower("&objname.")));
@@ -89,7 +89,7 @@ options pagesize=max;
     %if &datatype="DATA" %then %do;
 
     %end;
-    proc document name=&objname.;
+    proc document name=&objname..&objname.;
         replay \ (where=(lower(_name_)=lower("&method.")));;
     run;
     quit;

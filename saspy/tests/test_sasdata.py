@@ -48,18 +48,18 @@ class TestSASdataObject(unittest.TestCase):
         Create a copy of sashelp.cars in WORK.
         :return [SASdata]:
         """
-        self.sas.submit("data cars; set sashelp.cars; id = _n_; run;")
+        self.sas.submit("data work.cars; set sashelp.cars; id = _n_; run;")
 
-        return self.sas.sasdata('cars')
+        return self.sas.sasdata('cars', 'work')
 
     def helper_wkclass(self):
         """
         Create a copy of sashelp.class in WORK.
         :return [SASdata]:
         """
-        self.sas.submit("data class; set sashelp.class; run;")
+        self.sas.submit("data work.class; set sashelp.class; run;")
 
-        return self.sas.sasdata('class')
+        return self.sas.sasdata('class', 'work')
 
     def test_sasdata_construct(self):
         """
@@ -466,7 +466,7 @@ class TestSASdataObject(unittest.TestCase):
         fname = self.sas.workpath+'hpreg_code.sas'
         b = stat.hpreg(data=tr, model='weight=height', code=fname)
         tr.score(file=fname)
-        
+
         # check that p_weight is in columnInfo
         # FIXME: Only assert once
         self.assertTrue('P_Weight' in tr.columnInfo()['Variable'].values, msg="Prediction Column not found")
