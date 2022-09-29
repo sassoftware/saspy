@@ -593,16 +593,24 @@ Will use HTML5 for this SASsession.""")
                   logger.info("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                os.kill(self.pid, signal.SIGKILL)
 
-
-         self.stdin[0].shutdown(socks.SHUT_RDWR)
+         try: # Mac OS Python has bugs with this call
+            self.stdin[0].shutdown(socks.SHUT_RDWR)
+         except:
+            pass
          self.stdin[0].close()
          self.sockin.close()
 
-         self.stdout[0].shutdown(socks.SHUT_RDWR)
+         try: # Mac OS Python has bugs with this call
+            self.stdout[0].shutdown(socks.SHUT_RDWR)
+         except:
+            pass
          self.stdout[0].close()
          self.sockout.close()
 
-         self.stderr[0].shutdown(socks.SHUT_RDWR)
+         try: # Mac OS Python has bugs with this call
+            self.stderr[0].shutdown(socks.SHUT_RDWR)
+         except:
+            pass
          self.stderr[0].close()
          self.sockerr.close()
 

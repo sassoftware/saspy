@@ -1454,7 +1454,10 @@ Will use HTML5 for this SASsession.""")
                      send -= sent
                else:
                   done = True
-                  sock.shutdown(socks.SHUT_RDWR)
+                  try: # Mac OS Python has bugs with this call
+                     sock.shutdown(socks.SHUT_RDWR)
+                  except:
+                     pass
                   sock.close()
                   fd.close()
                   break
@@ -1564,18 +1567,21 @@ Will use HTML5 for this SASsession.""")
                      pass
                   send -= sent
             else:
-               newsock[0].shutdown(socks.SHUT_RDWR)
+               try: # Mac OS Python has bugs with this call
+                  newsock[0].shutdown(socks.SHUT_RDWR)
+               except:
+                  pass
                newsock[0].close()
                sock.close()
                fd.close()
                break
       except (KeyboardInterrupt, Exception) as e:
-         try:
-            if newsock[0]:
+         if newsock[0]:
+            try: # Mac OS Python has bugs with this call
                newsock[0].shutdown(socks.SHUT_RDWR)
-               newsock[0].close()
-         except:
-            pass
+            except:
+               pass
+            newsock[0].close()
          sock.close()
          fd.close()
          ll = self.submit("", 'text')
@@ -1680,6 +1686,10 @@ Will use HTML5 for this SASsession.""")
       except (KeyboardInterrupt, Exception) as e:
          try:
             if newsock[0]:
+               try: # Mac OS Python has bugs with this call
+                  newsock[0].shutdown(socks.SHUT_RDWR)
+               except:
+                  pass
                newsock[0].shutdown(socks.SHUT_RDWR)
                newsock[0].close()
          except:
@@ -1690,7 +1700,10 @@ Will use HTML5 for this SASsession.""")
          return {'Success' : False,
                  'LOG'     : "Download was interrupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
-      newsock[0].shutdown(socks.SHUT_RDWR)
+      try: # Mac OS Python has bugs with this call
+         newsock[0].shutdown(socks.SHUT_RDWR)
+      except:
+         pass
       newsock[0].close()
       sock.close()
 
@@ -1897,7 +1910,10 @@ Will use HTML5 for this SASsession.""")
          except (KeyboardInterrupt, Exception) as e:
             try:
                if newsock[0]:
-                  newsock[0].shutdown(socks.SHUT_RDWR)
+                  try: # Mac OS Python has bugs with this call
+                     newsock[0].shutdown(socks.SHUT_RDWR)
+                  except:
+                     pass
                   newsock[0].close()
             except:
                pass
@@ -1954,7 +1970,10 @@ Will use HTML5 for this SASsession.""")
                         sock.shutdown(socks.SHUT_RDWR)
                      else:
                         if newsock[0]:
-                           newsock[0].shutdown(socks.SHUT_RDWR)
+                           try: # Mac OS Python has bugs with this call
+                              newsock[0].shutdown(socks.SHUT_RDWR)
+                           except:
+                              pass
                            newsock[0].close()
                   except:
                      pass
@@ -1989,7 +2008,10 @@ Will use HTML5 for this SASsession.""")
                            sock.shutdown(socks.SHUT_RDWR)
                         else:
                            if newsock[0]:
-                              newsock[0].shutdown(socks.SHUT_RDWR)
+                              try: # Mac OS Python has bugs with this call
+                                 newsock[0].shutdown(socks.SHUT_RDWR)
+                              except:
+                                 pass
                               newsock[0].close()
                      except:
                         pass
@@ -2035,7 +2057,10 @@ Will use HTML5 for this SASsession.""")
                      sock.shutdown(socks.SHUT_RDWR)
                   else:
                      if newsock[0]:
-                        newsock[0].shutdown(socks.SHUT_RDWR)
+                        try: # Mac OS Python has bugs with this call
+                           newsock[0].shutdown(socks.SHUT_RDWR)
+                        except:
+                           pass
                         newsock[0].close()
                except:
                   pass
@@ -2063,7 +2088,10 @@ Will use HTML5 for this SASsession.""")
                         sock.shutdown(socks.SHUT_RDWR)
                      else:
                         if newsock[0]:
-                           newsock[0].shutdown(socks.SHUT_RDWR)
+                           try: # Mac OS Python has bugs with this call
+                              newsock[0].shutdown(socks.SHUT_RDWR)
+                           except:
+                              pass
                            newsock[0].close()
                   except:
                      pass
@@ -2084,7 +2112,10 @@ Will use HTML5 for this SASsession.""")
          if server:
             sock.shutdown(socks.SHUT_RDWR)
          else:
-            newsock[0].shutdown(socks.SHUT_RDWR)
+            try: # Mac OS Python has bugs with this call
+               newsock[0].shutdown(socks.SHUT_RDWR)
+            except:
+               pass
             newsock[0].close()
       except:
          pass
@@ -2297,7 +2328,10 @@ Will use HTML5 for this SASsession.""")
          logger.error("sasdata2dataframe was interrupted. Trying to return the saslog instead of a data frame.")
          try:
             if newsock[0]:
-               newsock[0].shutdown(socks.SHUT_RDWR)
+               try: # Mac OS Python has bugs with this call
+                  newsock[0].shutdown(socks.SHUT_RDWR)
+               except:
+                  pass
                newsock[0].close()
          except:
             pass
@@ -2305,7 +2339,10 @@ Will use HTML5 for this SASsession.""")
          ll = self.submit("", 'text')
          return str(e)+"\n\n"+ll['LOG']
 
-      newsock[0].shutdown(socks.SHUT_RDWR)
+      try: # Mac OS Python has bugs with this call
+         newsock[0].shutdown(socks.SHUT_RDWR)
+      except:
+         pass
       newsock[0].close()
       sock.close()
       ll = self.submit("", 'text')
@@ -2533,7 +2570,10 @@ Will use HTML5 for this SASsession.""")
          logger.error("sasdata2dataframe was interrupted. Trying to return the saslog instead of a data frame.")
          try:
             if newsock[0]:
-               newsock[0].shutdown(socks.SHUT_RDWR)
+               try: # Mac OS Python has bugs with this call
+                  newsock[0].shutdown(socks.SHUT_RDWR)
+               except:
+                  pass
                newsock[0].close()
          except:
             pass
@@ -2541,11 +2581,10 @@ Will use HTML5 for this SASsession.""")
          ll = self.submit("", 'text')
          return str(e)+"\n\n"+ll['LOG']
 
-      try:
+      try: # Mac OS Python has bugs with this call
          newsock[0].shutdown(socks.SHUT_RDWR)
       except:
          pass
-
       newsock[0].close()
       sock.close()
       ll = self.submit("", 'text')
