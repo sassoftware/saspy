@@ -117,12 +117,15 @@ Optional arguments:
                         saspy.SASsession() is executed.
 
 Examples:
-./run_sas.py -s example_1.sas
-./run_sas.py -s example_1.sas -l out1.log -o out1.lst
-./run_sas.py -s example_1.sas -r TEXT
-./run_sas.py -s example_1.sas -r HTML
-./run_sas.py -s example_1.sas -r htMl -l out2.log -o out2.html
-./run_sas.py -s example_1.sas -r teXt -l out3.log -o out3.lst
-./run_sas.py -s /home/a/b/c/example_1.sas
-./run_sas.py -s example_1.sas -r text -l out4.log -o out4.lst -c ssh
+
+.. code-block:: ipython3
+
+    ./run_sas.py -s example_1.sas
+    ./run_sas.py -s example_1.sas -l out1.log -o out1.lst
+    ./run_sas.py -s example_1.sas -r TEXT
+    ./run_sas.py -s example_1.sas -r HTML
+    ./run_sas.py -s example_1.sas -r htMl -l out2.log -o out2.html
+    ./run_sas.py -s example_1.sas -r teXt -l out3.log -o out3.lst
+    ./run_sas.py -s /home/a/b/c/example_1.sas
+    ./run_sas.py -s example_1.sas -r text -l out4.log -o out4.lst -c ssh
 
