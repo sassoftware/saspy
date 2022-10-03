@@ -44,12 +44,234 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="limitations.html">Limitations, restrictions and work arounds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#sascfg-personal-py">sascfg_personal.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#sascfg-personal-py-details">sascfg_personal.py details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#choosing-an-access-method">Choosing an Access Method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#stdio">STDIO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#ssh">SSH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#iom">IOM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#attn-log4j-vulnerabilities-found-in-dec-2021">ATTN, log4j vulnerabilities found in Dec 2021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file">ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#the-authinfo-file-authinfo-on-windows">The .authinfo file (_authinfo on Windows)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#remote">Remote</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#local">Local</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#remote-to-mvs-sas">Remote to MVS SAS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#http">HTTP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#com">COM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#initial-import">Initial import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#start-a-sas-session">Start a SAS session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#load-data-into-sas">Load data into SAS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#csv">CSV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#pandas-dataframe">Pandas DataFrame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#existing-sas-data-set">Existing SAS data set</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#explore-the-data">Explore the data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#list-the-variables">List the variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#see-the-first-observations">See the first observations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#summary-of-numeric-columns">Summary of numeric columns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#basic-bar-chart">Basic bar chart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#basic-histogram">Basic histogram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#basic-heatmap">Basic heatmap</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#submit-sas-code-directly-from-python-session">Submit SAS code directly from Python session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#split-the-data-into-training-and-test">Split the data into training and test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#build-an-analytical-model">Build an analytical model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#more-about-the-target-and-input-parameters">More about the target and input parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#evaluating-model-diagnostics">Evaluating model diagnostics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#saspy.isnotebook"><code class="docutils literal notranslate"><span class="pre">isnotebook()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#sas-session-object">SAS Session Object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#saspy.SASsession"><code class="docutils literal notranslate"><span class="pre">SASsession</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.SYSERR"><code class="docutils literal notranslate"><span class="pre">SASsession.SYSERR()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.SYSERRORTEXT"><code class="docutils literal notranslate"><span class="pre">SASsession.SYSERRORTEXT()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.SYSFILRC"><code class="docutils literal notranslate"><span class="pre">SASsession.SYSFILRC()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.SYSINFO"><code class="docutils literal notranslate"><span class="pre">SASsession.SYSINFO()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.SYSLIBRC"><code class="docutils literal notranslate"><span class="pre">SASsession.SYSLIBRC()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.SYSWARNINGTEXT"><code class="docutils literal notranslate"><span class="pre">SASsession.SYSWARNINGTEXT()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.assigned_librefs"><code class="docutils literal notranslate"><span class="pre">SASsession.assigned_librefs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.cat"><code class="docutils literal notranslate"><span class="pre">SASsession.cat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.dataframe2sasdata"><code class="docutils literal notranslate"><span class="pre">SASsession.dataframe2sasdata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.datasets"><code class="docutils literal notranslate"><span class="pre">SASsession.datasets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.df2sd"><code class="docutils literal notranslate"><span class="pre">SASsession.df2sd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.df_char_lengths"><code class="docutils literal notranslate"><span class="pre">SASsession.df_char_lengths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.dirlist"><code class="docutils literal notranslate"><span class="pre">SASsession.dirlist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.disconnect"><code class="docutils literal notranslate"><span class="pre">SASsession.disconnect()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.download"><code class="docutils literal notranslate"><span class="pre">SASsession.download()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.endsas"><code class="docutils literal notranslate"><span class="pre">SASsession.endsas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.exist"><code class="docutils literal notranslate"><span class="pre">SASsession.exist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.file_copy"><code class="docutils literal notranslate"><span class="pre">SASsession.file_copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.file_delete"><code class="docutils literal notranslate"><span class="pre">SASsession.file_delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.file_info"><code class="docutils literal notranslate"><span class="pre">SASsession.file_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.lastlog"><code class="docutils literal notranslate"><span class="pre">SASsession.lastlog()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.lib_path"><code class="docutils literal notranslate"><span class="pre">SASsession.lib_path()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.list_tables"><code class="docutils literal notranslate"><span class="pre">SASsession.list_tables()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.read_csv"><code class="docutils literal notranslate"><span class="pre">SASsession.read_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasdata"><code class="docutils literal notranslate"><span class="pre">SASsession.sasdata()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasdata2dataframe"><code class="docutils literal notranslate"><span class="pre">SASsession.sasdata2dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasets"><code class="docutils literal notranslate"><span class="pre">SASsession.sasets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.saslib"><code class="docutils literal notranslate"><span class="pre">SASsession.saslib()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.saslog"><code class="docutils literal notranslate"><span class="pre">SASsession.saslog()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasml"><code class="docutils literal notranslate"><span class="pre">SASsession.sasml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasqc"><code class="docutils literal notranslate"><span class="pre">SASsession.sasqc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasstat"><code class="docutils literal notranslate"><span class="pre">SASsession.sasstat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasutil"><code class="docutils literal notranslate"><span class="pre">SASsession.sasutil()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasviyaml"><code class="docutils literal notranslate"><span class="pre">SASsession.sasviyaml()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sd2df"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2df()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sd2df_CSV"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2df_CSV()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sd2df_DISK"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2df_DISK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.set_batch"><code class="docutils literal notranslate"><span class="pre">SASsession.set_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.set_results"><code class="docutils literal notranslate"><span class="pre">SASsession.set_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sil"><code class="docutils literal notranslate"><span class="pre">SASsession.sil()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.simple_interest_loan"><code class="docutils literal notranslate"><span class="pre">SASsession.simple_interest_loan()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.submit"><code class="docutils literal notranslate"><span class="pre">SASsession.submit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.submitLOG"><code class="docutils literal notranslate"><span class="pre">SASsession.submitLOG()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.submitLST"><code class="docutils literal notranslate"><span class="pre">SASsession.submitLST()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.symexist"><code class="docutils literal notranslate"><span class="pre">SASsession.symexist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.symget"><code class="docutils literal notranslate"><span class="pre">SASsession.symget()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.symput"><code class="docutils literal notranslate"><span class="pre">SASsession.symput()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.teach_me_SAS"><code class="docutils literal notranslate"><span class="pre">SASsession.teach_me_SAS()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.upload"><code class="docutils literal notranslate"><span class="pre">SASsession.upload()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.validvarname"><code class="docutils literal notranslate"><span class="pre">SASsession.validvarname()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.write_csv"><code class="docutils literal notranslate"><span class="pre">SASsession.write_csv()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#sas-data-object">SAS Data Object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#saspy.sasdata.SASdata"><code class="docutils literal notranslate"><span class="pre">SASdata</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.add_vars"><code class="docutils literal notranslate"><span class="pre">SASdata.add_vars()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.append"><code class="docutils literal notranslate"><span class="pre">SASdata.append()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.assessModel"><code class="docutils literal notranslate"><span class="pre">SASdata.assessModel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.bar"><code class="docutils literal notranslate"><span class="pre">SASdata.bar()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.columnInfo"><code class="docutils literal notranslate"><span class="pre">SASdata.columnInfo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.contents"><code class="docutils literal notranslate"><span class="pre">SASdata.contents()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.delete"><code class="docutils literal notranslate"><span class="pre">SASdata.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.describe"><code class="docutils literal notranslate"><span class="pre">SASdata.describe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.head"><code class="docutils literal notranslate"><span class="pre">SASdata.head()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.heatmap"><code class="docutils literal notranslate"><span class="pre">SASdata.heatmap()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.hist"><code class="docutils literal notranslate"><span class="pre">SASdata.hist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.impute"><code class="docutils literal notranslate"><span class="pre">SASdata.impute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.info"><code class="docutils literal notranslate"><span class="pre">SASdata.info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.means"><code class="docutils literal notranslate"><span class="pre">SASdata.means()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.modify"><code class="docutils literal notranslate"><span class="pre">SASdata.modify()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.obs"><code class="docutils literal notranslate"><span class="pre">SASdata.obs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.partition"><code class="docutils literal notranslate"><span class="pre">SASdata.partition()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.rename"><code class="docutils literal notranslate"><span class="pre">SASdata.rename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.scatter"><code class="docutils literal notranslate"><span class="pre">SASdata.scatter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.score"><code class="docutils literal notranslate"><span class="pre">SASdata.score()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.series"><code class="docutils literal notranslate"><span class="pre">SASdata.series()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.set_results"><code class="docutils literal notranslate"><span class="pre">SASdata.set_results()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.sort"><code class="docutils literal notranslate"><span class="pre">SASdata.sort()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.tail"><code class="docutils literal notranslate"><span class="pre">SASdata.tail()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.to_csv"><code class="docutils literal notranslate"><span class="pre">SASdata.to_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.to_df"><code class="docutils literal notranslate"><span class="pre">SASdata.to_df()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.to_df_CSV"><code class="docutils literal notranslate"><span class="pre">SASdata.to_df_CSV()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.to_df_DISK"><code class="docutils literal notranslate"><span class="pre">SASdata.to_df_DISK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.to_frame"><code class="docutils literal notranslate"><span class="pre">SASdata.to_frame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.to_json"><code class="docutils literal notranslate"><span class="pre">SASdata.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.top"><code class="docutils literal notranslate"><span class="pre">SASdata.top()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.where"><code class="docutils literal notranslate"><span class="pre">SASdata.where()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#procedure-syntax-statements">Procedure Syntax Statements</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#saspy.sasproccommons.SASProcCommons"><code class="docutils literal notranslate"><span class="pre">SASProcCommons</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#sas-results">SAS Results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#saspy.sasresults.SASresults"><code class="docutils literal notranslate"><span class="pre">SASresults</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasresults.SASresults.ALL"><code class="docutils literal notranslate"><span class="pre">SASresults.ALL()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#sas-procedures">SAS Procedures</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#utility">Utility</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasutil.SASutil"><code class="docutils literal notranslate"><span class="pre">SASutil</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#machine-learning-sas-enterprise-miner">Machine Learning (SAS Enterprise Miner)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasml.SASml"><code class="docutils literal notranslate"><span class="pre">SASml</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#statistics">Statistics</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasstat.SASstat"><code class="docutils literal notranslate"><span class="pre">SASstat</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#econometic-and-time-series">Econometic and Time Series</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasets.SASets"><code class="docutils literal notranslate"><span class="pre">SASets</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#quality-control">Quality Control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasqc.SASqc"><code class="docutils literal notranslate"><span class="pre">SASqc</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="api.html#sas-viya-vdmml">SAS Viya VDMML</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML"><code class="docutils literal notranslate"><span class="pre">SASViyaML</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#saspy-scripts">SASPy Scripts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api.html#run-sas-py">run_sas.py</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#using-batch-mode">Using Batch mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#prompting">Prompting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#moving-values-between-python-variables-and-sas-macro-variables">Moving values between Python Variables and SAS Macro Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#slow-performance-loading-a-dataframe-into-a-sas-data-set-df2sd">Slow performance loading a DataFrame into a SAS data set; df2sd()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#disconnecting-from-an-iom-session-and-reconnecting-back-to-it">Disconnecting from an IOM session and reconnecting back to it.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">Configuring Grid Option Sets to have saspy run on a specific Queue.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#dates-times-and-datetimes-oh-my">Dates, Times and Datetimes, Oh my!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#advanced-sd2df-and-df2sd-techniques">Advanced sd2df and df2sd techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#automatic-checking-for-error-in-the-log-and-the-warnings-module">Automatic checking for ERROR: in the LOG and the warnings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#saspy-logger-from-logging-logger-as-of-v3-7-5">saspy.logger from logging.logger as of V3.7.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#sassession-object-as-a-context-manager-as-of-v3-7-5">SASsession object as a context manager as of V3.7.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#jupyter-magics">Jupyter magics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="adding-procedures.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adding-procedures.html#process">Process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="limitations.html">Limitations, restrictions and work arounds</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="limitations.html#saslog">SASLOG</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#proc-printto">Proc Printto</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="limitations.html#terminating-sas-out-from-under-saspy">Terminating SAS out from under saspy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#abort-macro-and-abort-statement">%abort macro and abort statement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#canceling-submitted-statements">Canceling submitted statements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="limitations.html#perfect-storm">Perfect Storm</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#combining-proc-printto-and-abort-cancel">Combining proc printto and abort cancel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#printto-option-on-submit-methods">printto= option on submit methods</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Troubleshooting</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#connection-and-configuration-issues">Connection and configuration issues</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#common-diagnostics">Common diagnostics</a></li>
@@ -69,7 +291,10 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="license.html#apache-2-0">Apache 2.0</a></li>
+</ul>
+</li>
 </ul>
 
         </div>

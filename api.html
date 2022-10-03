@@ -44,8 +44,52 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#sascfg-personal-py">sascfg_personal.py</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#sascfg-personal-py-details">sascfg_personal.py details</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#choosing-an-access-method">Choosing an Access Method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#stdio">STDIO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#ssh">SSH</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#iom">IOM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#attn-log4j-vulnerabilities-found-in-dec-2021">ATTN, log4j vulnerabilities found in Dec 2021</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file">ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#the-authinfo-file-authinfo-on-windows">The .authinfo file (_authinfo on Windows)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#remote">Remote</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#local">Local</a></li>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#remote-to-mvs-sas">Remote to MVS SAS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#http">HTTP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="configuration.html#com">COM</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#initial-import">Initial import</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#start-a-sas-session">Start a SAS session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#load-data-into-sas">Load data into SAS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#csv">CSV</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#pandas-dataframe">Pandas DataFrame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#existing-sas-data-set">Existing SAS data set</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#explore-the-data">Explore the data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#list-the-variables">List the variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#see-the-first-observations">See the first observations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#summary-of-numeric-columns">Summary of numeric columns</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#basic-bar-chart">Basic bar chart</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#basic-histogram">Basic histogram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#basic-heatmap">Basic heatmap</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#submit-sas-code-directly-from-python-session">Submit SAS code directly from Python session</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#split-the-data-into-training-and-test">Split the data into training and test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#build-an-analytical-model">Build an analytical model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="getting-started.html#more-about-the-target-and-input-parameters">More about the target and input parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#evaluating-model-diagnostics">Evaluating model diagnostics</a></li>
+</ul>
+</li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#saspy.isnotebook"><code class="docutils literal notranslate"><span class="pre">isnotebook()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sas-session-object">SAS Session Object</a><ul>
@@ -187,11 +231,70 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a></li>
-<li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a></li>
-<li class="toctree-l1"><a class="reference internal" href="limitations.html">Limitations, restrictions and work arounds</a></li>
-<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced-topics.html">Advanced topics</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#using-batch-mode">Using Batch mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#prompting">Prompting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#moving-values-between-python-variables-and-sas-macro-variables">Moving values between Python Variables and SAS Macro Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#slow-performance-loading-a-dataframe-into-a-sas-data-set-df2sd">Slow performance loading a DataFrame into a SAS data set; df2sd()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#disconnecting-from-an-iom-session-and-reconnecting-back-to-it">Disconnecting from an IOM session and reconnecting back to it.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">Configuring Grid Option Sets to have saspy run on a specific Queue.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#dates-times-and-datetimes-oh-my">Dates, Times and Datetimes, Oh my!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#advanced-sd2df-and-df2sd-techniques">Advanced sd2df and df2sd techniques</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#automatic-checking-for-error-in-the-log-and-the-warnings-module">Automatic checking for ERROR: in the LOG and the warnings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#saspy-logger-from-logging-logger-as-of-v3-7-5">saspy.logger from logging.logger as of V3.7.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#sassession-object-as-a-context-manager-as-of-v3-7-5">SASsession object as a context manager as of V3.7.5</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced-topics.html#jupyter-magics">Jupyter magics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="adding-procedures.html">Contributing new methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="adding-procedures.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="adding-procedures.html#process">Process</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="limitations.html">Limitations, restrictions and work arounds</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="limitations.html#saslog">SASLOG</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#proc-printto">Proc Printto</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="limitations.html#terminating-sas-out-from-under-saspy">Terminating SAS out from under saspy</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#abort-macro-and-abort-statement">%abort macro and abort statement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#canceling-submitted-statements">Canceling submitted statements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="limitations.html#perfect-storm">Perfect Storm</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#combining-proc-printto-and-abort-cancel">Combining proc printto and abort cancel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="limitations.html#printto-option-on-submit-methods">printto= option on submit methods</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#connection-and-configuration-issues">Connection and configuration issues</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#common-diagnostics">Common diagnostics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#stdio">STDIO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#stdio-over-ssh">STDIO over SSH</a></li>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#iom">IOM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="troubleshooting.html#java-problems">Java problems</a></li>
+<li class="toctree-l4"><a class="reference internal" href="troubleshooting.html#classpath-problems">Classpath problems</a></li>
+<li class="toctree-l4"><a class="reference internal" href="troubleshooting.html#iom-specific-errors">IOM specific errors</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="troubleshooting.html#problems-running-code">Problems running code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="troubleshooting.html#my-model-didn-t-run">My model didn’t run</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="license.html#apache-2-0">Apache 2.0</a></li>
+</ul>
+</li>
 </ul>
 
         </div>
