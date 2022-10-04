@@ -1,9 +1,6 @@
 
 .. Copyright SAS Institute
 
-.. _license:
-
-:tocdepth: 4
 
 ************************
 Contributing new methods
@@ -12,13 +9,13 @@ Contributing new methods
 Overview
 --------
 This module is broken into product areas that largely follow the SAS product areas.
-There are many many procedures, which translate to object methods, that are not 
-currently included in the package. The aim of this document is to outline the 
+There are many many procedures, which translate to object methods, that are not
+currently included in the package. The aim of this document is to outline the
 steps you can take to add additional methods (procedures).
 
-A copy of the process is included inline of each product file (sasstat.py, 
-sasets.py, sasqc.py, and so on). The project maintainers expect that a new 
-contribution should take less than 30 minutes the first time and less than 15 
+A copy of the process is included inline of each product file (sasstat.py,
+sasets.py, sasqc.py, and so on). The project maintainers expect that a new
+contribution should take less than 30 minutes the first time and less than 15
 minutes for subsequent methods.
 
 Your contribution and feedback is greatly appreciated!

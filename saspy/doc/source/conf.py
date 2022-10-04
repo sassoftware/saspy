@@ -137,6 +137,8 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
+import sphinx_rtd_theme
+
 html_theme = 'sphinx_rtd_theme'
 
 #html_context = {
@@ -146,9 +148,12 @@ html_theme = 'sphinx_rtd_theme'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {
+    # Toc options
+    'collapse_navigation': False,
+    'navigation_depth': 5,
+}
 
-import sphinx_rtd_theme
 
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
