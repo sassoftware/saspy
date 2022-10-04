@@ -7,48 +7,60 @@
 Getting started
 ***************
 
-SASPy is an interface module to the SAS System. It connects to SAS 9.4 
+This is an interface module to the SAS System. It connects to SAS 9.4 
 (released July 2013) or newer and enables Python programmers to take 
-advantage of their licenced SAS infrastructure through Python 3.x.
+advantage of their licensed SAS infrastructure through Python 3.x.
 
-The SASPy interface is designed to enable programmers to use Python 
+The interface is designed to enable programmers to use Python 
 syntax and constructs to interact with SAS. The interface makes SAS the
 analytical engine--or "calculator" for data analysis. In its most simple
-form, SASPy is a code translator that accepts Python commands and 
+form, it is a code translator that accepts Python commands and 
 converts them into SAS language statements. The statements are run,
-and then SASPy displays the results in Python.
+and then the results are returned to Python to be displayed or accessed.
 
-SASPy is an open source project. Your contributions are appreciated 
+This is an open source project. Your contributions are appreciated 
 and encouraged. Please open issues in gitlab for problems that you see!
 
-The rest of this section demonstrates how to use SASPy with a simple example.
+The rest of this section demonstrates how to use this module with a simple example.
 The example uses `Kaggle Resources Analytics 
 <https://www.kaggle.com/ludobenistant/hr-analytics>`_ data.
 
+We now have a saspy-examples gityhub repo:
+https://github.com/sassoftware/saspy-examples
+
+There are a number of example Jupyter notebooks there, some contributed by SAS
+and others by users. If you have one you'd like to contribute, please open a pull request.
+
+The saspy_example_github.ipynb notebook is a perfect one to look though first,
+as it walks you through the various capabilities of saspy. You can even download it, and
+then upload it into your Jupyter and run it. It uses SASHELP tables, so it should run
+on your system already. You can edit it and play around with it directly on your system.
+The direct link to it is: https://github.com/sassoftware/saspy-examples/blob/master/SAS_contrib/saspy_example_github.ipynb
  
+
 Initial import
 ==============
-It is assumed you have already :doc:`installed and configured <install>` SASPy.
+It is assumed you have already done the :doc:`installation and configuration <install>`.
 If you have not, refer to that section for more information.
 
 .. code-block:: ipython3
 
     import saspy
     import pandas as pd
-    from IPython.display import HTML
 
 
 Start a SAS session
 ===================
 In the following code we start a SAS session named ``sas`` using the default 
 configuration. Each SAS session is a connection to a separate SAS instance.
-The cfgname parameter specifies the configuration definition (in sascfg.py) 
+The cfgname parameter specifies the configuration definition (in sascfg_personal.py) 
 to use for the connection to SAS.
 
-If sascfg.py has only one connection definition, then you do not need to 
+If sascfg_personal.py has only one connection definition, then you do not need to 
 specify the cfgname parameter. If the file has more than one connection
 definition and you do not specify the one to use with cfgname, you are 
 prompted for the connection to use. 
+
 
 After a connection is made and a SAS session is started, a note that is 
 similar to the the one below is displayed.
@@ -61,6 +73,33 @@ similar to the the one below is displayed.
 .. parsed-literal::
 
     SAS Connection established. Subprocess id is 28207
+
+
+Any of the keys in the configuration definition can be supplied as parameters
+on the SASsession() method. This allows you to change these values at run time,
+without having to edit the configuration file. However, whether you are allowed 
+to override keys that are defined in the config def, is controlled by one of the
+configuration options (also in the sascfg[_personal].py); lock_down. If lock_down
+is True, the only keys you can supply as parameters on SASsession() are ones that
+are not specified in the config def. If lock_down is False, any key can be specified
+on the SASsession() method.
+
+For instance, with lock_down set to False and the following config def, you can
+override things at run time:
+
+.. code-block:: ipython3
+
+
+    ssh      = {'saspath' : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
+                'ssh'     : '/usr/bin/ssh',
+                'host'    : 'remote.linux.host',
+                'options' : ["-fullstimer"]
+               }
+
+
+    sas = saspy.SASsession(cfgname='ssh', 
+                           options=["-fullstimer", "-autoexec", "/home/my.autoexec.sas"],
+                           host="'other.host.with.sas")
 
 
 Load data into SAS
@@ -152,36 +191,37 @@ Basic heatmap
 
 Submit SAS code directly from Python session
 ============================================
-The preceeding examples demonstrate commonly used Python
-methods that are available with the SASPy module.
+The proceeding examples demonstrate commonly used Python
+methods that are available with this module.
+
 
 If you encounter a situation where you need to submit SAS
-statements directly to the SAS system, the submit method can
-accomplish that. The following example creates a side-by-side
+statements directly to the SAS system, you can use any of the 3 submit* methods
+to accomplish that. The following example creates a side-by-side
 panel plot to compare employees who have left versus employees
 still working at the company, based on their business unit,
-median performance rating, and satisifaction level.
+median performance rating, and satisfaction level.
 
 The submit method returns a dictionary with two keys: LOG and LST.
-The LST has the results to display and the LOG has the portion 
-of the SAS log for the code submission.
+You can print() the LOG and sas.HTML() the LST. Or you can use the
+submitLST() method or the submitLOG() methods which automatically
+render the respective output for you.
 
 .. code-block:: ipython3
 
-    c = sas.submit("""
+    c = sas.submitLST("""
     proc sgpanel data=work._csv;
         PANELBY left;
         hbar sales / response=last_evaluation    stat=median;
         hbar sales / response=satisfaction_level stat=median;
     run;
     """)
-    HTML(c['LST'])
 
 
 Split the data into training and test
 =====================================
 Partitioning data is essential to avoid overfitting during
-model development. This can be achived using the partition
+model development. This can be achieved using the partition
 method. In this example, the data is partitioned in-place
 and performs stratified sampling, based on the variable 
 'left.' If you do not specify a variable or the variable
@@ -199,11 +239,11 @@ We create two partitions: test and training.
 
 Build an analytical model
 =========================
-One of the key activities for SASPy is analtycal modeling. The SAS
+One of the key activities for this module is analytical modeling. The SAS
 system is capable of modeling in a number of distinct areas
-(statisics, machine learning, econometric time series, and so on). 
+(statistics, machine learning, econometric time series, and so on).
 
-The capabilities of SASPy are organized similarly to make it easier 
+These capabilities are organized similarly to make it easier 
 for users. Grouping functionality also avoids cluttered tab-complete 
 lists with methods that you might not have licensed.
 
@@ -239,7 +279,7 @@ a SAS procedure. The API has a complete list of methods for each object.
 
 You can use the ``dir()`` function to see a list of the available methods. 
 For example, ``dir(stat)`` provides a list of the methods that are available. 
-**Not** all of the methods corresponds to a procedure but the vast majority do.
+**Not** all of the methods correspond to a procedure but the vast majority do.
 
 .. code-block:: python
 
@@ -328,11 +368,11 @@ These rules apply to both target and input:
 * The parameters accept strings (str), lists (list), or dictionaries (dict) types.
 * The target and input parameters are modified by a nominals parameter to 
   identify the proper variables treatment.
-* The nominals parameter must be a list type or you recieve a syntax warning.
+* The nominals parameter must be a list type or you receive a syntax warning.
 * Variables are treated as nominals if any of the following are met:
 
   * The variable is a character type in SAS.
-  * The variable is specificed in the nominals list.
+  * The variable is specified in the nominals list.
   * The variable is paired with dictionary key ``'nominal'``.
 
 .. note:: If a variable is a SAS character type then it does not need to be 
@@ -344,10 +384,10 @@ These rules apply to both target and input:
 Evaluating model diagnostics
 ============================
 Perhaps the most important part of modeling is evaluating the quality of the 
-model. SASPy makes this very easy by leverging the rich graphical and tabular 
+model. This is made very easy by leveraging the rich graphical and tabular
 output of `SAS ODS <http://support.sas.com/rnd/base/ods/>`_.
 
-The output of a model in SASPy is a :any:`SASresults` object. It contains all 
+The output of a model in is a :any:`SASresults` object. It contains all 
 the ODS tables and graphics that were produced by the SAS procedure. You can 
 see all the available objects by using ``dir()`` or tab-complete on the object.
 
@@ -356,7 +396,7 @@ see all the available objects by using ``dir()`` or tab-complete on the object.
     dir(rf_model)
 
 The returned list shows the available diagnostic output for this model. The 
-output lists vary slightly, depending on the modeling algorthm, the settings, 
+output lists vary slightly, depending on the modeling algorithm, the settings,
 and the target type (nominal or interval).
 
 .. parsed-literal::
@@ -379,7 +419,7 @@ use the ``results`` option to choose HTML for tables too, if you choose.
     rf_model.FITSTATISTICS
 
 
-.. note:: If an error occured during processing, the only artifact is ERROR_LOG.
+.. note:: If an error occurred during processing, the only artifact is ERROR_LOG.
           This object contains the SAS log to aid you in resolving your error.
 
 Below is an example where the variable name left is typed incorrectly as lefty.
