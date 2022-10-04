@@ -34,7 +34,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 logger.setLevel(logging.INFO)
 logger.propagate=False
 
-def isnotebook():
+def _isnotebook():
     try:
         shell = get_ipython().__class__.__name__
         if shell == 'ZMQInteractiveShell':
@@ -46,7 +46,7 @@ def isnotebook():
     except NameError:
         return False      # Probably standard Python interpreter
 
-if isnotebook():
+if _isnotebook():
     from saspy.sas_magic import SASMagic
     get_ipython().register_magics(SASMagic)
 
