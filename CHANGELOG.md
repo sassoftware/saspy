@@ -2,6 +2,43 @@
 
 
 
+## [4.3.4] - 2022-10-05
+
+### Added
+
+-   `None` Nothing Added
+
+
+### Changed
+
+-   `Tweak` I'm moving to a newer dev environment; newer OS version, newer Python version, and all the newer modules, ...
+Using Sphinx to build the doc fails with this newer version, so I've had to tweak and reworks things to get the doc to build
+with this newer version of evrerything. So, there were a lot of minor adjustments pushed to accomodate this. It's all working
+and, of course, requires no programming changes due to any of this. A plus is that now the index, shown on the left side of the
+page, finally has links to the individual methods, in the API section of the doc! This is a welcome enhancement.
+
+
+### Fixed
+
+-   `Fix` Fix for issue 480 was in the last version. That issue was a discrepency with how Python on MacOS works compared to
+any other operating system. I've had to implement workarounds for Mac Python for a number of issues in the past. This release
+has a couple more workarouds for problems with the Mac version of Python too. These are in the IOM access method, whereas the
+last versions fix was in the STDIO access method. Again, no programming changes required.
+
+-   `Fix` All of the analytic methods correspond to some SAS Procedure. Each method is one analytic PROC. The code that generates
+the PROC syntax for all of tese methods is a bit convoluted. While fixing the method signatures for the doc building issues,
+last release, I noticed that if the USER librfer is assigned, then none of the analytic method work. I've worked through that code
+to resolve this, so in this release, that problem is fixed and they all work as they should have regardless of is USER is assigned
+or not.
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+
 ## [4.3.3] - 2022-09-26
 
 ### Added
