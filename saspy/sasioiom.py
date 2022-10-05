@@ -564,34 +564,37 @@ Will use HTML5 for this SASsession.""")
    def _endsas(self):
       rc = 0
       if self.pid:
-         self.stdin[0].send(b'\ntom says EOL=ENDSAS                          \n')
-         if os.name == 'nt':
-            pid = self.pid.pid
-            try:
-               rc = self.pid.wait(5)
-               self.pid = None
-            except (subprocess.TimeoutExpired):
-               if self.sascfg.verbose:
-                  logger.info("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
-               self.pid.kill()
-         else:
-            pid = self.pid
-            x = 5
-            while True:
-               rc = os.waitpid(self.pid, os.WNOHANG)
-               if rc[0] != 0:
-                  break
-               x = x - 1
-               if x < 1:
-                  break
-               sleep(1)
-
-            if rc[0] != 0:
-               pass
+         try: # More Mac OS Python issues that don't work like everywhere else
+            self.stdin[0].send(b'\ntom says EOL=ENDSAS                          \n')
+            if os.name == 'nt':
+               pid = self.pid.pid
+               try:
+                  rc = self.pid.wait(5)
+                  self.pid = None
+               except (subprocess.TimeoutExpired):
+                  if self.sascfg.verbose:
+                     logger.info("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+                  self.pid.kill()
             else:
-               if self.sascfg.verbose:
-                  logger.info("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
-               os.kill(self.pid, signal.SIGKILL)
+               pid = self.pid
+               x = 5
+               while True:
+                  rc = os.waitpid(self.pid, os.WNOHANG)
+                  if rc[0] != 0:
+                     break
+                  x = x - 1
+                  if x < 1:
+                     break
+                  sleep(1)
+
+               if rc[0] != 0:
+                  pass
+               else:
+                  if self.sascfg.verbose:
+                     logger.info("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+                  os.kill(self.pid, signal.SIGKILL)
+         except:
+            pass
 
          try: # Mac OS Python has bugs with this call
             self.stdin[0].shutdown(socks.SHUT_RDWR)
