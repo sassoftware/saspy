@@ -567,7 +567,6 @@ Will use HTML5 for this SASsession.""")
          try: # More Mac OS Python issues that don't work like everywhere else
             self.stdin[0].send(b'\ntom says EOL=ENDSAS                          \n')
             if os.name == 'nt':
-               pid = self.pid.pid
                try:
                   rc = self.pid.wait(5)
                   self.pid = None
@@ -576,7 +575,6 @@ Will use HTML5 for this SASsession.""")
                      logger.info("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                   self.pid.kill()
             else:
-               pid = self.pid
                x = 5
                while True:
                   rc = os.waitpid(self.pid, os.WNOHANG)
@@ -618,7 +616,7 @@ Will use HTML5 for this SASsession.""")
          self.sockerr.close()
 
          if self.sascfg.verbose:
-            logger.info("SAS Connection terminated. Subprocess id was "+str(pid))
+            logger.info("SAS Connection terminated. Subprocess id was "+str(self.pid if os.name != 'nt' else self.pid.pid))
          self.pid        = None
          self._sb.SASpid = None
       return
