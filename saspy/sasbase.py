@@ -389,8 +389,8 @@ class SASsession():
 
     The SASsession object is the main object to instantiate and provides access to the rest of the functionality.
     Most of these parameters will be configured in the sascfg_personal.py configuration file.
-    All of these parameters are documented more thoroughly in the configuration section of the saspy doc:
-    https://sassoftware.github.io/saspy/install.html#configuration
+    All of these parameters are documented more thoroughly in the Configuration section of the saspy doc:
+    https://sassoftware.github.io/saspy/configuration.html
     These are generally defined in the sascfg_personal.py file as opposed to being specified on the SASsession() invocation.
 
     Common parms for all access methods are:
