@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; saspy 4.3.3 documentation</title>
+  <title>API Reference &mdash; saspy 4.3.4 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                4.3.3
+                4.3.4
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -396,9 +396,9 @@ These are generally defined in the sascfg_personal.py file as opposed to being s
 <li><p><strong>cfgfile</strong> – fully qualified file name of your sascfg_personal.py file, if it’s not in the python search path</p></li>
 <li><p><strong>kernel</strong> – None - internal use when running the SAS_kernel notebook</p></li>
 <li><p><strong>results</strong> – Type of tabular results to return. default is ‘Pandas’, other options are ‘HTML or ‘TEXT’</p></li>
-<li><p><strong>lrecl</strong> – An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</p></li>
+<li><p><strong>lrecl</strong> – An integer specifying the record length for transferring wide data sets from SAS to DataFrames.</p></li>
 <li><p><strong>autoexec</strong> – A string of SAS code that will be submitted upon establishing a connection</p></li>
-<li><p><strong>display</strong> – controls how to display html in differnet notebooks. default is jupyter.
+<li><p><strong>display</strong> – controls how to display html in different notebooks. default is jupyter.
 valid values are [‘jupyter’, ‘zeppelin’, ‘databricks’]</p></li>
 </ul>
 </dd>
@@ -465,18 +465,18 @@ valid values are [‘jupyter’, ‘zeppelin’, ‘databricks’]</p></li>
 <li><p><strong>verify</strong> – Flag to have http try to verify the certificate or not</p></li>
 <li><p><strong>client_id</strong> – [for SSO Viya configurations] client_id to use for authenticating to Viya (defaults to ‘SASPy’)</p></li>
 <li><p><strong>client_secret</strong> – [for SSO Viya configurations] client_secret to use for authenticating to Viya (defaults to ‘’)</p></li>
-<li><p><strong>authcode</strong> – [for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth servide            where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]i&amp;response_type=code            so perhapse: <a class="reference external" href="https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code">https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code</a></p></li>
+<li><p><strong>authcode</strong> – [for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth servide            where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]i&amp;response_type=code            so perhaps: <a class="reference external" href="https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code">https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&amp;response_type=code</a></p></li>
 <li><p><strong>authkey</strong> – Key value for finding credentials in .authfile</p></li>
 <li><p><strong>user</strong> – userid for connecting to Viya (Not valid if Viya is configured for SSO - Single Sign On)</p></li>
 <li><p><strong>pw</strong> – password for connecting to Viya (Not valid if Viya is configured for SSO - Single Sign On)</p></li>
 <li><p><strong>context</strong> – The Compute Server Context to connect to</p></li>
 <li><p><strong>options</strong> – SAS options to include when connecting</p></li>
-<li><p><strong>encoding</strong> – [depecated] The Compute Service interface only works in UTF-8, regardless of the SAS encoding</p></li>
+<li><p><strong>encoding</strong> – [deprecated] The Compute Service interface only works in UTF-8, regardless of the SAS encoding</p></li>
 <li><p><strong>timeout</strong> – This is passed to the HTTPConnection (http.client) and has nothing to do with Viya or Compute</p></li>
 <li><p><strong>inactive</strong> – This is Inactivity Timeout, in minutes, for the SAS Compute Session. It defaults to 120 minutes.</p></li>
 <li><p><strong>ip</strong> – [deprecated] The resolvable host name, or IP address to the Viya (use url instead)</p></li>
-<li><p><strong>port</strong> – [depecated] The port to use to connect to Viya (use url instead)</p></li>
-<li><p><strong>ssl</strong> – [depecated] Boolean identifying whether to use HTTPS (ssl=True) or just HTTP (use url instead)</p></li>
+<li><p><strong>port</strong> – [deprecated] The port to use to connect to Viya (use url instead)</p></li>
+<li><p><strong>ssl</strong> – [deprecated] Boolean identifying whether to use HTTPS (ssl=True) or just HTTP (use url instead)</p></li>
 <li><p><strong>authtoken</strong> – The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.            Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can pass it in.</p></li>
 <li><p><strong>jwt</strong> – A JWT that can be used to acquire a SASLogon authorization token. This would be something like an Azure            token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.</p></li>
 </ul>
@@ -576,14 +576,14 @@ is the text of the last warning message generated in the SAS log.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="saspy.SASsession.dataframe2sasdata">
 <span class="sig-name descname"><span class="pre">dataframe2sasdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_df'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">libref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_outer_quotes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedded_newlines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x02'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x03'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfmts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdsopts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encode_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">char_lengths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#saspy.sasdata.SASdata" title="saspy.sasdata.SASdata"><span class="pre">SASdata</span></a></span></span><a class="headerlink" href="#saspy.SASsession.dataframe2sasdata" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
-<p>Also note that dataframe indexes (row label) are not transferred over as columns, as they aren’t actualy in df.columns.
+<dd><p>This method imports a Pandas DataFrame to a SAS Data Set, returning the SASdata object for the new Data Set.</p>
+<p>Also note that DataFrame indexes (row label) are not transferred over as columns, as they aren’t actualy in df.columns.
 You can simpley use df.reset_index() before this method and df.set_index() after to have the index be a column which
 is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> – Pandas Data Frame to import to a SAS Data Set</p></li>
+<li><p><strong>df</strong> – Pandas DataFrame to import to a SAS Data Set</p></li>
 <li><p><strong>table</strong> – the name of the SAS Data Set to create</p></li>
 <li><p><strong>libref</strong> – the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</p></li>
 <li><p><strong>results</strong> – format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</p></li>
@@ -605,7 +605,7 @@ is transferred over to the SAS data set. If you want to create a SAS index at th
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>LF</strong> – if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)</p></li>
 <li><p><strong>CR</strong> – if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)</p></li>
-<li><p><strong>colsep</strong> – the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)</p></li>
+<li><p><strong>colsep</strong> – the column separator character used for streaming the delimmited data to SAS defaults to hex(3)</p></li>
 <li><p><strong>colrep</strong> – the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ‘ ‘</p></li>
 <li><p><strong>datetimes</strong> – dict with column names as keys and values of ‘date’ or ‘time’ to create SAS date or times instead of datetimes</p></li>
 <li><p><strong>outfmts</strong> – dict with column names and SAS formats to assign to the new SAS data set</p></li>
@@ -626,7 +626,7 @@ is transferred over to the SAS data set. If you want to create a SAS index at th
 <li><p>’exact’  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding,                          required for the longest actual value. This is slowest but most accurate. For big data, this can                          take excessive time. If SAS is running in a single byte encoding then this defaults to ‘1’ (see below),                          but you can override even that by explicitly specifying ‘exact’ when SAS is a single byte encoding.</p></li>
 <li><p>’safe’   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte                          encoding. This is much faster, but could declare SAS Char variables longer than absolutely required                          for multibyte SAS encodings. If SAS is running in a single byte encoding then ‘1’ (see below) is used.                          Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these.                          ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it’s variable</p></li>
 <li><p>[1|2|3|4]- this is ‘safe’ except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the                          default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default                          used, since characters can only be 1 byte long so char len == byte len                          For UTF-8 SAS session, 4 is the BPC, so if you know you don’t have many actual unicode characters                          you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead                          of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.</p></li>
-<li><p>dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates                            runmning the code to calculate the lengths, and goes strainght to transferring the data</p></li>
+<li><p>dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates                            running the code to calculate the lengths, and goes strainght to transferring the data</p></li>
 </ul>
 </p></li>
 </ul>
@@ -655,13 +655,13 @@ is transferred over to the SAS data set. If you want to create a SAS index at th
 <dt class="sig sig-object py" id="saspy.SASsession.df2sd">
 <span class="sig-name descname"><span class="pre">df2sd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_df'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">libref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_outer_quotes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedded_newlines</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">LF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CR</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x02'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x03'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfmts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdsopts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encode_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">char_lengths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#saspy.sasdata.SASdata" title="saspy.sasdata.SASdata"><span class="pre">SASdata</span></a></span></span><a class="headerlink" href="#saspy.SASsession.df2sd" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for ‘dataframe2sasdata’. Why type all that?</p>
-<p>Also note that dataframe indexes (row label) are not transferred over as columns, as they aren’t actualy in df.columns.
+<p>Also note that DataFrame indexes (row label) are not transferred over as columns, as they aren’t actualy in df.columns.
 You can simpley use df.reset_index() before this method and df.set_index() after to have the index be a column which
 is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> Pandas Data Frame to import to a SAS Data Set</p></li>
+<li><p><strong>df</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> Pandas DataFrame to import to a SAS Data Set</p></li>
 <li><p><strong>table</strong> – the name of the SAS Data Set to create</p></li>
 <li><p><strong>libref</strong> – the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned</p></li>
 <li><p><strong>results</strong> – format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives</p></li>
@@ -683,7 +683,7 @@ is transferred over to the SAS data set. If you want to create a SAS index at th
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>LF</strong> – if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)</p></li>
 <li><p><strong>CR</strong> – if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)</p></li>
-<li><p><strong>colsep</strong> – the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)</p></li>
+<li><p><strong>colsep</strong> – the column separator character used for streaming the delimmited data to SAS defaults to hex(3)</p></li>
 <li><p><strong>colrep</strong> – the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ‘ ‘</p></li>
 <li><p><strong>datetimes</strong> – dict with column names as keys and values of ‘date’ or ‘time’ to create SAS date or times instead of datetimes</p></li>
 <li><p><strong>outfmts</strong> – dict with column names and SAS formats to assign to the new SAS data set</p></li>
@@ -722,21 +722,21 @@ is transferred over to the SAS data set. If you want to create a SAS index at th
 <dl class="py method">
 <dt class="sig sig-object py" id="saspy.SASsession.df_char_lengths">
 <span class="sig-name descname"><span class="pre">df_char_lengths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encode_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">char_lengths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#saspy.SASsession.df_char_lengths" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is a utility method for df2sd, use to get the character columns lengths from a dataframe to use to
+<dd><p>This is a utility method for df2sd, use to get the character columns lengths from a DataFrame to use to
 create a SAS data set. This can be called by the user and the returned dict can be passed in to df2sd via
-the char_lengths= option. For big data frames, this can take a long time, so this can be used to do it once,
+the char_lengths= option. For big DataFrames, this can take a long time, so this can be used to do it once,
 and then the dictionary returned can be provided to df2sd each time it’s called to avoid recalculating this again.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> Pandas Data Frame to import to a SAS Data Set</p></li>
+<li><p><strong>df</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> Pandas DataFrames to import to a SAS Data Set</p></li>
 <li><p><strong>encode_errors</strong> – ‘fail’, ‘replace’ - default is to ‘fail’, other choice is to ‘replace’                               invalid chars with the replacement char. This is only when calculating byte lengths,                               which is dependent upon the value of char_lengths=. When calculating char lengths, this                               parameter is ignored in this method (encoding is deferred to the data transfer step in df2sd).</p></li>
 <li><p><strong>char_lengths</strong> – <p>How to determine (and declare) lengths for CHAR variables in the output SAS data set                              SAS declares lenghts in bytes, not characters, so multibyte encodings require more bytes per character (BPC)</p>
 <ul>
 <li><p>’exact’  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding,                          required for the longest actual value. This is slowest but most accurate. For big data, this can                          take excessive time. If SAS is running in a single byte encoding then this defaults to ‘1’ (see below),                          but you can override even that by explicitly specifying ‘exact’ when SAS is a single byte encoding.</p></li>
 <li><p>’safe’   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte                          encoding. This is much faster, but could declare SAS Char variables longer than absolutely required                          for multibyte SAS encodings. If SAS is running in a single byte encoding then ‘1’ (see below) is used.                          Norte that SAS has no fixed length multibyte encodings, so BPC is always between 1-2 or 1-4 for these.                          ASCII characters hex 00-7F use one btye in all of these, which other characters use more BPC; it’s variable</p></li>
 <li><p>[1|2|3|4]- this is ‘safe’ except the number (1 or 2 or 3 or 4) is the multiplier to use (BPC) instead of the                          default BPC of the SAS session encoding. For SAS single byte encodings, the valuse of 1 is the default                          used, since characters can only be 1 byte long so char len == byte len                          For UTF-8 SAS session, 4 is the BPC, so if you know you don’t have many actual unicode characters                          you could specify 2 so the SAS column lengths are only twice the length as the longest value, instead                          of 4 times the, which would be much longer than actually needed. Or if you know you have no unicode                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.</p></li>
-<li><p>dictionary - a dictionary containing the names:lengths of a subset of the character columns. This will calculate                            the rest of them and return the full dictionary of columns. This way you canoverride some of them.                            Also, the column names are now case independent.</p></li>
+<li><p>dictionary - a dictionary containing the names:lengths of a subset of the character columns. This will calculate                            the rest of them and return the full dictionary of columns. This way you can override some of them.                            Also, the column names are now case independent.</p></li>
 </ul>
 </p></li>
 </ul>
@@ -845,7 +845,7 @@ See the Advanced topics section of the doc for details</p>
 <dt class="sig sig-object py" id="saspy.SASsession.file_info">
 <span class="sig-name descname"><span class="pre">file_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'dict'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fileref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'_spfinfo'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#saspy.SASsession.file_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method returns a dictionary containing the file attributes for the file name provided</p>
-<p>If you would like a Pandas dataframe returned instead of a dictionary, specify results=’pandas’</p>
+<p>If you would like a Pandas DataFrame returned instead of a dictionary, specify results=’pandas’</p>
 </dd></dl>
 
 <dl class="py method">
@@ -882,7 +882,7 @@ whole session.</p>
 <dt class="sig sig-object py" id="saspy.SASsession.list_tables">
 <span class="sig-name descname"><span class="pre">list_tables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">libref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'work'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'list'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></span><a class="headerlink" href="#saspy.SASsession.list_tables" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method returns a list of tuples containing MEMNAME, MEMTYPE of members in the library of memtype data or view</p>
-<p>If you would like a Pandas dataframe returned instead of a list, specify results=’pandas’</p>
+<p>If you would like a Pandas DataFrame returned instead of a list, specify results=’pandas’</p>
 </dd></dl>
 
 <dl class="py method">
@@ -919,8 +919,8 @@ whole session.</p>
 <li><p>where is a string</p></li>
 <li><p>keep are strings or list of strings.</p></li>
 <li><p>drop are strings or list of strings.</p></li>
-<li><p>obs is a numbers - either string or int</p></li>
-<li><p>first obs is a numbers - either string or int</p></li>
+<li><p>obs is a number - either string or int</p></li>
+<li><p>first obs is a number - either string or int</p></li>
 <li><p>format is a string or dictionary { var: format }</p></li>
 <li><p>encoding is a string</p></li>
 </ul>
@@ -946,19 +946,19 @@ whole session.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="saspy.SASsession.sasdata2dataframe">
 <span class="sig-name descname"><span class="pre">sasdata2dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">libref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsopts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'MEMORY'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#saspy.SASsession.sasdata2dataframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.</p>
+<dd><p>This method exports the SAS Data Set to a Pandas DataFrame, returning the DataFrame object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>table</strong> – the name of the SAS Data Set you want to export to a Pandas Data Frame</p></li>
+<li><p><strong>table</strong> – the name of the SAS Data Set you want to export to a Pandas DataFrame</p></li>
 <li><p><strong>libref</strong> – the libref for the SAS Data Set.</p></li>
 <li><p><strong>dsopts</strong> – <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
 <ul>
 <li><p>where is a string</p></li>
 <li><p>keep are strings or list of strings.</p></li>
 <li><p>drop are strings or list of strings.</p></li>
-<li><p>obs is a numbers - either string or int</p></li>
-<li><p>first obs is a numbers - either string or int</p></li>
+<li><p>obs is a number - either string or int</p></li>
+<li><p>first obs is a number - either string or int</p></li>
 <li><p>format is a string or dictionary { var: format }</p></li>
 <li><p>encoding is a string</p></li>
 </ul>
@@ -975,7 +975,7 @@ whole session.</p>
 </p></li>
 <li><p><strong>method</strong> – <p>defaults to MEMORY; As of V3.7.0 all 3 of these now stream directly into read_csv() with no disk I/O                       and have much improved performance. MEM, the default, is now as fast as the others.</p>
 <ul>
-<li><p>MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory</p></li>
+<li><p>MEMORY the original method. Streams the data over and builds the DataFrame on the fly in memory</p></li>
 <li><p>CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data</p></li>
 <li><p>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.                      this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV                     has problems with</p></li>
 </ul>
@@ -996,8 +996,8 @@ whole session.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>rowsep</strong> – the row seperator character to use; defaults to hex(1)</p></li>
-<li><p><strong>colsep</strong> – the column seperator character to use; defaults to hex(2)</p></li>
+<li><p><strong>rowsep</strong> – the row separator character to use; defaults to hex(1)</p></li>
+<li><p><strong>colsep</strong> – the column separator character to use; defaults to hex(2)</p></li>
 <li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
 <li><p><strong>colrep</strong> – the char to convert to for any embedded colsep chars, defaults to  ‘ ‘</p></li>
 <li><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
@@ -1006,7 +1006,7 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Pandas data frame</p>
+<dd class="field-even"><p>Pandas DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1116,15 +1116,15 @@ See the SASViyaML.py module.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>table</strong> – the name of the SAS Data Set you want to export to a Pandas Data Frame</p></li>
+<li><p><strong>table</strong> – the name of the SAS Data Set you want to export to a Pandas DataFrame</p></li>
 <li><p><strong>libref</strong> – the libref for the SAS Data Set.</p></li>
 <li><p><strong>dsopts</strong> – <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
 <ul>
 <li><p>where is a string</p></li>
 <li><p>keep are strings or list of strings.</p></li>
 <li><p>drop are strings or list of strings.</p></li>
-<li><p>obs is a numbers - either string or int</p></li>
-<li><p>first obs is a numbers - either string or int</p></li>
+<li><p>obs is a number - either string or int</p></li>
+<li><p>first obs is a number - either string or int</p></li>
 <li><p>format is a string or dictionary { var: format }</p></li>
 <li><p>encoding is a string</p></li>
 </ul>
@@ -1141,7 +1141,7 @@ See the SASViyaML.py module.</p>
 </p></li>
 <li><p><strong>method</strong> – <p>defaults to MEMORY; As of V3.7.0 all 3 of these now stream directly into read_csv() with no disk I/O                       and have much improved performance. MEM, the default, is now as fast as the others.</p>
 <ul>
-<li><p>MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory</p></li>
+<li><p>MEMORY the original method. Streams the data over and builds the DataFrame on the fly in memory</p></li>
 <li><p>CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data</p></li>
 <li><p>DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV                     has problems with</p></li>
 </ul>
@@ -1162,8 +1162,8 @@ See the SASViyaML.py module.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>rowsep</strong> – the row seperator character to use; defaults to hex(1)</p></li>
-<li><p><strong>colsep</strong> – the column seperator character to use; defaults to hex(2)</p></li>
+<li><p><strong>rowsep</strong> – the row separator character to use; defaults to hex(1)</p></li>
+<li><p><strong>colsep</strong> – the column separator character to use; defaults to hex(2)</p></li>
 <li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
 <li><p><strong>colrep</strong> – the char to convert to for any embedded colsep chars, defaults to  ‘ ‘</p></li>
 <li><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
@@ -1172,7 +1172,7 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Pandas data frame</p>
+<dd class="field-even"><p>Pandas DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1184,15 +1184,15 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>table</strong> – the name of the SAS Data Set you want to export to a Pandas Data Frame</p></li>
+<li><p><strong>table</strong> – the name of the SAS Data Set you want to export to a Pandas DataFrame</p></li>
 <li><p><strong>libref</strong> – the libref for the SAS Data Set.</p></li>
 <li><p><strong>dsopts</strong> – <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
 <ul>
 <li><p>where is a string</p></li>
 <li><p>keep are strings or list of strings.</p></li>
 <li><p>drop are strings or list of strings.</p></li>
-<li><p>obs is a numbers - either string or int</p></li>
-<li><p>first obs is a numbers - either string or int</p></li>
+<li><p>obs is a number - either string or int</p></li>
+<li><p>first obs is a number - either string or int</p></li>
 <li><p>format is a string or dictionary { var: format }</p></li>
 <li><p>encoding is a string</p></li>
 </ul>
@@ -1226,7 +1226,7 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Pandas data frame</p>
+<dd class="field-even"><p>Pandas DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1238,15 +1238,15 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>table</strong> – the name of the SAS Data Set you want to export to a Pandas Data Frame</p></li>
+<li><p><strong>table</strong> – the name of the SAS Data Set you want to export to a Pandas DataFrame</p></li>
 <li><p><strong>libref</strong> – the libref for the SAS Data Set.</p></li>
 <li><p><strong>dsopts</strong> – <p>a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):</p>
 <ul>
 <li><p>where is a string</p></li>
 <li><p>keep are strings or list of strings.</p></li>
 <li><p>drop are strings or list of strings.</p></li>
-<li><p>obs is a numbers - either string or int</p></li>
-<li><p>first obs is a numbers - either string or int</p></li>
+<li><p>obs is a number - either string or int</p></li>
+<li><p>first obs is a number - either string or int</p></li>
 <li><p>format is a string or dictionary { var: format }</p></li>
 <li><p>encoding is a string</p></li>
 </ul>
@@ -1263,8 +1263,8 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 </p></li>
 <li><p><strong>tempfile</strong> – [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that’s cleaned up</p></li>
 <li><p><strong>tempkeep</strong> – [deprecated] if you specify your own file to use with tempfile=, this controls whether it’s cleaned up after using it</p></li>
-<li><p><strong>rowsep</strong> – the row seperator character to use; defaults to hex(1)</p></li>
-<li><p><strong>colsep</strong> – the column seperator character to use; defaults to hex(2)</p></li>
+<li><p><strong>rowsep</strong> – the row separator character to use; defaults to hex(1)</p></li>
+<li><p><strong>colsep</strong> – the column separator character to use; defaults to hex(2)</p></li>
 <li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
 <li><p><strong>colrep</strong> – the char to convert to for any embedded colsep chars, defaults to  ‘ ‘</p></li>
 <li><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
@@ -1273,7 +1273,7 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Pandas data frame</p>
+<dd class="field-even"><p>Pandas DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1370,7 +1370,7 @@ You must specify 3 of the for variables, to solve for the 4th.</p>
 that HTTP Disconnect failures can be returned, even though subsequent calls still work, when submitting the request to see
 if the code has finished, so the LOG and LST can then be requested.
 To work around this issue, two parameters are available; one to have a delay between polling requests, and the other the
-number of Disconect errors to ignore before returning a failure. The defaults are to delay 0 seconds (so everything doesn’t
+number of disconnect errors to ignore before returning a failure. The defaults are to delay 0 seconds (so everything doesn’t
 have a delay that slows down how things run), and 5 disconnect errors. If you submit code that runs for more then a few
 seconds, you can specify GETstatusDelay=n.n, the nunber of seconds (maybe 0.5 or 2, or 60 if you job runs for many minutes)
 to wait befor asking Compute if the code finished.</p>
@@ -1487,12 +1487,12 @@ as either HTML or TEXT, depending upon results. The method= parameter allows you
 <dl class="py method">
 <dt class="sig sig-object py" id="saspy.SASsession.validvarname">
 <span class="sig-name descname"><span class="pre">validvarname</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'v7'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#saspy.SASsession.validvarname" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a copy of a Data Frame with SAS compatible column names. The version= parameter allows
+<dd><p>Creates a copy of a DataFrame with SAS compatible column names. The version= parameter allows
 you to choose the compatability setting to use.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> – a Pandas Data Frame whose column names you wish to make SAS compatible.</p></li>
+<li><p><strong>df</strong> – a Pandas DataFrame whose column names you wish to make SAS compatible.</p></li>
 <li><p><strong>version</strong> – <p>select the validvarname version using SAS convention.</p>
 <ul>
 <li><dl class="simple">
@@ -1532,8 +1532,8 @@ you to choose the compatability setting to use.</p>
 <li><p>where is a string</p></li>
 <li><p>keep are strings or list of strings.</p></li>
 <li><p>drop are strings or list of strings.</p></li>
-<li><p>obs is a numbers - either string or int</p></li>
-<li><p>first obs is a numbers - either string or int</p></li>
+<li><p>obs is a number - either string or int</p></li>
+<li><p>first obs is a number - either string or int</p></li>
 <li><p>format is a string or dictionary { var: format }</p></li>
 <li><p>encoding is a string</p></li>
 </ul>
