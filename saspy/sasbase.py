@@ -293,20 +293,20 @@ class SASconfig(object):
     def _find_config(self, cfg_override: str=None):
         """
         Locate the user's preferred configuration file if possible, falling
-        back through a hierarchy of configuration file locations. The heirarchy
+        back through a hierarchy of configuration file locations. The hierarchy
         is as follows:
             1. If a `cfgfile` param is provided to `sas.SASsession()`, use this
                configuration or nothing else. If the configuration path is
                invalid, raise an exception.
             2. If no `cfgfile` param is provided, use existing behavior of global
                "personal" config in the saspy library path.
-            3. If no gloabl "personal" file found search for a "personal" config
+            3. If no global "personal" file found search for a "personal" config
                in the local scope (`sys.path[0]`). This is mainly to support a
                local project config that differs from a more general one.
             4. If no config file is found locally, search for a "personal"
                config in the user's $HOME/.config/saspy directory.
             5. Finally, fall back to the standard `sascfg.py` file in the
-               library path, then further doen the rest of the path.
+               library path, then further down the rest of the path.
         :option cfg_override: The provided `cfgfile` param to `sas.SASsession()`
         :return [module]:
         """
@@ -399,9 +399,9 @@ class SASsession():
     :param cfgfile: fully qualified file name of your sascfg_personal.py file, if it's not in the python search path
     :param kernel: None - internal use when running the SAS_kernel notebook
     :param results: Type of tabular results to return. default is 'Pandas', other options are 'HTML or 'TEXT'
-    :param lrecl: An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
+    :param lrecl: An integer specifying the record length for transferring wide data sets from SAS to DataFrames.
     :param autoexec: A string of SAS code that will be submitted upon establishing a connection
-    :param display: controls how to display html in differnet notebooks. default is jupyter.
+    :param display: controls how to display html in different notebooks. default is jupyter.
            valid values are ['jupyter', 'zeppelin', 'databricks']
     :return: 'SASsession'
     :rtype: 'SASsession'
@@ -456,18 +456,18 @@ class SASsession():
     :param client_secret: [for SSO Viya configurations] client_secret to use for authenticating to Viya (defaults to '')
     :param authcode: [for SSO Viya configurations] one time authorization code acquired via the SASLogon oauth servide \
            where the url to get the code would be [url]/SASLogon/oauth/authorize?client_id=[client_id]i&response_type=code \
-           so perhapse: https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&response_type=code
+           so perhaps: https://SAS.Viya.sas.com/SASLogon/oauth/authorize?client_id=SASPy&response_type=code
     :param authkey: Key value for finding credentials in .authfile
     :param user: userid for connecting to Viya (Not valid if Viya is configured for SSO - Single Sign On)
     :param pw: password for connecting to Viya (Not valid if Viya is configured for SSO - Single Sign On)
     :param context: The Compute Server Context to connect to
     :param options: SAS options to include when connecting
-    :param encoding: [depecated] The Compute Service interface only works in UTF-8, regardless of the SAS encoding
+    :param encoding: [deprecated] The Compute Service interface only works in UTF-8, regardless of the SAS encoding
     :param timeout: This is passed to the HTTPConnection (http.client) and has nothing to do with Viya or Compute
     :param inactive: This is Inactivity Timeout, in minutes, for the SAS Compute Session. It defaults to 120 minutes.
     :param ip: [deprecated] The resolvable host name, or IP address to the Viya (use url instead)
-    :param port: [depecated] The port to use to connect to Viya (use url instead)
-    :param ssl: [depecated] Boolean identifying whether to use HTTPS (ssl=True) or just HTTP (use url instead)
+    :param port: [deprecated] The port to use to connect to Viya (use url instead)
+    :param ssl: [deprecated] Boolean identifying whether to use HTTPS (ssl=True) or just HTTP (use url instead)
     :param authtoken: The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt. \
            Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can pass it in.
     :param jwt: A JWT that can be used to acquire a SASLogon authorization token. This would be something like an Azure \
@@ -819,7 +819,7 @@ class SASsession():
         that HTTP Disconnect failures can be returned, even though subsequent calls still work, when submitting the request to see
         if the code has finished, so the LOG and LST can then be requested.
         To work around this issue, two parameters are available; one to have a delay between polling requests, and the other the
-        number of Disconect errors to ignore before returning a failure. The defaults are to delay 0 seconds (so everything doesn't
+        number of disconnect errors to ignore before returning a failure. The defaults are to delay 0 seconds (so everything doesn't
         have a delay that slows down how things run), and 5 disconnect errors. If you submit code that runs for more then a few
         seconds, you can specify GETstatusDelay=n.n, the nunber of seconds (maybe 0.5 or 2, or 60 if you job runs for many minutes)
         to wait befor asking Compute if the code finished.
@@ -1031,8 +1031,8 @@ class SASsession():
             - where is a string
             - keep are strings or list of strings.
             - drop are strings or list of strings.
-            - obs is a numbers - either string or int
-            - first obs is a numbers - either string or int
+            - obs is a number - either string or int
+            - first obs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1190,8 +1190,8 @@ class SASsession():
             - where is a string
             - keep are strings or list of strings.
             - drop are strings or list of strings.
-            - obs is a numbers - either string or int
-            - first obs is a numbers - either string or int
+            - obs is a number - either string or int
+            - first obs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1270,12 +1270,12 @@ class SASsession():
     def df_char_lengths(self, df: 'pandas.DataFrame', encode_errors = None, char_lengths = None,
                         **kwargs) -> dict:
         """
-        This is a utility method for df2sd, use to get the character columns lengths from a dataframe to use to
+        This is a utility method for df2sd, use to get the character columns lengths from a DataFrame to use to
         create a SAS data set. This can be called by the user and the returned dict can be passed in to df2sd via
-        the char_lengths= option. For big data frames, this can take a long time, so this can be used to do it once,
+        the char_lengths= option. For big DataFrames, this can take a long time, so this can be used to do it once,
         and then the dictionary returned can be provided to df2sd each time it's called to avoid recalculating this again.
 
-        :param df: :class:`pandas.DataFrame` Pandas Data Frame to import to a SAS Data Set
+        :param df: :class:`pandas.DataFrame` Pandas DataFrames to import to a SAS Data Set
 
         :param encode_errors: 'fail', 'replace' - default is to 'fail', other choice is to 'replace' \
                               invalid chars with the replacement char. This is only when calculating byte lengths, \
@@ -1305,7 +1305,7 @@ class SASsession():
                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.
 
             - dictionary - a dictionary containing the names:lengths of a subset of the character columns. This will calculate \
-                           the rest of them and return the full dictionary of columns. This way you canoverride some of them. \
+                           the rest of them and return the full dictionary of columns. This way you can override some of them. \
                            Also, the column names are now case independent.
 
         :return: SASdata object
@@ -1368,11 +1368,11 @@ class SASsession():
         """
         This is an alias for 'dataframe2sasdata'. Why type all that?
 
-        Also note that dataframe indexes (row label) are not transferred over as columns, as they aren't actualy in df.columns.
+        Also note that DataFrame indexes (row label) are not transferred over as columns, as they aren't actualy in df.columns.
         You can simpley use df.reset_index() before this method and df.set_index() after to have the index be a column which
         is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.
 
-        :param df: :class:`pandas.DataFrame` Pandas Data Frame to import to a SAS Data Set
+        :param df: :class:`pandas.DataFrame` Pandas DataFrame to import to a SAS Data Set
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
@@ -1386,7 +1386,7 @@ class SASsession():
 
         :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)
         :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)
-        :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)
+        :param colsep: the column separator character used for streaming the delimmited data to SAS defaults to hex(3)
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
@@ -1447,13 +1447,13 @@ class SASsession():
                           datetimes: dict={}, outfmts: dict={}, labels: dict={},
                           outdsopts: dict={}, encode_errors = None, char_lengths = None, **kwargs) -> 'SASdata':
         """
-        This method imports a Pandas Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
+        This method imports a Pandas DataFrame to a SAS Data Set, returning the SASdata object for the new Data Set.
 
-        Also note that dataframe indexes (row label) are not transferred over as columns, as they aren't actualy in df.columns.
+        Also note that DataFrame indexes (row label) are not transferred over as columns, as they aren't actualy in df.columns.
         You can simpley use df.reset_index() before this method and df.set_index() after to have the index be a column which
         is transferred over to the SAS data set. If you want to create a SAS index at the same time, use the outdsopts dict.
 
-        :param df: Pandas Data Frame to import to a SAS Data Set
+        :param df: Pandas DataFrame to import to a SAS Data Set
         :param table: the name of the SAS Data Set to create
         :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
         :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
@@ -1467,7 +1467,7 @@ class SASsession():
 
         :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)
         :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)
-        :param colsep: the column seperator character used for streaming the delimmited data to SAS defaults to hex(3)
+        :param colsep: the column separator character used for streaming the delimmited data to SAS defaults to hex(3)
         :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
         :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
         :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
@@ -1511,7 +1511,7 @@ class SASsession():
                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.
 
             - dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates \
-                           runmning the code to calculate the lengths, and goes strainght to transferring the data \
+                           running the code to calculate the lengths, and goes strainght to transferring the data \
 
 
         :return: SASdata object
@@ -1582,15 +1582,15 @@ class SASsession():
         """
         This is an alias for 'sasdata2dataframe'. Why type all that?
 
-        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
+        :param table: the name of the SAS Data Set you want to export to a Pandas DataFrame
         :param libref: the libref for the SAS Data Set.
         :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
 
             - where is a string
             - keep are strings or list of strings.
             - drop are strings or list of strings.
-            - obs is a numbers - either string or int
-            - first obs is a numbers - either string or int
+            - obs is a number - either string or int
+            - first obs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1609,7 +1609,7 @@ class SASsession():
         :param method: defaults to MEMORY; As of V3.7.0 all 3 of these now stream directly into read_csv() with no disk I/O\
                        and have much improved performance. MEM, the default, is now as fast as the others.
 
-           - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
+           - MEMORY the original method. Streams the data over and builds the DataFrame on the fly in memory
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
            - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import. \
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV \
@@ -1624,8 +1624,8 @@ class SASsession():
 
         For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method
 
-        :param rowsep: the row seperator character to use; defaults to hex(1)
-        :param colsep: the column seperator character to use; defaults to hex(2)
+        :param rowsep: the row separator character to use; defaults to hex(1)
+        :param colsep: the column separator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
 
@@ -1634,7 +1634,7 @@ class SASsession():
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
 
-        :return: Pandas data frame
+        :return: Pandas DataFrame
         """
         dsopts = dsopts if dsopts is not None else {}
         return self.sasdata2dataframe(table, libref, dsopts, method, **kwargs)
@@ -1644,15 +1644,15 @@ class SASsession():
         """
         This is an alias for 'sasdata2dataframe' specifying method='CSV'. Why type all that?
 
-        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
+        :param table: the name of the SAS Data Set you want to export to a Pandas DataFrame
         :param libref: the libref for the SAS Data Set.
         :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
 
             - where is a string
             - keep are strings or list of strings.
             - drop are strings or list of strings.
-            - obs is a numbers - either string or int
-            - first obs is a numbers - either string or int
+            - obs is a number - either string or int
+            - first obs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1686,7 +1686,7 @@ class SASsession():
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
 
-        :return: Pandas data frame
+        :return: Pandas DataFrame
         """
         dsopts = dsopts if dsopts is not None else {}
         opts   =   opts if   opts is not None else {}
@@ -1699,15 +1699,15 @@ class SASsession():
         """
         This is an alias for 'sasdata2dataframe' specifying method='DISK'. Why type all that?
 
-        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
+        :param table: the name of the SAS Data Set you want to export to a Pandas DataFrame
         :param libref: the libref for the SAS Data Set.
         :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
 
             - where is a string
             - keep are strings or list of strings.
             - drop are strings or list of strings.
-            - obs is a numbers - either string or int
-            - first obs is a numbers - either string or int
+            - obs is a number - either string or int
+            - first obs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1725,8 +1725,8 @@ class SASsession():
         :param tempfile: [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
         :param tempkeep: [deprecated] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
-        :param rowsep: the row seperator character to use; defaults to hex(1)
-        :param colsep: the column seperator character to use; defaults to hex(2)
+        :param rowsep: the row separator character to use; defaults to hex(1)
+        :param colsep: the column separator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
 
@@ -1735,7 +1735,7 @@ class SASsession():
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
 
-        :return: Pandas data frame
+        :return: Pandas DataFrame
         """
         dsopts = dsopts if dsopts is not None else {}
         return self.sasdata2dataframe(table, libref, dsopts, method='DISK', tempfile=tempfile, tempkeep=tempkeep,
@@ -1744,17 +1744,17 @@ class SASsession():
     def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None,
                           method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
-        This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
+        This method exports the SAS Data Set to a Pandas DataFrame, returning the DataFrame object.
 
-        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
+        :param table: the name of the SAS Data Set you want to export to a Pandas DataFrame
         :param libref: the libref for the SAS Data Set.
         :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
 
             - where is a string
             - keep are strings or list of strings.
             - drop are strings or list of strings.
-            - obs is a numbers - either string or int
-            - first obs is a numbers - either string or int
+            - obs is a number - either string or int
+            - first obs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1772,7 +1772,7 @@ class SASsession():
         :param method: defaults to MEMORY; As of V3.7.0 all 3 of these now stream directly into read_csv() with no disk I/O\
                        and have much improved performance. MEM, the default, is now as fast as the others.
 
-           - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
+           - MEMORY the original method. Streams the data over and builds the DataFrame on the fly in memory
            - CSV    uses an intermediary Proc Export csv file and pandas read_csv() to import it; faster for large data
            - DISK   uses the original (MEMORY) method, but persists to disk and uses pandas read to import.  \
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV \
@@ -1787,8 +1787,8 @@ class SASsession():
 
         For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method
 
-        :param rowsep: the row seperator character to use; defaults to hex(1)
-        :param colsep: the column seperator character to use; defaults to hex(2)
+        :param rowsep: the row separator character to use; defaults to hex(1)
+        :param colsep: the column separator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
 
@@ -1797,7 +1797,7 @@ class SASsession():
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
 
-        :return: Pandas data frame
+        :return: Pandas DataFrame
         """
         lastlog = len(self._io._log)
         if self.sascfg.pandas:
@@ -1831,8 +1831,8 @@ class SASsession():
             - where is a string or list of strings
             - keep are strings or list of strings.
             - drop are strings or list of strings.
-            - obs is a numbers - either string or int
-            - first obs is a numbers - either string or int
+            - obs is a number - either string or int
+            - first obs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1912,7 +1912,7 @@ class SASsession():
             - datarow      is a number
             - delimiter    is a character
             - getnames     is a boolean
-            - guessingrows is a numbers or the string 'MAX'
+            - guessingrows is a number or the string 'MAX'
 
             .. code-block:: python
 
@@ -2204,7 +2204,7 @@ class SASsession():
         """
         This method returns a list of tuples containing MEMNAME, MEMTYPE of members in the library of memtype data or view
 
-        If you would like a Pandas dataframe returned instead of a list, specify results='pandas'
+        If you would like a Pandas DataFrame returned instead of a list, specify results='pandas'
         """
         lastlog = len(self._io._log)
 
@@ -2275,7 +2275,7 @@ class SASsession():
         """
         This method returns a dictionary containing the file attributes for the file name provided
 
-        If you would like a Pandas dataframe returned instead of a dictionary, specify results='pandas'
+        If you would like a Pandas DataFrame returned instead of a dictionary, specify results='pandas'
         """
         lastlog = len(self._io._log)
 
@@ -2536,10 +2536,10 @@ class SASsession():
 
     def validvarname(self, df: 'pandas.DataFrame', version: str = "v7" )  -> 'pandas.DataFrame':
         """
-        Creates a copy of a Data Frame with SAS compatible column names. The version= parameter allows
+        Creates a copy of a DataFrame with SAS compatible column names. The version= parameter allows
         you to choose the compatability setting to use.
 
-        :param df:      a Pandas Data Frame whose column names you wish to make SAS compatible.
+        :param df:      a Pandas DataFrame whose column names you wish to make SAS compatible.
         :param version: select the validvarname version using SAS convention.
 
             - V7: ensures the following conditions are met:
