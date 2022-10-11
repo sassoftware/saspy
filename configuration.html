@@ -396,8 +396,8 @@ This method can make a local Windows connection and it is also the way to connec
 to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
 Server on any supported SAS platform from any client.</p>
 </dd>
-<dt><a class="reference internal" href="#http">HTTP</a></dt><dd><p>This access mehtod uses http[s] to connect to the Compute Service (a micro service) of a Viya
-instalation. This does not connet to SAS 9.4 via http. The Compute Service will start a
+<dt><a class="reference internal" href="#http">HTTP</a></dt><dd><p>This access method uses http[s] to connect to the Compute Service (a micro service) of a Viya
+installation. This does not connect to SAS 9.4 via http. The Compute Service will start a
 Compute Server using the SPRE image of MVA SAS that is installed in the Viya deployment.
 This is roughly equivalent to a Workspace server via IOM, but in Viya with no SAS 9.4.</p>
 </dd>
@@ -475,10 +475,10 @@ It is the directory that is the module, so the sascfg.py file is in that directo
 on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
 you’ve in your installation. If you used that file for your configuration, then you would need to keep
 a copy elsewhere and then replace the new one with your copy after upgrading or pulling, if yours was replaced.</p>
-<p>So, the sascfg.py file bacame the exampls file, and sascfg_personal.py is config file to edit and use.
+<p>So, the sascfg.py file became the example file, and sascfg_personal.py is config file to edit and use.
 This file doesn’t exist in the repo, so it will never be overwritten when you upgrade or pull.
 saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
-import sascfg.py (only for backwaed compatibility).</p>
+import sascfg.py (only for backward compatibility).</p>
 <p>So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
 file. Note that the sascfg.py file has examples of all of the various kinds of connections you could use. You don’t need
 all of that in your _personal version; only the parts you need for your situation. The next section
@@ -774,7 +774,7 @@ executed and has to be in the full command. But this allows the use of user/pw c
 </dd>
 <dt>sshpassparms -</dt><dd><p>This is a Python List containing the parms you want to use for sshpass. The three primary choices are to provide
 the password on the command line (it’s xxx’ed out when looking at the system processes), or from a file or from an
-environment variable. Check the man page on sshpass. ie: ‘sshpassparms’ : [‘-f’, ‘/file/with/pw/in/it’]</p>
+environment variable. Check the main page on sshpass. ie: ‘sshpassparms’ : [‘-f’, ‘/file/with/pw/in/it’]</p>
 </dd>
 </dl>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span>      <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span> <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
@@ -827,7 +827,7 @@ are exposed via the SASPy client.</p>
 <section id="attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file">
 <h3>ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!<a class="headerlink" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file" title="Permalink to this heading">¶</a></h3>
 <p>The 4 required IOM Java client jars are now included in the saspy repo, and they, along with the saspyiom.jar and the
-thirdparty CORBA jars will be automatically provided as the calsspath by saspy. This is generally all that is needed.
+thirdparty CORBA jars will be automatically provided as the classpath by saspy. This is generally all that is needed.
 If you require the 3 encryption jars, shown below, they still need to be acquired from your SAS deployment, and then
 put in the saspy/java/iomclient directory of the saspy install (where the 4 included jars are) so they will be included
 in the classpath for you.</p>
