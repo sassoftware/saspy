@@ -499,16 +499,20 @@ Will use HTML5 for this SASsession.""")
       rc  = 0
       ret = None
       if self.pid:
+         if os.name == 'nt':
+            pid = self.pid.pid
+         else:
+            pid = self.pid
+
          code = b";*\';*\";*/;\n;quit;endsas;\n"
          self._getlog(wait=1)
          if self.pid:
             out = self.stdin.write(code)
             self.stdin.flush()
-            #self._asubmit(code,'text')
          sleep(1)
+
          if self.pid:
             if os.name == 'nt':
-               pid = self.pid.pid
                try:
                   rc = self.pid.wait(5)
                except (subprocess.TimeoutExpired):
@@ -518,7 +522,6 @@ Will use HTML5 for this SASsession.""")
                self.to.join(5)
                self.te.join(5)
             else:
-               pid = self.pid
                x = 5
                while True:
                   rc = os.waitpid(self.pid, os.WNOHANG)

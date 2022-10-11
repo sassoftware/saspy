@@ -2129,7 +2129,7 @@ class SASsession():
         return librefs
 
 
-    def dirlist(self, path) -> dict:
+    def dirlist(self, path) -> list:
         """
         This method returns the directory list for the path specified where SAS is running
         """

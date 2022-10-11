@@ -564,6 +564,11 @@ Will use HTML5 for this SASsession.""")
    def _endsas(self):
       rc = 0
       if self.pid:
+         if os.name == 'nt':
+            pid = self.pid.pid
+         else:
+            pid = self.pid
+
          try: # More Mac OS Python issues that don't work like everywhere else
             self.stdin[0].send(b'\ntom says EOL=ENDSAS                          \n')
             if os.name == 'nt':
@@ -616,7 +621,7 @@ Will use HTML5 for this SASsession.""")
          self.sockerr.close()
 
          if self.sascfg.verbose:
-            logger.info("SAS Connection terminated. Subprocess id was "+str(self.pid if os.name != 'nt' else self.pid.pid))
+            logger.info("SAS Connection terminated. Subprocess id was "+str(pid))
          self.pid        = None
          self._sb.SASpid = None
       return
