@@ -27,8 +27,8 @@ The current set of connection methods are as follows:
   Server on any supported SAS platform from any client.
 
 `HTTP`_
-  This access mehtod uses http[s] to connect to the Compute Service (a micro service) of a Viya
-  instalation. This does not connet to SAS 9.4 via http. The Compute Service will start a
+  This access method uses http[s] to connect to the Compute Service (a micro service) of a Viya
+  installation. This does not connect to SAS 9.4 via http. The Compute Service will start a
   Compute Server using the SPRE image of MVA SAS that is installed in the Viya deployment.
   This is roughly equivalent to a Workspace server via IOM, but in Viya with no SAS 9.4.
 
@@ -110,10 +110,10 @@ on occasion and when you do an upgrade it will pull down the repo sascfg.py and 
 you've in your installation. If you used that file for your configuration, then you would need to keep
 a copy elsewhere and then replace the new one with your copy after upgrading or pulling, if yours was replaced.
 
-So, the sascfg.py file bacame the exampls file, and sascfg_personal.py is config file to edit and use.
+So, the sascfg.py file became the example file, and sascfg_personal.py is config file to edit and use.
 This file doesn't exist in the repo, so it will never be overwritten when you upgrade or pull.
 saspy will always try to import sascfg_personal.py first, and only if that fails will it try to
-import sascfg.py (only for backwaed compatibility).
+import sascfg.py (only for backward compatibility).
 
 So copy sascfg.py to sascfg_personal.py and put all of your specific configuration into the _personal
 file. Note that the sascfg.py file has examples of all of the various kinds of connections you could use. You don't need
@@ -468,7 +468,7 @@ sshpass -
 sshpassparms -
     This is a Python List containing the parms you want to use for sshpass. The three primary choices are to provide
     the password on the command line (it's xxx'ed out when looking at the system processes), or from a file or from an
-    environment variable. Check the man page on sshpass. ie: 'sshpassparms' : ['-f', '/file/with/pw/in/it']
+    environment variable. Check the main page on sshpass. ie: 'sshpassparms' : ['-f', '/file/with/pw/in/it']
 
 .. code-block:: ipython3
 
@@ -530,7 +530,7 @@ ATTN, as of saspy version 3.3.3, the classpath is no longer required in your con
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The 4 required IOM Java client jars are now included in the saspy repo, and they, along with the saspyiom.jar and the
-thirdparty CORBA jars will be automatically provided as the calsspath by saspy. This is generally all that is needed.
+thirdparty CORBA jars will be automatically provided as the classpath by saspy. This is generally all that is needed.
 If you require the 3 encryption jars, shown below, they still need to be acquired from your SAS deployment, and then
 put in the saspy/java/iomclient directory of the saspy install (where the 4 included jars are) so they will be included
 in the classpath for you.
