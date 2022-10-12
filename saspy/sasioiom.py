@@ -500,21 +500,21 @@ Will use HTML5 for this SASsession.""")
             pass
       else:
 
-         self.pid    = pidpty[0]
-         self.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
-         self.stderr = os.fdopen(perr[PIPE_READ], mode='rb')
-         self.stdout = os.fdopen(pout[PIPE_READ], mode='rb')
+         self.pid     = pidpty[0]
+         self.stdinp  = os.fdopen(pin[PIPE_WRITE], mode='wb')
+         self.stdoutp = os.fdopen(pout[PIPE_READ], mode='rb')
+         self.stderrp = os.fdopen(perr[PIPE_READ], mode='rb')
 
-         fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
-         fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
+         fcntl.fcntl(self.stdoutp, fcntl.F_SETFL, os.O_NONBLOCK)
+         fcntl.fcntl(self.stderrp, fcntl.F_SETFL, os.O_NONBLOCK)
 
          sleep(1)
          rc = os.waitpid(self.pid, os.WNOHANG)
          if rc[0] == 0:
             pass
          else:
-            error  = self.stderr.read1(4096).decode()+'\n'
-            error += self.stdout.read1(4096).decode()
+            error  = self.stderrp.read1(4096).decode()+'\n'
+            error += self.stdoutp.read1(4096).decode()
             logger.fatal("Java Error:\n"+error)
             msg  = "SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check your settings in sascfg_personal.py file.\n"
             msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
@@ -572,6 +572,11 @@ Will use HTML5 for this SASsession.""")
          try: # More Mac OS Python issues that don't work like everywhere else
             self.stdin[0].send(b'\ntom says EOL=ENDSAS                          \n')
             if os.name == 'nt':
+               self._javalog  = self.pid.stderr.read(4096).decode()+'\n'
+               self._javalog += self.pid.stdout.read(4096).decode()
+               self.pid.stdin.close()
+               self.pid.stdout.close()
+               self.pid.stderr.close()
                try:
                   rc = self.pid.wait(5)
                   self.pid = None
@@ -580,6 +585,11 @@ Will use HTML5 for this SASsession.""")
                      logger.info("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                   self.pid.kill()
             else:
+               self._javalog  = self.stderrp.read1(4096).decode()+'\n'
+               self._javalog += self.stdoutp.read1(4096).decode()
+               self.stdinp.close()
+               self.stdoutp.close()
+               self.stderrp.close()
                x = 5
                while True:
                   rc = os.waitpid(self.pid, os.WNOHANG)

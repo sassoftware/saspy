@@ -223,6 +223,7 @@ class SASconfigSTDIO:
                self.hostip = ip
             except:
                pass
+            x.stdout.close()
             x.terminate()
          except:
             pass
@@ -513,6 +514,9 @@ Will use HTML5 for this SASsession.""")
 
          if self.pid:
             if os.name == 'nt':
+               self.pid.stdin.close()
+               self.pid.stdout.close()
+               self.pid.stderr.close()
                try:
                   rc = self.pid.wait(5)
                except (subprocess.TimeoutExpired):
