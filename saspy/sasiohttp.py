@@ -1469,6 +1469,8 @@ class SASsessionHTTP():
                if var == 'nan' or len(var) == 0:
                   var = ' '+colsep
                else:
+                  if var.startswith(';;;;'):
+                     var = ' '+var
                   var = var.replace(colsep, colrep)
             elif dts[col] == 'B':
                var = str(int(row[col]))
