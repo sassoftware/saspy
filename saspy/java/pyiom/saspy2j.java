@@ -339,20 +339,16 @@ public class saspy2j
                      {
                      try
                         {
-                        try
-                           {
-                           lang.Submit(pgm.substring(0, idx));
-                           }
-                        catch (Exception e)
-                           {
-                           String msg = "We failed in Submit\n"+e.getMessage()+"END We failed in Submit\n";
-                           errp.write(msg);
-                           errp.flush();
-                           System.out.print(msg);
-                           e.printStackTrace();
-                           //throw new IOException();
-                           }
-                        pgm = pgm.substring(idx + 13 + 33);
+                        lang.Submit(pgm.substring(0, idx));
+                        }
+                     catch (org.omg.CORBA.DATA_CONVERSION e)
+                        {
+                        String msg = "We failed in Submit\n"+e.getMessage()+"END We failed in Submit\n";
+                        errp.write(msg);
+                        errp.flush();
+                        System.out.print(msg);
+                        e.printStackTrace();
+                        //throw new IOException();
                         }
                      catch (org.omg.CORBA.COMM_FAILURE e)
                         {
@@ -372,6 +368,7 @@ public class saspy2j
                            throw new IOException();
                            }
                         }
+                     pgm = pgm.substring(idx + 13 + 33);
                      }
                   else if (eol.contains("DISCONNECT"))
                      {
@@ -454,26 +451,24 @@ public class saspy2j
                   else
                      {
                      pgm = pgm.substring(0, idx);
-                     try{
-                        try
-                           {
-                           lang.Submit(pgm);
-                           }
-                        catch (Exception e)
-                           {
-                           String msg = "We failed in Submit\n"+e.getMessage();
-                           errp.write(msg);
-                           errp.flush();
-                           System.out.print(msg);
-                           e.printStackTrace();
-                           //throw new IOException();
-                           }
+                     try
+                        {
+                        lang.Submit(pgm);
                         if (undo)
                            lang.Submit("\nproc printto;run;\n%put "+eol.substring(1)+";\n");
                         else
                            lang.Submit("\n%put "+eol.substring(1)+";\n");
                         undo = false;
                         break;
+                        }
+                     catch (org.omg.CORBA.DATA_CONVERSION e)
+                        {
+                        String msg = "We failed in Submit\n"+e.getMessage();
+                        errp.write(msg);
+                        errp.flush();
+                        System.out.print(msg);
+                        e.printStackTrace();
+                        //throw new IOException();
                         }
                      catch(org.omg.CORBA.COMM_FAILURE e)
                         {
