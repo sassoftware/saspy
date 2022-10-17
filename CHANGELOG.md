@@ -26,7 +26,8 @@ similar concerns. No programming changes required.
 termination string which resulted in the data step, which was retrieving the data and writing it to the SAS
 data step, terminating prior to processing all of the data and then SAS would take the rest of the stream
 as SAS code, which fails miserably and consumes memory with all of the errors going to the log. It also
-terminates the connection to the client. This is addressed and fixes in this release, and requires no
+terminates the connection to the client. I've also added code in the java client to catch this kind of
+failure so it wouldn't hang, like it was. So this is addressed and fixed in this release, and requires no
 programming changes.
 
 
