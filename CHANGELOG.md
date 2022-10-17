@@ -2,6 +2,40 @@
 
 
 
+## [4.3.5] - 2022-10-17
+
+### Added
+
+-   `None` Nothing Added
+
+
+### Changed
+
+-   `Tweak` Had a PR with fixes to Doc; mostly typos and consistent use of terms. Also fixed a broken link.
+
+
+### Fixed
+
+-   `Fix` Fix for leaked resources. The pipes that are created between subprocess and Python were not being
+released prior to subtask termination. This results in a resource leak that is identified when running with
+settings that report these issues. I clean this up in both the IOM and STDIO access methods, they each had
+similar concerns. No programming changes required.
+
+
+-   `Fix` Fix for issue 487 where, in the df2sd() method, there was data that contained the data step
+termination string which resulted in the data step, which was retrieving the data and writing it to the SAS
+data step, terminating prior to processing all of the data and then SAS would take the rest of the stream
+as SAS code, which fails miserably and consumes memory with all of the errors going to the log. It also
+terminates the connection to the client. This is addressed and fixes in this release, and requires no
+programming changes.
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [4.3.4] - 2022-10-05
 
 ### Added
