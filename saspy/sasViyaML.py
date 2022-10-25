@@ -332,3 +332,190 @@ class SASViyaML:
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
         """
+
+
+    @procDecorator.proc_decorator({'input'})
+    def kclus(self, data: ('SASdata', str) = None,
+            code: str = None,
+            display: str = None,
+            displayout: str = None,
+            freq: str = None,
+            input: (str, list, dict) = None,
+            score: (str, bool, 'SASdata') = True,
+            procopts: (str, list, dict) = None,
+            stmtpassthrough: (str, list, dict) = None,
+            **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the KCLUS procedure.
+
+        Documentation link:
+
+        :param data: SASdata object or string. This parameter is required..
+        :parm code: The code variable can only be a string type.
+        :parm display: The display variable can only be a string type.
+        :parm displayout: The displayout variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm score: The score variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        """
+
+    @procDecorator.proc_decorator({'input', 'target'})
+    def bnet(self, data: ('SASdata', str) = None,
+        autotune: str = None,
+        code: str = None,
+        freq: str = None,
+        id: (str, list) = None,
+        input: (str, list, dict) = None,
+        output: (str, bool, 'SASdata') = None,
+        partition: str = None,
+        savestate: str = None,
+        target: (str, list, dict) = None,
+        procopts: (str, list, dict) = None,
+        stmtpassthrough: (str, list, dict) = None,
+        **kwargs: dict) -> 'SASresults':
+            
+        '''
+        Python method to call the BNET procedure.
+
+        Documentation link:
+
+        :param data: SASdata object or string. This parameter is required..
+        :parm autotune: The autotune variable can only be a string type.
+        :parm code: The code variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm id: The id variable can be a string or list type. 
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
+        :parm partition: The partition variable can only be a string type.
+        :parm savesstate: The savesstate variable can only be a string type.
+        :parm target: The target variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        '''
+        
+        
+ 
+        
+    @procDecorator.proc_decorator({'input'})
+    def gvarclus(self, data: ('SASdata', str) = None,
+        display: str = None,
+        displayout: str = None,
+        freq: str = None,
+        input: (str, list, dict) = None,
+        procopts: str = None,
+        stmtpassthrough: str = None,
+        **kwargs: dict) -> 'SASresults':
+        '''
+        Python method to call the GVARCLUS procedure.
+
+        Documentation link:
+
+        :param data: SASdata object or string. This parameter is required..
+        :parm display: The display variable can only be a string type.
+        :parm displayout: The displayout variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        '''
+        
+        
+    @procDecorator.proc_decorator({'input'})
+    def gmm(self, data: ('SASdata', str) = None,
+        display: str = None,
+        displayout: str = None,
+        input: (str, list, dict) = None,
+        savestate: str = None,
+        score: (str, bool, 'SASdata') = True,
+        procopts: str = None,
+        stmtpassthrough: str = None,
+        **kwargs: dict) -> 'SASresults':
+        '''
+        Python method to call the GMM procedure.
+
+        Documentation link:
+
+        :param data: SASdata object or string. This parameter is required..
+        :parm display: The display variable can only be a string type.
+        :parm displayout: The displayout variable can only be a string type.
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm savestate: The savestate variable can only be a string type.
+        :parm score: The score variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        '''
+   
+    @procDecorator.proc_decorator({'input'})
+    def rpca(self, data: ('SASdata', str) = None,
+        anomalydetection: str = None,
+        code: str = None,
+        display: str = None,
+        displayout: str = None,
+        id: (str, list) = None,
+        input: (str, list, dict) = None,
+        outdecomp: str = None,
+        savestate: str = None,
+        svd: str = None,
+        procopts: str = None,
+        stmtpassthrough: str = None,
+        **kwargs: dict) -> 'SASresults':
+        '''
+        Python method to call the RPCA procedure.
+
+        Documentation link:
+
+        :param data: SASdata object or string. This parameter is required..
+        :parm anomalydetection: The anomalydetection variable can only be a string type.
+        :parm code: The code variable can only be a string type.
+        :parm display: The display variable can only be a string type.
+        :parm displayout: The displayout variable can only be a string type.
+        :parm id: The id variable can be a string or list type. 
+        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
+        :parm outdecomp: The outdecomp variable can only be a string type.
+        :parm savestate: The savestate variable can only be a string type.
+        :parm svd: The svd variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        '''
+        
+    @procDecorator.proc_decorator({'model'})
+    def treesplit(self, data: ('SASdata', str) = None,
+        autotune: str = None,
+        cls: (str, list) = None,
+        code: str = None,
+        freq: str = None,
+        grow: str = None,
+        model: str = None,
+        outputprune: str = None,
+        partition: str = None,
+        procopts: str = None,
+        stmtpassthrough: str = None,    
+        **kwargs: dict) -> 'SASresults':
+        
+        '''
+        Python method to call the TREESPLIT procedure.
+
+        Documentation link:
+
+        :param data: SASdata object or string. This parameter is required..
+        :parm autotune: The autotune variable can only be a string type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm code: The code variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm grow: The grow variable can only be a string type.
+        :parm model: The model variable can only be a string type.
+        :parm outputprune: The outputprune variable can only be a string type.
+        :parm partition: The partition variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+            
+        '''
+  
