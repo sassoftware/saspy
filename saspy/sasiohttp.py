@@ -25,6 +25,7 @@ import io
 
 import tempfile as tf
 from time import sleep
+from threading import Thread
 
 from saspy.sasexceptions import (SASHTTPauthenticateError, SASHTTPconnectionError, SASHTTPsubmissionError)
 
@@ -48,6 +49,7 @@ class SASconfigHTTP:
       cfg            = getattr(SAScfg, self.name)
 
       self._token    = cfg.get('authtoken', None)
+      self._refresh  = cfg.get('refreshtoken', None)
       self.url       = cfg.get('url', '')
       self.serverid  = cfg.get('serverid', None)
       self.ip        = cfg.get('ip', '')
@@ -167,6 +169,10 @@ class SASconfigHTTP:
       inautht = kwargs.get('authtoken', None)
       if inautht is not None:
          self._token = inautht
+
+      inrefresh = kwargs.get('refreshtoken', None)
+      if inrefresh is not None:
+         self._refresh = inrefresh
 
       injwt = kwargs.get('jwt', None)
       if injwt is not None:
@@ -328,23 +334,30 @@ class SASconfigHTTP:
          if self.verify:
             # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifyable
             try:
+               self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout)
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout)
                if not self._token:
-                  self._token = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
+                  js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
             except ssl.SSLError as e:
                logger.warning("SSL certificate verification failed, creating an unverified SSL connection. Error was:"+str(e))
+               self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
                logger.warning("You can set 'verify=False' to get rid of this message ")
                if not self._token:
-                  self._token   = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
+                  js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
          else:
+            self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
             self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
             if not self._token:
-               self._token = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
+               js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
       else:
+         self.REFConn  = hc.HTTPConnection(self.ip, self.port, timeout=self.timeout)
          self.HTTPConn = hc.HTTPConnection(self.ip, self.port, timeout=self.timeout)
          if not self._token:
-            self._token   = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
+            js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
+
+      self._token   = js.get('access_token',  None)
+      self._refresh = js.get('refresh_token', None)
 
       if not self._token:
          logger.error("Could not acquire an Authentication Token")
@@ -447,11 +460,11 @@ class SASconfigHTTP:
                            "Content-Type":"application/x-www-form-urlencoded",
                            "Authorization":client}
       else:
+         #client_id     = "sas.tkmtrb"
          uuser          = urllib.parse.quote(user)
          upw            = urllib.parse.quote(pw)
          d1             = ("grant_type=password&username="+uuser+"&password="+upw).encode(self.encoding)
-         client         = "Basic "+base64.encodebytes("sas.tkmtrb:".encode(self.encoding)).splitlines()[0].decode(self.encoding)
-         #client        = "Basic "+base64.encodebytes((client_id+":").encode(self.encoding)).splitlines()[0].decode(self.encoding)
+         client         = "Basic "+base64.encodebytes((client_id+":").encode(self.encoding)).splitlines()[0].decode(self.encoding)
          headers        = {"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded",
                            "Authorization":client}
 
@@ -477,8 +490,7 @@ class SASconfigHTTP:
          #return None
 
       js = json.loads(resp.decode(self.encoding))
-      token = js.get('access_token')
-      return token
+      return js
 
    def _get_contexts(self):
       #import pdb; pdb.set_trace()
@@ -678,6 +690,10 @@ class SASsessionHTTP():
       if self.sascfg.verbose:
          logger.info("SAS server started using Context "+self.sascfg.ctxname+" with SESSION_ID="+self.pid)
 
+      self._refthd = Thread(target=self._refresh_thread, args=())
+      self._refthd.daemon = True
+      self._refthd.start()
+
       return self.pid
 
    def _endsas(self):
@@ -691,6 +707,8 @@ class SASsessionHTTP():
          resp = req.read()
          conn.close()
 
+         self._refthd.join(5)
+
          if self.sascfg.verbose:
             logger.info("SAS server terminated for SESSION_ID="+self._session.get('id'))
          self._session   = None
@@ -698,6 +716,41 @@ class SASsessionHTTP():
          self._sb.SASpid = None
       return rc
 
+   def _refresh_thread(self):
+      while True:
+         sleep(3000)
+         self._refresh_token()
+
+   def _refresh_token(self):
+      d1      = ("grant_type=refresh_token&refresh_token="+self.sascfg._refresh).encode(self.sascfg.encoding)
+      client  = "Basic "+base64.encodebytes(("SASPy:").encode(self.sascfg.encoding)).splitlines()[0].decode(self.sascfg.encoding)
+      headers = {"Content-Type":"application/x-www-form-urlencoded", "Authorization":client}
+
+      # POST AuthToken
+      conn = self.sascfg.REFConn; conn.connect()
+      try:
+         conn.request('POST', "/SASLogon/oauth/token", body=d1, headers=headers)
+         req = conn.getresponse()
+      except:
+         #print("Failure in REFRESH AuthToken. Could not connect to the logon service. Exception info:\n"+str(sys.exc_info()))
+         msg="Failure in REFRESH AuthToken. Could not connect to the logon service. Exception info:\n"+str(sys.exc_info())
+         raise SASHTTPauthenticateError(msg)
+         #return None
+
+      status = req.status
+      resp   = req.read()
+      conn.close()
+
+      if status > 299:
+         #print("Failure in REFRESH AuthToken. Status="+str(status)+"\nResponse="+resp.decode(self.sascfg.encoding))
+         msg="Failure in REFRESH AuthToken. Status="+str(status)+"\nResponse="+str(resp)
+         raise SASHTTPauthenticateError(msg)
+         #return None
+
+      js                   = json.loads(resp.decode(self.sascfg.encoding))
+      self.sascfg._token   = js.get('access_token')
+      self.sascfg._refresh = js.get('refresh_token')
+      return
 
    def _getlog(self, jobid=None):
       start = 0
