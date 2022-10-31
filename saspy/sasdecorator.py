@@ -64,22 +64,22 @@ class procDecorator:
             if i.lower() in ['target', 'input']:
                 doc_mstr = ''.join([':parm ', i,
                                     ': The {} variable can be a string, list or dict type. It refers to the dependent, y, or label variable.'.format(i)])
-                doc_str = ': [str, list, dict] = None,'
+                doc_str = ': (str, list, dict) = None,'
             if i.lower() == 'score':
-                doc_str = ": [str, bool, 'SASdata' ] = True,"
+                doc_str = ": (str, bool, 'SASdata') = True,"
             if i.lower() in ['output', 'out']:
-                doc_str = ": [str, bool, 'SASdata' ] = None,"
+                doc_str = ": (str, bool, 'SASdata') = None,"
                 doc_mstr = ''.join([':parm ', i,
                                     ': The {} variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".'.format(i)])
             if i.lower() in ['cls']:
                 doc_mstr = ''.join([':parm ', i,
                                     ': The {} variable can be a string or list type. It refers to the categorical, or nominal variables.'.format(i)])
-                doc_str = ': [str, list] = None,'
+                doc_str = ': (str, list) = None,'
             if i.lower() in ['id', 'by']:
                 doc_mstr = ''.join([':parm ', i, ': The {} variable can be a string or list type. '.format(i)])
-                doc_str = ': [str, list] = None,'
+                doc_str = ': (str, list) = None,'
             if i.lower() in ['level', 'irregular', 'slope', 'estimate']:
-                doc_str = ": [str, bool] = True,"
+                doc_str = ": (str, bool) = True,"
 
             doc_list.append(''.join([i, doc_str, '\n']))
             doc_markup.append(''.join([doc_mstr, '\n']))
@@ -93,9 +93,9 @@ class procDecorator:
             doc_markup.append(''.join([doc_mstr, '\n']))
 
         doc_markup.insert(0, ''.join([':param data: SASdata object or string. This parameter is required..', '\n']))
-        first_line = ''.join(["data: ['SASdata', str] = None,", '\n'])
+        first_line = ''.join(["data: ('SASdata', str) = None,", '\n'])
         if len(proc) > 0:
-            first_line = ''.join(["def {}(self, data: ['SASdata', str] = None,".format(proc), '\n'])
+            first_line = ''.join(["def {}(self, data: ('SASdata', str) = None,".format(proc), '\n'])
             doc_markup.insert(0, ''.join(['Python method to call the {} procedure.\n'.format(proc.upper()),
                                           '\n', 'Documentation link:', '\n\n']))
         doc_list.insert(0, first_line)
