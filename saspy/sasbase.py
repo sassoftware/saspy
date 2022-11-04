@@ -712,6 +712,12 @@ class SASsession():
         if self._io:
            return self._io._endsas()
 
+    def _refresh_token(self):
+       if self.sascfg.mode == 'HTTP':
+          return self._io._refresh_token()
+       else:
+          print("This method is only valid in the HTTP Access Method")
+
     def _getlog(self, **kwargs):
         return self._io._getlog(**kwargs)
 
