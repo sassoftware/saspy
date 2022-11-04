@@ -504,6 +504,44 @@ The connection can be to a local SAS installation or a remote IOM Workspace serv
 on any supported platform.
 
 
+Authentication:
+~~~~~~~~~~~~~~~
+
+The IOM protocol (SAS 9's client/server interface protocol) supports different forms of authentication. This Access Method
+supports connecting to a Workspace Server on any host, as well as connecting to a Local SAS install of PC SAS
+on that same PC. There are 3 authentication mechanisms that are supported, for various configurations, and one
+mechanism which is not supported, as it requires a connection to the metadata server to acquire a Token for
+authenticating. user/pw and IWA are for Remote connections, while a Local Windows connection does authenticating
+based upon the user you're logged into the PC as. SAS Token authentication is not supported.
+
+Which authentication mechanism you use depends upon how the Workspace server was configured by your SAS admins.
+
+1) user/pw
+
+   this is for providing your metadata credentials as user and password. SASPy has a number of ways for you to provide
+   these. See below for more information on that.
+
+2) IWA (Integrated Windows Authentication)
+
+   This configuration allows a client on Windows (doesn't work with a Linux client) to be authenticated to a Workspace
+   server (the server can be on any host for this) based upon who you are logged into your PC as. No credentials
+   or other configuration is needed. It's like single signon. It does require access to the sspiauth.dll by havnig the
+   directory where that files lives, in the System PATH so that it can be found. See below for more info on that; namely the
+   sspi key in the configuration definition.
+
+3) Local Windows
+
+   Connecting to a Local SAS deployment (not a metadata server) from SASPy on the same PC also requires authentication, but
+   like IWA, it does this for you based upon the user you're logged in as. It does require access to the sspiauth.dll by having
+   the directory where that files lives, in the PATH so that it can be found. You don't need the sspi key, as this is the only
+   authentication mechanism, so it happens by default.
+
+3) SAS Token
+
+   SASPy does not connect to a Metadata server, so this form of authentication is not supported.
+
+
+
 ATTN, log4j vulnerabilities found in Dec 2021
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
