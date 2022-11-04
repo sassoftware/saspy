@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; saspy 4.3.4 documentation</title>
+  <title>Index &mdash; saspy 4.3.5 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -29,7 +29,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                4.3.4
+                4.3.5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -48,6 +48,7 @@
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#stdio">STDIO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#ssh">SSH</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#iom">IOM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="configuration.html#authentication">Authentication:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#attn-log4j-vulnerabilities-found-in-dec-2021">ATTN, log4j vulnerabilities found in Dec 2021</a></li>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file">ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!</a></li>
 <li class="toctree-l3"><a class="reference internal" href="configuration.html#the-authinfo-file-authinfo-on-windows">The .authinfo file (_authinfo on Windows)</a></li>
@@ -263,13 +264,19 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="api.html#sas-viya-vdmml">SAS Viya VDMML</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML"><code class="docutils literal notranslate"><span class="pre">SASViyaML</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.bnet"><code class="docutils literal notranslate"><span class="pre">SASViyaML.bnet()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.factmac"><code class="docutils literal notranslate"><span class="pre">SASViyaML.factmac()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.fastknn"><code class="docutils literal notranslate"><span class="pre">SASViyaML.fastknn()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.forest"><code class="docutils literal notranslate"><span class="pre">SASViyaML.forest()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.gmm"><code class="docutils literal notranslate"><span class="pre">SASViyaML.gmm()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.gradboost"><code class="docutils literal notranslate"><span class="pre">SASViyaML.gradboost()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.gvarclus"><code class="docutils literal notranslate"><span class="pre">SASViyaML.gvarclus()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.kclus"><code class="docutils literal notranslate"><span class="pre">SASViyaML.kclus()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.nnet"><code class="docutils literal notranslate"><span class="pre">SASViyaML.nnet()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.rpca"><code class="docutils literal notranslate"><span class="pre">SASViyaML.rpca()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.svdd"><code class="docutils literal notranslate"><span class="pre">SASViyaML.svdd()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.svmachine"><code class="docutils literal notranslate"><span class="pre">SASViyaML.svmachine()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.treesplit"><code class="docutils literal notranslate"><span class="pre">SASViyaML.treesplit()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -384,6 +391,7 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -424,6 +432,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#saspy.sasdata.SASdata.bar">bar() (saspy.sasdata.SASdata method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#saspy.sasViyaML.SASViyaML.bnet">bnet() (saspy.sasViyaML.SASViyaML method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -515,9 +527,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#saspy.sasstat.SASstat.glm">glm() (saspy.sasstat.SASstat method)</a>
 </li>
+      <li><a href="api.html#saspy.sasViyaML.SASViyaML.gmm">gmm() (saspy.sasViyaML.SASViyaML method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#saspy.sasViyaML.SASViyaML.gradboost">gradboost() (saspy.sasViyaML.SASViyaML method)</a>
+</li>
+      <li><a href="api.html#saspy.sasViyaML.SASViyaML.gvarclus">gvarclus() (saspy.sasViyaML.SASViyaML method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -566,6 +582,14 @@
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#saspy.sasdata.SASdata.info">info() (saspy.sasdata.SASdata method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#saspy.sasViyaML.SASViyaML.kclus">kclus() (saspy.sasViyaML.SASViyaML method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -642,11 +666,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#saspy.SASsession.read_csv">read_csv() (saspy.SASsession method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#saspy.sasstat.SASstat.reg">reg() (saspy.sasstat.SASstat method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#saspy.sasdata.SASdata.rename">rename() (saspy.sasdata.SASdata method)</a>
+</li>
+      <li><a href="api.html#saspy.sasViyaML.SASViyaML.rpca">rpca() (saspy.sasViyaML.SASViyaML method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -779,10 +805,10 @@
 </li>
       <li><a href="api.html#saspy.sasdata.SASdata.to_df">to_df() (saspy.sasdata.SASdata method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#saspy.sasdata.SASdata.to_df_CSV">to_df_CSV() (saspy.sasdata.SASdata method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#saspy.sasdata.SASdata.to_df_DISK">to_df_DISK() (saspy.sasdata.SASdata method)</a>
 </li>
       <li><a href="api.html#saspy.sasdata.SASdata.to_frame">to_frame() (saspy.sasdata.SASdata method)</a>
@@ -794,6 +820,8 @@
       <li><a href="api.html#saspy.sasstat.SASstat.tpspline">tpspline() (saspy.sasstat.SASstat method)</a>
 </li>
       <li><a href="api.html#saspy.sasml.SASml.treeboost">treeboost() (saspy.sasml.SASml method)</a>
+</li>
+      <li><a href="api.html#saspy.sasViyaML.SASViyaML.treesplit">treesplit() (saspy.sasViyaML.SASViyaML method)</a>
 </li>
       <li><a href="api.html#saspy.sasstat.SASstat.ttest">ttest() (saspy.sasstat.SASstat method)</a>
 </li>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 4.3.4 documentation</title>
+  <title>Configuration &mdash; saspy 4.3.5 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                4.3.4
+                4.3.5
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -51,6 +51,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#stdio">STDIO</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ssh">SSH</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#iom">IOM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#authentication">Authentication:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#attn-log4j-vulnerabilities-found-in-dec-2021">ATTN, log4j vulnerabilities found in Dec 2021</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file">ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-authinfo-file-authinfo-on-windows">The .authinfo file (_authinfo on Windows)</a></li>
@@ -266,13 +267,19 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="api.html#sas-viya-vdmml">SAS Viya VDMML</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML"><code class="docutils literal notranslate"><span class="pre">SASViyaML</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.bnet"><code class="docutils literal notranslate"><span class="pre">SASViyaML.bnet()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.factmac"><code class="docutils literal notranslate"><span class="pre">SASViyaML.factmac()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.fastknn"><code class="docutils literal notranslate"><span class="pre">SASViyaML.fastknn()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.forest"><code class="docutils literal notranslate"><span class="pre">SASViyaML.forest()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.gmm"><code class="docutils literal notranslate"><span class="pre">SASViyaML.gmm()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.gradboost"><code class="docutils literal notranslate"><span class="pre">SASViyaML.gradboost()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.gvarclus"><code class="docutils literal notranslate"><span class="pre">SASViyaML.gvarclus()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.kclus"><code class="docutils literal notranslate"><span class="pre">SASViyaML.kclus()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.nnet"><code class="docutils literal notranslate"><span class="pre">SASViyaML.nnet()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.rpca"><code class="docutils literal notranslate"><span class="pre">SASViyaML.rpca()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.svdd"><code class="docutils literal notranslate"><span class="pre">SASViyaML.svdd()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.svmachine"><code class="docutils literal notranslate"><span class="pre">SASViyaML.svmachine()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasViyaML.SASViyaML.treesplit"><code class="docutils literal notranslate"><span class="pre">SASViyaML.treesplit()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -806,6 +813,40 @@ and integrates all the monitoring and administration that SAS Grid Manager provi
 <p>The IOM connection method also enables you to connect to SAS from Windows (STDIO was Linux only).
 The connection can be to a local SAS installation or a remote IOM Workspace server running
 on any supported platform.</p>
+<section id="authentication">
+<h3>Authentication:<a class="headerlink" href="#authentication" title="Permalink to this heading">¶</a></h3>
+<p>The IOM protocol (SAS 9’s client/server interface protocol) supports different forms of authentication. This Access Method
+supports connecting to a Workspace Server on any host, as well as connecting to a Local SAS install of PC SAS
+on that same PC. There are 3 authentication mechanisms that are supported, for various configurations, and one
+mechanism which is not supported, as it requires a connection to the metadata server to acquire a Token for
+authenticating. user/pw and IWA are for Remote connections, while a Local Windows connection does authenticating
+based upon the user you’re logged into the PC as. SAS Token authentication is not supported.</p>
+<p>Which authentication mechanism you use depends upon how the Workspace server was configured by your SAS admins.</p>
+<ol class="arabic">
+<li><p>user/pw</p>
+<p>this is for providing your metadata credentials as user and password. SASPy has a number of ways for you to provide
+these. See below for more information on that.</p>
+</li>
+<li><p>IWA (Integrated Windows Authentication)</p>
+<p>This configuration allows a client on Windows (doesn’t work with a Linux client) to be authenticated to a Workspace
+server (the server can be on any host for this) based upon who you are logged into your PC as. No credentials
+or other configuration is needed. It’s like single signon. It does require access to the sspiauth.dll by havnig the
+directory where that files lives, in the System PATH so that it can be found. See below for more info on that; namely the
+sspi key in the configuration definition.</p>
+</li>
+<li><p>Local Windows</p>
+<p>Connecting to a Local SAS deployment (not a metadata server) from SASPy on the same PC also requires authentication, but
+like IWA, it does this for you based upon the user you’re logged in as. It does require access to the sspiauth.dll by having
+the directory where that files lives, in the PATH so that it can be found. You don’t need the sspi key, as this is the only
+authentication mechanism, so it happens by default.</p>
+</li>
+</ol>
+<ol class="arabic" start="3">
+<li><p>SAS Token</p>
+<p>SASPy does not connect to a Metadata server, so this form of authentication is not supported.</p>
+</li>
+</ol>
+</section>
 <section id="attn-log4j-vulnerabilities-found-in-dec-2021">
 <h3>ATTN, log4j vulnerabilities found in Dec 2021<a class="headerlink" href="#attn-log4j-vulnerabilities-found-in-dec-2021" title="Permalink to this heading">¶</a></h3>
 <p>Update to this for SASPy V4.0.0:
