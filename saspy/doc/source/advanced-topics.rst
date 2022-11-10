@@ -209,7 +209,7 @@ the macro variable name, and providing the python variable continaing the value.
     sas.symput(sas_macro_var, py_var)
 
 For a much better set of examples and use cases with these two methods, check out the notebook in saspy-examples:
-https://github.com/sassoftware/saspy-examples/blob/master/SAS_contrib/Using_SYMGET_and_SYMPUT.ipynb
+https://github.com/sassoftware/saspy-examples/blob/main/SAS_contrib/Using_SYMGET_and_SYMPUT.ipynb
 
 
 
@@ -653,7 +653,7 @@ df2sd(..., datetimes={'d' : 'date', 't' : 'time'})
     >>>
 
 For more examples of this date, time, datetime conversion, see the example notebook here:
-https://github.com/sassoftware/saspy-examples/blob/master/Issue_examples/Issue279.ipynb
+https://github.com/sassoftware/saspy-examples/blob/main/Issue_examples/Issue279.ipynb
 
 
 
