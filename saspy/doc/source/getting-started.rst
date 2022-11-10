@@ -35,7 +35,7 @@ The saspy_example_github.ipynb notebook is a perfect one to look though first,
 as it walks you through the various capabilities of saspy. You can even download it, and
 then upload it into your Jupyter and run it. It uses SASHELP tables, so it should run
 on your system already. You can edit it and play around with it directly on your system.
-The direct link to it is: https://github.com/sassoftware/saspy-examples/blob/master/SAS_contrib/saspy_example_github.ipynb
+The direct link to it is: https://github.com/sassoftware/saspy-examples/blob/main/SAS_contrib/saspy_example_github.ipynb
  
 
 Initial import

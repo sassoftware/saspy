@@ -47,12 +47,12 @@ Also, example Notebooks and use cases can be found at
 [sassoftware/saspy-examples](https://github.com/sassoftware/saspy-examples/).   
 
 # Contributing
-The [Contributing](https://github.com/sassoftware/saspy/blob/master/CONTRIBUTING.md) file explains the rules and conventions to follow while
+The [Contributing](https://github.com/sassoftware/saspy/blob/main/CONTRIBUTING.md) file explains the rules and conventions to follow while
 Contributing to this project. It also contains the **Contributor Agreement** instructions.
 
 # Licensing 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of
-the License at [LICENSE.txt](https://github.com/sassoftware/saspy/blob/master/LICENSE) 
+the License at [LICENSE.txt](https://github.com/sassoftware/saspy/blob/main/LICENSE.md) 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
 OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
