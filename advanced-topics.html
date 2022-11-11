@@ -296,13 +296,14 @@
 <li class="toctree-l2"><a class="reference internal" href="#using-batch-mode">Using Batch mode</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#prompting">Prompting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#moving-values-between-python-variables-and-sas-macro-variables">Moving values between Python Variables and SAS Macro Variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#moving-data-between-python-and-sas-datatype-conversion">Moving data between Python and SAS - datatype conversion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dates-times-and-datetimes-oh-my">Dates, Times and Datetimes, Oh my!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#advanced-sd2df-and-df2sd-techniques">Advanced sd2df and df2sd techniques</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#slow-performance-loading-a-dataframe-into-a-sas-data-set-df2sd">Slow performance loading a DataFrame into a SAS data set; df2sd()</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#disconnecting-from-an-iom-session-and-reconnecting-back-to-it">Disconnecting from an IOM session and reconnecting back to it.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">Configuring Grid Option Sets to have saspy run on a specific Queue.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dates-times-and-datetimes-oh-my">Dates, Times and Datetimes, Oh my!</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#advanced-sd2df-and-df2sd-techniques">Advanced sd2df and df2sd techniques</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#automatic-checking-for-error-in-the-log-and-the-warnings-module">Automatic checking for ERROR: in the LOG and the warnings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#saspy-logger-from-logging-logger-as-of-v3-7-5">saspy.logger from logging.logger as of V3.7.5</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sassession-object-as-a-context-manager-as-of-v3-7-5">SASsession object as a context manager as of V3.7.5</a></li>
@@ -552,9 +553,244 @@ the macro variable name, and providing the python variable continaing the value.
 <p>For a much better set of examples and use cases with these two methods, check out the notebook in saspy-examples:
 <a class="reference external" href="https://github.com/sassoftware/saspy-examples/blob/main/SAS_contrib/Using_SYMGET_and_SYMPUT.ipynb">https://github.com/sassoftware/saspy-examples/blob/main/SAS_contrib/Using_SYMGET_and_SYMPUT.ipynb</a></p>
 </section>
+<section id="moving-data-between-python-and-sas-datatype-conversion">
+<h2>Moving data between Python and SAS - datatype conversion<a class="headerlink" href="#moving-data-between-python-and-sas-datatype-conversion" title="Permalink to this heading">¶</a></h2>
+<p>SASPy has methods to load data from a SAS Data Set (or View) into Python as a Pandas dataframe, as well
+as the reverse; loading a dataframe into a SAS Data Set. This is all documented in the API doc and some
+of the sections below. This section is to document how the data type conversion is done. It’s pretty
+straight forward, but not specifically doc’ed in an easy to find place; so here it is.</p>
+<p>SAS has only 2 data types; fixed width character and floating point double. So, any data type in a Pandas
+dataframe will be converted to one of those two when loading it into a SAS Data Set. When loading a dataframe
+from SAS, character columns will be appropriately transcoded and loaded as strings (Object in Pandas).
+Doubles will be loaded as float.</p>
+<p>Date, time, timestamp (datetime) are the other types that are converted, though they aren’t actual
+datatypes in SAS, and Pandas only has datetime64, so moving between those is handled, and there’s more
+details about how to control this is the sections below.</p>
+<p>Also, regardless of the type, SAS missing values will be NaN or NaT in the dataframe, and NaN/NaT will
+become missing values in SAS.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sasdata2dataframe()
+
+SAS      -&gt;     Pandas
+
+double          float
+character       str
+
+double with the following type of SAS format
+
+datetime        datetime64
+date            datetime64
+time            datetime64
+</pre></div>
+</div>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dataframe2sasdata()
+
+Pandas   -&gt;     SAS
+
+numeric         double
+datetime64      double with datetime format (or date/time if you override)
+str(*)          character  (any other type in Pandas)
+</pre></div>
+</div>
+</section>
+<section id="dates-times-and-datetimes-oh-my">
+<h2>Dates, Times and Datetimes, Oh my!<a class="headerlink" href="#dates-times-and-datetimes-oh-my" title="Permalink to this heading">¶</a></h2>
+<p>The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most
+cases, if you start with a SAS dataset and import it to a dataframe, then send it back to SAS,
+you should end up with the same data in SAS as you started with. However, there are some caveats.
+First, SAS Formats do not transfer to a dataframe, so on the round trip the new SAS dataset will
+not necessarily have the same formats defined on it as the original data set. Starting in saspy
+version3.2.0, there is an option on df2sd to specify the formats you want defined on the new data
+set; outfmts={}. The keys for this are the column names and the values are the SAS formats you
+want defined.</p>
+<p>For example:
+df2sd(…, outfmts={‘col1’ : ‘YYMMDD.’, ‘col2’ : ‘TIMEAMPM.’, ‘some_numeric_col’ : ‘comma32.4’})</p>
+<p>To see the formats that are defined on the original data set, use the contents() or columnInfo()
+method on that SASdata object.</p>
+<p>One other issue is with SAS variables having Date and Time formats, which are logically data types
+of Date or Time. SAS only really has Numeric and Character data types, but the date, time, and
+datetime formats on Numeric variables identify them as representing date, time, or datetime data
+types. Pandas dataframe, has a datetime datatype, but not a date or a time datatype. When using
+sd2df, any SAS variable with date, time or datetime formats will be created in the dataframe as a
+datetime64[ns]. It is easy enough in python to reference only the date part, or time part of a
+pandas datetime column. In fact the column can be converted to datetime.date or datetime.time
+with one python statement. For instance, given datetime columns, the following can convert to
+the datetime date or time:</p>
+<p>Given df_conv.dtypes:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dt</span>     <span class="n">datetime64</span><span class="p">[</span><span class="n">ns</span><span class="p">]</span>
+<span class="n">tm</span>     <span class="n">datetime64</span><span class="p">[</span><span class="n">ns</span><span class="p">]</span>
+
+
+<span class="n">convert</span> <span class="n">datetime</span> <span class="n">columns</span> <span class="n">to</span> <span class="n">date</span> <span class="ow">or</span> <span class="n">time</span> <span class="n">only</span> <span class="nb">type</span> <span class="p">(</span><span class="n">honoring</span> <span class="n">missing</span> <span class="n">values</span><span class="p">)</span>
+
+<span class="n">nat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">nat</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;tm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;tm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">nat</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+
+<span class="n">convert</span> <span class="n">these</span> <span class="n">back</span> <span class="n">to</span> <span class="n">datetimes</span>
+
+<span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">),</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+<span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;tm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;tm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">),</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>When using df2sd to transfer a dataframe to a SAS data set, with values you want to be stored as SAS
+dates, times or datetimes, the following is the appropriate way to do so. In each case, the value
+in the dataframe must be a Pandas datetime64 value. For datetimes this just works. For date or
+time only values, specify the (new in V3.2.0) option datetimes={} on df2sd. The datetimes={} takes
+keys of the column names and values of ‘date’ or ‘time’. The code generated to create the SAS data
+set will then only use the date or time portion of the Pandas datetime64 value to populate the SAS
+variables, and assign default date or time formats for those variables. You can, of course, specify
+specific date or time formats using the outfmts={} option if you want.</p>
+<p>For example:
+df2sd(…, datetimes={‘d’ : ‘date’, ‘t’ : ‘time’})</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">rows</span> <span class="o">=</span> <span class="p">[[</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1965</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1965</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1965</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">,</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="s1">&#39;t&#39;</span><span class="p">])</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span>
+               <span class="n">dt</span>                   <span class="n">d</span>                   <span class="n">t</span>
+<span class="mi">0</span> <span class="mi">1965</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span> <span class="mi">1965</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span> <span class="mi">1965</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">datetimes</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;d&#39;</span> <span class="p">:</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span> <span class="p">:</span> <span class="s1">&#39;time&#39;</span><span class="p">},</span> <span class="n">results</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+
+
+                                                           <span class="n">The</span> <span class="n">SAS</span> <span class="n">System</span>                         <span class="mi">11</span><span class="p">:</span><span class="mi">31</span> <span class="n">Friday</span><span class="p">,</span> <span class="n">January</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">2020</span>   <span class="mi">2</span>
+
+                                    <span class="n">Obs</span>    <span class="n">dt</span>                                <span class="n">d</span>            <span class="n">t</span>
+
+                                     <span class="mi">1</span>     <span class="mi">1965</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span><span class="n">T08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">01.000000</span>    <span class="mi">1965</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span>    <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># For &#39;dt&#39; column, we still import it as a datetime, but specifying a numeric format will display it as a number (seconds since Jan 1,  1960)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="c1"># and I&#39;ve chosen different date and time formats for the other two variables too</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">datetimes</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;d&#39;</span> <span class="p">:</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span> <span class="p">:</span> <span class="s1">&#39;time&#39;</span><span class="p">},</span> <span class="n">outfmts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;dt&#39;</span> <span class="p">:</span> <span class="s1">&#39;comma32.4&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span> <span class="p">:</span> <span class="s1">&#39;YYMMDD.&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span> <span class="p">:</span> <span class="s1">&#39;TIMEAMPM.&#39;</span><span class="p">},</span> <span class="n">results</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+                                                           <span class="n">The</span> <span class="n">SAS</span> <span class="n">System</span>                         <span class="mi">09</span><span class="p">:</span><span class="mi">59</span> <span class="n">Friday</span><span class="p">,</span> <span class="n">January</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">2020</span>   <span class="mi">1</span>
+
+                                 <span class="n">Obs</span>                                  <span class="n">dt</span>           <span class="n">d</span>             <span class="n">t</span>
+
+                                  <span class="mi">1</span>                     <span class="mi">157</span><span class="p">,</span><span class="mi">881</span><span class="p">,</span><span class="mf">601.0000</span>    <span class="mi">65</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span>    <span class="mi">8</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span> <span class="n">AM</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p>For more examples of this date, time, datetime conversion, see the example notebook here:
+<a class="reference external" href="https://github.com/sassoftware/saspy-examples/blob/main/Issue_examples/Issue279.ipynb">https://github.com/sassoftware/saspy-examples/blob/main/Issue_examples/Issue279.ipynb</a></p>
+</section>
+<section id="advanced-sd2df-and-df2sd-techniques">
+<h2>Advanced sd2df and df2sd techniques<a class="headerlink" href="#advanced-sd2df-and-df2sd-techniques" title="Permalink to this heading">¶</a></h2>
+<p>The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most cases,
+you don’t need to specify extra options. But, there are extra options to cover a variety of specific
+use cases. The section above describes using the datetime= and outfmts= with df2sd, and this section will
+show how to manipulate sd2df if you want your dataframe to have non-default dtypes. Based upon an issue
+request to allow the dataframe created by sd2df to have differnent types than what are created by default,
+there are a couple options which can be used to accomplish this.</p>
+<p>Both the CSV and DISK methods of sd2df use Pandas read_csv method to create the dataframe from a file
+containing the SAS data. The read_csv method has many options. By default the sd2df CSV and DISK methods
+supply some of these parameters to control how the dataframe is created. There are two things in particular
+that must correlate to get the correct results in the dataframe. They are the format of the data values,
+for a given column, and the dtype specified for the creation of the column. The format of the data is
+controlled by the SAS format being used to write the data values. The dtype is controlled by the dtype=
+parameter on read_csv. By default saspy controls both of these, matching them up to create the valid
+dataframe columns.</p>
+<p>The sd2df* methods take a kwargs parameter. This can be used to pass through pandas parameters to the
+create dataframe method. dtype= is one of these that you can pass through. If you pass this through,
+then sd2df will not set the dtypes itself for any column. It will pass your dtype= value to read_csv. Now,
+if the format of the data values doesn’t match what Pandas can parse into the dtypes you specify, then
+it won’t work correctly. But, as of saspy version 3.2.0, there is an option (my_fmts=) to override
+saspy’s choice of formats for writing the data values and use the formats defined on the data set, or
+specified by you via the dsopts= parameter (or attribute of a SASdata object); my_fmts = [<strong>False</strong> | True].
+In this way, you can control both the format of the data values and the dtypes you want Pandas to create
+from them.</p>
+<p>Let’s loot at an example. One request was to have all of the data in the dataframe be string types.
+This can be done quite easily with just the dtype= parameter.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># lets get two numerics from the cars dataset. FYI, they have formats defined as DOLLAR8.</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sd2df_DISK</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">,</span>      <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">})</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
+<span class="n">MSRP</span>       <span class="nb">object</span>
+<span class="n">Invoice</span>    <span class="nb">object</span>
+<span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+    <span class="n">MSRP</span> <span class="n">Invoice</span>
+<span class="mi">0</span>  <span class="mi">36945</span>   <span class="mi">33337</span>
+<span class="mi">1</span>  <span class="mi">23820</span>   <span class="mi">21761</span>
+<span class="mi">2</span>  <span class="mi">26990</span>   <span class="mi">24647</span>
+<span class="mi">3</span>  <span class="mi">33195</span>   <span class="mi">30299</span>
+<span class="mi">4</span>  <span class="mi">43755</span>   <span class="mi">39014</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p>Now, since we’re creating these as stings, we probably want the SAS formatted version of the strings;
+same as we would see in the SAS output of the data. So, we set my_fmts=True.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sd2df_DISK</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">my_fmts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>     <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">})</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
+<span class="n">MSRP</span>       <span class="nb">object</span>
+<span class="n">Invoice</span>    <span class="nb">object</span>
+<span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+      <span class="n">MSRP</span>  <span class="n">Invoice</span>
+<span class="mi">0</span>  <span class="err">$</span><span class="mi">36</span><span class="p">,</span><span class="mi">945</span>  <span class="err">$</span><span class="mi">33</span><span class="p">,</span><span class="mi">337</span>
+<span class="mi">1</span>  <span class="err">$</span><span class="mi">23</span><span class="p">,</span><span class="mi">820</span>  <span class="err">$</span><span class="mi">21</span><span class="p">,</span><span class="mi">761</span>
+<span class="mi">2</span>  <span class="err">$</span><span class="mi">26</span><span class="p">,</span><span class="mi">990</span>  <span class="err">$</span><span class="mi">24</span><span class="p">,</span><span class="mi">647</span>
+<span class="mi">3</span>  <span class="err">$</span><span class="mi">33</span><span class="p">,</span><span class="mi">195</span>  <span class="err">$</span><span class="mi">30</span><span class="p">,</span><span class="mi">299</span>
+<span class="mi">4</span>  <span class="err">$</span><span class="mi">43</span><span class="p">,</span><span class="mi">755</span>  <span class="err">$</span><span class="mi">39</span><span class="p">,</span><span class="mi">014</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p>And, if you wanted to specify your own SAS format to use for this, overriding the ones defined on
+the dataset, you can specify it on the dsopts=.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sd2df_DISK</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">my_fmts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;msrp&#39;</span><span class="p">:</span><span class="s1">&#39;dollar32.2&#39;</span><span class="p">}})</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
+<span class="n">MSRP</span>       <span class="nb">object</span>
+<span class="n">Invoice</span>    <span class="nb">object</span>
+<span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+         <span class="n">MSRP</span>  <span class="n">Invoice</span>
+<span class="mi">0</span>  <span class="err">$</span><span class="mi">36</span><span class="p">,</span><span class="mf">945.00</span>  <span class="err">$</span><span class="mi">33</span><span class="p">,</span><span class="mi">337</span>
+<span class="mi">1</span>  <span class="err">$</span><span class="mi">23</span><span class="p">,</span><span class="mf">820.00</span>  <span class="err">$</span><span class="mi">21</span><span class="p">,</span><span class="mi">761</span>
+<span class="mi">2</span>  <span class="err">$</span><span class="mi">26</span><span class="p">,</span><span class="mf">990.00</span>  <span class="err">$</span><span class="mi">24</span><span class="p">,</span><span class="mi">647</span>
+<span class="mi">3</span>  <span class="err">$</span><span class="mi">33</span><span class="p">,</span><span class="mf">195.00</span>  <span class="err">$</span><span class="mi">30</span><span class="p">,</span><span class="mi">299</span>
+<span class="mi">4</span>  <span class="err">$</span><span class="mi">43</span><span class="p">,</span><span class="mf">755.00</span>  <span class="err">$</span><span class="mi">39</span><span class="p">,</span><span class="mi">014</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p>The dtype= parameter can also be a dictionary for each column and type. See the Pandas doc for more
+on that. So, you can control the format and type of each column yourself, but it is then up to you
+to be sure the values can be parsed by Pandas to the types you specify. When using these options,
+sd2df will not override anything you’ve provided, so you control it all.</p>
+<p>One last example where You only want to override one column and have the other defaulted.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sd2df_DISK</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;invoice&#39;</span> <span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">},</span> <span class="n">my_fmts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                     <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;msrp&#39;</span><span class="p">:</span><span class="s1">&#39;dollar32.2&#39;</span><span class="p">,</span><span class="s1">&#39;invoice&#39;</span><span class="p">:</span><span class="s1">&#39;best32.&#39;</span><span class="p">}})</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
+<span class="n">MSRP</span>       <span class="nb">object</span>
+<span class="n">Invoice</span>     <span class="n">int64</span>
+<span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+         <span class="n">MSRP</span>  <span class="n">Invoice</span>
+<span class="mi">0</span>  <span class="err">$</span><span class="mi">36</span><span class="p">,</span><span class="mf">945.00</span>    <span class="mi">33337</span>
+<span class="mi">1</span>  <span class="err">$</span><span class="mi">23</span><span class="p">,</span><span class="mf">820.00</span>    <span class="mi">21761</span>
+<span class="mi">2</span>  <span class="err">$</span><span class="mi">26</span><span class="p">,</span><span class="mf">990.00</span>    <span class="mi">24647</span>
+<span class="mi">3</span>  <span class="err">$</span><span class="mi">33</span><span class="p">,</span><span class="mf">195.00</span>    <span class="mi">30299</span>
+<span class="mi">4</span>  <span class="err">$</span><span class="mi">43</span><span class="p">,</span><span class="mf">755.00</span>    <span class="mi">39014</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p>Remember, if you want to send data like this back to a SAS data set and you want the original types,
+you need to have any numerics as a numeric type, dates, times or datetimes as a datetime64 type. You can
+use the datetimes= to create date or time SAS variables from a full datetime, and anything that is
+an Object type, will be a character variable in SAS, with the str() of the object as the value.</p>
+<p>There’s more interesting reading about this on the issue that started it. Take a look at
+<a class="reference external" href="https://github.com/sassoftware/saspy/issues/279">https://github.com/sassoftware/saspy/issues/279</a> to see where this fuctionality came from.</p>
+</section>
 <section id="slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">
 <h2>Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )<a class="headerlink" href="#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df" title="Permalink to this heading">¶</a></h2>
-<p>UPDATE!!! As of Version 3.7.0, the MEMORY (default) version of sasdata2dataframe now outperforms all of the various methods.
+<p>UPDATE!!!</p>
+<p>As of Version 3.7.0, the MEMORY (default) version of sasdata2dataframe now outperforms all of the various methods.
 So, effectively, the CSV and DISK versions are no longer needed (though, of course they are still there; can’t break your code).
 But, MEMORY and DISK are now actually one in the same. They do not use disk space on the client side, rather stream the data
 directly into pandas read_csv() method. Therfore, ‘tempfile’ and ‘tempkeep’ no longer have meaning and are ignored. But, you
@@ -563,8 +799,8 @@ For the CSV version, the same is true that the CSV file being streamed over from
 so no file is created on the client side; except for the Local IOM case. In this one case, it’s still faster to have the csv file SAS
 wrote out locally directly read by pandas. And that one case may be slightly faster then MEM or DISK, but not by much if so. Performance
 result vary, so it depends. But, in general, you can simple use sd2df() in all cases and have good performance instead of needing the
-CSV and DISK versions. So now you can ignore the rest of this section :)
-ENDUPDATE!!!</p>
+CSV and DISK versions. So now you can ignore the rest of this section :)</p>
+<p>ENDUPDATE!!!</p>
 <p>Transferring data from SAS into Python (and the reverse) has been in this module from the beginning. As usage of this has grown,
 larger sized data sets have been shown to be much slower to load and consume lots of memory. After investigations, this has to do with
 trying to build out the dataframes ‘in memory’. This works fine up to a point, but the memory consumption and CPU usage doesn’t scale.</p>
@@ -841,201 +1077,6 @@ Then add a Keyword-&gt; ‘isGridCapable’ and save it. Just like the picture i
 <p>After creating the SASPy folder (application), and setting it to grid capable, when you go back
 in to the grid options mapping wizard (the first part of the document referenced above), SASPy
 should now be available to choose and you can set this up as you want.</p>
-</section>
-<section id="dates-times-and-datetimes-oh-my">
-<h2>Dates, Times and Datetimes, Oh my!<a class="headerlink" href="#dates-times-and-datetimes-oh-my" title="Permalink to this heading">¶</a></h2>
-<p>The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most
-cases, if you start with a SAS dataset and import it to a dataframe, then send it back to SAS,
-you should end up with the same data in SAS as you started with. However, there are some caveats.
-First, SAS Formats do not transfer to a dataframe, so on the round trip the new SAS dataset will
-not necessarily have the same formats defined on it as the original data set. Starting in saspy
-version3.2.0, there is an option on df2sd to specify the formats you want defined on the new data
-set; outfmts={}. The keys for this are the column names and the values are the SAS formats you
-want defined.</p>
-<p>For example:
-df2sd(…, outfmts={‘col1’ : ‘YYMMDD.’, ‘col2’ : ‘TIMEAMPM.’, ‘some_numeric_col’ : ‘comma32.4’})</p>
-<p>To see the formats that are defined on the original data set, use the contents() or columnInfo()
-method on that SASdata object.</p>
-<p>One other issue is with SAS variables having Date and Time formats, which are logically data types
-of Date or Time. SAS only really has Numeric and Character data types, but the date, time, and
-datetime formats on Numeric variables identify them as representing date, time, or datetime data
-types. Pandas dataframe, has a datetime datatype, but not a date or a time datatype. When using
-sd2df, any SAS variable with date, time or datetime formats will be created in the dataframe as a
-datetime64[ns]. It is easy enough in python to reference only the date part, or time part of a
-pandas datetime column. In fact the column can be converted to datetime.date or datetime.time
-with one python statement. For instance, given datetime columns, the following can convert to
-the datetime date or time:</p>
-<p>Given df_conv.dtypes:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dt</span>     <span class="n">datetime64</span><span class="p">[</span><span class="n">ns</span><span class="p">]</span>
-<span class="n">tm</span>     <span class="n">datetime64</span><span class="p">[</span><span class="n">ns</span><span class="p">]</span>
-
-
-<span class="n">convert</span> <span class="n">datetime</span> <span class="n">columns</span> <span class="n">to</span> <span class="n">date</span> <span class="ow">or</span> <span class="n">time</span> <span class="n">only</span> <span class="nb">type</span> <span class="p">(</span><span class="n">honoring</span> <span class="n">missing</span> <span class="n">values</span><span class="p">)</span>
-
-<span class="n">nat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
-<span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">nat</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-<span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;tm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;tm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">nat</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="o">.</span><span class="n">time</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-
-
-<span class="n">convert</span> <span class="n">these</span> <span class="n">back</span> <span class="n">to</span> <span class="n">datetimes</span>
-
-<span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">),</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
-<span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;tm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_conv</span><span class="p">[</span><span class="s1">&#39;tm&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">),</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;coerce&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>When using df2sd to transfer a dataframe to a SAS data set, with values you want to be stored as SAS
-dates, times or datetimes, the following is the appropriate way to do so. In each case, the value
-in the dataframe must be a Pandas datetime64 value. For datetimes this just works. For date or
-time only values, specify the (new in V3.2.0) option datetimes={} on df2sd. The datetimes={} takes
-keys of the column names and values of ‘date’ or ‘time’. The code generated to create the SAS data
-set will then only use the date or time portion of the Pandas datetime64 value to populate the SAS
-variables, and assign default date or time formats for those variables. You can, of course, specify
-specific date or time formats using the outfmts={} option if you want.</p>
-<p>For example:
-df2sd(…, datetimes={‘d’ : ‘date’, ‘t’ : ‘time’})</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">rows</span> <span class="o">=</span> <span class="p">[[</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1965</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1965</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1965</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]]</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_records</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">,</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="s1">&#39;t&#39;</span><span class="p">])</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span>
-               <span class="n">dt</span>                   <span class="n">d</span>                   <span class="n">t</span>
-<span class="mi">0</span> <span class="mi">1965</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span> <span class="mi">1965</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span> <span class="mi">1965</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span> <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span>
-
-<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">datetimes</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;d&#39;</span> <span class="p">:</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span> <span class="p">:</span> <span class="s1">&#39;time&#39;</span><span class="p">},</span> <span class="n">results</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-
-
-                                                           <span class="n">The</span> <span class="n">SAS</span> <span class="n">System</span>                         <span class="mi">11</span><span class="p">:</span><span class="mi">31</span> <span class="n">Friday</span><span class="p">,</span> <span class="n">January</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">2020</span>   <span class="mi">2</span>
-
-                                    <span class="n">Obs</span>    <span class="n">dt</span>                                <span class="n">d</span>            <span class="n">t</span>
-
-                                     <span class="mi">1</span>     <span class="mi">1965</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span><span class="n">T08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mf">01.000000</span>    <span class="mi">1965</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span>    <span class="mi">08</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span>
-<span class="o">&gt;&gt;&gt;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="c1"># For &#39;dt&#39; column, we still import it as a datetime, but specifying a numeric format will display it as a number (seconds since Jan 1,  1960)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="c1"># and I&#39;ve chosen different date and time formats for the other two variables too</span>
-<span class="o">&gt;&gt;&gt;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">df2sd</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">datetimes</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;d&#39;</span> <span class="p">:</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span> <span class="p">:</span> <span class="s1">&#39;time&#39;</span><span class="p">},</span> <span class="n">outfmts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;dt&#39;</span> <span class="p">:</span> <span class="s1">&#39;comma32.4&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span> <span class="p">:</span> <span class="s1">&#39;YYMMDD.&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span> <span class="p">:</span> <span class="s1">&#39;TIMEAMPM.&#39;</span><span class="p">},</span> <span class="n">results</span><span class="o">=</span><span class="s1">&#39;text&#39;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">sd</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-                                                           <span class="n">The</span> <span class="n">SAS</span> <span class="n">System</span>                         <span class="mi">09</span><span class="p">:</span><span class="mi">59</span> <span class="n">Friday</span><span class="p">,</span> <span class="n">January</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">2020</span>   <span class="mi">1</span>
-
-                                 <span class="n">Obs</span>                                  <span class="n">dt</span>           <span class="n">d</span>             <span class="n">t</span>
-
-                                  <span class="mi">1</span>                     <span class="mi">157</span><span class="p">,</span><span class="mi">881</span><span class="p">,</span><span class="mf">601.0000</span>    <span class="mi">65</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">01</span>    <span class="mi">8</span><span class="p">:</span><span class="mi">00</span><span class="p">:</span><span class="mi">01</span> <span class="n">AM</span>
-<span class="o">&gt;&gt;&gt;</span>
-</pre></div>
-</div>
-<p>For more examples of this date, time, datetime conversion, see the example notebook here:
-<a class="reference external" href="https://github.com/sassoftware/saspy-examples/blob/main/Issue_examples/Issue279.ipynb">https://github.com/sassoftware/saspy-examples/blob/main/Issue_examples/Issue279.ipynb</a></p>
-</section>
-<section id="advanced-sd2df-and-df2sd-techniques">
-<h2>Advanced sd2df and df2sd techniques<a class="headerlink" href="#advanced-sd2df-and-df2sd-techniques" title="Permalink to this heading">¶</a></h2>
-<p>The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most cases,
-you don’t need to specify extra options. But, there are extra options to cover a variety of specific
-use cases. The section above describes using the datetime= and outfmts= with df2sd, and this section will
-show how to manipulate sd2df if you want your dataframe to have non-default dtypes. Based upon an issue
-request to allow the dataframe created by sd2df to have differnent types than what are created by default,
-there are a couple options which can be used to accomplish this.</p>
-<p>Both the CSV and DISK methods of sd2df use Pandas read_csv method to create the dataframe from a file
-containing the SAS data. The read_csv method has many options. By default the sd2df CSV and DISK methods
-supply some of these parameters to control how the dataframe is created. There are two things in particular
-that must correlate to get the correct results in the dataframe. They are the format of the data values,
-for a given column, and the dtype specified for the creation of the column. The format of the data is
-controlled by the SAS format being used to write the data values. The dtype is controlled by the dtype=
-parameter on read_csv. By default saspy controls both of these, matching them up to create the valid
-dataframe columns.</p>
-<p>The sd2df* methods take a kwargs parameter. This can be used to pass through pandas parameters to the
-create dataframe method. dtype= is one of these that you can pass through. If you pass this through,
-then sd2df will not set the dtypes itself for any column. It will pass your dtype= value to read_csv. Now,
-if the format of the data values doesn’t match what Pandas can parse into the dtypes you specify, then
-it won’t work correctly. But, as of saspy version 3.2.0, there is an option (my_fmts=) to override
-saspy’s choice of formats for writing the data values and use the formats defined on the data set, or
-specified by you via the dsopts= parameter (or attribute of a SASdata object); my_fmts = [<strong>False</strong> | True].
-In this way, you can control both the format of the data values and the dtypes you want Pandas to create
-from them.</p>
-<p>Let’s loot at an example. One request was to have all of the data in the dataframe be string types.
-This can be done quite easily with just the dtype= parameter.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># lets get two numerics from the cars dataset. FYI, they have formats defined as DOLLAR8.</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sd2df_DISK</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">,</span>      <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">})</span>
-
-<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
-<span class="n">MSRP</span>       <span class="nb">object</span>
-<span class="n">Invoice</span>    <span class="nb">object</span>
-<span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
-<span class="o">&gt;&gt;&gt;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-    <span class="n">MSRP</span> <span class="n">Invoice</span>
-<span class="mi">0</span>  <span class="mi">36945</span>   <span class="mi">33337</span>
-<span class="mi">1</span>  <span class="mi">23820</span>   <span class="mi">21761</span>
-<span class="mi">2</span>  <span class="mi">26990</span>   <span class="mi">24647</span>
-<span class="mi">3</span>  <span class="mi">33195</span>   <span class="mi">30299</span>
-<span class="mi">4</span>  <span class="mi">43755</span>   <span class="mi">39014</span>
-<span class="o">&gt;&gt;&gt;</span>
-</pre></div>
-</div>
-<p>Now, since we’re creating these as stings, we probably want the SAS formatted version of the strings;
-same as we would see in the SAS output of the data. So, we set my_fmts=True.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sd2df_DISK</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">my_fmts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>     <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">})</span>
-
-<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
-<span class="n">MSRP</span>       <span class="nb">object</span>
-<span class="n">Invoice</span>    <span class="nb">object</span>
-<span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
-<span class="o">&gt;&gt;&gt;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-      <span class="n">MSRP</span>  <span class="n">Invoice</span>
-<span class="mi">0</span>  <span class="err">$</span><span class="mi">36</span><span class="p">,</span><span class="mi">945</span>  <span class="err">$</span><span class="mi">33</span><span class="p">,</span><span class="mi">337</span>
-<span class="mi">1</span>  <span class="err">$</span><span class="mi">23</span><span class="p">,</span><span class="mi">820</span>  <span class="err">$</span><span class="mi">21</span><span class="p">,</span><span class="mi">761</span>
-<span class="mi">2</span>  <span class="err">$</span><span class="mi">26</span><span class="p">,</span><span class="mi">990</span>  <span class="err">$</span><span class="mi">24</span><span class="p">,</span><span class="mi">647</span>
-<span class="mi">3</span>  <span class="err">$</span><span class="mi">33</span><span class="p">,</span><span class="mi">195</span>  <span class="err">$</span><span class="mi">30</span><span class="p">,</span><span class="mi">299</span>
-<span class="mi">4</span>  <span class="err">$</span><span class="mi">43</span><span class="p">,</span><span class="mi">755</span>  <span class="err">$</span><span class="mi">39</span><span class="p">,</span><span class="mi">014</span>
-<span class="o">&gt;&gt;&gt;</span>
-</pre></div>
-</div>
-<p>And, if you wanted to specify your own SAS format to use for this, overriding the ones defined on
-the dataset, you can specify it on the dsopts=.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sd2df_DISK</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">my_fmts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                     <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;msrp&#39;</span><span class="p">:</span><span class="s1">&#39;dollar32.2&#39;</span><span class="p">}})</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
-<span class="n">MSRP</span>       <span class="nb">object</span>
-<span class="n">Invoice</span>    <span class="nb">object</span>
-<span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
-<span class="o">&gt;&gt;&gt;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-         <span class="n">MSRP</span>  <span class="n">Invoice</span>
-<span class="mi">0</span>  <span class="err">$</span><span class="mi">36</span><span class="p">,</span><span class="mf">945.00</span>  <span class="err">$</span><span class="mi">33</span><span class="p">,</span><span class="mi">337</span>
-<span class="mi">1</span>  <span class="err">$</span><span class="mi">23</span><span class="p">,</span><span class="mf">820.00</span>  <span class="err">$</span><span class="mi">21</span><span class="p">,</span><span class="mi">761</span>
-<span class="mi">2</span>  <span class="err">$</span><span class="mi">26</span><span class="p">,</span><span class="mf">990.00</span>  <span class="err">$</span><span class="mi">24</span><span class="p">,</span><span class="mi">647</span>
-<span class="mi">3</span>  <span class="err">$</span><span class="mi">33</span><span class="p">,</span><span class="mf">195.00</span>  <span class="err">$</span><span class="mi">30</span><span class="p">,</span><span class="mi">299</span>
-<span class="mi">4</span>  <span class="err">$</span><span class="mi">43</span><span class="p">,</span><span class="mf">755.00</span>  <span class="err">$</span><span class="mi">39</span><span class="p">,</span><span class="mi">014</span>
-<span class="o">&gt;&gt;&gt;</span>
-</pre></div>
-</div>
-<p>The dtype= parameter can also be a dictionary for each column and type. See the Pandas doc for more
-on that. So, you can control the format and type of each column yourself, but it is then up to you
-to be sure the values can be parsed by Pandas to the types you specify. When using these options,
-sd2df will not override anything you’ve provided, so you control it all.</p>
-<p>One last example where You only want to override one column and have the other defaulted.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sd2df_DISK</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="s1">&#39;sashelp&#39;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;invoice&#39;</span> <span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">},</span> <span class="n">my_fmts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                     <span class="n">dsopts</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;keep&#39;</span> <span class="p">:</span> <span class="s1">&#39;MSRP Invoice&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;msrp&#39;</span><span class="p">:</span><span class="s1">&#39;dollar32.2&#39;</span><span class="p">,</span><span class="s1">&#39;invoice&#39;</span><span class="p">:</span><span class="s1">&#39;best32.&#39;</span><span class="p">}})</span>
-
-<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">dtypes</span>
-<span class="n">MSRP</span>       <span class="nb">object</span>
-<span class="n">Invoice</span>     <span class="n">int64</span>
-<span class="n">dtype</span><span class="p">:</span> <span class="nb">object</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-         <span class="n">MSRP</span>  <span class="n">Invoice</span>
-<span class="mi">0</span>  <span class="err">$</span><span class="mi">36</span><span class="p">,</span><span class="mf">945.00</span>    <span class="mi">33337</span>
-<span class="mi">1</span>  <span class="err">$</span><span class="mi">23</span><span class="p">,</span><span class="mf">820.00</span>    <span class="mi">21761</span>
-<span class="mi">2</span>  <span class="err">$</span><span class="mi">26</span><span class="p">,</span><span class="mf">990.00</span>    <span class="mi">24647</span>
-<span class="mi">3</span>  <span class="err">$</span><span class="mi">33</span><span class="p">,</span><span class="mf">195.00</span>    <span class="mi">30299</span>
-<span class="mi">4</span>  <span class="err">$</span><span class="mi">43</span><span class="p">,</span><span class="mf">755.00</span>    <span class="mi">39014</span>
-<span class="o">&gt;&gt;&gt;</span>
-</pre></div>
-</div>
-<p>Remember, if you want to send data like this back to a SAS data set and you want the original types,
-you need to have any numerics as a numeric type, dates, times or datetimes as a datetime64 type. You can
-use the datetimes= to create date or time SAS variables from a full datetime, and anything that is
-an Object type, will be a character variable in SAS, with the str() of the object as the value.</p>
-<p>There’s more interesting reading about this on the issue that started it. Take a look at
-<a class="reference external" href="https://github.com/sassoftware/saspy/issues/279">https://github.com/sassoftware/saspy/issues/279</a> to see where this fuctionality came from.</p>
 </section>
 <section id="automatic-checking-for-error-in-the-log-and-the-warnings-module">
 <h2>Automatic checking for ERROR: in the LOG and the warnings module<a class="headerlink" href="#automatic-checking-for-error-in-the-log-and-the-warnings-module" title="Permalink to this heading">¶</a></h2>
