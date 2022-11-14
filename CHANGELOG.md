@@ -24,7 +24,7 @@ identifying which methods are supported and the one method that is not supported
 for the branch they linked to.
 
 -   `Enhanced` The HTTP access method, to Viya, requires a valid authentication token be passes to every request.
-This token is acquired at SASsession() time. This token had been se to expire after 10 hours. Viya has been changed
+This token is acquired when calling SASsession(). This token had been set to expire after 10 hours. Viya has been changed
 to have these tokens expire after 1 hour, so to keep this from causing problems for SASPy sessions, which can be
 interactive and last much longer than one hour, I've added support to reauthenticate and get a new authtoken prior
 to the current one expiring. This happens as long as the SASsession object is valid and connected. There are no coding
