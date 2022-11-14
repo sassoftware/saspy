@@ -2,6 +2,48 @@
 
 
 
+## [4.3.6] - 2022-11-14
+
+### Added
+
+-   `Enhanced` @rayewright added a half dozen more ML procs to the sasViyaML package for Viya.
+
+
+### Changed
+
+-   `Enhanced` Added documentation specifically identifying datatype conversions between SAS data Sets
+and Pandas dataframes; both directions. This was added in the AdvancedTopics section of the doc and the other
+couple parts of that section also about data movement were moved to all be contiguous and thus make all more
+clear. No code changes, just documentation.
+
+-   `Enhanced` Added documentation for the IOM access method regarding authentication. The Configurations
+section already specifies how to authenticate with different means, but now there's a part of the doc explicitly
+identifying which methods are supported and the one method that is not supported; SAS Token Authentication.
+
+-   `Enhanced` @andyjessen cleaned up some links in the doc that were still referring to master instead of main
+for the branch they linked to.
+
+-   `Enhanced` The HTTP access method, to Viya, requires a valid authentication token be passes to every request.
+This token is acquired at SASsession() time. This token had been se to expire after 10 hours. Viya has been changed
+to have these tokens expire after 1 hour, so to keep this from causing problems for SASPy sessions, which can be
+interactive and last much longer than one hour, I've added support to reauthenticate and get a new authtoken prior
+to the current one expiring. This happens as long as the SASsession object is valid and connected. There are no coding
+changes required in user code. This should all just happen under the covers with no requirements on the user or program.
+I did add a method for explicitly refreshing the authtoken, but that should not be required at any time. But, it may
+be of use as a diagnostic in the field if there are ever issues reauthenticating. So, again, no code changes required.
+
+
+### Fixed
+
+-   `None` Nothing fixed
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [4.3.5] - 2022-10-17
 
 ### Added
