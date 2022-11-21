@@ -61,3 +61,6 @@ OR CONDITIONS OF ANY KIND, either express or implied. See the License for the sp
 - [Python Website](http://www.python.org/)
 - [SASPy Documentation](https://sassoftware.github.io/saspy/).
 - [SASPy Examples](https://github.com/sassoftware/saspy-examples)
+
+
+[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/6716/badge)](https://bestpractices.coreinfrastructure.org/projects/6716)
