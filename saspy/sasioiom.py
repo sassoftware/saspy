@@ -321,15 +321,15 @@ class SASsessionIOM():
       port = 0
       try:
          self.sockin  = socks.socket()
-         self.sockin.bind(("",port))
+         self.sockin.bind(("127.0.0.1",port))
          #self.sockin.bind(("",32701))
 
          self.sockout = socks.socket()
-         self.sockout.bind(("",port))
+         self.sockout.bind(("127.0.0.1",port))
          #self.sockout.bind(("",32702))
 
          self.sockerr = socks.socket()
-         self.sockerr.bind(("",port))
+         self.sockerr.bind(("127.0.0.1",port))
          #self.sockerr.bind(("",32703))
       except OSError:
          logger.fatal('Error try to open a socket in the _startsas method. Call failed.')
