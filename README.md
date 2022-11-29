@@ -1,5 +1,7 @@
 ![224493-SASPy-logo-OL-01](https://user-images.githubusercontent.com/17710182/171252212-4af121a6-72d9-4234-b6cf-2a0d31eb8bf7.png)
 
+[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/6716/badge)](https://bestpractices.coreinfrastructure.org/projects/6716)
+
 # Overview
 This package provides interfaces between Python and SAS. This package enables a Python developer to create mixed Python/SAS workflows to leverage the
 powers of both SAS and Python, by connecting a Python process to any of a variety of SAS deployments, where it will run SAS code. The SAS code is
@@ -61,6 +63,3 @@ OR CONDITIONS OF ANY KIND, either express or implied. See the License for the sp
 - [Python Website](http://www.python.org/)
 - [SASPy Documentation](https://sassoftware.github.io/saspy/).
 - [SASPy Examples](https://github.com/sassoftware/saspy-examples)
-
-
-[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/6716/badge)](https://bestpractices.coreinfrastructure.org/projects/6716)
