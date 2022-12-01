@@ -2,6 +2,38 @@
 
 
 
+## [4.4.1] - 2022-12-01
+
+### Added
+
+-   `Enhanced` I added a number of security type enhancements to the repo; none of which has to do with
+how the code works, and requires no code changes. This was all based upon OpenSSF best practices for
+Cybersecurity regarding open source repos. You can see the new badge on the home page: in the README.
+
+
+### Changed
+
+-   `None` Nothing changed
+
+
+### Fixed
+
+-   `Fix` I made a fix to the IOM access method based upon a vulnerability scan from the newly added SAST
+tool that was part of the Security based enhancements added to the repo. This requires no code changes.
+
+
+-   `Fix` I made a fix for the SAS_kernel, which depends upon SASPY to do the work interacting with SAS.
+There was a breaking change in the Kernel interface regarding prompting. I fixed it so it still works
+with previous versions (of course; no breaking changes for my customers!), as well as with the new api.
+This fix addresses SAS_kernel issue https://github.com/sassoftware/sas_kernel/issues/83
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [4.4.0] - 2022-11-14
 
 ### Added
