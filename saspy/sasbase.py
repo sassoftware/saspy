@@ -376,7 +376,9 @@ class SASconfig(object):
                        return None
            else:
                try:
-                   return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header,
+                   return self._kernel._input_request(prompt, self._kernel._parent_ident, self._kernel._parent_header, password=pw)
+               except Exception:
+                   return self._kernel._input_request(prompt, self._kernel._parent_ident["shell"], self._kernel.get_parent("shell"),
                                                       password=pw)
                except KeyboardInterrupt:
                    return None
