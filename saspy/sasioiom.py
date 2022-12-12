@@ -1478,12 +1478,12 @@ Will use HTML5 for this SASsession.""")
       fd.close()
 
       logf = logf.decode(errors='replace')
-      self._log += ll['LOG'] + logf
+      self._log += logf
       final = logf.partition(logcodei)
       z = final[0].rpartition(chr(10))
       prev = '%08d' %  (self._log_cnt - 1)
       zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
-      logd = zz[2].replace(";*\';*\";*/;", '')
+      logd = ll['LOG'] + zz[2].replace(";*\';*\";*/;", '')
 
       ll = self.submit("filename _sp_updn;", 'text')
       logd += ll['LOG']
