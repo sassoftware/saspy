@@ -1241,7 +1241,8 @@ class SASsession():
         This method uploads a local file to the SAS servers file system.
 
         :param localfile: path to the local file
-        :param remotefile: path to remote file to create or overwrite
+        :param remotefile: path to remote file to create or overwrite. If a directory, the file will be
+         created in that directory and be named the same as the local file's name
         :param overwrite: overwrite the output file if it exists?
         :param permission: permissions to set on the new file. See SAS Filename Statement Doc for syntax
         :return: dict with 2 keys {'Success' : bool, 'LOG' : str}
@@ -1260,7 +1261,8 @@ class SASsession():
         """
         This method downloads a remote file from the SAS servers file system.
 
-        :param localfile: path to the local file to create or overwrite
+        :param localfile: path to the local file to create or overwrite. If a directory, the file will be
+         created in that directory and be named the same as the remote file's name
         :param remotefile: path to remote file
         :param overwrite: overwrite the output file if it exists?
         :return: dict with 2 keys {'Success' : bool, 'LOG' : str}
