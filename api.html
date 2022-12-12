@@ -775,7 +775,8 @@ See the Advanced topics section of the doc for details</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>localfile</strong> – path to the local file to create or overwrite</p></li>
+<li><p><strong>localfile</strong> – path to the local file to create or overwrite. If a directory, the file will be
+created in that directory and be named the same as the remote file’s name</p></li>
 <li><p><strong>remotefile</strong> – path to remote file</p></li>
 <li><p><strong>overwrite</strong> – overwrite the output file if it exists?</p></li>
 </ul>
@@ -1481,7 +1482,8 @@ as either HTML or TEXT, depending upon results. The method= parameter allows you
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>localfile</strong> – path to the local file</p></li>
-<li><p><strong>remotefile</strong> – path to remote file to create or overwrite</p></li>
+<li><p><strong>remotefile</strong> – path to remote file to create or overwrite. If a directory, the file will be
+created in that directory and be named the same as the local file’s name</p></li>
 <li><p><strong>overwrite</strong> – overwrite the output file if it exists?</p></li>
 <li><p><strong>permission</strong> – permissions to set on the new file. See SAS Filename Statement Doc for syntax</p></li>
 </ul>
