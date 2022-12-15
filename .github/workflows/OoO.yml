@@ -1,4 +1,0 @@
-name: Comment on new issue
-  uses: jd-solanki/gh-action-comment-on-new-issue@v2.0.3
-  with:
-    message: I'm Out of Office until Jan 2nd 2023. I'll try to check isues and help out as I can though. Tom
