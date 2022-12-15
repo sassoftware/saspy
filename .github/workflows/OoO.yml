@@ -1,4 +1,4 @@
-- name: Comment on new issue
+name: Comment on new issue
   # You may pin to the exact commit or the version.
   # uses: jd-solanki/gh-action-comment-on-new-issue@c443e1151cc69b146fd6918cc983ec1bd27ab254
   uses: jd-solanki/gh-action-comment-on-new-issue@v2.0.3
