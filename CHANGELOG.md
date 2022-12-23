@@ -2,6 +2,32 @@
 
 
 
+## [4.4.3] - 2022-12-23
+
+### Added
+
+-   `None` Nothing added
+
+
+### Changed
+
+-   `None` Nothing changed
+
+
+### Fixed
+
+-   `Fix` The changes for the last release caused one issue w/ unverifiable certificates, where the error isn't
+thrown when the connection is created, needed to add a connect() call at that time to catch the error; that was happening
+before, in a call I moved till later, which is why the error wasn't being caught on the creation where I was checking for it.
+Again, no coding chages for anyone, just made it throw the error where I was checjing for it.
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [4.4.2] - 2022-12-23
 
 ### Added
