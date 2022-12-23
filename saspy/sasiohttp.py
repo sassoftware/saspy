@@ -332,10 +332,10 @@ class SASconfigHTTP:
       # get Connections
       if self.ssl:
          if self.verify:
-            # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifyable
+            # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifiable
             try:
-               self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout)
-               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout)
+               self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout); self.REFConn.connect();  self.REFConn.close()
+               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout); self.HTTPConn.connect(); self.HTTPConn.close()
             except ssl.SSLError as e:
                logger.warning("SSL certificate verification failed, creating an unverified SSL connection. Error was:"+str(e))
                self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
