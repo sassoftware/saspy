@@ -2,6 +2,36 @@
 
 
 
+## [4.4.2] - 2022-12-23
+
+### Added
+
+-   `None` Nothing added
+
+
+### Changed
+
+-   `None` Nothing changed
+
+
+### Fixed
+
+-   `Fix` I caused a regression with Viya 3.5 from having to rework authentication due to chages in
+Viya 4. This fixes that and requires no coding changes. This fixes issue #500
+
+
+-   `Fix` I fixed another issue with the same reworking as above that presented in another specific
+case. This fixes that and requires no coding changes. This fixes issue #503
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+
+
 ## [4.4.1] - 2022-12-01
 
 ### Added
