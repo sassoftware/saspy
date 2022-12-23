@@ -329,35 +329,30 @@ class SASconfigHTTP:
                   self._token = None
                   raise RuntimeError("No password provided.")
 
-      # get AuthToken
+      # get Connections
       if self.ssl:
          if self.verify:
             # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifyable
             try:
                self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout)
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout)
-               if not self._token:
-                  js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
             except ssl.SSLError as e:
                logger.warning("SSL certificate verification failed, creating an unverified SSL connection. Error was:"+str(e))
                self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
                logger.warning("You can set 'verify=False' to get rid of this message ")
-               if not self._token:
-                  js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
          else:
             self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
             self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
-            if not self._token:
-               js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
       else:
          self.REFConn  = hc.HTTPConnection(self.ip, self.port, timeout=self.timeout)
          self.HTTPConn = hc.HTTPConnection(self.ip, self.port, timeout=self.timeout)
-         if not self._token:
-            js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
 
-      self._token   = js.get('access_token',  None)
-      self._refresh = js.get('refresh_token', None)
+      # get AuthToken
+      if not self._token:
+         js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
+         self._token   = js.get('access_token',  None)
+         self._refresh = js.get('refresh_token', None)
 
       if not self._token:
          logger.error("Could not acquire an Authentication Token")
@@ -443,7 +438,7 @@ class SASconfigHTTP:
    def _authenticate(self, user, pw, authcode, client_id, client_secret, jwt):
 
       if self.serverid:
-         return 'tom'
+         return {'access_token':'tom'}
 
       if   authcode:
          uauthcode      = urllib.parse.quote(authcode)
@@ -460,7 +455,7 @@ class SASconfigHTTP:
                            "Content-Type":"application/x-www-form-urlencoded",
                            "Authorization":client}
       else:
-         #client_id     = "sas.tkmtrb"
+         client_id     = "sas.tkmtrb"
          uuser          = urllib.parse.quote(user)
          upw            = urllib.parse.quote(pw)
          d1             = ("grant_type=password&username="+uuser+"&password="+upw).encode(self.encoding)
@@ -722,6 +717,8 @@ class SASsessionHTTP():
          self._refresh_token()
 
    def _refresh_token(self):
+      if not self.sascfg._refresh:
+         return
       d1      = ("grant_type=refresh_token&refresh_token="+self.sascfg._refresh).encode(self.sascfg.encoding)
       client  = "Basic "+base64.encodebytes(("SASPy:").encode(self.sascfg.encoding)).splitlines()[0].decode(self.sascfg.encoding)
       headers = {"Content-Type":"application/x-www-form-urlencoded", "Authorization":client}
