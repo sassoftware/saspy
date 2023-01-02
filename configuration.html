@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 4.4.1 documentation</title>
+  <title>Configuration &mdash; saspy 4.4.3 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                4.4.1
+                4.4.3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -878,12 +878,17 @@ support in it, so if your workspace server is configured for AES, just having a 
 higher will allow it to work, without needing the 3 encryption jars. That doesn’t work w/ M7 however, so you
 would need the encryption jars when connecting to M7.</p>
 <p>The 3 encryption jars, if needed, can be found in a SAS deployment in a location similar to, but not exactly the
-sam as, the following. If you get any error about encryption, adding these 3 jars is the proper way to address it.</p>
+same as, the following. If you get any error about encryption, adding these 3 jars is the proper way to address it.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil_904600.0.0.20181017190000_v940m6/sas.rutil.jar
 $SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil.nls_904600.0.0.20181017190000_v940m6/sas.rutil.nls.jar
 $SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_20121211183517/sastpj.rutil.jar
 </pre></div>
 </div>
+<p>ATTN: SAS ODA Users!! SAS/On Demand for Academics (ODA) has recently upgraded their SAS server environment to use SAS 9.40M7!
+This means that the 3 encryption jars are now required in order to be able to connect; they use AES encryption, and even with Java 8,
+you can no longer connect without these jars in the deployment. Since you don’tnecessarily have a SAS deployment to get these
+jars from, you can download them from the following location. Download, unzip and then copy them to the java/iomclient directory
+of the SASPy deployment, as explained above. Encryption jar download: <a class="reference external" href="https://support.sas.com/downloads/package.htm?pid=2494">https://support.sas.com/downloads/package.htm?pid=2494</a></p>
 </section>
 <section id="the-authinfo-file-authinfo-on-windows">
 <h3>The .authinfo file (_authinfo on Windows)<a class="headerlink" href="#the-authinfo-file-authinfo-on-windows" title="Permalink to this heading">¶</a></h3>
