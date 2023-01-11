@@ -51,6 +51,7 @@ class SASconfigHTTP:
       self._token    = cfg.get('authtoken', None)
       self._refresh  = cfg.get('refreshtoken', None)
       self.url       = cfg.get('url', '')
+      self.proxy     = cfg.get('proxy', None)
       self.serverid  = cfg.get('serverid', None)
       self.ip        = cfg.get('ip', '')
       self.port      = cfg.get('port', None)
@@ -94,6 +95,13 @@ class SASconfigHTTP:
       self.verbose = self.cfgopts.get('verbose', True)
       self.verbose = kwargs.get('verbose', self.verbose)
 
+      inproxy = kwargs.get('proxy', None)
+      if inproxy is not None:
+         if lock and len(self.proxy):
+            logger.warning("Parameter 'proxy' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.proxy = inproxy
+
       inurl = kwargs.get('url', None)
       if inurl is not None:
          if lock and len(self.url):
@@ -135,20 +143,6 @@ class SASconfigHTTP:
            logger.warning("Parameter 'options' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.options = inoptions
-
-      inssl = kwargs.get('ssl', None)
-      if inssl is not None:
-         if lock and self.ssl:
-            logger.warning("Parameter 'ssl' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.ssl = bool(inssl)
-
-      inver = kwargs.get('verify', None)
-      if inver is not None:
-         if lock and self.verify:
-            logger.warning("Parameter 'verify' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.verify = bool(inver)
 
       intout = kwargs.get('timeout', None)
       if intout is not None:
@@ -223,6 +217,20 @@ class SASconfigHTTP:
             logger.warning("Parameter 'authkey' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.authkey = inak
+
+      inssl = kwargs.get('ssl', None)
+      if inssl is not None:
+         if lock and self.ssl:
+            logger.warning("Parameter 'ssl' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.ssl = bool(inssl)
+
+      inver = kwargs.get('verify', None)
+      if inver is not None:
+         if lock and self.verify:
+            logger.warning("Parameter 'verify' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.verify = bool(inver)
 
       if len(self.url) > 0:
          http = self.url.split('://')
@@ -329,6 +337,23 @@ class SASconfigHTTP:
                   self._token = None
                   raise RuntimeError("No password provided.")
 
+      if self.proxy is not None:
+         http = self.proxy.split('://')
+         if http[0].lower() in ['http', 'https']:
+            hp = http[1].split(':')
+         else:
+            hp = http[0].split(':')
+
+         self.pip   = self.ip
+         self.ip    = hp[0]
+         self.pport = self.port
+         self.port  = hp[1] if len(hp) > 1 else self.port
+
+         #else:
+         #   logger.warning("Parameter 'proxy' not in recognized format. Expeting '[http[s]://]host[:port]'. Ignoring parameter.")
+      else:
+         self.pip = None
+
       # get Connections
       if self.ssl:
          if self.verify:
@@ -347,6 +372,10 @@ class SASconfigHTTP:
       else:
          self.REFConn  = hc.HTTPConnection(self.ip, self.port, timeout=self.timeout)
          self.HTTPConn = hc.HTTPConnection(self.ip, self.port, timeout=self.timeout)
+
+      if self.pip:
+         self.REFConn.set_tunnel( self.pip, self.pport)
+         self.HTTPConn.set_tunnel(self.pip, self.pport)
 
       # get AuthToken
       if not self._token:
