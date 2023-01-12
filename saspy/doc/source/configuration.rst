@@ -933,6 +933,8 @@ url -
     ip= will not be used, as the host's ip is retrieved from the url. Also, ssl= is set based upon http or https and port=
     is also parsed from the url, if provided, else defaulted based upon the derived ssl= value. So neither ip, port nor ssl
     are needed when url= is used.
+proxy -
+    (Optional) If your Viya deploymet is behind a proxy server, provide `host:port` for the proxy, using this keyword.
 ip -
     [Deprecated] (Required if url not specified) The resolvable host name, or IP address to the Viya Compute Service
 port -

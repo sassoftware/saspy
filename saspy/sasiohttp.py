@@ -128,7 +128,7 @@ class SASconfigHTTP:
          if lock and self.port:
             logger.warning("Parameter 'port' passed to SAS_session was ignored due to configuration restriction.")
          else:
-            self.port = inport
+            self.port = int(inport)
 
       inctxname = kwargs.get('context', None)
       if inctxname is not None:
@@ -237,7 +237,7 @@ class SASconfigHTTP:
          hp   = http[1].split(':')
          if http[0].lower() in ['http', 'https']:
             self.ip   = hp[0]
-            self.port = hp[1] if len(hp) > 1 else self.port
+            self.port = int(hp[1]) if len(hp) > 1 else self.port
             self.ssl  = True if 's' in http[0].lower() else False
          else:
             logger.warning("Parameter 'url' not in recognized format. Expeting 'http[s]://host[:port]'. Ignoring parameter.")
@@ -317,7 +317,7 @@ class SASconfigHTTP:
             if len(self.url) > 0:
                purl = self.url+purl
             else:
-               purl = "http{}://{}:{}{}".format('s' if self.ssl else '', self.ip, self.port, purl)
+               purl = "http{}://{}:{}{}".format('s' if self.ssl else '', self.ip, str(self.port), purl)
             msg  = "The default url to authenticate with would be {}\n".format(purl)
             msg += "Please enter authcode: "
             authcode = self._prompt(msg)
@@ -347,10 +347,10 @@ class SASconfigHTTP:
          self.pip   = self.ip
          self.ip    = hp[0]
          self.pport = self.port
-         self.port  = hp[1] if len(hp) > 1 else self.port
+         self.port  = int(hp[1]) if len(hp) > 1 else self.port
 
          #else:
-         #   logger.warning("Parameter 'proxy' not in recognized format. Expeting '[http[s]://]host[:port]'. Ignoring parameter.")
+         #   logger.warning("Parameter 'proxy' not in recognized format. Expeting '[http[s]://]host:port'. Ignoring parameter.")
       else:
          self.pip = None
 
