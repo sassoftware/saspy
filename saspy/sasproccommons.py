@@ -628,7 +628,7 @@ class SASProcCommons:
         nosub = False
         objname = ''
         log = ''
-        if len(verifiedKwargs):
+        if len(verifiedKwargs) or required_set == {}:
             objname = procname[:3].lower() + self.sas._objcnt()  # translate to a libname so needs to be less than 8
             code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, verifiedKwargs)
             logger.debug(procname + " macro submission: " + str(code))
@@ -650,7 +650,7 @@ class SASProcCommons:
                 print(code)
                 nosub = True
         else:
-            RuntimeWarning("Error in code submission")
+            raise RuntimeWarning("Error in code submission")
 
         self.sas._lastlog = self.sas._io._log[lastlog:]
         return SASresults(obj1, self.sas, objname, nosub, log)
