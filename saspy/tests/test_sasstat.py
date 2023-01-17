@@ -442,5 +442,30 @@ class TestSASstat(unittest.TestCase):
         s = stat.reg(data='sashelp.class', model='weight=height')
         self.assertRaises(AssertionError,s, msg="bad dataset fails")
 
+    def test_mi_no_opts(self):
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("heart", "sashelp")
+        s = stat.mi(data=tr, procopts="")
+        a = ['MODELINFO', 'MISSPATTERN', 'EMPOSTESTIMATES', 'VARIANCEINFO','PARAMETERESTIMATES','LOG']
+        self.assertEqual(sorted(a), sorted(s.__dir__()),
+                         msg=u"The MI function (NOOPTS) failed to return correct objects. Expected:{0:s}; returned:{1:s}".format(
+                             str(a), str(s)))
 
+    def test_mi_fcs(self):
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("heart", "sashelp")
+        s = stat.mi(data=tr, fcs="", var=["AgeAtDeath", "Weight"])
+        a = ['MODELINFO', 'FCSMODEL', 'MISSPATTERN', 'VARIANCEINFO', 'PARAMETERESTIMATES', 'LOG']
+        self.assertEqual(sorted(a), sorted(s.__dir__()),
+                        msg=u"The MI function (FCS) failed to return correct objects. Expected: {0:s}; returned: {1:s}".format(
+                            str(a), str(s)))
+
+    def test_mi_em(self):
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("heart", "sashelp")
+        s = stat.mi(data=tr, em="")
+        a = ['MODELINFO', 'EMINITESTIMATES', 'EMESTIMATES', 'EMPOSTESTIMATES', 'MISSPATTERN', 'VARIANCEINFO', 'PARAMETERESTIMATES', 'LOG']
+        self.assertEqual(sorted(a), sorted(s.__dir__()),
+                        msg=u"The MI function (FCS) failed to return correct objects. Expected: {0:s}; returned: {1:s}".format(
+                            str(a), str(s)))
 
