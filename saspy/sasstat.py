@@ -538,3 +538,40 @@ class SASstat:
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object
         """
+
+    @procDecorator.proc_decorator({})
+    def mi(self, data: ('SASdata', str) = None,
+           by: (str, list) = None,
+           cls: (str, list) = None,
+           em: str = None,
+           fcs: str = None,
+           freq: str = None,
+           mcmc: str = None,
+           mnar: str = None,
+           monotone: str = None,
+           transform: str = None,
+           var: str = None,
+           procopts: str = None,
+           stmtpassthrough: str = None,
+           **kwargs: dict) -> 'SASresults':
+        """
+        Python method to call the MI procedure.
+
+        Documentation link:
+        https://go.documentation.sas.com/doc/en/statug/15.2/statug_mi_toc.htm
+
+        :param data: SASdata object or string. This parameter is required.
+        :parm by: The by variable can be a string or list type.
+        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :parm em: The em variable can only be a string type.
+        :parm fcs: The fcs variable can only be a string type.
+        :parm freq: The freq variable can only be a string type.
+        :parm mcmc: The mcmc variable can only be a string type.
+        :parm mnar: The mnar variable can only be a string type.
+        :parm monotone: The monotone variable can only be a string type.
+        :parm transform: The transform variable can only be a string type.
+        :parm var: The var variable can only be a string type.
+        :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
+        :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
+        :return: SAS Result Object
+        """
