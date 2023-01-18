@@ -229,6 +229,7 @@
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasstat.SASstat.hpreg"><code class="docutils literal notranslate"><span class="pre">SASstat.hpreg()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasstat.SASstat.hpsplit"><code class="docutils literal notranslate"><span class="pre">SASstat.hpsplit()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasstat.SASstat.logistic"><code class="docutils literal notranslate"><span class="pre">SASstat.logistic()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasstat.SASstat.mi"><code class="docutils literal notranslate"><span class="pre">SASstat.mi()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasstat.SASstat.mixed"><code class="docutils literal notranslate"><span class="pre">SASstat.mixed()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasstat.SASstat.phreg"><code class="docutils literal notranslate"><span class="pre">SASstat.phreg()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="api.html#saspy.sasstat.SASstat.reg"><code class="docutils literal notranslate"><span class="pre">SASstat.reg()</span></code></a></li>
@@ -457,15 +458,29 @@ various connection methods, see what the errors look like, and how you can deter
 so if you’re having problems getting to to work from Windows, well there you go.</p>
 <p>Second, the only thing you really need to have right is the path to the SAS startup script in your SAS
 installation. The ‘saspath’ value in your configuration definition needs to be correct and accessible.</p>
+<p>If, for instance, you just installed SASPy on your PC and then tried to use it, without configuring it,
+you will see the following error, since the example config only has one configuration definition which
+can’t work on Windows.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
+<span class="n">Using</span> <span class="n">SAS</span> <span class="n">Config</span> <span class="n">named</span><span class="p">:</span> <span class="n">default</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+  <span class="n">File</span> <span class="s2">&quot;C:\Users\sastpw\AppData\Local\Programs\Python\Python311\Lib\site-packages\saspy\sasbase.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">556</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__init__</span>
+    <span class="k">raise</span> <span class="n">SASIONotSupportedError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sascfg</span><span class="o">.</span><span class="n">mode</span><span class="p">,</span> <span class="n">alts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;IOM&#39;</span><span class="p">])</span>
+<span class="n">saspy</span><span class="o">.</span><span class="n">sasexceptions</span><span class="o">.</span><span class="n">SASIONotSupportedError</span><span class="p">:</span> <span class="n">Cannot</span> <span class="n">use</span> <span class="n">STDIO</span> <span class="n">I</span><span class="o">/</span><span class="n">O</span> <span class="n">module</span> <span class="n">on</span> <span class="n">Windows</span><span class="o">.</span> <span class="n">Try</span> <span class="n">the</span> <span class="n">following</span><span class="p">:</span> <span class="n">IOM</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p>If you see that error, go read the configuration doc here: <a class="reference internal" href="configuration.html"><span class="doc">Configuration</span></a></p>
 </section>
 <section id="stdio-over-ssh">
 <h3>STDIO over SSH<a class="headerlink" href="#stdio-over-ssh" title="Permalink to this heading">¶</a></h3>
-<p>The same issues in STDIO above are true here, with one extra component: ssh. This method is still only
-valid on Unix, not Windows (both client side and SAS side). The ‘saspath’ value has to be right, and
-it has to be right on the remote Unix machine that you are ssh’ing to. That might not be the same path
-as on your local Unix SAS deployment.</p>
-<p>Secondly, this requires that you have passwordless SSH configured and working for each user that will
-be connecting between the local and remote machines. That can be diagnosed independant of this module and
+<p>The same issues in STDIO above are true here, with one extra component: ssh. The ‘saspath’ value has to be right, and
+it has to be right on the remote Linux machine that you are ssh’ing to. That might not be the same path
+as might be on your local SAS deployment.</p>
+<p>Secondly, this requires that you have passwordless SSH configured and working for each user that will be connecting
+between the local and remote machines, or or you can use sshpass. That can be diagnosed independant of this module and
 Python. If the connection cannot be made, you should see that error message with the command that was
 trying to be executed, and you can run it to get better diagnostic error messages that can tell you if its
 a problem with your SSH credentials, the machine you’re trying to reach isn’t listening, or any other
