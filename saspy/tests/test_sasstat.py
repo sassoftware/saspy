@@ -9,7 +9,7 @@ class TestSASstat(unittest.TestCase):
         cls.sas = saspy.SASsession()
         util = Utilities(cls.sas)
         procNeeded=['reg', 'mixed', 'hpsplit', 'hplogistic', 'hpreg', 'glm', 'logistic', 'tpspline',
-                    'hplogistic', 'hpreg', 'phreg', 'ttest', 'factor']
+                    'hplogistic', 'hpreg', 'phreg', 'ttest', 'factor', 'mi']
         if not util.procFound(procNeeded):
             cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
