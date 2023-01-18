@@ -103,17 +103,34 @@ so if you're having problems getting to to work from Windows, well there you go.
 Second, the only thing you really need to have right is the path to the SAS startup script in your SAS
 installation. The 'saspath' value in your configuration definition needs to be correct and accessible.
 
+If, for instance, you just installed SASPy on your PC and then tried to use it, without configuring it,
+you will see the following error, since the example config only has one configuration definition which
+can't work on Windows.
+
+.. code-block:: ipython3
+
+    >>> import saspy
+    >>> sas = saspy.SASsession()
+    Using SAS Config named: default
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+      File "C:\Users\sastpw\AppData\Local\Programs\Python\Python311\Lib\site-packages\saspy\sasbase.py", line 556, in __init__
+        raise SASIONotSupportedError(self.sascfg.mode, alts=['IOM'])
+    saspy.sasexceptions.SASIONotSupportedError: Cannot use STDIO I/O module on Windows. Try the following: IOM
+    >>>
+
+If you see that error, go read the configuration doc here: :doc:`configuration`
+
 
 STDIO over SSH
 --------------
 
-The same issues in STDIO above are true here, with one extra component: ssh. This method is still only
-valid on Unix, not Windows (both client side and SAS side). The 'saspath' value has to be right, and
-it has to be right on the remote Unix machine that you are ssh'ing to. That might not be the same path
-as on your local Unix SAS deployment.
+The same issues in STDIO above are true here, with one extra component: ssh. The 'saspath' value has to be right, and
+it has to be right on the remote Linux machine that you are ssh'ing to. That might not be the same path
+as might be on your local SAS deployment.
 
-Secondly, this requires that you have passwordless SSH configured and working for each user that will
-be connecting between the local and remote machines. That can be diagnosed independant of this module and
+Secondly, this requires that you have passwordless SSH configured and working for each user that will be connecting
+between the local and remote machines, or or you can use sshpass. That can be diagnosed independant of this module and
 Python. If the connection cannot be made, you should see that error message with the command that was
 trying to be executed, and you can run it to get better diagnostic error messages that can tell you if its
 a problem with your SSH credentials, the machine you're trying to reach isn't listening, or any other
