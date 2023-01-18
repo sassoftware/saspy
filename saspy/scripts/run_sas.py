@@ -9,6 +9,7 @@ import sys
 
 # Usage:
 # ./run_sas.py -s example_1.sas
+# ./run_sas.py -s example_1.sas example_2.sas
 # ./run_sas.py -s example_1.sas -l out1.log -o out1.lst
 # ./run_sas.py -s example_1.sas -r TEXT
 # ./run_sas.py -s example_1.sas -r HTML
