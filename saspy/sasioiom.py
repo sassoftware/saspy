@@ -950,7 +950,7 @@ Will use HTML5 for this SASsession.""")
                           #print("Tomods is now "+ self._tomods1.decode())
                        break
                  try:
-                    lst = self.stdout[0].recv(4096)
+                    lst = self.stdout[0].recv(4096000)
                  except (BlockingIOError):
                     lst = b''
 
@@ -959,7 +959,7 @@ Will use HTML5 for this SASsession.""")
                  else:
                     sleep(0.1)
                     try:
-                       log = self.stderr[0].recv(4096)
+                       log = self.stderr[0].recv(4096000)
                     except (BlockingIOError):
                        log = b''
 

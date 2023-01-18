@@ -2,6 +2,29 @@
 
 
 
+## [4.5.0] - 2023-01-12
+
+### Added
+
+-   `Enhanced` Added support in the HTTP Access Method for if there's a proxy server set up to get to the actual Viya deployment.
+There's a new `proxy` keyword in the config used to provide 'host:port' of the proxy.'
+
+### Changed
+
+-   `None` Nothing changed
+
+
+### Fixed
+
+-   `None` Nothing fixed
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [4.4.3] - 2022-12-23
 
 ### Added

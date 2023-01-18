@@ -628,29 +628,27 @@ class SASProcCommons:
         nosub = False
         objname = ''
         log = ''
-        if len(verifiedKwargs):
-            objname = procname[:3].lower() + self.sas._objcnt()  # translate to a libname so needs to be less than 8
-            code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, verifiedKwargs)
-            logger.debug(procname + " macro submission: " + str(code))
-            if not self.sas.nosub:
-                ll = self.sas._io.submit(code, "text")
-                log = ll['LOG']
-                error = SASProcCommons._errorLog(self, log)
-                isinstance(error, str)
-                if len(error) > 1:
-                    RuntimeWarning("ERRORS found in SAS log: \n%s" % error)
-                    self.sas._lastlog = self.sas._io._log[lastlog:]
-                    return SASresults(obj1, self.sas, objname, nosub, log)
-                try:
-                    obj1 = SASProcCommons._objectmethods(self, objname)
-                    logger.debug(obj1)
-                except Exception:
-                    pass
-            else:
-                print(code)
-                nosub = True
+
+        objname = procname[:3].lower() + self.sas._objcnt()  # translate to a libname so needs to be less than 8
+        code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, verifiedKwargs)
+        logger.debug(procname + " macro submission: " + str(code))
+        if not self.sas.nosub:
+            ll = self.sas._io.submit(code, "text")
+            log = ll['LOG']
+            error = SASProcCommons._errorLog(self, log)
+            isinstance(error, str)
+            if len(error) > 1:
+                RuntimeWarning("ERRORS found in SAS log: \n%s" % error)
+                self.sas._lastlog = self.sas._io._log[lastlog:]
+                return SASresults(obj1, self.sas, objname, nosub, log)
+            try:
+                obj1 = SASProcCommons._objectmethods(self, objname)
+                logger.debug(obj1)
+            except Exception:
+                pass
         else:
-            RuntimeWarning("Error in code submission")
+            print(code)
+            nosub = True
 
         self.sas._lastlog = self.sas._io._log[lastlog:]
         return SASresults(obj1, self.sas, objname, nosub, log)
