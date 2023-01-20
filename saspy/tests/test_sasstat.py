@@ -402,14 +402,14 @@ class TestSASstat(unittest.TestCase):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("SocioEconomics", "work")
-        b = stat.reg(data=tr, procopts='simple corr')
+        b = stat.factor(data=tr, procopts='simple corr')
         self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
 
     def test_factorResult2(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("SocioEconomics", "work")
-        b = stat.reg(data=tr,
+        b = stat.factor(data=tr,
                      procopts='priors=smc msa residual rotate=promax reorder outstat=fact_all',
                      var = ['population', 'school']
                      )
