@@ -144,27 +144,27 @@ class TestSASstat(unittest.TestCase):
                          msg=u"Simple Regession (reg) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), str(b)))
 
-    def regResult1(self):
+    def test_regResult1(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         b = stat.reg(data=tr, model='weight=height')
         self.assertIsInstance(b, saspy.sasresults.SASresults, msg="correct return type")
 
-    def regResult2(self):
+    def test_regResult2(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         tr.set_results('PANDAS')
         b = stat.reg(data=tr, model='weight=height')
         self.assertIsInstance(b.ANOVA, pandas.core.frame.DataFrame, msg="correct return type")
 
-    def regResult3(self):
+    def test_regResult3(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         tr.set_results('PANDAS')
         b = stat.reg(data=tr, model='weight=height')
         self.assertIsInstance(b.LOG, IPython.core.display.HTML, msg="correct return type")
 
-    def regResult4(self):
+    def test_regResult4(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         tr.set_results('PANDAS')
@@ -390,7 +390,7 @@ class TestSASstat(unittest.TestCase):
         ti5 = stat.glm(data=c, target=t1, input=i3)
         self.assertEqual(m2.__dir__(), ti5.__dir__())
 
-    def phregResult1(self):
+    def test_phregResult1(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("melanoma", "work")
@@ -398,14 +398,14 @@ class TestSASstat(unittest.TestCase):
                          Frac LogPBM Protein SCalc / selection=stepwise slentry=0.25 slstay=0.15 details""")
         self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
 
-    def factorResult1(self):
+    def test_factorResult1(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("SocioEconomics", "work")
         b = stat.reg(data=tr, procopts='simple corr')
         self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
 
-    def factorResult2(self):
+    def test_factorResult2(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("SocioEconomics", "work")
@@ -415,28 +415,28 @@ class TestSASstat(unittest.TestCase):
                      )
         self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
 
-    def ttestResult1(self):
+    def test_ttestResult1(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("time", "work")
         b = stat.reg(data=tr, var='time', procopts='h0=80 alpha=0.1')
         self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
 
-    def ttestResult2(self):
+    def test_ttestResult2(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("pressure", "work")
         b = stat.reg(data=tr,  paired="SBPbefore*SBPafter")
         self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
 
-    def strdset1(self):
+    def test_strdset1(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         s = stat.reg(data='sashelp.class', model='weight=height')
         ds = stat.reg(data=tr, model='weight=height')
         self.assertEqual(s, ds, msg="string sasdata mismatch")
 
-    def strdset2(self):
+    def test_strdset2(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         s = stat.reg(data='sashelp.class', model='weight=height')
