@@ -223,12 +223,12 @@ class SASProcCommons:
         # The different SAS products vary slightly in plotting and out methods.
         # this block sets the options correctly for plotting and output statements
         if self.sasproduct.lower() == 'stat' and not ('ODSGraphics' in args.keys() or ODSGraphics == False) and objtype != 'mi':
-            plot = 'plot=all'
+            plot = 'plots=all'
         if self.sasproduct.lower() == 'qc':
             pass
         if self.sasproduct.lower() == 'ets' and not ('ODSGraphics' in args.keys() or ODSGraphics == False):
             outmeth = 'out'
-            plot = 'plot=all'
+            plot = 'plots=all'
         if self.sasproduct.lower() == 'em':
 
             pass
