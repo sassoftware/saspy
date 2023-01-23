@@ -436,7 +436,8 @@ class TestSASstat(unittest.TestCase):
         tr = self.sas.sasdata("class", "sashelp")
         s = stat.reg(data='sashelp.class', model='weight=height')
         ds = stat.reg(data=tr, model='weight=height')
-        self.assertEqual(s, ds, msg="string sasdata mismatch")
+        self.assertEqual(len(s._names), len(ds._names), msg="String SASDATA returns different output than SASDATA Object.")
+        pandas.testing.assert_frame_equal(s.FITSTATISTICS, ds.FITSTATISTICS)
 
     @unittest.skip("Test raises 'RecursionError: maximum recursion depth exceeded', but the produced SAS code runs fine when copied staright into SAS.")
     def test_strdset2(self):
