@@ -421,14 +421,14 @@ class TestSASstat(unittest.TestCase):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("time", "work")
-        b = stat.reg(data=tr, var='time', procopts='h0=80 alpha=0.1')
+        b = stat.ttest(data=tr, var='time', procopts='h0=80 alpha=0.1')
         self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
 
     def test_ttestResult2(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("pressure", "work")
-        b = stat.reg(data=tr,  paired="SBPbefore*SBPafter")
+        b = stat.ttest(data=tr,  paired="SBPbefore*SBPafter")
         self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
 
     def test_strdset1(self):
