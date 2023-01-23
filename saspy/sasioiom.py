@@ -2204,7 +2204,7 @@ class _read_sock(io.StringIO):
 
       while datl < size or notarow:
          try:
-            data = self._io.stdout[0].recv(4096)
+            data = self._io.stdout[0].recv(size)
          except (BlockingIOError):
             data = b''
          dl = len(data)
@@ -2225,7 +2225,7 @@ class _read_sock(io.StringIO):
                else:
                   break
             try:
-               log = self._io.stderr[0].recv(4096)
+               log = self._io.stderr[0].recv(409600)
             except (BlockingIOError):
                log = b''
 

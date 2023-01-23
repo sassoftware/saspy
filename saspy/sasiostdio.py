@@ -917,7 +917,7 @@ Will use HTML5 for this SASsession.""")
                      except Empty:
                         lst = b''
                   else:
-                     lst = self.stdout.read1(409600)
+                     lst = self.stdout.read1(4096000)
 
                   if len(lst) > 0:
                      wait = False
@@ -934,7 +934,7 @@ Will use HTML5 for this SASsession.""")
                      except Empty:
                         log = b''
                   else:
-                     log = self.stderr.read1(409600)
+                     log = self.stderr.read1(4096000)
 
                   if len(log) > 0:
                      wait = False
