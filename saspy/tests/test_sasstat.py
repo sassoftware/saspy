@@ -1,5 +1,7 @@
 import unittest
 import saspy
+import pandas
+import IPython
 
 from saspy.tests.util import Utilities
 
