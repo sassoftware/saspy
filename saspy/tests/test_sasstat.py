@@ -1,7 +1,19 @@
 import unittest
 import saspy
-import pandas
-import IPython
+
+# import Pandas if present
+try:
+    import pandas
+    pd = True
+except:
+    pd = False
+
+# import IPython if present
+try:
+    import IPython
+    ip = True
+except:
+    ip = False
 
 from saspy.tests.util import Utilities
 
@@ -152,6 +164,7 @@ class TestSASstat(unittest.TestCase):
         b = stat.reg(data=tr, model='weight=height')
         self.assertIsInstance(b, saspy.sasresults.SASresults, msg="Incorrect return type.")
 
+    @unittest.skipUnless(pd, "Pandas not installed, skipping DataFrame result check.")
     def test_regResult2(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
@@ -159,6 +172,7 @@ class TestSASstat(unittest.TestCase):
         b = stat.reg(data=tr, model='weight=height')
         self.assertIsInstance(b.ANOVA, pandas.core.frame.DataFrame, msg="Incorrect return type.")
 
+    @unittest.skipUnless(ip, "IPython not installed, skipping HTML return check.")
     def test_regResult3(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
@@ -432,6 +446,7 @@ class TestSASstat(unittest.TestCase):
         b = stat.ttest(data=tr,  paired="SBPbefore*SBPafter")
         self.assertIsInstance(b, saspy.SASresults, msg="Incorrect return type")
 
+    @unittest.skipUnless(pd, "Pandas not installed, skipping dataframe comparison.")
     def test_strdset1(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
