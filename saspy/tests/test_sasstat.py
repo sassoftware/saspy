@@ -1,6 +1,20 @@
 import unittest
 import saspy
 
+# import Pandas if present
+try:
+    import pandas
+    pd = True
+except:
+    pd = False
+
+# import IPython if present
+try:
+    import IPython
+    ip = True
+except:
+    ip = False
+
 from saspy.tests.util import Utilities
 
 class TestSASstat(unittest.TestCase):
@@ -141,35 +155,38 @@ class TestSASstat(unittest.TestCase):
              'RESIDUALBYPREDICTED',
              'RESIDUALHISTOGRAM', 'RESIDUALPLOT', 'RFPLOT', 'RSTUDENTBYLEVERAGE', 'RSTUDENTBYPREDICTED']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u"Simple Regession (reg) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u"Simple Regession (reg) model failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
                              str(a), str(b)))
 
-    def regResult1(self):
+    def test_regResult1(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         b = stat.reg(data=tr, model='weight=height')
-        self.assertIsInstance(b, saspy.sasresults.SASresults, msg="correct return type")
+        self.assertIsInstance(b, saspy.sasresults.SASresults, msg="Incorrect return type.")
 
-    def regResult2(self):
+    @unittest.skipUnless(pd, "Pandas not installed, skipping DataFrame result check.")
+    def test_regResult2(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         tr.set_results('PANDAS')
         b = stat.reg(data=tr, model='weight=height')
-        self.assertIsInstance(b.ANOVA, pandas.core.frame.DataFrame, msg="correct return type")
+        self.assertIsInstance(b.ANOVA, pandas.core.frame.DataFrame, msg="Incorrect return type.")
 
-    def regResult3(self):
+    @unittest.skipUnless(ip, "IPython not installed, skipping HTML return check.")
+    def test_regResult3(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         tr.set_results('PANDAS')
         b = stat.reg(data=tr, model='weight=height')
-        self.assertIsInstance(b.LOG, IPython.core.display.HTML, msg="correct return type")
+        self.assertIsInstance(b.LOG, IPython.core.display.HTML, msg="Incorrect return type.")
 
-    def regResult4(self):
+    @unittest.skip("Type returns 'NoneType' but correctly displays in Jupyter notebook. This should be looked into more.")
+    def test_regResult4(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         tr.set_results('PANDAS')
         b = stat.reg(data=tr, model='weight=height')
-        self.assertIsInstance(b.RESIDUALHISTOGRAM, IPython.core.display.HTML, msg="correct return type")
+        self.assertIsInstance(b.RESIDUALHISTOGRAM, IPython.core.display.HTML, msg="Incorrect return type.")
 
 
     def test_smokeMixed(self):
@@ -180,7 +197,7 @@ class TestSASstat(unittest.TestCase):
         a = ['COVPARMS', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS', 'PEARSONPANEL',
              'RESIDUALPANEL', 'STUDENTPANEL', 'TESTS3']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u" Mixed failed to return correct objects. Expected:{0:s};  returned:{1:s}.".format(
                              str(a), str(b)))
 
     def test_smokeGLM(self):
@@ -191,7 +208,7 @@ class TestSASstat(unittest.TestCase):
         a = ['DIAGNOSTICSPANEL', 'FITPLOT', 'FITSTATISTICS', 'LOG', 'MODELANOVA', 'NOBS', 'OVERALLANOVA',
              'PARAMETERESTIMATES', 'RESIDUALPLOTS']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u" GLM failed to return correct objects. Expected:{0:s};  returned:{1:s}.".format(
                              str(a), str(b)))
 
     def test_smokeLogistic(self):
@@ -199,7 +216,7 @@ class TestSASstat(unittest.TestCase):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         b = stat.logistic(data=tr, model='sex=height weight')
-        self.assertFalse('ERROR_LOG' in b.__dir__(), msg=u"logistic had errors in the log")
+        self.assertFalse('ERROR_LOG' in b.__dir__(), msg=u"Logistic had errors in the log.")
 
     def test_smokeTpspline(self):
         # Basic model returns objects
@@ -227,7 +244,7 @@ class TestSASstat(unittest.TestCase):
         a = ['CRITERIONPLOT', 'DATASUMMARY', 'DIAGNOSTICSPANEL', 'FITPLOT', 'FITSTATISTICS', 'FITSUMMARY', 'LOG',
              'OBSERVEDBYPREDICTED', 'QQPLOT', 'RESIDPANEL', 'RESIDUALBYPREDICTED', 'RESIDUALHISTOGRAM', 'RFPLOT']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u" TPSPLIE failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
                              str(a), str(b)))
 
     def test_tpspline2(self):
@@ -258,7 +275,7 @@ class TestSASstat(unittest.TestCase):
              'OBSERVEDBYPREDICTED', 'QQPLOT', 'RESIDPANEL', 'RESIDUALBYPREDICTED', 'RESIDUALHISTOGRAM', 'RFPLOT',
              'SCOREPLOT']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u" model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u"TPSPLINE failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
                              str(a), str(b)))
 
     def test_smokeHPLogistic(self):
@@ -277,7 +294,7 @@ class TestSASstat(unittest.TestCase):
         a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS',
              'PARAMETERESTIMATES', 'PERFORMANCEINFO']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u"Simple Regession (reg) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
                              str(a), str(b)))
 
     def test_selectionDict(self):
@@ -290,7 +307,7 @@ class TestSASstat(unittest.TestCase):
              'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON', 
              'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u"Simple Regession (HPREG) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
                              str(a), str(b)))
 
     def test_selectionDict2(self):
@@ -304,7 +321,7 @@ class TestSASstat(unittest.TestCase):
              'MODELINFO', 'NOBS', 'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 
              'SELECTIONINFO', 'SELECTIONREASON', 'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u"Simple Regession (HPREG) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
                              str(a), str(b)))
 
     def test_selectionDict3(self):
@@ -318,7 +335,7 @@ class TestSASstat(unittest.TestCase):
              'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON',
              'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u"Simple Regession (HPREG) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
                              str(a), str(b)))
 
     def test_selectionDictError(self):
@@ -330,7 +347,7 @@ class TestSASstat(unittest.TestCase):
         b = stat.hpreg(data=tr, model='weight=height', selection=selDict)
         a = ['ERROR_LOG']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
-                         msg=u"Simple Regession (HPREG) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
                              str(a), str(b)))
 
     def test_missingVar(self):
@@ -339,7 +356,7 @@ class TestSASstat(unittest.TestCase):
         b = stat.mixed(data=tr, weight='novar', model='weight=height')
         a = ['ERROR_LOG']
         self.assertEqual(a, b.__dir__(),
-                         msg=u"Simple Regession (mixed) model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
+                         msg=u"Simple Regession (mixed) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
                              str(a), str(b)))
     """
     def test_extraStmt(self):
@@ -390,53 +407,56 @@ class TestSASstat(unittest.TestCase):
         ti5 = stat.glm(data=c, target=t1, input=i3)
         self.assertEqual(m2.__dir__(), ti5.__dir__())
 
-    def phregResult1(self):
+    def test_phregResult1(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("melanoma", "work")
         b = stat.reg(data=tr, model="""Time*VStatus(0)=LogBUN HGB Platelet Age LogWBC
                          Frac LogPBM Protein SCalc / selection=stepwise slentry=0.25 slstay=0.15 details""")
-        self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
+        self.assertIsInstance(b, saspy.SASresults, msg="Incorrect return type")
 
-    def factorResult1(self):
+    def test_factorResult1(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("SocioEconomics", "work")
-        b = stat.reg(data=tr, procopts='simple corr')
-        self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
+        b = stat.factor(data=tr, procopts='simple corr')
+        self.assertIsInstance(b, saspy.SASresults, msg="Incorrect return type")
 
-    def factorResult2(self):
+    def test_factorResult2(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("SocioEconomics", "work")
-        b = stat.reg(data=tr,
+        b = stat.factor(data=tr,
                      procopts='priors=smc msa residual rotate=promax reorder outstat=fact_all',
                      var = ['population', 'school']
                      )
-        self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
+        self.assertIsInstance(b, saspy.SASresults, msg="Incorrect return type")
 
-    def ttestResult1(self):
+    def test_ttestResult1(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("time", "work")
-        b = stat.reg(data=tr, var='time', procopts='h0=80 alpha=0.1')
-        self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
+        b = stat.ttest(data=tr, var='time', procopts='h0=80 alpha=0.1')
+        self.assertIsInstance(b, saspy.SASresults, msg="Incorrect return type")
 
-    def ttestResult2(self):
+    def test_ttestResult2(self):
         stat = self.sas.sasstat()
         self.defineData()
         tr = self.sas.sasdata("pressure", "work")
-        b = stat.reg(data=tr,  paired="SBPbefore*SBPafter")
-        self.assertIsInstance(b, saspy.SASresults, msg="correct return type")
+        b = stat.ttest(data=tr,  paired="SBPbefore*SBPafter")
+        self.assertIsInstance(b, saspy.SASresults, msg="Incorrect return type")
 
-    def strdset1(self):
+    @unittest.skipUnless(pd, "Pandas not installed, skipping dataframe comparison.")
+    def test_strdset1(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         s = stat.reg(data='sashelp.class', model='weight=height')
         ds = stat.reg(data=tr, model='weight=height')
-        self.assertEqual(s, ds, msg="string sasdata mismatch")
+        self.assertEqual(len(s._names), len(ds._names), msg="String SASDATA returns different output than SASDATA Object.")
+        pandas.testing.assert_frame_equal(s.FITSTATISTICS, ds.FITSTATISTICS)
 
-    def strdset2(self):
+    @unittest.skip("Test raises 'RecursionError: maximum recursion depth exceeded', but the produced SAS code runs fine when copied staright into SAS.")
+    def test_strdset2(self):
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         s = stat.reg(data='sashelp.class', model='weight=height')
