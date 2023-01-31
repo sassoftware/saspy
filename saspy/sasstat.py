@@ -512,10 +512,11 @@ class SASstat:
 
     @procDecorator.proc_decorator({})
     def factor(self, data: ('SASdata', str) = None,
-               by: str = None,
-               cls: (str, list) = None,
+               by: (str, list) = None,
                freq: str = None,
-               paired: str = None,
+               partial: str = None,
+               pathdiagram: str = None,
+               priors: str = None,
                var: str = None,
                weight: str = None,
                procopts: str = None,
@@ -527,11 +528,12 @@ class SASstat:
         Documentation link:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_factor_syntax.htm&locale=en
 
-        :param data: SASdata object or string. This parameter is required.
-        :parm by: The by variable can only be a string type.
-        :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
+        :param data: SASdata object or string. This parameter is required..
+        :parm by: The by variable can be a string or list type. 
         :parm freq: The freq variable can only be a string type.
-        :parm paired: The paired variable can only be a string type.
+        :parm partial: The partial variable can only be a string type.
+        :parm pathdiagram: The pathdiagram variable can only be a string type.
+        :parm priors: The priors variable can only be a string type.
         :parm var: The var variable can only be a string type.
         :parm weight: The weight variable can only be a string type.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
