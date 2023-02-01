@@ -2,6 +2,34 @@
 
 
 
+## [4.6.0] - 2023-02-01
+
+### Added
+
+-   `Added` @dmsenter89 added support for Proc MI in the SASStat package. Also, added tests for this in the Stat testing file.
+
+
+### Changed
+
+-   `Enhanced` Made a significant performance improvement in the IOM Access Method with reading the log back from the SAS session.
+
+-   `Enhanced` @ShuguangSun enhanced the run_sas script to support executing multiple scripts in one call
+
+
+### Fixed
+
+-   `Fixed` @dmsenter89 Fixed a number of things with Proc code generation for methods in the SASStat package and some minor things for all
+analytic methods. Fixed statements for Proc Factor.
+
+-   `Fixed` @dmsenter89 Fixed a number of things in the Stat testing file.
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [4.5.0] - 2023-01-12
 
 ### Added
