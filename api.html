@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; saspy 4.5.0 documentation</title>
+  <title>API Reference &mdash; saspy 4.6.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                4.5.0
+                4.6.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -229,6 +229,7 @@
 <li class="toctree-l5"><a class="reference internal" href="#saspy.sasstat.SASstat.hpreg"><code class="docutils literal notranslate"><span class="pre">SASstat.hpreg()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#saspy.sasstat.SASstat.hpsplit"><code class="docutils literal notranslate"><span class="pre">SASstat.hpsplit()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#saspy.sasstat.SASstat.logistic"><code class="docutils literal notranslate"><span class="pre">SASstat.logistic()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#saspy.sasstat.SASstat.mi"><code class="docutils literal notranslate"><span class="pre">SASstat.mi()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#saspy.sasstat.SASstat.mixed"><code class="docutils literal notranslate"><span class="pre">SASstat.mixed()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#saspy.sasstat.SASstat.phreg"><code class="docutils literal notranslate"><span class="pre">SASstat.phreg()</span></code></a></li>
 <li class="toctree-l5"><a class="reference internal" href="#saspy.sasstat.SASstat.reg"><code class="docutils literal notranslate"><span class="pre">SASstat.reg()</span></code></a></li>
@@ -2859,40 +2860,43 @@ appropriate testing file.</p></li>
 <p>If you have questions, please open an issue in the GitHub repo and the maintainers will be happy to help.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="saspy.sasstat.SASstat.factor">
-<span class="sig-name descname"><span class="pre">factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data:</span> <span class="pre">('SASdata'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;)</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls:</span> <span class="pre">(&lt;class</span> <span class="pre">'str'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'list'&gt;)</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">paired:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procopts:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stmtpassthrough:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs:</span> <span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#saspy.sasresults.SASresults" title="saspy.sasresults.SASresults"><span class="pre">SASresults</span></a></span></span><a class="headerlink" href="#saspy.sasstat.SASstat.factor" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data:</span> <span class="pre">('SASdata'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;)</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by:</span> <span class="pre">(&lt;class</span> <span class="pre">'str'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'list'&gt;)</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partial:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pathdiagram:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">priors:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procopts:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stmtpassthrough:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs:</span> <span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#saspy.sasresults.SASresults" title="saspy.sasresults.SASresults"><span class="pre">SASresults</span></a></span></span><a class="headerlink" href="#saspy.sasstat.SASstat.factor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Python method to call the FACTOR procedure</p>
 <p>Documentation link:
 <a class="reference external" href="https://go.documentation.sas.com/?cdcId=pgmsascdc&amp;cdcVersion=9.4_3.4&amp;docsetId=statug&amp;docsetTarget=statug_factor_syntax.htm&amp;locale=en">https://go.documentation.sas.com/?cdcId=pgmsascdc&amp;cdcVersion=9.4_3.4&amp;docsetId=statug&amp;docsetTarget=statug_factor_syntax.htm&amp;locale=en</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – SASdata object or string. This parameter is required.</p>
+<dd class="field-odd"><p><strong>data</strong> – SASdata object or string. This parameter is required..</p>
 </dd>
 <dt class="field-even">Parm by</dt>
-<dd class="field-even"><p>The by variable can only be a string type.</p>
+<dd class="field-even"><p>The by variable can be a string or list type.</p>
 </dd>
-<dt class="field-odd">Parm cls</dt>
-<dd class="field-odd"><p>The cls variable can be a string or list type. It refers to the categorical, or nominal variables.</p>
+<dt class="field-odd">Parm freq</dt>
+<dd class="field-odd"><p>The freq variable can only be a string type.</p>
 </dd>
-<dt class="field-even">Parm freq</dt>
-<dd class="field-even"><p>The freq variable can only be a string type.</p>
+<dt class="field-even">Parm partial</dt>
+<dd class="field-even"><p>The partial variable can only be a string type.</p>
 </dd>
-<dt class="field-odd">Parm paired</dt>
-<dd class="field-odd"><p>The paired variable can only be a string type.</p>
+<dt class="field-odd">Parm pathdiagram</dt>
+<dd class="field-odd"><p>The pathdiagram variable can only be a string type.</p>
 </dd>
-<dt class="field-even">Parm var</dt>
-<dd class="field-even"><p>The var variable can only be a string type.</p>
+<dt class="field-even">Parm priors</dt>
+<dd class="field-even"><p>The priors variable can only be a string type.</p>
 </dd>
-<dt class="field-odd">Parm weight</dt>
-<dd class="field-odd"><p>The weight variable can only be a string type.</p>
+<dt class="field-odd">Parm var</dt>
+<dd class="field-odd"><p>The var variable can only be a string type.</p>
 </dd>
-<dt class="field-even">Parm procopts</dt>
-<dd class="field-even"><p>The procopts variable is a generic option available for advanced use. It can only be a string type.</p>
+<dt class="field-even">Parm weight</dt>
+<dd class="field-even"><p>The weight variable can only be a string type.</p>
 </dd>
-<dt class="field-odd">Parm stmtpassthrough</dt>
-<dd class="field-odd"><p>The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.</p>
+<dt class="field-odd">Parm procopts</dt>
+<dd class="field-odd"><p>The procopts variable is a generic option available for advanced use. It can only be a string type.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>SAS Result Object</p>
+<dt class="field-even">Parm stmtpassthrough</dt>
+<dd class="field-even"><p>The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>SAS Result Object</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3195,6 +3199,58 @@ appropriate testing file.</p></li>
 </dd>
 <dt class="field-odd">Parm weight</dt>
 <dd class="field-odd"><p>The weight variable can only be a string type.</p>
+</dd>
+<dt class="field-even">Parm procopts</dt>
+<dd class="field-even"><p>The procopts variable is a generic option available for advanced use. It can only be a string type.</p>
+</dd>
+<dt class="field-odd">Parm stmtpassthrough</dt>
+<dd class="field-odd"><p>The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>SAS Result Object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="saspy.sasstat.SASstat.mi">
+<span class="sig-name descname"><span class="pre">mi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data:</span> <span class="pre">('SASdata'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;)</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">by:</span> <span class="pre">(&lt;class</span> <span class="pre">'str'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'list'&gt;)</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls:</span> <span class="pre">(&lt;class</span> <span class="pre">'str'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'list'&gt;)</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">em:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fcs:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mcmc:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mnar:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monotone:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">procopts:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stmtpassthrough:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs:</span> <span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#saspy.sasresults.SASresults" title="saspy.sasresults.SASresults"><span class="pre">SASresults</span></a></span></span><a class="headerlink" href="#saspy.sasstat.SASstat.mi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Python method to call the MI procedure.</p>
+<p>Documentation link:
+<a class="reference external" href="https://go.documentation.sas.com/doc/en/statug/15.2/statug_mi_toc.htm">https://go.documentation.sas.com/doc/en/statug/15.2/statug_mi_toc.htm</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – SASdata object or string. This parameter is required.</p>
+</dd>
+<dt class="field-even">Parm by</dt>
+<dd class="field-even"><p>The by variable can be a string or list type.</p>
+</dd>
+<dt class="field-odd">Parm cls</dt>
+<dd class="field-odd"><p>The cls variable can be a string or list type. It refers to the categorical, or nominal variables.</p>
+</dd>
+<dt class="field-even">Parm em</dt>
+<dd class="field-even"><p>The em variable can only be a string type.</p>
+</dd>
+<dt class="field-odd">Parm fcs</dt>
+<dd class="field-odd"><p>The fcs variable can only be a string type.</p>
+</dd>
+<dt class="field-even">Parm freq</dt>
+<dd class="field-even"><p>The freq variable can only be a string type.</p>
+</dd>
+<dt class="field-odd">Parm mcmc</dt>
+<dd class="field-odd"><p>The mcmc variable can only be a string type.</p>
+</dd>
+<dt class="field-even">Parm mnar</dt>
+<dd class="field-even"><p>The mnar variable can only be a string type.</p>
+</dd>
+<dt class="field-odd">Parm monotone</dt>
+<dd class="field-odd"><p>The monotone variable can only be a string type.</p>
+</dd>
+<dt class="field-even">Parm transform</dt>
+<dd class="field-even"><p>The transform variable can only be a string type.</p>
+</dd>
+<dt class="field-odd">Parm var</dt>
+<dd class="field-odd"><p>The var variable can only be a string type.</p>
 </dd>
 <dt class="field-even">Parm procopts</dt>
 <dd class="field-even"><p>The procopts variable is a generic option available for advanced use. It can only be a string type.</p>
