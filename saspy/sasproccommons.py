@@ -57,10 +57,17 @@ class Codegen(object):
                     raise SyntaxError("selection method: '{}' is not valid".format(self._args))
         if self._key in ['freq', 'weight'] and len(args.split()) > 1:
             raise SyntaxError('ERROR in code submission. {} can only have one variable and you submitted: {}'.format(self._key, args))
+
         if isinstance(self._args, (list, tuple)):
-            args = " ".join(self._args)
-            if len(self._args) < 1:
-                raise SyntaxError("The {} list has no members".format(self._key))
+            if self._key in ['estimate']:
+               args = ''
+               for value in self._args:
+                   args += "{0} {1};\n".format(self._key, value)
+               return args
+            else:
+                args = " ".join(self._args)
+                if len(self._args) < 1:
+                    raise SyntaxError("The {} list has no members".format(self._key))
 
         elif isinstance(self._args, bool):
             if self._args == False:
