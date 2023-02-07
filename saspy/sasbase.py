@@ -2007,6 +2007,10 @@ class SASsession():
                         provide an object of the type [1, 1.0, ' '] or a string of 'int', 'float' or 'str'
 
         """
+        if not self.symexist(name):
+           logger.warning("Macro variable is not defined. Returning None")
+           return None
+
         ll = self._io.submit("%put " + name + "BEGIN=&" + name + " "+ name+"END=;\n", results='text')
         l2 = ll['LOG'].rpartition(name + "BEGIN=")[2].rpartition(name+"END=")[0].strip().replace('\n','')
 
