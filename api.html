@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; saspy 4.6.0 documentation</title>
+  <title>API Reference &mdash; saspy 4.7.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                4.6.0
+                4.7.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -2924,7 +2924,7 @@ appropriate testing file.</p></li>
 <dd class="field-odd"><p>The contrast variable can only be a string type.</p>
 </dd>
 <dt class="field-even">Parm estimate</dt>
-<dd class="field-even"><p>The estimate variable can only be a string type.</p>
+<dd class="field-even"><p>The estimate variable is a string, or list of strings for procs that support multiple estimate statements.</p>
 </dd>
 <dt class="field-odd">Parm freq</dt>
 <dd class="field-odd"><p>The freq variable can only be a string type.</p>
@@ -3165,7 +3165,7 @@ appropriate testing file.</p></li>
 <dd class="field-odd"><p>The contrast variable can only be a string type.</p>
 </dd>
 <dt class="field-even">Parm estimate</dt>
-<dd class="field-even"><p>The estimate variable can only be a string type.</p>
+<dd class="field-even"><p>The estimate variable is a string, or list of strings for procs that support multiple estimate statements.</p>
 </dd>
 <dt class="field-odd">Parm freq</dt>
 <dd class="field-odd"><p>The freq variable can only be a string type.</p>
@@ -3287,7 +3287,7 @@ appropriate testing file.</p></li>
 <dd class="field-odd"><p>The contrast variable can only be a string type.</p>
 </dd>
 <dt class="field-even">Parm estimate</dt>
-<dd class="field-even"><p>The estimate variable can only be a string type.</p>
+<dd class="field-even"><p>The estimate variable is a string, or list of strings for procs that support multiple estimate statements.</p>
 </dd>
 <dt class="field-odd">Parm id</dt>
 <dd class="field-odd"><p>The id variable can only be a string type.</p>
@@ -3354,7 +3354,7 @@ appropriate testing file.</p></li>
 <dd class="field-odd"><p>The effect variable can only be a string type.</p>
 </dd>
 <dt class="field-even">Parm estimate</dt>
-<dd class="field-even"><p>The estimate variable can only be a string type.</p>
+<dd class="field-even"><p>The estimate variable is a string, or list of strings for procs that support multiple estimate statements.</p>
 </dd>
 <dt class="field-odd">Parm freq</dt>
 <dd class="field-odd"><p>The freq variable can only be a string type.</p>
@@ -3617,7 +3617,7 @@ appropriate testing file.</p></li>
 <dd class="field-even"><p>The by variable can only be a string type.</p>
 </dd>
 <dt class="field-odd">Parm estimate</dt>
-<dd class="field-odd"><p>The estimate variable can only be a string type.</p>
+<dd class="field-odd"><p>The estimate variable is a string, or list of strings for procs that support multiple estimate statements.</p>
 </dd>
 <dt class="field-even">Parm forecast</dt>
 <dd class="field-even"><p>The forecast variable can only be a string type.</p>
@@ -3908,7 +3908,7 @@ appropriate testing file.</p></li>
 <dd class="field-even"><p>The deplag variable can only be a string type.</p>
 </dd>
 <dt class="field-odd">Parm estimate</dt>
-<dd class="field-odd"><p>The estimate variable can be a string or boolean type.</p>
+<dd class="field-odd"><p>The estimate variable is a string, or list of strings for procs that support multiple estimate statements.</p>
 </dd>
 <dt class="field-even">Parm forecast</dt>
 <dd class="field-even"><p>The forecast variable can only be a string type.</p>
@@ -3974,68 +3974,44 @@ appropriate testing file.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>data</strong> – SASdata object or string. This parameter is required.</p>
 </dd>
-<dt class="field-even">Parm adjust</dt>
+<dt class="field-even">Parm bound</dt>
 <dd class="field-even"><p>The adjust variable can only be a string type.</p>
-</dd>
-<dt class="field-odd">Parm arima</dt>
-<dd class="field-odd"><p>The arima variable can only be a string type.</p>
-</dd>
-<dt class="field-even">Parm automdl</dt>
-<dd class="field-even"><p>The automdl variable can only be a string type.</p>
 </dd>
 <dt class="field-odd">Parm by</dt>
 <dd class="field-odd"><p>The by variable can be a string or list type.</p>
 </dd>
-<dt class="field-even">Parm check</dt>
+<dt class="field-even">Parm casual</dt>
 <dd class="field-even"><p>The check variable can only be a string type.</p>
 </dd>
-<dt class="field-odd">Parm estimate</dt>
-<dd class="field-odd"><p>The estimate variable can only be a string type.</p>
+<dt class="field-odd">Parm cointeg</dt>
+<dd class="field-odd"><p>The cointeg variable can only be a string type.</p>
 </dd>
-<dt class="field-even">Parm event</dt>
-<dd class="field-even"><p>The event variable can only be a string type.</p>
+<dt class="field-even">Parm condfore</dt>
+<dd class="field-even"><p>The condfore variable can only be a string type.</p>
 </dd>
-<dt class="field-odd">Parm forecast</dt>
-<dd class="field-odd"><p>The forecast variable can only be a string type.</p>
+<dt class="field-odd">Parm garch</dt>
+<dd class="field-odd"><p>The garch variable can only be a string type.</p>
 </dd>
 <dt class="field-even">Parm id</dt>
 <dd class="field-even"><p>The id variable can be a string or list type.</p>
 </dd>
-<dt class="field-odd">Parm identify</dt>
-<dd class="field-odd"><p>The identify variable can only be a string type.</p>
+<dt class="field-odd">Parm initial</dt>
+<dd class="field-odd"><p>The initial variable can only be a string type.</p>
 </dd>
-<dt class="field-even">Parm input</dt>
-<dd class="field-even"><p>The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.</p>
+<dt class="field-even">Parm model</dt>
+<dd class="field-even"><p>The model variable can only be a string.</p>
 </dd>
-<dt class="field-odd">Parm outlier</dt>
-<dd class="field-odd"><p>The outlier variable can only be a string type.</p>
+<dt class="field-odd">Parm nloptions</dt>
+<dd class="field-odd"><p>The nloptions variable can only be a string.</p>
 </dd>
 <dt class="field-even">Parm output</dt>
 <dd class="field-even"><p>The output variable can be a string, boolean or SASdata type. The member name for a boolean is “_output”.</p>
 </dd>
-<dt class="field-odd">Parm pickmdl</dt>
-<dd class="field-odd"><p>The pickmdl variable can only be a string type.</p>
+<dt class="field-odd">Parm restrict</dt>
+<dd class="field-odd"><p>The restrict variable can only be a string.</p>
 </dd>
-<dt class="field-even">Parm regression</dt>
-<dd class="field-even"><p>The regression variable can only be a string type.</p>
-</dd>
-<dt class="field-odd">Parm seatsdecomp</dt>
-<dd class="field-odd"><p>The seatsdecomp variable can only be a string type.</p>
-</dd>
-<dt class="field-even">Parm tables</dt>
-<dd class="field-even"><p>The tables variable can only be a string type.</p>
-</dd>
-<dt class="field-odd">Parm transform</dt>
-<dd class="field-odd"><p>The transform variable can only be a string type.</p>
-</dd>
-<dt class="field-even">Parm userdefined</dt>
-<dd class="field-even"><p>The userdefined variable can only be a string type.</p>
-</dd>
-<dt class="field-odd">Parm var</dt>
-<dd class="field-odd"><p>The var variable can only be a string type.</p>
-</dd>
-<dt class="field-even">Parm x11</dt>
-<dd class="field-even"><p>The x11 variable can only be a string type.</p>
+<dt class="field-even">Parm test</dt>
+<dd class="field-even"><p>The test variable can only be a string.</p>
 </dd>
 <dt class="field-odd">Parm procopts</dt>
 <dd class="field-odd"><p>The procopts variable is a generic option available for advanced use. It can only be a string type.</p>
@@ -4133,7 +4109,7 @@ the printing of tables, while the OUTPUT statement controls the creation of the 
 <dd class="field-even"><p>The check variable can only be a string type.</p>
 </dd>
 <dt class="field-odd">Parm estimate</dt>
-<dd class="field-odd"><p>The estimate variable can only be a string type.</p>
+<dd class="field-odd"><p>The estimate variable is a string, or list of strings for procs that support multiple estimate statements.</p>
 </dd>
 <dt class="field-even">Parm event</dt>
 <dd class="field-even"><p>The event variable can only be a string type.</p>
