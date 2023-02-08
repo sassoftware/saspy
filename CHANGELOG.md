@@ -2,6 +2,32 @@
 
 
 
+## [4.7.0] - 2023-02-08
+
+### Added
+
+-   `None` Nothing added
+
+
+### Changed
+
+-   `Enhanced` The `estimate` statement in at least some procs is allowed to be specified more than once, unlike most proc statements.
+There was previously no support for generating a given statement more than once. Estimate= now allows a list of strings and will generate
+an estimate statement for each string in the list.
+
+
+### Fixed
+
+-   `Fixed` symget(name) returns `&name` if the marco isn't defined, which is what SAS prints out. So  I fixed symget to issue symexist
+first and if not defined issue a warning and return None, which is what it should have been doing all along.
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [4.6.0] - 2023-02-01
 
 ### Added
