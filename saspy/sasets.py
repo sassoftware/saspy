@@ -136,7 +136,7 @@ class SASets:
 
         :param data: SASdata object or string. This parameter is required.
         :parm by: The by variable can only be a string type.
-        :parm estimate: The estimate variable can only be a string type.
+        :parm estimate: The estimate variable is a string, or list of strings for procs that support multiple estimate statements.
         :parm forecast: The forecast variable can only be a string type.
         :parm identify: The identify variable can only be a string type.
         :parm out: The out variable can be a string or SASdata type.
@@ -183,7 +183,7 @@ class SASets:
         :parm by: The by variable can only be a string type.
         :parm cycle: The cycle variable can only be a string type.
         :parm deplag: The deplag variable can only be a string type.
-        :parm estimate: The estimate variable can be a string or boolean type.
+        :parm estimate: The estimate variable is a string, or list of strings for procs that support multiple estimate statements.
         :parm forecast: The forecast variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm irregular: The irregular variable can be a string or boolean type.
@@ -365,7 +365,7 @@ class SASets:
         :parm automdl: The automdl variable can only be a string type.
         :parm by: The by variable can be a string or list type.
         :parm check: The check variable can only be a string type.
-        :parm estimate: The estimate variable can only be a string type.
+        :parm estimate: The estimate variable is a string, or list of strings for procs that support multiple estimate statements.
         :parm event: The event variable can only be a string type.
         :parm forecast: The forecast variable can only be a string type.
         :parm id: The id variable can be a string or list type.
@@ -411,27 +411,19 @@ class SASets:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=etsug&docsetTarget=etsug_varmax_syntax.htm&locale=en
 
         :param data: SASdata object or string. This parameter is required.
-        :parm adjust: The adjust variable can only be a string type.
-        :parm arima: The arima variable can only be a string type.
-        :parm automdl: The automdl variable can only be a string type.
+        :parm bound: The adjust variable can only be a string type.
         :parm by: The by variable can be a string or list type.
-        :parm check: The check variable can only be a string type.
-        :parm estimate: The estimate variable can only be a string type.
-        :parm event: The event variable can only be a string type.
-        :parm forecast: The forecast variable can only be a string type.
+        :parm casual: The check variable can only be a string type.
+        :parm cointeg: The cointeg variable can only be a string type.
+        :parm condfore: The condfore variable can only be a string type.
+        :parm garch: The garch variable can only be a string type.
         :parm id: The id variable can be a string or list type.
-        :parm identify: The identify variable can only be a string type.
-        :parm input: The input variable can be a string, list or dict type. It refers to the dependent, y, or label variable.
-        :parm outlier: The outlier variable can only be a string type.
+        :parm initial: The initial variable can only be a string type.
+        :parm model: The model variable can only be a string.
+        :parm nloptions: The nloptions variable can only be a string.
         :parm output: The output variable can be a string, boolean or SASdata type. The member name for a boolean is "_output".
-        :parm pickmdl: The pickmdl variable can only be a string type.
-        :parm regression: The regression variable can only be a string type.
-        :parm seatsdecomp: The seatsdecomp variable can only be a string type.
-        :parm tables: The tables variable can only be a string type.
-        :parm transform: The transform variable can only be a string type.
-        :parm userdefined: The userdefined variable can only be a string type.
-        :parm var: The var variable can only be a string type.
-        :parm x11: The x11 variable can only be a string type.
+        :parm restrict: The restrict variable can only be a string.
+        :parm test: The test variable can only be a string.
         :parm procopts: The procopts variable is a generic option available for advanced use. It can only be a string type.
         :parm stmtpassthrough: The stmtpassthrough variable is a generic option available for advanced use. It can only be a string type.
         :return: SAS Result Object

@@ -196,7 +196,7 @@ class SASstat:
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm code: The code variable can only be a string type.
         :parm contrast: The contrast variable can only be a string type.
-        :parm estimate: The estimate variable can only be a string type.
+        :parm estimate: The estimate variable is a string, or list of strings for procs that support multiple estimate statements.
         :parm id: The id variable can only be a string type.
         :parm lsmeans: The lsmeans variable can only be a string type.
         :parm model: The model variable can only be a string type.
@@ -243,7 +243,7 @@ class SASstat:
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm contrast: The contrast variable can only be a string type.
-        :parm estimate: The estimate variable can only be a string type.
+        :parm estimate: The estimate variable is a string, or list of strings for procs that support multiple estimate statements.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm lsmeans: The lsmeans variable can only be a string type.
@@ -294,7 +294,7 @@ class SASstat:
         :parm by: The by variable can only be a string type.
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm contrast: The contrast variable can only be a string type.
-        :parm estimate: The estimate variable can only be a string type.
+        :parm estimate: The estimate variable is a string, or list of strings for procs that support multiple estimate statements.
         :parm freq: The freq variable can only be a string type.
         :parm id: The id variable can only be a string type.
         :parm lsmeans: The lsmeans variable can only be a string type.
@@ -461,7 +461,7 @@ class SASstat:
         :parm cls: The cls variable can be a string or list type. It refers to the categorical, or nominal variables.
         :parm contrast: The contrast variable can only be a string type.
         :parm effect: The effect variable can only be a string type.
-        :parm estimate: The estimate variable can only be a string type.
+        :parm estimate: The estimate variable is a string, or list of strings for procs that support multiple estimate statements.
         :parm freq: The freq variable can only be a string type.
         :parm hazardratio: The hazardratio variable can only be a string type.
         :parm id: The id variable can only be a string type.
@@ -529,7 +529,7 @@ class SASstat:
         https://go.documentation.sas.com/?cdcId=pgmsascdc&cdcVersion=9.4_3.4&docsetId=statug&docsetTarget=statug_factor_syntax.htm&locale=en
 
         :param data: SASdata object or string. This parameter is required..
-        :parm by: The by variable can be a string or list type. 
+        :parm by: The by variable can be a string or list type.
         :parm freq: The freq variable can only be a string type.
         :parm partial: The partial variable can only be a string type.
         :parm pathdiagram: The pathdiagram variable can only be a string type.
