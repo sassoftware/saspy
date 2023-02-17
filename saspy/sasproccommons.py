@@ -301,7 +301,7 @@ class SASProcCommons:
                 debug_code += gen.debug
 
         code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
+        code += "%%mangobj1(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
         logger.debug("Proc code submission:\n " + str(code) + "\n\n\n" + debug_code)
         return code
 
@@ -640,6 +640,32 @@ class SASProcCommons:
         code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, verifiedKwargs)
         logger.debug(procname + " macro submission: " + str(code))
         if not self.sas.nosub:
+            ll = self.sas._io.submit(code, "text")
+            log = ll['LOG']
+            error = SASProcCommons._errorLog(self, log)
+            isinstance(error, str)
+            if len(error) > 1:
+                RuntimeWarning("ERRORS found in SAS log: \n%s" % error)
+                self.sas._lastlog = self.sas._io._log[lastlog:]
+                return SASresults(obj1, self.sas, objname, nosub, log)
+
+            all = []
+            for path in self.sas.lib_path("_"+objname):
+               x = self.sas._io.submit('''libname _spx_ sasedoc '{}';'''.format(path), 'text')
+               endpath  = path.rpartition('\\')[2].rpartition('#')[0]
+               cur      = self.sas.list_tables('_spx_', 'memname')
+               all.append((endpath, cur))
+               for row in all[:len(all)-1]:
+                  tables = [x for x in cur if x in row[1]]
+                  if len(tables):
+                     for name in tables:
+                        ren   = name[:(32 - (len(endpath)+1))].strip()+'_'+endpath
+                        code  = "proc datasets dd=_spx_ nolist;\n"
+                        code += "change '"+name.replace("'", "''")+"'n = '"+ren+"'n;\nrun;quit;"
+                        x     = self.sas._io.submit(code)
+                     break
+
+            code = "libname _spx_ clear;\n%%mangobj2(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
             ll = self.sas._io.submit(code, "text")
             log = ll['LOG']
             error = SASProcCommons._errorLog(self, log)

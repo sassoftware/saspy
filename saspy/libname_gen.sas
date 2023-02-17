@@ -28,7 +28,7 @@ options pagesize=max;
 */
 
 /*Take an ods document*/
-%macro mangobj(objname,objtype,d);
+%macro mangobj1(objname,objtype,d);
     data _null_;
         guid=uuidgen();
         tmpdir=dcreate(guid,getoption('work'));
@@ -64,6 +64,9 @@ options pagesize=max;
     run;
     /* concatenate all the directories in the ods document to the top level directory */
     %include file1;
+%mend mangobj1;
+
+%macro mangobj2(objname,objtype,d);
     /* Create a table of all the datasets using sashelp.vmember */
     data &objname.._&objname.filelist;
         length objtype $32 objname $32.;
@@ -76,7 +79,7 @@ options pagesize=max;
         if length(method)>1 then output;
     run;
     ods listing;
-%mend mangobj;
+%mend mangobj2;
 *%mangobj(cars,reg,sashelp.cars);
 /*
 %let d=sashelp.cars;
