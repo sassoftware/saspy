@@ -685,7 +685,7 @@ class SASProcCommons:
 
                if len(mems):
                  all[curpath[0]] = mems
-          
+
             doren = False
             code   = "proc document name={}.{}(update);\n".format(objname, objname)
             for key in all.keys():
@@ -709,8 +709,9 @@ class SASProcCommons:
                                  break
                            if i < 0:
                               iter += 1
-                           if endpath.startswith("'") and endpath.endswith("'n"):
-                              endpath = endpath[1:len(endpath)-2].translate(str.maketrans(' *','__'))
+                           end = endpath.find("'n")
+                           if endpath.startswith("'") and end > 0:
+                              endpath = (endpath[1:end]+endpath[end+2:]).translate(str.maketrans(' *','__'))
                            ren   = name.rpartition('#')[0][:(32 - (len(endpath)+1))].strip()+'_'+endpath
                            code += "rename {} to {};\n".format(key+'\\'+name, ren)
                            doren = True
