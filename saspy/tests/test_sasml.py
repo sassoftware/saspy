@@ -9,7 +9,7 @@ class TestSASml(unittest.TestCase):
     def setUpClass(cls):
         cls.sas = saspy.SASsession()
         util = Utilities(cls.sas)
-        procNeeded = ['hpforest', 'hp4score', 'hpclus', 'hpneural', 'treeboost', 'hpbnet', 'hpcluster']
+        procNeeded = ['hpforest', 'hp4score', 'hpneural', 'treeboost', 'hpbnet', 'hpcluster']
         if not util.procFound(procNeeded):
             cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
