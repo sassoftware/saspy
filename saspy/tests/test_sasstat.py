@@ -18,7 +18,7 @@ except:
 from saspy.tests.util import Utilities
 
 class TestSASstat(unittest.TestCase):
-    @classmethod    
+    @classmethod
     def setUpClass(cls):
         cls.sas = saspy.SASsession()
         util = Utilities(cls.sas)
@@ -27,14 +27,14 @@ class TestSASstat(unittest.TestCase):
         if not util.procFound(procNeeded):
             cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
-    @classmethod    
+    @classmethod
     def tearDownClass(cls):
         if cls.sas:
            cls.sas._endsas()
 
     def defineData(self):
         self.sas.submit("""
-                        data Myeloma;
+                        data work.Myeloma;
         input Time VStatus LogBUN HGB Platelet Age LogWBC Frac
              LogPBM Protein SCalc;
         label Time='Survival Time'
@@ -107,7 +107,7 @@ class TestSASstat(unittest.TestCase):
     77.00  0  1.0792  14.0  1  60  3.6812  0  0.9542   0  12
     ;;
     run;
-    data SocioEconomics;
+    data work.SocioEconomics;
    input Population School Employment Services HouseValue;
    datalines;
     5700     12.8      2500      270       25000
@@ -124,16 +124,16 @@ class TestSASstat(unittest.TestCase):
     9400     11.4      4000      100       13000
     ;;
     run;
-    
-    data time;
+
+    data work.time;
    input time @@;
    datalines;
     43  90  84  87  116   95  86   99   93  92
     121  71  66  98   79  102  60  112  105  98
     ;;
     run;
-    
-    data pressure;
+
+    data work.pressure;
    input SBPbefore SBPafter @@;
    datalines;
     120 128   124 131   130 131   118 127
@@ -304,7 +304,7 @@ class TestSASstat(unittest.TestCase):
         selDict = {'method':'stepwise'}
         b = stat.hpreg(data=tr, model='weight=height', selection= selDict)
         a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS',
-             'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON', 
+             'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON',
              'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
@@ -317,9 +317,14 @@ class TestSASstat(unittest.TestCase):
         # DETAILS=NONE | SUMMARY | ALL
         selDict = {'method':'forward', 'details':'ALL', 'maxeffects':'0'}
         b = stat.hpreg(data=tr, model='weight=height', selection= selDict)
-        a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'ENTRYCANDIDATES', 'FITSTATISTICS', 'LOG', 
-             'MODELINFO', 'NOBS', 'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 
+        a = ['ANOVA_SELECTEDMODEL', 'ANOVA_STEP0', 'ANOVA_STEP1', 'DATAACCESSINFO', 'DIMENSIONS', 'ENTRYCANDIDATES',
+             'FITSTATISTICS_SELECTEDMODEL', 'FITSTATISTICS_STEP0', 'FITSTATISTICS_STEP1', 'LOG',
+             'MODELINFO', 'NOBS', 'PARAMETERESTIMATES_STEP0', 'PARAMETERESTIMATES_STEP1', 'PERFORMANCEINFO', 'SELECTEDEFFECTS',
              'SELECTIONINFO', 'SELECTIONREASON', 'SELECTIONSUMMARY', 'STOPREASON']
+        a = ['ANOVA_SELECTEDMODEL1', 'ANOVA_STEP01', 'ANOVA_STEP11', 'DATAACCESSINFO', 'DIMENSIONS', 'ENTRYCANDIDATES',
+             'FITSTATISTICS_SELECTEDMODEL1', 'FITSTATISTICS_STEP01', 'FITSTATISTICS_STEP11', 'LOG', 'MODELINFO', 'NOBS',
+             'PARAMETERESTIMATES_STEP01', 'PARAMETERESTIMATES_STEP11', 'PARAMETERESTIMATE_SELECTEDMODEL1', 'PERFORMANCEINFO',
+             'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON', 'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
                              str(a), str(b)))
@@ -376,7 +381,7 @@ class TestSASstat(unittest.TestCase):
         x =  stat.hpsplit(data=nnin, target='MSRP origin', input='enginesize--length')
         a = ['ERROR_LOG']
         self.assertEqual(a, x.__dir__(), msg=u"Multiple target variables didn't fail in stat.hpsplit")
-  
+
     def test_outputDset(self):
         stat = self.sas.sasstat()
         tsave = self.sas.sasdata('tsave')

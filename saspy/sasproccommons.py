@@ -649,23 +649,77 @@ class SASProcCommons:
                 self.sas._lastlog = self.sas._io._log[lastlog:]
                 return SASresults(obj1, self.sas, objname, nosub, log)
 
-            all = []
-            for path in self.sas.lib_path("_"+objname):
-               x = self.sas._io.submit('''libname _spx_ sasedoc '{}';'''.format(path), 'text')
-               endpath  = path.rpartition('\\')[2].rpartition('#')[0]
-               cur      = self.sas.list_tables('_spx_', 'memname')
-               all.append((endpath, cur))
-               for row in all[:len(all)-1]:
-                  tables = [x for x in cur if x in row[1]]
-                  if len(tables):
-                     for name in tables:
-                        ren   = name[:(32 - (len(endpath)+1))].strip()+'_'+endpath
-                        code  = "proc datasets dd=_spx_ nolist;\n"
-                        code += "change '"+name.replace("'", "''")+"'n = '"+ren+"'n;\nrun;quit;"
-                        x     = self.sas._io.submit(code)
-                     break
+            code = """
+            data _null_;
+               set {}._{}properties(where=(type NE 'Dir')) end=last;
+               if _n_ = 1  then
+                  put 'LIBSTART=';
+               put path;
+               if last then
+                  put 'LIBEND=';
+            run;
+            """.format(objname, objname)
+            ll  = self.sas._io.submit(code, results='text')
 
-            code = "libname _spx_ clear;\n%%mangobj2(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
+            paths = ll['LOG'].rpartition('LIBEND=')[0].rpartition('LIBSTART=')[2][1:].splitlines()
+            all = {}
+            i   = 0
+            pl  = len(paths)
+            while i < pl:
+               curpath = paths[i].rpartition('\\')
+               n = i + 1
+               mems = [curpath[2]]
+               x = True
+               while x == True:
+                  if n < pl:
+                     next = paths[n].rpartition('\\')
+                     if next[0] == curpath[0]:
+                        mems.append(next[2])
+                        n += 1
+                     else:
+                        i = n
+                        x = False
+                  else:
+                     i = n
+                     x = False
+
+               if len(mems):
+                 all[curpath[0]] = mems
+          
+            doren = False
+            code   = "proc document name={}.{}(update);\n".format(objname, objname)
+            for key in all.keys():
+               iter  = 1
+               nodup = []
+               for row in all.keys():
+                  if key != row:
+                     tables = [x for x in all[key] if x in all[row] and x not in nodup]
+                     if len(tables):
+                        for name in tables:
+                           ep = key.split('\\')[1:]
+                           rp = row.split('\\')[1:]
+                           i  = len(ep)-1
+                           endpath = str(iter)
+                           while i >= 0:
+                              if ep[i] == rp[i]:
+                                 i -= 1
+                                 continue
+                              else:
+                                 endpath = ep[i].replace('#', '')
+                                 break
+                           if i < 0:
+                              iter += 1
+                           if endpath.startswith("'") and endpath.endswith("'n"):
+                              endpath = endpath[1:len(endpath)-2].translate(str.maketrans(' *','__'))
+                           ren   = name.rpartition('#')[0][:(32 - (len(endpath)+1))].strip()+'_'+endpath
+                           code += "rename {} to {};\n".format(key+'\\'+name, ren)
+                           doren = True
+                        nodup += tables
+            if doren:
+               code += "run;quit;"
+               x     = self.sas._io.submit(code, results='text')
+
+            code = "%%mangobj2(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
             ll = self.sas._io.submit(code, "text")
             log = ll['LOG']
             error = SASProcCommons._errorLog(self, log)

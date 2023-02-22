@@ -8,7 +8,7 @@ class TestSASets(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.sas = saspy.SASsession()
-        util = Utilities()
+        util = Utilities(cls.sas)
         procNeeded = ['arima', 'timeseries', 'ucm', 'esm', 'timeid', 'timedata']
         if not util.procFound(procNeeded):
             cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
@@ -152,6 +152,15 @@ class TestSASets(unittest.TestCase):
              'ERRORWHITENOISELOGPROBPLOT', 'ERRORWHITENOISEPROBPLOT', 'FORECASTSONLYPLOT', 'FORECASTSPLOT',
              'LEVELSTATEPLOT',
              'LOG', 'MODELFORECASTSPLOT', 'MODELPLOT', 'VARIABLE']
+        a = ['DATASET', 'ERRORACFNORMPLOT_VARIABLE1', 'ERRORACFNORMPLOT_VARIABLE2', 'ERRORACFPLOT_VARIABLE1',
+             'ERRORACFPLOT_VARIABLE2', 'ERRORHISTOGRAM_VARIABLE1', 'ERRORHISTOGRAM_VARIABLE2', 'ERRORIACFNORMPLOT_VARIABLE1',
+             'ERRORIACFNORMPLOT_VARIABLE2', 'ERRORIACFPLOT_VARIABLE1', 'ERRORIACFPLOT_VARIABLE2', 'ERRORPACFNORMPLOT_VARIABLE1',
+             'ERRORPACFNORMPLOT_VARIABLE2', 'ERRORPACFPLOT_VARIABLE1', 'ERRORPACFPLOT_VARIABLE2', 'ERRORPERIODOGRAM_VARIABLE1',
+             'ERRORPERIODOGRAM_VARIABLE2', 'ERRORPLOT_VARIABLE1', 'ERRORPLOT_VARIABLE2', 'ERRORSPECTRALDENSITYPL_VARIABLE1',
+             'ERRORSPECTRALDENSITYPL_VARIABLE2', 'ERRORWHITENOISELOGPROB_VARIABLE1', 'ERRORWHITENOISELOGPROB_VARIABLE2',
+             'ERRORWHITENOISEPROBPLO_VARIABLE1', 'ERRORWHITENOISEPROBPLO_VARIABLE2', 'FORECASTSONLYPLOT_VARIABLE1',
+             'FORECASTSONLYPLOT_VARIABLE2', 'FORECASTSPLOT_VARIABLE1', 'FORECASTSPLOT_VARIABLE2', 'LEVELSTATEPLOT', 'LOG',
+             'MODELFORECASTSPLOT_VARIABLE1', 'MODELFORECASTSPLOT_VARIABLE2', 'MODELPLOT', 'VARIABLE']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"model failed to return correct objects expected:{0:s}  returned:{1:s}".format(
                              str(a), str(b)))

@@ -12,7 +12,6 @@ class TestSASViyaML(unittest.TestCase):
         if not util.procFound(procNeeded):
             cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
         cls.sas.submit("""
-        options cashost="localhost" casport=5570;
         cas mysession;
         libname mycas cas;
         data mycas.class;
@@ -33,17 +32,18 @@ class TestSASViyaML(unittest.TestCase):
         out1 = viya.factmac(data=dt, target='height', input={'interval': 'weight', "nominal": 'sex'})
         self.assertFalse('ERROR_LOG' in out1.__dir__(), msg=u"factmac had errors in the log")
 
+    @unittest.skip("this is just syntax errors")
     def testFastknnSmoke1(self):
         viya = self.sas.sasviyaml()
         # sas.saslib(engine='cas', libref='mycas')
         self.sas.submit("""
         data mycas.hmeq;
-        	set sampsio.hmeq(obs=4000);
-        	id=_n_;
+                set sampsio.hmeq(obs=4000);
+                id=_n_;
         run;
         data mycas.query;
-        	set sampsio.hmeq(firstobs=4001 obs=4100);
-        	id=_n_;
+                set sampsio.hmeq(firstobs=4001 obs=4100);
+                id=_n_;
         run;
         """)
         hmeq = self.sas.sasdata('hmeq','mycas')
