@@ -913,7 +913,7 @@ them here, as they are mutually exclusive. You use only one of the various means
 3) Azure JWT (actually, any JWT perhaps, in the future)
 
    'jwt' is the key to provide that non-Viya Bearer Token, to then pass through to SASLogon to get the Viya Bearer Token to use.
-   And these tokens, are just big long strings; thoussnads of bytes long strings of random characters
+   And these tokens, are just big long strings; thousands of bytes long strings of random characters
    (so you know you're passing in the right thing).
 
 4) SASLogon Authentication Token
