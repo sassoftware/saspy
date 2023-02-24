@@ -681,26 +681,25 @@ class SASProcCommons:
                      if key != row:
                         tables = [x for x in all[key] if x in all[row] and x not in nodup]
                         if len(tables):
-                           ep = key.split('\\')[1:]
+                           kp = key.split('\\')[1:]
                            rp = row.split('\\')[1:]
-                           i  = len(ep)-1
-                           endpath = str(iter)
+                           i  = len(kp)-1
                            for name in tables:
-                              i  = len(ep)-1
-                              while i > 0:
-                                 if ep[i] == rp[i]:
+                              while i >= 0:
+                                 if kp[i] == rp[i]:
                                     i -= 1
                                     continue
                                  else:
-                                    end = ep[i].find("'n")
-                                    if ep[i].startswith("'") and end > 0:
-                                       endpath  = ep[0].replace('#', '')+'_'
-                                       endpath += (ep[i][1:end]+ep[i][end+2:].replace('#', '')).translate(str.maketrans(' *','__'))
+                                    endpath = kp[0].replace('#', '')+'_'
+                                    if i == 0:
+                                       i = len(kp)-1
+                                    end = kp[i].find("'n")
+                                    if kp[i].startswith("'") and end > 0:
+                                       endpath  = kp[0].replace('#', '')+'_'
+                                       endpath += (kp[i][1:end]+kp[i][end+2:].replace('#', '')).translate(str.maketrans(' *','__'))
                                     else:
-                                       endpath = ep[0].replace('#', '')+'_'+ep[i].replace('#', '')
+                                       endpath = kp[0].replace('#', '')+'_'+kp[i].replace('#', '')
                                     break
-                              if i == 0:
-                                 endpath = '_'+ep[0].replace('#', '')
                               ren = name[:(32 - (len(endpath)))].strip()+endpath
                               spl = key.find('\\',2)
                               code += "rename {} to {};\n".format(key[spl:]+'\\'+name+key[1:spl], ren)
