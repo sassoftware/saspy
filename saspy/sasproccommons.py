@@ -660,62 +660,52 @@ class SASProcCommons:
             run;
             """.format(objname, objname)
             ll  = self.sas._io.submit(code, results='text')
-
+            #import pdb; pdb.set_trace()
             paths = ll['LOG'].rpartition('LIBEND=')[0].rpartition('LIBSTART=')[2][1:].splitlines()
-            all = {}
-            i   = 0
-            pl  = len(paths)
-            while i < pl:
-               curpath = paths[i].rpartition('\\')
-               n = i + 1
-               mems = [curpath[2]]
-               x = True
-               while x == True:
-                  if n < pl:
-                     next = paths[n].rpartition('\\')
-                     if next[0] == curpath[0]:
-                        mems.append(next[2])
-                        n += 1
-                     else:
-                        i = n
-                        x = False
-                  else:
-                     i = n
-                     x = False
 
-               if len(mems):
-                 all[curpath[0]] = mems
+            all = {}
+            for path in paths:
+               part    = path.rpartition('\\')
+               curpath = '\\#'+part[2].rpartition('#')[2]+part[0]
+               if curpath in all.keys():
+                  all[curpath] = all[curpath]+[part[2].rpartition('#')[0]]
+               else:
+                  all[curpath] = [part[2].rpartition('#')[0]]
 
             doren = False
             code   = "proc document name={}.{}(update);\n".format(objname, objname)
             for key in all.keys():
-               iter  = 1
                nodup = []
                for row in all.keys():
                   if key != row:
                      tables = [x for x in all[key] if x in all[row] and x not in nodup]
                      if len(tables):
+                        ep = key.split('\\')[1:]
+                        rp = row.split('\\')[1:]
+                        i  = len(ep)-1
+                        endpath = str(iter)
                         for name in tables:
-                           ep = key.split('\\')[1:]
-                           rp = row.split('\\')[1:]
                            i  = len(ep)-1
-                           endpath = str(iter)
-                           while i >= 0:
+                           while i > 0:
                               if ep[i] == rp[i]:
                                  i -= 1
                                  continue
                               else:
-                                 endpath = ep[i].replace('#', '')
+                                 end = ep[i].find("'n")
+                                 if ep[i].startswith("'") and end > 0:
+                                    endpath  = ep[0].replace('#', '')+'_'
+                                    endpath += (ep[i][1:end]+ep[i][end+2:].replace('#', '')).translate(str.maketrans(' *','__'))
+                                 else:
+                                    endpath = ep[0].replace('#', '')+'_'+ep[i].replace('#', '')
                                  break
-                           if i < 0:
-                              iter += 1
-                           end = endpath.find("'n")
-                           if endpath.startswith("'") and end > 0:
-                              endpath = (endpath[1:end]+endpath[end+2:]).translate(str.maketrans(' *','__'))
-                           ren   = name.rpartition('#')[0][:(32 - (len(endpath)+1))].strip()+'_'+endpath
-                           code += "rename {} to {};\n".format(key+'\\'+name, ren)
+                           if i == 0:
+                              endpath = '_'+ep[0].replace('#', '')
+                           ren = name[:(32 - (len(endpath)))].strip()+endpath
+                           spl = key.find('\\',2)
+                           code += "rename {} to {};\n".format(key[spl:]+'\\'+name+key[1:spl], ren)
                            doren = True
                         nodup += tables
+
             if doren:
                code += "run;quit;"
                x     = self.sas._io.submit(code, results='text')
