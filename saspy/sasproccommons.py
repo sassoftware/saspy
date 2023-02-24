@@ -653,62 +653,63 @@ class SASProcCommons:
             data _null_;
                set {}._{}properties(where=(type NE 'Dir')) end=last;
                if _n_ = 1  then
-                  put 'LIBSTART=';
+                  put %upcase("libStart=");
                put path;
                if last then
-                  put 'LIBEND=';
+                  put %upcase("libEND=");
             run;
             """.format(objname, objname)
             ll  = self.sas._io.submit(code, results='text')
             #import pdb; pdb.set_trace()
-            paths = ll['LOG'].rpartition('LIBEND=')[0].rpartition('LIBSTART=')[2][1:].splitlines()
 
-            all = {}
-            for path in paths:
-               part    = path.rpartition('\\')
-               curpath = '\\#'+part[2].rpartition('#')[2]+part[0]
-               if curpath in all.keys():
-                  all[curpath] = all[curpath]+[part[2].rpartition('#')[0]]
-               else:
-                  all[curpath] = [part[2].rpartition('#')[0]]
+            if ll['LOG'].find("LIBSTART") and ll['LOG'].find("LIBEND"):
+               paths = ll['LOG'].rpartition('LIBEND=')[0].rpartition('LIBSTART=')[2][1:].splitlines()
+               all = {}
+               for path in paths:
+                  part    = path.rpartition('\\')
+                  curpath = '\\#'+part[2].rpartition('#')[2]+part[0]
+                  if curpath in all.keys():
+                     all[curpath] = all[curpath]+[part[2].rpartition('#')[0]]
+                  else:
+                     all[curpath] = [part[2].rpartition('#')[0]]
 
-            doren = False
-            code   = "proc document name={}.{}(update);\n".format(objname, objname)
-            for key in all.keys():
-               nodup = []
-               for row in all.keys():
-                  if key != row:
-                     tables = [x for x in all[key] if x in all[row] and x not in nodup]
-                     if len(tables):
-                        ep = key.split('\\')[1:]
-                        rp = row.split('\\')[1:]
-                        i  = len(ep)-1
-                        endpath = str(iter)
-                        for name in tables:
+               doren = False
+               code   = "proc document name={}.{}(update);\n".format(objname, objname)
+               for key in all.keys():
+                  nodup = []
+                  for row in all.keys():
+                     if key != row:
+                        tables = [x for x in all[key] if x in all[row] and x not in nodup]
+                        if len(tables):
+                           ep = key.split('\\')[1:]
+                           rp = row.split('\\')[1:]
                            i  = len(ep)-1
-                           while i > 0:
-                              if ep[i] == rp[i]:
-                                 i -= 1
-                                 continue
-                              else:
-                                 end = ep[i].find("'n")
-                                 if ep[i].startswith("'") and end > 0:
-                                    endpath  = ep[0].replace('#', '')+'_'
-                                    endpath += (ep[i][1:end]+ep[i][end+2:].replace('#', '')).translate(str.maketrans(' *','__'))
+                           endpath = str(iter)
+                           for name in tables:
+                              i  = len(ep)-1
+                              while i > 0:
+                                 if ep[i] == rp[i]:
+                                    i -= 1
+                                    continue
                                  else:
-                                    endpath = ep[0].replace('#', '')+'_'+ep[i].replace('#', '')
-                                 break
-                           if i == 0:
-                              endpath = '_'+ep[0].replace('#', '')
-                           ren = name[:(32 - (len(endpath)))].strip()+endpath
-                           spl = key.find('\\',2)
-                           code += "rename {} to {};\n".format(key[spl:]+'\\'+name+key[1:spl], ren)
-                           doren = True
-                        nodup += tables
+                                    end = ep[i].find("'n")
+                                    if ep[i].startswith("'") and end > 0:
+                                       endpath  = ep[0].replace('#', '')+'_'
+                                       endpath += (ep[i][1:end]+ep[i][end+2:].replace('#', '')).translate(str.maketrans(' *','__'))
+                                    else:
+                                       endpath = ep[0].replace('#', '')+'_'+ep[i].replace('#', '')
+                                    break
+                              if i == 0:
+                                 endpath = '_'+ep[0].replace('#', '')
+                              ren = name[:(32 - (len(endpath)))].strip()+endpath
+                              spl = key.find('\\',2)
+                              code += "rename {} to {};\n".format(key[spl:]+'\\'+name+key[1:spl], ren)
+                              doren = True
+                           nodup += tables
 
-            if doren:
-               code += "run;quit;"
-               x     = self.sas._io.submit(code, results='text')
+               if doren:
+                  code += "run;quit;"
+                  x     = self.sas._io.submit(code, results='text')
 
             code = "%%mangobj2(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
             ll = self.sas._io.submit(code, "text")
