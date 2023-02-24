@@ -137,14 +137,14 @@ class SASml:
         """
 
     @procDecorator.proc_decorator({'input'})
-    def hpcluster(self, data: ('SASdata', str) = None,
-                  freq: str = None,
-                  id: (str, list) = None,
-                  input: (str, list, dict) = None,
-                  score: (str, bool, 'SASdata') = True,
-                  procopts: str = None,
-                  stmtpassthrough: str = None,
-                  **kwargs: dict) -> SASresults:
+    def hpclus(self, data: ('SASdata', str) = None,
+               freq: str = None,
+               id: (str, list) = None,
+               input: (str, list, dict) = None,
+               score: (str, bool, 'SASdata') = True,
+               procopts: str = None,
+               stmtpassthrough: str = None,
+               **kwargs: dict) -> SASresults:
         """
         Python method to call the HPCLUS procedure
 
