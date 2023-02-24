@@ -20,7 +20,7 @@ from saspy.tests.util import Utilities
 class TestSASstat(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.sas = saspy.SASsession()
+        cls.sas = saspy.SASsession(autoexec='options mprint DLCREATEDIR;')
         util = Utilities(cls.sas)
         procNeeded=['reg', 'mixed', 'hpsplit', 'hplogistic', 'hpreg', 'glm', 'logistic', 'tpspline',
                     'hplogistic', 'hpreg', 'phreg', 'ttest', 'factor', 'mi']
@@ -30,6 +30,7 @@ class TestSASstat(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         if cls.sas:
+           #print(cls.sas.saslog())
            cls.sas._endsas()
 
     def defineData(self):
@@ -156,7 +157,7 @@ class TestSASstat(unittest.TestCase):
              'RESIDUALHISTOGRAM', 'RESIDUALPLOT', 'RFPLOT', 'RSTUDENTBYLEVERAGE', 'RSTUDENTBYPREDICTED']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (reg) model failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_regResult1(self):
         stat = self.sas.sasstat()
@@ -198,18 +199,18 @@ class TestSASstat(unittest.TestCase):
              'RESIDUALPANEL', 'STUDENTPANEL', 'TESTS3']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u" Mixed failed to return correct objects. Expected:{0:s};  returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_smokeGLM(self):
         # Basic model returns objects
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         b = stat.glm(data=tr, model='weight=height')
-        a = ['DIAGNOSTICSPANEL', 'FITPLOT', 'FITSTATISTICS', 'LOG', 'MODELANOVA', 'NOBS', 'OVERALLANOVA',
-             'PARAMETERESTIMATES', 'RESIDUALPLOTS']
+        a = ['DIAGNOSTICSPANEL', 'FITPLOT', 'FITSTATISTICS', 'LOG', 'MODELANOVA1_WEIGHT1', 'MODELANOVA2_WEIGHT1',
+             'NOBS', 'OVERALLANOVA', 'PARAMETERESTIMATES', 'RESIDUALPLOTS']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u" GLM failed to return correct objects. Expected:{0:s};  returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_smokeLogistic(self):
         # Basic model returns objects
@@ -245,7 +246,7 @@ class TestSASstat(unittest.TestCase):
              'OBSERVEDBYPREDICTED', 'QQPLOT', 'RESIDPANEL', 'RESIDUALBYPREDICTED', 'RESIDUALHISTOGRAM', 'RFPLOT']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u" TPSPLIE failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_tpspline2(self):
         # Basic model returns objects
@@ -276,7 +277,7 @@ class TestSASstat(unittest.TestCase):
              'SCOREPLOT']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"TPSPLINE failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_smokeHPLogistic(self):
         # Basic model returns objects
@@ -295,7 +296,7 @@ class TestSASstat(unittest.TestCase):
              'PARAMETERESTIMATES', 'PERFORMANCEINFO']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_selectionDict(self):
         # Basic model returns objects
@@ -308,7 +309,7 @@ class TestSASstat(unittest.TestCase):
              'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_selectionDict2(self):
         # Basic model returns objects
@@ -317,17 +318,13 @@ class TestSASstat(unittest.TestCase):
         # DETAILS=NONE | SUMMARY | ALL
         selDict = {'method':'forward', 'details':'ALL', 'maxeffects':'0'}
         b = stat.hpreg(data=tr, model='weight=height', selection= selDict)
-        a = ['ANOVA_SELECTEDMODEL', 'ANOVA_STEP0', 'ANOVA_STEP1', 'DATAACCESSINFO', 'DIMENSIONS', 'ENTRYCANDIDATES',
-             'FITSTATISTICS_SELECTEDMODEL', 'FITSTATISTICS_STEP0', 'FITSTATISTICS_STEP1', 'LOG',
-             'MODELINFO', 'NOBS', 'PARAMETERESTIMATES_STEP0', 'PARAMETERESTIMATES_STEP1', 'PERFORMANCEINFO', 'SELECTEDEFFECTS',
-             'SELECTIONINFO', 'SELECTIONREASON', 'SELECTIONSUMMARY', 'STOPREASON']
-        a = ['ANOVA_SELECTEDMODEL1', 'ANOVA_STEP01', 'ANOVA_STEP11', 'DATAACCESSINFO', 'DIMENSIONS', 'ENTRYCANDIDATES',
-             'FITSTATISTICS_SELECTEDMODEL1', 'FITSTATISTICS_STEP01', 'FITSTATISTICS_STEP11', 'LOG', 'MODELINFO', 'NOBS',
-             'PARAMETERESTIMATES_STEP01', 'PARAMETERESTIMATES_STEP11', 'PARAMETERESTIMATE_SELECTEDMODEL1', 'PERFORMANCEINFO',
+        a = ['ANOVA1_SELECTEDMODEL1', 'ANOVA1_STEP01', 'ANOVA1_STEP11', 'DATAACCESSINFO', 'DIMENSIONS', 'ENTRYCANDIDATES',
+             'FITSTATISTICS1_SELECTEDMODEL1', 'FITSTATISTICS1_STEP01', 'FITSTATISTICS1_STEP11', 'LOG', 'MODELINFO', 'NOBS',
+             'PARAMETERESTIMAT1_SELECTEDMODEL1', 'PARAMETERESTIMATES1_STEP01', 'PARAMETERESTIMATES1_STEP11', 'PERFORMANCEINFO',
              'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON', 'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_selectionDict3(self):
         # Basic model returns objects
@@ -341,7 +338,7 @@ class TestSASstat(unittest.TestCase):
              'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_selectionDictError(self):
         # Basic model returns objects
@@ -353,7 +350,7 @@ class TestSASstat(unittest.TestCase):
         a = ['ERROR_LOG']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_missingVar(self):
         stat = self.sas.sasstat()
@@ -362,7 +359,7 @@ class TestSASstat(unittest.TestCase):
         a = ['ERROR_LOG']
         self.assertEqual(a, b.__dir__(),
                          msg=u"Simple Regession (mixed) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
     """
     def test_extraStmt(self):
         # Extra Statements are ignored
@@ -370,7 +367,7 @@ class TestSASstat(unittest.TestCase):
         d = self.sas.sasdata('cars', 'sashelp')
         b = stat.hpsplit(data=d, target='MSRP / level=interval', architecture='MLP', hidden=100, input='enginesize--length', train='', procopts='maxdepth=3')
         a = stat.hpsplit(data=d, target='MSRP / level=interval', input='enginesize--length', procopts='maxdepth=3' )
-        self.assertEqual(a.__dir__(), b.__dir__(), msg=u"Extra Statements not being ignored expected:{0:s}  returned:{1:s}".format(str(a), str(b)))
+        self.assertEqual(a.__dir__(), b.__dir__(), msg=u"Extra Statements not being ignored expected:{0:s}  returned:{1:s}".format(str(a), str(dir(b))))
     """
 
     def test_multiTarget(self):
