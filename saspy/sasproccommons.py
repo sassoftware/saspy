@@ -20,6 +20,7 @@ from collections import OrderedDict
 from saspy.sasdata import SASdata
 from saspy.sasresults import SASresults
 # from pdb import set_trace as bp
+from saspy.sasexceptions import SASResultsError
 
 import logging
 logger = logging.getLogger('saspy')
@@ -673,8 +674,7 @@ class SASProcCommons:
                   else:
                      all[curpath] = [part[2].rpartition('#')[0]]
 
-               doren = False
-               code   = "proc document name={}.{}(update);\n".format(objname, objname)
+               n_ren = []
                for key in all.keys():
                   nodup = []
                   for row in all.keys():
@@ -700,13 +700,21 @@ class SASProcCommons:
                                     else:
                                        endpath = kp[0].replace('#', '')+'_'+kp[i].replace('#', '')
                                     break
-                              ren = name[:(32 - (len(endpath)))].strip()+endpath
-                              spl = key.find('\\',2)
-                              code += "rename {} to {};\n".format(key[spl:]+'\\'+name+key[1:spl], ren)
-                              doren = True
+                              ren   = name[:(32 - (len(endpath)))].strip()+endpath
+                              spl   = key.find('\\',2)
+                              n     = key[spl:]+'\\'+name+key[1:spl]
+                              n_ren.append((n, ren))
                            nodup += tables
 
-               if doren:
+               if len(n_ren):
+                  code  = "proc document name={}.{}(update);\n".format(objname, objname)
+                  for name, ren in n_ren:
+                     if 'to '+ren+';' in code:
+                        res  = "Duplicate name found. Please open an Issue on the SASPy Github site with this error.\n"
+                        res += str(paths)+'\n\n'+str(n_ren)
+                        raise SASResultsError(res)
+                     else:
+                        code += "rename {} to {};\n".format(name, ren)
                   code += "run;quit;"
                   x     = self.sas._io.submit(code, results='text')
 

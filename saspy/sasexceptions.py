@@ -51,7 +51,7 @@ class SASIOConnectionError(Exception):
         self.msg = msg
 
     def __str__(self):
-        return 'Failure establishing SASsession.\n {}'.format(self.msg)
+        return 'Failure establishing SASsession.\n{}'.format(self.msg)
 
 
 class SASHTTPauthenticateError(Exception):
@@ -59,7 +59,7 @@ class SASHTTPauthenticateError(Exception):
         self.msg = msg
 
     def __str__(self):
-        return 'Failure in GET AuthToken.\n {}'.format(self.msg)
+        return 'Failure in GET AuthToken.\n{}'.format(self.msg)
 
 
 class SASHTTPconnectionError(Exception):
@@ -67,14 +67,22 @@ class SASHTTPconnectionError(Exception):
         self.msg = msg
 
     def __str__(self):
-        return 'Failure in GET Connection.\n {}'.format(self.msg)
+        return 'Failure in GET Connection.\n{}'.format(self.msg)
 
 class SASHTTPsubmissionError(Exception):
     def __init__(self, msg: str):
         self.msg = msg
 
     def __str__(self):
-        return 'Failure in submit().\n {}'.format(self.msg)
+        return 'Failure in submit().\n{}'.format(self.msg)
+
+class SASResultsError(Exception):
+    def __init__(self, msg: str):
+        self.msg = msg
+
+    def __str__(self):
+        return 'Failure creating SASResults object.\n{}'.format(self.msg)
+
 
 
 

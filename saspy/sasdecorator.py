@@ -30,8 +30,8 @@ class procDecorator:
                 self.logger.debug("kwargs type: " + str(type(kwargs)))
                 if proc in ['hplogistic', 'hpreg']:
                     kwargs['ODSGraphics'] = kwargs.get('ODSGraphics', False)
-                if proc == 'hpcluster':
-                    proc = 'hpclus'
+                #if proc == 'hpcluster':
+                #    proc = 'hpclus'
                 # read the signature for the proc and use that as the legal set - kwargs and args
                 # legal_set = set(kwargs.keys())
                 legal_set = set(inspect.signature(self.__getattribute__(proc)).parameters.keys() - {'kwargs', 'args'})
