@@ -212,6 +212,55 @@ class TestSASstat(unittest.TestCase):
                          msg=u" GLM failed to return correct objects. Expected:{0:s};  returned:{1:s}.".format(
                              str(a), str(dir(b))))
 
+    def test_namesGLM(self):
+        # validate multiple sets of samed named outputs
+        self.sas.submit("""
+                data work.snapbean;
+                   input S    V  replicate    x1   x2    x3     x4;
+                   datalines;
+                1.0  1.0        1.0  59.3  4.5  38.4  295.0
+                1.0  1.0        2.0  60.3  3.5  38.6  302.0
+                1.0  1.0        3.0  60.9  5.3  37.2  318.0
+                1.0  1.0        4.0  60.6  5.8  38.1  345.0
+                1.0  1.0        5.0  60.4  6.0  38.8  325.0
+                1.0  2.0        1.0  59.3  6.7  37.9  275.0
+                1.0  2.0        2.0  59.4  4.8  36.6  290.0
+                1.0  2.0        3.0  60.0  5.1  38.7  295.0
+                1.0  2.0        4.0  58.9  5.8  37.5  296.0
+                1.0  2.0        5.0  59.5  4.8  37.0  330.0
+                1.0  3.0        1.0  59.4  5.1  38.7  299.0
+                1.0  3.0        2.0  60.2  5.3  37.0  315.0
+                1.0  3.0        3.0  60.7  6.4  37.4  304.0
+                1.0  3.0        4.0  60.5  7.1  37.0  302.0
+                1.0  3.0        5.0  60.1  7.8  36.9  308.0
+                2.0  1.0        1.0  63.7  5.4  39.5  271.0
+                2.0  1.0        2.0  64.1  5.4  39.2  284.0
+                2.0  1.0        3.0  63.4  5.4  39.0  281.0
+                2.0  1.0        4.0  63.2  5.3  39.0  291.0
+                2.0  1.0        5.0  63.2  5.0  39.0  270.0
+                2.0  2.0        1.0  60.6  6.8  38.1  248.0
+                ;;
+                run;
+                """)
+
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("snapbeans", "work")
+        b  = stat.glm(data = 'snapbean',
+                      cls = 'S V',
+                      model = 'x1 x2 x3 x4 = S V S*V',
+                      manova = 'H = S V S*V / PRINTE PRINTH MSTAT=exact'
+                     )
+        a = ['CHARSTRUCT1_S1', 'CHARSTRUCT1_S_V1', 'CHARSTRUCT1_V1', 'CLASSLEVELS', 'DIAGNOSTICSPANEL1_X11', 'DIAGNOSTICSPANEL1_X21',
+             'DIAGNOSTICSPANEL1_X31', 'DIAGNOSTICSPANEL1_X41', 'ERRORSSCP', 'FITSTATISTICS1_X11', 'FITSTATISTICS1_X21',
+             'FITSTATISTICS1_X31', 'FITSTATISTICS1_X41', 'HYPOTHESISSSCP1_S1', 'HYPOTHESISSSCP1_S_V1', 'HYPOTHESISSSCP1_V1',
+             'INTPLOT1_X11', 'INTPLOT1_X21', 'INTPLOT1_X31', 'INTPLOT1_X41', 'LOG', 'MODELANOVA1_X11', 'MODELANOVA1_X21',
+             'MODELANOVA1_X31', 'MODELANOVA1_X41', 'MODELANOVA2_X11', 'MODELANOVA2_X21', 'MODELANOVA2_X31', 'MODELANOVA2_X41',
+             'MULTSTAT1_S1', 'MULTSTAT1_S_V1', 'MULTSTAT1_V1', 'NOBS', 'OVERALLANOVA1_X11', 'OVERALLANOVA1_X21', 'OVERALLANOVA1_X31',
+             'OVERALLANOVA1_X41', 'PARTIALCORR']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u" GLM failed to return correct objects. Expected:{0:s};  returned:{1:s}.".format(
+                             str(a), str(dir(b))))
+
     def test_smokeLogistic(self):
         # Basic model returns objects
         stat = self.sas.sasstat()
