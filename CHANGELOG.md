@@ -49,7 +49,7 @@ have been wrong to begin with, and so making it right outweighs my aversion to i
 -   `BREAK` This is a breaking change, thus the incrementation of the major digit of the Sematic Version.
 The SASml method `hpcluster` is renamed to be the correct Proc name of `hpclus`, There is no proc named hpcluster
 and this being named wrong caused issues with the test cases, and there was a special check in the code to catch
-this name anc change it to be the correct proc name. So, since this release is already a breaking change to fix
+this name and change it to be the correct proc name. So, since this release is already a breaking change to fix
 the SASResults for all of the procs, I figured it would be a good time to fix this one wrongly named proc/method.
 If you use `hpcluster` in your SASPy code, I'm afraid you'll need to delete the `ter` from it to address this change.
 
