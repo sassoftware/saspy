@@ -2250,7 +2250,7 @@ class SASsession():
         else:
            ll = self._io.submit(code, results='text')
 
-        if results != 'list':
+        if results.lower() == 'pandas':
            res = self.sd2df('_saspy_lib_list', 'work')
            ll = self._io.submit("proc delete data=work._saspy_lib_list;run;", results='text')
            self._lastlog = self._io._log[lastlog:]
@@ -2279,7 +2279,10 @@ class SASsession():
            key = log[0]
            log = log[2].partition('MEMTYPE=')[2].partition(' MEMTYPEEND=')
            val = log[0]
-           tablist.append(tuple((key, val)))
+           if results == 'list':
+              tablist.append(tuple((key, val)))
+           else:
+              tablist.append(key)
 
         self._lastlog = self._io._log[lastlog:]
         return tablist

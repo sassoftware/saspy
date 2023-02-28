@@ -20,6 +20,7 @@ from collections import OrderedDict
 from saspy.sasdata import SASdata
 from saspy.sasresults import SASresults
 # from pdb import set_trace as bp
+from saspy.sasexceptions import SASResultsError
 
 import logging
 logger = logging.getLogger('saspy')
@@ -301,7 +302,7 @@ class SASProcCommons:
                 debug_code += gen.debug
 
         code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
+        code += "%%mangobj1(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
         logger.debug("Proc code submission:\n " + str(code) + "\n\n\n" + debug_code)
         return code
 
@@ -640,6 +641,84 @@ class SASProcCommons:
         code = SASProcCommons._makeProcCallMacro(self, objtype, objname, data, verifiedKwargs)
         logger.debug(procname + " macro submission: " + str(code))
         if not self.sas.nosub:
+            ll = self.sas._io.submit(code, "text")
+            log = ll['LOG']
+            error = SASProcCommons._errorLog(self, log)
+            isinstance(error, str)
+            if len(error) > 1:
+                RuntimeWarning("ERRORS found in SAS log: \n%s" % error)
+                self.sas._lastlog = self.sas._io._log[lastlog:]
+                return SASresults(obj1, self.sas, objname, nosub, log)
+
+            code = """
+            data _null_;
+               set {}._{}properties(where=(type NE 'Dir')) end=last;
+               if _n_ = 1  then
+                  put %upcase("libStart=");
+               put path;
+               if last then
+                  put %upcase("libEND=");
+            run;
+            """.format(objname, objname)
+            ll  = self.sas._io.submit(code, results='text')
+            #import pdb; pdb.set_trace()
+
+            if ll['LOG'].find("LIBSTART") and ll['LOG'].find("LIBEND"):
+               paths = ll['LOG'].rpartition('LIBEND=')[0].rpartition('LIBSTART=')[2][1:].splitlines()
+               all = {}
+               for path in paths:
+                  part    = path.rpartition('\\')
+                  curpath = '\\#'+part[2].rpartition('#')[2]+part[0]
+                  if curpath in all.keys():
+                     all[curpath] = all[curpath]+[part[2].rpartition('#')[0]]
+                  else:
+                     all[curpath] = [part[2].rpartition('#')[0]]
+
+               n_ren = []
+               for key in all.keys():
+                  nodup = []
+                  for row in all.keys():
+                     if key != row:
+                        tables = [x for x in all[key] if x in all[row] and x not in nodup]
+                        if len(tables):
+                           kp = key.split('\\')[1:]
+                           rp = row.split('\\')[1:]
+                           i  = len(kp)-1
+                           for name in tables:
+                              while i >= 0:
+                                 if kp[i] == rp[i]:
+                                    i -= 1
+                                    continue
+                                 else:
+                                    endpath = kp[0].replace('#', '')+'_'
+                                    if i == 0:
+                                       i = len(kp)-1
+                                    end = kp[i].find("'n")
+                                    if kp[i].startswith("'") and end > 0:
+                                       endpath  = kp[0].replace('#', '')+'_'
+                                       endpath += (kp[i][1:end]+kp[i][end+2:].replace('#', '')).translate(str.maketrans(' *','__'))
+                                    else:
+                                       endpath = kp[0].replace('#', '')+'_'+kp[i].replace('#', '')
+                                    break
+                              ren   = name[:(32 - (len(endpath)))].strip()+endpath
+                              spl   = key.find('\\',2)
+                              n     = key[spl:]+'\\'+name+key[1:spl]
+                              n_ren.append((n, ren))
+                           nodup += tables
+
+               if len(n_ren):
+                  code  = "proc document name={}.{}(update);\n".format(objname, objname)
+                  for name, ren in n_ren:
+                     if 'to '+ren+';' in code:
+                        res  = "Duplicate name found. Please open an Issue on the SASPy Github site with this error.\n"
+                        res += str(paths)+'\n\n'+str(n_ren)
+                        raise SASResultsError(res)
+                     else:
+                        code += "rename {} to {};\n".format(name, ren)
+                  code += "run;quit;"
+                  x     = self.sas._io.submit(code, results='text')
+
+            code = "%%mangobj2(%s,%s,'%s'n);" % (objname, objtype, data.table.replace("'", "''"))
             ll = self.sas._io.submit(code, "text")
             log = ll['LOG']
             error = SASProcCommons._errorLog(self, log)

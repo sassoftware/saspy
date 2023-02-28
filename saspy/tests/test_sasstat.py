@@ -18,23 +18,24 @@ except:
 from saspy.tests.util import Utilities
 
 class TestSASstat(unittest.TestCase):
-    @classmethod    
+    @classmethod
     def setUpClass(cls):
-        cls.sas = saspy.SASsession()
+        cls.sas = saspy.SASsession(autoexec='options mprint DLCREATEDIR;')
         util = Utilities(cls.sas)
         procNeeded=['reg', 'mixed', 'hpsplit', 'hplogistic', 'hpreg', 'glm', 'logistic', 'tpspline',
                     'hplogistic', 'hpreg', 'phreg', 'ttest', 'factor', 'mi']
         if not util.procFound(procNeeded):
             cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
-    @classmethod    
+    @classmethod
     def tearDownClass(cls):
         if cls.sas:
+           #print(cls.sas.saslog())
            cls.sas._endsas()
 
     def defineData(self):
         self.sas.submit("""
-                        data Myeloma;
+                        data work.Myeloma;
         input Time VStatus LogBUN HGB Platelet Age LogWBC Frac
              LogPBM Protein SCalc;
         label Time='Survival Time'
@@ -107,7 +108,7 @@ class TestSASstat(unittest.TestCase):
     77.00  0  1.0792  14.0  1  60  3.6812  0  0.9542   0  12
     ;;
     run;
-    data SocioEconomics;
+    data work.SocioEconomics;
    input Population School Employment Services HouseValue;
    datalines;
     5700     12.8      2500      270       25000
@@ -124,16 +125,16 @@ class TestSASstat(unittest.TestCase):
     9400     11.4      4000      100       13000
     ;;
     run;
-    
-    data time;
+
+    data work.time;
    input time @@;
    datalines;
     43  90  84  87  116   95  86   99   93  92
     121  71  66  98   79  102  60  112  105  98
     ;;
     run;
-    
-    data pressure;
+
+    data work.pressure;
    input SBPbefore SBPafter @@;
    datalines;
     120 128   124 131   130 131   118 127
@@ -156,7 +157,7 @@ class TestSASstat(unittest.TestCase):
              'RESIDUALHISTOGRAM', 'RESIDUALPLOT', 'RFPLOT', 'RSTUDENTBYLEVERAGE', 'RSTUDENTBYPREDICTED']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (reg) model failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_regResult1(self):
         stat = self.sas.sasstat()
@@ -198,18 +199,67 @@ class TestSASstat(unittest.TestCase):
              'RESIDUALPANEL', 'STUDENTPANEL', 'TESTS3']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u" Mixed failed to return correct objects. Expected:{0:s};  returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_smokeGLM(self):
         # Basic model returns objects
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("class", "sashelp")
         b = stat.glm(data=tr, model='weight=height')
-        a = ['DIAGNOSTICSPANEL', 'FITPLOT', 'FITSTATISTICS', 'LOG', 'MODELANOVA', 'NOBS', 'OVERALLANOVA',
-             'PARAMETERESTIMATES', 'RESIDUALPLOTS']
+        a = ['DIAGNOSTICSPANEL', 'FITPLOT', 'FITSTATISTICS', 'LOG', 'MODELANOVA1_WEIGHT1', 'MODELANOVA2_WEIGHT1',
+             'NOBS', 'OVERALLANOVA', 'PARAMETERESTIMATES', 'RESIDUALPLOTS']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u" GLM failed to return correct objects. Expected:{0:s};  returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
+
+    def test_namesGLM(self):
+        # validate multiple sets of samed named outputs
+        self.sas.submit("""
+                data work.snapbean;
+                   input S    V  replicate    x1   x2    x3     x4;
+                   datalines;
+                1.0  1.0        1.0  59.3  4.5  38.4  295.0
+                1.0  1.0        2.0  60.3  3.5  38.6  302.0
+                1.0  1.0        3.0  60.9  5.3  37.2  318.0
+                1.0  1.0        4.0  60.6  5.8  38.1  345.0
+                1.0  1.0        5.0  60.4  6.0  38.8  325.0
+                1.0  2.0        1.0  59.3  6.7  37.9  275.0
+                1.0  2.0        2.0  59.4  4.8  36.6  290.0
+                1.0  2.0        3.0  60.0  5.1  38.7  295.0
+                1.0  2.0        4.0  58.9  5.8  37.5  296.0
+                1.0  2.0        5.0  59.5  4.8  37.0  330.0
+                1.0  3.0        1.0  59.4  5.1  38.7  299.0
+                1.0  3.0        2.0  60.2  5.3  37.0  315.0
+                1.0  3.0        3.0  60.7  6.4  37.4  304.0
+                1.0  3.0        4.0  60.5  7.1  37.0  302.0
+                1.0  3.0        5.0  60.1  7.8  36.9  308.0
+                2.0  1.0        1.0  63.7  5.4  39.5  271.0
+                2.0  1.0        2.0  64.1  5.4  39.2  284.0
+                2.0  1.0        3.0  63.4  5.4  39.0  281.0
+                2.0  1.0        4.0  63.2  5.3  39.0  291.0
+                2.0  1.0        5.0  63.2  5.0  39.0  270.0
+                2.0  2.0        1.0  60.6  6.8  38.1  248.0
+                ;;
+                run;
+                """)
+
+        stat = self.sas.sasstat()
+        tr = self.sas.sasdata("snapbeans", "work")
+        b  = stat.glm(data = 'snapbean',
+                      cls = 'S V',
+                      model = 'x1 x2 x3 x4 = S V S*V',
+                      manova = 'H = S V S*V / PRINTE PRINTH MSTAT=exact'
+                     )
+        a = ['CHARSTRUCT1_S1', 'CHARSTRUCT1_S_V1', 'CHARSTRUCT1_V1', 'CLASSLEVELS', 'DIAGNOSTICSPANEL1_X11', 'DIAGNOSTICSPANEL1_X21',
+             'DIAGNOSTICSPANEL1_X31', 'DIAGNOSTICSPANEL1_X41', 'ERRORSSCP', 'FITSTATISTICS1_X11', 'FITSTATISTICS1_X21',
+             'FITSTATISTICS1_X31', 'FITSTATISTICS1_X41', 'HYPOTHESISSSCP1_S1', 'HYPOTHESISSSCP1_S_V1', 'HYPOTHESISSSCP1_V1',
+             'INTPLOT1_X11', 'INTPLOT1_X21', 'INTPLOT1_X31', 'INTPLOT1_X41', 'LOG', 'MODELANOVA1_X11', 'MODELANOVA1_X21',
+             'MODELANOVA1_X31', 'MODELANOVA1_X41', 'MODELANOVA2_X11', 'MODELANOVA2_X21', 'MODELANOVA2_X31', 'MODELANOVA2_X41',
+             'MULTSTAT1_S1', 'MULTSTAT1_S_V1', 'MULTSTAT1_V1', 'NOBS', 'OVERALLANOVA1_X11', 'OVERALLANOVA1_X21', 'OVERALLANOVA1_X31',
+             'OVERALLANOVA1_X41', 'PARTIALCORR']
+        self.assertEqual(sorted(a), sorted(b.__dir__()),
+                         msg=u" GLM failed to return correct objects. Expected:{0:s};  returned:{1:s}.".format(
+                             str(a), str(dir(b))))
 
     def test_smokeLogistic(self):
         # Basic model returns objects
@@ -245,7 +295,7 @@ class TestSASstat(unittest.TestCase):
              'OBSERVEDBYPREDICTED', 'QQPLOT', 'RESIDPANEL', 'RESIDUALBYPREDICTED', 'RESIDUALHISTOGRAM', 'RFPLOT']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u" TPSPLIE failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_tpspline2(self):
         # Basic model returns objects
@@ -276,7 +326,7 @@ class TestSASstat(unittest.TestCase):
              'SCOREPLOT']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"TPSPLINE failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_smokeHPLogistic(self):
         # Basic model returns objects
@@ -295,7 +345,7 @@ class TestSASstat(unittest.TestCase):
              'PARAMETERESTIMATES', 'PERFORMANCEINFO']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_selectionDict(self):
         # Basic model returns objects
@@ -304,11 +354,11 @@ class TestSASstat(unittest.TestCase):
         selDict = {'method':'stepwise'}
         b = stat.hpreg(data=tr, model='weight=height', selection= selDict)
         a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'FITSTATISTICS', 'LOG', 'MODELINFO', 'NOBS',
-             'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON', 
+             'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON',
              'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_selectionDict2(self):
         # Basic model returns objects
@@ -317,12 +367,13 @@ class TestSASstat(unittest.TestCase):
         # DETAILS=NONE | SUMMARY | ALL
         selDict = {'method':'forward', 'details':'ALL', 'maxeffects':'0'}
         b = stat.hpreg(data=tr, model='weight=height', selection= selDict)
-        a = ['ANOVA', 'DATAACCESSINFO', 'DIMENSIONS', 'ENTRYCANDIDATES', 'FITSTATISTICS', 'LOG', 
-             'MODELINFO', 'NOBS', 'PARAMETERESTIMATES', 'PERFORMANCEINFO', 'SELECTEDEFFECTS', 
-             'SELECTIONINFO', 'SELECTIONREASON', 'SELECTIONSUMMARY', 'STOPREASON']
+        a = ['ANOVA1_SELECTEDMODEL1', 'ANOVA1_STEP01', 'ANOVA1_STEP11', 'DATAACCESSINFO', 'DIMENSIONS', 'ENTRYCANDIDATES',
+             'FITSTATISTICS1_SELECTEDMODEL1', 'FITSTATISTICS1_STEP01', 'FITSTATISTICS1_STEP11', 'LOG', 'MODELINFO', 'NOBS',
+             'PARAMETERESTIMAT1_SELECTEDMODEL1', 'PARAMETERESTIMATES1_STEP01', 'PARAMETERESTIMATES1_STEP11', 'PERFORMANCEINFO',
+             'SELECTEDEFFECTS', 'SELECTIONINFO', 'SELECTIONREASON', 'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_selectionDict3(self):
         # Basic model returns objects
@@ -336,7 +387,7 @@ class TestSASstat(unittest.TestCase):
              'SELECTIONSUMMARY', 'STOPREASON']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_selectionDictError(self):
         # Basic model returns objects
@@ -348,7 +399,7 @@ class TestSASstat(unittest.TestCase):
         a = ['ERROR_LOG']
         self.assertEqual(sorted(a), sorted(b.__dir__()),
                          msg=u"Simple Regession (HPREG) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
 
     def test_missingVar(self):
         stat = self.sas.sasstat()
@@ -357,7 +408,7 @@ class TestSASstat(unittest.TestCase):
         a = ['ERROR_LOG']
         self.assertEqual(a, b.__dir__(),
                          msg=u"Simple Regession (mixed) model failed to return correct objects. Expected:{0:s}; Returned:{1:s}.".format(
-                             str(a), str(b)))
+                             str(a), str(dir(b))))
     """
     def test_extraStmt(self):
         # Extra Statements are ignored
@@ -365,7 +416,7 @@ class TestSASstat(unittest.TestCase):
         d = self.sas.sasdata('cars', 'sashelp')
         b = stat.hpsplit(data=d, target='MSRP / level=interval', architecture='MLP', hidden=100, input='enginesize--length', train='', procopts='maxdepth=3')
         a = stat.hpsplit(data=d, target='MSRP / level=interval', input='enginesize--length', procopts='maxdepth=3' )
-        self.assertEqual(a.__dir__(), b.__dir__(), msg=u"Extra Statements not being ignored expected:{0:s}  returned:{1:s}".format(str(a), str(b)))
+        self.assertEqual(a.__dir__(), b.__dir__(), msg=u"Extra Statements not being ignored expected:{0:s}  returned:{1:s}".format(str(a), str(dir(b))))
     """
 
     def test_multiTarget(self):
@@ -376,7 +427,7 @@ class TestSASstat(unittest.TestCase):
         x =  stat.hpsplit(data=nnin, target='MSRP origin', input='enginesize--length')
         a = ['ERROR_LOG']
         self.assertEqual(a, x.__dir__(), msg=u"Multiple target variables didn't fail in stat.hpsplit")
-  
+
     def test_outputDset(self):
         stat = self.sas.sasstat()
         tsave = self.sas.sasdata('tsave')

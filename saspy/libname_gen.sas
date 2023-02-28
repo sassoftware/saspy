@@ -28,7 +28,7 @@ options pagesize=max;
 */
 
 /*Take an ods document*/
-%macro mangobj(objname,objtype,d);
+%macro mangobj1(objname,objtype,d);
     data _null_;
         guid=uuidgen();
         tmpdir=dcreate(guid,getoption('work'));
@@ -46,12 +46,12 @@ options pagesize=max;
 
     proc document name=&objname..&objname.;
         ods output Properties=&objname.._&objname.properties;
-        list \(where=(_type_='Dir')) /levels=all;
+        list \ /levels=all;
     quit;
     filename file1 temp;
     data _null_;
         length path $1000;
-        set &objname.._&objname.properties end=last;
+        set &objname.._&objname.properties(where=(type ='Dir')) end=last;
         file file1;
         if _n_=1 then do;
             put "libname _&objname. sasedoc (";
@@ -64,6 +64,9 @@ options pagesize=max;
     run;
     /* concatenate all the directories in the ods document to the top level directory */
     %include file1;
+%mend mangobj1;
+
+%macro mangobj2(objname,objtype,d);
     /* Create a table of all the datasets using sashelp.vmember */
     data &objname.._&objname.filelist;
         length objtype $32 objname $32.;
@@ -73,10 +76,10 @@ options pagesize=max;
         objname="&objname";
         method=memname;
         keep objtype objname method;
-        if length(method)>1 then output;
+        if length(method)>1 and char(method, 1) NE '_' then output;
     run;
     ods listing;
-%mend mangobj;
+%mend mangobj2;
 *%mangobj(cars,reg,sashelp.cars);
 /*
 %let d=sashelp.cars;

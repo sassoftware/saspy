@@ -1071,7 +1071,8 @@ class SASdata:
             """
             code += graphics.format(out)
         code += "run; quit; %mend;\n"
-        code += "%%mangobj(%s,%s,'%s'n);" % (objname, objtype, self.table.replace("'", "''"))
+        code += "%%mangobj1(%s,%s,'%s'n);" % (objname, objtype, self.table.replace("'", "''"))
+        code += "%%mangobj2(%s,%s,'%s'n);" % (objname, objtype, self.table.replace("'", "''"))
 
         if self.sas.nosub:
             print(code)

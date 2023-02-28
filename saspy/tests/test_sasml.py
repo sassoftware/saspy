@@ -65,7 +65,7 @@ class TestSASml(unittest.TestCase):
     def testHP4scoreSmoke1(self):
         pass
 
-    def testHPclusterSmoke1(self):
+    def testHPclusSmoke1(self):
         ml = self.sas.sasml()
         dt = self.sas.sasdata("iris", "sashelp")
         out1 = ml.hpclus(data=dt,
