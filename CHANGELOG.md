@@ -12,6 +12,7 @@
 ### Changed
 
 -   `BREAK` This is a breaking change, thus the incrementation of the major digit of the Sematic Version.
+
 The analytic methods (which are really SAS Procs) return any number of results; they produce tables, graphs, plots,
 ... All of these results are (supposed to be) returned in the SASResults object. This object is implemented by having
 the proc code executed in a way that writes all output to an ODS Document. That is an Itemstore file created by SAS.
