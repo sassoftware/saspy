@@ -2,6 +2,75 @@
 
 
 
+## [5.0.0] - 2023-02-28
+
+### Added
+
+-   `None` Nothing added
+
+
+### Changed
+
+-   `BREAK` This is a breaking change, thus the incrementation of the major digit of the Sematic Version.
+The analytic methods (which are really SAS Procs) return any number of results; they produce tables, graphs, plots,
+... All of these results are (supposed to be) returned in the SASResults object. This object is implemented by having
+the proc code executed in a way that writes all output to an ODS Document. That is an Itemstore file created by SAS.
+It's like a blob store with an internal directory structure. There is also a libname engine that can access these
+stores, at the directory level. The proc generation code and the implementation of the SASResults object use the
+concatenation of all of the directories in the ODS document to access and return the various outputs from the
+procedure. Unfortunately, the original implementation of this never took into account the fact that many procs
+produce the same set of tables/plots/... for multiple criteria. The names of these objects are the same in each set,
+but stored in the document under different directories. A side effect of this is that accessing these through the
+concatenated libref only sees, and can only access, the first of occurrence of these same named members. That means
+that much of the actual output from these procs has NOT been returned and is NOT accessible from the SASResults
+object.
+
+To address this, I've had to learn how all of this works (this is the one part of saspy I didn't write), and rework
+how the SASResults object is implemented, including some overly complicated traversal and renaming of these members
+in the Document so that they can be returned and accessed via the SASResults object. Now all of the tables/plots/...
+will be returned and can be accessed. The change is that now the names of these members are comprised of their
+original names and part of the directory structure names (being limited to 32 chars) such that they can be easily
+identified as the results for the appropriate criteria.
+
+So, clearly, this is a breaking change for the cases where there were missing results and now the names of the
+results have been changed to allow the other missing results to be available. For member names that had no duplicate
+missing members, their names are not changed by this. That means that there are cases where this fix does not break
+any code; if you had hard coded names of the SASResults list of results. So, new members that had been missing
+previously will now be available when they hadn't previously. While names that didn't have missing duplicates won't
+change. So the only thing you have to do to your programs, is adjust the name of a result you're trying to access
+when that member has duplicates; as all of those members are renamed with the new algorithm. Remember, you get the
+list of results by executing `dir(SASResults_object)`.
+
+Hopefully fixing this to return the correct results is worth any code that has to be adjusted. I consider this to
+have been wrong to begin with, and so making it right outweighs my aversion to introducing a breaking change.
+
+
+-   `BREAK` This is a breaking change, thus the incrementation of the major digit of the Sematic Version.
+The SASml method `hpcluster' is renamed to be the correct Proc name of `hpclus', There is no proc named hpcluster
+and this being named wrong caused issues with the test cases, and there was a special check in the code to catch
+this name anc change it to be the correct proc name. So, since this release is already a breaking change to fix
+the SASResults for all of the procs, I figured it would be a good time to fix this one wrongly named proc/method.
+If you use `hpcluster` in your SASPy code, I'm afraid you'll need to delete the `ter` from it to address this change.
+
+
+### Fixed
+
+-   `Fixed` Fixed a number of problems in the test suits for the analytic procs. There were a number of test cases that
+failed and now pass correctly. There were Viya procs that never ran, even when connected to a Viya deployment. These
+previously failed regardless, and now they run and pass when connected to Viya. None of this affects user code, it's
+just cleaning up the test ware having to do with these Procs (analytic methods).
+
+This also includes re-benching all of the test cases where there were missing results. These all now have all of the
+results being returned and the tests now validate all of the correct results.
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+
 ## [4.7.0] - 2023-02-08
 
 ### Added
