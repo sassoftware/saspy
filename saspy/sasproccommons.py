@@ -652,14 +652,14 @@ class SASProcCommons:
 
             code = """
             data _null_;
-               set {}._{}properties(where=(type NE 'Dir')) end=last;
+               set {}._{}properties(where=(type NE 'Dir' and type NE {})) end=last;
                if _n_ = 1  then
                   put %upcase("libStart=");
                put path;
                if last then
                   put %upcase("libEND=");
             run;
-            """.format(objname, objname)
+            """.format(objname, objname, self.sas.pyenc[2])
             ll  = self.sas._io.submit(code, results='text')
             #import pdb; pdb.set_trace()
 
