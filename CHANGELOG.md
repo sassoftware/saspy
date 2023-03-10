@@ -2,7 +2,7 @@
 
 
 
-## [5.0.1] - 2023-03-10
+## [5.0.2] - 2023-03-10
 
 ### Added
 
@@ -17,7 +17,7 @@ This release of SASPy has a minimum pyproject.toml file which seems to be accept
 to see if the whole process, from PyPI to conda-forge all work with this change; thus this is the only change. If all
 works well, then great. If not, I'll scrap this and see what else is needed. Obviously I've tested this out and it works,
 other than seeing if PiPI and conda-forge have any issue; have to run it through those to see what comes out. I expect
-there to be no issue, but let's see.
+there to be no issue, but let's see. Well, v5.0.1 didn't build right for pypi, so take 2 with 5.0.2.
 
 
 ### Fixed
