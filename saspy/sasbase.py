@@ -513,6 +513,8 @@ class SASsession():
                  to running a saspy method that where you check it after. saspy does not reset it to False for you.
     - reconuri - the uri (token) for connecting back to the workspace server after you've disconnected. \
                  not needed unless connecting back from a different Python process; not the usual case.
+    - HTML_Style - This is the Style for ODS output, set from SAS_output_options {'style' : ''} value in your config file.
+                   You can change this value on the fly by setting the value for this attribute.
 
     """
     # SAS Epoch: 1960-01-01
@@ -609,20 +611,20 @@ class SASsession():
 
            if self.pyenc is not None:
               if self._io.sascfg.encoding != '':
-                 if self._io.sascfg.encoding.lower() not in self.pyenc[1]:
+                 if self._io.sascfg.encoding.lower() not in self.pyenc:
                     msg  = "The encoding value provided doesn't match the SAS session encoding.\n"
                     msg += "SAS encoding is "+self.sascei+". Specified encoding is "+self._io.sascfg.encoding+".\n"
-                    msg += "Using encoding "+self.pyenc[1][0]+" instead to avoid transcoding problems.\n"
+                    msg += "Using encoding "+self.pyenc[1]+" instead to avoid transcoding problems.\n"
                     logging.info(msg)
                     msg  = "You can override this change, if you think you must, by changing the encoding attribute of the SASsession object, as follows.\n"
                     msg += """If you had 'sas = saspy.SASsession(), then submit: "sas._io.sascfg.encoding='override_encoding'" to change it.\n"""
                     logging.debug(msg)
-                    self._io.sascfg.encoding = self.pyenc[1][0]
+                    self._io.sascfg.encoding = self.pyenc[1]
               else:
-                 self._io.sascfg.encoding = self.pyenc[1][0]
+                 self._io.sascfg.encoding = self.pyenc[1]
                  if self._io.sascfg.verbose:
                     msg  = "No encoding value provided. Will try to determine the correct encoding.\n"
-                    msg += "Setting encoding to "+self.pyenc[1][0]+" based upon the SAS session encoding value of "+self.sascei+".\n"
+                    msg += "Setting encoding to "+self.pyenc[1]+" based upon the SAS session encoding value of "+self.sascei+".\n"
                     logging.info(msg)
            else:
               msg  = "The SAS session encoding for this session ("+self.sascei+") doesn't have a known Python equivalent encoding.\n"
@@ -1011,11 +1013,11 @@ class SASsession():
         """
         macro_path = os.path.dirname(os.path.realpath(__file__))
         fd = os.open(macro_path + '/' + 'libname_gen.sas', os.O_RDONLY)
-        code  = b'options nosource;\n'
+        code = b'options nosource;\n'
         code += os.read(fd, 32767)
         code += b'\noptions source;'
-        code  = code.decode().format(self.pyenc[2])
-        self._io._asubmit(code, results='text')
+
+        self._io._asubmit(code.decode(), results='text')
         os.close(fd)
 
     def _render_html_or_log(self, ll):
@@ -2679,67 +2681,67 @@ sas_datetime_fmts = (
 )
 
 sas_encoding_mapping = {
-'arabic':      [1, ['iso8859_6', 'iso-8859-6', 'arabic'],                                                                                "'Dir'"      ], # No
-'big5':        [2, ['big5', 'big5-tw', 'csbig5'],                                                                                        "'Dir'"      ], # No
-'cyrillic':    [1, ['iso8859_5', 'iso-8859-5', 'cyrillic'],                                                                              "'Dir'"      ], # No
-'ebcdic037':   [1, ['cp037', 'ibm037', 'ibm039'],                                                                                        "'Dir'"      ], # No
-'ebcdic273':   [1, ['cp273', '273', 'ibm273', 'csibm273'],                                                                               "'Dir'"      ], # No
-'ebcdic500':   [1, ['cp500', 'ebcdic-cp-be', 'ebcdic-cp-ch', 'ibm500'],                                                                  "'Dir'"      ], # No                                                                          ],
-'euc-cn':      [2, ['gb2312', 'chinese', 'csiso58gb231280', 'euc-cn', 'euccn', 'eucgb2312-cn', 'gb2312-1980', 'gb2312-80', 'iso-ir-58'], "'C4BFC2BC'x"],
-'euc-jp':      [4, ['euc_jis_2004', 'jisx0213', 'eucjis2004'],                                                                           "'Dir'"      ], # No
-'euc-kr':      [4, ['euc_kr', 'euckr', 'korean', 'ksc5601', 'ks_c-5601', 'ks_c-5601-1987', 'ksx1001', 'ks_x-1001'],                      "'B5F0B7BAC5CDB8AE'x"],
-'greek':       [1, ['iso8859_7', 'iso-8859-7', 'greek', 'greek8'],                                                                       "'Dir'"      ], # No
-'hebrew':      [1, ['iso8859_8', 'iso-8859-8', 'hebrew'],                                                                                "'Dir'"      ], # No
-'ibm-949':     [1, ['cp949', '949', 'ms949', 'uhc'],                                                                                     "'Dir'"      ], # No
-'kz1048':      [1, ['kz1048', 'kz_1048', 'strk1048_2002', 'rk1048'],                                                                     "'Dir'"      ], # No
-'latin10':     [1, ['iso8859_16', 'iso-8859-16', 'latin10', 'l10'],                                                                      "'Dir'"      ], # No
-'latin1':      [1, ['latin_1', 'iso-8859-1', 'iso8859-1', '8859', 'cp819', 'latin', 'latin1', 'l1'],                                     "'Dir'"      ], # No
-'latin2':      [1, ['iso8859_2', 'iso-8859-2', 'latin2', 'l2'],                                                                          "'Dir'"      ], # No
-'latin3':      [1, ['iso8859_3', 'iso-8859-3', 'latin3', 'l3'],                                                                          "'Dir'"      ], # No
-'latin4':      [1, ['iso8859_4', 'iso-8859-4', 'latin4', 'l4'],                                                                          "'Dir'"      ], # No
-'latin5':      [1, ['iso8859_9', 'iso-8859-9', 'latin5', 'l5'],                                                                          "'Dir'"      ], # No
-'latin6':      [1, ['iso8859_10', 'iso-8859-10', 'latin6', 'l6'],                                                                        "'Dir'"      ], # No
-'latin7':      [1, ['iso8859_13', 'iso-8859-13', 'latin7', 'l7'],                                                                        "'Dir'"      ], # No
-'latin8':      [1, ['iso8859_14', 'iso-8859-14', 'latin8', 'l8'],                                                                        "'Dir'"      ], # No
-'latin9':      [1, ['iso8859_15', 'iso-8859-15', 'latin9', 'l9'],                                                                        "'Dir'"      ], # No
-'ms-932':      [2, ['cp932', '932', 'ms932', 'mskanji', 'ms-kanji'],                                                                     "'Dir'"      ], # No
-'msdos737':    [1, ['cp737'],                                                                                                            "'Dir'"      ], # No
-'msdos775':    [1, ['cp775', 'ibm775'],                                                                                                  "'Dir'"      ], # No
-'open_ed-1026':[1, ['cp1026', 'ibm1026'],                                                                                                "'Dir'"      ], # No
-'open_ed-1047':[1, ['cp1047'],                                                                                                           "'Dir'"      ], # No # Though this isn't available in base python, it's 3rd party
-'open_ed-1140':[1, ['cp1140', 'ibm1140'],                                                                                                "'Dir'"      ], # No
-'open_ed-424': [1, ['cp424', 'ebcdic-cp-he', 'ibm424'],                                                                                  "'Dir'"      ], # No
-'open_ed-875': [1, ['cp875'],                                                                                                            "'Dir'"      ], # No
-'pcoem437':    [1, ['cp437', '437', 'ibm437'],                                                                                           "'Dir'"      ], # No
-'pcoem850':    [1, ['cp850', '850', 'ibm850'],                                                                                           "'Dir'"      ], # No
-'pcoem852':    [1, ['cp852', '852', 'ibm852'],                                                                                           "'Dir'"      ], # No
-'pcoem857':    [1, ['cp857', '857', 'ibm857'],                                                                                           "'Dir'"      ], # No
-'pcoem858':    [1, ['cp858', '858', 'ibm858'],                                                                                           "'Dir'"      ], # No
-'pcoem860':    [1, ['cp860', '860', 'ibm860'],                                                                                           "'Dir'"      ], # No
-'pcoem862':    [1, ['cp862', '862', 'ibm862'],                                                                                           "'Dir'"      ], # No
-'pcoem863':    [1, ['cp863'],                                                                                                            "'Dir'"      ], # No
-'pcoem864':    [1, ['cp864', 'ibm864'],                                                                                                  "'Dir'"      ], # No
-'pcoem865':    [1, ['cp865', '865', 'ibm865'],                                                                                           "'Dir'"      ], # No
-'pcoem866':    [1, ['cp866', '866', 'ibm866'],                                                                                           "'Dir'"      ], # No
-'pcoem869':    [1, ['cp869', '869', 'cp-gr', 'ibm869'],                                                                                  "'Dir'"      ], # No
-'pcoem874':    [1, ['cp874'],                                                                                                            "'Dir'"      ], # No
-'shift-jis':   [2, ['shift_jis', 'csshiftjis', 'shiftjis', 'sjis', 's_jis'],                                                             "'Dir'"      ], # No
-'thai':        [1, ['iso8859_11', 'so-8859-11', 'thai'],                                                                                 "'Dir'"      ], # No
-'us-ascii':    [1, ['ascii', '646', 'us-ascii'],                                                                                         "'Dir'"      ], # No
-'utf-8':       [4, ['utf_8', 'u8', 'utf', 'utf8', 'utf-8'],                                                                              "'Dir'"      ], # No
-'warabic':     [1, ['cp1256', 'windows-1256'],                                                                                           "'Dir'"      ], # No
-'wbaltic':     [1, ['cp1257', 'windows-1257'],                                                                                           "'Dir'"      ], # No
-'wcyrillic':   [1, ['cp1251', 'windows-1251'],                                                                                           "'Dir'"      ], # No
-'wgreek':      [1, ['cp1253', 'windows-1253'],                                                                                           "'Dir'"      ], # No
-'whebrew':     [1, ['cp1255', 'windows-1255'],                                                                                           "'Dir'"      ], # No
-'wlatin1':     [1, ['cp1252', 'windows-1252'],                                                                                           "'Dir'"      ], # No
-'wlatin2':     [1, ['cp1250', 'windows-1250'],                                                                                           "'Dir'"      ], # No
-'wturkish':    [1, ['cp1254', 'windows-1254'],                                                                                           "'Dir'"      ], # No
-'wvietnamese': [1, ['cp1258', 'windows-1258'],                                                                                           "'Dir'"      ], # No
-'any':None,                                                                                                                            
-'dec-cn':None,                                                                                                                         
-'dec-jp':None,                                                                                                                         
-'dec-tw':None,                                                                                                                         
+'arabic':      [1, 'iso8859_6', 'iso-8859-6', 'arabic'],
+'big5':        [2, 'big5', 'big5-tw', 'csbig5'],
+'cyrillic':    [1, 'iso8859_5', 'iso-8859-5', 'cyrillic'],
+'ebcdic037':   [1, 'cp037', 'ibm037', 'ibm039'],
+'ebcdic273':   [1, 'cp273', '273', 'ibm273', 'csibm273'],
+'ebcdic500':   [1, 'cp500', 'ebcdic-cp-be', 'ebcdic-cp-ch', 'ibm500'],
+'euc-cn':      [2, 'gb2312', 'chinese', 'csiso58gb231280', 'euc-cn', 'euccn', 'eucgb2312-cn', 'gb2312-1980', 'gb2312-80', 'iso-ir-58'],
+'euc-jp':      [4, 'euc_jis_2004', 'jisx0213', 'eucjis2004'],
+'euc-kr':      [4, 'euc_kr', 'euckr', 'korean', 'ksc5601', 'ks_c-5601', 'ks_c-5601-1987', 'ksx1001', 'ks_x-1001'],
+'greek':       [1, 'iso8859_7', 'iso-8859-7', 'greek', 'greek8'],
+'hebrew':      [1, 'iso8859_8', 'iso-8859-8', 'hebrew'],
+'ibm-949':     [1, 'cp949', '949', 'ms949', 'uhc'],
+'kz1048':      [1, 'kz1048', 'kz_1048', 'strk1048_2002', 'rk1048'],
+'latin10':     [1, 'iso8859_16', 'iso-8859-16', 'latin10', 'l10'],
+'latin1':      [1, 'latin_1', 'iso-8859-1', 'iso8859-1', '8859', 'cp819', 'latin', 'latin1', 'l1'],
+'latin2':      [1, 'iso8859_2', 'iso-8859-2', 'latin2', 'l2'],
+'latin3':      [1, 'iso8859_3', 'iso-8859-3', 'latin3', 'l3'],
+'latin4':      [1, 'iso8859_4', 'iso-8859-4', 'latin4', 'l4'],
+'latin5':      [1, 'iso8859_9', 'iso-8859-9', 'latin5', 'l5'],
+'latin6':      [1, 'iso8859_10', 'iso-8859-10', 'latin6', 'l6'],
+'latin7':      [1, 'iso8859_13', 'iso-8859-13', 'latin7', 'l7'],
+'latin8':      [1, 'iso8859_14', 'iso-8859-14', 'latin8', 'l8'],
+'latin9':      [1, 'iso8859_15', 'iso-8859-15', 'latin9', 'l9'],
+'ms-932':      [2, 'cp932', '932', 'ms932', 'mskanji', 'ms-kanji'],
+'msdos737':    [1, 'cp737'],
+'msdos775':    [1, 'cp775', 'ibm775'],
+'open_ed-1026':[1, 'cp1026', 'ibm1026'],
+'open_ed-1047':[1, 'cp1047'],              # Though this isn't available in base python, it's 3rd party
+'open_ed-1140':[1, 'cp1140', 'ibm1140'],
+'open_ed-424': [1, 'cp424', 'ebcdic-cp-he', 'ibm424'],
+'open_ed-875': [1, 'cp875'],
+'pcoem437':    [1, 'cp437', '437', 'ibm437'],
+'pcoem850':    [1, 'cp850', '850', 'ibm850'],
+'pcoem852':    [1, 'cp852', '852', 'ibm852'],
+'pcoem857':    [1, 'cp857', '857', 'ibm857'],
+'pcoem858':    [1, 'cp858', '858', 'ibm858'],
+'pcoem860':    [1, 'cp860', '860', 'ibm860'],
+'pcoem862':    [1, 'cp862', '862', 'ibm862'],
+'pcoem863':    [1, 'cp863'],
+'pcoem864':    [1, 'cp864', 'ibm864'],
+'pcoem865':    [1, 'cp865', '865', 'ibm865'],
+'pcoem866':    [1, 'cp866', '866', 'ibm866'],
+'pcoem869':    [1, 'cp869', '869', 'cp-gr', 'ibm869'],
+'pcoem874':    [1, 'cp874'],
+'shift-jis':   [2, 'shift_jis', 'csshiftjis', 'shiftjis', 'sjis', 's_jis'],
+'thai':        [1, 'iso8859_11', 'so-8859-11', 'thai'],
+'us-ascii':    [1, 'ascii', '646', 'us-ascii'],
+'utf-8':       [4, 'utf_8', 'u8', 'utf', 'utf8', 'utf-8'],
+'warabic':     [1, 'cp1256', 'windows-1256'],
+'wbaltic':     [1, 'cp1257', 'windows-1257'],
+'wcyrillic':   [1, 'cp1251', 'windows-1251'],
+'wgreek':      [1, 'cp1253', 'windows-1253'],
+'whebrew':     [1, 'cp1255', 'windows-1255'],
+'wlatin1':     [1, 'cp1252', 'windows-1252'],
+'wlatin2':     [1, 'cp1250', 'windows-1250'],
+'wturkish':    [1, 'cp1254', 'windows-1254'],
+'wvietnamese': [1, 'cp1258', 'windows-1258'],
+'any':None,
+'dec-cn':None,
+'dec-jp':None,
+'dec-tw':None,
 'ebcdic1025':None,
 'ebcdic1026':None,
 'ebcdic1047':None,

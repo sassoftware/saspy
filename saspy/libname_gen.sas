@@ -51,7 +51,7 @@ options pagesize=max;
     filename file1 temp;
     data _null_;
         length path $1000;
-        set &objname.._&objname.properties(where=(type = 'Dir' or type = {})) end=last;
+        set &objname.._&objname.properties(where=(type = 'Dir')) end=last;
         file file1;
         if _n_=1 then do;
             put "libname _&objname. sasedoc (";
