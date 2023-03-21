@@ -527,11 +527,7 @@ or change their value. The others you should NOT change, for obvious reasons.</p
 <li><p>hostsep - simply a forward slash for linux systems and a backslash on windows clients; just for convenience</p></li>
 <li><p>check_error_log - Boolean that identifies an ERROR has been found in the SASLOG. You should set this to False prior                  to running a saspy method that where you check it after. saspy does not reset it to False for you.</p></li>
 <li><p>reconuri - the uri (token) for connecting back to the workspace server after you’ve disconnected.                  not needed unless connecting back from a different Python process; not the usual case.</p></li>
-<li><dl class="simple">
-<dt>HTML_Style - This is the Style for ODS output, set from SAS_output_options {‘style’<span class="classifier">‘’} value in your config file.</span></dt><dd><p>You can change this value on the fly by setting the value for this attribute.</p>
-</dd>
-</dl>
-</li>
+<li><p>HTML_Style - This is the Style for ODS output, set from SAS_output_options {‘style’ : ‘’} value in your config file.                    You can change this value on the fly by setting the value for this attribute.</p></li>
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="saspy.SASsession.SYSERR">
