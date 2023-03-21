@@ -513,7 +513,7 @@ class SASsession():
                  to running a saspy method that where you check it after. saspy does not reset it to False for you.
     - reconuri - the uri (token) for connecting back to the workspace server after you've disconnected. \
                  not needed unless connecting back from a different Python process; not the usual case.
-    - HTML_Style - This is the Style for ODS output, set from SAS_output_options {'style' : ''} value in your config file.
+    - HTML_Style - This is the Style for ODS output, set from SAS_output_options {'style' : ''} value in your config file. \
                    You can change this value on the fly by setting the value for this attribute.
 
     """
