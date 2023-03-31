@@ -1022,7 +1022,7 @@ jwt -
 
 .. code-block:: ipython3
 
-    httpsviya = {'ip'      : 'sastpw.rndk8s.openstack.sas.com',
+    httpsviya = {'url'     : 'https://viya.deployment.sas.com',
                  'context' : 'Data Mining compute context'
                  'authkey' : 'viya_user-pw',
                  'options' : ["fullstimer", "memsize=1G"]
