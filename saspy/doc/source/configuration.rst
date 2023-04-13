@@ -966,7 +966,8 @@ ssl -
     the port is not specified. If set to False, it will default to port 80, if the port is not specified.
     Note that depending upon the version of python, certificate verification may or may not be required, later version are more strict.
     See the python doc for your version if this is a concern.
-cafile - specifies the location of the Viya CA Certificate your Viya admin provided from the Viya deployment so the client
+cafile -
+    specifies the location of the Viya CA Certificate your Viya admin provided from the Viya deployment so the client
     HTTPS connection can verify the CA against the Viya server. Not needed if that certificate has been incorporated into your default
     certificate used on your client machine.
 verify -
