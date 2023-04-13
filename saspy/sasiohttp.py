@@ -22,6 +22,7 @@ import sys
 import urllib
 import warnings
 import io
+import ssl
 
 import tempfile as tf
 from time import sleep
@@ -59,7 +60,8 @@ class SASconfigHTTP:
       self.ctx       = {}
       self.options   = cfg.get('options', [])
       self.ssl       = cfg.get('ssl', True)
-      self.verify    = cfg.get('verify', True)
+      self.cafile    = cfg.get('cafile', None)
+      self.verify    = cfg.get('verify', None)
       self.timeout   = cfg.get('timeout', None)
       user           = cfg.get('user', '')
       pw             = cfg.get('pw', '')
@@ -225,6 +227,13 @@ class SASconfigHTTP:
          else:
             self.ssl = bool(inssl)
 
+      incaf = kwargs.get('cafile', None)
+      if incaf is not None:
+         if lock and self.cafile:
+            logger.warning("Parameter 'cafile' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.cafile = incaf
+
       inver = kwargs.get('verify', None)
       if inver is not None:
          if lock and self.verify:
@@ -356,16 +365,28 @@ class SASconfigHTTP:
 
       # get Connections
       if self.ssl:
-         if self.verify:
+         sslctx = ssl.create_default_context(cafile=self.cafile)
+         if   self.verify is None:
             # handle having self signed certificate default on Viya w/out copies on client; still ssl, just not verifiable
             try:
-               self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout); self.REFConn.connect();  self.REFConn.close()
-               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout); self.HTTPConn.connect(); self.HTTPConn.close()
+               self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=sslctx)
+               self.REFConn.connect();  self.REFConn.close()
+               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=sslctx)
+               self.HTTPConn.connect(); self.HTTPConn.close()
             except ssl.SSLError as e:
                logger.warning("SSL certificate verification failed, creating an unverified SSL connection. Error was:"+str(e))
                self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
                self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
                logger.warning("You can set 'verify=False' to get rid of this message ")
+         elif self.verify:
+            try:
+               self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=sslctx)
+               self.REFConn.connect();  self.REFConn.close()
+               self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=sslctx)
+               self.HTTPConn.connect(); self.HTTPConn.close()
+            except ssl.SSLError as e:
+               logger.error("SSL certificate verification failed and verify was True; no connection established.\nError was:"+str(e))
+               raise SASHTTPconnectionError(msg="SSL certificate verification failed and verify was True; no connection established.")
          else:
             self.REFConn  = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
             self.HTTPConn = hc.HTTPSConnection(self.ip, self.port, timeout=self.timeout, context=ssl._create_unverified_context())
@@ -385,7 +406,7 @@ class SASconfigHTTP:
 
       if not self._token:
          logger.error("Could not acquire an Authentication Token")
-         return
+         raise SASHTTPconnectionError(msg="Could not acquire an Authentication Token. No connection established.")
 
       # GET Contexts
       contexts = self._get_contexts()

@@ -925,6 +925,28 @@ them here, as they are mutually exclusive. You use only one of the various means
 Again, only use one of these and don't mix using config keys from more than one for a given connection.
 
 
+SSL/TLS:
+
+When Viya is configured to use TLS (HTTPS not HTTP), then the expectation is that the CA Certificate from the Viya
+deployment must match with those on the client side. The easy way is to make Viya use existing CA Certs that your site
+already has, then it all works and HTTPS can verify the certs and establish a trusted connection. All of this is Viya
+administration work, nothing an end user needs to deal with. However, if your site uses Certificates from Viya, then
+the Viya Certificate (a .pem file) must be downloaded and then the contents of that .pem file be appended to the existing
+default .pem certificate that your client machine already uses so that the HTTPS connection can Verify the certificate against
+theViya deployment. There's some doc in the admin guide about this
+(https://go.documentation.sas.com/doc/en/sasadmincdc/v_038/calencryptmotion/n1xdqv1sezyrahn17erzcunxwix9.htm#p1umnmdi53qfjnn17wqb5aqb8ncx)
+but again, that's not something an end user needs to read. It does mean that the Viya admin team should be able to get you
+the .pem file from Viya for you to save on your client machine. Since appending it to the default .pem file used by
+https on your machine is likely something you can't do anyway (some sites have IT set all of this up so you don't have to),
+there is a new configuration key `cafile` with which you can specify the full path to this .pem file and that will make
+https use that certificate to Verify that client certificate against Viya's server certificate when making the connection.
+If the Certificate can't be verified, or you don't have this certificate, the default certificate can be used, just not verified,
+and will still provide TLS Encryption. The original certificates in older Viya deployments were just self-signed certificates and thus
+couldn't be verified (thus the need for the `verify` key below to get rid of the message about that). If you set Verify to
+True, then if the certificate can't be verified the connection fails. False just connects without trying to verify it.
+And the default is still to try but if it can't be verified then connect unverified. In any case, Encryption is still enabled.
+The `cafile` key is new in release 5.1.0.
+
 
 The keys for this configuration definition dictionary are:
 
@@ -944,8 +966,11 @@ ssl -
     the port is not specified. If set to False, it will default to port 80, if the port is not specified.
     Note that depending upon the version of python, certificate verification may or may not be required, later version are more strict.
     See the python doc for your version if this is a concern.
+cafile - specifies the location of the Viya CA Certificate your Viya admin provided from the Viya deployment so the client
+    HTTPS connection can verify the CA against the Viya server. Not needed if that certificate has been incorporated into your default
+    certificate used on your client machine.
 verify -
-    (Optional) Also note that if Viya uses the default self signed ssl certificates it ships with, you will not be able to verify them,
+    (Optional) Also note that if Viya uses the default self-signed ssl certificates it ships with, you will not be able to verify them,
     but that can be fine, and you can still use an ssl connection. You can use set 'verify' : False, in your config to
     turn off verification for this case.
 
