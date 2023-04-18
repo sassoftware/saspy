@@ -573,10 +573,25 @@ If you require the 3 encryption jars, shown below, they still need to be acquire
 put in the saspy/java/iomclient directory of the saspy install (where the 4 included jars are) so they will be included
 in the classpath for you.
 
+
+SAS IOM client Encryption Jars
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note:: ATTN: SAS ODA Users!! SAS/On Demand for Academics (ODA) has recently upgraded their SAS server environment to use SAS 9.40M7!
+          This means that the 3 encryption jars are now required in order to be able to connect; they use AES encryption, and even with Java 8,
+          you can no longer connect without these jars in the deployment. Since you don'tnecessarily have a SAS deployment to get these
+          jars from, you can download them from the following location. Download, unzip and then copy them to the java/iomclient directory
+          of the SASPy deployment, as explained above.
+          Encryption jar download: `https://support.sas.com/downloads <https://support.sas.com/downloads/package.htm?pid=2494>`_.
+
+
 Note that for AES encryption, at least prior to SAS 9.4M7, Java 8 (release greater than 151), has the needed
 support in it, so if your workspace server is configured for AES, just having a current version of Java 8 or
 higher will allow it to work, without needing the 3 encryption jars. That doesn't work w/ M7 however, so you
 would need the encryption jars when connecting to M7.
+
+As noted inthe section above, you simply need to copy these 3 jars into the saspy/java/iomclient directory of the saspy install
+location (where the 4 included jars are) so they will be included in the classpath for you.
 
 The 3 encryption jars, if needed, can be found in a SAS deployment in a location similar to, but not exactly the
 same as, the following. If you get any error about encryption, adding these 3 jars is the proper way to address it.
@@ -586,14 +601,6 @@ same as, the following. If you get any error about encryption, adding these 3 ja
     $SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil_904600.0.0.20181017190000_v940m6/sas.rutil.jar
     $SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil.nls_904600.0.0.20181017190000_v940m6/sas.rutil.nls.jar
     $SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_20121211183517/sastpj.rutil.jar
-
-
-.. note:: ATTN: SAS ODA Users!! SAS/On Demand for Academics (ODA) has recently upgraded their SAS server environment to use SAS 9.40M7!
-          This means that the 3 encryption jars are now required in order to be able to connect; they use AES encryption, and even with Java 8,
-          you can no longer connect without these jars in the deployment. Since you don'tnecessarily have a SAS deployment to get these
-          jars from, you can download them from the following location. Download, unzip and then copy them to the java/iomclient directory
-          of the SASPy deployment, as explained above.
-          Encryption jar download: `https://support.sas.com/downloads <https://support.sas.com/downloads/package.htm?pid=2494>`_.
 
 
 
