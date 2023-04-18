@@ -54,6 +54,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#authentication">Authentication:</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#attn-log4j-vulnerabilities-found-in-dec-2021">ATTN, log4j vulnerabilities found in Dec 2021</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file">ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sas-iom-client-encryption-jars">SAS IOM client Encryption Jars</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-authinfo-file-authinfo-on-windows">The .authinfo file (_authinfo on Windows)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#remote">Remote</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#local">Local</a></li>
@@ -874,17 +875,9 @@ thirdparty CORBA jars will be automatically provided as the classpath by saspy. 
 If you require the 3 encryption jars, shown below, they still need to be acquired from your SAS deployment, and then
 put in the saspy/java/iomclient directory of the saspy install (where the 4 included jars are) so they will be included
 in the classpath for you.</p>
-<p>Note that for AES encryption, at least prior to SAS 9.4M7, Java 8 (release greater than 151), has the needed
-support in it, so if your workspace server is configured for AES, just having a current version of Java 8 or
-higher will allow it to work, without needing the 3 encryption jars. That doesn’t work w/ M7 however, so you
-would need the encryption jars when connecting to M7.</p>
-<p>The 3 encryption jars, if needed, can be found in a SAS deployment in a location similar to, but not exactly the
-same as, the following. If you get any error about encryption, adding these 3 jars is the proper way to address it.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil_904600.0.0.20181017190000_v940m6/sas.rutil.jar
-$SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil.nls_904600.0.0.20181017190000_v940m6/sas.rutil.nls.jar
-$SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_20121211183517/sastpj.rutil.jar
-</pre></div>
-</div>
+</section>
+<section id="sas-iom-client-encryption-jars">
+<h3>SAS IOM client Encryption Jars<a class="headerlink" href="#sas-iom-client-encryption-jars" title="Permalink to this heading">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>ATTN: SAS ODA Users!! SAS/On Demand for Academics (ODA) has recently upgraded their SAS server environment to use SAS 9.40M7!
@@ -893,6 +886,19 @@ you can no longer connect without these jars in the deployment. Since you don’
 jars from, you can download them from the following location. Download, unzip and then copy them to the java/iomclient directory
 of the SASPy deployment, as explained above.
 Encryption jar download: <a class="reference external" href="https://support.sas.com/downloads/package.htm?pid=2494">https://support.sas.com/downloads</a>.</p>
+</div>
+<p>Note that for AES encryption, at least prior to SAS 9.4M7, Java 8 (release greater than 151), has the needed
+support in it, so if your workspace server is configured for AES, just having a current version of Java 8 or
+higher will allow it to work, without needing the 3 encryption jars. That doesn’t work w/ M7 however, so you
+would need the encryption jars when connecting to M7.</p>
+<p>As noted inthe section above, you simply need to copy these 3 jars into the saspy/java/iomclient directory of the saspy install
+location (where the 4 included jars are) so they will be included in the classpath for you.</p>
+<p>The 3 encryption jars, if needed, can be found in a SAS deployment in a location similar to, but not exactly the
+same as, the following. If you get any error about encryption, adding these 3 jars is the proper way to address it.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil_904600.0.0.20181017190000_v940m6/sas.rutil.jar
+$SASHome/SASVersionedJarRepository/eclipse/plugins/sas.rutil.nls_904600.0.0.20181017190000_v940m6/sas.rutil.nls.jar
+$SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_20121211183517/sastpj.rutil.jar
+</pre></div>
 </div>
 </section>
 <section id="the-authinfo-file-authinfo-on-windows">
