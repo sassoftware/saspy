@@ -36,9 +36,8 @@ try:
 except ImportError:
    pass
 
-if os.name == 'nt':
-   from queue     import Queue, Empty
-   from threading import Thread
+from queue     import Queue, Empty
+from threading import Thread
 
 class SASconfigSTDIO:
    """
@@ -442,20 +441,31 @@ Will use HTML5 for this SASsession.""")
             self.te.start()
             self.stdin  = self.pid.stdin
       else:
-         self.pid    = pidpty[0]
-         self.stdin  = os.fdopen(pin[PIPE_WRITE], mode='wb')
-         self.stderr = os.fdopen(perr[PIPE_READ], mode='rb')
-         self.stdout = os.fdopen(pout[PIPE_READ], mode='rb')
+         self.pid     = pidpty[0]
+         self.stdin   = os.fdopen(pin[PIPE_WRITE], mode='wb')
+         self.stdoutp = os.fdopen(pout[PIPE_READ], mode='rb')
+         self.stderrp = os.fdopen(perr[PIPE_READ], mode='rb')
 
-         fcntl.fcntl(self.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
-         fcntl.fcntl(self.stderr, fcntl.F_SETFL, os.O_NONBLOCK)
+         # to fix deadlock when submitting a huge amount of code, which is written to stderr and blocks
+         # stdin, so we deadlock, use the queue's and read/write threads to asynch read so we don't block
+         #fcntl.fcntl(self.stdoutp, fcntl.F_SETFL, os.O_NONBLOCK)
+         #fcntl.fcntl(self.stderrp, fcntl.F_SETFL, os.O_NONBLOCK)
 
          rc = os.waitpid(self.pid, os.WNOHANG)
          if rc[0] != 0:
             self.pid = None
             self._sb.SASpid = None
-            lst = self.stdout.read1(4096)
+            lst = self.stdoutp.read1(4096000)
             logger.error("stdout from subprocess is:\n"+lst.decode())
+         else:
+            self.stdout = Queue()
+            self.stderr = Queue()
+            self.to = Thread(target=self._read_out, args=())
+            self.te = Thread(target=self._read_err, args=())
+            self.to.daemon = True
+            self.te.daemon = True
+            self.to.start()
+            self.te.start()
 
       if self.pid is None:
          msg  = "SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n"
@@ -484,17 +494,32 @@ Will use HTML5 for this SASsession.""")
    if os.name == 'nt':
       def _read_out(self):
          while True:
-            lst = self.pid.stdout.read(4096)
+            lst = self.pid.stdout.read(4096000)
             if lst == b'':
                break
             self.stdout.put(lst)
 
       def _read_err(self):
          while True:
-            log = self.pid.stderr.read(4096)
+            log = self.pid.stderr.read(4096000)
             if log == b'':
                break
             self.stderr.put(log)
+   else:
+      def _read_out(self):
+         while True:
+            lst = self.stdoutp.read1(4096000)
+            if lst == b'':
+               break
+            self.stdout.put(lst)
+
+      def _read_err(self):
+         while True:
+            log = self.stderrp.read1(4096000)
+            if log == b'':
+               break
+            self.stderr.put(log)
+
 
    def _endsas(self):
       rc  = 0
@@ -511,6 +536,11 @@ Will use HTML5 for this SASsession.""")
             out = self.stdin.write(code)
             self.stdin.flush()
          sleep(1)
+
+         try:
+            self._log += self.stderr.get_nowait().decode(self.sascfg.encoding, errors='replace').replace(chr(12), chr(10))
+         except Empty:
+            pass
 
          if self.pid:
             if os.name == 'nt':
@@ -542,6 +572,8 @@ Will use HTML5 for this SASsession.""")
                   if self.sascfg.verbose:
                      logger.warning("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
                   os.kill(self.pid, signal.SIGKILL)
+               self.to.join(5)
+               self.te.join(5)
 
          if self.sascfg.verbose:
             logger.info("SAS Connection terminated. Subprocess id was "+str(pid))
@@ -577,13 +609,10 @@ Will use HTML5 for this SASsession.""")
             return 'SAS process has terminated unexpectedly. Pid State= '+str(rc)
 
       while True:
-         if os.name == 'nt':
-            try:
-               log = self.stderr.get_nowait()
-            except Empty:
-               log = b''
-         else:
-            log = self.stderr.read1(4096)
+         try:
+            log = self.stderr.get_nowait()
+         except Empty:
+            log = b''
          if len(log) > 0:
             logf += log
          else:
@@ -592,7 +621,7 @@ Will use HTML5 for this SASsession.""")
                break
             sleep(0.5)
 
-      x = logf.decode(self.sascfg.encoding, errors='replace').replace(code1, " ")
+      x = logf.decode(self.sascfg.encoding, errors='replace').replace(code1, " ").replace(chr(12), chr(10))
       self._log += x
 
       if self._checkLogForError(x):
@@ -626,13 +655,10 @@ Will use HTML5 for this SASsession.""")
       lenf = 0
 
       while True:
-         if os.name == 'nt':
-            try:
-               lst = self.stdout.get_nowait()
-            except Empty:
-               lst = b''
-         else:
-            lst = self.stdout.read1(4096)
+         try:
+            lst = self.stdout.get_nowait()
+         except Empty:
+            lst = b''
          if len(lst) > 0:
             lstf += lst
 
@@ -684,13 +710,10 @@ Will use HTML5 for this SASsession.""")
       self._asubmit("data _null_;file print;put 'Tom was here';run;", "text")
 
       while True:
-         if os.name == 'nt':
-            try:
-               lst = self.stdout.get_nowait()
-            except Empty:
-               lst = b''
-         else:
-            lst = self.stdout.read1(4096)
+         try:
+            lst = self.stdout.get_nowait()
+         except Empty:
+            lst = b''
          if len(lst) > 0:
             lstf += lst
 
@@ -889,7 +912,7 @@ Will use HTML5 for this SASsession.""")
                   if rc[0] != 0:
                      log = b''
                      try:
-                        log = self.stderr.read1(4096)
+                        log = self.stderr.get_nowait()
                         if len(log) > 0:
                             logf += log
                         self._log += logf.decode(self.sascfg.encoding, errors='replace')
@@ -911,13 +934,10 @@ Will use HTML5 for this SASsession.""")
                   break
 
                while True:
-                  if os.name == 'nt':
-                     try:
-                        lst = self.stdout.get_nowait()
-                     except Empty:
-                        lst = b''
-                  else:
-                     lst = self.stdout.read1(4096000)
+                  try:
+                     lst = self.stdout.get_nowait()
+                  except Empty:
+                     lst = b''
 
                   if len(lst) > 0:
                      wait = False
@@ -928,13 +948,10 @@ Will use HTML5 for this SASsession.""")
                      break
 
                while True:
-                  if os.name == 'nt':
-                     try:
-                        log = self.stderr.get_nowait()
-                     except Empty:
-                        log = b''
-                  else:
-                     log = self.stderr.read1(4096000)
+                  try:
+                     log = self.stderr.get_nowait()
+                  except Empty:
+                     log = b''
 
                   if len(log) > 0:
                      wait = False
@@ -988,19 +1005,15 @@ Will use HTML5 for this SASsession.""")
 
          except (ConnectionResetError):
             log = ''
-            if os.name == 'nt':
-               try:
-                  log = self.stderr.get_nowait()
-               except Empty:
-                  log = b''
-            else:
-               try:
-                  log = self.stderr.read1(4096)
-                  if len(log) > 0:
-                     logf += log
-                  self._log += logf.decode(self.sascfg.encoding, errors='replace')
-               except:
-                  pass
+            try:
+               log = self.stderr.get_nowait()
+            except Empty:
+               log = b''
+
+            if len(log) > 0:
+               logf += log
+               self._log += logf.decode(self.sascfg.encoding, errors='replace')
+
             rc = 0
             if os.name == 'nt':
                try:
@@ -1092,7 +1105,7 @@ Will use HTML5 for this SASsession.""")
                   outrc = str(rc)
                   return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+outrc, LST='',ABORT=True)
 
-            lst = self.stdout.read1(4096)
+            lst = self.stdout.get_nowait()
             if len(lst) > 0:
                 lsts = lst.rpartition(b'Select:')
                 if lsts[0] != b'' and lsts[1] != b'':
@@ -1135,7 +1148,7 @@ Will use HTML5 for this SASsession.""")
             else:
                 if bc:
                    break
-                log = self.stderr.read1(4096)
+                log = self.stderr.get_nowait()
                 logf += log
                 self._log += log.decode(self.sascfg.encoding, errors='replace')
 
@@ -1206,9 +1219,9 @@ Will use HTML5 for this SASsession.""")
                   pass
 
             sleep(.25)
-            lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
+            lst = self.stdout.get_nowait().decode(self.sascfg.encoding, errors='replace')
          else:
-            log = self.stderr.read1(4096).decode(self.sascfg.encoding, errors='replace')
+            log = self.stderr.get_nowait().decode(self.sascfg.encoding, errors='replace')
             self._log += log
             logn = self._logcnt(False)
 
@@ -1221,7 +1234,7 @@ Will use HTML5 for this SASsession.""")
                break
 
             sleep(.25)
-            lst = self.stdout.read1(4096).decode(self.sascfg.encoding, errors='replace')
+            lst = self.stdout.get_nowait().decode(self.sascfg.encoding, errors='replace')
 
       return log
 
@@ -2037,13 +2050,10 @@ Will use HTML5 for this SASsession.""")
                send -= sent
             code = ""
 
-            if os.name == 'nt':
-               try:
-                  log = self.stderr.get_nowait()
-               except Empty:
-                  log = b''
-            else:
-               log = self.stderr.read1(4096)
+            try:
+               log = self.stderr.get_nowait()
+            except Empty:
+               log = b''
 
             if len(log) > 0:
                logf += log
