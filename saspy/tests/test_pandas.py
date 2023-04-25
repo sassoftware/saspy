@@ -225,6 +225,27 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         self.assertTrue(df.equals(x))
         sde.delete(); del(sde); del(x); del(df)
 
+    def test_long_datastep_code(self):
+        """
+        Test from issue #541 with deadlock in the STDIO Access Method
+        """
+        x = self.sas.submit('''
+        data work.a; array x{4049} x0001-x4049;
+           do i = 1 to 4049;
+              x{i} = i;
+           end;
+           output;
+        run;
+        ''')
+
+        sd = self.sas.sasdata('a', 'work')
+        df = sd.to_df()
+        #print(df)
+        sd2 = self.sas.df2sd(df)
+
+        self.assertTrue(df.equals(sd2.to_df()))
+        sd.delete(); del(sd); sd2.delete(); del(sd2); del(x); del(df)
+
 
 class TestPandasValidVarname(unittest.TestCase):
     @classmethod
