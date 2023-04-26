@@ -7,9 +7,13 @@ This package installs just like any other Python package.
 It is a pure Python package and works with Python 3.x
 installations. To install the latest version using `pip`, you execute the following::
 
+.. code-block:: ipython3
+
     pip install saspy
 
 or, for a specific release::
+
+.. code-block:: ipython3
 
     pip install http://github.com/sassoftware/saspy/releases/saspy-X.X.X.tar.gz
 
@@ -19,6 +23,8 @@ or, for a given branch (put the name of the branch after @)::
 
 The best way to update and existing deployment to the latest SASPy version is to simply
 uninstall and then install, picking up the latest production version from PyPI:
+
+.. code-block:: ipython3
 
     pip uninstall -y saspy
     pip install saspy
