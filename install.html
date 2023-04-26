@@ -390,23 +390,29 @@
 <p>This package installs just like any other Python package.
 It is a pure Python package and works with Python 3.x
 installations. To install the latest version using <cite>pip</cite>, you execute the following:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">saspy</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">code</span><span class="o">-</span><span class="n">block</span><span class="p">::</span> <span class="n">ipython3</span>
 </pre></div>
 </div>
+<blockquote>
+<div><p>pip install saspy</p>
+</div></blockquote>
 <p>or, for a specific release:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sassoftware</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">releases</span><span class="o">/</span><span class="n">saspy</span><span class="o">-</span><span class="n">X</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">code</span><span class="o">-</span><span class="n">block</span><span class="p">::</span> <span class="n">ipython3</span>
 </pre></div>
 </div>
+<blockquote>
+<div><p>pip install <a class="reference external" href="http://github.com/sassoftware/saspy/releases/saspy-X.X.X.tar.gz">http://github.com/sassoftware/saspy/releases/saspy-X.X.X.tar.gz</a></p>
+</div></blockquote>
 <p>or, for a given branch (put the name of the branch after &#64;):</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">sassoftware</span><span class="o">/</span><span class="n">saspy</span><span class="o">.</span><span class="n">git</span><span class="nd">@branchname</span>
 </pre></div>
 </div>
 <p>The best way to update and existing deployment to the latest SASPy version is to simply
 uninstall and then install, picking up the latest production version from PyPI:</p>
-<blockquote>
-<div><p>pip uninstall -y saspy
-pip install saspy</p>
-</div></blockquote>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">uninstall</span> <span class="o">-</span><span class="n">y</span> <span class="n">saspy</span>
+<span class="n">pip</span> <span class="n">install</span> <span class="n">saspy</span>
+</pre></div>
+</div>
 <p>Also, if you prefer conda install, you can use that from the conda-forge channel:</p>
 <blockquote>
 <div><p>see: <a class="reference external" href="https://github.com/conda-forge/saspy-feedstock#installing-saspy">https://github.com/conda-forge/saspy-feedstock#installing-saspy</a></p>
