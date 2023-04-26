@@ -5,7 +5,7 @@ Installation
 
 This package installs just like any other Python package.
 It is a pure Python package and works with Python 3.x
-installations.  To install the latest version using `pip`, you execute the following::
+installations. To install the latest version using `pip`, you execute the following::
 
     pip install saspy
 
@@ -16,6 +16,13 @@ or, for a specific release::
 or, for a given branch (put the name of the branch after @)::
 
     pip install git+https://git@github.com/sassoftware/saspy.git@branchname
+
+The best way to update and existing deployment to the latest SASPy version is to simply
+uninstall and then install, picking up the latest production version from PyPI:
+
+pip uninstall -y saspy
+pip install saspy
+
 
 Also, if you prefer conda install, you can use that from the conda-forge channel:
 
