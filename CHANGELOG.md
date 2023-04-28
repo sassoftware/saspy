@@ -17,7 +17,7 @@ it was more obvious and so that I could point to the more specific section depen
 ### Fixed
 
 -   `Fixed` Issue 541 showed a deadlock situation in the STDIO Access Method when the generated code for a
-sd2df() call was long enough to block python trying to write that to STDIO because SAS was blocked writing
+sd2df() call was long enough to block python trying to write that to STDIN because SAS was blocked writing
 it out to the LOG, STDERR. So I addressed this so that the deadlock won't happen anymore. This requires no
 code changes on your part.
 
