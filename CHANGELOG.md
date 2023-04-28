@@ -2,16 +2,49 @@
 
 
 
+
+## [5.1.1] - 2023-04-28
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Tweak` I adjusted the doc regarding the classpath and the encryption jars; separating the two so that
+it was more obvious and so that I could point to the more specific section depending upon the question.
+
+### Fixed
+
+-   `Fixed` Issue 541 showed a deadlock situation in the STDIO Access Method when the generated code for a
+sd2df() call was long enough to block python trying to write that to STDIO because SAS was blocked writing
+it out to the LOG, STDERR. So I addressed this so that the deadlock won't happen anymore. This requires no
+code changes on your part.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+
 ## [5.1.0] - 2023-04-14
 
 ### Added
 
--   `Enhancement` Viya has been evolving since I first introduced the HTTP Access Method to connect to SAS w/in Viya (SAS Compute Server). The current versions are configured with TLS (SSL) by default, and there are different ways the system can be configu
-red for this. SASPy uses the Public REST API to interact with Viya. This means HTTPS communication and than means CA Certificates both server side and client side. The best approach with the latest Viya is to configure it with your companies CA Certificate
-s that are already in use on your clients. But, if using Viya generated certificates, then these need to be distributed and installed in the right places on all client machines (that'sa easier said than done). For this case, I've added a new Configuration 
-Definition key, `cafile`, which can be used to specify the location of the Viya Certificate bundle (the path to that .pem file), so that HTTP from python will use this certificate to create a Trusted connection. This access method has had the `verify` key 
-to control whether the connection is to be verified or not (Trusted). With Verify set to True, it now fails if the connection cannot be verified. If False it doesn't try to create a verified connection, same as before. The default it still to try and if no
-t verifiable, fall back to unverified; same as it has been, since the original Viya certificates were not CA Verifiable.
+-   `Enhancement` Viya has been evolving since I first introduced the HTTP Access Method to connect to SAS
+w/in Viya (SAS Compute Server). The current versions are configured with TLS (SSL) by default, and there are
+different ways the system can be configured for this. SASPy uses the Public REST API to interact with Viya.
+This means HTTPS communication and than means CA Certificates both server side and client side. The best approach
+with the latest Viya is to configure it with your companies CA Certificates that are already in use on your clients.
+But, if using Viya generated certificates, then these need to be distributed and installed in the right places on
+all client machines (that'sa easier said than done). For this case, I've added a new Configuration Definition key,
+`cafile`, which can be used to specify the location of the Viya Certificate bundle (the path to that .pem file),
+so that HTTP from python will use this certificate to create a Trusted connection. This access method has had the
+`verify` key to control whether the connection is to be verified or not (Trusted). With Verify set to True, it now
+fails if the connection cannot be verified. If False it doesn't try to create a verified connection, same as before.
+The default it still to try and if not verifiable, fall back to unverified; same as it has been, since the original
+Viya certificates were not CA Verifiable.
 
 ### Changed
 
