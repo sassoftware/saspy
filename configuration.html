@@ -687,11 +687,14 @@ which would be after SAS already included any autoexec file if there was one.</p
 </dd>
 <dt>lrecl -</dt><dd><p>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</p>
 </dd>
-<dt>display -</dt><dd><p>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either ‘jupyter’ or ‘zeppelin’,
-or, as of version 3.1.7, ‘databricks’. The default when this is not specified is ‘jupyter’.
+<dt>display -</dt><dd><p>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either ‘jupyter’ or ‘zeppelin’.
+The default when this is not specified is ‘jupyter’.
 Jupyter uses IPython to render HTML, which is how saspy has always worked.
 To support other Notebooks display methods, different display interface have to be added to saspy.
 If you want to run saspy in Zeppelin, set this in your configuration definition: ‘display’ : ‘zeppelin’,</p>
+<p>As of version 3.1.7, I added ‘databricks’, but it turns out their method for rendering html can only be
+executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
+it to render. I have an <a class="reference external" href="https://community.databricks.com/s/question/0D58Y00008l8WMwSAM/displayhtml-cant-seem-to-be-used-from-python-code-only-hand-typed-into-a-cell?t=1659537507722">open issue</a> with them.</p>
 </dd>
 <dt>m5dsbug -</dt><dd><p>This is a new key, as of version 3.1.9, to address a bug in the data step in the M5 maintenance release.
 This bug affects the code generated in the sasdata2dataframe method of this access method. It’s only
@@ -991,11 +994,14 @@ does allows for a way to specify them if something was needed.</p>
 </dd>
 <dt>lrecl -</dt><dd><p>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</p>
 </dd>
-<dt>display -</dt><dd><p>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either ‘jupyter’ or ‘zeppelin’,
-or, as of version 3.1.7, ‘databricks’. The default when this is not specified is ‘jupyter’.
+<dt>display -</dt><dd><p>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either ‘jupyter’ or ‘zeppelin’.
+The default when this is not specified is ‘jupyter’.
 Jupyter uses IPython to render HTML, which is how saspy has always worked.
 To support other Notebooks display methods, different display interface have to be added to saspy.
 If you want to run saspy in Zeppelin, set this in your configuration definition: ‘display’ : ‘zeppelin’,</p>
+<p>As of version 3.1.7, I added ‘databricks’, but it turns out their method for rendering html can only be
+executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
+it to render. I have an <a class="reference external" href="https://community.databricks.com/s/question/0D58Y00008l8WMwSAM/displayhtml-cant-seem-to-be-used-from-python-code-only-hand-typed-into-a-cell?t=1659537507722">open issue</a> with them.</p>
 </dd>
 <dt>logbufsz -</dt><dd><p>see issue 266 for details on this. not needed normally</p>
 </dd>
@@ -1093,11 +1099,14 @@ does allows for a way to specify them if something was needed.</p>
 </dd>
 <dt>lrecl -</dt><dd><p>An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</p>
 </dd>
-<dt>display -</dt><dd><p>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either ‘jupyter’ or ‘zeppelin’,
-or, as of version 3.1.7, ‘databricks’. The default when this is not specified is ‘jupyter’.
+<dt>display -</dt><dd><p>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either ‘jupyter’ or ‘zeppelin’.
+The default when this is not specified is ‘jupyter’.
 Jupyter uses IPython to render HTML, which is how saspy has always worked.
 To support other Notebooks display methods, different display interface have to be added to saspy.
 If you want to run saspy in Zeppelin, set this in your configuration definition: ‘display’ : ‘zeppelin’,</p>
+<p>As of version 3.1.7, I added ‘databricks’, but it turns out their method for rendering html can only be
+executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
+it to render. I have an <a class="reference external" href="https://community.databricks.com/s/question/0D58Y00008l8WMwSAM/displayhtml-cant-seem-to-be-used-from-python-code-only-hand-typed-into-a-cell?t=1659537507722">open issue</a> with them.</p>
 </dd>
 <dt>logbufsz -</dt><dd><p>see issue 266 for details on this. not needed normally</p>
 </dd>
@@ -1206,7 +1215,7 @@ True, then if the certificate can’t be verified the connection fails. False ju
 And the default is still to try but if it can’t be verified then connect unverified. In any case, Encryption is still enabled.
 The <cite>cafile</cite> key is new in release 5.1.0.</p>
 <p>The keys for this configuration definition dictionary are:</p>
-<dl class="simple">
+<dl>
 <dt>url -</dt><dd><p>(Required if ip not specified) The URL to Viya, of the form ‘http[s]://host.identifier[:port]’. When this is specified,
 ip= will not be used, as the host’s ip is retrieved from the url. Also, ssl= is set based upon http or https and port=
 is also parsed from the url, if provided, else defaulted based upon the derived ssl= value. So neither ip, port nor ssl
@@ -1273,11 +1282,14 @@ which would be after SAS already included any autoexec file if there was one.</p
 </dd>
 <dt>lrecl -</dt><dd><p>(Optional) An integer specifying the record length for transferring wide data sets from SAS to Data Frames.</p>
 </dd>
-<dt>display -</dt><dd><p>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either ‘jupyter’ or ‘zeppelin’,
-or, as of version 3.1.7, ‘databricks’. The default when this is not specified is ‘jupyter’.
+<dt>display -</dt><dd><p>This is a new key to support Zeppelin (saspy V2.4.4). The values can be either ‘jupyter’ or ‘zeppelin’.
+The default when this is not specified is ‘jupyter’.
 Jupyter uses IPython to render HTML, which is how saspy has always worked.
 To support other Notebooks display methods, different display interface have to be added to saspy.
 If you want to run saspy in Zeppelin, set this in your configuration definition: ‘display’ : ‘zeppelin’,</p>
+<p>As of version 3.1.7, I added ‘databricks’, but it turns out their method for rendering html can only be
+executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
+it to render. I have an <a class="reference external" href="https://community.databricks.com/s/question/0D58Y00008l8WMwSAM/displayhtml-cant-seem-to-be-used-from-python-code-only-hand-typed-into-a-cell?t=1659537507722">open issue</a> with them.</p>
 </dd>
 <dt>authtoken -</dt><dd><p>The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.
 Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can just pass it in.
