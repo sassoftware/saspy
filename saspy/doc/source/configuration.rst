@@ -356,11 +356,17 @@ lrecl -
     An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 display -
-    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
-    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'.
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'.
+    The default when this is not specified is 'jupyter'.
     Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
+
+    As of version 3.1.7, I added 'databricks', but it turns out their method for rendering html can only be
+    executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
+    it to render. I have an `open issue <https://community.databricks.com/s/question/0D58Y00008l8WMwSAM/
+    displayhtml-cant-seem-to-be-used-from-python-code-only-hand-typed-into-a-cell?t=1659537507722>`_ with them.
+
 
 m5dsbug -
     This is a new key, as of version 3.1.9, to address a bug in the data step in the M5 maintenance release.
@@ -708,11 +714,17 @@ lrecl -
     An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 display -
-    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
-    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'.
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'.
+    The default when this is not specified is 'jupyter'.
     Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
+
+    As of version 3.1.7, I added 'databricks', but it turns out their method for rendering html can only be
+    executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
+    it to render. I have an `open issue <https://community.databricks.com/s/question/0D58Y00008l8WMwSAM/
+    displayhtml-cant-seem-to-be-used-from-python-code-only-hand-typed-into-a-cell?t=1659537507722>`_ with them.
+
 
 logbufsz -
     see issue 266 for details on this. not needed normally
@@ -825,11 +837,17 @@ lrecl -
     An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 display -
-    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
-    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'.
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'.
+    The default when this is not specified is 'jupyter'.
     Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
+
+    As of version 3.1.7, I added 'databricks', but it turns out their method for rendering html can only be
+    executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
+    it to render. I have an `open issue <https://community.databricks.com/s/question/0D58Y00008l8WMwSAM/
+    displayhtml-cant-seem-to-be-used-from-python-code-only-hand-typed-into-a-cell?t=1659537507722>`_ with them.
+
 
 logbufsz -
     see issue 266 for details on this. not needed normally
@@ -1035,11 +1053,17 @@ lrecl -
     (Optional) An integer specifying the record length for transferring wide data sets from SAS to Data Frames.
 
 display -
-    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin',
-    or, as of version 3.1.7, 'databricks'. The default when this is not specified is 'jupyter'.
+    This is a new key to support Zeppelin (saspy V2.4.4). The values can be either 'jupyter' or 'zeppelin'.
+    The default when this is not specified is 'jupyter'.
     Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
+
+    As of version 3.1.7, I added 'databricks', but it turns out their method for rendering html can only be
+    executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
+    it to render. I have an `open issue <https://community.databricks.com/s/question/0D58Y00008l8WMwSAM/
+    displayhtml-cant-seem-to-be-used-from-python-code-only-hand-typed-into-a-cell?t=1659537507722>`_ with them.
+
 
 authtoken -
     The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.
