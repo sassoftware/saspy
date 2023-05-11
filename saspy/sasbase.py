@@ -175,7 +175,7 @@ class SASconfig(object):
 
         while cfgname not in configs:
             cfgname = self._prompt(
-                "The SAS Config name specified was not found. Please enter the SAS Config you wish to use. Available Configs are: " +
+                "The SAS Config name specified ("+cfgname+") was not found. Please enter the SAS Config you wish to use. Available Configs are: " +
                 str(configs) + " ")
             if cfgname is None:
                 raise RuntimeError("No SAS Config name provided.")

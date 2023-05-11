@@ -224,6 +224,7 @@ class SASconfigSTDIO:
                pass
             x.stdout.close()
             x.terminate()
+            x.wait(1)
          except:
             pass
 
