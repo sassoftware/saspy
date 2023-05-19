@@ -1870,7 +1870,7 @@ Will use HTML5 for this SASsession.""")
             else:
                host = 'localhost'
          else:
-            host = ''
+            host = 'localhost'
 
          try:
             sock = socks.socket()
