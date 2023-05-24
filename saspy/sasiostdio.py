@@ -557,13 +557,9 @@ Will use HTML5 for this SASsession.""")
                self.to.join(5)
                self.te.join(5)
             else:
-               x = 5
-               while True:
+               for i in range(5):
                   rc = os.waitpid(self.pid, os.WNOHANG)
                   if rc[0] != 0:
-                     break
-                  x = x - 1
-                  if x < 1:
                      break
                   sleep(1)
 
