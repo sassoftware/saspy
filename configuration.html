@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 5.1.2 documentation</title>
+  <title>Configuration &mdash; saspy 5.2.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.1.2
+                5.2.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -1194,6 +1194,14 @@ use that token; Bob’s your uncle, as they say. The key for this is ‘authtoke
 </li>
 </ol>
 <p>Again, only use one of these and don’t mix using config keys from more than one for a given connection.</p>
+<p>Authenticating to a Proxy server:</p>
+<p>Support for having Viya behind a proxy server was added in version 4.5.0. The <cite>proxy</cite> key is used to provide the host and port.
+I had a request from a customer to add support for authenticating to the proxy server itself, before then authenticating to Viya.
+Support for this was added in version 5.2.0; for authenticating to the proxy via user/pw. There are new configuration definition
+keys to support this; <cite>proxy_authkey</cite>, <cite>proxy_user</cite> and <cite>proxy_pw</cite>. To use this you must specify <cite>proxy_authkey</cite> or <cite>proxy_user</cite>.
+Since normally this is not required, the only way to enable prompting for both user/pw is to provide <cite>proxy_authkey</cite>
+that isn’t actually in the authinfo file, then when not found, you will be prompted for user and pw. Alternately, if you provide
+<cite>proxy_user</cite>, but neither <cite>proxy_authkey</cite> nor <cite>proxy_pw</cite>, this will just prompt you for the <cite>proxy_pw</cite>.</p>
 <p>SSL/TLS:</p>
 <p>When Viya is configured to use TLS (HTTPS not HTTP), then the expectation is that the CA Certificate from the Viya
 deployment must match with those on the client side. The easy way is to make Viya use existing CA Certs that your site
@@ -1255,6 +1263,12 @@ the user is <strong>prompted</strong> for a user ID at runtime, unless it’s fo
 </dd>
 <dt>pw  -</dt><dd><p>(<strong>Strongly discouraged</strong>) A password is required but if this field is left
 blank, the user is <strong>prompted</strong> for a password at runtime, unless it’s found in the authinfo file.</p>
+</dd>
+<dt>proxy_authkey -</dt><dd><p>(Optional) The keyword that starts a line in the authinfo file containing user and or password for authenticating to the provided <cite>proxy</cite> server.</p>
+</dd>
+<dt>proxy_user -</dt><dd><p>(Optional) The user ID for authenticating to the provided <cite>proxy</cite> server.</p>
+</dd>
+<dt>proxy_pw  -</dt><dd><p>(Optional) The password for authenticating to the provided <cite>proxy</cite> server.</p>
 </dd>
 <dt>context -</dt><dd><p>The Compute Service has different Contexts that you can connect to. Think Appserver in IOM.
 if you don’t provide one here, saspy will query the Service upon connecting and get a list of available Contexts and
