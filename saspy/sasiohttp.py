@@ -382,29 +382,30 @@ class SASconfigHTTP:
          self.pport = self.port
          self.port  = int(hp[1]) if len(hp) > 1 else self.port
 
-         if pauthkey:
-            found = False
-            if os.name == 'nt':
-               pwf = os.path.expanduser('~')+os.sep+'_authinfo'
-            else:
-               pwf = os.path.expanduser('~')+os.sep+'.authinfo'
-            try:
-               fid = open(pwf, mode='r')
-               for line in fid:
-                  if line.startswith(pauthkey):
-                     puser  = line.partition(' user'    )[2].lstrip().partition(' ')[0].partition('\n')[0]
-                     ppw    = line.partition(' password')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                     found  = True
-                     break
-               fid.close()
-            except OSError as e:
-               logger.warning('Error trying to read authinfo file:'+pwf+'\n'+str(e))
-               pass
-            except:
-               pass
+         if pauthkey or puser:
+            if not puser:
+               found = False
+               if os.name == 'nt':
+                  pwf = os.path.expanduser('~')+os.sep+'_authinfo'
+               else:
+                  pwf = os.path.expanduser('~')+os.sep+'.authinfo'
+               try:
+                  fid = open(pwf, mode='r')
+                  for line in fid:
+                     if line.startswith(pauthkey):
+                        puser  = line.partition(' user'    )[2].lstrip().partition(' ')[0].partition('\n')[0]
+                        ppw    = line.partition(' password')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                        found  = True
+                        break
+                  fid.close()
+               except OSError as e:
+                  logger.warning('Error trying to read authinfo file:'+pwf+'\n'+str(e))
+                  pass
+               except:
+                  pass
 
-            if not found:
-               logger.warning('Did not find key '+self.authkey+' in authinfo file:'+pwf+'\n')
+               if not found:
+                  logger.warning('Did not find key '+self.authkey+' in authinfo file:'+pwf+'\n')
 
             while len(puser) == 0:
                puser = self._prompt("Please enter proxy_userid: ")
