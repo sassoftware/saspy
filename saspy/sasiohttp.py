@@ -74,6 +74,9 @@ class SASconfigHTTP:
       self._prompt   = session._sb.sascfg._prompt
       self.lrecl     = cfg.get('lrecl', None)
       self.inactive  = cfg.get('inactive', 120)
+      puser          = cfg.get('proxy_user', '')
+      ppw            = cfg.get('proxy_pw', '')
+      pauthkey       = cfg.get('proxy_authkey', '')
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -220,6 +223,27 @@ class SASconfigHTTP:
          else:
             self.authkey = inak
 
+      inpak = kwargs.get('proxy_authkey', '')
+      if len(inpak) > 0:
+         if lock and len(pauthkey):
+            logger.warning("Parameter 'proxy_authkey' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            pauthkey = inpak
+
+      inpuser = kwargs.get('proxy_user', '')
+      if len(inpuser) > 0:
+         if lock and len(puser):
+            logger.warning("Parameter 'proxy_user' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            puser = inpuser
+
+      inppw = kwargs.get('proxy_pw', '')
+      if len(inppw) > 0:
+         if lock and len(ppw):
+            logger.warning("Parameter 'proxy_pw' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            ppw = inppw
+
       inssl = kwargs.get('ssl', None)
       if inssl is not None:
          if lock and self.ssl:
@@ -358,8 +382,42 @@ class SASconfigHTTP:
          self.pport = self.port
          self.port  = int(hp[1]) if len(hp) > 1 else self.port
 
-         #else:
-         #   logger.warning("Parameter 'proxy' not in recognized format. Expeting '[http[s]://]host:port'. Ignoring parameter.")
+         if pauthkey or puser:
+            if not puser:
+               found = False
+               if os.name == 'nt':
+                  pwf = os.path.expanduser('~')+os.sep+'_authinfo'
+               else:
+                  pwf = os.path.expanduser('~')+os.sep+'.authinfo'
+               try:
+                  fid = open(pwf, mode='r')
+                  for line in fid:
+                     if line.startswith(pauthkey):
+                        puser  = line.partition(' user'    )[2].lstrip().partition(' ')[0].partition('\n')[0]
+                        ppw    = line.partition(' password')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                        found  = True
+                        break
+                  fid.close()
+               except OSError as e:
+                  logger.warning('Error trying to read authinfo file:'+pwf+'\n'+str(e))
+                  pass
+               except:
+                  pass
+
+               if not found:
+                  logger.warning('Did not find key '+self.authkey+' in authinfo file:'+pwf+'\n')
+
+            while len(puser) == 0:
+               puser = self._prompt("Please enter proxy_userid: ")
+               if puser is None:
+                  self._token = None
+                  raise RuntimeError("No proxy_userid provided.")
+
+            while len(ppw) == 0:
+               ppw = self._prompt("Please enter proxy_password: ", pw = True)
+               if ppw is None:
+                  self._token = None
+                  raise RuntimeError("No proxy_password provided.")
       else:
          self.pip = None
 
@@ -395,8 +453,15 @@ class SASconfigHTTP:
          self.HTTPConn = hc.HTTPConnection(self.ip, self.port, timeout=self.timeout)
 
       if self.pip:
-         self.REFConn.set_tunnel( self.pip, self.pport)
-         self.HTTPConn.set_tunnel(self.pip, self.pport)
+         if puser and ppw:
+            uuser  = urllib.parse.quote(puser)
+            upw    = urllib.parse.quote(ppw)
+            auth   = "Basic "+base64.encodebytes((uuser+":"+upw).encode(self.encoding)).splitlines()[0].decode(self.encoding)
+            header = {"Proxy-Authorization":auth}
+         else:
+            header = None
+         self.REFConn.set_tunnel( self.pip, self.pport, header)
+         self.HTTPConn.set_tunnel(self.pip, self.pport, header)
 
       # get AuthToken
       if not self._token:
