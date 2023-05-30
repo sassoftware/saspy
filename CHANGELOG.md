@@ -3,6 +3,34 @@
 
 
 
+## [5.2.0] - 2023-05-30
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Enhancement` Added support for Proxy Authentication using user/pw. Support for having a proxy server ahead
+of Viya was added in version 4.5.0, and in this release, support for authenticating to that proxy with user/pw
+was added based upon a user request. This is documented in the HTTP section of the Configuration documentation.
+
+### Fixed
+
+-   `Fixed` A minor fix for a case where a unit test was producing a resource warning. I couldn't reproduce this,
+but the fix was trivial and it fixed the users case. This was for issue 543.
+
+-   `Fixed` A fix in the STDIO access method to explicitly use 'localhost' in the filename statement generated for
+dataframe2sasdata() instead of using blank hostname. This was causing an issue for a user with multiple network
+adapters and an unusual configuration. Explicitly using localhost is the correct path for this since SAS and Python
+are on the same machine, so using the loopback adapter is the right choice.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.1.2] - 2023-04-28
 
 ### Added

@@ -950,6 +950,17 @@ them here, as they are mutually exclusive. You use only one of the various means
 Again, only use one of these and don't mix using config keys from more than one for a given connection.
 
 
+Authenticating to a Proxy server:
+
+Support for having Viya behind a proxy server was added in version 4.5.0. The `proxy` key is used to provide the host and port.
+I had a request from a customer to add support for authenticating to the proxy server itself, before then authenticating to Viya.
+Support for this was added in version 5.2.0; for authenticating to the proxy via user/pw. There are new configuration definition
+keys to support this; `proxy_authkey`, `proxy_user` and `proxy_pw`. To use this you must specify `proxy_authkey` or `proxy_user`.
+Since normally this is not required, the only way to enable prompting for both user/pw is to provide `proxy_authkey`
+that isn't actually in the authinfo file, then when not found, you will be prompted for user and pw. Alternately, if you provide
+`proxy_user`, but neither `proxy_authkey` nor `proxy_pw`, this will just prompt you for the `proxy_pw`.
+
+
 SSL/TLS:
 
 When Viya is configured to use TLS (HTTPS not HTTP), then the expectation is that the CA Certificate from the Viya
@@ -1018,6 +1029,14 @@ user -
 pw  -
     (**Strongly discouraged**) A password is required but if this field is left
     blank, the user is **prompted** for a password at runtime, unless it's found in the authinfo file.
+
+proxy_authkey -
+    (Optional) The keyword that starts a line in the authinfo file containing user and or password for authenticating to the provided `proxy` server.
+
+proxy_user -
+    (Optional) The user ID for authenticating to the provided `proxy` server.
+proxy_pw  -
+    (Optional) The password for authenticating to the provided `proxy` server.
 
 context -
     The Compute Service has different Contexts that you can connect to. Think Appserver in IOM.
