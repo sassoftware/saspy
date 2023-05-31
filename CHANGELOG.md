@@ -2,6 +2,27 @@
 
 
 
+## [5.2.1] - 2023-05-31
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `Fixed` A bug was found in df2sd where having a variable of all blanks caused errors in the data step
+being used to read in the data. An empty or missing var is handled, but a multibyte blank string wasn't being
+handled the same, required, way. This release fixes that bug in all three access methods.
+
+### Removed
+
+-   `None` Nothing removed
+
+
 
 ## [5.2.0] - 2023-05-30
 
