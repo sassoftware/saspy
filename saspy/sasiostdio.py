@@ -1956,8 +1956,10 @@ Will use HTML5 for this SASsession.""")
             if   dts[col] == 'N' and var == 'nan':
                var = '.'
             elif dts[col] == 'C':
-               if var == 'nan' or len(var) == 0:
+               if   var == 'nan' or len(var) == 0:
                   var = ' '+colsep
+               elif len(var) == var.count(' '):
+                  var += colsep
                else:
                   var = var.replace(colsep, colrep)
             elif dts[col] == 'B':
