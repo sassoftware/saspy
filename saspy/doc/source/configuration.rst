@@ -692,7 +692,9 @@ timeout -
 appserver -
     If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
     that you want to connect to, i.e.: 'SASApp - Workspace Server'. Without this the Object spawner will only try the
-    first one in the list of app servers it supports.
+    first one in the list of app servers it supports. Note that this needs to be the exact string that is the Name for
+    this server in metadata. Generally the pattern follows: '{} - Workspace Server'.format('name you gave it'). The object
+    spawner compares these strings as is, so spaces and case matter.
 sspi -
     New in 2.17, there is support for IWA (Integrated Windows Authentication) from a Windows client to remote IOM server.
     This is only for when your Workspace server is configured to use IWA as the authentication method, which is not the default.
