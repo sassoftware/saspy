@@ -973,11 +973,13 @@ windows-1252, respectively.</p>
 </dd>
 <dt>timeout -</dt><dd><p>Timeout value for establishing connection to workspace server</p>
 </dd>
-<dt>appserver -</dt><dd><p>If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
+<dt>appserver -</dt><dd><p>If you have more than one AppServer defined on OMR, and one object spawner is configured to start workspace servers
+from multiple Appservers, then you may need to pass the name of the physical workspace server (as defined in metadata)
 that you want to connect to, i.e.: ‘SASApp - Workspace Server’. Without this the Object spawner will only try the
 first one in the list of app servers it supports. Note that this needs to be the exact string that is the Name for
 this server in metadata. Generally the pattern follows: ‘{} - Workspace Server’.format(‘name you gave it’). The object
-spawner compares these strings as is, so spaces and case matter.</p>
+spawner compares these strings as is, so spaces and case matter. If your object spawner only starts one workspace server,
+then there’s no chance of mixing up which one, and then this option isn’t needed.</p>
 </dd>
 <dt>sspi -</dt><dd><p>New in 2.17, there is support for IWA (Integrated Windows Authentication) from a Windows client to remote IOM server.
 This is only for when your Workspace server is configured to use IWA as the authentication method, which is not the default.
