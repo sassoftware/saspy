@@ -687,7 +687,7 @@ Here are a few example cases showing this.
 
 
 *****************************************************************************
-Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports
+Using Proc Iomoperate to find Object Spawner hosts and Workspace Server ports
 *****************************************************************************
 
 If you already use a client to connect to IOM servers, you may have the host and port to OMR
@@ -697,25 +697,29 @@ If you can connect to your OMR Server, then you can use the following code to fi
 
 The three configuration keys are:
 
-.. code-block:: ipython3
+.. code-block:: text
 
     iomhost -
-        (Required) The resolvable host name, or IP address to the IOM object spawner.
-        New in 2.1.6; this can be a list of all the object spawners hosts if you have load balanced object spawners.
-        This provides Grid HA (High Availability)
+       (Required) The resolvable host name, or IP address to the IOM object spawner.
+       New in 2.1.6; this can be a list of all the object spawners hosts if you have load balanced object spawners.
+       This provides Grid HA (High Availability)
     iomport -
-        (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
+       (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
     appserver -
-        If you have more than one AppServer defined on OMR, then you must pass the name of the physical workspace server
-        that you want to connect to, i.e.: 'SASApp - Workspace Server'. Without this the Object spawner will only try the
-        first one in the list of app servers it supports.
+       If you have more than one AppServer defined on OMR, and one object spawner is configured to start workspace servers
+       from multiple Appservers, then you may need to pass the name of the physical workspace server (as defined in metadata)
+       that you want to connect to, i.e.: 'SASApp - Workspace Server'. Without this the Object spawner will only try the
+       first one in the list of app servers it supports. Note that this needs to be the exact string that is the Name for
+       this server in metadata. Generally the pattern follows: '{} - Workspace Server'.format('name you gave it'). The object
+       spawner compares these strings as is, so spaces and case matter. If your object spawner only starts one workspace server,
+       then there's no chance of mixing up which one, and then this option isn't needed.
 
 
 First, query to find any available Object Spawners. You would use the 'Machine name :' value(s) from
 this for the 'iomhost' configuration key. Note that often there will only be one Object Spawner, but
 there can be more then one configured.
 
-.. code-block:: ipython3
+.. code-block:: text
 
     proc iomoperate
       uri="iom://omrhost.abc.xyz.com:8561;Bridge;USER=omruserid,PASS=omrpasswd";
@@ -725,7 +729,7 @@ there can be more then one configured.
 The reuslts from this should include output like the following for any defined Object Spawners.
 Use the 'Machine name :' value for your 'iomhost' key.
 
-.. code-block:: ipython3
+.. code-block:: text
 
     Object Spawner - objhost (A5H4N590.AY000003)
         Server class : IOM Spawner
@@ -747,7 +751,7 @@ you will want to set the 'appserver' configuration key to the SASApp Workspace S
 to (or have permission to) connect to. The value to use is the name shown in the output for the server;
 'SASApp - Workspace Server' in the output below.
 
-.. code-block:: ipython3
+.. code-block:: text
 
     proc iomoperate
       uri="iom://omrhost.abc.xyz.com:8561;Bridge;USER=omruserid,PASS=omrpasswd";
@@ -757,7 +761,7 @@ to (or have permission to) connect to. The value to use is the name shown in the
 The reuslts from this should include output like the following for any defined Workspace Servers.
 Use the 'Bridge port :' value for your 'iomport' key.
 
-.. code-block:: ipython3
+.. code-block:: text
 
     SASApp - Workspace Server (A5H4N590.AY000009)
         Server class : 440196D4-90F0-11D0-9F41-00A024BB830C

@@ -645,8 +645,8 @@ from either a Unix or Windows client. This module does not connect to a SAS Meta
 but rather connects directly to an Object Spawner to get access to a Workspace Server. If you already
 access these with other SAS clients, like Enterprise Guide (EG), you may already be familiar with
 connecting to OMR, but not directly to the others by host/port. There is information in the
-:doc:`advanced-topics` section about using Proc iomoperate to find Object Spawners and Workspace
-Server to get values for the three keys defined below (iomhost, iomport, appserver).
+:doc:`advanced-topics` section titled `Using Proc Iomoperate to find Object Spawner hosts and Workspace Server ports`
+to get values for the three keys defined below (iomhost, iomport, appserver).
 
 The following keys are available for the configuration definition dictionary:
 
