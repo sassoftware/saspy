@@ -303,7 +303,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#advanced-sd2df-and-df2sd-techniques">Advanced sd2df and df2sd techniques</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#slow-performance-loading-a-dataframe-into-a-sas-data-set-df2sd">Slow performance loading a DataFrame into a SAS data set; df2sd()</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">Using Proc Iomoperate to find Object Spawner hosts and Workspace Server ports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#disconnecting-from-an-iom-session-and-reconnecting-back-to-it">Disconnecting from an IOM session and reconnecting back to it.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">Configuring Grid Option Sets to have saspy run on a specific Queue.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#automatic-checking-for-error-in-the-log-and-the-warnings-module">Automatic checking for ERROR: in the LOG and the warnings module</a></li>
@@ -961,46 +961,50 @@ lengths once and just pass in the dict all the times and never have to specd tim
 </div>
 </section>
 <section id="using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">
-<h2>Using Proc iomoperate to find Object Spawner hosts and Workspace Server ports<a class="headerlink" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports" title="Permalink to this heading">¶</a></h2>
+<h2>Using Proc Iomoperate to find Object Spawner hosts and Workspace Server ports<a class="headerlink" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports" title="Permalink to this heading">¶</a></h2>
 <p>If you already use a client to connect to IOM servers, you may have the host and port to OMR
 (the SAS Metadata Server), but not necessarily those of the Object Spawners or Workspace Servers.
 For Remote IOM connections there are three configuration keys that require some of this other information.
 If you can connect to your OMR Server, then you can use the following code to find out the information you need.</p>
 <p>The three configuration keys are:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iomhost</span> <span class="o">-</span>
-    <span class="p">(</span><span class="n">Required</span><span class="p">)</span> <span class="n">The</span> <span class="n">resolvable</span> <span class="n">host</span> <span class="n">name</span><span class="p">,</span> <span class="ow">or</span> <span class="n">IP</span> <span class="n">address</span> <span class="n">to</span> <span class="n">the</span> <span class="n">IOM</span> <span class="nb">object</span> <span class="n">spawner</span><span class="o">.</span>
-    <span class="n">New</span> <span class="ow">in</span> <span class="mf">2.1.6</span><span class="p">;</span> <span class="n">this</span> <span class="n">can</span> <span class="n">be</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">of</span> <span class="nb">all</span> <span class="n">the</span> <span class="nb">object</span> <span class="n">spawners</span> <span class="n">hosts</span> <span class="k">if</span> <span class="n">you</span> <span class="n">have</span> <span class="n">load</span> <span class="n">balanced</span> <span class="nb">object</span> <span class="n">spawners</span><span class="o">.</span>
-    <span class="n">This</span> <span class="n">provides</span> <span class="n">Grid</span> <span class="n">HA</span> <span class="p">(</span><span class="n">High</span> <span class="n">Availability</span><span class="p">)</span>
-<span class="n">iomport</span> <span class="o">-</span>
-    <span class="p">(</span><span class="n">Required</span><span class="p">)</span> <span class="n">The</span> <span class="n">port</span> <span class="n">that</span> <span class="nb">object</span> <span class="n">spawner</span> <span class="ow">is</span> <span class="n">listening</span> <span class="n">on</span> <span class="k">for</span> <span class="n">workspace</span> <span class="n">server</span> <span class="n">connections</span> <span class="p">(</span><span class="n">workspace</span> <span class="n">server</span> <span class="n">port</span> <span class="o">-</span> <span class="ow">not</span> <span class="nb">object</span> <span class="n">spawner</span> <span class="n">port</span><span class="o">!)</span>.
-<span class="n">appserver</span> <span class="o">-</span>
-    <span class="n">If</span> <span class="n">you</span> <span class="n">have</span> <span class="n">more</span> <span class="n">than</span> <span class="n">one</span> <span class="n">AppServer</span> <span class="n">defined</span> <span class="n">on</span> <span class="n">OMR</span><span class="p">,</span> <span class="n">then</span> <span class="n">you</span> <span class="n">must</span> <span class="k">pass</span> <span class="n">the</span> <span class="n">name</span> <span class="n">of</span> <span class="n">the</span> <span class="n">physical</span> <span class="n">workspace</span> <span class="n">server</span>
-    <span class="n">that</span> <span class="n">you</span> <span class="n">want</span> <span class="n">to</span> <span class="n">connect</span> <span class="n">to</span><span class="p">,</span> <span class="n">i</span><span class="o">.</span><span class="n">e</span><span class="o">.</span><span class="p">:</span> <span class="s1">&#39;SASApp - Workspace Server&#39;</span><span class="o">.</span> <span class="n">Without</span> <span class="n">this</span> <span class="n">the</span> <span class="n">Object</span> <span class="n">spawner</span> <span class="n">will</span> <span class="n">only</span> <span class="k">try</span> <span class="n">the</span>
-    <span class="n">first</span> <span class="n">one</span> <span class="ow">in</span> <span class="n">the</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">app</span> <span class="n">servers</span> <span class="n">it</span> <span class="n">supports</span><span class="o">.</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>iomhost -
+   (Required) The resolvable host name, or IP address to the IOM object spawner.
+   New in 2.1.6; this can be a list of all the object spawners hosts if you have load balanced object spawners.
+   This provides Grid HA (High Availability)
+iomport -
+   (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
+appserver -
+   If you have more than one AppServer defined on OMR, and one object spawner is configured to start workspace servers
+   from multiple Appservers, then you may need to pass the name of the physical workspace server (as defined in metadata)
+   that you want to connect to, i.e.: &#39;SASApp - Workspace Server&#39;. Without this the Object spawner will only try the
+   first one in the list of app servers it supports. Note that this needs to be the exact string that is the Name for
+   this server in metadata. Generally the pattern follows: &#39;{} - Workspace Server&#39;.format(&#39;name you gave it&#39;). The object
+   spawner compares these strings as is, so spaces and case matter. If your object spawner only starts one workspace server,
+   then there&#39;s no chance of mixing up which one, and then this option isn&#39;t needed.
 </pre></div>
 </div>
 <p>First, query to find any available Object Spawners. You would use the ‘Machine name :’ value(s) from
 this for the ‘iomhost’ configuration key. Note that often there will only be one Object Spawner, but
 there can be more then one configured.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">proc</span> <span class="n">iomoperate</span>
-  <span class="n">uri</span><span class="o">=</span><span class="s2">&quot;iom://omrhost.abc.xyz.com:8561;Bridge;USER=omruserid,PASS=omrpasswd&quot;</span><span class="p">;</span>
-  <span class="nb">list</span> <span class="n">DEFINED</span> <span class="n">FILTER</span><span class="o">=</span><span class="s2">&quot;Object&quot;</span><span class="p">;</span>
-<span class="n">quit</span><span class="p">;</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>proc iomoperate
+  uri=&quot;iom://omrhost.abc.xyz.com:8561;Bridge;USER=omruserid,PASS=omrpasswd&quot;;
+  list DEFINED FILTER=&quot;Object&quot;;
+quit;
 </pre></div>
 </div>
 <p>The reuslts from this should include output like the following for any defined Object Spawners.
 Use the ‘Machine name :’ value for your ‘iomhost’ key.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Object</span> <span class="n">Spawner</span> <span class="o">-</span> <span class="n">objhost</span> <span class="p">(</span><span class="n">A5H4N590</span><span class="o">.</span><span class="n">AY000003</span><span class="p">)</span>
-    <span class="n">Server</span> <span class="k">class</span> <span class="err">: </span><span class="nc">IOM</span> <span class="n">Spawner</span>
-    <span class="n">Spawnable</span> <span class="n">server</span> <span class="n">component</span> <span class="p">:</span> <span class="n">Operating</span> <span class="n">System</span> <span class="n">Services</span> <span class="o">-</span> <span class="n">objhost</span>
-    <span class="n">Spawnable</span> <span class="n">server</span> <span class="n">component</span> <span class="p">:</span> <span class="n">SASApp</span> <span class="o">-</span> <span class="n">Pooled</span> <span class="n">Workspace</span> <span class="n">Server</span>
-    <span class="n">Spawnable</span> <span class="n">server</span> <span class="n">component</span> <span class="p">:</span> <span class="n">SASApp</span> <span class="o">-</span> <span class="n">Stored</span> <span class="n">Process</span> <span class="n">Server</span>
-    <span class="n">Spawnable</span> <span class="n">server</span> <span class="n">component</span> <span class="p">:</span> <span class="n">SASApp</span> <span class="o">-</span> <span class="n">Workspace</span> <span class="n">Server</span>
-    <span class="n">Operator</span> <span class="n">port</span> <span class="p">:</span> <span class="mi">8581</span>
-    <span class="n">PortBank</span> <span class="n">port</span> <span class="p">:</span> <span class="mi">8801</span>
-    <span class="n">PortBank</span> <span class="n">port</span> <span class="p">:</span> <span class="mi">8811</span>
-    <span class="n">PortBank</span> <span class="n">port</span> <span class="p">:</span> <span class="mi">8821</span>
-    <span class="n">Machine</span> <span class="n">name</span> <span class="p">:</span> <span class="n">objhost</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">xyz</span><span class="o">.</span><span class="n">com</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Object Spawner - objhost (A5H4N590.AY000003)
+    Server class : IOM Spawner
+    Spawnable server component : Operating System Services - objhost
+    Spawnable server component : SASApp - Pooled Workspace Server
+    Spawnable server component : SASApp - Stored Process Server
+    Spawnable server component : SASApp - Workspace Server
+    Operator port : 8581
+    PortBank port : 8801
+    PortBank port : 8811
+    PortBank port : 8821
+    Machine name : objhost.abc.xyz.com
 </pre></div>
 </div>
 <p>Next, query to find any available Workspace Servers. You would use the ‘Bridge port :’ value from
@@ -1009,20 +1013,20 @@ really means you have multipe SASApp’s defined (see ‘Server context :’ val
 you will want to set the ‘appserver’ configuration key to the SASApp Workspace Server that you want
 to (or have permission to) connect to. The value to use is the name shown in the output for the server;
 ‘SASApp - Workspace Server’ in the output below.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">proc</span> <span class="n">iomoperate</span>
-  <span class="n">uri</span><span class="o">=</span><span class="s2">&quot;iom://omrhost.abc.xyz.com:8561;Bridge;USER=omruserid,PASS=omrpasswd&quot;</span><span class="p">;</span>
-  <span class="nb">list</span> <span class="n">DEFINED</span> <span class="n">FILTER</span><span class="o">=</span><span class="s2">&quot;- Workspace&quot;</span><span class="p">;</span>
-<span class="n">quit</span><span class="p">;</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>proc iomoperate
+  uri=&quot;iom://omrhost.abc.xyz.com:8561;Bridge;USER=omruserid,PASS=omrpasswd&quot;;
+  list DEFINED FILTER=&quot;- Workspace&quot;;
+quit;
 </pre></div>
 </div>
 <p>The reuslts from this should include output like the following for any defined Workspace Servers.
 Use the ‘Bridge port :’ value for your ‘iomport’ key.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">SASApp</span> <span class="o">-</span> <span class="n">Workspace</span> <span class="n">Server</span> <span class="p">(</span><span class="n">A5H4N590</span><span class="o">.</span><span class="n">AY000009</span><span class="p">)</span>
-    <span class="n">Server</span> <span class="k">class</span> <span class="err">: 440196</span><span class="nc">D4</span><span class="o">-</span><span class="mi">90</span><span class="n">F0</span><span class="o">-</span><span class="mi">11</span><span class="n">D0</span><span class="o">-</span><span class="mi">9</span><span class="n">F41</span><span class="o">-</span><span class="mi">00</span><span class="n">A024BB830C</span>
-    <span class="n">Logical</span> <span class="n">name</span> <span class="p">:</span> <span class="n">SASApp</span> <span class="o">-</span> <span class="n">Logical</span> <span class="n">Workspace</span> <span class="n">Server</span>
-    <span class="n">Server</span> <span class="n">context</span> <span class="p">:</span> <span class="n">SASApp</span>
-    <span class="n">Bridge</span> <span class="n">port</span> <span class="p">:</span> <span class="mi">8591</span>
-    <span class="n">Machine</span> <span class="n">name</span> <span class="p">:</span> <span class="n">wrkhost</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">xyz</span><span class="o">.</span><span class="n">com</span>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>SASApp - Workspace Server (A5H4N590.AY000009)
+    Server class : 440196D4-90F0-11D0-9F41-00A024BB830C
+    Logical name : SASApp - Logical Workspace Server
+    Server context : SASApp
+    Bridge port : 8591
+    Machine name : wrkhost.abc.xyz.com
 </pre></div>
 </div>
 <p>If your site has a complex setup, you may have multiple Object Spawners and/or Workspace Servers.
