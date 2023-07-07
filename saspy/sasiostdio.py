@@ -26,6 +26,7 @@ import select as sel
 import warnings
 import io
 import re
+import atexit
 
 import logging
 logger = logging.getLogger('saspy')
@@ -490,7 +491,11 @@ Will use HTML5 for this SASsession.""")
       if self.sascfg.verbose:
          pid = self.pid if os.name != 'nt' else self.pid.pid
          logger.info("SAS Connection established. Subprocess id is "+str(pid)+"\n")
+
+      atexit.register(self._endsas)
+
       return self.pid
+
 
    if os.name == 'nt':
       def _read_out(self):

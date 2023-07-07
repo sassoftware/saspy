@@ -23,6 +23,7 @@ import urllib
 import warnings
 import io
 import ssl
+import atexit
 
 import tempfile as tf
 from time import sleep
@@ -803,6 +804,8 @@ class SASsessionHTTP():
       self._refthd = Thread(target=self._refresh_thread, args=())
       self._refthd.daemon = True
       self._refthd.start()
+
+      atexit.register(self._endsas)
 
       return self.pid
 

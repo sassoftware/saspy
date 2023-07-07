@@ -22,6 +22,7 @@ import tempfile as tf
 import codecs
 import warnings
 import io
+import atexit
 
 import logging
 logger = logging.getLogger('saspy')
@@ -559,6 +560,9 @@ Will use HTML5 for this SASsession.""")
 
       if self.sascfg.verbose:
          logger.info("SAS Connection established. Subprocess id is "+str(pid)+"\n")
+
+      atexit.register(self._endsas)
+
       return self.pid
 
    def _endsas(self):
