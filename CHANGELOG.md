@@ -2,6 +2,30 @@
 
 
 
+## [5.2.2] - 2023-07-07
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Tweak` Cleaned up a few bit of documentation. Nothing significant or different.
+
+### Fixed
+
+-   `Fixed` Some time ago, when the Python process terminated (normally), my __del__ methods on SASsession
+objects would be called, and I would cleanly terminate the SAS process that was attached. That isn't behaving
+as it used to, at least with the HTTP access method for Viya. So, I've added code to explicitly register
+a termination exit routing where I then call my cleanup, and that now is behaving as expected for all three
+access methods. The SAS process is cleanly terminated before Python finally terminates. So, this is working
+as it used to again.
+
+### Removed
+
+-   `None` Nothing removed
+
+
 ## [5.2.1] - 2023-05-31
 
 ### Added
