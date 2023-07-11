@@ -589,7 +589,7 @@ Here are examples of each of the above problems:
 3)  The native implementation module for the security package could not be found in the path.
 
     For Windows Local connection (and remote connections using IWA via {'sspi' : True}), you don't have the path to the sspiauth.dll in yout System Path variable. See the configuration doc
-    to see how to specify this: https://sassoftware.github.io/saspy/install.html#local
+    to see how to specify this: https://sassoftware.github.io/saspy/configuration.html#local
 
 .. code-block:: ipython3
 
