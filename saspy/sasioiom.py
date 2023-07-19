@@ -1187,61 +1187,6 @@ Will use HTML5 for this SASsession.""")
 
       return bool(exists)
 
-   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict = None) -> '<SASdata object>':
-      """
-      This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
-      file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
-      table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-      opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
-      """
-      opts = opts if opts is not None else {}
-
-      code  = "filename x "
-
-      if file.lower().startswith("http"):
-         code += "url "
-
-      code += "\""+file+"\";\n"
-      code += "proc import datafile=x out="
-      if len(libref):
-         code += libref+"."
-      code += "'"+table.strip().replace("'", "''")+"'n dbms=csv replace; "+self._sb._impopts(opts)+" run;"
-
-      if nosub:
-         print(code)
-      else:
-         ll = self.submit(code, "text")
-
-   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict = None, opts: dict = None) -> 'The LOG showing the results of the step':
-      """
-      This method will export a SAS Data Set to a file in CSV format.
-      file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
-      table   - the name of the SAS Data Set you want to export to a CSV file
-      libref  - the libref for the SAS Data Set.
-      dsopts  - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
-      opts    - a dictionary containing any of the following Proc Export options(delimiter, putnames)
-      """
-      dsopts = dsopts if dsopts is not None else {}
-      opts = opts if opts is not None else {}
-
-      code  = "filename x \""+file+"\";\n"
-      code += "options nosource;\n"
-      code += "proc export data="
-
-      if len(libref):
-         code += libref+"."
-
-      code += "'"+table.strip().replace("'", "''")+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace; "
-      code += self._sb._expopts(opts)+" run\n;"
-      code += "options source;\n"
-
-      if nosub:
-         print(code)
-      else:
-         ll = self.submit(code, "text")
-         return ll['LOG']
-
    def upload_slow(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
       """
       This method uploads a local file to the SAS servers file system.
@@ -1894,6 +1839,8 @@ Will use HTML5 for this SASsession.""")
       code += "proc export data=work.sasdata2dataframe outfile="+outname+" dbms=csv replace;\n"
       code += self._sb._expopts(opts)+" run;\n"
       code += "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+      if local:
+         code += "filename _tomodsx;"
 
       ll = self._asubmit(code, 'text')
 

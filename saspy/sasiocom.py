@@ -15,7 +15,6 @@
 #
 
 import datetime
-import csv
 import io
 import numbers
 import os
@@ -600,57 +599,6 @@ class SASSessionCOM(object):
         recordset.Close()
 
         return (header, rows, meta)
-
-    def read_csv(self, filepath: str, table: str, libref: str=None, nosub: bool=False, opts: dict=None):
-        """
-        Submit an import job to the SAS workspace.
-        :param filepath [str]: File URI.
-        :param table [str]: Table name.
-        :option libref [str]: Library name.
-        :option nosob [bool]: Return the SAS code instead of executing it.
-        :option opts [dict]: SAS PROC IMPORT options.
-        """
-        opts = opts if opts is not None else {}
-        filepath = 'url ' + filepath if filepath.lower().startswith('http') else filepath
-        tablepath = self._tablepath(table, libref=libref)
-
-        proc_code = """
-            filename csv_file "{}";
-            proc import datafile=csv_file out={} dbms=csv replace;
-                {}
-            run;
-        """.format(filepath.replace('"', '""'), tablepath, self._sb._impopts(opts))
-
-        if nosub is True:
-            return proc_code
-        else:
-            return self.submit(proc_code, 'text')
-
-    def write_csv(self, filepath: str, table: str, libref: str=None, nosub: bool=True, dsopts: dict=None, opts: dict=None):
-        """
-        Submit an export job to the SAS workspace.
-        :param filepath [str]: File URI.
-        :param table [str]: Table name.
-        :option libref [str]: Library name.
-        :option nosob [bool]: Return the SAS code instead of executing it.
-        :option opts [dict]: SAS PROC IMPORT options.
-        :option dsopts [dict]: SAS dataset options.
-        """
-        opts = opts if opts is not None else {}
-        dsopts = dsopts if dsopts is not None else {}
-        tablepath = self._tablepath(table, libref=libref)
-
-        proc_code = """
-            filename csv_file "{}";
-            proc export data={} {} outfile=csv_file dbms=csv replace;
-                {}
-            run;
-        """.format(filepath.replace('"', '""'), tablepath, self._sb._dsopts(dsopts), self._sb._expopts(opts))
-
-        if nosub is True:
-            return proc_code
-        else:
-            return self.submit(proc_code, 'text')['LOG']
 
     def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a',
                           libref: str ="", keep_outer_quotes: bool=False,

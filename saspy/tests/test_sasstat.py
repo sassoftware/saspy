@@ -215,7 +215,7 @@ class TestSASstat(unittest.TestCase):
     def test_namesGLM(self):
         # validate multiple sets of samed named outputs
         self.sas.submit("""
-                data work.snapbean;
+                data work.snapbeans;
                    input S    V  replicate    x1   x2    x3     x4;
                    datalines;
                 1.0  1.0        1.0  59.3  4.5  38.4  295.0
@@ -245,7 +245,7 @@ class TestSASstat(unittest.TestCase):
 
         stat = self.sas.sasstat()
         tr = self.sas.sasdata("snapbeans", "work")
-        b  = stat.glm(data = 'snapbean',
+        b  = stat.glm(data = tr,
                       cls = 'S V',
                       model = 'x1 x2 x3 x4 = S V S*V',
                       manova = 'H = S V S*V / PRINTE PRINTH MSTAT=exact'

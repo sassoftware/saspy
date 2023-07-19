@@ -1270,61 +1270,6 @@ Will use HTML5 for this SASsession.""")
 
       return bool(exists)
 
-   def read_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, opts: dict = None) -> '<SASdata object>':
-      """
-      This method will import a csv file into a SAS Data Set and return the SASdata object referring to it.
-      file    - eithe the OS filesystem path of the file, or HTTP://... for a url accessible file
-      table   - the name of the SAS Data Set to create
-      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
-      opts    - a dictionary containing any of the following Proc Import options(datarow, delimiter, getnames, guessingrows)
-      """
-      opts = opts if opts is not None else {}
-      code  = "filename x "
-
-      if file.lower().startswith("http"):
-         code += "url "
-
-      code += "\""+file+"\";\n"
-      code += "proc import datafile=x out="
-      if len(libref):
-         code += libref+"."
-
-      code += "'"+table.strip().replace("'", "''")+"'n dbms=csv replace; "+self._sb._impopts(opts)+" run;"
-
-      if nosub:
-         print(code)
-      else:
-         ll = self.submit(code, "text")
-
-   def write_csv(self, file: str, table: str, libref: str ="", nosub: bool =False, dsopts: dict = None, opts: dict = None) -> 'The LOG showing the results of the step':
-      """
-      This method will export a SAS Data Set to a file in CSV format.
-      file    - the OS filesystem path of the file to be created (exported from the SAS Data Set)
-      table   - the name of the SAS Data Set you want to export to a CSV file
-      libref  - the libref for the SAS Data Set.
-      dsopts  - a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs)
-      opts    - a dictionary containing any of the following Proc Export options(delimiter, putnames)
-      """
-      dsopts = dsopts if dsopts is not None else {}
-      opts = opts if opts is not None else {}
-
-      code  = "filename x \""+file+"\";\n"
-      code += "options nosource;\n"
-      code += "proc export data="
-
-      if len(libref):
-         code += libref+"."
-
-      code += "'"+table.strip().replace("'", "''")+"'n "+self._sb._dsopts(dsopts)+" outfile=x dbms=csv replace;\n"
-      code += self._sb._expopts(opts)+" run;\n"
-      code += "options source;\n"
-
-      if nosub:
-         print(code)
-      else:
-         ll = self.submit(code, "text")
-         return ll['LOG']
-
    def upload_slow(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
       """
       This method uploads a local file to the SAS servers file system.
@@ -1432,17 +1377,17 @@ Will use HTML5 for this SASsession.""")
                  'LOG'     : "File "+str(localfile)+" could not be opened. Error was: "+str(e)}
 
       code = """
-         filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
+         filename _sp_updn '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
          filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=S lrecl=4096;
 
          data _null_; nb = -1;
          infile sock nbyte=nb;
-         file saspydir;
+         file _sp_updn;
          input;
          put _infile_;
          run;
 
-         filename saspydir;
+         filename _sp_updn;
          filename sock;\n"""
 
       self._asubmit(code, "text")
@@ -1547,18 +1492,18 @@ Will use HTML5 for this SASsession.""")
                  'LOG'     : "Error try to open a socket in the upload method. Call failed."}
 
       code = """
-         filename saspydir '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
+         filename _sp_updn '"""+remf+"""' recfm=F encoding=binary lrecl=1 permission='"""+permission+"""';
          filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S lrecl=4096;
          /* filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary lrecl=4096; */
 
          data _null_; nb = -1;
          infile sock nbyte=nb;
-         file saspydir;
+         file _sp_updn;
          input;
          put _infile_;
          run;
 
-         filename saspydir;
+         filename _sp_updn;
          filename sock;\n"""
 
       sock.listen(1)
@@ -1668,12 +1613,12 @@ Will use HTML5 for this SASsession.""")
          host = ''
 
       code = """
-         filename saspydir '"""+remotefile+"""' recfm=F encoding=binary lrecl=4096;
+         filename _sp_updn '"""+remotefile+"""' recfm=F encoding=binary lrecl=4096;
          filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S lrecl=4096;
          /* filename sock socket '"""+host+""":"""+str(port)+"""' recfm=S encoding=binary; */
          data _null_;
          file sock;
-         infile saspydir;
+         infile _sp_updn;
          input;
          put _infile_;
          run;\n"""
@@ -1718,7 +1663,7 @@ Will use HTML5 for this SASsession.""")
             pass
          sock.close()
          fd.close()
-         ll = self.submit("filename saspydir;", 'text')
+         ll = self.submit("filename _sp_updn;", 'text')
          return {'Success' : False,
                  'LOG'     : "Download was interrupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
@@ -1732,7 +1677,7 @@ Will use HTML5 for this SASsession.""")
       fd.flush()
       fd.close()
 
-      ll = self.submit("filename saspydir;", 'text')
+      ll = self.submit("filename _sp_updn;", 'text')
       return {'Success' : True,
               'LOG'     : ll['LOG']}
 
@@ -2323,10 +2268,10 @@ Will use HTML5 for this SASsession.""")
       else:
          dts = k_dts
 
-      code  = ''
       code  = "proc export data=work.sasdata2dataframe outfile=sock dbms=csv replace;\n"
       code += self._sb._expopts(opts)+" run;\n"
       code += "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+      code += "filename sock;"
 
       sock.listen(1)
       self._asubmit(code, 'text')
@@ -2550,7 +2495,7 @@ Will use HTML5 for this SASsession.""")
          code += " '"+varlist[i]+"'n "
          if i % 10 == 9:
             code +='\n'
-      code += rdelim+";\nrun;"
+      code += rdelim+";\nrun;\nfilename sock;"
 
       if k_dts is None:
          dts = {}

@@ -32,12 +32,6 @@ class TestSASIO(unittest.TestCase):
         """
         self.assertTrue(self.is_method(self.io, 'exist'))
 
-    def test_sasio_mexist_read_csv(self):
-        """
-        Test that the SAS IO object has a `read_csv` method.
-        """
-        self.assertTrue(self.is_method(self.io, 'read_csv'))
-
     def test_sasio_mexist_sasdata2dataframe(self):
         """
         Test that the SAS IO object has a `sasdata2dataframe` method.
@@ -61,12 +55,6 @@ class TestSASIO(unittest.TestCase):
         Test that the SAS IO object has a `submit` method.
         """
         self.assertTrue(self.is_method(self.io, 'submit'))
-
-    def test_sasio_mexist_submit(self):
-        """
-        Test that the SAS IO object has a `write_csv` method.
-        """
-        self.assertTrue(self.is_method(self.io, 'write_csv'))
 
     def test_sasio_mexist_download(self):
         """

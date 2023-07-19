@@ -1178,7 +1178,22 @@ class SASsession():
         if results == '':
             results = self.results
 
-        self._io.read_csv(file, table, libref, self.nosub, opts)
+        code  = "filename _x "
+
+        if file.lower().startswith("http"):
+           code += "url "
+
+        code += "\""+file+"\";\n"
+        code += "proc import datafile=_x out="
+        if len(libref):
+           code += libref+"."
+        code += "'"+table.strip().replace("'", "''")+"'n dbms=csv replace; "+self._impopts(opts)+" run;"
+        code += "filename _x clear;\n"
+
+        if self.nosub:
+           print(code)
+        else:
+           ll = self._io.submit(code, "text")
 
         if self.exist(table, libref):
             sd = SASdata(self, libref, table, results)
@@ -1230,9 +1245,25 @@ class SASsession():
         :return: SAS log
         """
         dsopts = dsopts if dsopts is not None else {}
-        opts = opts if opts is not None else {}
+        opts   = opts if opts is not None else {}
 
-        log = self._io.write_csv(file, table, libref, self.nosub, dsopts, opts)
+        code  = "filename _x \""+file+"\";\n"
+        code += "options nosource;\n"
+        code += "proc export data="
+
+        if len(libref):
+           code += libref+"."
+
+        code += "'"+table.strip().replace("'", "''")+"'n "+self._dsopts(dsopts)+" outfile=_x dbms=csv replace;\n"
+        code += self._expopts(opts)+" run;\n"
+        code += "filename _x clear;"
+        code += "options source;\n"
+
+        if self.nosub:
+           print(code)
+        else:
+           log = self._io.submit(code, "text")['LOG']
+
         if not self.batch:
             print(log)
         else:
