@@ -709,7 +709,7 @@ class SASsessionHTTP():
       # POST Session
       uri = None
       for ld in self.sascfg.ctx.get('links'):
-         if ld.get('method') == 'POST':
+         if ld.get('method') == 'POST' and ld.get('rel') == 'createSession':
             uri = ld.get('uri')
             break
 
