@@ -44,7 +44,7 @@ class SASIONotSupportedError(Exception):
             alt_text = ''
 
         extra  = '\nPlease refer to the Configuration instructions in the SASPy Documentation at '
-        extra += 'https://sassoftware.github.io/saspy/configuration'
+        extra += 'https://sassoftware.github.io/saspy/configuration\n'
         extra += 'If you need more help, please open an Issue on the SASPy GitHub site at '
         extra += 'https://github.com/sassoftware/saspy/issues'
 
