@@ -23,8 +23,7 @@ The current set of connection methods are as follows:
 `IOM`_
   The Integrated Object Method (IOM) connection method (IOM using Java) supports SAS on any platform.
   This method can make a local Windows connection and it is also the way to connect
-  to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
-  Server on any supported SAS platform from any client.
+  to a SAS Workspace Server on any SAS platform from any client. This includes SAS Grid deployments too.
 
 `HTTP`_
   This access method uses http[s] to connect to the Compute Service (a micro service) of a Viya
@@ -498,18 +497,18 @@ aka: IOM using Java
 
 This connection method opens many connectivity options. This method enables you to
 connect to any Workspace server on any supported platform. It requires Java 7 or higher
-installed on your Client machine (where you're running SASPy)
+to be installed on your Client machine (where you're running SASPy)
 
 This supports connecting to Workspace servers in a SAS/Grid deployment
-(`SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__)
-as well. This method, compared to STDIO over SSH, enables SAS Grid
-Manager to control the distribution of connections to the various grid nodes
-and integrates all the monitoring and administration that SAS Grid Manager provides, as well as providing
-client side High Availability (HA) by supporting load balanced object spawners.
+as well. This method, compared to STDIO over SSH, enables
+`SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__
+to control the distribution of connections to the various grid nodes
+and integrates with monitoring and administration that SAS Grid Manager provides,
+as well as providing client side High Availability (HA) by supporting load balanced object spawners.
 
-The IOM connection method also enables you to connect to SAS from Windows (STDIO was Linux only).
+The IOM connection method also enables you to connect to SAS from a Windows client (STDIO was Linux only).
 The connection can be to a local SAS installation or a remote IOM Workspace server running
-on any supported platform, including MVS.
+on any platform, including MVS.
 
 
 Authentication:
