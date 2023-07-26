@@ -500,14 +500,16 @@ This connection method opens many connectivity options. This method enables you 
 connect to any Workspace server on any supported platform. It requires Java 7 or higher
 installed on your Client machine (where you're running SASPy)
 
-You can also use `SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__
-to connect to a SAS grid. This method, compared to STDIO over SSH, enables SAS Grid
+This supports connecting to Workspace servers in a SAS/Grid deployment
+(`SAS Grid Manager <https://www.sas.com/en_us/software/foundation/grid-manager.html>`__)
+as well. This method, compared to STDIO over SSH, enables SAS Grid
 Manager to control the distribution of connections to the various grid nodes
-and integrates all the monitoring and administration that SAS Grid Manager provides.
+and integrates all the monitoring and administration that SAS Grid Manager provides, as well as providing
+client side High Availability (HA) by supporting load balanced object spawners.
 
 The IOM connection method also enables you to connect to SAS from Windows (STDIO was Linux only).
 The connection can be to a local SAS installation or a remote IOM Workspace server running
-on any supported platform.
+on any supported platform, including MVS.
 
 
 Authentication:
@@ -556,10 +558,12 @@ Replacing the versions with 2.17.1 and 2.12.4 now, as they are currently the lat
 
 There are a number of vulnerabilities in log4j and Apache provided new releases of log4j to address these.
 At the time of this writing (SASPy V3.7.8), 2.16.0 was the current newest release that fixed these, and 2.12.2 was added
-to address them in a version that still supports Java 7. SASPy still provides support for Java 7 so both
-2.12.2 and 2.16.0 are included in the SASPy deployment. SASPy configures the classpath by default and uses
-the 2.12.2 jars to maintain compatibility with Java 7. There is a new configuration definition key, 'log4j',
-that can be used to cause SASPy to use the 2.16.0 version instead. If there is another version you want to
+to address them in a version that still supports Java 7. But the current versions are now 2.17.1 and 2.12.4.
+
+SASPy still provides support for Java 7 so both
+2.12.4 and 2.17.1 are included in the SASPy deployment. SASPy configures the classpath by default and uses
+the 2.12.4 jars to maintain compatibility with Java 7. There is a new configuration definition key, 'log4j',
+that can be used to cause SASPy to use the 2.17.1 version instead. If there is another version you want to
 use, it can be done by providing the 'classpath' key to override the classpath SASPy would generate, specifying
 whichever log4j jar file you want to use (you have to provide the files themselves). Note that if doing this, you
 should use the same classpath as SASPy generates, just replacing the log4j jar files with the ones you
