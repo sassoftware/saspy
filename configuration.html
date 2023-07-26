@@ -403,8 +403,7 @@ user/pw.</p>
 </dd>
 <dt><a class="reference internal" href="#iom">IOM</a></dt><dd><p>The Integrated Object Method (IOM) connection method (IOM using Java) supports SAS on any platform.
 This method can make a local Windows connection and it is also the way to connect
-to SAS Grid through SAS Grid Manager. This method can connect to a SAS Workspace
-Server on any supported SAS platform from any client.</p>
+to a SAS Workspace Server on any SAS platform from any client. This includes SAS Grid deployments too.</p>
 </dd>
 <dt><a class="reference internal" href="#http">HTTP</a></dt><dd><p>This access method uses http[s] to connect to the Compute Service (a micro service) of a Viya
 installation. This does not connect to SAS 9.4 via http. The Compute Service will start a
@@ -811,16 +810,16 @@ method.</p>
 <p>aka: IOM using Java</p>
 <p>This connection method opens many connectivity options. This method enables you to
 connect to any Workspace server on any supported platform. It requires Java 7 or higher
-installed on your Client machine (where you’re running SASPy)</p>
+to be installed on your Client machine (where you’re running SASPy)</p>
 <p>This supports connecting to Workspace servers in a SAS/Grid deployment
-(<a class="reference external" href="https://www.sas.com/en_us/software/foundation/grid-manager.html">SAS Grid Manager</a>)
-as well. This method, compared to STDIO over SSH, enables SAS Grid
-Manager to control the distribution of connections to the various grid nodes
-and integrates all the monitoring and administration that SAS Grid Manager provides, as well as providing
-client side High Availability (HA) by supporting load balanced object spawners.</p>
-<p>The IOM connection method also enables you to connect to SAS from Windows (STDIO was Linux only).
+as well. This method, compared to STDIO over SSH, enables
+<a class="reference external" href="https://www.sas.com/en_us/software/foundation/grid-manager.html">SAS Grid Manager</a>
+to control the distribution of connections to the various grid nodes
+and integrates with monitoring and administration that SAS Grid Manager provides,
+as well as providing client side High Availability (HA) by supporting load balanced object spawners.</p>
+<p>The IOM connection method also enables you to connect to SAS from a Windows client (STDIO was Linux only).
 The connection can be to a local SAS installation or a remote IOM Workspace server running
-on any supported platform, including MVS.</p>
+on any platform, including MVS.</p>
 <section id="authentication">
 <h3>Authentication:<a class="headerlink" href="#authentication" title="Permalink to this heading">¶</a></h3>
 <p>The IOM protocol (SAS 9’s client/server interface protocol) supports different forms of authentication. This Access Method
