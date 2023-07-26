@@ -43,7 +43,12 @@ class SASIONotSupportedError(Exception):
         else:
             alt_text = ''
 
-        return 'Cannot use {} I/O module on Windows. {}'.format(self.method, alt_text)
+        extra  = '\nPlease refer to the Configuration instructions in the SASPy Documentation at '
+        extra += 'https://sassoftware.github.io/saspy/configuration'
+        extra += 'If you need more help, please open an Issue on the SASPy GitHub site at '
+        extra += 'https://github.com/sassoftware/saspy/issues'
+
+        return 'Cannot use {} I/O module on Windows. {}'.format(self.method, alt_text+extra)
 
 
 class SASIOConnectionError(Exception):
@@ -51,7 +56,12 @@ class SASIOConnectionError(Exception):
         self.msg = msg
 
     def __str__(self):
-        return 'Failure establishing SASsession.\n{}'.format(self.msg)
+        extra  = '\nPlease refer to the Configuration instructions in the SASPy Documentation at '
+        extra += 'https://sassoftware.github.io/saspy/configuration\n'
+        extra += 'If you need more help, please open an Issue on the SASPy GitHub site at '
+        extra += 'https://github.com/sassoftware/saspy/issues'
+
+        return 'Failure establishing SASsession.\n{}'.format(self.msg+extra)
 
 
 class SASHTTPauthenticateError(Exception):
