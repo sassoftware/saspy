@@ -43,10 +43,12 @@ class SASIONotSupportedError(Exception):
         else:
             alt_text = ''
 
-        extra  = '\nPlease refer to the Configuration instructions in the SASPy Documentation at '
-        extra += 'https://sassoftware.github.io/saspy/configuration\n'
-        extra += 'If you need more help, please open an Issue on the SASPy GitHub site at '
-        extra += 'https://github.com/sassoftware/saspy/issues'
+        extra  = "\n\nPlease refer to the Configuration Instructions in the SASPy Documentation at "
+        extra += "https://sassoftware.github.io/saspy/configuration\n"
+        extra += "You can also look for the error you've recieved in the Troublshooting guide at "
+        extra += "https://sassoftware.github.io/saspy/troubleshooting\n"
+        extra += "If you need more help, please open an Issue on the SASPy GitHub site at "
+        extra += "https://github.com/sassoftware/saspy/issues"
 
         return 'Cannot use {} I/O module on Windows. {}'.format(self.method, alt_text+extra)
 
@@ -56,10 +58,12 @@ class SASIOConnectionError(Exception):
         self.msg = msg
 
     def __str__(self):
-        extra  = '\nPlease refer to the Configuration instructions in the SASPy Documentation at '
-        extra += 'https://sassoftware.github.io/saspy/configuration\n'
-        extra += 'If you need more help, please open an Issue on the SASPy GitHub site at '
-        extra += 'https://github.com/sassoftware/saspy/issues'
+        extra  = "\n\nPlease refer to the Configuration Instructions in the SASPy Documentation at "
+        extra += "https://sassoftware.github.io/saspy/configuration\n"
+        extra += "You can also look for the error you've recieved in the Troublshooting guide at "
+        extra += "https://sassoftware.github.io/saspy/troubleshooting\n"
+        extra += "If you need more help, please open an Issue on the SASPy GitHub site at "
+        extra += "https://github.com/sassoftware/saspy/issues"
 
         return 'Failure establishing SASsession.\n{}'.format(self.msg+extra)
 
