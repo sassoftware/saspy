@@ -2,6 +2,37 @@
 
 
 
+## [5.2.3] - 2023-07-28
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Tweak` Cleaned up a few bit of documentation. Fixed a link in one section. Nothing significant or different.
+
+-   `Tweak` I moved a couple methods out of the individual Access Method modules and into the base module.
+Over time, I had been able to make these be the same code in each access method, so now it's cleaner to have
+the single implementation in one place instead of 4 places. No changes are required in user code.
+
+-   `Tweak` Modified a lookup in the HTTP access method to be more specific, in case something changes in the
+API over time. Just getting a link from the list returned by Compute. Nothing changing from users perspective.
+
+-   `Tweak` Added some instructions to a couple of SASsession Exceptions to point users at the documentation.
+Added messages pointing to the Configuration Doc, the Troubleshooting Guide in the doc and a message to open
+an Issue on the saspy github site if needing more help.
+
+### Fixed
+
+-   `None` Nothing fixed in this release.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.2.2] - 2023-07-07
 
 ### Added
@@ -24,6 +55,7 @@ as it used to again.
 ### Removed
 
 -   `None` Nothing removed
+
 
 
 ## [5.2.1] - 2023-05-31
