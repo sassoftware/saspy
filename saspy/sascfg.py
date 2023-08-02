@@ -206,14 +206,14 @@ iomcom = {
 #
 
 httpsviya = {'url'     : 'https://viya.deployment.com',
-             'context' : 'Data Mining compute context',
+             'context' : 'SAS Studio compute context',
              'authkey' : 'viya_user-pw',
              'options' : ["fullstimer", "memsize=1G"]
              }
 
 httpviya = {'url'     : 'https://sastpw.rndk8s.openstack.sas.com:23456',
-           #'port'    :  23456,   # can put different port here or ^ is it's not using the default port
-            'context' : 'Data Mining compute context',
+           #'port'    :  23456,   # can put different port here or ^ if it's not using the default port
+            'context' : 'SAS Studio compute context',
             'authkey' : 'viya_user-pw',
             'options' : ["fullstimer", "memsize=1G"]
             }
