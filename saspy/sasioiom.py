@@ -27,6 +27,8 @@ import atexit
 import logging
 logger = logging.getLogger('saspy')
 
+from saspy.sasexceptions import SASDFNamesToLong
+
 try:
    import pandas as pd
    import numpy  as np
@@ -1506,8 +1508,13 @@ Will use HTML5 for this SASsession.""")
       if type(df.index) != pd.RangeIndex:
          warnings.warn("Note that Indexes are not transferred over as columns. Only actual columns are transferred")
 
+      longname = False
       for name in df.columns:
          colname = str(name).replace("'", "''")
+         if len(colname.encode(self.sascfg.encoding)) > 32:
+            warnings.warn("Column '{}' in DataFrame is too long for SAS. Rename to 32 bytes or less".format(colname),
+                     RuntimeWarning)
+            longname = True
          col_up  = str(name).upper()
          input  += "input '"+colname+"'n "
          if col_up in lab_keys:
@@ -1557,6 +1564,9 @@ Will use HTML5 for this SASsession.""")
                else:
                   dts.append('N')
          input += ';\n'
+
+      if longname:
+         raise SASDFNamesToLong(Exception)
 
       code = "data "
       if len(libref):

@@ -97,6 +97,12 @@ class SASResultsError(Exception):
     def __str__(self):
         return 'Failure creating SASResults object.\n{}'.format(self.msg)
 
+class SASDFNamesToLong(Exception):
+    def __init__(self, msg: str):
+        self.msg = msg
+
+    def __str__(self):
+        return 'Column name(s) in DataFrame are too long for SAS. Rename to 32 bytes (in SAS Session encoding) or less.\n'
 
 
 

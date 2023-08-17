@@ -25,6 +25,8 @@ import warnings
 import logging
 logger = logging.getLogger('saspy')
 
+from saspy.sasexceptions import SASDFNamesToLong
+
 try:
     from win32com.client import dynamic
 except ImportError:
@@ -656,9 +658,14 @@ class SASSessionCOM(object):
         if type(df.index) != pd.RangeIndex:
            warnings.warn("Note that Indexes are not transferred over as columns. Only actual columns are transferred")
 
-        columns = []
-        formats = {}
+        longname = False
+        columns  = []
+        formats  = {}
         for i, name in enumerate(df.columns):
+            if len(name.encode(self.sascfg.encoding)) > 32:
+               warnings.warn("Column '{}' in DataFrame is too long for SAS. Rename to 32 bytes or less".format(name),
+                        RuntimeWarning)
+               longname = True
             if df[name].dtypes.kind in self.PD_NUM_TYPE:
                 # Numeric type
                 definition = "'{}'n num".format(name)
@@ -683,6 +690,9 @@ class SASSessionCOM(object):
                 formats[name] = lambda x: "'{}'".format(x.replace("'", "''")) if pd.isnull(x) is False else 'NULL'
 
             columns.append(definition)
+
+        if longname:
+           raise SASDFNamesToLong(Exception)
 
         sql_values = []
         for index, row in df.iterrows():

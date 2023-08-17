@@ -29,7 +29,11 @@ import tempfile as tf
 from time import sleep
 from threading import Thread
 
-from saspy.sasexceptions import (SASHTTPauthenticateError, SASHTTPconnectionError, SASHTTPsubmissionError)
+from saspy.sasexceptions import (SASHTTPauthenticateError,
+                                 SASHTTPconnectionError,
+                                 SASHTTPsubmissionError,
+                                 SASDFNamesToLong
+                                )
 
 import logging
 logger = logging.getLogger('saspy')
@@ -1496,8 +1500,13 @@ class SASsessionHTTP():
       if type(df.index) != pd.RangeIndex:
          warnings.warn("Note that Indexes are not transferred over as columns. Only actual columns are transferred")
 
+      longname = False
       for name in df.columns:
          colname = str(name).replace("'", "''")
+         if len(colname.encode(self.sascfg.encoding)) > 32:
+            warnings.warn("Column '{}' in DataFrame is too long for SAS. Rename to 32 bytes or less".format(colname),
+                     RuntimeWarning)
+            longname = True
          col_up  = str(name).upper()
          input  += "input '"+colname+"'n "
          if col_up in lab_keys:
@@ -1546,6 +1555,9 @@ class SASsessionHTTP():
                else:
                   dts.append('N')
          input += ";\n"
+
+      if longname:
+         raise SASDFNamesToLong(Exception)
 
       code = "data "
       if len(libref):
