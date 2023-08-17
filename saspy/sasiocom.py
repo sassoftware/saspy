@@ -25,7 +25,7 @@ import warnings
 import logging
 logger = logging.getLogger('saspy')
 
-from saspy.sasexceptions import SASDFNamesToLong
+from saspy.sasexceptions import SASDFNamesToLongError
 
 try:
     from win32com.client import dynamic
@@ -692,7 +692,7 @@ class SASSessionCOM(object):
             columns.append(definition)
 
         if longname:
-           raise SASDFNamesToLong(Exception)
+           raise SASDFNamesToLongError(Exception)
 
         sql_values = []
         for index, row in df.iterrows():

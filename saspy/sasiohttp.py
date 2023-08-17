@@ -32,7 +32,7 @@ from threading import Thread
 from saspy.sasexceptions import (SASHTTPauthenticateError,
                                  SASHTTPconnectionError,
                                  SASHTTPsubmissionError,
-                                 SASDFNamesToLong
+                                 SASDFNamesToLongError
                                 )
 
 import logging
@@ -1557,7 +1557,7 @@ class SASsessionHTTP():
          input += ";\n"
 
       if longname:
-         raise SASDFNamesToLong(Exception)
+         raise SASDFNamesToLongError(Exception)
 
       code = "data "
       if len(libref):

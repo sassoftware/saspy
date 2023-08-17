@@ -27,7 +27,7 @@ import atexit
 import logging
 logger = logging.getLogger('saspy')
 
-from saspy.sasexceptions import SASDFNamesToLong
+from saspy.sasexceptions import SASDFNamesToLongError
 
 try:
    import pandas as pd
@@ -1566,7 +1566,7 @@ Will use HTML5 for this SASsession.""")
          input += ';\n'
 
       if longname:
-         raise SASDFNamesToLong(Exception)
+         raise SASDFNamesToLongError(Exception)
 
       code = "data "
       if len(libref):
