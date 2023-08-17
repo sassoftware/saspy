@@ -358,10 +358,12 @@ Will use HTML5 for this SASsession.""")
                try:
                   fid = open(pwf, mode='r')
                   for line in fid:
-                     if line.startswith(self.sascfg.authkey):
-                        user = line.partition(' user')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                        pw   = line.partition(' password')[2].lstrip().partition(' ')[0].partition('\n')[0]
+                     ls = line.split()
+                     if len(ls) == 5 and ls[0] == self.sascfg.authkey and ls[1] == 'user' and ls[3] == 'password':
+                        user  = ls[2]
+                        pw    = ls[4]
                         found = True
+                        break
                   fid.close()
                except OSError as e:
                   logger.warning('Error trying to read authinfo file:'+pwf+'\n'+str(e))

@@ -393,10 +393,11 @@ class SASconfigHTTP:
                try:
                   fid = open(pwf, mode='r')
                   for line in fid:
-                     if line.startswith(pauthkey):
-                        puser  = line.partition(' user'    )[2].lstrip().partition(' ')[0].partition('\n')[0]
-                        ppw    = line.partition(' password')[2].lstrip().partition(' ')[0].partition('\n')[0]
-                        found  = True
+                     ls = line.split()
+                     if len(ls) == 5 and ls[0] == self.sascfg.authkey and ls[1] == 'user' and ls[3] == 'password':
+                        user  = ls[2]
+                        pw    = ls[4]
+                        found = True
                         break
                   fid.close()
                except OSError as e:
