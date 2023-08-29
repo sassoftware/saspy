@@ -1,6 +1,38 @@
 # Changelog
 
 
+## [5.3.0] - 2023-08-29
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Tweak` Changed the value of Context in the HTTP config definitions in the example sascfg.py file to use
+the more likely `SAS Studio compute context`. This has no effect on any code. It's just an example configuration.
+
+-   `Enhanced` df2sd() now raises an exception (SASDFNamesToLongError) if any of the column names are longer than 32 bytes,
+in the SAS Session encoding, since the data step will fail for those columns and produce errors in the log, but SAS still create
+the SAS Data set, incorrectly. Previously, df2sd returned the SASData object, and issued a message about finding Errors in the log,
+but didn't fail. The resultant SAS Data Set wasn't correct so checking for this and raising the exception is what should happen.
+I also write a message with each column name that is too long, so you know which one(s) need to be changed. And remember, SAS's
+restriction on these names is 32 bytes in the SAS Session encoding, and not necessarily 32 characters of utf-8 from Python.
+
+### Fixed
+
+-   `Fixed` I found a bug in the code that parses the authinfo file to find the authkey. It was using startswith(authkey)
+to find the line to use, for the user and password. But startswith() isn't looking at the first word, only so many characters.
+This could result in using the wrong line from the authinfo file. For instance, if you had a line with the authkey of `tom1` and
+another line further in the file with authkey of `tom`, then looking for authkey='tom' would use the first line with `tom1` for the
+credentials instead of the correct line starting with `tom`. Simple fix to parse it correctly so it compares the whole first
+word of the line now.
+
+### Removed
+
+-   `None` Nothing removed
+
+
 
 ## [5.2.3] - 2023-07-28
 
