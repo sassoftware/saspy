@@ -1423,7 +1423,7 @@ class SASsession():
         As of version 3.5.0, keep_outer_quotes is deprecated and embedded_newlines defaults to True
 
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
-        :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
+        :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them imported into the SAS data set
 
         colrep is new as of version 3.5.0
 
@@ -1504,7 +1504,7 @@ class SASsession():
         As of version 3.5.0, keep_outer_quotes is deprecated and embedded_newlines defaults to True
 
         :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
-        :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
+        :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them imported into the SAS data set
 
         colrep is new as of version 3.5.0
 

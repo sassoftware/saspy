@@ -1464,7 +1464,7 @@ Will use HTML5 for this SASsession.""")
       table   - the name of the SAS Data Set to create
       libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
       keep_outer_quotes - for character columns, have SAS keep any outer quotes instead of stripping them off.
-      embedded_newlines - if any char columns have embedded CR or LF, set this to True to get them iported into the SAS data set
+      embedded_newlines - if any char columns have embedded CR or LF, set this to True to get them imported into the SAS data set
       LF - if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to '\x01'
       CR - if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
       colsep - the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
