@@ -1037,10 +1037,11 @@ See the sasets.py module.
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>libref</strong> – the libref to be assigned</p></li>
+<li><p><strong>libref</strong> – the libref to be assigned (or deassigned if providing <cite>options=’clear’</cite>)</p></li>
 <li><p><strong>engine</strong> – the engine name used to access the SAS Library (engine defaults to BASE, per SAS)</p></li>
 <li><p><strong>path</strong> – path or list of paths to the library (for engines that take a path parameter)</p></li>
-<li><p><strong>options</strong> – other engine or engine supervisor options</p></li>
+<li><p><strong>options</strong> – other engine or engine supervisor options. Including CLEAR to deassign the library.
+To deassign a library only provide libref= and options=’clear’.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
