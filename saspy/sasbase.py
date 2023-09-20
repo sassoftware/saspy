@@ -1110,10 +1110,11 @@ class SASsession():
                options: str = ' ', prompt: dict = None) -> str:
         """
 
-        :param libref:  the libref to be assigned
+        :param libref:  the libref to be assigned (or deassigned if providing `options='clear'`)
         :param engine:  the engine name used to access the SAS Library (engine defaults to BASE, per SAS)
         :param path:    path or list of paths to the library (for engines that take a path parameter)
-        :param options: other engine or engine supervisor options
+        :param options: other engine or engine supervisor options. Including CLEAR to deassign the library.
+                        To deassign a library only provide libref= and options='clear'.
         :return: SAS log
         """
         prompt = prompt if prompt is not None else {}
