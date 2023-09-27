@@ -2119,7 +2119,7 @@ Will use HTML5 for this SASsession.""")
                               lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=dvarlist,
-                          sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
+                          sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, keep_default_na=False,
                           encoding='utf-8', quoting=quoting, **kwargs)
       except:
          if os.name == 'nt':

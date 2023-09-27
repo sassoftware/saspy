@@ -2538,7 +2538,7 @@ Will use HTML5 for this SASsession.""")
          sockout = _read_sock(newsock=newsock, rowsep=rowsep.encode())
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=dvarlist,
-                          sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
+                          sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, keep_default_na=False,
                           encoding='utf8', quoting=quoting, **kwargs)
 
       except (KeyboardInterrupt, Exception) as e:

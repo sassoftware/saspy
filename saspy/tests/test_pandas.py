@@ -246,6 +246,27 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         self.assertTrue(df.equals(sd2.to_df()))
         sd.delete(); del(sd); sd2.delete(); del(sd2); del(x); del(df)
 
+    def test_NaN(self):
+        """
+        Test that default NA values aren't converted from SAS real values to pandas NaN
+        """
+
+        code = '''
+               data basin; input name $;
+               datalines;
+               NA
+               NA
+               WP
+               WP
+               EP
+               EP
+               ;
+               run;
+               '''
+        res = self.sas.submit(code)
+        df = self.sas.sd2df('basin')
+        self.assertFalse(True in df.isna().values)
+
 
 class TestPandasValidVarname(unittest.TestCase):
     @classmethod
@@ -324,3 +345,5 @@ class TestPandasValidVarname(unittest.TestCase):
                          'Really Long Variable Name To Sho']
         [self.assertIn(name, converted_col_names) for name in correct_names]
         self.assertEqual(len(correct_names), len(converted_col_names))
+
+
