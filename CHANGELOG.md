@@ -1,6 +1,34 @@
 # Changelog
 
 
+## [5.4.0] - 2023-09-27
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Tweak` Changed the doc for saslib() to show how to deassign a libref using this method, as well
+as how it's already doc'ed for assigning librefs. Nothing changed with the method, just documenting how to use
+it for both assign and deassign.
+
+### Fixed
+
+-   `Fixed` An internal user found a bug with sd2df() where it was converting character variables values of
+'NA' in the SAS Data Set to NaN in the dataframe instead of them being the string 'NA'. This turned out to
+be due to the interaction of the na_values={...} dictionary I pass in, since I need to normalize the 30ish
+different MISSING Values that SAS has, to individual values to provide Pandas so they are processed correctly.
+The problem, however, is that the default value of keep_default_na= being True, appends my list to Pandas
+list of what it thinks values are for NaN's instead of only using my list. The file is to specify keep_default_na=True
+as well as provide my list via na_values={...}. That is fixed in this release.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.3.0] - 2023-08-29
 
 ### Added
