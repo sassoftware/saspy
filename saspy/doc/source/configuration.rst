@@ -950,9 +950,10 @@ them here, as they are mutually exclusive. You use only one of the various means
 
 4) SASLogon Authentication Token
 
-   All of the previous authentication mechanisms are used to acquire the Viya Auth Token. You can, actually, do all of that yourself
-   via various Rest API's. If you do that, then you can just pass in the Viya Auth Token, and I'll skip the auth process and just
-   use that token; Bob's your uncle, as they say. The key for this is 'authtoken'.
+   All of the previous authentication mechanisms are used to have SASPy acquire the Viya Auth Token. You can, actually, do all of
+   that yourself via various Rest API's. If you do that, then you can just pass in the Viya Auth Token, and even the refresh token
+   too, and I'll skip the auth process and just use your tokens; Bob's your uncle, as they say. The key for this is 'authtoken',
+   and optionally, 'refreshtoken'.
 
 Again, only use one of these and don't mix using config keys from more than one for a given connection.
 
@@ -1094,13 +1095,17 @@ display -
 authtoken -
     The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.
     Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can just pass it in.
-    These tokens, for reference, are very long strings of random chatacters; just so you know that
+    These tokens, for reference, are very long strings of random characters; just so you know that
     you're using the right thing :)
+
+refreshtoken -
+    If you are providing the Authtoken yourself you should also have access to the Refreshtoken, acquired when
+    you got the Authtoken from SASLogon. Provide that token so SASPy can refresh your access token before it expires.
 
 jwt -
     A JWT bearer token that can be used to acquire a SASLogon authorization token. This would be something like an Azure
     token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.
-    These tokens, for reference, are very long strings of random chatacters; just so you know that
+    These tokens, for reference, are very long strings of random characters; just so you know that
     you're using the right thing :)
 
 .. code-block:: ipython3
