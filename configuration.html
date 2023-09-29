@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 5.3.0 documentation</title>
+  <title>Configuration &mdash; saspy 5.4.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.3.0
+                5.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -1194,9 +1194,10 @@ And these tokens, are just big long strings; thousands of bytes long strings of 
 (so you know you’re passing in the right thing).</p>
 </li>
 <li><p>SASLogon Authentication Token</p>
-<p>All of the previous authentication mechanisms are used to acquire the Viya Auth Token. You can, actually, do all of that yourself
-via various Rest API’s. If you do that, then you can just pass in the Viya Auth Token, and I’ll skip the auth process and just
-use that token; Bob’s your uncle, as they say. The key for this is ‘authtoken’.</p>
+<p>All of the previous authentication mechanisms are used to have SASPy acquire the Viya Auth Token. You can, actually, do all of
+that yourself via various Rest API’s. If you do that, then you can just pass in the Viya Auth Token, and even the refresh token
+too, and I’ll skip the auth process and just use your tokens; Bob’s your uncle, as they say. The key for this is ‘authtoken’,
+and optionally, ‘refreshtoken’.</p>
 </li>
 </ol>
 <p>Again, only use one of these and don’t mix using config keys from more than one for a given connection.</p>
@@ -1313,12 +1314,15 @@ it to render. I have an <a class="reference external" href="https://community.da
 </dd>
 <dt>authtoken -</dt><dd><p>The SASLogon authorization token to use instead of acquiring one via user/pw or authcode or jwt.
 Normally SASPy calls SASLogon to authenticate and get this token. But, if you do that yourself, you can just pass it in.
-These tokens, for reference, are very long strings of random chatacters; just so you know that
+These tokens, for reference, are very long strings of random characters; just so you know that
 you’re using the right thing :)</p>
+</dd>
+<dt>refreshtoken -</dt><dd><p>If you are providing the Authtoken yourself you should also have access to the Refreshtoken, acquired when
+you got the Authtoken from SASLogon. Provide that token so SASPy can refresh your access token before it expires.</p>
 </dd>
 <dt>jwt -</dt><dd><p>A JWT bearer token that can be used to acquire a SASLogon authorization token. This would be something like an Azure
 token, where Azure and Viya have been set up to allow the JWT to be used to get a SASLogon token.
-These tokens, for reference, are very long strings of random chatacters; just so you know that
+These tokens, for reference, are very long strings of random characters; just so you know that
 you’re using the right thing :)</p>
 </dd>
 </dl>
