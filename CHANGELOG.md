@@ -1,6 +1,31 @@
 # Changelog
 
 
+
+## [5.4.1] - 2023-10-06
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Tweak` Added to the doc for the HTTP access method, adding the 'refreshtoken' keyword which goes along with the
+'authtoken' keyword if you did your own authentication to SASLogon. Refreshtoken was added when authtoken was, I just
+didn't get it in the doc then.
+
+### Fixed
+
+-   `Fixed` Based upon Issue 562, I enhanced sd2df() to allow you to provide 'errors=' as a keyword parameter which is
+used in the decode() method when converting the bytes being streamed across to characters. The errors keyword determines
+how transcoding failures are handled; the default being failure. See bytes.decode() in the Python doc for valid values.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.4.0] - 2023-09-27
 
 ### Added
