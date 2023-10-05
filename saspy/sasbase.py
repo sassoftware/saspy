@@ -1666,13 +1666,15 @@ class SASsession():
         :param tempfile: [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
         :param tempkeep: [deprecated] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
-        For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method
+        For the MEMORY and DISK methods, the following 5 parameters are also available, depending upon access method
 
         :param rowsep: the row separator character to use; defaults to hex(1)
         :param colsep: the column separator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
-
+        :param errors: this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
+                       from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
+                       then you can provide values like 'replace' or 'ignore' to load the invalid data instead of failing.
 
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
@@ -1773,7 +1775,9 @@ class SASsession():
         :param colsep: the column separator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
-
+        :param errors: this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
+                       from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
+                       then you can provide values like 'replace' or 'ignore' to load the invalid data instead of failing.
 
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
@@ -1829,13 +1833,15 @@ class SASsession():
         :param tempfile: [deprecated except for Local IOM] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
         :param tempkeep: [deprecated except for Local IOM] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
 
-        For the MEMORY and DISK methods, the following 4 parameters are also available, depending upon access method
+        For the MEMORY and DISK methods, the following 5 parameters are also available, depending upon access method
 
         :param rowsep: the row separator character to use; defaults to hex(1)
         :param colsep: the column separator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
-
+        :param errors: this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
+                       from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
+                       then you can provide values like 'replace' or 'ignore' to load the invalid data instead of failing.
 
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.

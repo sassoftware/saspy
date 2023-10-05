@@ -1885,6 +1885,7 @@ class SASsessionHTTP():
       tmp = kwargs.pop('tempfile', None)
       tmp = kwargs.pop('tempkeep', None)
 
+      errors = kwargs.pop('errors', 'strict')
       dsopts = dsopts if dsopts is not None else {}
 
       if libref:
@@ -2063,7 +2064,7 @@ class SASsessionHTTP():
       status = req.status
 
 
-      sockout = _read_sock(req=req, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode())
+      sockout = _read_sock(req=req, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(), errors=errors)
 
       df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=dvarlist,
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, keep_default_na=False,
@@ -2090,6 +2091,7 @@ class _read_sock(io.StringIO):
       self.method   = kwargs.get('method', 'CSV')
       self.rowsep   = kwargs.get('rowsep', b'\n')
       self.rsep     = kwargs.get('rsep', self.rowsep)
+      self.errs     = kwargs.get('errors', 'strict')
       self.datar    = b""
 
    def read(self, size=4096):
@@ -2119,5 +2121,5 @@ class _read_sock(io.StringIO):
          datap    = data[0]+data[1]
       self.datar  = data[2]
 
-      return datap.decode()
+      return datap.decode(errors=self.errs)
 
