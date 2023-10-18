@@ -572,8 +572,7 @@ class SASconfigHTTP:
          ujwt           = urllib.parse.quote(jwt)
          d1             = "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion="+ujwt
          client         = "Basic "+base64.encodebytes((client_id+":").encode(self.encoding)).splitlines()[0].decode(self.encoding)
-         headers        = {"Accept":"application/vnd.sas.compute.session+json",
-                           "Content-Type":"application/x-www-form-urlencoded",
+         headers        = {"Accept":"application/vnd.sas.compute.session+json", "Content-Type":"application/x-www-form-urlencoded",
                            "Authorization":client}
       else:
          client_id     = "sas.tkmtrb"
@@ -1854,7 +1853,7 @@ class SASsessionHTTP():
                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
                   df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce')
 
-      code = "data _null_; fdelete(_sp_updn); run;\nfilename _sp_updn;"
+      code = "data _null_; rc = fdelete('_sp_updn'); run;\nfilename _sp_updn;"
 
       ll = self.submit(code, 'text')
       logf += ll['LOG']
@@ -2078,7 +2077,7 @@ class SASsessionHTTP():
                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
                   df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce')
 
-      code = "data _null_; fdelete(_sp_updn); run;\nfilename _sp_updn;"
+      code = "data _null_; rc = fdelete('_sp_updn'); run;\nfilename _sp_updn;"
 
       ll = self.submit(code, 'text')
       logf += ll['LOG']
