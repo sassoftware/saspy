@@ -2,6 +2,27 @@
 
 
 
+## [5.4.2] - 2023-10-18
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `Fixed` Found a SAS code gen syntax error in the HTTP access method causing an error in the log
+for sd2df. Needed to quote the fileref in a function. So, fixed that syntax error in that method.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.4.1] - 2023-10-06
 
 ### Added
