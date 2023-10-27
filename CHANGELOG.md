@@ -2,6 +2,31 @@
 
 
 
+## [5.4.3] - 2023-10-27
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `Fixed` The upload method wasn't validating that the file was uploaded successfully after the fact.
+It has a number of checks up front, and if there's a failure, it could return Success=False, but each
+access method is different and they didn't each get a failure the same way. So I added a more explicit
+validation after the upload is completed, to prove the file really made it or not. For the HTTP access
+method, I also mitigated a situation where the Compute server process could be killed for trying to
+access a restricted path. Now that just gets a clean failure with a message about the problem.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.4.2] - 2023-10-18
 
 ### Added
