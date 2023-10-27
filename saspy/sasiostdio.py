@@ -1352,13 +1352,28 @@ Will use HTML5 for this SASsession.""")
       """
       valid = self._sb.file_info(remotefile, quiet = True)
 
+      # check for non-exist, dir or existing file
       if valid is None:
-         remf = remotefile
+         remf  = remotefile
+         exist = False
       else:
          if valid == {}:
             remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
+            valid = self._sb.file_info(remf, quiet = True)
+            if valid is None:
+               exist = False
+            else:
+               if valid == {}:
+                  return {'Success' : False,
+                          'LOG'     : "File "+str(remf)+" is an existing directory. Upload was stopped."}
+               else:
+                  exist = True
+                  if overwrite == False:
+                     return {'Success' : False,
+                             'LOG'     : "File "+str(remf)+" exists and overwrite was set to False. Upload was stopped."}
          else:
-            remf = remotefile
+            remf  = remotefile
+            exist = True
             if overwrite == False:
                return {'Success' : False,
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
@@ -1370,7 +1385,7 @@ Will use HTML5 for this SASsession.""")
          port = self.sascfg.rtunnel
          host = 'localhost'
       else:
-         return self._upload_client(localfile, remotefile, overwrite, permission, **kwargs)
+         return self._upload_client(localfile, remf, overwrite, permission, valid=valid, **kwargs)
 
       try:
          fd = open(localfile, 'rb')
@@ -1393,7 +1408,7 @@ Will use HTML5 for this SASsession.""")
          filename sock;\n"""
 
       self._asubmit(code, "text")
-
+      sleep(1)
       sock = socks.socket()
       sock.connect((host, port))
 
@@ -1438,31 +1453,36 @@ Will use HTML5 for this SASsession.""")
                     'LOG'     : "Download was interrupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
       ll = self.submit("", 'text')
-      return {'Success' : True,
+
+      valid2  = self._sb.file_info(remf, quiet = True)
+
+      if valid2 is not None:
+         if exist:
+            success = False
+            for key in valid.keys():
+               if valid[key] != valid2[key]:
+                  success = True
+                  break
+         else:
+            success = True
+      else:
+         success = False
+
+      return {'Success' : success,
               'LOG'     : ll['LOG']}
 
-   def _upload_client(self, localfile: str, remotefile: str, overwrite: bool = True, permission: str = '', **kwargs):
+   def _upload_client(self, localfile: str, remf: str, overwrite: bool = True, permission: str = '', **kwargs):
       """
       This method uploads a local file to the SAS servers file system.
       localfile  - path to the local file to upload
-      remotefile - path to remote file to create or overwrite
+      remf       - path to remote file to create or overwrite
       overwrite  - overwrite the output file if it exists?
       permission - permissions to set on the new file. See SAS Filename Statement Doc for syntax
       """
-      valid = self._sb.file_info(remotefile, quiet = True)
+      valid = kwargs.pop('valid', None)
+      exist = False if valid is None else True
 
-      if valid is None:
-         remf = remotefile
-      else:
-         if valid == {}:
-            remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
-         else:
-            remf = remotefile
-            if overwrite == False:
-               return {'Success' : False,
-                       'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
-
-      port =  kwargs.get('port', 0)
+      port  = kwargs.get('port', 0)
 
       if port==0 and self.sascfg.tunnel:
          # we are using a tunnel; default to that port
@@ -1558,7 +1578,22 @@ Will use HTML5 for this SASsession.""")
                  'LOG'     : "Download was interrupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
 
       ll = self.submit("", 'text')
-      return {'Success' : True,
+
+      valid2  = self._sb.file_info(remf, quiet = True)
+
+      if valid2 is not None:
+         if exist:
+            success = False
+            for key in valid.keys():
+               if valid[key] != valid2[key]:
+                  success = True
+                  break
+         else:
+            success = True
+      else:
+         success = False
+
+      return {'Success' : success,
               'LOG'     : ll['LOG']}
 
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):

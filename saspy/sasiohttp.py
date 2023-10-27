@@ -1278,13 +1278,28 @@ class SASsessionHTTP():
       """
       valid = self._sb.file_info(remotefile, quiet = True)
 
+      # check for non-exist, dir or existing file
       if valid is None:
-         remf = remotefile
+         remf  = remotefile
+         exist = False
       else:
          if valid == {}:
             remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
+            valid = self._sb.file_info(remf, quiet = True)
+            if valid is None:
+               exist = False
+            else:
+               if valid == {}:
+                  return {'Success' : False,
+                          'LOG'     : "File "+str(remf)+" is an existing directory. Upload was stopped."}
+               else:
+                  exist = True
+                  if overwrite == False:
+                     return {'Success' : False,
+                             'LOG'     : "File "+str(remf)+" exists and overwrite was set to False. Upload was stopped."}
          else:
-            remf = remotefile
+            remf  = remotefile
+            exist = True
             if overwrite == False:
                return {'Success' : False,
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
@@ -1301,6 +1316,21 @@ class SASsessionHTTP():
          code = "filename _sp_updn '"+remf+"' recfm=N permission='"+permission+"';"
          ll = self.submit(code, 'text')
          logf = ll['LOG']
+
+         # See if that worked cuz the next call will abend SAS if not; if lockdown/WatchDog ...
+         conn = self.sascfg.HTTPConn; conn.connect()
+         headers={"Accept":"application/vnd.sas.compute.fileref+json;application/json",
+                  "Authorization":"Bearer "+self.sascfg._token}
+         conn.request('HEAD', self._uri_files+"/_sp_updn", headers=headers)
+         req = conn.getresponse()
+         status = req.status
+         resp = req.read()
+         conn.close()
+
+         if status > 299:
+            fd.close()
+            return {'Success' : False,
+                    'LOG'     : logf}
 
          # GET Etag
          conn = self.sascfg.HTTPConn; conn.connect()
@@ -1345,8 +1375,15 @@ class SASsessionHTTP():
          status = req.status
          resp   = req.read()
          conn.close()
+         fd.close()
 
-         code = "filename _sp_updn;"
+         ll = self.submit("filename _sp_updn;", 'text')
+         logf += ll['LOG']
+
+         if status > 299:
+            return {'Success' : False,
+                    'LOG'     : "Failure in upload. Status="+str(status)+"\nResponse="+str(resp.decode())+
+                                "\n\n"+logf}
       else:
          logf = ''
          code = """
@@ -1358,17 +1395,26 @@ class SASsessionHTTP():
             run;
             filename _sp_updn;
             """
+         ll = self.submit(code, 'text')
+         logf += ll['LOG']
+         fd.close()
 
-      ll = self.submit(code, 'text')
-      logf += ll['LOG']
-      fd.close()
+      valid2  = self._sb.file_info(remf, quiet = True)
 
-      if status > 299:
-         return {'Success' : False,
-                 'LOG'     : "Failure in upload. Status="+str(status)+"\nResponse="+str(resp.decode())}
+      if valid2 is not None:
+         if exist:
+            success = False
+            for key in valid.keys():
+               if valid[key] != valid2[key]:
+                  success = True
+                  break
+         else:
+            success = True
       else:
-         return {'Success' : True,
-                 'LOG'     : logf}
+         success = False
+
+      return {'Success' : success,
+              'LOG'     : logf}
 
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """

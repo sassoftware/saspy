@@ -1272,13 +1272,28 @@ Will use HTML5 for this SASsession.""")
       """
       valid = self._sb.file_info(remotefile, quiet = True)
 
+      # check for non-exist, dir or existing file
       if valid is None:
-         remf = remotefile
+         remf  = remotefile
+         exist = False
       else:
          if valid == {}:
             remf = remotefile + self._sb.hostsep + localfile.rpartition(os.sep)[2]
+            valid = self._sb.file_info(remf, quiet = True)
+            if valid is None:
+               exist = False
+            else:
+               if valid == {}:
+                  return {'Success' : False,
+                          'LOG'     : "File "+str(remf)+" is an existing directory. Upload was stopped."}
+               else:
+                  exist = True
+                  if overwrite == False:
+                     return {'Success' : False,
+                             'LOG'     : "File "+str(remf)+" exists and overwrite was set to False. Upload was stopped."}
          else:
-            remf = remotefile
+            remf  = remotefile
+            exist = True
             if overwrite == False:
                return {'Success' : False,
                        'LOG'     : "File "+str(remotefile)+" exists and overwrite was set to False. Upload was stopped."}
@@ -1329,8 +1344,23 @@ Will use HTML5 for this SASsession.""")
       ll2 = self.submit(code, 'text')
       fd.close()
 
-      return {'Success' : True,
-              'LOG'     : log1+ll2['LOG']}
+      logf    = log1+ll2['LOG']
+      valid2  = self._sb.file_info(remf, quiet = True)
+
+      if valid2 is not None:
+         if exist:
+            success = False
+            for key in valid.keys():
+               if valid[key] != valid2[key]:
+                  success = True
+                  break
+         else:
+            success = True
+      else:
+         success = False
+
+      return {'Success' : success,
+              'LOG'     : logf}
 
    def download(self, localfile: str, remotefile: str, overwrite: bool = True, **kwargs):
       """
