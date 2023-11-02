@@ -75,11 +75,13 @@ from saspy.sasexceptions import (SASIONotSupportedError, SASConfigNotValidError,
 _cfgfile_cnt = 0
 
 try:
-   from IPython.display import HTML
    from IPython.display import display as DISPLAY
+   from IPython.display import HTML
 except ImportError:
-   def DISPLAY(x): print(x)
-   def HTML(x):    return "IPython didn't import. Can't render HTML"
+   def DISPLAY(x):
+      print(x)
+   def HTML(x):
+      return "IPython didn't import. Can't render HTML"
 
 def zepDISPLAY(x):
    print(x)
@@ -219,9 +221,9 @@ class SASconfig(object):
         if   self.display.lower() == 'zeppelin':
            self.DISPLAY = zepDISPLAY
            self.HTML    = zepHTML
-        elif self.display.lower() == 'databricks':
-           self.DISPLAY = dbDISPLAY
-           self.HTML    = dbHTML
+        #elif self.display.lower() == 'databricks':
+        #   self.DISPLAY = dbDISPLAY
+        #   self.HTML    = dbHTML
         else:
            self.DISPLAY = DISPLAY
            self.HTML    = HTML

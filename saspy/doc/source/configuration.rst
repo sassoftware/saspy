@@ -361,6 +361,11 @@ display -
     To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
 
+    Databricks: At some point since trying to support Databricks, they finally added support for IPython, which
+    is how Jupyter renders HTML. Now the default (Jupyter) display value works as is on Databricks. In V5.4.4,
+    I've changed the code path for display='databricks' to just use the default Jupyter path and that finally
+    works on that platform. So, the following paragraph is now moot (leaving it here for context).
+
     As of version 3.1.7, I added 'databricks', but it turns out their method for rendering html can only be
     executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
     it to render. I have an `open issue <https://community.databricks.com/s/question/0D58Y00008l8WMwSAM/
@@ -727,6 +732,11 @@ display -
     To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
 
+    Databricks: At some point since trying to support Databricks, they finally added support for IPython, which
+    is how Jupyter renders HTML. Now the default (Jupyter) display value works as is on Databricks. In V5.4.4,
+    I've changed the code path for display='databricks' to just use the default Jupyter path and that finally
+    works on that platform. So, the following paragraph is now moot (leaving it here for context).
+
     As of version 3.1.7, I added 'databricks', but it turns out their method for rendering html can only be
     executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
     it to render. I have an `open issue <https://community.databricks.com/s/question/0D58Y00008l8WMwSAM/
@@ -849,6 +859,11 @@ display -
     Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
+
+    Databricks: At some point since trying to support Databricks, they finally added support for IPython, which
+    is how Jupyter renders HTML. Now the default (Jupyter) display value works as is on Databricks. In V5.4.4,
+    I've changed the code path for display='databricks' to just use the default Jupyter path and that finally
+    works on that platform. So, the following paragraph is now moot (leaving it here for context).
 
     As of version 3.1.7, I added 'databricks', but it turns out their method for rendering html can only be
     executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
@@ -1085,6 +1100,11 @@ display -
     Jupyter uses IPython to render HTML, which is how saspy has always worked.
     To support other Notebooks display methods, different display interface have to be added to saspy.
     If you want to run saspy in Zeppelin, set this in your configuration definition: 'display' : 'zeppelin',
+
+    Databricks: At some point since trying to support Databricks, they finally added support for IPython, which
+    is how Jupyter renders HTML. Now the default (Jupyter) display value works as is on Databricks. In V5.4.4,
+    I've changed the code path for display='databricks' to just use the default Jupyter path and that finally
+    works on that platform. So, the following paragraph is now moot (leaving it here for context).
 
     As of version 3.1.7, I added 'databricks', but it turns out their method for rendering html can only be
     executed from a cell in their notebook; meaning you have to type it in and pass it the string of html for
