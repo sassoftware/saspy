@@ -2,6 +2,30 @@
 
 
 
+## [5.4.4] - 2023-11-02
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Tweak` Databricks finally enabled IPython support which allows for HTML rendering from w/in SASPy,
+like in both Jupyter and Zeppelin (Zeppelin has its own rendering, but SASPy supports it). So now
+display='databricks' will just use the same code as display='jupyter' so HTML can finally be rendered
+for you by SASPy instead of having to run batch mode to get the HTML returned to you and then you having
+to pass it to their displayHTML() method.
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.4.3] - 2023-10-27
 
 ### Added
