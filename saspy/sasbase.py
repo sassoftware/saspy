@@ -2550,7 +2550,7 @@ class SASsession():
        :param rate:    interest rate as a decimal percent: .03 is 3% apr
        :param amount:  amount of loan
        :param payment: monthly payment amount
-       :return: SAS Lst showing the amortization schule calculated for the missing variable
+       :return: SAS Lst showing the amortization schedule calculated for the missing variable
        """
        vars = 0
 
