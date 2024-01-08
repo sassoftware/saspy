@@ -2093,6 +2093,8 @@ class SASsession():
         ll = self._io.submit("%put " + name + "BEGIN=%symexist(" + name + ") "+ name+"END=;\n")
         l2 = ll['LOG'].rpartition(name + "BEGIN=")[2].rpartition(name+"END=")[0].strip().replace('\n','')
 
+        if l2 == '':
+           raise ValueError("Failed to execute symexist. Your session may have prematurely terminated.")
         var = int(l2)
 
         return bool(var)
