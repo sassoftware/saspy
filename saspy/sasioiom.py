@@ -27,7 +27,9 @@ import atexit
 import logging
 logger = logging.getLogger('saspy')
 
-from saspy.sasexceptions import SASDFNamesToLongError
+from saspy.sasexceptions import (SASDFNamesToLongError,
+                                 SASIOConnectionTerminated
+                                )
 
 try:
    import pandas as pd
@@ -862,28 +864,35 @@ Will use HTML5 for this SASsession.""")
 
       if self.pid == None:
          self._sb.SASpid = None
-         logger.error("No SAS process attached. SAS process has terminated unexpectedly.")
-         return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
+         #return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
+         logger.fatal("No SAS process attached. SAS process has terminated unexpectedly.")
+         raise SASIOConnectionTerminated(Exception)
 
       if os.name == 'nt':
          try:
             rc = self.pid.wait(0)
             self.pid = None
             self._sb.SASpid = None
-            return dict(LOG='SAS process has terminated unexpectedly. RC from wait was: '+str(rc), LST='')
-         except:
+            #return dict(LOG='SAS process has terminated unexpectedly. RC from wait was: '+str(rc), LST='')
+            logger.fatal("SAS process has terminated unexpectedly. RC from wait was: "+str(rc))
+            raise SASIOConnectionTerminated(Exception)
+         except subprocess.TimeoutExpired:
             pass
       else:
          if self.pid == None:
             self._sb.SASpid = None
-            return "No SAS process attached. SAS process has terminated unexpectedly."
+            #return "No SAS process attached. SAS process has terminated unexpectedly."
+            logger.fatal("No SAS process attached. SAS process has terminated unexpectedly.")
+            raise SASIOConnectionTerminated(Exception)
          #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
          rc = os.waitpid(self.pid, os.WNOHANG)
          #if rc != None:
          if rc[1]:
             self.pid = None
             self._sb.SASpid = None
-            return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+            #return dict(LOG='SAS process has terminated unexpectedly. Pid State= '+str(rc), LST='')
+            logger.fatal("SAS process has terminated unexpectedly. Pid State= "+str(rc))
+            raise SASIOConnectionTerminated(Exception)
 
       # to cover the possibility of an _asubmit w/ lst output not read; no known cases now; used to be __flushlst__()
       # removing this and adding comment in _asubmit to use _getlst[txt] so this will never be necessary; delete later
@@ -936,8 +945,10 @@ Will use HTML5 for this SASsession.""")
                        self.pid = None
                        self._sb.SASpid = None
                        log = logf.partition(logcodeo)[0]+b'\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc).encode()
-                       return dict(LOG=log.decode(errors='replace'), LST='')
-                    except:
+                       #return dict(LOG=log.decode(errors='replace'), LST='')
+                       logger.fatal(log.decode(errors='replace'))
+                       raise SASIOConnectionTerminated(Exception)
+                    except subprocess.TimeoutExpired:
                        pass
                  else:
                     #rc = os.waitid(os.P_PID, self.pid, os.WEXITED | os.WNOHANG)
@@ -947,7 +958,9 @@ Will use HTML5 for this SASsession.""")
                        self.pid = None
                        self._sb.SASpid = None
                        log = logf.partition(logcodeo)[0]+b'\nSAS process has terminated unexpectedly. Pid State= '+str(rc).encode()
-                       return dict(LOG=log.decode(errors='replace'), LST='')
+                       #return dict(LOG=log.decode(errors='replace'), LST='')
+                       logger.fatal(log.decode(errors='replace'))
+                       raise SASIOConnectionTerminated(Exception)
 
                  if bail:
                     if lstf.count(logcodeo) >= 1:
@@ -993,7 +1006,9 @@ Will use HTML5 for this SASsession.""")
              self.pid = None
              self._sb.SASpid = None
              log =logf.partition(logcodeo)[0]+b'\nConnection Reset: SAS process has terminated unexpectedly. Pid State= '+str(rc).encode()
-             return dict(LOG=log.decode(errors='replace'), LST='')
+             #return dict(LOG=log.decode(errors='replace'), LST='')
+             logger.fatal(log.decode(errors='replace'))
+             raise SASIOConnectionTerminated(Exception)
 
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
@@ -1418,17 +1433,21 @@ Will use HTML5 for this SASsession.""")
                    rc = self.pid.wait(0)
                    self.pid = None
                    self._sb.SASpid = None
-                   return {'Success' : False,
-                           'LOG'     : "SAS process has terminated unexpectedly. RC from wait was: "+str(rc)}
-                except:
+                   #return {'Success' : False,
+                   #        'LOG'     : "SAS process has terminated unexpectedly. RC from wait was: "+str(rc)}
+                   logger.fatal("SAS process has terminated unexpectedly. RC from wait was: "+str(rc))
+                   raise SASIOConnectionTerminated(Exception)
+                except subprocess.TimeoutExpired:
                    pass
              else:
                 rc = os.waitpid(self.pid, os.WNOHANG)
                 if rc[1]:
-                    self.pid = None
-                    self._sb.SASpid = None
-                    return {'Success' : False,
-                            'LOG'     : "SAS process has terminated unexpectedly. RC from wait was: "+str(rc)}
+                   self.pid = None
+                   self._sb.SASpid = None
+                   #return {'Success' : False,
+                   #        'LOG'     : "SAS process has terminated unexpectedly. RC from wait was: "+str(rc)}
+                   logger.fatal("SAS process has terminated unexpectedly. Pid State= "+str(rc))
+                   raise SASIOConnectionTerminated(Exception)
 
              if bail:
                 if datar.count(logcodeb) >= 1:
@@ -1904,17 +1923,19 @@ Will use HTML5 for this SASsession.""")
                   rc = self.pid.wait(0)
                   self.pid = None
                   self._sb.SASpid = None
+                  #return None
                   logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                  return None
-               except:
+                  raise SASIOConnectionTerminated(Exception)
+               except subprocess.TimeoutExpired:
                   pass
             else:
                rc = os.waitpid(self.pid, os.WNOHANG)
                if rc[1]:
-                   self.pid = None
-                   self._sb.SASpid = None
-                   logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                   return None
+                  self.pid = None
+                  self._sb.SASpid = None
+                  #return None
+                  logger.fatal("\nSAS process has terminated unexpectedly. Pid State= "+str(rc))
+                  raise SASIOConnectionTerminated(Exception)
             raise
       else:
          while True:
@@ -2158,17 +2179,19 @@ Will use HTML5 for this SASsession.""")
                rc = self.pid.wait(0)
                self.pid = None
                self._sb.SASpid = None
+               #return None
                logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-               return None
-            except:
+               raise SASIOConnectionTerminated(Exception)
+            except subprocess.TimeoutExpired:
                pass
          else:
             rc = os.waitpid(self.pid, os.WNOHANG)
             if rc[1]:
-                self.pid = None
-                self._sb.SASpid = None
-                logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                return None
+               self.pid = None
+               self._sb.SASpid = None
+               #return None
+               logger.fatal("\nSAS process has terminated unexpectedly. Pid State= "+str(rc))
+               raise SASIOConnectionTerminated(Exception)
          raise
 
       if k_dts is None:  # don't override these if user provided their own dtypes

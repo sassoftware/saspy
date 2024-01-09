@@ -32,7 +32,8 @@ from threading import Thread
 from saspy.sasexceptions import (SASHTTPauthenticateError,
                                  SASHTTPconnectionError,
                                  SASHTTPsubmissionError,
-                                 SASDFNamesToLongError
+                                 SASDFNamesToLongError,
+                                 SASIOConnectionTerminated
                                 )
 
 import logging
@@ -1080,8 +1081,9 @@ class SASsessionHTTP():
       ods      = True;
 
       if self._session == None:
-         logger.error("No SAS process attached. SAS process has terminated unexpectedly.")
-         return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
+         #return dict(LOG="No SAS process attached. SAS process has terminated unexpectedly.", LST='')
+         logger.fatal("No SAS process attached. SAS process has terminated unexpectedly.")
+         raise SASIOConnectionTerminated(Exception)
 
       if len(prompt):
          pcodeiv = ''

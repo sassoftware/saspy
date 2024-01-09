@@ -16,4 +16,5 @@ gen
 .idea/
 build/
 dist/
+misc/
 saspy/__pycache__/

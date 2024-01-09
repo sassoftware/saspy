@@ -68,6 +68,14 @@ class SASIOConnectionError(Exception):
         return 'Failure establishing SASsession.\n{}'.format(self.msg+extra)
 
 
+class SASIOConnectionTerminated(Exception):
+    def __init__(self, msg: str):
+        self.msg = msg
+
+    def __str__(self):
+        return 'No SAS process attached. SAS process has terminated unexpectedly.\n{}'.format(self.msg)
+
+
 class SASHTTPauthenticateError(Exception):
     def __init__(self, msg: str):
         self.msg = msg
