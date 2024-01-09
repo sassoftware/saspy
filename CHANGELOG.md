@@ -2,6 +2,36 @@
 
 
 
+## [5.5.0] - 2024-01-09
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Tweak` A user contribution enhanced an error case where parsing an empty log due to the SAS session
+being terminated returned a less than helpful error in the exception. This now would return a clear error
+as to the problem.
+
+
+-   `Enhancement` Regarding a SAS process unexpectedly terminating out from under SASPy, you may have seen this or a similar
+error message before: "No SAS process attached. SAS process has terminated unexpectedly." along with an arbitrary exception.
+I've enhanced this case, like many other situations to now throw a new exception, SASIOConnectionTerminated, and to log the
+message(s) previously returned (logger.fatal()). This should really have always been an exception as it is a fatal case where
+the SAS session is no longer functional, since there's no SAS process connected anymore.
+
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.4.4] - 2023-11-02
 
 ### Added
