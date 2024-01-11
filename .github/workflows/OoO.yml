@@ -7,5 +7,5 @@ jobs:
     steps:
       - uses: jd-0001/gh-action-comment-on-new-issue@v2.0.3
         with:
-          message: "Hey, I'm OOO till Jan 29th. I will reply to this then! Thanks, Tom"
+          message: "Hey, I'm OOO till Jan 29th. I will reply to this then! Sorry for the delay. Thanks, Tom"
           
