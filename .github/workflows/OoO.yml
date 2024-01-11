@@ -1,13 +1,10 @@
 name: Auto message for PR's and Issues
-on: 
-  issues:
-    types [opened]
+on: [pull_request, issues]
 jobs:
   build:
     name: Out of Office
     runs-on: ubuntu-latest
     steps:
-      - uses: jd-0001/gh-action-comment-on-new-issue
+      - uses: jd-0001/gh-action-comment-on-new-issue@v2.0.3
         with:
           message: "Hey, I'm OOO till Jan 29th. I will reply to this then! Sorry for the delay. Thanks, Tom"
-          
