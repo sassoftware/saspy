@@ -1,5 +1,11 @@
 name: Auto message for PR's and Issues
-on: [pull_request, issues]
+on: 
+  pull_request:
+    types [opened]
+  issues:
+    types [opened]
+  discussion:
+    types [opened]
 jobs:
   build:
     name: Out of Office
