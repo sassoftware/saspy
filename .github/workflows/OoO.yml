@@ -1,0 +1,11 @@
+name: Auto message for PR's and Issues
+on: [pull_request, issues]
+jobs:
+  build:
+    name: Out of Office
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/interaction@v1
+        with:
+          issue-message: "Hey, I'm OOO till Jan 29th. I will reply to this then! Thanks, Tom"
+          pr-message: "Hey, I'm OOO till Jan 29th. I will reply to this then! Thanks, Tom"
