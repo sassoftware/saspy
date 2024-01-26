@@ -993,7 +993,7 @@ administration work, nothing an end user needs to deal with. However, if your si
 the Viya Certificate (a .pem file) must be downloaded and then the contents of that .pem file be appended to the existing
 default .pem certificate that your client machine already uses so that the HTTPS connection can Verify the certificate against
 theViya deployment. There's some doc in the admin guide about this
-(https://go.documentation.sas.com/doc/en/sasadmincdc/v_038/calencryptmotion/n1xdqv1sezyrahn17erzcunxwix9.htm#p1umnmdi53qfjnn17wqb5aqb8ncx)
+(https://go.documentation.sas.com/doc/en/sasadmincdc/default/calencryptmotion/n1xdqv1sezyrahn17erzcunxwix9.htm#p1umnmdi53qfjnn17wqb5aqb8ncx)
 but again, that's not something an end user needs to read. It does mean that the Viya admin team should be able to get you
 the .pem file from Viya for you to save on your client machine. Since appending it to the default .pem file used by
 https on your machine is likely something you can't do anyway (some sites have IT set all of this up so you don't have to),
