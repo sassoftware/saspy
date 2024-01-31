@@ -42,6 +42,13 @@ try:
 except Exception as e:
    pass
 
+try:
+   from pygments.formatters import HtmlFormatter
+   from pygments import highlight
+   from saspy.SASLogLexer import SASLogStyle, SASLogLexer
+except:
+   pass
+
 import os
 import sys
 import datetime
@@ -193,6 +200,7 @@ class SASconfig(object):
         provider      = cfg.get('provider')
         self.display  = cfg.get('display',  '')
         self.results  = cfg.get('results')
+        self.colorLOG = cfg.get('colorLOG', False)
         self.autoexec = cfg.get('autoexec')
 
         bcv           = kwargs.get('SAS_BCV', getattr(SAScfg, "SAS_BCV", SASPy_CUR_VER))
@@ -276,6 +284,17 @@ class SASconfig(object):
               logger.warning("Parameter 'provider' passed to SAS_session was ignored due to configuration restriction.")
            else:
               provider = inprov
+
+        incLOG = kwargs.get('colorLOG', None)
+        if incLOG is not None:
+           self.colorLOG = bool(incLOG)
+        if self.colorLOG:
+           try:
+              if SASLogLexer:
+                 self.colorLOG = True
+           except:
+              logger.warning("Pygments module wasn't found so coloring isn't available.")
+              self.colorLOG = False
 
         if java is not None:
             self.mode = 'IOM'
@@ -746,7 +765,16 @@ class SASsession():
         '''
         This method is a convenience wrapper around the submit() method. It executes the submit then prints the LOG that was returned.
         '''
-        print(self.submit(code, results, prompt, printto, **kwargs)['LOG'])
+        cl = self.sascfg.colorLOG
+        self.sascfg.colorLOG = False
+        log = self.submit(code, results, prompt, printto, **kwargs)['LOG']
+        self.sascfg.colorLOG = cl
+
+        if self.sascfg.colorLOG:
+           cl = highlight(log, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+           self.DISPLAY(self.HTML(cl))
+        else:
+           print(log)
 
     def submitLST(self, code, results: str = '', prompt: dict = None, method: str = None, printto=False, **kwargs):
         '''
@@ -772,7 +800,10 @@ class SASsession():
            else:
               results = self.results
 
+        cl = self.sascfg.colorLOG
+        self.sascfg.colorLOG = False
         ll  = self.submit(code, results, prompt, printto, **kwargs)
+        self.sascfg.colorLOG = cl
 
         if results.upper() == 'HTML':
            if   method.lower() == 'listonly':
@@ -781,11 +812,28 @@ class SASsession():
               if len(ll['LST']) > 0:
                  self.DISPLAY(self.HTML(ll['LST']))
               else:
-                 self.DISPLAY(self.HTML("<pre>"+ll['LOG']+"</pre>"))
+                 if self.sascfg.colorLOG:
+                    cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                    self.DISPLAY(self.HTML(cl))
+                 else:
+                    print(ll['LOG'])
            elif method.lower() == 'listandlog':
-              self.DISPLAY(self.HTML(ll['LST']+"\n<pre>"+ll['LOG']+"</pre>"))
+              if self.sascfg.colorLOG:
+                 cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                 self.DISPLAY(self.HTML(ll['LST']))
+                 self.DISPLAY(self.HTML(cl))
+              else:
+                 #self.DISPLAY(self.HTML(ll['LST']+"\n<pre>"+ll['LOG']+"</pre>"))
+                 self.DISPLAY(self.HTML(ll['LST']))
+                 print(ll['LOG'])
            else:
-              self.DISPLAY(self.HTML("<pre>"+ll['LOG']+"\n</pre>"+ll['LST']))
+              if self.sascfg.colorLOG:
+                 cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                 self.DISPLAY(self.HTML(cl))
+                 self.DISPLAY(self.HTML(ll['LST']))
+              else:
+                 print(ll['LOG'])
+                 self.DISPLAY(self.HTML(ll['LST']))
         else:
            if   method.lower() == 'listonly':
               print(ll['LST'])
@@ -793,11 +841,25 @@ class SASsession():
               if len(ll['LST']) > 0:
                  print(ll['LST'])
               else:
-                 print(ll['LOG'])
+                 if self.sascfg.colorLOG:
+                    cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                    self.DISPLAY(self.HTML(cl))
+                 else:
+                    print(ll['LOG'])
            elif method.lower() == 'listandlog':
-              print(ll['LST']+"\n"+ll['LOG'])
+              if self.sascfg.colorLOG:
+                 cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                 print(ll['LST'])
+                 self.DISPLAY(self.HTML(cl))
+              else:
+                 print(ll['LST']+"\n"+ll['LOG'])
            else:
-              print(ll['LOG']+"\n"+ll['LST'])
+              if self.sascfg.colorLOG:
+                 cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                 self.DISPLAY(self.HTML(cl))
+                 print(ll['LST'])
+              else:
+                 print(ll['LOG']+"\n"+ll['LST'])
 
     def submit(self, code: str, results: str = '', prompt: dict = None, printto=False, **kwargs) -> dict:
         '''
@@ -863,6 +925,10 @@ class SASsession():
                 results = self.results
 
         ll = self._io.submit(code, results, prompt, undo=printto, **kwargs)
+
+        if self.sascfg.colorLOG:
+           cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+           ll['LOG'] = cl
 
         return ll
 
