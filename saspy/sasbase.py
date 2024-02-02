@@ -765,14 +765,14 @@ class SASsession():
         '''
         This method is a convenience wrapper around the submit() method. It executes the submit then prints the LOG that was returned.
         '''
-        cl = self.sascfg.colorLOG
+        clog = self.sascfg.colorLOG
         self.sascfg.colorLOG = False
         log = self.submit(code, results, prompt, printto, **kwargs)['LOG']
-        self.sascfg.colorLOG = cl
+        self.sascfg.colorLOG = clog
 
         if self.sascfg.colorLOG:
-           cl = highlight(log, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
-           self.DISPLAY(self.HTML(cl))
+           clog = highlight(log, SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+           self.DISPLAY(self.HTML(clog))
         else:
            print(log)
 
@@ -800,10 +800,10 @@ class SASsession():
            else:
               results = self.results
 
-        cl = self.sascfg.colorLOG
+        clog = self.sascfg.colorLOG
         self.sascfg.colorLOG = False
         ll  = self.submit(code, results, prompt, printto, **kwargs)
-        self.sascfg.colorLOG = cl
+        self.sascfg.colorLOG = clog
 
         if results.upper() == 'HTML':
            if   method.lower() == 'listonly':
@@ -813,23 +813,23 @@ class SASsession():
                  self.DISPLAY(self.HTML(ll['LST']))
               else:
                  if self.sascfg.colorLOG:
-                    cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
-                    self.DISPLAY(self.HTML(cl))
+                    clog = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                    self.DISPLAY(self.HTML(clog))
                  else:
                     print(ll['LOG'])
            elif method.lower() == 'listandlog':
               if self.sascfg.colorLOG:
-                 cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                 clog = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
                  self.DISPLAY(self.HTML(ll['LST']))
-                 self.DISPLAY(self.HTML(cl))
+                 self.DISPLAY(self.HTML(clog))
               else:
                  #self.DISPLAY(self.HTML(ll['LST']+"\n<pre>"+ll['LOG']+"</pre>"))
                  self.DISPLAY(self.HTML(ll['LST']))
                  print(ll['LOG'])
            else:
               if self.sascfg.colorLOG:
-                 cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
-                 self.DISPLAY(self.HTML(cl))
+                 clog = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                 self.DISPLAY(self.HTML(clog))
                  self.DISPLAY(self.HTML(ll['LST']))
               else:
                  print(ll['LOG'])
@@ -842,21 +842,21 @@ class SASsession():
                  print(ll['LST'])
               else:
                  if self.sascfg.colorLOG:
-                    cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
-                    self.DISPLAY(self.HTML(cl))
+                    clog = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                    self.DISPLAY(self.HTML(clog))
                  else:
                     print(ll['LOG'])
            elif method.lower() == 'listandlog':
               if self.sascfg.colorLOG:
-                 cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                 clog = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
                  print(ll['LST'])
-                 self.DISPLAY(self.HTML(cl))
+                 self.DISPLAY(self.HTML(clog))
               else:
                  print(ll['LST']+"\n"+ll['LOG'])
            else:
               if self.sascfg.colorLOG:
-                 cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
-                 self.DISPLAY(self.HTML(cl))
+                 clog = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+                 self.DISPLAY(self.HTML(clog))
                  print(ll['LST'])
               else:
                  print(ll['LOG']+"\n"+ll['LST'])
@@ -927,8 +927,8 @@ class SASsession():
         ll = self._io.submit(code, results, prompt, undo=printto, **kwargs)
 
         if self.sascfg.colorLOG:
-           cl = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
-           ll['LOG'] = cl
+           clog = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
+           ll['LOG'] = clog
 
         return ll
 
