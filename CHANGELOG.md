@@ -14,7 +14,8 @@
 be HTML with ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI's. This is how the SAS_Kernel for
 Jupyter colors it's LOG and how the log returned in the SAS_Results object in SASPy colors that log too. This
 feature requires the Pygments package, so it is only available if that package in installed, else you get the
-current behavior.
+current behavior. The new `colorLOG` configuration key is how to set this. It's a boolean and defaults to False;
+existing behavior. It can be specified in the Configuration Definition or on SASsession, like any other key.
 
 ### Fixed
 
