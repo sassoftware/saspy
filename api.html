@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; saspy 5.5.0 documentation</title>
+  <title>API Reference &mdash; saspy 5.6.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.5.0
+                5.6.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -398,6 +398,11 @@ Most of these parameters will be configured in the sascfg_personal.py configurat
 All of these parameters are documented more thoroughly in the Configuration section of the saspy doc:
 <a class="reference external" href="https://sassoftware.github.io/saspy/configuration.html">https://sassoftware.github.io/saspy/configuration.html</a>
 These are generally defined in the sascfg_personal.py file as opposed to being specified on the SASsession() invocation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>‘SASsession’</p>
+</dd>
+</dl>
 <p>Common parms for all access methods are:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -410,13 +415,10 @@ These are generally defined in the sascfg_personal.py file as opposed to being s
 <li><p><strong>autoexec</strong> – A string of SAS code that will be submitted upon establishing a connection</p></li>
 <li><p><strong>display</strong> – controls how to display html in different notebooks. default is jupyter.
 valid values are [‘jupyter’, ‘zeppelin’, ‘databricks’]</p></li>
+<li><p><strong>colorLOG</strong> – boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI’s. This was added
+in version 5.6.0.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>‘SASsession’</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>‘SASsession’</p>
 </dd>
 </dl>
 <p>And each access method has its own set of parameters.</p>
@@ -529,6 +531,11 @@ or change their value. The others you should NOT change, for obvious reasons.</p
 <li><p>check_error_log - Boolean that identifies an ERROR has been found in the SASLOG. You should set this to False prior                  to running a saspy method that where you check it after. saspy does not reset it to False for you.</p></li>
 <li><p>reconuri - the uri (token) for connecting back to the workspace server after you’ve disconnected.                  not needed unless connecting back from a different Python process; not the usual case.</p></li>
 <li><p>HTML_Style - This is the Style for ODS output, set from SAS_output_options {‘style’ : ‘’} value in your config file.                    You can change this value on the fly by setting the value for this attribute.</p></li>
+</ul>
+<p><strong>Common functions that can be used in the Notebook sessions supported by the `Display` Config setting</strong></p>
+<ul class="simple">
+<li><p><cite>HTML()</cite> - different Notebooks use different ways to identify HTML. This function maps to each Notebooks method.                For instance, in Jupyter HTML is the HTML method from IPython.display</p></li>
+<li><p><cite>DISPLAY()</cite> - different Notebooks have different ways to render things, like HTML. This function maps to each                      Notebooks method. For instance, in Jupyter DISPLAY is the display method from IPython.display.</p></li>
 </ul>
 <dl class="py method">
 <dt class="sig sig-object py" id="saspy.SASsession.SYSERR">

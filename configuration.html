@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 5.5.0 documentation</title>
+  <title>Configuration &mdash; saspy 5.6.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.5.0
+                5.6.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -705,6 +705,9 @@ is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. 
 key to True will cause different code to be generated to work around this problem. See the description
 of V3.1.9 here for more info: <a class="reference external" href="https://github.com/sassoftware/saspy/releases/tag/v3.1.9">https://github.com/sassoftware/saspy/releases/tag/v3.1.9</a></p>
 </dd>
+<dt>colorLOG -</dt><dd><p>boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI’s.</p>
+</dd>
 </dl>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
             <span class="s1">&#39;options&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s2">&quot;-fullstimer&quot;</span><span class="p">,</span> <span class="s2">&quot;-autoexec&quot;</span><span class="p">,</span> <span class="s2">&quot;/user/tom/autoexec.sas&quot;</span><span class="p">],</span>
@@ -1025,6 +1028,9 @@ is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. 
 key to True will cause different code to be generated to work around this problem. See the description
 of V3.1.9 here for more info: <a class="reference external" href="https://github.com/sassoftware/saspy/releases/tag/v3.1.9">https://github.com/sassoftware/saspy/releases/tag/v3.1.9</a></p>
 </dd>
+<dt>colorLOG -</dt><dd><p>boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI’s.</p>
+</dd>
 </dl>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Unix client and Unix IOM server  NEW 2.1.6 - with load balanced object spawners</span>
 <span class="n">iomlinux</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;java&#39;</span>      <span class="p">:</span> <span class="s1">&#39;/usr/bin/java&#39;</span><span class="p">,</span>
@@ -1133,6 +1139,9 @@ This bug affects the code generated in the sasdata2dataframe method of this acce
 is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. Setting this
 key to True will cause different code to be generated to work around this problem. See the description
 of V3.1.9 here for more info: <a class="reference external" href="https://github.com/sassoftware/saspy/releases/tag/v3.1.9">https://github.com/sassoftware/saspy/releases/tag/v3.1.9</a></p>
+</dd>
+<dt>colorLOG -</dt><dd><p>boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI’s.</p>
 </dd>
 </dl>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Windows client and Local Windows SAS Install</span>
@@ -1341,6 +1350,9 @@ token, where Azure and Viya have been set up to allow the JWT to be used to get 
 These tokens, for reference, are very long strings of random characters; just so you know that
 you’re using the right thing :)</p>
 </dd>
+<dt>colorLOG -</dt><dd><p>boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI’s.</p>
+</dd>
 </dl>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">httpsviya</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;url&#39;</span>     <span class="p">:</span> <span class="s1">&#39;https://viya.deployment.sas.com&#39;</span><span class="p">,</span>
              <span class="s1">&#39;context&#39;</span> <span class="p">:</span> <span class="s1">&#39;Data Mining compute context&#39;</span>
@@ -1424,6 +1436,9 @@ The three most common SAS encodings, UTF8, LATIN1, and WLATIN1 are the
 default encodings for running SAS in Unicode, on Unix, and on Windows,
 respectively. Those map to Python encoding values: utf8, latin1, and
 windows-1252, respectively.</p>
+</dd>
+<dt>colorLOG -</dt><dd><p>boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI’s.</p>
 </dd>
 </dl>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">iomcom</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;iomhost&#39;</span><span class="p">:</span> <span class="s1">&#39;mynode.mycompany.org&#39;</span><span class="p">,</span>
