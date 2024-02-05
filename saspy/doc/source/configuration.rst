@@ -380,6 +380,11 @@ m5dsbug -
     of V3.1.9 here for more info: https://github.com/sassoftware/saspy/releases/tag/v3.1.9
 
 
+colorLOG -
+     boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+     text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI's.
+
+
 .. code-block:: ipython3
 
     default  = {'saspath': '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8',
@@ -753,6 +758,11 @@ m5dsbug -
     key to True will cause different code to be generated to work around this problem. See the description
     of V3.1.9 here for more info: https://github.com/sassoftware/saspy/releases/tag/v3.1.9
 
+colorLOG -
+     boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+     text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI's.
+
+
 .. code-block:: ipython3
 
     # Unix client and Unix IOM server  NEW 2.1.6 - with load balanced object spawners
@@ -880,6 +890,11 @@ m5dsbug -
     is a problem if connected to SAS 9.4M5 and if the data set has multi-byte data. Setting this
     key to True will cause different code to be generated to work around this problem. See the description
     of V3.1.9 here for more info: https://github.com/sassoftware/saspy/releases/tag/v3.1.9
+
+colorLOG -
+     boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+     text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI's.
+
 
 .. code-block:: ipython3
 
@@ -1128,6 +1143,11 @@ jwt -
     These tokens, for reference, are very long strings of random characters; just so you know that
     you're using the right thing :)
 
+colorLOG -
+     boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+     text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI's.
+
+
 .. code-block:: ipython3
 
     httpsviya = {'url'     : 'https://viya.deployment.sas.com',
@@ -1218,6 +1238,11 @@ encoding  -
     default encodings for running SAS in Unicode, on Unix, and on Windows,
     respectively. Those map to Python encoding values: utf8, latin1, and
     windows-1252, respectively.
+
+colorLOG -
+     boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+     text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI's.
+
 
 .. code-block:: ipython3
 

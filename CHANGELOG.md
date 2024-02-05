@@ -2,6 +2,31 @@
 
 
 
+## [5.6.0] - 2024-02-05
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Enhancement` Per user request, I've added the ability to have the SASLOG returned from the submit methods
+be HTML with ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI's. This is how the SAS_Kernel for
+Jupyter colors it's LOG and how the log returned in the SAS_Results object in SASPy colors that log too. This
+feature requires the Pygments package, so it is only available if that package in installed, else you get the
+current behavior.
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+
 ## [5.5.0] - 2024-01-09
 
 ### Added

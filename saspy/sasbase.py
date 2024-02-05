@@ -426,8 +426,16 @@ class SASsession():
     :param autoexec: A string of SAS code that will be submitted upon establishing a connection
     :param display: controls how to display html in different notebooks. default is jupyter.
            valid values are ['jupyter', 'zeppelin', 'databricks']
-    :return: 'SASsession'
-    :rtype: 'SASsession'
+    :param colorLOG: boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
+           text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI's. This was added
+           in version 5.6.0.
+
+    Common functions that can be used in the Notebook sessions supported by the `Display` Config setting
+
+    - HTML() - different Notebooks use different ways to identify HTML. This function maps to each Notebooks method.
+               For instance, in Jupyter HTML is the HTML method from IPython.display
+    - DISPLAY() - different Notebooks have different ways to render things, like HTML. This function maps to each
+                  Notebooks method. For instance, in Jupyter DISPLAY is the display method from IPython.display.
 
     And each access method has its own set of parameters.
 
@@ -536,6 +544,9 @@ class SASsession():
                  not needed unless connecting back from a different Python process; not the usual case.
     - HTML_Style - This is the Style for ODS output, set from SAS_output_options {'style' : ''} value in your config file. \
                    You can change this value on the fly by setting the value for this attribute.
+
+
+    :rtype: 'SASsession'
 
     """
     # SAS Epoch: 1960-01-01
