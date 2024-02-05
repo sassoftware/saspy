@@ -416,6 +416,8 @@ class SASsession():
     https://sassoftware.github.io/saspy/configuration.html
     These are generally defined in the sascfg_personal.py file as opposed to being specified on the SASsession() invocation.
 
+    :rtype: 'SASsession'
+
     Common parms for all access methods are:
 
     :param cfgname: the Configuration Definition to use - value in SAS_config_names List in the sascfg_personal.py file
@@ -429,13 +431,6 @@ class SASsession():
     :param colorLOG: boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
            text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI's. This was added
            in version 5.6.0.
-
-    Common functions that can be used in the Notebook sessions supported by the `Display` Config setting
-
-    - HTML() - different Notebooks use different ways to identify HTML. This function maps to each Notebooks method.
-               For instance, in Jupyter HTML is the HTML method from IPython.display
-    - DISPLAY() - different Notebooks have different ways to render things, like HTML. This function maps to each
-                  Notebooks method. For instance, in Jupyter DISPLAY is the display method from IPython.display.
 
     And each access method has its own set of parameters.
 
@@ -546,7 +541,13 @@ class SASsession():
                    You can change this value on the fly by setting the value for this attribute.
 
 
-    :rtype: 'SASsession'
+    **Common functions that can be used in the Notebook sessions supported by the `Display` Config setting**
+
+    - `HTML()` - different Notebooks use different ways to identify HTML. This function maps to each Notebooks method. \
+               For instance, in Jupyter HTML is the HTML method from IPython.display
+    - `DISPLAY()` - different Notebooks have different ways to render things, like HTML. This function maps to each    \
+                  Notebooks method. For instance, in Jupyter DISPLAY is the display method from IPython.display.
+
 
     """
     # SAS Epoch: 1960-01-01
