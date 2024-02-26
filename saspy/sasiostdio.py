@@ -64,6 +64,7 @@ class SASconfigSTDIO:
       self.luser    = cfg.get('luser', None)
       self.tunnel   = cfg.get('tunnel', None)
       self.rtunnel  = cfg.get('rtunnel', None)
+      self.rusetunn = cfg.get('reusetunnel', None)
       self.port     = cfg.get('port', None)
       self.host     = cfg.get('host', '')
       self.encoding = cfg.get('encoding', '')
@@ -157,6 +158,13 @@ class SASconfigSTDIO:
             logger.warning("Parameter 'rtunnel' passed to SAS_session was ignored due to configuration restriction.")
          else:
             self.rtunnel = inrtunnel
+
+      inrusetunnel = kwargs.get('reusetunnel', None)
+      if inrusetunnel is not None:
+         if lock:
+            logger.warning("Parameter 'reusetunnel' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.rusetunn = inrusetunnel
 
       ino = kwargs.get('dasho', None)
       if ino is not None:
@@ -1538,6 +1546,8 @@ Will use HTML5 for this SASsession.""")
       try:
          sock = socks.socket()
          if self.sascfg.tunnel:
+            if self.sascfg.rusetunn:
+               sock.setsockopt(socks.SOL_SOCKET, socks.SO_REUSEPORT, 1)
             sock.bind(('localhost', port))
          else:
             sock.bind(('', port))
@@ -1666,6 +1676,8 @@ Will use HTML5 for this SASsession.""")
       try:
          sock = socks.socket()
          if self.sascfg.tunnel:
+            if self.sascfg.rusetunn:
+               sock.setsockopt(socks.SOL_SOCKET, socks.SO_REUSEPORT, 1)
             sock.bind(('localhost', port))
          else:
             sock.bind(('', port))
@@ -1899,6 +1911,8 @@ Will use HTML5 for this SASsession.""")
          try:
             sock = socks.socket()
             if self.sascfg.tunnel:
+               if self.sascfg.rusetunn:
+                  sock.setsockopt(socks.SOL_SOCKET, socks.SO_REUSEPORT, 1)
                sock.bind(('localhost', port))
             else:
                sock.bind(('', port))
@@ -2293,6 +2307,8 @@ Will use HTML5 for this SASsession.""")
       try:
          sock = socks.socket()
          if not self.sascfg.ssh or self.sascfg.tunnel:
+            if self.sascfg.rusetunn:
+               sock.setsockopt(socks.SOL_SOCKET, socks.SO_REUSEPORT, 1)
             sock.bind(('localhost', port))
          else:
             sock.bind(('', port))
@@ -2503,6 +2519,8 @@ Will use HTML5 for this SASsession.""")
       try:
          sock = socks.socket()
          if not self.sascfg.ssh or self.sascfg.tunnel:
+            if self.sascfg.rusetunn:
+               sock.setsockopt(socks.SOL_SOCKET, socks.SO_REUSEPORT, 1)
             sock.bind(('localhost', port))
          else:
             sock.bind(('', port))
