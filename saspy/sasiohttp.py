@@ -1135,10 +1135,17 @@ class SASsessionHTTP():
       if not jobid or status > 299:
          raise SASHTTPsubmissionError(msg="Problem submitting job to Compute Service.\n   Status code="+str(jobid.get('httpStatusCode'))+"\n   Message="+jobid.get('message'))
 
+      uri = None
+      can = None
       for ld in jobid.get('links'):
          if ld.get('method') == 'GET' and ld.get('rel') == 'state':
             uri = ld.get('uri')
+         if ld.get('method') == 'PUT' and ld.get('rel') == 'cancel':
+            can = ld.get('uri')
+         if uri and can:
             break
+
+      Etag = req.getheader("Etag")
 
       conn    = self.sascfg.HTTPConn;
       headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
@@ -1155,6 +1162,7 @@ class SASsessionHTTP():
                conn.request('GET', uri, headers=headers)
                req = conn.getresponse()
                resp = req.read()
+               Etag = req.getheader("Etag")
                conn.close()
                if resp not in [b'running', b'pending']:
                   done = True
@@ -1165,11 +1173,20 @@ class SASsessionHTTP():
             conn.close()
             print('Exception caught!')
             response = self.sascfg._prompt(
-                      "SAS attention handling not yet supported over HTTP. Please enter (Q) to Quit waiting for results or (C) to continue waiting.")
+                      "Please enter (C) to Cancel submitted code or (Q) to Quit waiting for results or (W) continue to Wait.")
             while True:
+               if response is None or response.upper() == 'C':
+                  # GET Status for JOB
+                  canheaders = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token, "If-Match":Etag}
+                  conn.connect()
+                  conn.request('PUT', can, headers=canheaders)
+                  req = conn.getresponse()
+                  resp = req.read()
+                  conn.close()
+                  break
                if response is None or response.upper() == 'Q':
-                  return dict(LOG='', LST='', BC=True)
-               if response.upper() == 'C':
+                  return dict(LOG='', LST='')
+               if response.upper() == 'W':
                   break
                response = self.sascfg._prompt("Please enter (Q) to Quit waiting for results or (C) to continue waiting.")
 

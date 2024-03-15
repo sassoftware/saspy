@@ -93,6 +93,7 @@ public class saspy2j
    static Socket   sin      = null;
    static Socket   sout     = null;
    static Socket   serr     = null;
+   static Socket   scan     = null;
    static String   appName  = "";
    static String   iomhost  = "";
    static int      iomport  = 0;
@@ -104,7 +105,7 @@ public class saspy2j
    static String[] iomhosts;
    static int      lrecl    = 32767;
    static int      logsz    = 32767;
-
+   static Thread   t1; 
 
    public static void main(String[] args) throws
                        InterruptedException, IOException, ConnectionFactoryException, GenericError
@@ -112,6 +113,7 @@ public class saspy2j
       int inport  = 0;
       int outport = 0;
       int errport = 0;
+      int canport = 0;
       int len     = 0;
       int blen    = 0;
       int slen    = 0;
@@ -135,6 +137,8 @@ public class saspy2j
       char[]         in      = new char[4097];
       byte[]         out     = new byte[32768];
 
+      Runnable cancel = new cancel(scan, lang);
+      
       for (int x = 0; x < nargs; x++)
          {
          if (args[x].equalsIgnoreCase("-host"))
@@ -145,6 +149,8 @@ public class saspy2j
             outport = Integer.parseInt(args[x + 1]);
          else if (args[x].equalsIgnoreCase("-stderrport"))
             errport = Integer.parseInt(args[x + 1]);
+         else if (args[x].equalsIgnoreCase("-cancelport"))
+            canport = Integer.parseInt(args[x + 1]);
          else if (args[x].equalsIgnoreCase("-iomhost"))
             iomhost = args[x + 1];
          else if (args[x].equalsIgnoreCase("-iomport"))
@@ -175,6 +181,7 @@ public class saspy2j
          sin  = new Socket(addr, inport);
          sout = new Socket(addr, outport);
          serr = new Socket(addr, errport);
+         scan = new Socket(addr, canport);
          }
       catch (IOException e)
          {
@@ -222,6 +229,11 @@ public class saspy2j
          connect(false, false, false);
          }
 
+      cancel = new cancel(scan, lang);
+      t1 = new Thread(cancel);
+      t1.setName("cancel");
+      t1.start();
+      
       while (true)
          {
          try
@@ -274,6 +286,11 @@ public class saspy2j
                               String msg = "We failed in Submit\n"+e.getMessage();
                               errp.write(msg);
                               errp.flush();
+                              sin.close();
+                              sout.close();
+                              serr.close();
+                              scan.close();
+                              t1.join();
                               System.out.print(msg);
                               e.printStackTrace();
                               throw new IOException();
@@ -327,6 +344,11 @@ public class saspy2j
                               String msg = "We failed in Submit\n"+e.getMessage();
                               errp.write(msg);
                               errp.flush();
+                              sin.close();
+                              sout.close();
+                              serr.close();
+                              scan.close();
+                              t1.join();
                               System.out.print(msg);
                               e.printStackTrace();
                               throw new IOException();
@@ -363,6 +385,11 @@ public class saspy2j
                            String msg = "We failed in Submit\n"+e.getMessage();
                            errp.write(msg);
                            errp.flush();
+                           sin.close();
+                           sout.close();
+                           serr.close();
+                           scan.close();
+                           t1.join();
                            System.out.print(msg);
                            e.printStackTrace();
                            throw new IOException();
@@ -432,6 +459,11 @@ public class saspy2j
                               System.out.print(msg+"\n");
                               errp.write(msg+"\n");
                               errp.flush();
+                              sin.close();
+                              sout.close();
+                              serr.close();
+                              scan.close();
+                              t1.join();
                               e2.printStackTrace();
                               }
                            }
@@ -441,6 +473,8 @@ public class saspy2j
                      sin.close();
                      sout.close();
                      serr.close();
+                     scan.close();
+                     t1.join();
                      return;
                      }
                   else if (eol.contains("PRINTTO"))
@@ -448,7 +482,7 @@ public class saspy2j
                      undo = true;
                      pgm  = pgm.substring(idx + 13 + 33);
                      }
-                  else
+                  else  /* SUBMIT */
                      {
                      pgm = pgm.substring(0, idx);
                      try
@@ -468,7 +502,6 @@ public class saspy2j
                         errp.flush();
                         System.out.print(msg);
                         e.printStackTrace();
-                        //throw new IOException();
                         }
                      catch(org.omg.CORBA.COMM_FAILURE e)
                         {
@@ -488,10 +521,29 @@ public class saspy2j
                            String msg = "We failed in Submit\n"+e.getMessage();
                            errp.write(msg);
                            errp.flush();
+                           sin.close();
+                           sout.close();
+                           serr.close();
+                           scan.close();
+                           t1.join();
                            System.out.print(msg);
                            e.printStackTrace();
                            throw new IOException();
                            }
+                        }
+                     catch(org.omg.CORBA.OBJECT_NOT_EXIST e)
+                        {
+                        String msg = "We failed in Submit\n"+e.getMessage();
+                        errp.write(msg);
+                        errp.flush();
+                        sin.close();
+                        sout.close();
+                        serr.close();
+                        scan.close();
+                        t1.join();
+                        System.out.print(msg);
+                        e.printStackTrace();
+                        throw new IOException();
                         }
                      }
                   }
@@ -550,6 +602,11 @@ public class saspy2j
                         String msg = "We failed in Submit\n"+e.getMessage();
                         errp.write(msg);
                         errp.flush();
+                        sin.close();
+                        sout.close();
+                        serr.close();
+                        scan.close();
+                        t1.join();
                         System.out.print(msg);
                         e.printStackTrace();
                         throw new IOException();
@@ -594,6 +651,11 @@ public class saspy2j
                         String msg = "We failed in reading the List\n"+e.getMessage();
                         errp.write(msg);
                         errp.flush();
+                        sin.close();
+                        sout.close();
+                        serr.close();
+                        scan.close();
+                        t1.join();
                         System.out.print(msg);
                         e.printStackTrace();
                         throw new IOException();
@@ -608,91 +670,102 @@ public class saspy2j
                      sin.close();
                      sout.close();
                      serr.close();
+                     scan.close();
+                     t1.join();
                      e.printStackTrace();
                      break;
                      }
                   }
 
-                  if (fndeol)
-                     break;
+               if (fndeol)
+                  break;
 
-                  slen = 1;
-                  while (slen > 0)
+               slen = 1;
+               while (slen > 0)
+                  {
+                  try
                      {
-                     try
+                     log  = lang.FlushLog(logsz);
+                     slen = log.length();
+                     if (slen > 0)
                         {
-                        log  = lang.FlushLog(logsz);
-                        slen = log.length();
-                        if (slen > 0)
-                           {
-                           errp.write(log);
-                           errp.flush();
+                        errp.write(log);
+                        errp.flush();
 
-                           if ((plog+log).contains(eol))
-                              {
-                              outp.write(eol);
-                              if (ods)
-                                 {
-                                 outp.write(fn);
-                                 ods = false;
-                                 }
-                              outp.flush();
-                              fndeol = true;
-                              }
-                           plog = log;
-                           }
-                        }
-                     catch (org.omg.CORBA.COMM_FAILURE e)
-                        {
-                        if (reconnect)
-                           connect(true, false, false);
-                        else
+                        if ((plog+log).contains(eol))
                            {
-                           String msg = "We failed in reading the Log\n"+e.getMessage();
-                           errp.write(msg);
-                           errp.flush();
-                           System.out.print(msg);
-                           e.printStackTrace();
-                           throw new IOException();
+                           outp.write(eol);
+                           if (ods)
+                              {
+                              outp.write(fn);
+                              ods = false;
+                              }
+                           outp.flush();
+                           fndeol = true;
                            }
+                        plog = log;
                         }
-                     catch (IOException e)
+                     }
+                  catch (org.omg.CORBA.COMM_FAILURE e)
+                     {
+                     if (reconnect)
+                        connect(true, false, false);
+                     else
                         {
                         String msg = "We failed in reading the Log\n"+e.getMessage();
                         errp.write(msg);
                         errp.flush();
-                        System.out.print(msg);
                         sin.close();
                         sout.close();
                         serr.close();
+                        scan.close();
+                        t1.join();
+                        System.out.print(msg);
                         e.printStackTrace();
-                        break;
+                        throw new IOException();
                         }
-                     catch (org.omg.CORBA.DATA_CONVERSION e)
-                        {
-                        String msg = "We failed in reading the Log\n"+e.getMessage();
-                        errp.write(msg);
-                        errp.flush();
-                        lang.Submit("%put "+eol.substring(1)+";\n");
-                        slen = 1;
-                        continue;
-                        }
+                     }
+                  catch (IOException e)
+                     {
+                     String msg = "We failed in reading the Log\n"+e.getMessage();
+                     errp.write(msg);
+                     errp.flush();
+                     System.out.print(msg);
+                     sin.close();
+                     sout.close();
+                     serr.close();
+                     scan.close();
+                     t1.join();
+                     e.printStackTrace();
+                     break;
+                     }
+                  catch (org.omg.CORBA.DATA_CONVERSION e)
+                     {
+                     String msg = "We failed in reading the Log\n"+e.getMessage();
+                     errp.write(msg);
+                     errp.flush();
+                     lang.Submit("%put "+eol.substring(1)+";\n");
+                     slen = 1;
+                     continue;
                      }
                   }
                }
-          catch (GenericError e)
-             {
-             String msg = "We failed in outer loop\n"+e.getMessage();
-             errp.write(msg);
-             errp.flush();
-             System.out.print(msg);
-             sin.close();
-             sout.close();
-             serr.close();
-             e.printStackTrace();
-             break;
-             }
-          }
+            }
+         catch (GenericError e)
+            {
+            String msg = "We failed in outer loop\n"+e.getMessage();
+            errp.write(msg);
+            errp.flush();
+            System.out.print(msg);
+            sin.close();
+            sout.close();
+            serr.close();
+            scan.close();
+            t1.join();
+            e.printStackTrace();
+            break;
+            }
+         }
       }
 
 private static void connect(boolean recon, boolean ods, boolean zero) throws IOException, ConnectionFactoryException, GenericError

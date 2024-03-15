@@ -336,12 +336,18 @@ class SASsessionIOM():
          self.sockerr = socks.socket()
          self.sockerr.bind(("127.0.0.1",port))
          #self.sockerr.bind(("",32703))
+
+         self.sockcan = socks.socket()
+         self.sockcan.bind(("127.0.0.1",port))
+         #self.sockcan.bind(("",32704))
+
       except OSError:
          logger.fatal('Error try to open a socket in the _startsas method. Call failed.')
          return None
       self.sockin.listen(1)
       self.sockout.listen(1)
       self.sockerr.listen(1)
+      self.sockcan.listen(1)
 
       if not zero:
          if self.sascfg.output.lower() == 'html':
@@ -397,6 +403,7 @@ Will use HTML5 for this SASsession.""")
       parms += ["-stdinport",  str(self.sockin.getsockname()[1])]
       parms += ["-stdoutport", str(self.sockout.getsockname()[1])]
       parms += ["-stderrport", str(self.sockerr.getsockname()[1])]
+      parms += ["-cancelport", str(self.sockcan.getsockname()[1])]
       if self.sascfg.timeout is not None:
          parms += ["-timeout", str(self.sascfg.timeout)]
       if self.sascfg.appserver:
@@ -550,6 +557,8 @@ Will use HTML5 for this SASsession.""")
             pw += '\n'
             self.stdin[0].send(pw.encode())
 
+      self.stdcan = self.sockcan.accept()
+
       enc = self.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
       if enc == '':
          self.sascfg.encoding = 'utf-8'
@@ -578,6 +587,14 @@ Will use HTML5 for this SASsession.""")
             pid = self.pid.pid
          else:
             pid = self.pid
+
+         try: # Mac OS Python has bugs with this call
+            self.stdcan[0].send(b'C')
+            self.stdcan[0].shutdown(socks.SHUT_RDWR)
+         except:
+            pass
+         self.stdcan[0].close()
+         self.sockcan.close()
 
          try: # More Mac OS Python issues that don't work like everywhere else
             self.stdin[0].send(b'\ntom says EOL=ENDSAS                          \n')
@@ -1022,11 +1039,10 @@ Will use HTML5 for this SASsession.""")
              bc    = ll['BC']
 
              if not bc:
-                print('Exception handled :)\n')
+                print('Canceled submitted statements\n')
+                self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo+b'\n')
              else:
                 print('Exception ignored, continuing to process...\n')
-
-             #self.stdin[0].send(odsclose+logcodei.encode()+b'tom says EOL='+logcodeo+b'\n')
 
       try:
          lstf = lstf.decode()
@@ -1071,13 +1087,16 @@ Will use HTML5 for this SASsession.""")
 
         if True:
            response = self.sascfg._prompt(
-                     "SAS attention handling is not yet supported over IOM. Please enter (T) to terminate SAS or (C) to continue.")
+                     "Please enter (T) to Terminate SAS or (C) to Cancel submitted code or (W) continue to Wait.")
            while True:
               if response is None or response.upper() == 'C':
+                 self.stdcan[0].send(b'C')
+                 return dict(LOG=b'', LST=b'', BC=False)
+              if response is None or response.upper() == 'W':
                  return dict(LOG=b'', LST=b'', BC=True)
               if response.upper() == 'T':
                  break
-              response = self.sascfg._prompt("Please enter (T) to terminate SAS or (C) to continue.")
+              response = self.sascfg._prompt("Please enter (T) to Terminate SAS or (C) to Cancel or (W) to Wait.")
 
         if os.name == 'nt':
            self.pid.kill()
