@@ -3,22 +3,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import com.sas.iom.SAS.ILanguageService;
-import com.sas.iom.SASIOMDefs.GenericError;
-import com.sas.services.connection.ConnectionInterface;
 
 public class cancel implements Runnable 
    {
-   private int port;
-   private String addr;
-   private ConnectionInterface cx      = null;
+   private Socket sc;
    private ILanguageService    lang    = null;
 
 
-   public cancel(String addr, int port, ConnectionInterface cx, ILanguageService lang)
+   public cancel(Socket sc, ILanguageService lang)
       {
-      this.addr = addr;
-      this.port = port;
-      this.cx   = cx;
+      this.sc   = sc;
       this.lang = lang;
       }
 
@@ -26,23 +20,21 @@ public class cancel implements Runnable
    public void run()
       {
       InputStreamReader inc;
-      Socket         sc = null;
       int            op;
 
-      try
+      try 
          {
-         sc  = new Socket(this.addr, this.port);
+         inc = new InputStreamReader(this.sc.getInputStream());
          }
-      catch (IOException e)
+      catch (IOException e2) 
          {
-         e.printStackTrace();
+         return;
          }
 
       while(true)
          {
          try
             {
-            inc = new InputStreamReader(sc.getInputStream());
             op  = inc.read();
             if (op == 'C')
                try
@@ -51,55 +43,25 @@ public class cancel implements Runnable
                   lang.Cancel();
                   lang.Async(false);
                   }
-               catch (GenericError e1)
+               catch (org.omg.CORBA.OBJECT_NOT_EXIST e1)
                   {
+                  return;
                   }
             else
                return;
             }
+         catch (IOException e)
+            {
+            return;
+            }
          catch (Exception e)
             {
-            try
-               {
-               lang.Async(true);
-               lang.Cancel();
-               lang.Async(false);
-               }
-            catch (GenericError e1)
-               {
-               }
-            cx.close();
-            try
-               {
-               sc.close();
-               }
-            catch (IOException e1)
-               {
-               }
             return;
             }
          catch (Error e)
             {
-            try
-               {
-               lang.Async(true);
-               lang.Cancel();
-               lang.Async(false);
-               }
-            catch (GenericError e1)
-               {
-               }
-            cx.close();
-            try
-               {
-               sc.close();
-               }
-            catch (IOException e1)
-               {
-               }
             return;
             }
          }
       }   
    }
-

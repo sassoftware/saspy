@@ -93,6 +93,7 @@ public class saspy2j
    static Socket   sin      = null;
    static Socket   sout     = null;
    static Socket   serr     = null;
+   static Socket   scan     = null;
    static String   appName  = "";
    static String   iomhost  = "";
    static int      iomport  = 0;
@@ -136,7 +137,7 @@ public class saspy2j
       char[]         in      = new char[4097];
       byte[]         out     = new byte[32768];
 
-      Runnable cancel = new cancel(eol, nargs, cx, lang);
+      Runnable cancel = new cancel(scan, lang);
       
       for (int x = 0; x < nargs; x++)
          {
@@ -180,6 +181,7 @@ public class saspy2j
          sin  = new Socket(addr, inport);
          sout = new Socket(addr, outport);
          serr = new Socket(addr, errport);
+         scan = new Socket(addr, canport);
          }
       catch (IOException e)
          {
@@ -227,7 +229,7 @@ public class saspy2j
          connect(false, false, false);
          }
 
-      cancel = new cancel(addr, canport, cx, lang);
+      cancel = new cancel(scan, lang);
       t1 = new Thread(cancel);
       t1.setName("cancel");
       t1.start();
@@ -284,6 +286,11 @@ public class saspy2j
                               String msg = "We failed in Submit\n"+e.getMessage();
                               errp.write(msg);
                               errp.flush();
+                              sin.close();
+                              sout.close();
+                              serr.close();
+                              scan.close();
+                              t1.join();
                               System.out.print(msg);
                               e.printStackTrace();
                               throw new IOException();
@@ -337,6 +344,11 @@ public class saspy2j
                               String msg = "We failed in Submit\n"+e.getMessage();
                               errp.write(msg);
                               errp.flush();
+                              sin.close();
+                              sout.close();
+                              serr.close();
+                              scan.close();
+                              t1.join();
                               System.out.print(msg);
                               e.printStackTrace();
                               throw new IOException();
@@ -373,6 +385,11 @@ public class saspy2j
                            String msg = "We failed in Submit\n"+e.getMessage();
                            errp.write(msg);
                            errp.flush();
+                           sin.close();
+                           sout.close();
+                           serr.close();
+                           scan.close();
+                           t1.join();
                            System.out.print(msg);
                            e.printStackTrace();
                            throw new IOException();
@@ -442,6 +459,11 @@ public class saspy2j
                               System.out.print(msg+"\n");
                               errp.write(msg+"\n");
                               errp.flush();
+                              sin.close();
+                              sout.close();
+                              serr.close();
+                              scan.close();
+                              t1.join();
                               e2.printStackTrace();
                               }
                            }
@@ -451,6 +473,8 @@ public class saspy2j
                      sin.close();
                      sout.close();
                      serr.close();
+                     scan.close();
+                     t1.join();
                      return;
                      }
                   else if (eol.contains("PRINTTO"))
@@ -497,10 +521,29 @@ public class saspy2j
                            String msg = "We failed in Submit\n"+e.getMessage();
                            errp.write(msg);
                            errp.flush();
+                           sin.close();
+                           sout.close();
+                           serr.close();
+                           scan.close();
+                           t1.join();
                            System.out.print(msg);
                            e.printStackTrace();
                            throw new IOException();
                            }
+                        }
+                     catch(org.omg.CORBA.OBJECT_NOT_EXIST e)
+                        {
+                        String msg = "We failed in Submit\n"+e.getMessage();
+                        errp.write(msg);
+                        errp.flush();
+                        sin.close();
+                        sout.close();
+                        serr.close();
+                        scan.close();
+                        t1.join();
+                        System.out.print(msg);
+                        e.printStackTrace();
+                        throw new IOException();
                         }
                      }
                   }
@@ -559,6 +602,11 @@ public class saspy2j
                         String msg = "We failed in Submit\n"+e.getMessage();
                         errp.write(msg);
                         errp.flush();
+                        sin.close();
+                        sout.close();
+                        serr.close();
+                        scan.close();
+                        t1.join();
                         System.out.print(msg);
                         e.printStackTrace();
                         throw new IOException();
@@ -603,6 +651,11 @@ public class saspy2j
                         String msg = "We failed in reading the List\n"+e.getMessage();
                         errp.write(msg);
                         errp.flush();
+                        sin.close();
+                        sout.close();
+                        serr.close();
+                        scan.close();
+                        t1.join();
                         System.out.print(msg);
                         e.printStackTrace();
                         throw new IOException();
@@ -617,6 +670,8 @@ public class saspy2j
                      sin.close();
                      sout.close();
                      serr.close();
+                     scan.close();
+                     t1.join();
                      e.printStackTrace();
                      break;
                      }
@@ -660,6 +715,11 @@ public class saspy2j
                         String msg = "We failed in reading the Log\n"+e.getMessage();
                         errp.write(msg);
                         errp.flush();
+                        sin.close();
+                        sout.close();
+                        serr.close();
+                        scan.close();
+                        t1.join();
                         System.out.print(msg);
                         e.printStackTrace();
                         throw new IOException();
@@ -674,6 +734,8 @@ public class saspy2j
                      sin.close();
                      sout.close();
                      serr.close();
+                     scan.close();
+                     t1.join();
                      e.printStackTrace();
                      break;
                      }
@@ -698,6 +760,8 @@ public class saspy2j
             sin.close();
             sout.close();
             serr.close();
+            scan.close();
+            t1.join();
             e.printStackTrace();
             break;
             }
