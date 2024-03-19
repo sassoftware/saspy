@@ -2,6 +2,35 @@
 
 
 
+## [5.7.0] - 2024-03-19
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Enhancement` Per user request, I've added the ability to CANCEL submit()'ed code in both the IOM and HTTP
+access methods. Until now you would see a message like the following if you tried to interrupt a submit:
+`SAS attention handling is not yet supported over IOM. Please enter (T) to terminate SAS or (C) to continue.`
+But now, with the ability to cancel long running code, you will see something like this instead:
+`Please enter (T) to Terminate SAS or (C) to Cancel submitted code or (W) continue to Wait.`
+If you choose 'C' then I can now use the API to tell the server to terminate whatever was being executed and
+come back immediately, so you can then run other code. Also, for IOM, I cancel any code in endsas() so that the
+workspace server terminates immediately instead of only after whatever is running finishes.
+
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+
 ## [5.6.0] - 2024-02-05
 
 ### Added
