@@ -936,7 +936,7 @@ class SASsession():
             else:
                 results = self.results
 
-        ll = self._io.submit(code, results, prompt, undo=printto, **kwargs)
+        ll = self._io.submit(code, results, prompt, undo=printto, cancel=True, **kwargs)
 
         if self.sascfg.colorLOG:
            clog = highlight(ll['LOG'], SASLogLexer(), HtmlFormatter(full=True, style=SASLogStyle, lineseparator="<br>"))
