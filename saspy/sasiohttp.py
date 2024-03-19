@@ -1189,6 +1189,7 @@ class SASsessionHTTP():
                   req = conn.getresponse()
                   resp = req.read()
                   conn.close()
+                  print('Canceled submitted statements\n')
                   break
                if response is None or response.upper() == 'Q':
                   return dict(LOG='', LST='')
