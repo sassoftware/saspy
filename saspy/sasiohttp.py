@@ -1075,6 +1075,7 @@ class SASsessionHTTP():
       '''
       prompt  = prompt if prompt is not None else {}
       printto = kwargs.pop('undo', False)
+      cancel  = kwargs.pop('cancel', False)
 
       odsopen  = json.dumps("ods listing close;ods "+self.sascfg.output+" (id=saspy_internal) options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style+"; ods graphics on / outputfmt=png;\n")
       odsclose = json.dumps("ods "+self.sascfg.output+" (id=saspy_internal) close;ods listing;\n")
@@ -1172,10 +1173,15 @@ class SASsessionHTTP():
          except (KeyboardInterrupt, SystemExit):
             conn.close()
             print('Exception caught!')
-            response = self.sascfg._prompt(
-                      "Please enter (C) to Cancel submitted code or (Q) to Quit waiting for results or (W) continue to Wait.")
+            if cancel:
+               msg = "Please enter (C) to Cancel submitted code or (Q) to Quit waiting for results or (W) continue to Wait."
+            else:
+               msg = "CANCEL is only supported for the submit*() methods. Please enter (Q) to Quit waiting for results or (W) to continue to Wait."
+
+            response = self.sascfg._prompt(msg)
+
             while True:
-               if response is None or response.upper() == 'C':
+               if cancel and response is None or response.upper() == 'C':
                   # GET Status for JOB
                   canheaders = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token, "If-Match":Etag}
                   conn.connect()
@@ -1188,7 +1194,7 @@ class SASsessionHTTP():
                   return dict(LOG='', LST='')
                if response.upper() == 'W':
                   break
-               response = self.sascfg._prompt("Please enter (Q) to Quit waiting for results or (C) to continue waiting.")
+               response = self.sascfg._prompt(msg)
 
          except hc.RemoteDisconnected as Dis:
             conn.close()

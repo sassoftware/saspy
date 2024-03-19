@@ -811,6 +811,7 @@ Will use HTML5 for this SASsession.""")
       odsopen  = b"ods listing close;ods "+self.sascfg.output.encode()+ \
                  b" (id=saspy_internal) file="+self._tomods1+b" options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style.encode()+ \
                  b"; ods graphics on / outputfmt=png;\n"
+
       odsclose = b"ods "+self.sascfg.output.encode()+b" (id=saspy_internal) close;ods listing;\n"
       ods      = True
       pgm      = b""
@@ -857,6 +858,7 @@ Will use HTML5 for this SASsession.""")
       '''
       prompt  = prompt if prompt is not None else {}
       printto = kwargs.pop('undo', False)
+      cancel  = kwargs.pop('cancel', False)
 
       #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsopen  = b"ods listing close;ods "+self.sascfg.output.encode()+ \
@@ -1029,7 +1031,7 @@ Will use HTML5 for this SASsession.""")
 
          except (KeyboardInterrupt, SystemExit):
              print('Exception caught!')
-             ll = self._breakprompt(logcodeo)
+             ll = self._breakprompt(logcodeo, cancel)
 
              if ll.get('ABORT', False):
                 return ll
@@ -1075,7 +1077,7 @@ Will use HTML5 for this SASsession.""")
       self._sb._lastlog = logd
       return dict(LOG=logd, LST=lstd)
 
-   def _breakprompt(self, eos):
+   def _breakprompt(self, eos, cancel):
         found = False
         logf  = b''
         lstf  = b''
@@ -1086,18 +1088,25 @@ Will use HTML5 for this SASsession.""")
             return dict(LOG=b"No SAS process attached. SAS process has terminated unexpectedly.", LST=b'', ABORT=True)
 
         if True:
-           response = self.sascfg._prompt(
-                     "Please enter (T) to Terminate SAS or (C) to Cancel submitted code or (W) continue to Wait.")
+           if cancel:
+              msg = "Please enter (T) to Terminate SAS or (C) to Cancel submitted code or (W) continue to Wait."
+           else:
+              msg = "CANCEL is only supported for the submit*() methods. Please enter (T) to Terminate SAS or (W) to continue to Wait."
+
+           response = self.sascfg._prompt(msg)
            while True:
-              if response is None or response.upper() == 'C':
+              if cancel and response is None or response.upper() == 'C':
                  self.stdcan[0].send(b'C')
                  return dict(LOG=b'', LST=b'', BC=False)
               if response is None or response.upper() == 'W':
                  return dict(LOG=b'', LST=b'', BC=True)
               if response.upper() == 'T':
                  break
-              response = self.sascfg._prompt("Please enter (T) to Terminate SAS or (C) to Cancel or (W) to Wait.")
+              response = self.sascfg._prompt(msg)
 
+        self._endsas()
+
+        '''
         if os.name == 'nt':
            self.pid.kill()
         else:
@@ -1107,10 +1116,9 @@ Will use HTML5 for this SASsession.""")
 
         self.pid = None
         self._sb.SASpid = None
-        return dict(LOG=b"SAS process terminated", LST=b'', ABORT=True)
+        '''
 
-
-
+        return dict(LOG="SAS process terminated", LST='', ABORT=True)
 
         """
         while True:
