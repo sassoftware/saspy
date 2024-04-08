@@ -823,7 +823,7 @@ class SASsessionHTTP():
          resp = req.read()
          conn.close()
 
-         self._refthd.join(5)
+         self._refthd.join(1)
 
          if self.sascfg.verbose:
             logger.info("SAS server terminated for SESSION_ID="+self._session.get('id'))
@@ -835,6 +835,8 @@ class SASsessionHTTP():
    def _refresh_thread(self):
       while True:
          sleep(3000)
+         if self.pid is None:
+            return
          self._refresh_token()
 
    def _refresh_token(self):
