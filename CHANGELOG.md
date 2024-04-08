@@ -2,6 +2,34 @@
 
 
 
+## [5.8.0] - 2024-04-08
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Enhancement` Per user request, I've added the ability to request a keepalive thread in the IOM access method.
+The workspace server has a timeout option (defined in metadata), which usually defaults to 60 minutes. If no interaction
+happens in that amount of time since the last interaction, the Workspace server will terminate itself. I've added an
+option `keepalive` for the IOM access method that can be defined in the Configuration Definition or on SASsession(keepalive=50) to
+specify you want this thread created and how many minutes in between interactions. So, if you're Workspace server has
+a timeout of 60 min, you can specify `'keepalive' : 50,` in your config def to have saspy send a request every 50 min
+so the timeout doesn't happen, and keep your session connected until you terminate it. The default is, of course, the
+current behavior which is no keepalive thread.
+
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.7.0] - 2024-03-19
 
 ### Added
