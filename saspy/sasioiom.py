@@ -685,7 +685,7 @@ Will use HTML5 for this SASsession.""")
 
    def _keepalive_thread(self):
       while True:
-         sleep(self.sascfg.keep * 100)
+         sleep(self.sascfg.keep * 60)
          if self.pid is None:
             return
          self.submit('', results='text')
