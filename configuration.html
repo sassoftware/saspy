@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 5.6.0 documentation</title>
+  <title>Configuration &mdash; saspy 5.8.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.6.0
+                5.8.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -981,6 +981,11 @@ respectively. Those map to Python encoding values: utf8, latin1, and
 windows-1252, respectively.</p>
 </dd>
 <dt>timeout -</dt><dd><p>Timeout value for establishing connection to workspace server</p>
+</dd>
+<dt>keepalive -</dt><dd><p>Specifies to create a thread that makes a call to the Workspace server every X number of minutes to keep the
+server from timing out. The Workspace servers timeout value is defined in Metadata and if this is set to be less
+minutes than the timeout, it will keep the server from timing out and terminating. The default timeout for Workspace
+servers is usually 60 minutes, but it can be set to whatever by an admin who defines these in metadata.</p>
 </dd>
 <dt>appserver -</dt><dd><p>If you have more than one AppServer defined on OMR, and one object spawner is configured to start workspace servers
 from multiple Appservers, then you may need to pass the name of the physical workspace server (as defined in metadata)
