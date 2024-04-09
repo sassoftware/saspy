@@ -702,11 +702,6 @@ encoding  -
     windows-1252, respectively.
 timeout -
     Timeout value for establishing connection to workspace server
-keepalive -
-    Specifies to create a thread that makes a call to the Workspace server every X number of minutes to keep the
-    server from timing out. The Workspace servers timeout value is defined in Metadata and if this is set to be less
-    minutes than the timeout, it will keep the server from timing out and terminating. The default timeout for Workspace
-    servers is usually 60 minutes, but it can be set to whatever by an admin who defines these in metadata.
 appserver -
     If you have more than one AppServer defined on OMR, and one object spawner is configured to start workspace servers
     from multiple Appservers, then you may need to pass the name of the physical workspace server (as defined in metadata)

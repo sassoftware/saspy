@@ -23,7 +23,6 @@ import codecs
 import warnings
 import io
 import atexit
-from threading import Thread
 
 import logging
 logger = logging.getLogger('saspy')
@@ -72,10 +71,6 @@ class SASconfigIOM:
       self.reconuri  = cfg.get('reconuri', None)
       self.logbufsz  = cfg.get('logbufsz', None)
       self.log4j     = cfg.get('log4j', '2.12.4')
-      self.keep      = cfg.get('keepalive', None)
-
-      if self.keep:
-         self.keep = int(self.keep)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -265,13 +260,6 @@ class SASconfigIOM:
             self.logbufsz = 32
          else:
             self.logbufsz = inlogsz
-
-      inkeep = kwargs.get('keepalive', None)
-      if inkeep:
-         if lock and self.keep:
-            logger.warning("Parameter 'keepalive' passed to SAS_session was ignored due to configuration restriction.")
-         else:
-            self.keep = int(inkeep)
 
       self._prompt = session._sb.sascfg._prompt
 
@@ -588,11 +576,6 @@ Will use HTML5 for this SASsession.""")
       if self.sascfg.verbose:
          logger.info("SAS Connection established. Subprocess id is "+str(pid)+"\n")
 
-      if self.sascfg.keep:
-         self._keep = Thread(target=self._keepalive_thread, args=())
-         self._keep.daemon = True
-         self._keep.start()
-
       atexit.register(self._endsas)
 
       return self.pid
@@ -653,9 +636,6 @@ Will use HTML5 for this SASsession.""")
          except:
             pass
 
-         if self.sascfg.keep:
-            self._keep.join(1)
-
          try: # Mac OS Python has bugs with this call
             self.stdin[0].shutdown(socks.SHUT_RDWR)
          except:
@@ -682,13 +662,6 @@ Will use HTML5 for this SASsession.""")
          self.pid        = None
          self._sb.SASpid = None
       return
-
-   def _keepalive_thread(self):
-      while True:
-         sleep(self.sascfg.keep * 60)
-         if self.pid is None:
-            return
-         self.submit('', results='text')
 
    """
    def _getlog(self, wait=5, jobid=None):

@@ -2,6 +2,29 @@
 
 
 
+## [5.10.0] - 2024-04-09
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `Enhancement` Per user request, I've added the ability to request a keepalive thread in the IOM access method.
+I added this in V5.9.0, but then found that this could deadlock the IOM access method if the keepalive thread executed while in the middle
+of one of my SASPy methods; which I didn't think would be the case, but I didn't happen to have it happen. When it
+does, it can deadlock everything. So, I'm removing this feature with this release. It just doesn't work as expected.
+
+
+
 ## [5.9.0] - 2024-04-08
 
 ### Added
