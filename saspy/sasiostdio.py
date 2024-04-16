@@ -72,6 +72,7 @@ class SASconfigSTDIO:
       self.iomc     = cfg.get('iomc', '')
       self.dasho    = cfg.get('dasho', None)
       localhost     = cfg.get('localhost', None)
+      self.termwait = cfg.get('termwait', None)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -211,6 +212,15 @@ class SASconfigSTDIO:
             self.lrecl = inlrecl
       if not self.lrecl:
          self.lrecl = 1048576
+
+      intw = kwargs.get('termwait', None)
+      if intw:
+         if lock and self.termwait:
+            logger.warning("Parameter 'termwait' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.termwait = intw
+      if not self.termwait:
+         self.termwait = 5
 
       self._prompt = session._sb.sascfg._prompt
 
@@ -558,15 +568,15 @@ Will use HTML5 for this SASsession.""")
                self.pid.stdout.close()
                self.pid.stderr.close()
                try:
-                  rc = self.pid.wait(5)
+                  rc = self.pid.wait(self.sascfg.termwait)
                except (subprocess.TimeoutExpired):
                   if self.sascfg.verbose:
-                     logger.warning("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+                     logger.warning("SAS didn't shutdown w/in {} seconds; killing it to be sure".format(str(self.sascfg.termwait)))
                   self.pid.kill()
                self.to.join(5)
                self.te.join(5)
             else:
-               for i in range(5):
+               for i in range(self.sascfg.termwait):
                   rc = os.waitpid(self.pid, os.WNOHANG)
                   if rc[0] != 0:
                      break
@@ -576,10 +586,10 @@ Will use HTML5 for this SASsession.""")
                   pass
                else:
                   if self.sascfg.verbose:
-                     logger.warning("SAS didn't shutdown w/in 5 seconds; killing it to be sure")
+                     logger.warning("SAS didn't shutdown w/in {} seconds; killing it to be sure".format(str(self.sascfg.termwait)))
                   os.kill(self.pid, signal.SIGKILL)
-               self.to.join(5)
-               self.te.join(5)
+               self.to.join(1)
+               self.te.join(1)
 
          if self.sascfg.verbose:
             logger.info("SAS Connection terminated. Subprocess id was "+str(pid))
