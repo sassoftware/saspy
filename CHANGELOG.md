@@ -2,6 +2,33 @@
 
 
 
+## [5.11.0] - 2024-04-16
+
+### Added
+
+-   `Enhancement` Per internal tester request, I've added an option for the STDIO access method to provide an amount of time for
+SAS to terminate before killing the process, in the endsas() method. I've always waited up to 5 seconds from the subprocess
+to terminate after requesting SAS shutdown, which is normally fine. If it takes longer, I kill the process. In this case,
+SAS runs with some internal testing options which causes processing at termination, and takes longer than 5 seconds. So I've
+added an option to allow me to wait longer before terminating the process which will allow this extra termination processing
+to complete. This isn't a usual option customers would set, but it's there either way. The option is `termwait` and it takes an
+integer number of seconds. In this case, the config def required: `'termwait':  60,` to get it to work as expected.
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
+
 ## [5.10.0] - 2024-04-09
 
 ### Added
