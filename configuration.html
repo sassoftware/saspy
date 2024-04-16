@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 5.10.0 documentation</title>
+  <title>Configuration &mdash; saspy 5.11.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.10.0
+                5.11.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -707,6 +707,9 @@ of V3.1.9 here for more info: <a class="reference external" href="https://github
 </dd>
 <dt>colorLOG -</dt><dd><p>boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
 text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI’s.</p>
+</dd>
+<dt>termwait -</dt><dd><p>An integer specifying the max number of seconds to wait in endsas() for the SAS process to terminate before
+killing the subprocess. This was added for an internal testing requirement and isn’t something needed in the field.</p>
 </dd>
 </dl>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">default</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span><span class="p">,</span>
