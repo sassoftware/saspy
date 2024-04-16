@@ -384,6 +384,10 @@ colorLOG -
      boolean, default False, causes the SASLOG returned from the submit methods to be HTML instead of
      text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other SAS UI's.
 
+termwait -
+    An integer specifying the max number of seconds to wait in endsas() for the SAS process to terminate before
+    killing the subprocess. This was added for an internal testing requirement and isn't something needed in the field.
+
 
 .. code-block:: ipython3
 
