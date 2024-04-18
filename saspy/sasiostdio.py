@@ -557,11 +557,6 @@ Will use HTML5 for this SASsession.""")
             self.stdin.flush()
          sleep(1)
 
-         try:
-            self._log += self.stderr.get_nowait().decode(self.sascfg.encoding, errors='replace').replace(chr(12), chr(10))
-         except Empty:
-            pass
-
          if self.pid:
             if os.name == 'nt':
                self.pid.stdin.close()
@@ -590,6 +585,11 @@ Will use HTML5 for this SASsession.""")
                   os.kill(self.pid, signal.SIGKILL)
                self.to.join(1)
                self.te.join(1)
+
+         try:
+            self._log += self.stderr.get_nowait().decode(self.sascfg.encoding, errors='replace').replace(chr(12), chr(10))
+         except Empty:
+            pass
 
          if self.sascfg.verbose:
             logger.info("SAS Connection terminated. Subprocess id was "+str(pid))

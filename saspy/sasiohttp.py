@@ -25,6 +25,10 @@ import io
 import ssl
 import atexit
 
+import secrets
+import hashlib
+import base64
+
 import tempfile as tf
 from time import sleep
 from threading import Thread
@@ -83,6 +87,7 @@ class SASconfigHTTP:
       puser          = cfg.get('proxy_user', '')
       ppw            = cfg.get('proxy_pw', '')
       pauthkey       = cfg.get('proxy_authkey', '')
+      self.pkce      = cfg.get('pkce', None)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -271,6 +276,15 @@ class SASconfigHTTP:
          else:
             self.verify = bool(inver)
 
+      inpkce = kwargs.get('pkce', None)
+      if inpkce is not None:
+         if lock and self.pkce:
+            logger.warning("Parameter 'pkce' passed to SAS_session was ignored due to configuration restriction.")
+         else:
+            self.pkce = inpkce
+      if self.pkce is None:
+         self.pkce = True
+
       if len(self.url) > 0:
          http = self.url.split('://')
          hp   = http[1].split(':')
@@ -297,6 +311,7 @@ class SASconfigHTTP:
          else:
             self.port = 80
 
+      cv = None
       if not self._token and not authcode and not jwt and not self.serverid:
          found = False
          if self.authkey:
@@ -352,12 +367,23 @@ class SASconfigHTTP:
                      raise RuntimeError("Neither authcode nor userid provided.")
 
          if code_pw.lower() == 'authcode':
-            purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code".format(client_id)
+            if self.pkce:
+               cv    = secrets.token_urlsafe(32)
+               cvh   = hashlib.sha256(cv.encode('ascii')).digest()
+               cvhe  = base64.urlsafe_b64encode(cvh)
+               cc    = cvhe.decode('ascii')[:-1]
+               purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code&code_challenge_method=S256&code_challenge={}".format(client_id, cc)
+            else:
+               purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code".format(client_id)
+
             if len(self.url) > 0:
                purl = self.url+purl
             else:
                purl = "http{}://{}:{}{}".format('s' if self.ssl else '', self.ip, str(self.port), purl)
-            msg  = "The default url to authenticate with would be {}\n".format(purl)
+            if self.pkce:
+               msg  = "The PKCE required url to authenticate with is {}\n".format(purl)
+            else:
+               msg  = "The default url to authenticate with would be {}\n".format(purl)
             msg += "Please enter authcode: "
             authcode = self._prompt(msg)
             if authcode is None:
@@ -472,7 +498,7 @@ class SASconfigHTTP:
 
       # get AuthToken
       if not self._token:
-         js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt)
+         js = self._authenticate(user, pw, authcode, client_id, client_secret, jwt, cv)
          self._token   = js.get('access_token',  None)
          self._refresh = js.get('refresh_token', None)
 
@@ -557,7 +583,7 @@ class SASconfigHTTP:
 
          return
 
-   def _authenticate(self, user, pw, authcode, client_id, client_secret, jwt):
+   def _authenticate(self, user, pw, authcode, client_id, client_secret, jwt, cv):
 
       if self.serverid:
          return {'access_token':'tom'}
@@ -566,9 +592,13 @@ class SASconfigHTTP:
          uauthcode      = urllib.parse.quote(authcode)
          uclient_id     = urllib.parse.quote(client_id)
          uclient_secret = urllib.parse.quote(client_secret)
-         d1             = ("grant_type=authorization_code&code="+uauthcode+
-                          "&client_id="+uclient_id+"&client_secret="+uclient_secret).encode(self.encoding)
          headers        = {"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded"}
+         if self.pkce:
+            d1          = ("grant_type=authorization_code&code="+uauthcode+"&code_verifier="+cv+
+                          "&client_id="+uclient_id+"&client_secret="+uclient_secret).encode(self.encoding)
+         else:
+            d1          = ("grant_type=authorization_code&code="+uauthcode+
+                          "&client_id="+uclient_id+"&client_secret="+uclient_secret).encode(self.encoding)
       elif jwt:
          ujwt           = urllib.parse.quote(jwt)
          d1             = "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion="+ujwt

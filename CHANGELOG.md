@@ -2,6 +2,31 @@
 
 
 
+## [5.12.0] - 2024-04-18
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Enhancement` A new requirement in Viya 4 called for a change in the SSO authentication mechanism, to support PKCE. So this
+release provides support for that. There's nothing you have to do, but you will see a different message about the URL you need
+to use to get an auth code to provide, when using that authentication mechanism. In short, every time you want to authenticate,
+you get a new URL (it has its own unique code in it). This is displayed in the log same as the previous URL was, but unlike
+previously, where the url was the same every time for the deployment, and you could already get a code and provide it to SASsession(),
+this is a unique URL every time. So you can't get an authcode ahead of time. Don't fuss at me, I don't like it either. If you need
+help, open an issue and I'll see what I can do.
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
 ## [5.11.0] - 2024-04-16
 
 ### Added
