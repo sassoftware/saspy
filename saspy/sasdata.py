@@ -53,8 +53,8 @@ class SASdata:
                          {'where'    : 'msrp < 20000 and make = "Ford"' ,
                           'keep'     : 'msrp enginesize Cylinders Horsepower Weight' ,
                           'drop'     : ['msrp', 'enginesize', 'Cylinders', 'Horsepower', 'Weight'] ,
-                          'obs'      :  10 ,
-                          'firstobs' : '12' ,
+                          'obs'      :  20 ,
+                          'firstobs' : '10' ,
                           'format'   : {'money': 'dollar10', 'time': 'tod5.'} ,
                           'encoding' : 'latin9'
                          }
