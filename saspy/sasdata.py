@@ -44,7 +44,7 @@ class SASdata:
         - keep are strings or list of strings.
         - drop are strings or list of strings.
         - obs is a numbers - either string or int
-        - first obs is a numbers - either string or int
+        - firstobs is a numbers - either string or int
         - format is a string or dictionary { var: format }
         - encoding is a string
 

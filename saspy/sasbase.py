@@ -1122,7 +1122,7 @@ class SASsession():
             - keep are strings or list of strings.
             - drop are strings or list of strings.
             - obs is a number - either string or int
-            - first obs is a number - either string or int
+            - firstobs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1297,7 +1297,7 @@ class SASsession():
             - keep are strings or list of strings.
             - drop are strings or list of strings.
             - obs is a number - either string or int
-            - first obs is a number - either string or int
+            - firstobs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1714,7 +1714,7 @@ class SASsession():
             - keep are strings or list of strings.
             - drop are strings or list of strings.
             - obs is a number - either string or int
-            - first obs is a number - either string or int
+            - firstobs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1778,7 +1778,7 @@ class SASsession():
             - keep are strings or list of strings.
             - drop are strings or list of strings.
             - obs is a number - either string or int
-            - first obs is a number - either string or int
+            - firstobs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1833,7 +1833,7 @@ class SASsession():
             - keep are strings or list of strings.
             - drop are strings or list of strings.
             - obs is a number - either string or int
-            - first obs is a number - either string or int
+            - firstobs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1882,7 +1882,7 @@ class SASsession():
             - keep are strings or list of strings.
             - drop are strings or list of strings.
             - obs is a number - either string or int
-            - first obs is a number - either string or int
+            - firstobs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
@@ -1962,7 +1962,7 @@ class SASsession():
             - keep are strings or list of strings.
             - drop are strings or list of strings.
             - obs is a number - either string or int
-            - first obs is a number - either string or int
+            - firstobs is a number - either string or int
             - format is a string or dictionary { var: format }
             - encoding is a string
 
