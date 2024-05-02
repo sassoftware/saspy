@@ -1423,11 +1423,20 @@ class SASsessionHTTP():
             if len(buf) == 0:
                conn.send(b"0\r\n\r\n")
                break
-
-            lenstr = "%s\r\n" % hex(len(buf))[2:]
-            conn.send(lenstr.encode())
-            conn.send(buf)
-            conn.send(b"\r\n")
+            try:
+               lenstr = "%s\r\n" % hex(len(buf))[2:]
+               conn.send(lenstr.encode())
+               conn.send(buf)
+               conn.send(b"\r\n")
+            except Exception as e:
+               req    = conn.getresponse()
+               status = req.status
+               resp   = req.read()
+               conn.close()
+               fd.close()
+               logger.error("Caught an exception in upload.\nException="+str(e)+"\nStatus="+str(status)+
+                            "\nResponse="+str(resp.decode())+"\nLOG=\n"+logf)
+               raise e
 
          req    = conn.getresponse()
          status = req.status
