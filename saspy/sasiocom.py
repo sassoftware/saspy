@@ -850,6 +850,15 @@ class SASSessionCOM(object):
 
         return df
 
+    def sasdata2parquet(self, table: str, libref: str ='', dsopts: dict = None,
+                        parquetfile: str=None, pa_schema: None = None,
+                        rowsep: str = '\x01', colsep: str = '\x02',
+                        rowrep: str = ' ',    colrep: str = ' ',
+                        **kwargs) -> '<Pandas Data Frame object>':
+
+       logger.error("This access method doesn't support this method. Try the IOM access method instead.")
+       return None
+
     def upload(self, local: str, remote: str, overwrite: bool=True, permission: str='', **kwargs):
         """
         Upload a file to the SAS server.

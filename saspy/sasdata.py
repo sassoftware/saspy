@@ -1158,6 +1158,41 @@ class SASdata:
         else:
             return ll
 
+    def to_pq(self, table: str, libref: str ='', dsopts: dict = None,
+                        parquetfile: str=None, pa_schema: 'pa.schema' = None,
+                        rowsep: str = '\x01', colsep: str = '\x02',
+                        rowrep: str = ' ',    colrep: str = ' ',
+                        **kwargs) -> '<Pandas Data Frame object>':
+       """
+       This method exports the SAS Data Set to a Parquet File. It' suseful when the data is too large to fit in a Pandas Dataframe
+       table       - the name of the SAS Data Set you want to export to a Pandas Data Frame
+       libref      - the libref for the SAS Data Set.
+       dsopts      - data set options for the input SAS Data Set
+       parquetfile - path of the parquet file to create
+       pa_schema   - an optional pyarrow schema that overrides the default schema
+       rowsep      - the row seperator character to use; defaults to '\x01'
+       colsep      - the column seperator character to use; defaults to '\x02'
+       rowrep      - the char to convert to for any embedded rowsep chars, defaults to  ' '
+       colrep      - the char to convert to for any embedded colsep chars, defaults to  ' '
+
+       These two options are for advanced usage. They override how saspy imports data. For more info
+       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
+
+       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
+       """
+       lastlog = len(self.sas._io._log)
+       ll = self._is_valid()
+       self.sas._lastlog = self.sas._io._log[lastlog:]
+       if ll:
+           print(ll['LOG'])
+           return None
+       else:
+           df = self.sasdata2parquet(table, libref, dsopts, parquetfile=parquetfile, pa_schema=pa_schema,
+                                     rowsep=rowsep, colsep=colsep, rowrep=rowrep, colrep=colrep, **kwargs)
+           self.sas._lastlog = self.sas._io._log[lastlog:]
+           return df
+
     def to_frame(self, **kwargs) -> 'pandas.DataFrame':
         """
         This is just an alias for to_df()

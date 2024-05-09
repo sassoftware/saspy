@@ -41,6 +41,14 @@ try:
 except ImportError:
    pass
 
+try:
+   import pyarrow         as pa
+   import pyarrow.csv     as pc
+   import pyarrow.parquet as pq
+except ImportError:
+   pa = None
+   pass
+
 from queue     import Queue, Empty
 from threading import Thread
 
@@ -2651,6 +2659,298 @@ Will use HTML5 for this SASsession.""")
                   df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce')
 
       return df
+
+   if pa:
+    def sasdata2parquet(self, table: str, libref: str ='', dsopts: dict = None,
+                        parquetfile: str=None, pa_schema: pa.schema = None,
+                        rowsep: str = '\x01', colsep: str = '\x02',
+                        rowrep: str = ' ',    colrep: str = ' ',
+                        port: int=0, wait: int=10,
+                        **kwargs) -> '<Pandas Data Frame object>':
+       """
+       This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
+       table       - the name of the SAS Data Set you want to export to a Pandas Data Frame
+       libref      - the libref for the SAS Data Set.
+       dsopts      - data set options for the input SAS Data Set
+       parquetfile - path of the parquet file to create
+       pa_schema   - an optional pyarrow schema that overrides the default schema
+       rowsep      - the row seperator character to use; defaults to '\x01'
+       colsep      - the column seperator character to use; defaults to '\x02'
+       rowrep      - the char to convert to for any embedded rowsep chars, defaults to  ' '
+       colrep      - the char to convert to for any embedded colsep chars, defaults to  ' '
+
+       These two options are for advanced usage. They override how saspy imports data. For more info
+       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
+
+       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
+       """
+
+       errors = kwargs.pop('errors', 'strict')
+       dsopts = dsopts if dsopts is not None else {}
+
+       if port==0 and self.sascfg.tunnel:
+          # we are using a tunnel; default to that port
+          port = self.sascfg.tunnel
+
+       if libref:
+          tabname = libref+".'"+table.strip().replace("'", "''")+"'n "
+       else:
+          tabname = "'"+table.strip().replace("'", "''")+"'n "
+
+       code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+       code += "data _null_; file STDERR;d = open('work.sasdata2dataframe');\n"
+       code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
+       code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
+       code += "put lr lrecl; put vn nvars; put vl;\n"
+       code += "do i = 1 to nvars; var = varname(d, i); put var; end;\n"
+       code += "put vt;\n"
+       code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
+       code += "run;"
+
+       ll = self.submit(code, "text")
+
+       try:
+          l2 = ll['LOG'].rpartition("LRECL= ")
+          l2 = l2[2].partition("\n")
+          lrecl = int(l2[0])
+
+          l2 = l2[2].partition("VARNUMS= ")
+          l2 = l2[2].partition("\n")
+          nvars = int(l2[0])
+
+          l2 = l2[2].partition("\n")
+          varlist = l2[2].split("\n", nvars)
+          del varlist[nvars]
+
+          dvarlist = list(varlist)
+          for i in range(len(varlist)):
+             varlist[i] = varlist[i].replace("'", "''")
+
+          l2 = l2[2].partition("VARTYPE=")
+          l2 = l2[2].partition("\n")
+          vartype = l2[2].split("\n", nvars)
+          del vartype[nvars]
+       except Exception as e:
+          logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+          \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+          return None
+
+       topts = dict(dsopts)
+       topts.pop('firstobs', None)
+       topts.pop('obs', None)
+
+       code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+       code += "data work._n_u_l_l_;output;run;\n"
+       code += "data _null_; file STDERR; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+
+       for i in range(nvars):
+          code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
+       code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
+
+       ll = self.submit(code, "text")
+
+       try:
+          l2 = ll['LOG'].rpartition("FMT_CATS=")
+          l2 = l2[2].partition("\n")
+          varcat = l2[2].split("\n", nvars)
+          del varcat[nvars]
+       except Exception as e:
+          logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+          \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+          return None
+
+       try:
+          sock = socks.socket()
+          if not self.sascfg.ssh or self.sascfg.tunnel:
+             sock.bind(('localhost', port))
+          else:
+             sock.bind(('', port))
+          port = sock.getsockname()[1]
+       except OSError:
+          logger.error('Error try to open a socket in the sasdata2dataframe method. Call failed.')
+          return None
+
+       if self.sascfg.ssh and not self.sascfg.tunnel:
+          host = self.sascfg.hostip  #socks.gethostname()
+       else:
+          host = 'localhost'
+
+       lreclx = max(self.sascfg.lrecl, (lrecl + nvars + 1))
+
+       code = "filename sock socket '"+host+":"+str(port)+"' recfm=s encoding='utf-8' lrecl={};\n".format(str(lreclx))
+
+       rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
+       cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
+
+       idx_col = kwargs.pop('index_col', False)
+       eng     = kwargs.pop('engine',    'c')
+       my_fmts = kwargs.pop('my_fmts',   False)
+       k_dts   = kwargs.pop('dtype',     None)
+       if k_dts is None and my_fmts:
+          logger.warning("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+          my_fmts = False
+
+       code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
+
+       if not my_fmts:
+          for i in range(nvars):
+             if vartype[i] == 'N':
+                code += "format '"+varlist[i]+"'n "
+                if varcat[i] in self._sb.sas_date_fmts:
+                   code += 'E8601DA10.'
+                else:
+                   if varcat[i] in self._sb.sas_time_fmts:
+                      code += 'E8601TM15.6'
+                   else:
+                      if varcat[i] in self._sb.sas_datetime_fmts:
+                         code += 'E8601DT26.6'
+                      else:
+                         code += 'best32.'
+                code += '; '
+                if i % 10 == 9:
+                   code +='\n'
+
+       miss  = {}
+       code += "\nfile sock dlm="+cdelim+";\n"
+       for i in range(nvars):
+          if vartype[i] != 'N':
+             code += "'"+varlist[i]+"'n = translate('"
+             code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                         '%02x%02x' %                               \
+                         (ord(rowrep.encode(self.sascfg.encoding)), \
+                          ord(colrep.encode(self.sascfg.encoding))),
+                         '%02x%02x' %                               \
+                         (ord(rowsep.encode(self.sascfg.encoding)), \
+                          ord(colsep.encode(self.sascfg.encoding))))
+             miss[dvarlist[i]] = ' '
+          else:
+             code += "if missing('"+varlist[i]+"'n) then '"+varlist[i]+"'n = .; "
+             miss[dvarlist[i]] = '.'
+          if i % 10 == 9:
+             code +='\n'
+       code += "\nput "
+       for i in range(nvars):
+          code += " '"+varlist[i]+"'n "
+          if i % 10 == 9:
+             code +='\n'
+       code += rdelim+";\nrun;\nfilename sock;"
+
+       if k_dts is None:
+          dts = {}
+          for i in range(nvars):
+             if vartype[i] == 'N':
+                if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                   dts[dvarlist[i]] = 'float'
+                else:
+                   dts[dvarlist[i]] = 'str'
+             else:
+                dts[dvarlist[i]] = 'str'
+       else:
+          dts = k_dts
+
+       quoting = kwargs.pop('quoting', 3)
+
+       sock.listen(1)
+       self._asubmit(code, 'text')
+
+       if wait > 0 and sel.select([sock],[],[],wait)[0] == []:
+          logger.error("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
+          sock.close()
+          ll = self.submit("", 'text')
+          return ll['LOG']
+
+       parquet_writer = None
+
+       newsock = (0,0)
+       try:
+          newsock = sock.accept()
+
+          sockout = _read_sock(newsock=newsock, rowsep=rowsep.encode(), errors=errors)
+
+          if os.path.exists(parquetfile):
+             os.remove(parquetfile)
+
+          parse_options = pc.ParseOptions(delimiter=colsep)
+          read_options  = pc.ReadOptions(column_names=dvarlist)
+
+          if pa_schema:
+             convert_options = pc.ConvertOptions(column_types=pa_schema)
+          else:
+             convert_options = pc.ConvertOptions(column_types=dts)
+
+          while True:
+             parsed_chunk = sockout.read(4096*1000)
+             if parsed_chunk == '':
+                break
+
+             df = pd.read_csv(io.StringIO(parsed_chunk), index_col=idx_col, engine=eng, header=None, names=dvarlist,
+                              sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, keep_default_na=False,
+                              encoding='utf-8', quoting=quoting, **kwargs)
+             df = df.astype(dts) # if a column is completely empty, it will be cast as null, so we need to set it (again) here
+
+             if k_dts is None:  # don't override these if user provided their own dtypes
+                for i in range(nvars):
+                   if vartype[i] == 'N':
+                      if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                         df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce',unit='ms')#pandas default ns unit is deprecated for parquet
+
+             ptable = pa.Table.from_pandas(df,schema=pa_schema)
+
+             if not parquet_writer:
+                parquet_writer = pq.ParquetWriter(parquetfile, schema=ptable.schema, use_deprecated_int96_timestamps=True,
+                                                  write_statistics = False)
+
+             # Write the table chunk to the Parquet file
+             parquet_writer.write_table(ptable)
+
+       except (KeyboardInterrupt, Exception) as e:
+          logger.error(e)
+          logger.error("sasdata2dataframe was interrupted. Trying to return the saslog instead of a data frame.")
+          try:
+             if newsock[0]:
+                try: # Mac OS Python has bugs with this call
+                   newsock[0].shutdown(socks.SHUT_RDWR)
+                except:
+                   pass
+                newsock[0].close()
+          except:
+             pass
+          sock.close()
+          if parquet_writer:
+             parquet_writer.close()
+          ll = self.submit("", 'text')
+          return str(e)+"\n\n"+ll['LOG']
+
+       try: # Mac OS Python has bugs with this call
+          newsock[0].shutdown(socks.SHUT_RDWR)
+       except:
+          pass
+       newsock[0].close()
+       sock.close()
+       ll = self.submit("", 'text')
+
+       if k_dts is None:  # don't override these if user provided their own dtypes
+          for i in range(nvars):
+             if vartype[i] == 'N':
+                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                   df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce')
+
+       if parquet_writer:
+          parquet_writer.close()
+
+       return parquetfile
+
+   else:
+    def sasdata2parquet(self, table: str, libref: str ='', dsopts: dict = None,
+                        parquetfile: str=None, pa_schema: None = None,
+                        rowsep: str = '\x01', colsep: str = '\x02',
+                        rowrep: str = ' ',    colrep: str = ' ',
+                        **kwargs) -> '<Pandas Data Frame object>':
+
+       logger.error("pyarrow was not imported. This method can't be used without it.")
+       return None
+
 
 class _read_sock(io.StringIO):
    def __init__(self, **kwargs):
