@@ -1717,6 +1717,7 @@ class SASdata:
              return failmsg
 
        if new == 'df':
+          tmp = True
           new = self.sas.df2sd(data, '_temp_df')
           if type(new) is not type(self):
              failmsg = "df2sd on input data failed. Check SASLOG for errors."
@@ -1726,6 +1727,7 @@ class SASdata:
              else:
                 return failmsg
        else:
+          tmp = False
           new = data
 
        if self.sas.nosub:
@@ -1750,7 +1752,8 @@ class SASdata:
        ll = self.sas._io.submit(code, results='text')
        self.sas._lastlog = self.sas._io._log[lastlog:]
 
-       new.delete(quiet=True)
+       if tmp:
+          new.delete(quiet=True)
 
        if not self.sas.batch:
           print(ll['LOG'])
