@@ -600,6 +600,7 @@ class SASconfigHTTP:
             d1          = ("grant_type=authorization_code&code="+uauthcode+
                           "&client_id="+uclient_id+"&client_secret="+uclient_secret).encode(self.encoding)
       elif jwt:
+         logger.warning("BEING DEPRECATED - Viya has decided to remove this authentication mechanism for SASPy. In a future release of Viya this will no longer work.")
          ujwt           = urllib.parse.quote(jwt)
          d1             = "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion="+ujwt
          client         = "Basic "+base64.encodebytes((client_id+":").encode(self.encoding)).splitlines()[0].decode(self.encoding)
