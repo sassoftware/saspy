@@ -2,6 +2,29 @@
 
 
 
+## [5.13.0] - 2024-05-16
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `None`
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `Deprecated` A new requirement from Viya 4 is to deprecate the Azure JWT Authentication mechanism for SASPy. In a future
+version of Viya this will no longer work. I've added this to the doc and issue a warning when trying to use this, in this release.
+Support for this will be removed in a future release.
+
+
+
+
 ## [5.12.0] - 2024-04-18
 
 ### Added
