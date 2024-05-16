@@ -10,7 +10,7 @@
 
 ### Changed
 
--   `None` Nothing added
+-   `None` Nothing changed
 
 ### Fixed
 
