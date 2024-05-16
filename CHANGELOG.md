@@ -10,11 +10,15 @@
 
 ### Changed
 
--   `None` Nothing changed
+-   `Enhancement` In the HTTP access method, the upload method may encounter an error from the server when the file being uploaded
+is bigger that is allowed by the server. This previously resulted in an unclear failure. I now catch this and throw a clear exception.
 
 ### Fixed
 
--   `None` Nothing fixed
+-   `Fixed` A bug was found with the append method of the SASdata object. When appending a Dataframe, the method uses df2sd to
+transfer the data to SAS to then proc append it. After, it deletes that SASdata set it created. The method also allows you to
+provide a SASdata object to append, but it didn't check and deletes that SASdata set too. That should not have been happening.
+This is fixed in this release and only deletes the data set if it was temporarily created from the Dataframe.
 
 ### Removed
 
