@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 5.12.0 documentation</title>
+  <title>Configuration &mdash; saspy 5.13.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.12.0
+                5.13.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -1213,6 +1213,7 @@ The ‘client_id’ and ‘client_secret’ are also required, although a specia
 for SASPy, and I will default to that unless you provide other client info that an administrator created and provided you to use.</p>
 </li>
 <li><p>Azure JWT (actually, any JWT perhaps, in the future)</p>
+<p><strong>BEING DEPRECATED - Viya has decided to remove this authentication mechanism for SASPy. In a future release of Viya this will no longer work.</strong></p>
 <p>‘jwt’ is the key to provide that non-Viya Bearer Token, to then pass through to SASLogon to get the Viya Bearer Token to use.
 And these tokens, are just big long strings; thousands of bytes long strings of random characters
 (so you know you’re passing in the right thing).</p>
