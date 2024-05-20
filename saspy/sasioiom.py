@@ -2242,7 +2242,7 @@ Will use HTML5 for this SASsession.""")
       return df
 
    if pa:
-    def sasdata2parquet(self, table: str, libref: str ='',parquet_file_path: str, 
+    def sasdata2parquet(self, parquet_file_path: str,  table: str, libref: str ='',
                         pa_schema: pa.schema = None, dsopts: dict = None, 
                         static_columns:list = None,
                         rowsep: str = '\x01', colsep: str = '\x02',
@@ -2536,7 +2536,7 @@ Will use HTML5 for this SASsession.""")
              parquet_writer.close()
 
    else:
-    def sasdata2parquet(self, table: str, libref: str ='',parquet_file_path: str, 
+    def sasdata2parquet(self, parquet_file_path: str,  table: str, libref: str ='',
                         pa_schema: pa.schema = None, dsopts: dict = None, 
                         static_columns:list = None,
                         rowsep: str = '\x01', colsep: str = '\x02',
