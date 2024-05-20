@@ -35,6 +35,10 @@ from saspy.sasexceptions import (SASDFNamesToLongError,
 try:
    import pandas as pd
    import numpy  as np
+   from warnings import simplefilter
+   simplefilter(action="ignore", category=pd.errors.PerformanceWarning) #Ignore the following warning:
+   # PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+   #   df[[col[0] for col in static_columns]] = tuple([col[1] for col in static_columns])
 except ImportError:
    pass
 
@@ -2481,8 +2485,6 @@ Will use HTML5 for this SASsession.""")
                  
                  if static_columns:
                     df[[col[0] for col in static_columns]] = tuple([col[1] for col in static_columns])
-                    # for column in static_columns:
-                    #    df.insert(*column)
 
                  if k_dts is None:  # don't override these if user provided their own dtypes
                     for i in range(nvars):
