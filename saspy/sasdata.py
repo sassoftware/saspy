@@ -1158,22 +1158,27 @@ class SASdata:
         else:
             return ll
 
-    def to_pq(self, table: str, libref: str ='', dsopts: dict = None,
-                        parquetfile: str=None, pa_schema: 'pa.schema' = None,
+    def to_pq(self, parquet_file_path: str , pa_schema: 'pa.schema' = None,
+                        static_columns:list = None,
+                        partitioned = False, partition_size_mb = 128,
+                        chunk_size_mb = 4, compression = 'snappy',
                         rowsep: str = '\x01', colsep: str = '\x02',
                         rowrep: str = ' ',    colrep: str = ' ',
-                        **kwargs) -> '<Pandas Data Frame object>':
+                        **kwargs) -> None:
        """
-       This method exports the SAS Data Set to a Parquet File. It' suseful when the data is too large to fit in a Pandas Dataframe
-       table       - the name of the SAS Data Set you want to export to a Pandas Data Frame
-       libref      - the libref for the SAS Data Set.
-       dsopts      - data set options for the input SAS Data Set
-       parquetfile - path of the parquet file to create
-       pa_schema   - an optional pyarrow schema that overrides the default schema
-       rowsep      - the row seperator character to use; defaults to '\x01'
-       colsep      - the column seperator character to use; defaults to '\x02'
-       rowrep      - the char to convert to for any embedded rowsep chars, defaults to  ' '
-       colrep      - the char to convert to for any embedded colsep chars, defaults to  ' '
+       This method exports the SAS Data Set to a Parquet file
+       parquet_file_path- path of the parquet file to create
+       dsopts           - data set options for the input SAS Data Set
+       pa_schema        - an optional pyarrow schema that overrides the default schema
+       static_columns   - optional list of tuples (name, value) representing static columns that will be added to the parquet file.
+       partitioned      - boolean whether the parquet should be writting in partitions
+       partition_size_mb- the size in MB of each partition in memory
+       chunk_size_mb    - the chunk size in MB at which the stream is processes
+       compression      - the compression algorithm for the parquet writer.
+       rowsep           - the row seperator character to use; defaults to '\x01'
+       colsep           - the column seperator character to use; defaults to '\x02'
+       rowrep           - the char to convert to for any embedded rowsep chars, defaults to  ' '
+       colrep           - the char to convert to for any embedded colsep chars, defaults to  ' '
 
        These two options are for advanced usage. They override how saspy imports data. For more info
        see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
@@ -1185,13 +1190,15 @@ class SASdata:
        ll = self._is_valid()
        self.sas._lastlog = self.sas._io._log[lastlog:]
        if ll:
-           print(ll['LOG'])
-           return None
+          print(ll['LOG'])
+          return None
        else:
-           df = self.sasdata2parquet(table, libref, dsopts, parquetfile=parquetfile, pa_schema=pa_schema,
-                                     rowsep=rowsep, colsep=colsep, rowrep=rowrep, colrep=colrep, **kwargs)
-           self.sas._lastlog = self.sas._io._log[lastlog:]
-           return df
+          df = self.sas.sasdata2parquet(parquet_file_path, self.table, self.libref, self.dsopts, pa_schema,
+                                        static_columns, partitioned,  partition_size_mb,
+                                        chunk_size_mb,  compression,
+                                        rowsep, colsep, rowrep, colrep, **kwargs)
+          self.sas._lastlog = self.sas._io._log[lastlog:]
+          return df
 
     def to_frame(self, **kwargs) -> 'pandas.DataFrame':
         """

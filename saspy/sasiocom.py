@@ -850,11 +850,14 @@ class SASSessionCOM(object):
 
         return df
 
-    def sasdata2parquet(self, table: str, libref: str ='', dsopts: dict = None,
-                        parquetfile: str=None, pa_schema: None = None,
+    def sasdata2parquet(self, parquet_file_path: str, table: str, libref: str ='',
+                        dsopts: dict = None, pa_schema: 'pa_schema' = None,
+                        static_columns:list = None,
+                        partitioned = False, partition_size_mb = 128,
+                        chunk_size_mb = 4, compression = 'snappy',
                         rowsep: str = '\x01', colsep: str = '\x02',
                         rowrep: str = ' ',    colrep: str = ' ',
-                        **kwargs) -> '<Pandas Data Frame object>':
+                        **kwargs) -> None:
 
        logger.error("This access method doesn't support this method. Try the IOM access method instead.")
        return None
