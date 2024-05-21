@@ -23,6 +23,7 @@ import codecs
 import warnings
 import io
 import atexit
+import math
 
 import logging
 logger = logging.getLogger('saspy')
@@ -34,6 +35,10 @@ from saspy.sasexceptions import (SASDFNamesToLongError,
 try:
    import pandas as pd
    import numpy  as np
+   from warnings import simplefilter
+   simplefilter(action="ignore", category=pd.errors.PerformanceWarning) #Ignore the following warning:
+   # PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times, which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead. To get a de-fragmented frame, use `newframe = frame.copy()`
+   #   df[[col[0] for col in static_columns]] = tuple([col[1] for col in static_columns])
 except ImportError:
    pass
 
@@ -2237,23 +2242,31 @@ Will use HTML5 for this SASsession.""")
       return df
 
    if pa:
-    def sasdata2parquet(self, table: str, libref: str ='', dsopts: dict = None,
-                        parquetfile: str=None, pa_schema: pa.schema = None,
+    def sasdata2parquet(self, parquet_file_path: str,  table: str, libref: str ='',
+                        pa_schema: pa.schema = None, dsopts: dict = None, 
+                        static_columns:list = None,
                         rowsep: str = '\x01', colsep: str = '\x02',
                         rowrep: str = ' ',    colrep: str = ' ',
-                        **kwargs) -> '<Pandas Data Frame object>':
+                        partitioned = False,  partition_size_mb = 128,
+                        chunk_size_mb = 4,
+                        compression = 'snappy',
+                        **kwargs) -> None:
        """
        This method exports the SAS Data Set to a Pandas Data Frame, returning the Data Frame object.
-       table       - the name of the SAS Data Set you want to export to a Pandas Data Frame
-       libref      - the libref for the SAS Data Set.
-       dsopts      - data set options for the input SAS Data Set
-       parquetfile - path of the parquet file to create
-       pa_schema   - an optional pyarrow schema that overrides the default schema
-       rowsep      - the row seperator character to use; defaults to '\x01'
-       colsep      - the column seperator character to use; defaults to '\x02'
-       rowrep      - the char to convert to for any embedded rowsep chars, defaults to  ' '
-       colrep      - the char to convert to for any embedded colsep chars, defaults to  ' '
-
+       table            - the name of the SAS Data Set you want to export to a Pandas Data Frame
+       libref           - the libref for the SAS Data Set.
+       dsopts           - data set options for the input SAS Data Set
+       parquet_file_path- path of the parquet file to create
+       pa_schema        - an optional pyarrow schema that overrides the default schema
+       static_columns   - optional list of tuples (name, value) representing static columns that will be added to the parquet file. 
+       rowsep           - the row seperator character to use; defaults to '\x01'
+       colsep           - the column seperator character to use; defaults to '\x02'
+       rowrep           - the char to convert to for any embedded rowsep chars, defaults to  ' '
+       colrep           - the char to convert to for any embedded colsep chars, defaults to  ' '
+       partitioned      - boolean whether the parquet should be writting in partitions
+       partition_size_mb- the size in MB of each partition in memory
+       chunk_size_mb    - the chunk size in MB at which the stream is processes 
+       compression      - the compression algorithm for the parquet writer.
        These two options are for advanced usage. They override how saspy imports data. For more info
        see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
 
@@ -2417,83 +2430,121 @@ Will use HTML5 for this SASsession.""")
        self.stdin[0].send(b'\ntom says EOL='+logcodeb)
        #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb)
 
-       parquet_writer = None
 
+       parquet_writer = None
        try:
           sockout = _read_sock(io=self, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(),
-                               lstcodeo=lstcodeo.encode(), logcodeb=logcodeb, errors=errors)
+                           lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
+          logging.info("Socket ready")
 
-          if os.path.exists(parquetfile):
-             os.remove(parquetfile)
+          if partitioned:
+             os.makedirs(parquet_file_path)
+             # logging.info("")
+          #### process stream ####
 
-          parse_options = pc.ParseOptions(delimiter=colsep)
-          read_options  = pc.ReadOptions(column_names=dvarlist)
+          partition = 1
+          loop = 1
+          chunk_size = chunk_size_mb*1024*1024 #convert to bytes
+          data_read = 0
 
-          if pa_schema:
-             convert_options = pc.ConvertOptions(column_types=pa_schema)
-          else:
-             convert_options = pc.ConvertOptions(column_types=dts)
-
+          logging.info("Starting stream")
+          # determine how many chunks should be written into one partition.
+          chunks_in_partition = math.floor(partition_size_mb/chunk_size_mb)
+          if chunks_in_partition == 0:
+             raise ValueError("Partition size needs to be larger than chunk size")
           while True:
-             parsed_chunk = sockout.read(4096*1000)
-             if parsed_chunk == '':
-                break
+              # for spark, it is better if large files are split over multiple partitions, 
+              # so that all worker nodes can be used to read the data 
+              if partitioned:
+                 #batch chunks into one partition
+                 if loop % chunks_in_partition == 0: 
+                    logging.info("Closing partition "+str(partition).zfill(5))
+                    partition += 1
+                    parquet_writer.close()
+                    parquet_writer = None
+                 path = f"{parquet_file_path}/{str(partition).zfill(5)}.{compression}.parquet"
+              else:
+                 path = parquet_file_path
+              # pyarrow needs \n
 
-             df = pd.read_csv(io.StringIO(parsed_chunk), index_col=idx_col, engine=eng, header=None, names=dvarlist,
-                              sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, keep_default_na=False,
-                              encoding='utf-8', quoting=quoting, **kwargs)
-             df = df.astype(dts) # if a column is completely empty, it will be cast as null, so we need to set it (again) here
+              # 4 MB seems to be the most efficient chunk size, but could vary
+              chunk = sockout.read(chunk_size)#.replace(" "+rowsep,"' '\n"+rowsep) # need to replace empty end of rows
+              if chunk == '':
+                 logging.info("Done")
+                 if loop == 1:
+                    logging.info("Query returned no rows.")
+                    return
+                 break
 
-             if k_dts is None:  # don't override these if user provided their own dtypes
-                for i in range(nvars):
-                   if vartype[i] == 'N':
-                      if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                         df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce',unit='ms')#pandas default ns unit is deprecated for parquet
+              try:
 
-             ptable = pa.Table.from_pandas(df,schema=pa_schema)
+                 df = pd.read_csv(io.StringIO(chunk), index_col=idx_col, engine=eng, header=None, names=dvarlist,
+                     sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,# dtype_backend='pyarrow',
+                     encoding='utf-8', quoting=quoting, **kwargs) 
+                 df = df.astype(dts) # if a column is completely empty, it will be cast as null, so we need to set it (again) here
+                 
+                 if static_columns:
+                    df[[col[0] for col in static_columns]] = tuple([col[1] for col in static_columns])
 
-             if not parquet_writer:
-                parquet_writer = pq.ParquetWriter(parquetfile, schema=ptable.schema, use_deprecated_int96_timestamps=True,
-                                                  write_statistics = False)
+                 if k_dts is None:  # don't override these if user provided their own dtypes
+                    for i in range(nvars):
+                     if vartype[i] == 'N':
+                        if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                           df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce',unit='ms')#format=timestamp_format
 
-             # Write the table chunk to the Parquet file
-             parquet_writer.write_table(ptable)
+                 pa_table = pa.Table.from_pandas(df,schema=pa_schema)
 
+              except:
+                 logging.info(f"Parsing failed, see {path}/failedchunk.csv")
+                 os.makedirs(path,exist_ok=True)
+                 with open(f"{path}/failedchunk.csv", "w") as log:
+                    log.write(chunk)
+                 raise e
+
+              if not parquet_writer:
+                 parquet_writer = pq.ParquetWriter(path,schema=pa_table.schema,write_statistics = False,compression=compression)#use_deprecated_int96_timestamps=True,
+
+              # Write the table chunk to the Parquet file
+              parquet_writer.write_table(pa_table)
+              loop += 1
+              data_read += chunk_size
+              if loop % 30 == 0:
+                 logging.info(f"{round(data_read/1073741824,2)} GB read so far") #Convert bytes to GB => bytes /1024³
+          
+          logging.info(f"Finished reading {round(data_read/1073741824,2)} GB.")
+          logging.info(str(pa_table.schema))
        except:
           if os.name == 'nt':
              try:
-                rc = self.pid.wait(0)
-                self.pid = None
-                self._sb.SASpid = None
-                if parquet_writer:
-                   parquet_writer.close()
-                #return None
-                logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
-                raise SASIOConnectionTerminated(Exception)
-             except subprocess.TimeoutExpired:
-                pass
+              rc = self.pid.wait(0)
+              self.pid = None
+              self._sb.SASpid = None
+              logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+              # return None
+             except:
+              pass
           else:
              rc = os.waitpid(self.pid, os.WNOHANG)
              if rc[1]:
-                self.pid = None
-                self._sb.SASpid = None
-                if parquet_writer:
-                   parquet_writer.close()
-                #return None
-                logger.fatal("\nSAS process has terminated unexpectedly. Pid State= "+str(rc))
-                raise SASIOConnectionTerminated(Exception)
+                 self.pid = None
+                 self._sb.SASpid = None
+                 logger.fatal('\nSAS process has terminated unexpectedly. RC from wait was: '+str(rc))
+                 # return None
           raise
+       finally:
+          if parquet_writer:
+             parquet_writer.close()
 
-       if parquet_writer:
-          parquet_writer.close()
-
-       return parquetfile
    else:
-    def sasdata2parquet(self, table: str, libref: str ='', dsopts: dict = None,
-                        parquetfile: str=None, pa_schema: None = None,
+    def sasdata2parquet(self, parquet_file_path: str,  table: str, libref: str ='',
+                        pa_schema: pa.schema = None, dsopts: dict = None, 
+                        static_columns:list = None,
                         rowsep: str = '\x01', colsep: str = '\x02',
                         rowrep: str = ' ',    colrep: str = ' ',
-                        **kwargs) -> '<Pandas Data Frame object>':
+                        partitioned = False,  partition_size_mb = 128,
+                        chunk_size_mb = 4,
+                        compression = 'snappy',
+                        **kwargs) -> None:
 
        logger.error("pyarrow was not imported. This method can't be used without it.")
        return None
