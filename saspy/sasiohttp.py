@@ -805,7 +805,7 @@ class SASsessionHTTP():
 
       self.pid = self._session.get('id')
 
-      self._log = self._getlog()
+      self._log = self._getlog().replace(chr(12), chr(10))
 
       # POST Job - Lets see if the server really came up, cuz you can't tell from what happend so far
       conn = self.sascfg.HTTPConn; conn.connect()
@@ -903,9 +903,10 @@ class SASsessionHTTP():
       self.sascfg._refresh = js.get('refresh_token')
       return
 
-   def _getlog(self, jobid=None):
+   def _getlog(self, jobid=None, loglines=False):
       start = 0
       logr = ''
+      logl = []
 
       # GET Log
       if jobid:
@@ -937,17 +938,24 @@ class SASsessionHTTP():
             break
          start += lines
 
-         for line in log:
-             logr += line.get('line')+'\n'
+         logl += log
+
+      for line in logl:
+          logr += line.get('line')+'\n'
 
       if jobid != None:
-         self._log += logr.replace(chr(12), chr(10))
+         logr       = logr.replace(chr(12), chr(10))
+         self._log += logr
 
       if logr.count('\nERROR:') > 0:
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
 
-      return logr
+      if not loglines:
+         del(logl)
+         return logr
+      else:
+         return (logr, logl)
 
    def _getlst(self, jobid=None):
       htm = ''
@@ -1034,7 +1042,7 @@ class SASsessionHTTP():
          for line in lst:
              lstr += line.get('line')+'\n'
 
-      return lstr
+      return lstr.replace(chr(12), chr(10))
 
    def _asubmit(self, code, results="html"):
       odsopen  = json.dumps("ods listing close;ods "+self.sascfg.output+" (id=saspy_internal) options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style+"; ods graphics on / outputfmt=png;\n")
@@ -1109,6 +1117,7 @@ class SASsessionHTTP():
       prompt  = prompt if prompt is not None else {}
       printto = kwargs.pop('undo', False)
       cancel  = kwargs.pop('cancel', False)
+      lines   = kwargs.pop('loglines', False)
 
       odsopen  = json.dumps("ods listing close;ods "+self.sascfg.output+" (id=saspy_internal) options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style+"; ods graphics on / outputfmt=png;\n")
       odsclose = json.dumps("ods "+self.sascfg.output+" (id=saspy_internal) close;ods listing;\n")
@@ -1237,12 +1246,17 @@ class SASsessionHTTP():
             if excpcnt < 0:
                raise
 
-      logd = self._getlog(jobid).replace(chr(12), chr(10))
+      logs = self._getlog(jobid, lines)
+
+      if not lines:
+         logd = logs
+      else:
+         logd, logl = logs
 
       if ods:
-         lstd = self._getlst(jobid).replace(chr(12), chr(10))
+         lstd = self._getlst(jobid)
       else:
-         lstd = self._getlsttxt(jobid).replace(chr(12), chr(10))
+         lstd = self._getlsttxt(jobid)
 
       trip = lstd.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 200:
@@ -1262,6 +1276,10 @@ class SASsessionHTTP():
          status = req.status
          resp = req.read()
          conn.close()
+
+      if lines:
+         logd = list(logl)
+         del(logl)
 
       return dict(LOG=logd, LST=lstd)
 
@@ -1696,7 +1714,7 @@ class SASsessionHTTP():
       code += "end;\n"
       code += "datalines4;"
       jobid = self._asubmit(code, "text")
-      self._log += self._getlog(jobid).replace(chr(12), chr(10))
+      self._log += self._getlog(jobid)
 
       blksz = int(kwargs.get('blocksize', 1000000))
       noencode = self._sb.sascei == 'utf-8' or encode_errors == 'ignore'
@@ -1751,7 +1769,7 @@ class SASsessionHTTP():
                   code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
 
             jobid = self._asubmit(code, "text")
-            self._log += self._getlog(jobid).replace(chr(12), chr(10))
+            self._log += self._getlog(jobid)
             code = ""
 
       if not noencode and len(code) > 0:
@@ -1769,7 +1787,7 @@ class SASsessionHTTP():
             code = code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
 
       jobid = self._asubmit(code+";;;;\n;;;;", "text")
-      self._log += self._getlog(jobid).replace(chr(12), chr(10))
+      self._log += self._getlog(jobid)
       ll = self.submit("quit;", 'text')
       return None
 
