@@ -1086,14 +1086,14 @@ Will use HTML5 for this SASsession.""")
                pass
             if types.count(logcodeo) >= 1:
                break
-
+         sas_linetype_mapping
          types = types.partition(b"TomSaysTypes=")[2]
          types = list(types.rpartition(logcodeo)[0].decode(errors='replace'))
 
          logl = []
          logs = logd.split('\n')
          for i in range(len(logs)):
-            logl.append({'line':logs[i], 'type':types[i]})
+            logl.append({'line':logs[i], 'type':sas_linetype_mapping[int(types[i])]})
          logd = logl
 
       return dict(LOG=logd, LST=lstd)
@@ -2320,4 +2320,19 @@ class _read_sock(io.StringIO):
          return datap.decode(errors=self.errs)
       else:
          return datap.decode(self._io.sascfg.encoding, errors=self.errs)
+
+sas_linetype_mapping = {
+0 : "Normal",
+1 : "Hilighted",
+2 : "Source",
+3 : "Title",
+4 : "Byline",
+5 : "Footnote",
+6 : "Error",
+7 : "Warning",
+8 : "Note",
+9 : "Message"
+}
+
+
 
