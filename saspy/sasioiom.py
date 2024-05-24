@@ -858,6 +858,7 @@ Will use HTML5 for this SASsession.""")
       prompt  = prompt if prompt is not None else {}
       printto = kwargs.pop('undo', False)
       cancel  = kwargs.pop('cancel', False)
+      lines   = kwargs.pop('loglines', False)
 
       #odsopen  = b"ods listing close;ods html5 (id=saspy_internal) file=STDOUT options(bitmap_mode='inline') device=svg; ods graphics on / outputfmt=png;\n"
       odsopen  = b"ods listing close;ods "+self.sascfg.output.encode()+ \
@@ -952,6 +953,8 @@ Will use HTML5 for this SASsession.""")
 
       if printto:
          self.stdin[0].send(b'\ntom says EOL=PRINTTO                         \n')
+      if lines:
+         self.stdin[0].send(b'\ntom says EOL=LOGLINES                        \n')
       self.stdin[0].send(pgm+b'tom says EOL='+logcodeo+b'\n')
 
       while not done:
@@ -1053,27 +1056,46 @@ Will use HTML5 for this SASsession.""")
          except UnicodeDecodeError:
             lstf = lstf.decode(errors='replace')
 
-      logf = logf.decode(errors='replace').replace(chr(12), chr(10))
-
       trip = lstf.rpartition("/*]]>*/")
       if len(trip[1]) > 0 and len(trip[2]) < 200:
          lstf = ''
 
-      self._log += logf
-      final = logf.partition(logcodei)
-      z = final[0].rpartition(chr(10))
-      prev = '%08d' %  (self._log_cnt - 1)
-      zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
-      logd = zz[2].replace(mj.decode(), '').replace(chr(12), chr(10))
-
       lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                     '<body class="l body">').replace("font-size: x-small;",
                                                                                      "font-size:  normal;")
+      logf = logf.decode(errors='replace').replace(chr(12), chr(20))
+      self._log += logf
+      final = logf.partition(logcodei)
+      types = final[2].encode()
+      z = final[0].rpartition(chr(10))
+      prev = '%08d' %  (self._log_cnt - 1)
+      zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
+      logd = zz[2].replace(mj.decode(), '')
+
       if logd.count('\nERROR:') > 0:
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
 
       self._sb._lastlog = logd
+
+      if lines:
+         while True:
+            try:
+              types += self.stderr[0].recv(4096000)
+            except (BlockingIOError):
+               pass
+            if types.count(logcodeo) >= 1:
+               break
+
+         types = types.partition(b"TomSaysTypes=")[2]
+         types = list(types.rpartition(logcodeo)[0].decode(errors='replace'))
+
+         logl = []
+         logs = logd.split('\n')
+         for i in range(len(logs)):
+            logl.append({'line':logs[i], 'type':types[1]})
+         logd = logl
+
       return dict(LOG=logd, LST=lstd)
 
    def _breakprompt(self, eos, cancel):
