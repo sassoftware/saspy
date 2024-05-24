@@ -1093,7 +1093,7 @@ Will use HTML5 for this SASsession.""")
          logl = []
          logs = logd.split('\n')
          for i in range(len(logs)):
-            logl.append({'line':logs[i], 'type':types[1]})
+            logl.append({'line':logs[i], 'type':types[i]})
          logd = logl
 
       return dict(LOG=logd, LST=lstd)
