@@ -2,6 +2,33 @@
 
 
 
+## [5.14.0] - 2024-06-14
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Enhancement` Per a user request (see issue #603 for details), in the HTTP and IOM access methods, there is
+now a new boolean parameter `loglines` on the submit() method which changes how the LOG is returned. Of course the
+default is Fslse to preserve current behavior. The user wanted a list of dictionaries for each line of the log, which
+is returned from both the HTTP and IOM API's. The dictionaries have the `line`, which has the LOG contents for that
+line, and the `type` which contains identifiers like NOTE, WARRNING, ERROR, TITLE, SOURCE ... See the Issue for
+details of what to output is like for each of the access methods, as the API's don't return identical information.
+The STDIO (SSH) access method can't return this as there is no API for that.
+
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.13.0] - 2024-05-16
 
 ### Added

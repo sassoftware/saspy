@@ -877,11 +877,11 @@ class SASsession():
         '''
         This method is used to submit any SAS code. It returns the Log and Listing as a python dictionary.
 
-        :param code:    the SAS statements you want to execute
-        :param results: format of results. 'HTML' by default, alternatively 'TEXT'
-        :param prompt:  dict of names and flags to prompt for; create macro variables (used in submitted code), then keep or delete \
-                        the keys which are the names of the macro variables. The boolean flag is to either hide what you type and \
-                        delete the macros, or show what you type and keep the macros (they will still be available later).
+        :param code:     the SAS statements you want to execute
+        :param results:  format of results. 'HTML' by default, alternatively 'TEXT'
+        :param prompt:   dict of names and flags to prompt for; create macro variables (used in submitted code), then keep or delete \
+                         the keys which are the names of the macro variables. The boolean flag is to either hide what you type and \
+                         delete the macros, or show what you type and keep the macros (they will still be available later).
 
             for example (what you type for pw will not be displayed, user and dsname will):
 
@@ -895,9 +895,10 @@ class SASsession():
                              prompt = {'user': False, 'pw': True, 'dsname': False}
                              )
 
-        :param printto: this option, when set to True, will cause saspy to issue a 'proc printto;run;' after the code that is being \
-                        submitted. This will 'undo' any proc printto w/in the submitted code that redirected the LOG or LST, to return \
-                        the LOG/LST back to saspy. This is explained in more detail in the doc: https://sassoftware.github.io/saspy/limitations.html
+        :param printto:  this option, when set to True, will cause saspy to issue a 'proc printto;run;' after the code that is being \
+                         submitted. This will 'undo' any proc printto w/in the submitted code that redirected the LOG or LST, to return \
+                         the LOG/LST back to saspy. This is explained in more detail in the doc: https://sassoftware.github.io/saspy/limitations.html
+        :param loglines: boolean identifying you want the list of dicts for each line that can be returned from the HTTP and IOM APIs
 
         **HTTP**
 
