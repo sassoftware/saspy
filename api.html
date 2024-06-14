@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; saspy 5.13.0 documentation</title>
+  <title>API Reference &mdash; saspy 5.14.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.13.0
+                5.14.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -1378,7 +1378,7 @@ You must specify 3 of the for variables, to solve for the 4th.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>code</strong> – the SAS statements you want to execute</p></li>
 <li><p><strong>results</strong> – format of results. ‘HTML’ by default, alternatively ‘TEXT’</p></li>
-<li><p><strong>prompt</strong> – <p>dict of names and flags to prompt for; create macro variables (used in submitted code), then keep or delete                         the keys which are the names of the macro variables. The boolean flag is to either hide what you type and                         delete the macros, or show what you type and keep the macros (they will still be available later).</p>
+<li><p><strong>prompt</strong> – <p>dict of names and flags to prompt for; create macro variables (used in submitted code), then keep or delete                          the keys which are the names of the macro variables. The boolean flag is to either hide what you type and                          delete the macros, or show what you type and keep the macros (they will still be available later).</p>
 <p>for example (what you type for pw will not be displayed, user and dsname will):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results_dict</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
              <span class="sd">&quot;&quot;&quot;</span>
@@ -1390,7 +1390,8 @@ You must specify 3 of the for variables, to solve for the 4th.</p>
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>printto</strong> – this option, when set to True, will cause saspy to issue a ‘proc printto;run;’ after the code that is being                         submitted. This will ‘undo’ any proc printto w/in the submitted code that redirected the LOG or LST, to return                         the LOG/LST back to saspy. This is explained in more detail in the doc: <a class="reference external" href="https://sassoftware.github.io/saspy/limitations.html">https://sassoftware.github.io/saspy/limitations.html</a></p></li>
+<li><p><strong>printto</strong> – this option, when set to True, will cause saspy to issue a ‘proc printto;run;’ after the code that is being                          submitted. This will ‘undo’ any proc printto w/in the submitted code that redirected the LOG or LST, to return                          the LOG/LST back to saspy. This is explained in more detail in the doc: <a class="reference external" href="https://sassoftware.github.io/saspy/limitations.html">https://sassoftware.github.io/saspy/limitations.html</a></p></li>
+<li><p><strong>loglines</strong> – boolean identifying you want the list of dicts for each line that can be returned from the HTTP and IOM APIs</p></li>
 </ul>
 </dd>
 </dl>
