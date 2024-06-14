@@ -37,6 +37,10 @@ import com.sas.iom.SASIOMCommon.IDisconnectPackage.iomReconnectNotAllowed;
 import com.sas.iom.SASIOMDefs.*;
 import com.sas.iom.orb.SASURI;
 
+import com.sas.iom.SAS.ILanguageServicePackage.CarriageControlSeqHolder;
+import com.sas.iom.SAS.ILanguageServicePackage.LineTypeSeqHolder;
+
+
 import com.sas.services.connection.BridgeServer;
 import com.sas.services.connection.ConnectionFactoryConfiguration;
 import com.sas.services.connection.ConnectionFactoryException;
@@ -105,7 +109,9 @@ public class saspy2j
    static String[] iomhosts;
    static int      lrecl    = 32767;
    static int      logsz    = 32767;
-   static Thread   t1; 
+   static Thread   t1;
+
+
 
    public static void main(String[] args) throws
                        InterruptedException, IOException, ConnectionFactoryException, GenericError
@@ -123,6 +129,7 @@ public class saspy2j
 
       String addr = "";
       String log  = "";
+      String types= "";
       String plog = "";
       String lst  = "";
       String pgm  = "";
@@ -132,13 +139,18 @@ public class saspy2j
       boolean zero   = false;
       boolean ods    = false;
       boolean undo   = false;
+      boolean llines = false;
 
       OctetSeqHolder odsdata = new OctetSeqHolder();
       char[]         in      = new char[4097];
       byte[]         out     = new byte[32768];
 
+      CarriageControlSeqHolder logCarriageControlHldr = new CarriageControlSeqHolder();
+      LineTypeSeqHolder        logLineTypeHldr = new LineTypeSeqHolder();
+      StringSeqHolder          logHldr = new StringSeqHolder();
+
       Runnable cancel = new cancel(scan, lang);
-      
+
       for (int x = 0; x < nargs; x++)
          {
          if (args[x].equalsIgnoreCase("-host"))
@@ -233,7 +245,7 @@ public class saspy2j
       t1 = new Thread(cancel);
       t1.setName("cancel");
       t1.start();
-      
+
       while (true)
          {
          try
@@ -482,6 +494,11 @@ public class saspy2j
                      undo = true;
                      pgm  = pgm.substring(idx + 13 + 33);
                      }
+                  else if (eol.contains("LOGLINES"))
+                     {
+                     llines = true;
+                     pgm  = pgm.substring(idx + 13 + 33);
+                     }
                   else  /* SUBMIT */
                      {
                      pgm = pgm.substring(0, idx);
@@ -626,6 +643,7 @@ public class saspy2j
                   }
                }
 
+            types  = "";
             fndeol = false;
             while (true)
                {
@@ -685,8 +703,26 @@ public class saspy2j
                   {
                   try
                      {
-                     log  = lang.FlushLog(logsz);
-                     slen = log.length();
+                     if (! llines)
+                        {
+                        log  = lang.FlushLog(logsz);
+                        slen = log.length();
+                        }
+                     else
+                        {
+                        int x;
+                        lang.FlushLogLines(Integer.MAX_VALUE,logCarriageControlHldr,logLineTypeHldr,logHldr);
+                        log   = "";
+                        slen = logHldr.value.length;
+
+                        for(x = 0; x < slen; x ++)
+                           {
+                           log   += logHldr.value[x]+'\n';
+                           types += logLineTypeHldr.value[x].value();
+                           }
+                        slen = log.length();
+                        }
+
                      if (slen > 0)
                         {
                         errp.write(log);
@@ -727,6 +763,7 @@ public class saspy2j
                      }
                   catch (IOException e)
                      {
+                     llines = false;
                      String msg = "We failed in reading the Log\n"+e.getMessage();
                      errp.write(msg);
                      errp.flush();
@@ -741,6 +778,7 @@ public class saspy2j
                      }
                   catch (org.omg.CORBA.DATA_CONVERSION e)
                      {
+                     llines = false;
                      String msg = "We failed in reading the Log\n"+e.getMessage();
                      errp.write(msg);
                      errp.flush();
@@ -748,6 +786,17 @@ public class saspy2j
                      slen = 1;
                      continue;
                      }
+                  }
+               }
+
+            if (llines)
+               {
+               llines = false;
+               slen = types.length();
+               if (slen > 0)
+                  {
+                  errp.write("TomSaysTypes="+types+"\n"+eol.substring(1));
+                  errp.flush();
                   }
                }
             }
