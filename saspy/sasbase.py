@@ -1857,36 +1857,67 @@ class SASsession():
                                    rowsep, colsep, rowrep, colrep, **kwargs)
 
 
-    def sasdata2parquet(self, parquet_file_path: str, table: str, libref: str ='',
-                        dsopts: dict = None, pa_schema: 'pa.schema' = None,
-                        static_columns:list = None,
-                        partitioned = False, partition_size_mb = 128,
-                        chunk_size_mb = 4, compression = 'snappy',
-                        rowsep: str = '\x01', colsep: str = '\x02',
-                        rowrep: str = ' ',    colrep: str = ' ',
-                        **kwargs) -> None:
+    def sasdata2parquet(self,
+                       parquet_file_path: str, 
+                       table: str, 
+                       libref: str ='',
+                       pa_parquet_kwargs = {"compression": 'snappy',
+                                          "flavor":"spark",
+                                          "write_statistics":False},
+                       pa_pandas_kwargs = {},
+                       partitioned = False, 
+                       partition_size_mb = 128,
+                       chunk_size_mb = 4, 
+                       coerce_timestamp_errors=True,
+                       static_columns:list = None,
+                       dsopts: dict = None, 
+                       rowsep: str = '\x01', 
+                       colsep: str = '\x02',
+                       rowrep: str = ' ',    
+                       colrep: str = ' ',
+                       **kwargs) -> None:
        """
-       This method exports the SAS Data Set to a Parquet file
-       parquet_file_path- path of the parquet file to create
-       table            - the name of the SAS Data Set you want to export to a Pandas Data Frame
-       libref           - the libref for the SAS Data Set.
-       dsopts           - data set options for the input SAS Data Set
-       pa_schema        - an optional pyarrow schema that overrides the default schema
-       static_columns   - optional list of tuples (name, value) representing static columns that will be added to the parquet file.
-       partitioned      - boolean whether the parquet should be writting in partitions
-       partition_size_mb- the size in MB of each partition in memory
-       chunk_size_mb    - the chunk size in MB at which the stream is processes
-       compression      - the compression algorithm for the parquet writer.
-       rowsep           - the row seperator character to use; defaults to '\x01'
-       colsep           - the column seperator character to use; defaults to '\x02'
-       rowrep           - the char to convert to for any embedded rowsep chars, defaults to  ' '
-       colrep           - the char to convert to for any embedded colsep chars, defaults to  ' '
-
-       These two options are for advanced usage. They override how saspy imports data. For more info
-       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
-
-       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
-       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
+       This method exports the SAS Data Set to a Parquet file.
+       
+       Parameters:
+       -----------
+       parquet_file_path : str
+          Path of the parquet file to create.
+       table : str
+          The name of the SAS Data Set you want to export to a Parquet file.
+       libref : str, optional
+          The libref for the SAS Data Set (default is '').
+       pa_parquet_kwargs : dict, optional
+          Additional parameters to pass to pyarrow.parquet.ParquetWriter 
+          (default is {"compression": 'snappy', "flavor": "spark", "write_statistics": False}).
+       pa_pandas_kwargs : dict, optional
+          Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).
+       partitioned : bool, optional
+          Boolean indicating whether the parquet file should be written in partitions (default is False).
+       partition_size_mb : int, optional
+          The size in MB of each partition in memory (default is 128).
+       chunk_size_mb : int, optional
+          The chunk size in MB at which the stream is processed (default is 4).
+       coerce_timestamp_errors : bool, optional
+          Whether to coerce errors when converting timestamps (default is True).
+       static_columns : list of tuples, optional
+          List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).
+       dsopts : dict, optional
+          Data set options for the input SAS Data Set (default is None).
+       rowsep : str, optional
+          The row separator character to use (default is '\x01').
+       colsep : str, optional
+          The column separator character to use (default is '\x02').
+       rowrep : str, optional
+          The character to convert to for any embedded rowsep chars (default is ' ').
+       colrep : str, optional
+          The character to convert to for any embedded colsep chars (default is ' ').
+       **kwargs : 
+          Additional keyword arguments.
+       
+       Returns:
+       --------
+       None
        """
        lastlog = len(self._io._log)
 
@@ -1902,13 +1933,24 @@ class SASsession():
            print("too complicated to show the code, read the source :), sorry.")
            df = None
        else:
-           df = self._io.sasdata2parquet(parquet_file_path, table, libref, dsopts, pa_schema,
-                                         static_columns, partitioned,  partition_size_mb,
-                                         chunk_size_mb,  compression,
-                                         rowsep, colsep, rowrep, colrep, **kwargs)
-
+           self._io.sasdata2parquet(
+                       parquet_file_path = parquet_file_path, 
+                       table = table, 
+                       libref = libref,
+                       pa_parquet_kwargs = pa_parquet_kwargs,
+                       pa_pandas_kwargs = pa_pandas_kwargs,
+                       partitioned = partitioned, 
+                       partition_size_mb = partition_size_mb,
+                       chunk_size_mb = chunk_size_mb, 
+                       coerce_timestamp_errors=coerce_timestamp_errors,
+                       static_columns = static_columns,
+                       dsopts = dsopts, 
+                       rowsep = rowsep, 
+                       colsep = colsep,
+                       rowrep = rowrep,    
+                       colrep = colrep,
+                       **kwargs)
        self._lastlog = self._io._log[lastlog:]
-       return df
 
     def sd2df_DISK(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None,
                   tempkeep: bool = False, rowsep: str = '\x01', colsep: str = '\x02',
