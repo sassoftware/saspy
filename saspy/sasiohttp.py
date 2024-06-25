@@ -55,9 +55,11 @@ try:
 except ImportError:
    pass
 
+import shutil
+import datetime
 try:
    import pyarrow         as pa
-   import pyarrow.csv     as pc
+   import pyarrow.compute as pc
    import pyarrow.parquet as pq
 except ImportError:
    pa = None
@@ -2211,40 +2213,56 @@ class SASsessionHTTP():
 
       return df
 
-   def sasdata2parquet(self, parquet_file_path: str, table: str, libref: str ='',
-                       dsopts: dict = None, pa_schema: 'pa.schema' = None,
+   def sasdata2parquet(self,
+                       parquet_file_path: str,
+                       table: str,
+                       libref: str ='',
+                       dsopts: dict = None,
+                       pa_parquet_kwargs = {"compression": 'snappy',
+                                          "flavor":"spark",
+                                          "write_statistics":False},
+                       pa_pandas_kwargs = {},
+                       partitioned = False,
+                       partition_size_mb = 128,
+                       chunk_size_mb = 4,
+                       coerce_timestamp_errors=True,
                        static_columns:list = None,
-                       partitioned = False, partition_size_mb = 128,
-                       chunk_size_mb = 4, compression = 'snappy',
-                       rowsep: str = '\x01', colsep: str = '\x02',
-                       rowrep: str = ' ',    colrep: str = ' ',
+                       rowsep: str = '\x01',
+                       colsep: str = '\x02',
+                       rowrep: str = ' ',
+                       colrep: str = ' ',
                        **kwargs) -> None:
       """
       This method exports the SAS Data Set to a Parquet file
-      parquet_file_path- path of the parquet file to create
-      table            - the name of the SAS Data Set you want to export to a Pandas Data Frame
-      libref           - the libref for the SAS Data Set.
-      dsopts           - data set options for the input SAS Data Set
-      pa_schema        - an optional pyarrow schema that overrides the default schema
-      static_columns   - optional list of tuples (name, value) representing static columns that will be added to the parquet file.
-      partitioned      - boolean whether the parquet should be writting in partitions
-      partition_size_mb- the size in MB of each partition in memory
-      chunk_size_mb    - the chunk size in MB at which the stream is processes
-      compression      - the compression algorithm for the parquet writer.
-      rowsep           - the row seperator character to use; defaults to '\x01'
-      colsep           - the column seperator character to use; defaults to '\x02'
-      rowrep           - the char to convert to for any embedded rowsep chars, defaults to  ' '
-      colrep           - the char to convert to for any embedded colsep chars, defaults to  ' '
+      parquet_file_path       - path of the parquet file to create
+      table                   - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref                  - the libref for the SAS Data Set.
+      dsopts                  - data set options for the input SAS Data Set
+      pa_parquet_kwargs       - Additional parameters to pass to pyarrow.parquet.ParquetWriter (default is {"compression": 'snappy', "flavor": "spark", "write_statistics": False}).
+      pa_pandas_kwargs        - Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).
+      partitioned             - Boolean indicating whether the parquet file should be written in partitions (default is False).
+      partition_size_mb       - The size in MB of each partition in memory (default is 128).
+      chunk_size_mb           - The chunk size in MB at which the stream is processed (default is 4).
+      coerce_timestamp_errors - Whether to coerce errors when converting timestamps (default is True).
+      static_columns          - List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).
+      rowsep                  - the row seperator character to use; defaults to '\x01'
+      colsep                  - the column seperator character to use; defaults to '\x02'
+      rowrep                  - the char to convert to for any embedded rowsep chars, defaults to  ' '
+      colrep                  - the char to convert to for any embedded colsep chars, defaults to  ' '
 
       These two options are for advanced usage. They override how saspy imports data. For more info
       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
 
-      dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
-      my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
+      dtype                   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+      my_fmts                 - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       if not pa:
          logger.error("pyarrow was not imported. This method can't be used without it.")
          return None
+      try:
+         compression = pa_parquet_kwargs["compression"]
+      except KeyError:
+         raise KeyError("The pa_parquet_kwargs dict needs to contain at least the parameter 'compression'. Default value is 'snappy'")
 
       errors = kwargs.pop('errors', 'strict')
       dsopts = dsopts if dsopts is not None else {}
@@ -2424,25 +2442,127 @@ class SASsessionHTTP():
       req = conn.getresponse()
       status = req.status
 
+      #Define timestamp conversion functions
+      def dt_string_to_float64(pd_series: pd.Series, coerce_timestamp_errors: bool) -> pd.Series:
+         """
+         This function converts a pandas Series of datetime strings to a Series of float64,
+         handling NaN values and optionally coercing errors to NaN.
+         """
+
+         if coerce_timestamp_errors:
+            # define conversion with error handling
+            def convert(date_str):
+               try:
+                     return np.datetime64(date_str, 'ms').astype(np.float64)
+               except ValueError:
+                     return np.nan
+            # vectorize for pandas
+            vectorized_convert = np.vectorize(convert, otypes=[np.float64])
+         else:
+            # define conversion without error handling
+            convert = lambda date_str: np.datetime64(date_str, 'ms').astype(np.float64)
+            # vectorize for pandas
+            vectorized_convert = np.vectorize(convert, otypes=[np.float64])
+
+         result = vectorized_convert(pd_series)
+
+         return pd.Series(result, index=pd_series.index)
+
+      def dt_string_to_int64(pd_series: pd.Series, coerce_timestamp_errors: bool) -> pd.Series:
+         """
+         This function converts a pandas Series of datetime strings to a Series of Int64,
+         handling NaN values and optionally coercing errors to NaN.
+         """
+         float64_series = dt_string_to_float64(pd_series, coerce_timestamp_errors)
+         return float64_series.astype('Int64')
+
+      ##### DEFINE SCHEMA #####
+
+      def dts_to_pyarrow_schema(dtype_dict):
+         # Define a mapping from string type names to pyarrow data types
+         type_mapping = {
+            'str': pa.string(),
+            'float': pa.float64(),
+            'int': pa.int64(),
+            'bool': pa.bool_(),
+            'date': pa.date32(),
+            'timestamp': pa.timestamp('ms'),
+            # python types
+            str: pa.string(),
+            float: pa.float64(),
+            int: pa.int64(),
+            bool: pa.bool_(),
+            datetime.date: pa.timestamp('ms'),
+            datetime.datetime: pa.timestamp('ms'),
+            np.datetime64: pa.timestamp('ms')
+         }
+
+         # Create a list of pyarrow fields from the dictionary
+         fields = []
+         i=0
+         for column_name, dtype in dtype_dict.items():
+            pa_type = type_mapping.get(dtype)
+            if pa_type is None:
+               logging.warning(f"Unknown data type '{dtype} of column {column_name}. Will try cast to string")
+               pa_type = pa.string()
+         # account for timestamp columns
+            if vartype[i] == 'N':
+               if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                  pa_type = pa.timestamp('ms')
+            fields.append(pa.field(column_name, pa_type))
+            i+=1
+         #add static columns to schema, if given
+         if static_columns:
+            for column_name, value in static_columns:
+               py_type = type_mapping.get(type(value))
+               if py_type is None:
+                  logging.warning(f"Unknown data type '{dtype} of column {column_name}. Will try cast to string")
+                  pa_type = pa.string()
+               fields.append(pa.field(column_name, py_type))
+         # Create a pyarrow schema from the list of fields
+         schema = pa.schema(fields)
+         return schema
+      # derive parque schema if not defined by user.
+      if "schema" not in pa_parquet_kwargs or pa_parquet_kwargs["schema"] is None:
+         custom_schema = False
+         pa_parquet_kwargs["schema"] = dts_to_pyarrow_schema(dts)
+      else:
+         custom_schema = True
+      pa_pandas_kwargs["schema"] = pa_parquet_kwargs["schema"]
+
+      ##### START STERAM #####
       parquet_writer = None
+      partition = 1
+      loop = 1
+      chunk_size = chunk_size_mb*1024*1024 #convert to bytes
+      data_read = 0
+      rows_read = 0
 
       try:
          sockout = _read_sock(req=req, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(), errors=errors)
+         logging.info("Socket ready, waiting for results...")
 
-         if partitioned:
-            os.makedirs(parquet_file_path)
-
-         partition = 1
-         loop = 1
-         chunk_size = chunk_size_mb*1024*1024 #convert to bytes
-         data_read = 0
-
-         logging.info("Starting stream")
          # determine how many chunks should be written into one partition.
          chunks_in_partition = int(partition_size_mb/chunk_size_mb)
          if chunks_in_partition == 0:
             raise ValueError("Partition size needs to be larger than chunk size")
          while True:
+            # 4 MB seems to be the most efficient chunk size, but could vary
+
+            chunk = sockout.read(chunk_size)
+            #check if query yields any results
+            if loop == 1:
+               logging.info("Stream ready")
+            if loop == 1 and chunk == '':
+               logging.warning("Query returned no rows.")
+               return
+            # create directory if partitioned
+            elif loop == 1 and partitioned:
+               os.makedirs(parquet_file_path)
+
+            if chunk == '':
+               logging.info("Done")
+               break
             # for spark, it is better if large files are split over multiple partitions,
             # so that all worker nodes can be used to read the data
             if partitioned:
@@ -2455,72 +2575,100 @@ class SASsessionHTTP():
                path = f"{parquet_file_path}/{str(partition).zfill(5)}.{compression}.parquet"
             else:
                path = parquet_file_path
-            # pyarrow needs \n
-
-            # 4 MB seems to be the most efficient chunk size, but could vary
-            chunk = sockout.read(chunk_size)    #.replace(" "+rowsep,"' '\n"+rowsep) # need to replace empty end of rows
-            if chunk == '':
-               logging.info("Done")
-               if loop == 1:
-                  logging.info("Query returned no rows.")
-                  return
-               break
 
             try:
                df = pd.read_csv(io.StringIO(chunk), index_col=idx_col, engine=eng, header=None, names=dvarlist,
                                 sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, keep_default_na=False,
                                 encoding='utf-8', quoting=quoting, **kwargs)
-               df = df.astype(dts) # if a column is completely empty, it will be cast as null, so we need to set it (again) here
+
+               for col in df.columns:
+                  if df[col].isnull().all():
+                     df[col] = df[col].astype(dts[col])
+                     df[col] = np.nan
+
+               rows_read += len(df)
+               if static_columns:
+                  df[[col[0] for col in static_columns]] = tuple([col[1] for col in static_columns])
 
                if k_dts is None:  # don't override these if user provided their own dtypes
                   for i in range(nvars):
                      if vartype[i] == 'N':
                         if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                           df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce',unit='ms')#pandas default ns unit is deprecated for parquet
 
-               pa_table = pa.Table.from_pandas(df,schema=pa_schema)
+                           if coerce_timestamp_errors:
+                              df[dvarlist[i]] = dt_string_to_int64(df[dvarlist[i]],coerce_timestamp_errors)
+                           else:
+                              try:
+                                 df[dvarlist[i]] = dt_string_to_int64(df[dvarlist[i]],coerce_timestamp_errors)
+                              except ValueError:
+                                 raise ValueError(f"""The column {dvarlist[i]} contains an unparseable timestamp.
+   Consider setting a different pd_timestamp_format or set coerce_timestamp_errors = True and they will be cast as Null""")
 
-            except:
-               logging.info(f"Parsing failed, see {path}/failedchunk.csv")
-               os.makedirs(path,exist_ok=True)
-               with open(f"{path}/failedchunk.csv", "w") as log:
+               pa_table = pa.Table.from_pandas(df,**pa_pandas_kwargs)
+
+               if not custom_schema:
+                  #cast the int64 columns to timestamp
+                  for i in range(nvars):
+                     if vartype[i] == 'N':
+                        if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                           # Cast the integer column to the timestamp type using pyarrow.compute.cast
+                           casted_column = pc.cast(pa_table[dvarlist[i]], pa.timestamp('ms'))
+                           # Replace int64 with timestamp column
+                           pa_table = pa_table.set_column(pa_table.column_names.index(dvarlist[i]), dvarlist[i], casted_column)
+
+            except Exception as e:
+            #### If parsing a chunk fails, the csv chunk is written to disk and the expression to read the csv using pandas is printed
+               failed_path= os.path.abspath(path+"_failed")
+               logging.error(f"Parsing chunk #{loop} failed, see {failed_path}/failedchunk.csv")
+               if os.path.isdir(failed_path):
+                  shutil.rmtree(failed_path)
+               os.makedirs(failed_path)
+               with open(f"{failed_path}/failedchunk.csv", "w",encoding='utf-8') as log:
                   log.write(chunk)
+               logging.error(f"""
+                              #Read the chunk using:
+                              import pandas as pd
+                              df = pd.read_csv(
+                                 '{failed_path}/failedchunk.csv',
+                                 index_col={idx_col},
+                                 engine='{eng}',
+                                 header=None,
+                                 names={dvarlist},
+                                 sep={colsep!r},
+                                 lineterminator={rowsep!r},
+                                 dtype={dts},
+                                 na_values={miss},
+                                 encoding='utf-8',
+                                 quoting={quoting},
+                                 **{kwargs}
+                              )"""
+               )
                raise e
 
             if not parquet_writer:
-               parquet_writer = pq.ParquetWriter(path,schema=pa_table.schema,write_statistics = False,compression=compression)#use_deprecated_int96_timestamps=True,
+               if "schema" not in pa_parquet_kwargs or pa_parquet_kwargs["schema"] is None:
+                  pa_parquet_kwargs["schema"] = pa_table.schema
+               parquet_writer = pq.ParquetWriter(path,**pa_parquet_kwargs)#use_deprecated_int96_timestamps=True,
 
             # Write the table chunk to the Parquet file
             parquet_writer.write_table(pa_table)
             loop += 1
             data_read += chunk_size
             if loop % 30 == 0:
-               logging.info(f"{round(data_read/1073741824,2)} GB read so far") #Convert bytes to GB => bytes /1024³
+               logging.info(f"{round(data_read/1024/1024/1024,3)} GB / {rows_read} rows read so far") #Convert bytes to GB => bytes /1024³
 
-         logging.info(f"Finished reading {round(data_read/1073741824,2)} GB.")
+         logging.info(f"Finished reading {round(data_read/1024/1024/1024,3)} GB / {rows_read} rows.")
          logging.info(str(pa_table.schema))
       except:
          raise
       finally:
          conn.close()
+         code = "data _null_; rc = fdelete('_sp_updn'); run;\nfilename _sp_updn;"
+
+         ll = self.submit(code, 'text')
+         logf += ll['LOG']
          if parquet_writer:
             parquet_writer.close()
-
-      conn.close()
-
-      if k_dts is None:  # don't override these if user provided their own dtypes
-         for i in range(nvars):
-            if vartype[i] == 'FLOAT':
-               if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
-                  df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce')
-
-      code = "data _null_; rc = fdelete('_sp_updn'); run;\nfilename _sp_updn;"
-
-      ll = self.submit(code, 'text')
-      logf += ll['LOG']
-
-      if parquet_writer:
-         parquet_writer.close()
 
       return
 

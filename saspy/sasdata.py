@@ -1158,33 +1158,42 @@ class SASdata:
         else:
             return ll
 
-    def to_pq(self, parquet_file_path: str , pa_schema: 'pa.schema' = None,
-                        static_columns:list = None,
-                        partitioned = False, partition_size_mb = 128,
-                        chunk_size_mb = 4, compression = 'snappy',
-                        rowsep: str = '\x01', colsep: str = '\x02',
-                        rowrep: str = ' ',    colrep: str = ' ',
-                        **kwargs) -> None:
+    def to_pq(self, parquet_file_path: str,
+                    pa_parquet_kwargs = {"compression": 'snappy',
+                                         "flavor":"spark",
+                                         "write_statistics":False},
+                    pa_pandas_kwargs = {},
+                    partitioned = False,
+                    partition_size_mb = 128,
+                    chunk_size_mb = 4,
+                    coerce_timestamp_errors=True,
+                    static_columns:list = None,
+                    rowsep: str = '\x01', colsep: str = '\x02',
+                    rowrep: str = ' ',    colrep: str = ' ',
+                    **kwargs) -> None:
        """
-       This method exports the SAS Data Set to a Parquet file
-       parquet_file_path- path of the parquet file to create
-       dsopts           - data set options for the input SAS Data Set
-       pa_schema        - an optional pyarrow schema that overrides the default schema
-       static_columns   - optional list of tuples (name, value) representing static columns that will be added to the parquet file.
-       partitioned      - boolean whether the parquet should be writting in partitions
-       partition_size_mb- the size in MB of each partition in memory
-       chunk_size_mb    - the chunk size in MB at which the stream is processes
-       compression      - the compression algorithm for the parquet writer.
-       rowsep           - the row seperator character to use; defaults to '\x01'
-       colsep           - the column seperator character to use; defaults to '\x02'
-       rowrep           - the char to convert to for any embedded rowsep chars, defaults to  ' '
-       colrep           - the char to convert to for any embedded colsep chars, defaults to  ' '
+       This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet.
+
+       :param parquet_file_path: path of the parquet file to create
+       :param pa_parquet_kwargs: Additional parameters to pass to pyarrow.parquet.ParquetWriter (default is {"compression": 'snappy', "flavor": "spark", "write_statistics": False}).
+       :param pa_pandas_kwargs: Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).
+       :param partitioned: Boolean indicating whether the parquet file should be written in partitions (default is False).
+       :param partition_size_mb: The size in MB of each partition in memory (default is 128).
+       :param chunk_size_mb: The chunk size in MB at which the stream is processed (default is 4).
+       :param coerce_timestamp_errors: Whether to coerce errors when converting timestamps (default is True).
+       :param static_columns: List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).
+       :param rowsep: the row seperator character to use; defaults to '\x01'
+       :param colsep: the column seperator character to use; defaults to '\x02'
+       :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
+       :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
 
        These two options are for advanced usage. They override how saspy imports data. For more info
        see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
 
-       dtype   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
-       my_fmts - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
+       :param dtype: this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+       :param my_fmts: bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=
+
+       :return: None
        """
        lastlog = len(self.sas._io._log)
        ll = self._is_valid()
@@ -1193,12 +1202,24 @@ class SASdata:
           print(ll['LOG'])
           return None
        else:
-          df = self.sas.sasdata2parquet(parquet_file_path, self.table, self.libref, self.dsopts, pa_schema,
-                                        static_columns, partitioned,  partition_size_mb,
-                                        chunk_size_mb,  compression,
-                                        rowsep, colsep, rowrep, colrep, **kwargs)
+          self.sas.sasdata2parquet(parquet_file_path = parquet_file_path,
+                                   table  = self.table,
+                                   libref = self.libref,
+                                   dsopts = self.dsopts,
+                                   pa_parquet_kwargs = pa_parquet_kwargs,
+                                   pa_pandas_kwargs = pa_pandas_kwargs,
+                                   partitioned = partitioned,
+                                   partition_size_mb = partition_size_mb,
+                                   chunk_size_mb = chunk_size_mb,
+                                   coerce_timestamp_errors=coerce_timestamp_errors,
+                                   static_columns = static_columns,
+                                   rowsep = rowsep,
+                                   colsep = colsep,
+                                   rowrep = rowrep,
+                                   colrep = colrep,
+                                   **kwargs)
           self.sas._lastlog = self.sas._io._log[lastlog:]
-          return df
+          return None
 
     def to_frame(self, **kwargs) -> 'pandas.DataFrame':
         """

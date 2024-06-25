@@ -23,9 +23,6 @@ import codecs
 import warnings
 import io
 import atexit
-import math
-import shutil
-import datetime
 
 import logging
 logger = logging.getLogger('saspy')
@@ -52,6 +49,8 @@ try:
 except ImportError:
    pass
 
+import shutil
+import datetime
 try:
    import pyarrow         as pa
    import pyarrow.compute as pc
@@ -2245,67 +2244,48 @@ Will use HTML5 for this SASsession.""")
 
       return df
 
-   def sasdata2parquet(self, 
-                       parquet_file_path: str, 
-                       table: str, 
+   def sasdata2parquet(self,
+                       parquet_file_path: str,
+                       table: str,
                        libref: str ='',
+                       dsopts: dict = None,
                        pa_parquet_kwargs = {"compression": 'snappy',
                                           "flavor":"spark",
                                           "write_statistics":False},
                        pa_pandas_kwargs = {},
-                       partitioned = False, 
+                       partitioned = False,
                        partition_size_mb = 128,
-                       chunk_size_mb = 4, 
+                       chunk_size_mb = 4,
                        coerce_timestamp_errors=True,
                        static_columns:list = None,
-                       dsopts: dict = None, 
-                       rowsep: str = '\x01', 
+                       rowsep: str = '\x01',
                        colsep: str = '\x02',
-                       rowrep: str = ' ',    
+                       rowrep: str = ' ',
                        colrep: str = ' ',
                        **kwargs) -> None:
       """
-      This method exports the SAS Data Set to a Parquet file.
-      
-      Parameters:
-      -----------
-      parquet_file_path : str
-          Path of the parquet file to create.
-      table : str
-          The name of the SAS Data Set you want to export to a Parquet file.
-      libref : str, optional
-          The libref for the SAS Data Set (default is '').
-      pa_parquet_kwargs : dict, optional
-          Additional parameters to pass to pyarrow.parquet.ParquetWriter 
-          (default is {"compression": 'snappy', "flavor": "spark", "write_statistics": False}).
-      pa_pandas_kwargs : dict, optional
-          Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).
-      partitioned : bool, optional
-          Boolean indicating whether the parquet file should be written in partitions (default is False).
-      partition_size_mb : int, optional
-          The size in MB of each partition in memory (default is 128).
-      chunk_size_mb : int, optional
-          The chunk size in MB at which the stream is processed (default is 4).
-      coerce_timestamp_errors : bool, optional
-          Whether to coerce errors when converting timestamps (default is True).
-      static_columns : list of tuples, optional
-          List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).
-      dsopts : dict, optional
-          Data set options for the input SAS Data Set (default is None).
-      rowsep : str, optional
-          The row separator character to use (default is '\x01').
-      colsep : str, optional
-          The column separator character to use (default is '\x02').
-      rowrep : str, optional
-          The character to convert to for any embedded rowsep chars (default is ' ').
-      colrep : str, optional
-          The character to convert to for any embedded colsep chars (default is ' ').
-      **kwargs : 
-          Additional keyword arguments.
-      
-      Returns:
-      --------
-      None
+      This method exports the SAS Data Set to a Parquet file
+      parquet_file_path       - path of the parquet file to create
+      table                   - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref                  - the libref for the SAS Data Set.
+      dsopts                  - data set options for the input SAS Data Set
+      pa_parquet_kwargs       - Additional parameters to pass to pyarrow.parquet.ParquetWriter (default is {"compression": 'snappy', "flavor": "spark", "write_statistics": False}).
+      pa_pandas_kwargs        - Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).
+      partitioned             - Boolean indicating whether the parquet file should be written in partitions (default is False).
+      partition_size_mb       - The size in MB of each partition in memory (default is 128).
+      chunk_size_mb           - The chunk size in MB at which the stream is processed (default is 4).
+      coerce_timestamp_errors - Whether to coerce errors when converting timestamps (default is True).
+      static_columns          - List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).
+      rowsep                  - the row seperator character to use; defaults to '\x01'
+      colsep                  - the column seperator character to use; defaults to '\x02'
+      rowrep                  - the char to convert to for any embedded rowsep chars, defaults to  ' '
+      colrep                  - the char to convert to for any embedded colsep chars, defaults to  ' '
+
+      These two options are for advanced usage. They override how saspy imports data. For more info
+      see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
+
+      dtype                   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+      my_fmts                 - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
       """
       if not pa:
          logger.error("pyarrow was not imported. This method can't be used without it.")
@@ -2314,7 +2294,7 @@ Will use HTML5 for this SASsession.""")
          compression = pa_parquet_kwargs["compression"]
       except KeyError:
          raise KeyError("The pa_parquet_kwargs dict needs to contain at least the parameter 'compression'. Default value is 'snappy'")
-   
+
       errors = kwargs.pop('errors', 'strict')
       dsopts = dsopts if dsopts is not None else {}
 
@@ -2474,10 +2454,10 @@ Will use HTML5 for this SASsession.""")
       #Define timestamp conversion functions
       def dt_string_to_float64(pd_series: pd.Series, coerce_timestamp_errors: bool) -> pd.Series:
          """
-         This function converts a pandas Series of datetime strings to a Series of float64, 
+         This function converts a pandas Series of datetime strings to a Series of float64,
          handling NaN values and optionally coercing errors to NaN.
          """
-         
+
          if coerce_timestamp_errors:
             # define conversion with error handling
             def convert(date_str):
@@ -2492,14 +2472,14 @@ Will use HTML5 for this SASsession.""")
             convert = lambda date_str: np.datetime64(date_str, 'ms').astype(np.float64)
             # vectorize for pandas
             vectorized_convert = np.vectorize(convert, otypes=[np.float64])
-         
+
          result = vectorized_convert(pd_series)
-         
+
          return pd.Series(result, index=pd_series.index)
 
       def dt_string_to_int64(pd_series: pd.Series, coerce_timestamp_errors: bool) -> pd.Series:
          """
-         This function converts a pandas Series of datetime strings to a Series of Int64, 
+         This function converts a pandas Series of datetime strings to a Series of Int64,
          handling NaN values and optionally coercing errors to NaN.
          """
          float64_series = dt_string_to_float64(pd_series, coerce_timestamp_errors)
@@ -2515,7 +2495,7 @@ Will use HTML5 for this SASsession.""")
             'int': pa.int64(),
             'bool': pa.bool_(),
             'date': pa.date32(),
-            'timestamp': pa.timestamp('ms'),  
+            'timestamp': pa.timestamp('ms'),
             # python types
             str: pa.string(),
             float: pa.float64(),
@@ -2525,7 +2505,7 @@ Will use HTML5 for this SASsession.""")
             datetime.datetime: pa.timestamp('ms'),
             np.datetime64: pa.timestamp('ms')
          }
-         
+
          # Create a list of pyarrow fields from the dictionary
          fields = []
          i=0
@@ -2534,7 +2514,7 @@ Will use HTML5 for this SASsession.""")
             if pa_type is None:
                logging.warning(f"Unknown data type '{dtype} of column {column_name}. Will try cast to string")
                pa_type = pa.string()
-         # account for timestamp columns 
+         # account for timestamp columns
             if vartype[i] == 'N':
                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
                   pa_type = pa.timestamp('ms')
@@ -2555,10 +2535,10 @@ Will use HTML5 for this SASsession.""")
       if "schema" not in pa_parquet_kwargs or pa_parquet_kwargs["schema"] is None:
          custom_schema = False
          pa_parquet_kwargs["schema"] = dts_to_pyarrow_schema(dts)
-      else: 
+      else:
          custom_schema = True
       pa_pandas_kwargs["schema"] = pa_parquet_kwargs["schema"]
-      
+
       ##### START STERAM #####
       parquet_writer = None
       partition = 1
@@ -2569,11 +2549,11 @@ Will use HTML5 for this SASsession.""")
 
       try:
          sockout = _read_sock(io=self, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(),
-                              lstcodeo=lstcodeo.encode(), logcodeb=logcodeb)
+                              lstcodeo=lstcodeo.encode(), logcodeb=logcodeb, errors=errors)
          logging.info("Socket ready, waiting for results...")
-         
+
          # determine how many chunks should be written into one partition.
-         chunks_in_partition = math.floor(partition_size_mb/chunk_size_mb)
+         chunks_in_partition = int(partition_size_mb/chunk_size_mb)
          if chunks_in_partition == 0:
             raise ValueError("Partition size needs to be larger than chunk size")
          while True:
@@ -2589,15 +2569,15 @@ Will use HTML5 for this SASsession.""")
                # create directory if partitioned
                elif loop == 1 and partitioned:
                   os.makedirs(parquet_file_path)
-                  
+
                if chunk == '':
                   logging.info("Done")
                   break
-               # for spark, it is better if large files are split over multiple partitions, 
-               # so that all worker nodes can be used to read the data 
+               # for spark, it is better if large files are split over multiple partitions,
+               # so that all worker nodes can be used to read the data
                if partitioned:
                   #batch chunks into one partition
-                  if loop % chunks_in_partition == 0: 
+                  if loop % chunks_in_partition == 0:
                      logging.info("Closing partition "+str(partition).zfill(5))
                      partition += 1
                      parquet_writer.close()
@@ -2607,10 +2587,9 @@ Will use HTML5 for this SASsession.""")
                   path = parquet_file_path
 
                try:
-
                   df = pd.read_csv(io.StringIO(chunk), index_col=idx_col, engine=eng, header=None, names=dvarlist,
-                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss,
-                        encoding='utf-8', quoting=quoting, **kwargs) 
+                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, keep_default_na=False,
+                        encoding='utf-8', quoting=quoting, **kwargs)
 
                   for col in df.columns:
                      if df[col].isnull().all():
@@ -2632,7 +2611,7 @@ Will use HTML5 for this SASsession.""")
                                  try:
                                     df[dvarlist[i]] = dt_string_to_int64(df[dvarlist[i]],coerce_timestamp_errors)
                                  except ValueError:
-                                    raise ValueError(f"""The column {dvarlist[i]} contains an unparseable timestamp. 
+                                    raise ValueError(f"""The column {dvarlist[i]} contains an unparseable timestamp.
    Consider setting a different pd_timestamp_format or set coerce_timestamp_errors = True and they will be cast as Null""")
 
                   pa_table = pa.Table.from_pandas(df,**pa_pandas_kwargs)
@@ -2657,22 +2636,22 @@ Will use HTML5 for this SASsession.""")
                   with open(f"{failed_path}/failedchunk.csv", "w",encoding='utf-8') as log:
                      log.write(chunk)
                   logging.error(f"""
-   #Read the chunk using:
-   import pandas as pd
-   df = pd.read_csv(
-      '{failed_path}/failedchunk.csv', 
-      index_col={idx_col}, 
-      engine='{eng}', 
-      header=None, 
-      names={dvarlist},
-      sep={colsep!r}, 
-      lineterminator={rowsep!r}, 
-      dtype={dts}, 
-      na_values={miss},
-      encoding='utf-8', 
-      quoting={quoting}, 
-      **{kwargs}
-   )"""           
+                                 #Read the chunk using:
+                                 import pandas as pd
+                                 df = pd.read_csv(
+                                    '{failed_path}/failedchunk.csv',
+                                    index_col={idx_col},
+                                    engine='{eng}',
+                                    header=None,
+                                    names={dvarlist},
+                                    sep={colsep!r},
+                                    lineterminator={rowsep!r},
+                                    dtype={dts},
+                                    na_values={miss},
+                                    encoding='utf-8',
+                                    quoting={quoting},
+                                    **{kwargs}
+                                 )"""
                   )
                   raise e
                if not parquet_writer:
@@ -2686,7 +2665,7 @@ Will use HTML5 for this SASsession.""")
                data_read += chunk_size
                if loop % 30 == 0:
                   logging.info(f"{round(data_read/1024/1024/1024,3)} GB / {rows_read} rows read so far") #Convert bytes to GB => bytes /1024³
-         
+
          logging.info(f"Finished reading {round(data_read/1024/1024/1024,3)} GB / {rows_read} rows.")
          logging.info(str(pa_table.schema))
       except:
@@ -2712,6 +2691,7 @@ Will use HTML5 for this SASsession.""")
             parquet_writer.close()
 
       return
+
 
 class _read_sock(io.StringIO):
    def __init__(self, **kwargs):
