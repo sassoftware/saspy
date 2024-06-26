@@ -600,10 +600,13 @@ class SASconfigHTTP:
             d1          = ("grant_type=authorization_code&code="+uauthcode+
                           "&client_id="+uclient_id+"&client_secret="+uclient_secret).encode(self.encoding)
       elif jwt:
-         logger.warning("BEING DEPRECATED - Viya has decided to remove this authentication mechanism for SASPy. In a future release of Viya this will no longer work.")
+         if client_id == 'SASPy':
+            msg  = "BEING DEPRECATED - Viya has decided to remove this authentication mechanism for SASPy; when using the SASPy client_id."
+            msg += "To still use `jwt` you have to define your own client in Viya and provide that via `'client_id` along with `client_secret` and the jwt."
+            logger.warning(msg)
          ujwt           = urllib.parse.quote(jwt)
          d1             = "grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion="+ujwt
-         client         = "Basic "+base64.encodebytes((client_id+":").encode(self.encoding)).splitlines()[0].decode(self.encoding)
+         client         = "Basic "+base64.encodebytes((client_id+":"+client_secret).encode(self.encoding)).splitlines()[0].decode(self.encoding)
          headers        = {"Accept":"application/vnd.sas.compute.session+json", "Content-Type":"application/x-www-form-urlencoded",
                            "Authorization":client}
       else:
