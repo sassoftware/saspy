@@ -38,7 +38,23 @@ from saspy.sasexceptions import (SASDFNamesToLongError,
 try:
    import pandas as pd
    import numpy  as np
+   from warnings import simplefilter
+   simplefilter(action="ignore", category=pd.errors.PerformanceWarning) #Ignore the following warning:
+   # PerformanceWarning: DataFrame is highly fragmented.  This is usually the result of calling `frame.insert` many times,
+   # which has poor performance.  Consider joining all columns at once using pd.concat(axis=1) instead.
+   # To get a de-fragmented frame, use `newframe = frame.copy()`
+   #   df[[col[0] for col in static_columns]] = tuple([col[1] for col in static_columns])
 except ImportError:
+   pass
+
+import shutil
+import datetime
+try:
+   import pyarrow         as pa
+   import pyarrow.compute as pc
+   import pyarrow.parquet as pq
+except ImportError:
+   pa = None
    pass
 
 from queue     import Queue, Empty
@@ -2651,6 +2667,471 @@ Will use HTML5 for this SASsession.""")
                   df[dvarlist[i]] = pd.to_datetime(df[dvarlist[i]], errors='coerce')
 
       return df
+
+   def sasdata2parquet(self,
+                       parquet_file_path: str,
+                       table: str,
+                       libref: str ='',
+                       dsopts: dict = None,
+                       pa_parquet_kwargs = {"compression": 'snappy',
+                                          "flavor":"spark",
+                                          "write_statistics":False},
+                       pa_pandas_kwargs = {},
+                       partitioned = False,
+                       partition_size_mb = 128,
+                       chunk_size_mb = 4,
+                       coerce_timestamp_errors=True,
+                       static_columns:list = None,
+                       rowsep: str = '\x01',
+                       colsep: str = '\x02',
+                       rowrep: str = ' ',
+                       colrep: str = ' ',
+                       port: int=0, wait: int=10,
+                       **kwargs) -> None:
+      """
+      This method exports the SAS Data Set to a Parquet file
+      parquet_file_path       - path of the parquet file to create
+      table                   - the name of the SAS Data Set you want to export to a Pandas Data Frame
+      libref                  - the libref for the SAS Data Set.
+      dsopts                  - data set options for the input SAS Data Set
+      pa_parquet_kwargs       - Additional parameters to pass to pyarrow.parquet.ParquetWriter (default is {"compression": 'snappy', "flavor": "spark", "write_statistics": False}).
+      pa_pandas_kwargs        - Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).
+      partitioned             - Boolean indicating whether the parquet file should be written in partitions (default is False).
+      partition_size_mb       - The size in MB of each partition in memory (default is 128).
+      chunk_size_mb           - The chunk size in MB at which the stream is processed (default is 4).
+      coerce_timestamp_errors - Whether to coerce errors when converting timestamps (default is True).
+      static_columns          - List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).
+      rowsep                  - the row seperator character to use; defaults to '\x01'
+      colsep                  - the column seperator character to use; defaults to '\x02'
+      rowrep                  - the char to convert to for any embedded rowsep chars, defaults to  ' '
+      colrep                  - the char to convert to for any embedded colsep chars, defaults to  ' '
+
+      These two options are for advanced usage. They override how saspy imports data. For more info
+      see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
+
+      dtype                   - this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+      my_fmts                 - bool: if True, overrides the formats saspy would use, using those on the data set or in dsopts=
+      """
+      if not pa:
+         logger.error("pyarrow was not imported. This method can't be used without it.")
+         return None
+      try:
+         compression = pa_parquet_kwargs["compression"]
+      except KeyError:
+         raise KeyError("The pa_parquet_kwargs dict needs to contain at least the parameter 'compression'. Default value is 'snappy'")
+
+      errors = kwargs.pop('errors', 'strict')
+      dsopts = dsopts if dsopts is not None else {}
+
+      if port==0 and self.sascfg.tunnel:
+         # we are using a tunnel; default to that port
+         port = self.sascfg.tunnel
+
+      if libref:
+         tabname = libref+".'"+table.strip().replace("'", "''")+"'n "
+      else:
+         tabname = "'"+table.strip().replace("'", "''")+"'n "
+
+      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code += "data _null_; file STDERR;d = open('work.sasdata2dataframe');\n"
+      code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
+      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
+      code += "put lr lrecl; put vn nvars; put vl;\n"
+      code += "do i = 1 to nvars; var = varname(d, i); put var; end;\n"
+      code += "put vt;\n"
+      code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
+      code += "run;"
+
+      ll = self.submit(code, "text")
+
+      try:
+         l2 = ll['LOG'].rpartition("LRECL= ")
+         l2 = l2[2].partition("\n")
+         lrecl = int(l2[0])
+
+         l2 = l2[2].partition("VARNUMS= ")
+         l2 = l2[2].partition("\n")
+         nvars = int(l2[0])
+
+         l2 = l2[2].partition("\n")
+         varlist = l2[2].split("\n", nvars)
+         del varlist[nvars]
+
+         dvarlist = list(varlist)
+         for i in range(len(varlist)):
+            varlist[i] = varlist[i].replace("'", "''")
+
+         l2 = l2[2].partition("VARTYPE=")
+         l2 = l2[2].partition("\n")
+         vartype = l2[2].split("\n", nvars)
+         del vartype[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
+
+      topts = dict(dsopts)
+      topts.pop('firstobs', None)
+      topts.pop('obs', None)
+
+      code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+      code += "data work._n_u_l_l_;output;run;\n"
+      code += "data _null_; file STDERR; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+
+      for i in range(nvars):
+         code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
+      code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
+
+      ll = self.submit(code, "text")
+
+      try:
+         l2 = ll['LOG'].rpartition("FMT_CATS=")
+         l2 = l2[2].partition("\n")
+         varcat = l2[2].split("\n", nvars)
+         del varcat[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2dataframe step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
+
+      try:
+         sock = socks.socket()
+         if not self.sascfg.ssh or self.sascfg.tunnel:
+            sock.bind(('localhost', port))
+         else:
+            sock.bind(('', port))
+         port = sock.getsockname()[1]
+      except OSError:
+         logger.error('Error try to open a socket in the sasdata2dataframe method. Call failed.')
+         return None
+
+      if self.sascfg.ssh and not self.sascfg.tunnel:
+         host = self.sascfg.hostip  #socks.gethostname()
+      else:
+         host = 'localhost'
+
+      lreclx = max(self.sascfg.lrecl, (lrecl + nvars + 1))
+
+      code = "filename sock socket '"+host+":"+str(port)+"' recfm=s encoding='utf-8' lrecl={};\n".format(str(lreclx))
+
+      rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
+      cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
+
+      idx_col = kwargs.pop('index_col', False)
+      eng     = kwargs.pop('engine',    'c')
+      my_fmts = kwargs.pop('my_fmts',   False)
+      k_dts   = kwargs.pop('dtype',     None)
+      if k_dts is None and my_fmts:
+         logger.warning("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+         my_fmts = False
+
+      code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
+
+      if not my_fmts:
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               code += "format '"+varlist[i]+"'n "
+               if varcat[i] in self._sb.sas_date_fmts:
+                  code += 'E8601DA10.'
+               else:
+                  if varcat[i] in self._sb.sas_time_fmts:
+                     code += 'E8601TM15.6'
+                  else:
+                     if varcat[i] in self._sb.sas_datetime_fmts:
+                        code += 'E8601DT26.6'
+                     else:
+                        code += 'best32.'
+               code += '; '
+               if i % 10 == 9:
+                  code +='\n'
+
+      miss  = {}
+      code += "\nfile sock dlm="+cdelim+";\n"
+      for i in range(nvars):
+         if vartype[i] != 'N':
+            code += "'"+varlist[i]+"'n = translate('"
+            code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                        '%02x%02x' %                               \
+                        (ord(rowrep.encode(self.sascfg.encoding)), \
+                         ord(colrep.encode(self.sascfg.encoding))),
+                        '%02x%02x' %                               \
+                        (ord(rowsep.encode(self.sascfg.encoding)), \
+                         ord(colsep.encode(self.sascfg.encoding))))
+            miss[dvarlist[i]] = ' '
+         else:
+            code += "if missing('"+varlist[i]+"'n) then '"+varlist[i]+"'n = .; "
+            miss[dvarlist[i]] = '.'
+         if i % 10 == 9:
+            code +='\n'
+      code += "\nput "
+      for i in range(nvars):
+         code += " '"+varlist[i]+"'n "
+         if i % 10 == 9:
+            code +='\n'
+      code += rdelim+";\nrun;\nfilename sock;"
+
+      if k_dts is None:
+         dts = {}
+         for i in range(nvars):
+            if vartype[i] == 'N':
+               if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                  dts[dvarlist[i]] = 'float'
+               else:
+                  dts[dvarlist[i]] = 'str'
+            else:
+               dts[dvarlist[i]] = 'str'
+      else:
+         dts = k_dts
+
+      quoting = kwargs.pop('quoting', 3)
+
+      sock.listen(1)
+      self._asubmit(code, 'text')
+
+      if wait > 0 and sel.select([sock],[],[],wait)[0] == []:
+         logger.error("error occured in SAS during sasdata2dataframe. Trying to return the saslog instead of a data frame.")
+         sock.close()
+         ll = self.submit("", 'text')
+         return ll['LOG']
+
+      #Define timestamp conversion functions
+      def dt_string_to_float64(pd_series: pd.Series, coerce_timestamp_errors: bool) -> pd.Series:
+         """
+         This function converts a pandas Series of datetime strings to a Series of float64,
+         handling NaN values and optionally coercing errors to NaN.
+         """
+
+         if coerce_timestamp_errors:
+            # define conversion with error handling
+            def convert(date_str):
+               try:
+                     return np.datetime64(date_str, 'ms').astype(np.float64)
+               except ValueError:
+                     return np.nan
+            # vectorize for pandas
+            vectorized_convert = np.vectorize(convert, otypes=[np.float64])
+         else:
+            # define conversion without error handling
+            convert = lambda date_str: np.datetime64(date_str, 'ms').astype(np.float64)
+            # vectorize for pandas
+            vectorized_convert = np.vectorize(convert, otypes=[np.float64])
+
+         result = vectorized_convert(pd_series)
+
+         return pd.Series(result, index=pd_series.index)
+
+      def dt_string_to_int64(pd_series: pd.Series, coerce_timestamp_errors: bool) -> pd.Series:
+         """
+         This function converts a pandas Series of datetime strings to a Series of Int64,
+         handling NaN values and optionally coercing errors to NaN.
+         """
+         float64_series = dt_string_to_float64(pd_series, coerce_timestamp_errors)
+         return float64_series.astype('Int64')
+
+      ##### DEFINE SCHEMA #####
+
+      def dts_to_pyarrow_schema(dtype_dict):
+         # Define a mapping from string type names to pyarrow data types
+         type_mapping = {
+            'str': pa.string(),
+            'float': pa.float64(),
+            'int': pa.int64(),
+            'bool': pa.bool_(),
+            'date': pa.date32(),
+            'timestamp': pa.timestamp('ms'),
+            # python types
+            str: pa.string(),
+            float: pa.float64(),
+            int: pa.int64(),
+            bool: pa.bool_(),
+            datetime.date: pa.timestamp('ms'),
+            datetime.datetime: pa.timestamp('ms'),
+            np.datetime64: pa.timestamp('ms')
+         }
+
+         # Create a list of pyarrow fields from the dictionary
+         fields = []
+         i=0
+         for column_name, dtype in dtype_dict.items():
+            pa_type = type_mapping.get(dtype)
+            if pa_type is None:
+               logging.warning(f"Unknown data type '{dtype} of column {column_name}. Will try cast to string")
+               pa_type = pa.string()
+         # account for timestamp columns
+            if vartype[i] == 'N':
+               if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                  pa_type = pa.timestamp('ms')
+            fields.append(pa.field(column_name, pa_type))
+            i+=1
+         #add static columns to schema, if given
+         if static_columns:
+            for column_name, value in static_columns:
+               py_type = type_mapping.get(type(value))
+               if py_type is None:
+                  logging.warning(f"Unknown data type '{dtype} of column {column_name}. Will try cast to string")
+                  pa_type = pa.string()
+               fields.append(pa.field(column_name, py_type))
+         # Create a pyarrow schema from the list of fields
+         schema = pa.schema(fields)
+         return schema
+      # derive parque schema if not defined by user.
+      if "schema" not in pa_parquet_kwargs or pa_parquet_kwargs["schema"] is None:
+         custom_schema = False
+         pa_parquet_kwargs["schema"] = dts_to_pyarrow_schema(dts)
+      else:
+         custom_schema = True
+      pa_pandas_kwargs["schema"] = pa_parquet_kwargs["schema"]
+
+      ##### START STERAM #####
+      parquet_writer = None
+      partition = 1
+      loop = 1
+      chunk_size = chunk_size_mb*1024*1024 #convert to bytes
+      data_read = 0
+      rows_read = 0
+
+      newsock = (0,0)
+      try:
+         newsock = sock.accept()
+
+         sockout = _read_sock(newsock=newsock, rowsep=rowsep.encode(), errors=errors)
+         logging.info("Socket ready, waiting for results...")
+
+         # determine how many chunks should be written into one partition.
+         chunks_in_partition = int(partition_size_mb/chunk_size_mb)
+         if chunks_in_partition == 0:
+            raise ValueError("Partition size needs to be larger than chunk size")
+         while True:
+            # 4 MB seems to be the most efficient chunk size, but could vary
+
+            chunk = sockout.read(chunk_size)
+            #check if query yields any results
+            if loop == 1:
+               logging.info("Stream ready")
+            if loop == 1 and chunk == '':
+               logging.warning("Query returned no rows.")
+               return
+            # create directory if partitioned
+            elif loop == 1 and partitioned:
+               os.makedirs(parquet_file_path)
+
+            if chunk == '':
+               logging.info("Done")
+               break
+            # for spark, it is better if large files are split over multiple partitions,
+            # so that all worker nodes can be used to read the data
+            if partitioned:
+               #batch chunks into one partition
+               if loop % chunks_in_partition == 0:
+                  logging.info("Closing partition "+str(partition).zfill(5))
+                  partition += 1
+                  parquet_writer.close()
+                  parquet_writer = None
+               path = f"{parquet_file_path}/{str(partition).zfill(5)}.{compression}.parquet"
+            else:
+               path = parquet_file_path
+
+            try:
+               df = pd.read_csv(io.StringIO(chunk), index_col=idx_col, engine=eng, header=None, names=dvarlist,
+                                sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, keep_default_na=False,
+                                encoding='utf-8', quoting=quoting, **kwargs)
+
+               for col in df.columns:
+                  if df[col].isnull().all():
+                     df[col] = df[col].astype(dts[col])
+                     df[col] = np.nan
+
+               rows_read += len(df)
+               if static_columns:
+                  df[[col[0] for col in static_columns]] = tuple([col[1] for col in static_columns])
+
+               if k_dts is None:  # don't override these if user provided their own dtypes
+                  for i in range(nvars):
+                     if vartype[i] == 'N':
+                        if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+
+                           if coerce_timestamp_errors:
+                              df[dvarlist[i]] = dt_string_to_int64(df[dvarlist[i]],coerce_timestamp_errors)
+                           else:
+                              try:
+                                 df[dvarlist[i]] = dt_string_to_int64(df[dvarlist[i]],coerce_timestamp_errors)
+                              except ValueError:
+                                 raise ValueError(f"""The column {dvarlist[i]} contains an unparseable timestamp.
+   Consider setting a different pd_timestamp_format or set coerce_timestamp_errors = True and they will be cast as Null""")
+
+               pa_table = pa.Table.from_pandas(df,**pa_pandas_kwargs)
+
+               if not custom_schema:
+                  #cast the int64 columns to timestamp
+                  for i in range(nvars):
+                     if vartype[i] == 'N':
+                        if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                           # Cast the integer column to the timestamp type using pyarrow.compute.cast
+                           casted_column = pc.cast(pa_table[dvarlist[i]], pa.timestamp('ms'))
+                           # Replace int64 with timestamp column
+                           pa_table = pa_table.set_column(pa_table.column_names.index(dvarlist[i]), dvarlist[i], casted_column)
+
+            except Exception as e:
+            #### If parsing a chunk fails, the csv chunk is written to disk and the expression to read the csv using pandas is printed
+               failed_path= os.path.abspath(path+"_failed")
+               logging.error(f"Parsing chunk #{loop} failed, see {failed_path}/failedchunk.csv")
+               if os.path.isdir(failed_path):
+                  shutil.rmtree(failed_path)
+               os.makedirs(failed_path)
+               with open(f"{failed_path}/failedchunk.csv", "w",encoding='utf-8') as log:
+                  log.write(chunk)
+               logging.error(f"""
+                              #Read the chunk using:
+                              import pandas as pd
+                              df = pd.read_csv(
+                                 '{failed_path}/failedchunk.csv',
+                                 index_col={idx_col},
+                                 engine='{eng}',
+                                 header=None,
+                                 names={dvarlist},
+                                 sep={colsep!r},
+                                 lineterminator={rowsep!r},
+                                 dtype={dts},
+                                 na_values={miss},
+                                 encoding='utf-8',
+                                 quoting={quoting},
+                                 **{kwargs}
+                              )"""
+               )
+               raise e
+
+            if not parquet_writer:
+               if "schema" not in pa_parquet_kwargs or pa_parquet_kwargs["schema"] is None:
+                  pa_parquet_kwargs["schema"] = pa_table.schema
+               parquet_writer = pq.ParquetWriter(path,**pa_parquet_kwargs)#use_deprecated_int96_timestamps=True,
+
+            # Write the table chunk to the Parquet file
+            parquet_writer.write_table(pa_table)
+            loop += 1
+            data_read += chunk_size
+            if loop % 30 == 0:
+               logging.info(f"{round(data_read/1024/1024/1024,3)} GB / {rows_read} rows read so far") #Convert bytes to GB => bytes /1024³
+
+         logging.info(f"Finished reading {round(data_read/1024/1024/1024,3)} GB / {rows_read} rows.")
+         logging.info(str(pa_table.schema))
+      except:
+         raise
+      finally:
+         try:
+            if newsock[0]:
+               try: # Mac OS Python has bugs with this call
+                  newsock[0].shutdown(socks.SHUT_RDWR)
+               except:
+                  pass
+               newsock[0].close()
+         except:
+            pass
+         sock.close()
+         ll = self.submit("", 'text')
+         if parquet_writer:
+            parquet_writer.close()
+
+      return
 
 class _read_sock(io.StringIO):
    def __init__(self, **kwargs):
