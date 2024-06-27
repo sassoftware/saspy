@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 5.14.0 documentation</title>
+  <title>Configuration &mdash; saspy 5.15.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.14.0
+                5.15.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -121,6 +121,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.read_csv"><code class="docutils literal notranslate"><span class="pre">SASsession.read_csv()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasdata"><code class="docutils literal notranslate"><span class="pre">SASsession.sasdata()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasdata2dataframe"><code class="docutils literal notranslate"><span class="pre">SASsession.sasdata2dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasdata2parquet"><code class="docutils literal notranslate"><span class="pre">SASsession.sasdata2parquet()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sasets"><code class="docutils literal notranslate"><span class="pre">SASsession.sasets()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.saslib"><code class="docutils literal notranslate"><span class="pre">SASsession.saslib()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.saslog"><code class="docutils literal notranslate"><span class="pre">SASsession.saslog()</span></code></a></li>
@@ -132,6 +133,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sd2df"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2df()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sd2df_CSV"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2df_CSV()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sd2df_DISK"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2df_DISK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sd2pq"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2pq()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.set_batch"><code class="docutils literal notranslate"><span class="pre">SASsession.set_batch()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.set_results"><code class="docutils literal notranslate"><span class="pre">SASsession.set_results()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.SASsession.sil"><code class="docutils literal notranslate"><span class="pre">SASsession.sil()</span></code></a></li>
@@ -182,6 +184,7 @@
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.to_df_DISK"><code class="docutils literal notranslate"><span class="pre">SASdata.to_df_DISK()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.to_frame"><code class="docutils literal notranslate"><span class="pre">SASdata.to_frame()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.to_json"><code class="docutils literal notranslate"><span class="pre">SASdata.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.to_pq"><code class="docutils literal notranslate"><span class="pre">SASdata.to_pq()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.top"><code class="docutils literal notranslate"><span class="pre">SASdata.top()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="api.html#saspy.sasdata.SASdata.where"><code class="docutils literal notranslate"><span class="pre">SASdata.where()</span></code></a></li>
 </ul>
@@ -1213,7 +1216,7 @@ The ‘client_id’ and ‘client_secret’ are also required, although a specia
 for SASPy, and I will default to that unless you provide other client info that an administrator created and provided you to use.</p>
 </li>
 <li><p>Azure JWT (actually, any JWT perhaps, in the future)</p>
-<p><strong>BEING DEPRECATED - Viya has decided to remove this authentication mechanism for SASPy. In a future release of Viya this will no longer work.</strong></p>
+<p><strong>BEING DEPRECATED - Viya has decided to remove this authentication mechanism for SASPy; when using the SASPy client_id. To still use `jwt` you have to define your own client in Viya and provide that via `client_id` along with `client_secret` and the jwt.</strong></p>
 <p>‘jwt’ is the key to provide that non-Viya Bearer Token, to then pass through to SASLogon to get the Viya Bearer Token to use.
 And these tokens, are just big long strings; thousands of bytes long strings of random characters
 (so you know you’re passing in the right thing).</p>

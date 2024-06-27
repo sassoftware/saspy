@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; saspy 5.14.0 documentation</title>
+  <title>API Reference &mdash; saspy 5.15.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.14.0
+                5.15.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -121,6 +121,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.read_csv"><code class="docutils literal notranslate"><span class="pre">SASsession.read_csv()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.sasdata"><code class="docutils literal notranslate"><span class="pre">SASsession.sasdata()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.sasdata2dataframe"><code class="docutils literal notranslate"><span class="pre">SASsession.sasdata2dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.sasdata2parquet"><code class="docutils literal notranslate"><span class="pre">SASsession.sasdata2parquet()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.sasets"><code class="docutils literal notranslate"><span class="pre">SASsession.sasets()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.saslib"><code class="docutils literal notranslate"><span class="pre">SASsession.saslib()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.saslog"><code class="docutils literal notranslate"><span class="pre">SASsession.saslog()</span></code></a></li>
@@ -132,6 +133,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.sd2df"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2df()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.sd2df_CSV"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2df_CSV()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.sd2df_DISK"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2df_DISK()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.sd2pq"><code class="docutils literal notranslate"><span class="pre">SASsession.sd2pq()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.set_batch"><code class="docutils literal notranslate"><span class="pre">SASsession.set_batch()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.set_results"><code class="docutils literal notranslate"><span class="pre">SASsession.set_results()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.SASsession.sil"><code class="docutils literal notranslate"><span class="pre">SASsession.sil()</span></code></a></li>
@@ -182,6 +184,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#saspy.sasdata.SASdata.to_df_DISK"><code class="docutils literal notranslate"><span class="pre">SASdata.to_df_DISK()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.sasdata.SASdata.to_frame"><code class="docutils literal notranslate"><span class="pre">SASdata.to_frame()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.sasdata.SASdata.to_json"><code class="docutils literal notranslate"><span class="pre">SASdata.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#saspy.sasdata.SASdata.to_pq"><code class="docutils literal notranslate"><span class="pre">SASdata.to_pq()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.sasdata.SASdata.top"><code class="docutils literal notranslate"><span class="pre">SASdata.top()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#saspy.sasdata.SASdata.where"><code class="docutils literal notranslate"><span class="pre">SASdata.where()</span></code></a></li>
 </ul>
@@ -1022,13 +1025,68 @@ whole session.</p>
 <li><p><strong>errors</strong> – this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
 from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
 then you can provide values like ‘replace’ or ‘ignore’ to load the invalid data instead of failing.</p></li>
-<li><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
-They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.</p></li>
+</ul>
+</dd>
+</dl>
+<p>These vary per access method, and are generally NOT needed. They are either access method specific parms or specific         pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – a dictionary.</p>
+</dd>
+</dl>
+<p>These two options are for advanced usage. They override how saspy imports data. For more info
+see <a class="reference external" href="https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques">https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dtype</strong> – this is the parameter to Pandas read_csv, overriding what saspy generates and uses</p></li>
+<li><p><strong>my_fmts</strong> – bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Pandas DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="saspy.SASsession.sasdata2parquet">
+<span class="sig-name descname"><span class="pre">sasdata2parquet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parquet_file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">libref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsopts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pa_parquet_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'compression':</span> <span class="pre">'snappy',</span> <span class="pre">'flavor':</span> <span class="pre">'spark',</span> <span class="pre">'write_statistics':</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pa_pandas_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_size_mb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size_mb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coerce_timestamp_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">static_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x02'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#saspy.SASsession.sasdata2parquet" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method exports the SAS Data Set to a Parquet file. This is a user contributed method created to work around data sets that
+are too large to be able to reside in a data frame; not enough memory for Python to have it in Pandas. So, this writes the data
+out to a parquet file so it can be instantiated back in Python using Arrow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parquet_file_path</strong> – path of the parquet file to create</p></li>
+<li><p><strong>table</strong> – the name of the SAS Data Set you want to export to a Pandas Data Frame</p></li>
+<li><p><strong>libref</strong> – the libref for the SAS Data Set.</p></li>
+<li><p><strong>dsopts</strong> – data set options for the input SAS Data Set</p></li>
+<li><p><strong>pa_parquet_kwargs</strong> – Additional parameters to pass to pyarrow.parquet.ParquetWriter (default is {“compression”: ‘snappy’, “flavor”: “spark”, “write_statistics”: False}).</p></li>
+<li><p><strong>pa_pandas_kwargs</strong> – Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).</p></li>
+<li><p><strong>partitioned</strong> – Boolean indicating whether the parquet file should be written in partitions (default is False).</p></li>
+<li><p><strong>partition_size_mb</strong> – The size in MB of each partition in memory (default is 128).</p></li>
+<li><p><strong>chunk_size_mb</strong> – The chunk size in MB at which the stream is processed (default is 4).</p></li>
+<li><p><strong>coerce_timestamp_errors</strong> – Whether to coerce errors when converting timestamps (default is True).</p></li>
+<li><p><strong>static_columns</strong> – List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).</p></li>
+<li><p><strong>rowsep</strong> – the row seperator character to use; defaults to ‘’</p></li>
+<li><p><strong>colsep</strong> – the column seperator character to use; defaults to ‘’</p></li>
+<li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
+<li><p><strong>colrep</strong> – the char to convert to for any embedded colsep chars, defaults to  ‘ ‘</p></li>
+</ul>
+</dd>
+</dl>
+<p>These two options are for advanced usage. They override how saspy imports data. For more info
+see <a class="reference external" href="https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques">https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dtype</strong> – this is the parameter to Pandas read_csv, overriding what saspy generates and uses</p></li>
+<li><p><strong>my_fmts</strong> – bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1192,9 +1250,22 @@ See the SASViyaML.py module.</p>
 <li><p><strong>errors</strong> – this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
 from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
 then you can provide values like ‘replace’ or ‘ignore’ to load the invalid data instead of failing.</p></li>
-<li><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
-They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.</p></li>
+</ul>
+</dd>
+</dl>
+<p>These vary per access method, and are generally NOT needed. They are either access method specific parms or specific         pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – a dictionary.</p>
+</dd>
+</dl>
+<p>These two options are for advanced usage. They override how saspy imports data. For more info
+see <a class="reference external" href="https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques">https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dtype</strong> – this is the parameter to Pandas read_csv, overriding what saspy generates and uses</p></li>
+<li><p><strong>my_fmts</strong> – bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -1251,6 +1322,16 @@ They are either access method specific parms or specific pandas parms.
 See the specific sasdata2dataframe* method in the access method for valid possibilities.</p></li>
 </ul>
 </dd>
+</dl>
+<p>These two options are for advanced usage. They override how saspy imports data. For more info
+see <a class="reference external" href="https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques">https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dtype</strong> – this is the parameter to Pandas read_csv, overriding what saspy generates and uses</p></li>
+<li><p><strong>my_fmts</strong> – bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=</p></li>
+</ul>
+</dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Pandas DataFrame</p>
 </dd>
@@ -1301,8 +1382,60 @@ They are either access method specific parms or specific pandas parms.
 See the specific sasdata2dataframe* method in the access method for valid possibilities.</p></li>
 </ul>
 </dd>
+</dl>
+<p>These two options are for advanced usage. They override how saspy imports data. For more info
+see <a class="reference external" href="https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques">https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dtype</strong> – this is the parameter to Pandas read_csv, overriding what saspy generates and uses</p></li>
+<li><p><strong>my_fmts</strong> – bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=</p></li>
+</ul>
+</dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Pandas DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="saspy.SASsession.sd2pq">
+<span class="sig-name descname"><span class="pre">sd2pq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parquet_file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">libref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsopts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pa_parquet_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'compression':</span> <span class="pre">'snappy',</span> <span class="pre">'flavor':</span> <span class="pre">'spark',</span> <span class="pre">'write_statistics':</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pa_pandas_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_size_mb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size_mb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coerce_timestamp_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">static_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x02'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#saspy.SASsession.sd2pq" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet. This is a user contributed method
+created to work around data sets that are too large to be able to reside in a data frame; not enough memory for Python to have
+it in Pandas. So, this writes the data out to a parquet file so it can be instantiated back in Python using Arrow.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parquet_file_path</strong> – path of the parquet file to create</p></li>
+<li><p><strong>table</strong> – the name of the SAS Data Set you want to export to a Pandas Data Frame</p></li>
+<li><p><strong>libref</strong> – the libref for the SAS Data Set.</p></li>
+<li><p><strong>dsopts</strong> – data set options for the input SAS Data Set</p></li>
+<li><p><strong>pa_parquet_kwargs</strong> – Additional parameters to pass to pyarrow.parquet.ParquetWriter (default is {“compression”: ‘snappy’, “flavor”: “spark”, “write_statistics”: False}).</p></li>
+<li><p><strong>pa_pandas_kwargs</strong> – Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).</p></li>
+<li><p><strong>partitioned</strong> – Boolean indicating whether the parquet file should be written in partitions (default is False).</p></li>
+<li><p><strong>partition_size_mb</strong> – The size in MB of each partition in memory (default is 128).</p></li>
+<li><p><strong>chunk_size_mb</strong> – The chunk size in MB at which the stream is processed (default is 4).</p></li>
+<li><p><strong>coerce_timestamp_errors</strong> – Whether to coerce errors when converting timestamps (default is True).</p></li>
+<li><p><strong>static_columns</strong> – List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).</p></li>
+<li><p><strong>rowsep</strong> – the row seperator character to use; defaults to ‘’</p></li>
+<li><p><strong>colsep</strong> – the column seperator character to use; defaults to ‘’</p></li>
+<li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
+<li><p><strong>colrep</strong> – the char to convert to for any embedded colsep chars, defaults to  ‘ ‘</p></li>
+</ul>
+</dd>
+</dl>
+<p>These two options are for advanced usage. They override how saspy imports data. For more info
+see <a class="reference external" href="https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques">https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dtype</strong> – this is the parameter to Pandas read_csv, overriding what saspy generates and uses</p></li>
+<li><p><strong>my_fmts</strong> – bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2207,6 +2340,43 @@ PROC JSON documentation: <a class="reference external" href="http://go.documenta
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>JSON str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="saspy.sasdata.SASdata.to_pq">
+<span class="sig-name descname"><span class="pre">to_pq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parquet_file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pa_parquet_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'compression':</span> <span class="pre">'snappy',</span> <span class="pre">'flavor':</span> <span class="pre">'spark',</span> <span class="pre">'write_statistics':</span> <span class="pre">False}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pa_pandas_kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitioned</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_size_mb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size_mb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coerce_timestamp_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">static_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x02'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#saspy.sasdata.SASdata.to_pq" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parquet_file_path</strong> – path of the parquet file to create</p></li>
+<li><p><strong>pa_parquet_kwargs</strong> – Additional parameters to pass to pyarrow.parquet.ParquetWriter (default is {“compression”: ‘snappy’, “flavor”: “spark”, “write_statistics”: False}).</p></li>
+<li><p><strong>pa_pandas_kwargs</strong> – Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).</p></li>
+<li><p><strong>partitioned</strong> – Boolean indicating whether the parquet file should be written in partitions (default is False).</p></li>
+<li><p><strong>partition_size_mb</strong> – The size in MB of each partition in memory (default is 128).</p></li>
+<li><p><strong>chunk_size_mb</strong> – The chunk size in MB at which the stream is processed (default is 4).</p></li>
+<li><p><strong>coerce_timestamp_errors</strong> – Whether to coerce errors when converting timestamps (default is True).</p></li>
+<li><p><strong>static_columns</strong> – List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).</p></li>
+<li><p><strong>rowsep</strong> – the row seperator character to use; defaults to ‘’</p></li>
+<li><p><strong>colsep</strong> – the column seperator character to use; defaults to ‘’</p></li>
+<li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
+<li><p><strong>colrep</strong> – the char to convert to for any embedded colsep chars, defaults to  ‘ ‘</p></li>
+</ul>
+</dd>
+</dl>
+<p>These two options are for advanced usage. They override how saspy imports data. For more info
+see <a class="reference external" href="https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques">https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dtype</strong> – this is the parameter to Pandas read_csv, overriding what saspy generates and uses</p></li>
+<li><p><strong>my_fmts</strong> – bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
 </dd>
 </dl>
 </dd></dl>
