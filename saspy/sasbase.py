@@ -1996,7 +1996,9 @@ class SASsession():
                         rowrep: str = ' ',    colrep: str = ' ',
                         **kwargs) -> None:
        """
-       This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet.
+       This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet. This is a user contributed method
+       created to work around data sets that are too large to be able to reside in a data frame; not enough memory for Python to have
+       it in Pandas. So, this writes the data out to a parquet file so it can be instantiated back in Python using Arrow.
 
        :param parquet_file_path: path of the parquet file to create
        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
@@ -2061,7 +2063,9 @@ class SASsession():
                        colrep: str = ' ',
                        **kwargs) -> None:
        """
-       This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet.
+       This method exports the SAS Data Set to a Parquet file. This is a user contributed method created to work around data sets that
+       are too large to be able to reside in a data frame; not enough memory for Python to have it in Pandas. So, this writes the data
+       out to a parquet file so it can be instantiated back in Python using Arrow.
 
        :param parquet_file_path: path of the parquet file to create
        :param table: the name of the SAS Data Set you want to export to a Pandas Data Frame
