@@ -7,7 +7,7 @@
 ### Added
 
 -   `Enhancement` Per a user request. I've added support in the sd2df* methods for dealing with SAS dates and datetimes that
-are out of range of Pandats Timestamps (pandas.Timestamp.min, pandas.Timestamp.max). These values will be converted to NaT
+are out of range of Pandas Timestamps (pandas.Timestamp.min, pandas.Timestamp.max). These values will be converted to NaT
 in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low values
 (tsmin=, tsmax=) to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
 For instance, given a SASdata object: sd.to_df(tsmin='1966-01-03 00:00:00.000000', tsmax='1966-01-03 23:59:59.111111')
@@ -25,6 +25,13 @@ For instance, given a SASdata object: sd.to_df(tsmin='1966-01-03 00:00:00.000000
 
 -   `None` Nothing removed
 
+### Note
+
+- This is just a note to acknowledge that the minor version jumped from 15 to 100. What that about!? 
+Well, glad you asked ;) This is the 100th release of SASPy, in under its almost 10 years in existence. So, I just
+thought I'd skip a few minor releases to identify the milestone. It's been a privilege to have created and supported
+SASPy this whole time, and to have helped and supported all of our users who use it!
+Tom
 
 
 ## [5.15.0] - 2024-06-27
