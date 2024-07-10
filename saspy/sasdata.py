@@ -1329,7 +1329,7 @@ class SASdata:
         opts   =   opts if   opts is not None else {}
         return self.to_df(method='CSV', tempfile=tempfile, tempkeep=tempkeep, opts=opts, **kwargs)
 
-    def to_df_DISK(rowsep: str = '\x01', colsep: str = '\x02',
+    def to_df_DISK(self, rowsep: str = '\x01', colsep: str = '\x02',
                    rowrep: str = ' ',    colrep: str = ' ', **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'to_df' specifying method='DISK'.

@@ -1904,7 +1904,7 @@ class SASsession():
         :return: Pandas DataFrame
         """
         dsopts = dsopts if dsopts is not None else {}
-        return self.sasdata2dataframe(table, libref, dsopts, method='DISK', tempfile=tempfile, tempkeep=tempkeep,
+        return self.sasdata2dataframe(table, libref, dsopts, method='DISK',
                                       rowsep=rowsep, colsep=colsep, rowrep=rowrep, colrep=colrep, **kwargs)
 
     def sasdata2dataframe(self, table: str, libref: str = '', dsopts: dict = None,
