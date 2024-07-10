@@ -1187,6 +1187,17 @@ class SASdata:
        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
 
+       Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+       be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+       to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+
+       :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+       :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
+
+       :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                      They are either access method specific parms or specific pandas parms.
+                      See the specific sasdata2dataframe* method in the access method for valid possibilities.
+
        These two options are for advanced usage. They override how saspy imports data. For more info
        see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
 
@@ -1244,13 +1255,6 @@ class SASdata:
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV  \
                     has problems with
 
-
-        For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream \
-        directly into read_csv() with no disk I/O and have much improved performance. MEM, the default, is now as fast as the others.
-
-        :param tempfile: [deprecated except for Local IOM] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
-        :param tempkeep: [deprecated except for Local IOM] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
-
         For the MEMORY and DISK methods the following 4 parameters are also available, depending upon access method
 
         :param rowsep: the row seperator character to use; defaults to hex(1)
@@ -1258,6 +1262,16 @@ class SASdata:
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
 
+
+        Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+        be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+        to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+
+        :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+        :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
+
+        These vary per access method, and are generally NOT needed. They are either access method specific parms or specific \
+        pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.
 
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
@@ -1295,6 +1309,16 @@ class SASdata:
                               'putnames'  : True
                              }
 
+        Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+        be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+        to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+
+        :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+        :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
+
+        These vary per access method, and are generally NOT needed. They are either access method specific parms or specific \
+        pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.
+
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
@@ -1305,14 +1329,11 @@ class SASdata:
         opts   =   opts if   opts is not None else {}
         return self.to_df(method='CSV', tempfile=tempfile, tempkeep=tempkeep, opts=opts, **kwargs)
 
-    def to_df_DISK(self, tempfile: str=None, tempkeep: bool=False,
-                   rowsep: str = '\x01', colsep: str = '\x02',
+    def to_df_DISK(rowsep: str = '\x01', colsep: str = '\x02',
                    rowrep: str = ' ',    colrep: str = ' ', **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'to_df' specifying method='DISK'.
 
-        :param tempfile: [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
-        :param tempkeep: [deprecated] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
         :param rowsep: the row seperator character to use; defaults to hex(1)
         :param colsep: the column seperator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
@@ -1321,11 +1342,24 @@ class SASdata:
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
 
+        Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+        be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+        to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+
+        :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+        :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
+
+        These vary per access method, and are generally NOT needed. They are either access method specific parms or specific \
+        pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.
+
+        :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                       They are either access method specific parms or specific pandas parms.
+                       See the specific sasdata2dataframe* method in the access method for valid possibilities.
+
         :return: Pandas data frame
         :rtype: 'pd.DataFrame'
         """
-        return self.to_df(method='DISK', tempfile=tempfile, tempkeep=tempkeep,
-                          rowsep=rowsep, colsep=colsep, rowrep=rowrep, colrep=colrep, **kwargs)
+        return self.to_df(method='DISK', rowsep=rowsep, colsep=colsep, rowrep=rowrep, colrep=colrep, **kwargs)
 
     def to_json(self, pretty: bool = False, sastag: bool = False, **kwargs) -> str:
         """

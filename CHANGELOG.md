@@ -2,6 +2,31 @@
 
 
 
+## [5.100.0] - 2024-07-10
+
+### Added
+
+-   `Enhancement` Per a user request. I've added support in the sd2df* methods for dealing with SAS dates and datetimes that
+are out of range of Pandats Timestamps (pandas.Timestamp.min, pandas.Timestamp.max). These values will be converted to NaT
+in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low values
+(tsmin=, tsmax=) to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+For instance, given a SASdata object: sd.to_df(tsmin='1966-01-03 00:00:00.000000', tsmax='1966-01-03 23:59:59.111111')
+
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.15.0] - 2024-06-27
 
 ### Added
@@ -9,13 +34,13 @@
 -   `Enhancement` A user contributed method `sasdata2parquet` (sd2pq), which is like sasdata2dataframe, but for data too
 big to fit in a Pandas DataFrame (not enough memory). This method streams the data over, like sd2df but it writes the data
 out as parquet file(s) so that it can then be access in Python by Arrow. It was designed specifically for the users use case,
-but it can be used for simple situations as well. There are a lot of parameters, but most default so they aren't needed. It 
+but it can be used for simple situations as well. There are a lot of parameters, but most default so they aren't needed. It
 can be called as simply as:  sas.sasdata2parquet('parquet_file','cars','sashelp'). Se the API doc for more.
 
 ### Changed
 
--   ` Deprecated ` In version 5.13.0, the JWT authentication mechanism for the HTTP Access Method (Viya) was being deprecated,
-so a warning message about that was added to the code path. It turns out that this is being deprecated only for connecting to 
+-   `Deprecated` In version 5.13.0, the JWT authentication mechanism for the HTTP Access Method (Viya) was being deprecated,
+so a warning message about that was added to the code path. It turns out that this is being deprecated only for connecting to
 Viya using the default SASPy client_id. If however, you have created your own client_id that can use Azure JWT's to connect, then
 you can continue to connect and authenticate with the JWT mechanism by providing that client_id, along with the client_secret
 and the jwt to SASPy. Those are all existing configuration keys that have been there since before had an internal client id that it

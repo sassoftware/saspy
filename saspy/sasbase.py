@@ -1740,13 +1740,6 @@ class SASsession():
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV \
                     has problems with
 
-
-        For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream \
-        directly into read_csv() with no disk I/O and have much improved performance. MEM, the default, is now as fast as the others.
-
-        :param tempfile: [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
-        :param tempkeep: [deprecated] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
-
         For the MEMORY and DISK methods, the following 5 parameters are also available, depending upon access method
 
         :param rowsep: the row separator character to use; defaults to hex(1)
@@ -1756,6 +1749,13 @@ class SASsession():
         :param errors: this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
                        from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
                        then you can provide values like 'replace' or 'ignore' to load the invalid data instead of failing.
+
+        Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+        be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+        to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+
+        :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+        :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
 
         These vary per access method, and are generally NOT needed. They are either access method specific parms or specific \
         pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.
@@ -1816,6 +1816,16 @@ class SASsession():
                               'putnames'  : True
                              }
 
+        Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+        be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+        to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+
+        :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+        :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
+
+        These vary per access method, and are generally NOT needed. They are either access method specific parms or specific \
+        pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.
+
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
@@ -1834,8 +1844,8 @@ class SASsession():
         return self.sasdata2dataframe(table, libref, dsopts, method='CSV', tempfile=tempfile, tempkeep=tempkeep,
                                       opts=opts, **kwargs)
 
-    def sd2df_DISK(self, table: str, libref: str = '', dsopts: dict = None, tempfile: str = None,
-                  tempkeep: bool = False, rowsep: str = '\x01', colsep: str = '\x02',
+    def sd2df_DISK(self, table: str, libref: str = '', dsopts: dict = None,
+                  rowsep: str = '\x01', colsep: str = '\x02',
                   rowrep: str = ' ', colrep: str = ' ', **kwargs) -> 'pandas.DataFrame':
         """
         This is an alias for 'sasdata2dataframe' specifying method='DISK'. Why type all that?
@@ -1863,9 +1873,6 @@ class SASsession():
                               'encoding' : 'latin9'
                              }
 
-        :param tempfile: [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
-        :param tempkeep: [deprecated] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
-
         :param rowsep: the row separator character to use; defaults to hex(1)
         :param colsep: the column separator character to use; defaults to hex(2)
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
@@ -1873,6 +1880,16 @@ class SASsession():
         :param errors: this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
                        from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
                        then you can provide values like 'replace' or 'ignore' to load the invalid data instead of failing.
+
+        Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+        be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+        to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+
+        :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+        :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
+
+        These vary per access method, and are generally NOT needed. They are either access method specific parms or specific \
+        pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.
 
         :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
                        They are either access method specific parms or specific pandas parms.
@@ -1927,13 +1944,6 @@ class SASsession():
                     this has better support than CSV for embedded delimiters (commas), nulls, CR/LF that CSV \
                     has problems with
 
-
-        For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream \
-        directly into read_csv() with no disk I/O and have much improved performance. MEM, the default, is now as fast as the others.
-
-        :param tempfile: [deprecated except for Local IOM] [optional] an OS path for a file to use for the local file; default it a temporary file that's cleaned up
-        :param tempkeep: [deprecated except for Local IOM] if you specify your own file to use with tempfile=, this controls whether it's cleaned up after using it
-
         For the MEMORY and DISK methods, the following 5 parameters are also available, depending upon access method
 
         :param rowsep: the row separator character to use; defaults to hex(1)
@@ -1943,6 +1953,13 @@ class SASsession():
         :param errors: this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
                        from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
                        then you can provide values like 'replace' or 'ignore' to load the invalid data instead of failing.
+
+        Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+        be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+        to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+
+        :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+        :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
 
         These vary per access method, and are generally NOT needed. They are either access method specific parms or specific \
         pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.
@@ -2016,6 +2033,20 @@ class SASsession():
        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
 
+       Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+       be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+       to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+
+       :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+       :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
+
+       These vary per access method, and are generally NOT needed. They are either access method specific parms or specific \
+       pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.
+
+       :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                      They are either access method specific parms or specific pandas parms.
+                      See the specific sasdata2dataframe* method in the access method for valid possibilities.
+
        These two options are for advanced usage. They override how saspy imports data. For more info
        see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
 
@@ -2082,6 +2113,20 @@ class SASsession():
        :param colsep: the column seperator character to use; defaults to '\x02'
        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
+
+       Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+       be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+       to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+
+       :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+       :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
+
+       These vary per access method, and are generally NOT needed. They are either access method specific parms or specific \
+       pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.
+
+       :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                      They are either access method specific parms or specific pandas parms.
+                      See the specific sasdata2dataframe* method in the access method for valid possibilities.
 
        These two options are for advanced usage. They override how saspy imports data. For more info
        see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
