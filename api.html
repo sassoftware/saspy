@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; saspy 5.15.0 documentation</title>
+  <title>API Reference &mdash; saspy 5.100.0 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -32,7 +32,7 @@
             <a href="index.html" class="icon icon-home"> saspy
           </a>
               <div class="version">
-                5.15.0
+                5.100.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -1005,15 +1005,6 @@ whole session.</p>
 </ul>
 </dd>
 </dl>
-<p>For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream         directly into read_csv() with no disk I/O and have much improved performance. MEM, the default, is now as fast as the others.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tempfile</strong> – [deprecated except for Local IOM] [optional] an OS path for a file to use for the local file; default it a temporary file that’s cleaned up</p></li>
-<li><p><strong>tempkeep</strong> – [deprecated except for Local IOM] if you specify your own file to use with tempfile=, this controls whether it’s cleaned up after using it</p></li>
-</ul>
-</dd>
-</dl>
 <p>For the MEMORY and DISK methods, the following 5 parameters are also available, depending upon access method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1025,6 +1016,17 @@ whole session.</p>
 <li><p><strong>errors</strong> – this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
 from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
 then you can provide values like ‘replace’ or ‘ignore’ to load the invalid data instead of failing.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+to use to replace Nat’s with in the dataframe. This works for both SAS datetime and date values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmin</strong> – str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min</p></li>
+<li><p><strong>tsmax</strong> – str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max</p></li>
 </ul>
 </dd>
 </dl>
@@ -1074,6 +1076,25 @@ out to a parquet file so it can be instantiated back in Python using Arrow.</p>
 <li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
 <li><p><strong>colrep</strong> – the char to convert to for any embedded colsep chars, defaults to  ‘ ‘</p></li>
 </ul>
+</dd>
+</dl>
+<p>Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+to use to replace Nat’s with in the dataframe. This works for both SAS datetime and date values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmin</strong> – str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min</p></li>
+<li><p><strong>tsmax</strong> – str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max</p></li>
+</ul>
+</dd>
+</dl>
+<p>These vary per access method, and are generally NOT needed. They are either access method specific parms or specific        pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
 </dd>
 </dl>
 <p>These two options are for advanced usage. They override how saspy imports data. For more info
@@ -1230,15 +1251,6 @@ See the SASViyaML.py module.</p>
 </ul>
 </dd>
 </dl>
-<p>For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream         directly into read_csv() with no disk I/O and have much improved performance. MEM, the default, is now as fast as the others.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tempfile</strong> – [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that’s cleaned up</p></li>
-<li><p><strong>tempkeep</strong> – [deprecated] if you specify your own file to use with tempfile=, this controls whether it’s cleaned up after using it</p></li>
-</ul>
-</dd>
-</dl>
 <p>For the MEMORY and DISK methods, the following 5 parameters are also available, depending upon access method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1250,6 +1262,17 @@ See the SASViyaML.py module.</p>
 <li><p><strong>errors</strong> – this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
 from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
 then you can provide values like ‘replace’ or ‘ignore’ to load the invalid data instead of failing.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+to use to replace Nat’s with in the dataframe. This works for both SAS datetime and date values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmin</strong> – str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min</p></li>
+<li><p><strong>tsmax</strong> – str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max</p></li>
 </ul>
 </dd>
 </dl>
@@ -1317,10 +1340,26 @@ see <a class="reference external" href="https://sassoftware.github.io/saspy/adva
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
-They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.</p></li>
 </ul>
+</dd>
+</dl>
+<p>Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+to use to replace Nat’s with in the dataframe. This works for both SAS datetime and date values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmin</strong> – str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min</p></li>
+<li><p><strong>tsmax</strong> – str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max</p></li>
+</ul>
+</dd>
+</dl>
+<p>These vary per access method, and are generally NOT needed. They are either access method specific parms or specific         pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
 </dd>
 </dl>
 <p>These two options are for advanced usage. They override how saspy imports data. For more info
@@ -1340,7 +1379,7 @@ see <a class="reference external" href="https://sassoftware.github.io/saspy/adva
 
 <dl class="py method">
 <dt class="sig sig-object py" id="saspy.SASsession.sd2df_DISK">
-<span class="sig-name descname"><span class="pre">sd2df_DISK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">libref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsopts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempkeep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x02'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#saspy.SASsession.sd2df_DISK" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">sd2df_DISK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">libref</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dsopts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x02'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#saspy.SASsession.sd2df_DISK" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for ‘sasdata2dataframe’ specifying method=’DISK’. Why type all that?</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1368,8 +1407,6 @@ see <a class="reference external" href="https://sassoftware.github.io/saspy/adva
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>tempfile</strong> – [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that’s cleaned up</p></li>
-<li><p><strong>tempkeep</strong> – [deprecated] if you specify your own file to use with tempfile=, this controls whether it’s cleaned up after using it</p></li>
 <li><p><strong>rowsep</strong> – the row separator character to use; defaults to hex(1)</p></li>
 <li><p><strong>colsep</strong> – the column separator character to use; defaults to hex(2)</p></li>
 <li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
@@ -1377,10 +1414,26 @@ see <a class="reference external" href="https://sassoftware.github.io/saspy/adva
 <li><p><strong>errors</strong> – this is the parameter to decode(errors=) when reading the stream of data into pandas and converting
 from bytes to chars. If the variables in the SAS data set have invalid characters (from truncation or other)
 then you can provide values like ‘replace’ or ‘ignore’ to load the invalid data instead of failing.</p></li>
-<li><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
-They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.</p></li>
 </ul>
+</dd>
+</dl>
+<p>Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+to use to replace Nat’s with in the dataframe. This works for both SAS datetime and date values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmin</strong> – str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min</p></li>
+<li><p><strong>tsmax</strong> – str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max</p></li>
+</ul>
+</dd>
+</dl>
+<p>These vary per access method, and are generally NOT needed. They are either access method specific parms or specific         pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
 </dd>
 </dl>
 <p>These two options are for advanced usage. They override how saspy imports data. For more info
@@ -1423,6 +1476,25 @@ it in Pandas. So, this writes the data out to a parquet file so it can be instan
 <li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
 <li><p><strong>colrep</strong> – the char to convert to for any embedded colsep chars, defaults to  ‘ ‘</p></li>
 </ul>
+</dd>
+</dl>
+<p>Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+to use to replace Nat’s with in the dataframe. This works for both SAS datetime and date values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmin</strong> – str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min</p></li>
+<li><p><strong>tsmax</strong> – str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max</p></li>
+</ul>
+</dd>
+</dl>
+<p>These vary per access method, and are generally NOT needed. They are either access method specific parms or specific        pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
 </dd>
 </dl>
 <p>These two options are for advanced usage. They override how saspy imports data. For more info
@@ -2219,15 +2291,6 @@ if assigned or a sas data object’’ will sort in place if allowed</p></li>
 </p>
 </dd>
 </dl>
-<p>For the CSV and DISK methods, the following 2 parameters are also available As of V3.7.0 all 3 of these now stream         directly into read_csv() with no disk I/O and have much improved performance. MEM, the default, is now as fast as the others.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tempfile</strong> – [deprecated except for Local IOM] [optional] an OS path for a file to use for the local file; default it a temporary file that’s cleaned up</p></li>
-<li><p><strong>tempkeep</strong> – [deprecated except for Local IOM] if you specify your own file to use with tempfile=, this controls whether it’s cleaned up after using it</p></li>
-</ul>
-</dd>
-</dl>
 <p>For the MEMORY and DISK methods the following 4 parameters are also available, depending upon access method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -2236,10 +2299,26 @@ if assigned or a sas data object’’ will sort in place if allowed</p></li>
 <li><p><strong>colsep</strong> – the column seperator character to use; defaults to hex(2)</p></li>
 <li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
 <li><p><strong>colrep</strong> – the char to convert to for any embedded colsep chars, defaults to  ‘ ‘</p></li>
-<li><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
-They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.</p></li>
 </ul>
+</dd>
+</dl>
+<p>Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+to use to replace Nat’s with in the dataframe. This works for both SAS datetime and date values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmin</strong> – str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min</p></li>
+<li><p><strong>tsmax</strong> – str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max</p></li>
+</ul>
+</dd>
+</dl>
+<p>These vary per access method, and are generally NOT needed. They are either access method specific parms or specific         pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Pandas data frame</p>
@@ -2267,10 +2346,26 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 </pre></div>
 </div>
 </p></li>
-<li><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
-They are either access method specific parms or specific pandas parms.
-See the specific sasdata2dataframe* method in the access method for valid possibilities.</p></li>
 </ul>
+</dd>
+</dl>
+<p>Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+to use to replace Nat’s with in the dataframe. This works for both SAS datetime and date values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmin</strong> – str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min</p></li>
+<li><p><strong>tsmax</strong> – str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max</p></li>
+</ul>
+</dd>
+</dl>
+<p>These vary per access method, and are generally NOT needed. They are either access method specific parms or specific         pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Pandas data frame</p>
@@ -2283,13 +2378,11 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 
 <dl class="py method">
 <dt class="sig sig-object py" id="saspy.sasdata.SASdata.to_df_DISK">
-<span class="sig-name descname"><span class="pre">to_df_DISK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tempfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.12)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tempkeep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x02'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#saspy.sasdata.SASdata.to_df_DISK" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_df_DISK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rowsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x01'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colsep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'\x02'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rowrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colrep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'</span> <span class="pre">'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="headerlink" href="#saspy.sasdata.SASdata.to_df_DISK" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is an alias for ‘to_df’ specifying method=’DISK’.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>tempfile</strong> – [deprecated] [optional] an OS path for a file to use for the local file; default it a temporary file that’s cleaned up</p></li>
-<li><p><strong>tempkeep</strong> – [deprecated] if you specify your own file to use with tempfile=, this controls whether it’s cleaned up after using it</p></li>
 <li><p><strong>rowsep</strong> – the row seperator character to use; defaults to hex(1)</p></li>
 <li><p><strong>colsep</strong> – the column seperator character to use; defaults to hex(2)</p></li>
 <li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
@@ -2298,6 +2391,25 @@ See the specific sasdata2dataframe* method in the access method for valid possib
 They are either access method specific parms or specific pandas parms.
 See the specific sasdata2dataframe* method in the access method for valid possibilities.</p></li>
 </ul>
+</dd>
+</dl>
+<p>Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+to use to replace Nat’s with in the dataframe. This works for both SAS datetime and date values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmin</strong> – str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min</p></li>
+<li><p><strong>tsmax</strong> – str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max</p></li>
+</ul>
+</dd>
+</dl>
+<p>These vary per access method, and are generally NOT needed. They are either access method specific parms or specific         pandas parms. See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Pandas data frame</p>
@@ -2363,6 +2475,20 @@ PROC JSON documentation: <a class="reference external" href="http://go.documenta
 <li><p><strong>colsep</strong> – the column seperator character to use; defaults to ‘’</p></li>
 <li><p><strong>rowrep</strong> – the char to convert to for any embedded rowsep chars, defaults to  ‘ ‘</p></li>
 <li><p><strong>colrep</strong> – the char to convert to for any embedded colsep chars, defaults to  ‘ ‘</p></li>
+</ul>
+</dd>
+</dl>
+<p>Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+to use to replace Nat’s with in the dataframe. This works for both SAS datetime and date values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tsmin</strong> – str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min</p></li>
+<li><p><strong>tsmax</strong> – str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max</p></li>
+<li><p><strong>kwargs</strong> – a dictionary. These vary per access method, and are generally NOT needed.
+They are either access method specific parms or specific pandas parms.
+See the specific sasdata2dataframe* method in the access method for valid possibilities.</p></li>
 </ul>
 </dd>
 </dl>
