@@ -2242,6 +2242,10 @@ Will use HTML5 for this SASsession.""")
       tmp = kwargs.pop('tempfile', None)
       tmp = kwargs.pop('tempkeep', None)
 
+      tsmax = kwargs.pop('tsmax', None)
+      tsmin = kwargs.pop('tsmin', None)
+      tscode = ''
+
       dsopts = dsopts if dsopts is not None else {}
       opts   = opts   if   opts is not None else {}
 
@@ -2348,12 +2352,24 @@ Will use HTML5 for this SASsession.""")
                code += "'"+varlist[i]+"'n "
                if varcat[i] in self._sb.sas_date_fmts:
                   code += 'E8601DA10. '
+                  if tsmax:
+                     tscode += "if {} GE 110405 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmax)
+                     if tsmin:
+                        tscode += "else if {} LE -103099 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
+                  elif tsmin:
+                     tscode += "if {} LE -103099 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
                else:
                   if varcat[i] in self._sb.sas_time_fmts:
                      code += 'E8601TM15.6 '
                   else:
                      if varcat[i] in self._sb.sas_datetime_fmts:
                         code += 'E8601DT26.6 '
+                        if tsmax:
+                           tscode += "if {} GE  9538991236.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmax)
+                           if tsmin:
+                              tscode += "else if {} LE -8907752836.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
+                        elif tsmin:
+                           tscode += "if {} LE -8907752836.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
                      else:
                         code += 'best32. '
       code += ";\n run;\n"
@@ -2451,6 +2467,10 @@ Will use HTML5 for this SASsession.""")
       """
       tmp = kwargs.pop('tempfile', None)
       tmp = kwargs.pop('tempkeep', None)
+
+      tsmax = kwargs.pop('tsmax', None)
+      tsmin = kwargs.pop('tsmin', None)
+      tscode = ''
 
       errors = kwargs.pop('errors', 'strict')
       dsopts = dsopts if dsopts is not None else {}
@@ -2565,12 +2585,24 @@ Will use HTML5 for this SASsession.""")
                code += "format '"+varlist[i]+"'n "
                if varcat[i] in self._sb.sas_date_fmts:
                   code += 'E8601DA10.'
+                  if tsmax:
+                     tscode += "if {} GE 110405 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmax)
+                     if tsmin:
+                        tscode += "else if {} LE -103099 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
+                  elif tsmin:
+                     tscode += "if {} LE -103099 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
                else:
                   if varcat[i] in self._sb.sas_time_fmts:
                      code += 'E8601TM15.6'
                   else:
                      if varcat[i] in self._sb.sas_datetime_fmts:
                         code += 'E8601DT26.6'
+                        if tsmax:
+                           tscode += "if {} GE  9538991236.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmax)
+                           if tsmin:
+                              tscode += "else if {} LE -8907752836.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
+                        elif tsmin:
+                           tscode += "if {} LE -8907752836.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
                      else:
                         code += 'best32.'
                code += '; '
@@ -2720,6 +2752,10 @@ Will use HTML5 for this SASsession.""")
       except KeyError:
          raise KeyError("The pa_parquet_kwargs dict needs to contain at least the parameter 'compression'. Default value is 'snappy'")
 
+      tsmax = kwargs.pop('tsmax', None)
+      tsmin = kwargs.pop('tsmin', None)
+      tscode = ''
+
       errors = kwargs.pop('errors', 'strict')
       dsopts = dsopts if dsopts is not None else {}
 
@@ -2833,12 +2869,24 @@ Will use HTML5 for this SASsession.""")
                code += "format '"+varlist[i]+"'n "
                if varcat[i] in self._sb.sas_date_fmts:
                   code += 'E8601DA10.'
+                  if tsmax:
+                     tscode += "if {} GE 110405 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmax)
+                     if tsmin:
+                        tscode += "else if {} LE -103099 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
+                  elif tsmin:
+                     tscode += "if {} LE -103099 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
                else:
                   if varcat[i] in self._sb.sas_time_fmts:
                      code += 'E8601TM15.6'
                   else:
                      if varcat[i] in self._sb.sas_datetime_fmts:
                         code += 'E8601DT26.6'
+                        if tsmax:
+                           tscode += "if {} GE  9538991236.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmax)
+                           if tsmin:
+                              tscode += "else if {} LE -8907752836.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
+                        elif tsmin:
+                           tscode += "if {} LE -8907752836.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
                      else:
                         code += 'best32.'
                code += '; '
