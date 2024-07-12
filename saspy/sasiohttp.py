@@ -382,12 +382,12 @@ class SASconfigHTTP:
                      raise RuntimeError("Neither authcode nor userid provided.")
 
          if code_pw.lower() == 'authcode':
+            ci    = 'SASPy' if client_id is None else client_id
             if self.pkce:
                cv    = secrets.token_urlsafe(32)
                cvh   = hashlib.sha256(cv.encode('ascii')).digest()
                cvhe  = base64.urlsafe_b64encode(cvh)
                cc    = cvhe.decode('ascii')[:-1]
-               ci    = 'SASPy' if client_id is None else client_id
                purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code&code_challenge_method=S256&code_challenge={}".format(ci, cc)
             else:
                purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code".format(ci)
