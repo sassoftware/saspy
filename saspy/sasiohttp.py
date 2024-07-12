@@ -222,7 +222,6 @@ class SASconfigHTTP:
          else:
             client_id = incid
       if client_id is None:
-         client_id    = 'SASPy'
          use_authcode = False
       else:
          use_authcode = True
@@ -367,11 +366,11 @@ class SASconfigHTTP:
             else:
                pw = inpw
 
-         if use_authcode:
+         if use_authcode and not user:
             code_pw = 'authcode'
          else:
             code_pw = ''
-            if len(user) == 0:
+            if not user:
                msg  = "To connect to Viya you need either an authcode or a userid/pw. Neither were provided.\n"
                msg += "Please enter which one you want to enter next. Type one of these now: [default=authcode | userid]: "
                while code_pw.lower() not in ['userid','authcode']:
@@ -388,9 +387,10 @@ class SASconfigHTTP:
                cvh   = hashlib.sha256(cv.encode('ascii')).digest()
                cvhe  = base64.urlsafe_b64encode(cvh)
                cc    = cvhe.decode('ascii')[:-1]
-               purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code&code_challenge_method=S256&code_challenge={}".format(client_id, cc)
+               ci    = 'SASPy' if client_id is None else client_id
+               purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code&code_challenge_method=S256&code_challenge={}".format(ci, cc)
             else:
-               purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code".format(client_id)
+               purl = "/SASLogon/oauth/authorize?client_id={}&response_type=code".format(ci)
 
             if len(self.url) > 0:
                purl = self.url+purl
@@ -604,12 +604,22 @@ class SASconfigHTTP:
       if self.serverid:
          return {'access_token':'tom'}
 
+      if client_id is None:
+         client_id = 'SASPy'
+         ci = False
+      else:
+         ci = True
+
       if   authcode:
          uauthcode      = urllib.parse.quote(authcode)
          uclient_id     = urllib.parse.quote(client_id)
          uclient_secret = urllib.parse.quote(client_secret)
          headers        = {"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/x-www-form-urlencoded"}
          if self.pkce:
+            if not cv:
+               msg  = "A PKCE URL is configured to be used to acquire an authcode with is system, but a non-PKCE authcode was passed in.\n"
+               msg += "Failure in GET AuthToken."
+               raise SASHTTPauthenticateError(msg)
             d1          = ("grant_type=authorization_code&code="+uauthcode+"&code_verifier="+cv+
                           "&client_id="+uclient_id+"&client_secret="+uclient_secret).encode(self.encoding)
          else:
@@ -626,7 +636,8 @@ class SASconfigHTTP:
          headers        = {"Accept":"application/vnd.sas.compute.session+json", "Content-Type":"application/x-www-form-urlencoded",
                            "Authorization":client}
       else:
-         client_id     = "sas.tkmtrb"
+         if not ci:
+            client_id   = "sas.tkmtrb"
          uuser          = urllib.parse.quote(user)
          upw            = urllib.parse.quote(pw)
          d1             = ("grant_type=password&username="+uuser+"&password="+upw).encode(self.encoding)
