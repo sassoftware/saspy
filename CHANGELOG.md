@@ -2,6 +2,37 @@
 
 
 
+## [5.100.1] - 2024-07-17
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Fix` The HTTP authorization interfaces keep changing and an internal user found a code path that didn't
+provide the expected behavior. In order to still support older versions of viya 3.x, which don't have the SASPy
+client_id and only supported user/pw authentication (that's changed in more recent 3.5 versions), I had to use
+a different internal client_id. However, that client id doesn't support all the things, specifically refresh token
+in this case, that the SASPy client id supports. The path through authentication in saspy when using user/pw and
+providing client_id didn't use the client id you provided, but rather used the old internal one. So, this fix
+simply allows you to provide a client_id (`SASPy` or other), and user/pw as the means to connect. Authorization Code
+authentication uses the SASPy id by default (which supports that) as well as with any client_id you provide, so it's
+only the user/pw case with client_id being provided that had to be fixed; it now uses the client_id you said.
+Until I no longer have to support the old Viya 3.x versions, you do need to specify client_id='SASPy' in order to
+get the refresh token, which I do use to automatically refresh your auth token so you don't have it expire after 1
+hour, which they changed it to recently.
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.100.0] - 2024-07-10
 
 ### Added
@@ -27,7 +58,7 @@ For instance, given a SASdata object: sd.to_df(tsmin='1966-01-03 00:00:00.000000
 
 ### Note
 
-- This is just a note to acknowledge that the minor version jumped from 15 to 100. What that about!? 
+- This is just a note to acknowledge that the minor version jumped from 15 to 100. What that about!?
 Well, glad you asked ;) This is the 100th release of SASPy, in under its almost 10 years in existence. So, I just
 thought I'd skip a few minor releases to identify the milestone. It's been a privilege to have created and supported
 SASPy this whole time, and to have helped and supported all of our users who use it!
