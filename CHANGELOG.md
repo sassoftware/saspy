@@ -10,6 +10,10 @@
 
 ### Changed
 
+-   `None` Nothing changed
+
+### Fixed
+
 -   `Fix` The HTTP authorization interfaces keep changing and an internal user found a code path that didn't
 provide the expected behavior. In order to still support older versions of viya 3.x, which don't have the SASPy
 client_id and only supported user/pw authentication (that's changed in more recent 3.5 versions), I had to use
@@ -23,9 +27,6 @@ Until I no longer have to support the old Viya 3.x versions, you do need to spec
 get the refresh token, which I do use to automatically refresh your auth token so you don't have it expire after 1
 hour, which they changed it to recently.
 
-### Fixed
-
--   `None` Nothing fixed
 
 ### Removed
 
