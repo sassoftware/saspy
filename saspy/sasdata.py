@@ -1159,15 +1159,13 @@ class SASdata:
             return ll
 
     def to_pq(self, parquet_file_path: str,
-                    pa_parquet_kwargs = {"compression": 'snappy',
-                                         "flavor":"spark",
-                                         "write_statistics":False},
-                    pa_pandas_kwargs = {},
-                    partitioned = False,
+                    pa_parquet_kwargs = None,
+                    pa_pandas_kwargs  = None,
+                    partitioned       = False,
                     partition_size_mb = 128,
-                    chunk_size_mb = 4,
-                    coerce_timestamp_errors=True,
-                    static_columns:list = None,
+                    chunk_size_mb     = 4,
+                    coerce_timestamp_errors = True,
+                    static_columns:list     = None,
                     rowsep: str = '\x01', colsep: str = '\x02',
                     rowrep: str = ' ',    colrep: str = ' ',
                     **kwargs) -> None:
@@ -1207,6 +1205,13 @@ class SASdata:
        :return: None
        """
        lastlog = len(self.sas._io._log)
+
+       parquet_kwargs = pa_parquet_kwargs if pa_parquet_kwargs is not None else {"compression": 'snappy',
+                                                                                 "flavor":"spark",
+                                                                                 "write_statistics":False
+                                                                                 }
+       pandas_kwargs  = pa_pandas_kwargs if pa_pandas_kwargs  is not None  else {}
+
        ll = self._is_valid()
        self.sas._lastlog = self.sas._io._log[lastlog:]
        if ll:
@@ -1217,8 +1222,8 @@ class SASdata:
                                    table  = self.table,
                                    libref = self.libref,
                                    dsopts = self.dsopts,
-                                   pa_parquet_kwargs = pa_parquet_kwargs,
-                                   pa_pandas_kwargs = pa_pandas_kwargs,
+                                   pa_parquet_kwargs = parquet_kwargs,
+                                   pa_pandas_kwargs  = pandas_kwargs,
                                    partitioned = partitioned,
                                    partition_size_mb = partition_size_mb,
                                    chunk_size_mb = chunk_size_mb,

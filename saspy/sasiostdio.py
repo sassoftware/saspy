@@ -2705,10 +2705,8 @@ Will use HTML5 for this SASsession.""")
                        table: str,
                        libref: str ='',
                        dsopts: dict = None,
-                       pa_parquet_kwargs = {"compression": 'snappy',
-                                          "flavor":"spark",
-                                          "write_statistics":False},
-                       pa_pandas_kwargs = {},
+                       pa_parquet_kwargs = None,
+                       pa_pandas_kwargs  = None,
                        partitioned = False,
                        partition_size_mb = 128,
                        chunk_size_mb = 4,
@@ -2747,8 +2745,15 @@ Will use HTML5 for this SASsession.""")
       if not pa:
          logger.error("pyarrow was not imported. This method can't be used without it.")
          return None
+
+      parquet_kwargs = pa_parquet_kwargs if pa_parquet_kwargs is not None else {"compression": 'snappy',
+                                                                                "flavor":"spark",
+                                                                                "write_statistics":False
+                                                                                }
+      pandas_kwargs  = pa_pandas_kwargs if pa_pandas_kwargs  is not None  else {}
+
       try:
-         compression = pa_parquet_kwargs["compression"]
+         compression = parquet_kwargs["compression"]
       except KeyError:
          raise KeyError("The pa_parquet_kwargs dict needs to contain at least the parameter 'compression'. Default value is 'snappy'")
 
@@ -3023,12 +3028,12 @@ Will use HTML5 for this SASsession.""")
          schema = pa.schema(fields)
          return schema
       # derive parque schema if not defined by user.
-      if "schema" not in pa_parquet_kwargs or pa_parquet_kwargs["schema"] is None:
+      if "schema" not in parquet_kwargs or parquet_kwargs["schema"] is None:
          custom_schema = False
-         pa_parquet_kwargs["schema"] = dts_to_pyarrow_schema(dts)
+         parquet_kwargs["schema"] = dts_to_pyarrow_schema(dts)
       else:
          custom_schema = True
-      pa_pandas_kwargs["schema"] = pa_parquet_kwargs["schema"]
+      pandas_kwargs["schema"] = parquet_kwargs["schema"]
 
       ##### START STERAM #####
       parquet_writer = None
@@ -3107,7 +3112,7 @@ Will use HTML5 for this SASsession.""")
                                  raise ValueError(f"""The column {dvarlist[i]} contains an unparseable timestamp.
    Consider setting a different pd_timestamp_format or set coerce_timestamp_errors = True and they will be cast as Null""")
 
-               pa_table = pa.Table.from_pandas(df,**pa_pandas_kwargs)
+               pa_table = pa.Table.from_pandas(df,**pandas_kwargs)
 
                if not custom_schema:
                   #cast the int64 columns to timestamp
@@ -3149,9 +3154,9 @@ Will use HTML5 for this SASsession.""")
                raise e
 
             if not parquet_writer:
-               if "schema" not in pa_parquet_kwargs or pa_parquet_kwargs["schema"] is None:
-                  pa_parquet_kwargs["schema"] = pa_table.schema
-               parquet_writer = pq.ParquetWriter(path,**pa_parquet_kwargs)#use_deprecated_int96_timestamps=True,
+               if "schema" not in parquet_kwargs or parquet_kwargs["schema"] is None:
+                  parquet_kwargs["schema"] = pa_table.schema
+               parquet_writer = pq.ParquetWriter(path,**parquet_kwargs)#use_deprecated_int96_timestamps=True,
 
             # Write the table chunk to the Parquet file
             parquet_writer.write_table(pa_table)

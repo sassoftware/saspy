@@ -2000,15 +2000,13 @@ class SASsession():
         return df
 
     def sd2pq(self, parquet_file_path: str, table: str, libref: str ='', dsopts: dict = None,
-                        pa_parquet_kwargs = {"compression": 'snappy',
-                                             "flavor":"spark",
-                                             "write_statistics":False},
-                        pa_pandas_kwargs = {},
-                        partitioned = False,
+                        pa_parquet_kwargs = None,
+                        pa_pandas_kwargs  = None,
+                        partitioned       = False,
                         partition_size_mb = 128,
-                        chunk_size_mb = 4,
-                        coerce_timestamp_errors=True,
-                        static_columns:list = None,
+                        chunk_size_mb     = 4,
+                        coerce_timestamp_errors = True,
+                        static_columns:list     = None,
                         rowsep: str = '\x01', colsep: str = '\x02',
                         rowrep: str = ' ',    colrep: str = ' ',
                         **kwargs) -> None:
@@ -2055,13 +2053,19 @@ class SASsession():
 
        :return: None
        """
-       dsopts = dsopts if dsopts is not None else {}
+       dsopts         = dsopts if dsopts is not None else {}
+       parquet_kwargs = pa_parquet_kwargs if pa_parquet_kwargs is not None else {"compression": 'snappy',
+                                                                                 "flavor":"spark",
+                                                                                 "write_statistics":False
+                                                                                 }
+       pandas_kwargs  = pa_pandas_kwargs if pa_pandas_kwargs  is not None  else {}
+
        return self.sasdata2parquet(parquet_file_path = parquet_file_path,
                                    table = table,
                                    libref = libref,
                                    dsopts = dsopts,
-                                   pa_parquet_kwargs = pa_parquet_kwargs,
-                                   pa_pandas_kwargs = pa_pandas_kwargs,
+                                   pa_parquet_kwargs = parquet_kwargs,
+                                   pa_pandas_kwargs  = pandas_kwargs,
                                    partitioned = partitioned,
                                    partition_size_mb = partition_size_mb,
                                    chunk_size_mb = chunk_size_mb,
@@ -2077,17 +2081,15 @@ class SASsession():
     def sasdata2parquet(self,
                        parquet_file_path: str,
                        table: str,
-                       libref: str ='',
-                       dsopts: dict = None,
-                       pa_parquet_kwargs = {"compression": 'snappy',
-                                          "flavor":"spark",
-                                          "write_statistics":False},
-                       pa_pandas_kwargs = {},
-                       partitioned = False,
+                       libref: str       ='',
+                       dsopts: dict      = None,
+                       pa_parquet_kwargs = None,
+                       pa_pandas_kwargs  = None,
+                       partitioned       = False,
                        partition_size_mb = 128,
-                       chunk_size_mb = 4,
-                       coerce_timestamp_errors=True,
-                       static_columns:list = None,
+                       chunk_size_mb     = 4,
+                       coerce_timestamp_errors = True,
+                       static_columns:list     = None,
                        rowsep: str = '\x01',
                        colsep: str = '\x02',
                        rowrep: str = ' ',
@@ -2139,6 +2141,12 @@ class SASsession():
        lastlog = len(self._io._log)
 
        dsopts = dsopts if dsopts is not None else {}
+       parquet_kwargs = pa_parquet_kwargs if pa_parquet_kwargs is not None else {"compression": 'snappy',
+                                                                                 "flavor":"spark",
+                                                                                 "write_statistics":False
+                                                                                 }
+       pandas_kwargs  = pa_pandas_kwargs if pa_pandas_kwargs  is not None  else {}
+
        if self.exist(table, libref) == 0:
            logger.error('The SAS Data Set ' + libref + '.' + table + ' does not exist')
            if self.sascfg.bcv < 3007009:
@@ -2154,8 +2162,8 @@ class SASsession():
                        table = table,
                        libref = libref,
                        dsopts = dsopts,
-                       pa_parquet_kwargs = pa_parquet_kwargs,
-                       pa_pandas_kwargs = pa_pandas_kwargs,
+                       pa_parquet_kwargs = parquet_kwargs,
+                       pa_pandas_kwargs  = pandas_kwargs,
                        partitioned = partitioned,
                        partition_size_mb = partition_size_mb,
                        chunk_size_mb = chunk_size_mb,
