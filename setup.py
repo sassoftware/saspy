@@ -36,7 +36,7 @@ setup(name='saspy',
       cmdclass = {},
       package_data = {'': ['*.js', '*.md', '*.yaml', '*.css', '*.rst'], 'saspy': ['*.sas', 'scripts/*.*', 'java/*.*', 'java/pyiom/*.*', 'java/iomclient/*.*', 'java/thirdparty/*.*']},
       install_requires = [],
-      extras_require = {'iomcom': ['pypiwin32'], 'colorLOG': ['pygments']},
+      extras_require = {'iomcom': ['pypiwin32'], 'colorLOG': ['pygments'], 'parquet':['pyarrow']},
       classifiers = [
         'Programming Language :: Python :: 3',
         "Programming Language :: Python :: 3.4",
