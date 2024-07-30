@@ -2,6 +2,35 @@
 
 
 
+## [5.100.2] - 2024-07-30
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `Fix` The user contributed method sd2pq() had a bug in that the signature had a default dictionary declared,
+but that persists as an independent object, and the method conditionally assigns other key:values to it which
+then persist, incorrectly, in subsequent calls. See issue 611 for details. This version fixes that by defaulting
+to None in the signature and using a local variable to provide the actual defaults and other values.
+
+-   `Fix` Per issue 612, I've added `parquet` as an optional requirement for the SASPy install, so pyarrow
+can be conditionally installed if wanting to use the new user contributed sd2pq() method. I also wnt ahead and
+added a conditional install for pandas, via `pandas`, since I never added that to the condition install list
+and it's also not a requirement except for if using the sd2df() and df2sd() methods. This doesn't affect any
+behavior.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.100.1] - 2024-07-17
 
 ### Added
