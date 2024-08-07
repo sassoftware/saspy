@@ -52,6 +52,7 @@ except:
 import os
 import sys
 import datetime
+import time
 import getpass
 import importlib
 import re
@@ -596,6 +597,8 @@ class SASsession():
         elif self.sascfg.mode == 'HTTP':
             self._io = SASsessionHTTP(sascfgname=self.sascfg.name, sb=self, **kwargs)
 
+        self.sesstart = time.ctime()
+
         # gather some session info
         sysvars  = "data _null_; length x $ 4096;"
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
@@ -717,6 +720,7 @@ class SASsession():
         x += "SAS Session Encoding  = %s\n" % self.sascei
         x += "Python Encoding value = %s\n" % pyenc
         x += "SAS process Pid value = %s\n" % self.SASpid
+        x += "SASsession started    = %s\n" % self.sesstart
         x += "\n"
 
         return x
