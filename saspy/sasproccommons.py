@@ -202,7 +202,7 @@ class SASProcCommons:
             for line in lines:
                 i += 1
                 e = []
-                if line[self.sas.logoffset:].startswith('ERROR'):
+                if re.search(r'^ERROR[ \d-]*:', line[self.sas.logoffset:]):
                     e = lines[(max(i - 1, 0)):(min(i + 0, len(lines)))]
                 elog = elog + e
             return "\n".join(elog)

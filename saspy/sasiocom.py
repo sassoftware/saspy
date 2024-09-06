@@ -21,6 +21,7 @@ import os
 import shlex
 import sys
 import warnings
+import re
 
 import logging
 logger = logging.getLogger('saspy')
@@ -303,7 +304,7 @@ class SASSessionCOM(object):
         # Store flush result in running log
         self._log += result
 
-        if result.count('\nERROR:') > 0:
+        if re.search(r'\nERROR[ \d-]*:', result):
            warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
            self._sb.check_error_log = True
 

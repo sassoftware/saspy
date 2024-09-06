@@ -24,6 +24,7 @@ import warnings
 import io
 import ssl
 import atexit
+import re
 
 import secrets
 import hashlib
@@ -977,7 +978,7 @@ class SASsessionHTTP():
          logr       = logr.replace(chr(12), chr(10))
          self._log += logr
 
-      if logr.count('\nERROR:') > 0:
+      if re.search(r'\nERROR[ \d-]*:', logr):
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
 

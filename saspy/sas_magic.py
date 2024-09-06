@@ -52,7 +52,7 @@ class SASMagic(ipym.Magics):
                 set sashelp.cars;
             run;
         """
-        
+
         mva = self.mva
         if len(line):  # session supplied
             names = line.split('.')
@@ -99,7 +99,7 @@ class SASMagic(ipym.Magics):
         res = mva.submit(cell)
         dis = self._which_display(mva, res['LOG'], res['LST'])
 
-        if len(line)>0:  # Restore SAS options 
+        if len(line)>0:  # Restore SAS options
             mva.submit(restoreOpts)
 
         return dis
@@ -178,7 +178,7 @@ class SASMagic(ipym.Magics):
         for line in lines:
             i += 1
             e = []
-            if line[mva.logoffset:].startswith('ERROR'):
+            if re.search(r'^ERROR[ \d-]*:', line[mva.logoffset:]):
                 e = lines[(max(i - 15, 0)):(min(i + 16, len(lines)))]
             elog = elog + e
         if len(elog) == 0 and len(output) > lst_len:   # no error and LST output

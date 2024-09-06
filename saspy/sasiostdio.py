@@ -616,7 +616,7 @@ Will use HTML5 for this SASsession.""")
    def _checkLogForError(self, log):
       lines = re.split(r'[\n]\s*', log)
       for line in lines:
-         if line[self._sb.logoffset:].startswith('ERROR:'):
+         if re.search(r'^ERROR[ \d-]*:', line[self._sb.logoffset:]):
             return (True)
       return (False)
 

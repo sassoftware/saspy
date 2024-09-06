@@ -153,7 +153,7 @@ class SASdata:
     def _checkLogForError(self, log):
         lines = re.split(r'[\n]\s*', log)
         for line in lines:
-            if line[self.sas.logoffset:].startswith('ERROR'):
+            if re.search(r'^ERROR[ \d-]*:', line[self.sas.logoffset:]):
                 return (False, line)
         return (True, '')
 
@@ -508,7 +508,7 @@ class SASdata:
             self.sas._lastlog = self.sas._io._log[lastlog:]
             elog = []
             for line in ll['LOG'].splitlines():
-                if line[self.sas.logoffset:].startswith('ERROR'):
+                if re.search(r'^ERROR[ \d-]*:', line[self.sas.logoffset:]):
                     elog.append(line)
             if len(elog):
                 raise RuntimeError("\n".join(elog))
@@ -907,7 +907,7 @@ class SASdata:
             self.sas._lastlog = self.sas._io._log[lastlog:]
             elog = []
             for line in ll['LOG'].splitlines():
-                if line[self.sas.logoffset:].startswith('ERROR'):
+                if re.search(r'^ERROR[ \d-]*:', line[self.sas.logoffset:]):
                     elog.append(line)
             if len(elog):
                 raise RuntimeError("\n".join(elog))
@@ -1402,7 +1402,7 @@ class SASdata:
             for line in ll['LOG'].splitlines():
                 if line[self.sas.logoffset:].startswith('JSONFilePath:'):
                     fpath = line[14:]
-                if line[self.sas.logoffset:].startswith('ERROR'):
+                if re.search(r'^ERROR[ \d-]*:', line[self.sas.logoffset:]):
                     elog.append(line)
             if len(elog):
                 raise RuntimeError("\n".join(elog))

@@ -23,6 +23,7 @@ import codecs
 import warnings
 import io
 import atexit
+import re
 
 import logging
 logger = logging.getLogger('saspy')
@@ -1088,7 +1089,7 @@ Will use HTML5 for this SASsession.""")
       zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
       logd = zz[2].replace(mj.decode(), '')
 
-      if logd.count('\nERROR:') > 0:
+      if re.search(r'\nERROR[ \d-]*:', logd):
          warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
          self._sb.check_error_log = True
 
@@ -2047,7 +2048,7 @@ Will use HTML5 for this SASsession.""")
 
          logd = logf.decode(errors='replace')
          self._log += logd.replace(chr(12), chr(10))
-         if logd.count('\nERROR:') > 0:
+         if re.search(r'\nERROR[ \d-]*:', logd):
             warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
             self._sb.check_error_log = True
 
@@ -2823,7 +2824,7 @@ class _read_sock(io.StringIO):
 
                   logd = self.logf.decode(errors='replace')
                   self._io._log += logd.replace(chr(12), chr(10))
-                  if logd.count('\nERROR:') > 0:
+                  if re.search(r'\nERROR[ \d-]*:', logd):
                      warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
                      self._io._sb.check_error_log = True
 

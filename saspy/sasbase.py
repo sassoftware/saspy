@@ -682,7 +682,7 @@ class SASsession():
         if self.sascfg.autoexec:
             self._io.submit(self.sascfg.autoexec)
 
-        # this is to support parsing the log to fring log records w/ 'ERROR' when diagnostic logging is enabled.
+        # this is to support parsing the log to find log records w/ 'ERROR' when diagnostic logging is enabled.
         # in thi scase the log can have prefix and/or suffix info so the 'regular' log data is in the middle, not left justified
         if self.sascfg.mode in ['STDIO', 'SSH', '']:
            ll = self._io.submit("""data _null_; file STDERR; put %upcase('col0REG=');
