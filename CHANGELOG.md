@@ -2,6 +2,48 @@
 
 
 
+## [5.100.3] - 2024-09-10
+
+### Added
+
+-   `None` I added the timestamp of when the SAS Serssion was sterted to the output when submittting the SASsession Object.
+See `SASsession started` below:
+```
+>>> sas
+Access Method         = IOM
+SAS Config name       = iomj
+SAS Config file       = /opt/tom/github/saspy/saspy/sascfg_personal.py
+WORK Path             = /sastmp/SAS_work7AD4000A185A_tom64-7/SAS_workA74A000A185A_tom64-7/
+SAS Version           = 9.04.01M8P01182023
+SASPy Version         = 5.100.3
+Teach me SAS          = False
+Batch                 = False
+Results               = Pandas
+SAS Session Encoding  = utf-8
+Python Encoding value = utf_8
+SAS process Pid value = 661594
+SASsession started    = Tue Sep 10 13:52:19 2024
+```
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `Fix` From Issue #516, I reworked how SASPy looks through the SASLOG to see if there was an ERROR, to set the
+SASsession attreibute, `sas.check_error_log`, to True. The usual 'ERROR:' that starts a line in the SASLOG sometimes
+has line number/col number embedded in it, though that's not the usual case. I reworked all of the places looking for
+ERROR: in the log to use a better regex expression that finds both that case and the other; for instance:
+`ERROR 180-322: Statement is not valid or it is used out of proper order.`
+
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.100.2] - 2024-07-30
 
 ### Added
