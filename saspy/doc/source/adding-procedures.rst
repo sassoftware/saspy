@@ -2,12 +2,12 @@
 .. Copyright SAS Institute
 
 
-************************
+========================
 Contributing new methods
-************************
+========================
 
 Overview
---------
+========
 This module is broken into product areas that largely follow the SAS product areas.
 There are many many procedures, which translate to object methods, that are not
 currently included in the package. The aim of this document is to outline the
@@ -21,7 +21,7 @@ minutes for subsequent methods.
 Your contribution and feedback is greatly appreciated!
 
 Process
-=======
+~~~~~~~
 
 To add a new procedure follow these steps:
 

@@ -13,15 +13,15 @@ require special handling to be able to work correctly. Hopefully this will be a 
 It was initiated while working on `Issue 294 <https://github.com/sassoftware/saspy/issues/294>`_.
 That issue was about running batch SAS scripts via the submit() method and some problems that
 ensued.
- 
+
 Let me preface this section by describing some aspects of saspy that warrant this section. saspy
 was designed to be a python interface to an interactive SAS session. Its many methods generate
-SAS code, which it submits to the SAS session and then retrieves both the SASLOG (LOG) and any listing/results 
+SAS code, which it submits to the SAS session and then retrieves both the SASLOG (LOG) and any listing/results
 (LST) and then provides that back as objects or by directly rendering in interactive sessions.
 
 Many methods require saspy to query the SAS session to gather information about session, data, configuration,
 the environment, and other things. There is no API for these 'queries'. Rather, saspy generates specific
-SAS code to gather this information and has it written to the LOG to then parse out on the Python side 
+SAS code to gather this information and has it written to the LOG to then parse out on the Python side
 after retirving the LOG. That is a common mode of access. This, then, demands that saspy have access to
 the LOG. That is perhaps the first, most important requirement.
 
@@ -36,12 +36,11 @@ is implemented very differently, yet they each provide the same functionality an
 to the best of my ability to make that the case. Any divergences between those will also be identified here.
 
 
-******
 SASLOG
-******
+======
 
 Proc Printto
-------------
+~~~~~~~~~~~~
 
 Let's start with the first requirement that saspy has access to the SAS Log. SAS has a procedure which
 allows you to redirect the LOG and/or LST out from under the currently existing locations, to files or other locations:
@@ -50,7 +49,7 @@ allows you to redirect the LOG and/or LST out from under the currently existing 
 If this is used to redirect the LST, then you just won't get any results back from any methods in saspy.
 Your choice, I suppose. However, if redirecting the LOG, then saspy may hang, may have any number of failures
 or exceptions in various methods, and will generally be useless other than for other submit() methods, which won't
-return anything. 
+return anything.
 
 Not the intent of the design. However, intent not being everything, providing a way to allow for the use of this,
 if needed, while addressing this restriction is possible. This would be considered a work around.
@@ -61,7 +60,7 @@ successfully use Proc Printto within a saspy submit() method, you are simply req
 return the LOG and LST back to saspy which will then continue to function correctly. Of course, you won't get
 any part of the log or any results that happened while the redirection was enabled, but you knew that. Keep reading
 to see, below, that 'you' don't have to do this, there's an option on submit(..., printto=True) which will do this
-for you. 
+for you.
 
 One parting though on this is that you can use saspy's download() method to pull the file(s) you redirected things
 to back to the client and then access them in saspy. Don't know why you would, but you could. Maybe there's a use
@@ -69,12 +68,11 @@ case where that makes sense.
 
 
 
-************************************
 Terminating SAS out from under saspy
-************************************
+====================================
 
 %abort macro and abort statement
---------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 SAS also has statements you can submit which will cause the SAS session to immediately terminate; yes, really.
 So, if you execute one of these statements, guess what? The interactive SAS session saspy that started and is connected to
@@ -84,17 +82,17 @@ that executed SAS :) (lol)  Well, executed the statement that terminated SAS.
 The SAS macro `%abort <https://go.documentation.sas.com/?docsetId=mcrolref&docsetTarget=p0f7j2zr6z71nqn1fpefnmulzazf.htm&docsetVersion=9.4&locale=en>`_
 and the data step statement `abort <https://go.documentation.sas.com/?docsetId=lestmtsref&docsetTarget=p0hp2evpgqvfsfn1u223hh9ubv3g.htm&docsetVersion=9.4&locale=en>`_
 each have various arguments which cause them to behave differently, and depending upon how the SASsession was started the
-behavior can vary as well. 
+behavior can vary as well.
 
 There are two general behaviors these statements can produce. The first ts to terminate SAS. The other is to stop processing
 (some) remaining code that was submitted, but not terminate the SAS session. This second behavior is complicated by the nature of
-the SAS session itself. As termination of the SAS session is pretty cut and dry, the following will be addressing the second behavior. 
+the SAS session itself. As termination of the SAS session is pretty cut and dry, the following will be addressing the second behavior.
 
 Canceling submitted statements
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There are two variations of this second behavior. The first variation is when you supply no argument to the abort statement
-or macro. In this case it only stops executing the current macro and/or data step, but any following submitted statements 
+or macro. In this case it only stops executing the current macro and/or data step, but any following submitted statements
 continue to be executed normally. This case is generally not a problem for any access method of saspy.
 
 The second variant is specifying the CANCEL argument: '[%]abort CANCEL;'. This version stops executing all of the following
@@ -109,12 +107,11 @@ is a single 'submit'. In this case, the SASsession is no longer functional; it w
 terminated it (endsas()). That is a SASism, and nothing that can be changed or fixed from the Python side to solve this.
 
 
-*************
 Perfect Storm
-*************
+=============
 
 Combining proc printto and abort cancel
----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 What happens if you issue a the following code, having proc printto to redirect LOG/LST, and have an abort CANCEL, which gets executed,
 and you have the undo for the proc printto (proc printto;run;) at the end of your code?
@@ -123,7 +120,7 @@ and you have the undo for the proc printto (proc printto;run;) at the end of you
 
     >>> sas.submitLOG('''
         proc printto LOG='./mylogfile';run;
-       
+
         /* some SAS code */
 
         /* some conditional check which turns out to be true */
@@ -140,7 +137,7 @@ and you have the undo for the proc printto (proc printto;run;) at the end of you
 
 
 So, in this case, the 'undo' won't happen so saspy won't have it's LOG back. In this case, you could
-code it in your program before each 'abort cancel;' that could execute. 
+code it in your program before each 'abort cancel;' that could execute.
 
 So, for IOM and HTTP, this will solve this case:
 
@@ -148,7 +145,7 @@ So, for IOM and HTTP, this will solve this case:
 
     >>> sas.submitLOG('''
         proc printto LOG='./mylogfile';run;
-       
+
         /* some SAS code */
 
         /* some conditional check which turns out to be true - return the log before canceling */
@@ -167,7 +164,7 @@ So, for IOM and HTTP, this will solve this case:
 
 
 printto= option on submit methods
----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now, odds are that if you are submitting code like this, you didn't type it into saspy. You probably
 are reading in some existing SAS batch script (.sas file) and just submitting it, as is. You may not

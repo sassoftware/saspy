@@ -13,9 +13,8 @@ there are some cases where you might not have everything working right. We've tr
 for diagnosing and fixing those issues here.
 
 
-***********************************
 Connection and configuration issues
-***********************************
+===================================
 
 Although setup and configuration is pretty simple, if you do have something not quite right, it
 may be hard to figure out what's wrong. That's when you come to this chapter.
@@ -31,7 +30,7 @@ documentation and so does :doc:`install`.
 
 
 Common diagnostics
-------------------
+~~~~~~~~~~~~~~~~~~
 
 Although each access method has its own ways something can go wrong, there are some common diagnostics
 you will get and can use to track down the issue.
@@ -95,7 +94,7 @@ various connection methods, see what the errors look like, and how you can deter
 
 
 STDIO
------
+~~~~~
 
 There are only a couple of things that can go wrong here. First, this only works on Unix, not Windows,
 so if you're having problems getting to to work from Windows, well there you go.
@@ -123,7 +122,7 @@ If you see that error, go read the configuration doc here: :doc:`configuration`
 
 
 STDIO over SSH
---------------
+~~~~~~~~~~~~~~
 
 The same issues in STDIO above are true here, with one extra component: ssh. The 'saspath' value has to be right, and
 it has to be right on the remote Linux machine that you are ssh'ing to. That might not be the same path
@@ -216,7 +215,7 @@ For instance, everything seems set up correctly but after running ssh it just sa
 
 
 IOM
----
+~~~
 
 This access method has the most possibilities of having something misconfigured, because it has more
 components that all have to connect together. But, it also has the most diagnostics to help you out.
@@ -230,7 +229,7 @@ There are three things that are likely to be the problem.
 
 
 Java problems
-^^^^^^^^^^^^^
+-------------
 
 This error is descibed below:
 
@@ -277,7 +276,7 @@ there is no c:\\java command to execute.
 
 
 Classpath problems
-^^^^^^^^^^^^^^^^^^
+------------------
 So what about CLASSPATH problems? Here are three cases. The first is just the wrong path, so Java won't be able to find the main class to run.
 The second case has a valid classpath, but is missing one of the IOM jars. The third is a case with EG versions of the jars, not from a SAS 9 install.
 
@@ -504,7 +503,7 @@ back to the python process, which isn't running, thus the connection error. But 
 
 
 IOM specific errors
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 So if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM.
 The IOM Error message will be reported, followed by the command that was trying to be run. Below
@@ -800,13 +799,12 @@ So, hopefully this has shown you how to diagnose connection and configuration pr
 have any problems, it should just work!
 
 
-*********************
 Problems running code
-*********************
+=====================
 
 
 My model didn't run
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 When you run an analytical method there are a number of things that occur.
 The goal is to have informative messages when things go wrong and in this section we'll explain what his happening

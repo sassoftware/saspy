@@ -50,11 +50,13 @@ numpydoc_show_class_members = False
 autodoc_default_flags = ['show-inheritance']
 autoclass_content = 'class'
 
-intersphinx_mapping = {'python': ('https://docs.python.org/', None),
-                       'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None),
-                       'numpy': ('http://docs.scipy.org/doc/numpy/', None),
-                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-                       'matplotlib': ('http://matplotlib.sourceforge.net/', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None),
+                       'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None),
+                       'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+                       'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+#                       'matplotlib': ('https://matplotlib.sourceforge.net/', None)
+                       }
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -151,7 +153,12 @@ html_theme = 'sphinx_rtd_theme'
 html_theme_options = {
     # Toc options
     'collapse_navigation': False,
+    'sticky_navigation': True,
     'navigation_depth': 5,
+    'includehidden': True,
+    'titles_only': False,
+    'globaltoc_maxdepth' : 5,
+
 }
 
 
@@ -327,4 +334,4 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+#intersphinx_mapping = {'https://docs.python.org/3': None}

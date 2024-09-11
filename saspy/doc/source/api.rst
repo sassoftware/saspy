@@ -2,9 +2,9 @@
 .. Copyright SAS Institute
 
 
-*************
+=============
 API Reference
-*************
+=============
 
 .. automodule:: saspy
     :members:
@@ -13,30 +13,27 @@ API Reference
     :show-inheritance:
 
 SAS Session Object
-------------------
-.. autoclass:: SASsession
+==================
+.. autoclass:: saspy.sasbase.SASsession
     :members:
 
 SAS Data Object
----------------
-
+===============
 .. autoclass:: saspy.sasdata.SASdata
     :members:
 
 Procedure Syntax Statements
----------------------------
-
+===========================
 .. autoclass:: saspy.sasproccommons.SASProcCommons
     :members:
 
-
 SAS Results
------------
+===========
 .. autoclass:: saspy.sasresults.SASresults
     :members:
 
 SAS Procedures
---------------
+==============
 
 Utility
 ~~~~~~~
@@ -51,7 +48,6 @@ Machine Learning (SAS Enterprise Miner)
 .. autoclass:: saspy.sasml.SASml
     :members:
 
-.. autosummary:: saspy.sasml.SASml
 
 Statistics
 ~~~~~~~~~~
@@ -80,7 +76,7 @@ SAS Viya VDMML
 
 
 SASPy Scripts
--------------
+=============
 
 run_sas.py
 ~~~~~~~~~~

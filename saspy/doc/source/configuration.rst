@@ -1,7 +1,7 @@
 
-===============
+=============
 Configuration
-===============
+=============
 
 This module can connect and start different kinds of SAS sessions. It can connect to SAS
 on Unix, Mainframe, and Windows. It can connect to a local SAS session or remote session.

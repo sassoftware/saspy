@@ -4,9 +4,9 @@
 
 .. image:: https://user-images.githubusercontent.com/17710182/171252212-4af121a6-72d9-4234-b6cf-2a0d31eb8bf7.png
 
-*****
+=====
 SASPy
-*****
+=====
 
 **Date**: |today| **Version**: |version|
 
@@ -17,9 +17,8 @@ SASPy
 **Example Repo:** `<https://github.com/sassoftware/saspy-examples>`_
 
 
-*************
 What is this?
-*************
+=============
 
 This module provides Python APIs to the SAS system. You can start a
 SAS session and run analytics from Python through a combination of
@@ -39,9 +38,8 @@ control are organized in Python classes.
 See :doc:`getting-started` for programming examples.
 
 
-************
 Dependencies
-************
+============
 
 - Python3.4 or higher.
 - SAS 9.4 or higher. SAS Viya 3.1 or higher is also supported.
@@ -53,6 +51,8 @@ releases.
 
 
 .. toctree::
+   :maxdepth: 5
+   :hidden:
 
    install
    configuration

@@ -11,9 +11,8 @@ Advanced topics
 In this chapter we will explore more detailed explanations of specific functionality.
 
 
-****************
 Using Batch mode
-****************
+================
 
 Batch mode is meant to be used when you want to automate your code as Python scripts.
 
@@ -64,9 +63,8 @@ than this few lines of code, you can have the results updated and refreshed by j
 re-running the script.
 
 
-*********
 Prompting
-*********
+=========
 
 There are two types of prompting that can be performed; meaning to stop processing and
 prompt the user for input and then resume processing.
@@ -188,9 +186,8 @@ at runtime for values you want to use in the code, and those values can be
 kept around and used later in the code, or hidden and inaccessible afterward.
 
 
-***************************************************************
 Moving values between Python Variables and SAS Macro Variables
-***************************************************************
+==============================================================
 
 There are two methods on the SASsession object you can use to transfer values between Python and SAS.
 symget() and symput(). To get a value from a SAS Macro Variable and assign it to a Python variable you
@@ -213,9 +210,8 @@ https://github.com/sassoftware/saspy-examples/blob/main/SAS_contrib/Using_SYMGET
 
 
 
-********************************************************
 Moving data between Python and SAS - datatype conversion
-********************************************************
+========================================================
 
 SASPy has methods to load data from a SAS Data Set (or View) into Python as a Pandas dataframe, as well
 as the reverse; loading a dataframe into a SAS Data Set. This is all documented in the API doc and some
@@ -265,9 +261,8 @@ become missing values in SAS.
 
 
 
-**********************************
 Dates, Times and Datetimes, Oh my!
-**********************************
+==================================
 
 The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most
 cases, if you start with a SAS dataset and import it to a dataframe, then send it back to SAS,
@@ -362,9 +357,8 @@ https://github.com/sassoftware/saspy-examples/blob/main/Issue_examples/Issue279.
 
 
 
-***********************************
 Advanced sd2df and df2sd techniques
-***********************************
+===================================
 
 The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most cases,
 you don't need to specify extra options. But, there are extra options to cover a variety of specific
@@ -492,9 +486,8 @@ https://github.com/sassoftware/saspy/issues/279 to see where this fuctionality c
 
 
 
-******************************************************************************
 Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )
-******************************************************************************
+==============================================================================
 
 UPDATE!!!
 
@@ -538,9 +531,8 @@ and newlines, which Pandas can have parsing problem with reading CSV file create
 
 
 
-*****************************************************************
 Slow performance loading a DataFrame into a SAS data set; df2sd()
-*****************************************************************
+=================================================================
 
 df2sd (dataframe2sasdata) has two main steps, which were both done internal to the method. The second is transferring the data
 but the first is figureing out the necessary metadata to be able to correctly define the SAS Data Set being created. This requires
@@ -686,9 +678,8 @@ Here are a few example cases showing this.
 
 
 
-*****************************************************************************
 Using Proc Iomoperate to find Object Spawner hosts and Workspace Server ports
-*****************************************************************************
+=============================================================================
 
 If you already use a client to connect to IOM servers, you may have the host and port to OMR
 (the SAS Metadata Server), but not necessarily those of the Object Spawners or Workspace Servers.
@@ -782,9 +773,8 @@ convention for these is to use the 'Server context :' value as the config name. 
 to know which server you will be connecting to.
 
 
-**************************************************************
 Disconnecting from an IOM session and reconnecting back to it.
-**************************************************************
+==============================================================
 
 The IOM access method has the ability to disconnect from the workspace server and
 reconnect to it (the same one); IF the reconnect setting is configured for that workspace
@@ -818,9 +808,8 @@ a single process, and each time a disconnect happens a new toke is created. But,
 specific case, so it is now available.
 
 
-*******************************************************************
 Configuring Grid Option Sets to have saspy run on a specific Queue.
-*******************************************************************
+===================================================================
 
 Working with Grid Options Sets is documented here (the 'Doc' referred to below):
 http://support.sas.com/documentation/cdl/en/gridref/67371/HTML/default/viewer.htm#n1inymfs0b7go2n147xdknz0ygpx.htm
@@ -847,9 +836,8 @@ in to the grid options mapping wizard (the first part of the document referenced
 should now be available to choose and you can set this up as you want.
 
 
-****************************************************************
 Automatic checking for ERROR: in the LOG and the warnings module
-****************************************************************
+================================================================
 
 Based upon an enhancement request, as of version 3.6.7, SASPy now checks for 'ERROR:' and issues a message via the warnings module
 to inform you that you should take a look at the log and see if there was a problem. SASPy methods won't blindly fail just by finding
@@ -964,9 +952,8 @@ Hopefully you will find this enhancement useful. It would be great if each thing
 not the case. So, checking the log is something that's necessary sometimes. Hopefully this warning when an ERROR is seen, will make this easier.
 
 
-*********************************************
 saspy.logger from logging.logger as of V3.7.5
-*********************************************
+=============================================
 
 Per a user request to get rid of using print() for variaous messages, and use the logging facility instead, I've
 replaced all non-interactive prints() in saspy (print is still used for prompting, as it needs to be) with
@@ -1100,9 +1087,8 @@ Here's just a little example of a programm showing some of this.
 
 
 
-***************************************************
 SASsession object as a context manager as of V3.7.5
-***************************************************
+===================================================
 
 A user contributed, via PR #401, the ability for a SASsession object to be used as a context manage
 for the 'with' statement (see https://docs.python.org/3.9/reference/datamodel.html#context-managers).
@@ -1177,9 +1163,9 @@ Here's a live example showing that the Session was terminated after the with con
     >>>
 
 
-**************
 Jupyter magics
-**************
+==============
+
 Jupyter Notebooks have what they call Magics, which let you submit code from a diferent language
 than the kernel of the notebook, or provide other functionality. SASPy supports a few magics that
 you can use if you are in a Jupyter Notebook. They simply allow you to submit explicit SAS code
