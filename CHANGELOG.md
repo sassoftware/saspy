@@ -6,7 +6,7 @@
 
 ### Added
 
--   `Enhancement` I added the timestamp of when the SAS Serssion was started to the output when submittting the SASsession Object.
+-   `Enhancement` I added the timestamp of when the SAS Session was started to the output when submitting the SASsession Object.
 See `SASsession started` below:
 ```
 >>> sas
