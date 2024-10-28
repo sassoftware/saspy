@@ -2,6 +2,29 @@
 
 
 
+## [5.100.4] - 2024-10-28
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `Tweak` This was from an internal reported issue. I noticed 2 places where I was submitting code internally where
+I was missing the results='text' that I use for internal code submissions that don't need ODS results. For an unusual
+(not user case) reason that was causing them a problem. There's no issue reported from the field for this, so just
+cleaning up these 2 submits so they are the same as all of the others.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.100.3] - 2024-09-10
 
 ### Added
