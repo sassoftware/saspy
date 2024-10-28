@@ -680,7 +680,7 @@ class SASsession():
         self.workpath = self.workpath + self.hostsep
 
         if self.sascfg.autoexec:
-            self._io.submit(self.sascfg.autoexec)
+            self._io.submit(self.sascfg.autoexec, 'text')
 
         # this is to support parsing the log to find log records w/ 'ERROR' when diagnostic logging is enabled.
         # in thi scase the log can have prefix and/or suffix info so the 'regular' log data is in the middle, not left justified
@@ -2395,7 +2395,7 @@ class SASsession():
 
         :return: bool
         """
-        ll = self._io.submit("%put " + name + "BEGIN=%symexist(" + name + ") "+ name+"END=;\n")
+        ll = self._io.submit("%put " + name + "BEGIN=%symexist(" + name + ") "+ name+"END=;\n", 'text')
         l2 = ll['LOG'].rpartition(name + "BEGIN=")[2].rpartition(name+"END=")[0].strip().replace('\n','')
 
         if l2 == '':
