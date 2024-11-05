@@ -170,7 +170,7 @@ class SASdata:
            raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
 
         libref = kwargs.get('libref','work')
-        ll = self.sas._io.submit(code)
+        ll = self.sas._io.submit(code, 'text')
         check, errorMsg = self._checkLogForError(ll['LOG'])
         if not check:
             raise ValueError("Internal code execution failed: " + errorMsg)
@@ -1862,4 +1862,76 @@ class SASdata:
           return None
        else:
           return ll['LOG']
+
+    def attrs(self):
+       """
+       Get the ATTRN and ATTRC attributes for the Data Set
+
+       :return: SASLOG for this step
+       """
+       lastlog = len(self.sas._io._log)
+       code  = """
+       data work._spattr_; drop dsid;
+          format MODTE datetime26.2 CRDTE datetime26.2;
+          dsid=open("{}");
+          ALTERPW      =attrn(dsid, 'ALTERPW');
+          ANOBS        =attrn(dsid, 'ANOBS');
+          ANY          =attrn(dsid, 'ANY');
+          ARAND        =attrn(dsid, 'ARAND');
+          ARWU         =attrn(dsid, 'ARWU');
+          AUDIT        =attrn(dsid, 'AUDIT');
+          AUDIT_DATA   =attrn(dsid, 'AUDIT_DATA');
+          AUDIT_BEFORE =attrn(dsid, 'AUDIT_BEFORE');
+          AUDIT_ERROR  =attrn(dsid, 'AUDIT_ERROR');
+          CRDTE        =attrn(dsid, 'CRDTE');
+          ICONST       =attrn(dsid, 'ICONST');
+          INDEX        =attrn(dsid, 'INDEX');
+          ISINDEX      =attrn(dsid, 'ISINDEX');
+          ISSUBSET     =attrn(dsid, 'ISSUBSET');
+          LRECL        =attrn(dsid, 'LRECL');
+          LRID         =attrn(dsid, 'LRID');
+          MAXGEN       =attrn(dsid, 'MAXGEN');
+          MAXRC        =attrn(dsid, 'MAXRC');
+          MODTE        =attrn(dsid, 'MODTE');
+          NDEL         =attrn(dsid, 'NDEL');
+          NEXTGEN      =attrn(dsid, 'NEXTGEN');
+          NLOBS        =attrn(dsid, 'NLOBS');
+          NLOBSF       =attrn(dsid, 'NLOBSF');
+          NOBS         =attrn(dsid, 'NOBS');
+          NVARS        =attrn(dsid, 'NVARS');
+          PW           =attrn(dsid, 'PW');
+          RADIX        =attrn(dsid, 'RADIX');
+          READPW       =attrn(dsid, 'READPW');
+          REUSE        =attrn(dsid, 'REUSE');
+          TAPE         =attrn(dsid, 'TAPE');
+          WHSTMT       =attrn(dsid, 'WHSTMT');
+          WRITEPW      =attrn(dsid, 'WRITEPW');
+
+          CHARSET      =attrc(dsid, 'CHARSET');
+          COMPRESS     =attrc(dsid, 'COMPRESS');
+          DATAREP      =attrc(dsid, 'DATAREP');
+          ENCODING     =attrc(dsid, 'ENCODING');
+          ENCRYPT      =attrc(dsid, 'ENCRYPT');
+          ENGINE       =attrc(dsid, 'ENGINE');
+          LABEL        =attrc(dsid, 'LABEL');
+          LIB          =attrc(dsid, 'LIB');
+          MEM          =attrc(dsid, 'MEM');
+          MODE         =attrc(dsid, 'MODE');
+          MTYPE        =attrc(dsid, 'MTYPE');
+          SORTEDBY     =attrc(dsid, 'SORTEDBY');
+          SORTLVL      =attrc(dsid, 'SORTLVL');
+          SORTSEQ      =attrc(dsid, 'SORTSEQ');
+          TYPE         =attrc(dsid, 'TYPE');
+       run;
+       """.format(self.libref + ".'" + self.table.replace("'", "''")+"'n")
+
+       if self.sas.nosub:
+          print(code)
+          return
+
+       df = self._returnPD(code, '_spattr_', libref='work')
+
+       self.sas._lastlog = self.sas._io._log[lastlog:]
+
+       return df
 
