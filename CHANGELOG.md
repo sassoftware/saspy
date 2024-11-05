@@ -2,6 +2,29 @@
 
 
 
+## [5.101.0] - 2024-11-05
+
+### Added
+
+-   `Enhancement` For an internal request to get data set information, like date time created/modified, ...
+I added a method on the SASdata object called `attrs` which returns a 1 row dataframe with each of the attributes
+returned by the ATTRN and ATTRC functions. Mostly they are character or numeric, but the create/modified are
+returned as timestamps. This provides an easy programmatic wat to access any of these values.
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.100.4] - 2024-10-28
 
 ### Added
