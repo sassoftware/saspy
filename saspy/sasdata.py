@@ -1865,9 +1865,9 @@ class SASdata:
 
     def attrs(self):
        """
-       Get the ATTRN and ATTRC attributes for the Data Set
+       Get the ATTRN and ATTRC (SAS functions) attributes for the Data Set
 
-       :return: SASLOG for this step
+       :return: 1 row Pandas DataFrame containiung each of the ATTRN/ATTRC SAS function values for the data set
        """
        lastlog = len(self.sas._io._log)
        code  = """
