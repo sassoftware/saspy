@@ -906,14 +906,14 @@ class SASsession():
 
         **HTTP**
 
-        These kwargs are available for the HTTP Access Method for cases where long running code is submitteds. It's been observed
+        These kwargs are available for the HTTP Access Method for cases where long running code is submitted. It's been observed
         that HTTP Disconnect failures can be returned, even though subsequent calls still work, when submitting the request to see
         if the code has finished, so the LOG and LST can then be requested.
         To work around this issue, two parameters are available; one to have a delay between polling requests, and the other the
         number of disconnect errors to ignore before returning a failure. The defaults are to delay 0 seconds (so everything doesn't
-        have a delay that slows down how things run), and 5 disconnect errors. If you submit code that runs for more then a few
-        seconds, you can specify GETstatusDelay=n.n, the nunber of seconds (maybe 0.5 or 2, or 60 if you job runs for many minutes)
-        to wait befor asking Compute if the code finished.
+        have a delay that slows down how things run), and 5 disconnect errors. If you submit code that runs for more than a few
+        seconds, you can specify GETstatusDelay=n.n, the number of seconds (maybe 0.5 or 2, or 60 if you job runs for many minutes)
+        to wait before asking Compute if the code finished.
 
         :param GETstatusDelay: Number of seconds to sleep between HTTP calls to poll and see if the submitted code has finished
         :param GETstatusFailcnt: Number of disconnect failures to ignore before failing, when polling to see if the submitted code has finished
