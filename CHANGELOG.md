@@ -1,6 +1,28 @@
 # Changelog
 
 
+## [5.101.1] - 2024-12-20
+
+### Added
+
+-   `Enhancement` For an internal request to get around a VPN DNS problem, I've enhanced the way I try to get
+the local IP address for the Python machine, when using the SSH access method to connect to a remote server.
+So when the local machine isn't registered in DNS, this can get the local IP to use w/out requiring setting the
+`localhost` key in your configuration. `localhost` will still be used if provided. 
+
+### Changed
+
+-   `None` Nothing changed
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
 
 ## [5.101.0] - 2024-11-05
 
