@@ -873,6 +873,7 @@ Will use HTML5 for this SASsession.""")
             HTML(results['LST'])
       '''
       prompt  = prompt if prompt is not None else {}
+      reset   = kwargs.pop('reset', False)
       printto = kwargs.pop('undo', False)
       cancel  = kwargs.pop('cancel', False)
       lines   = kwargs.pop('loglines', False)
@@ -968,6 +969,9 @@ Will use HTML5 for this SASsession.""")
       if ods:
          pgm += odsclose
 
+      if reset:
+         print('RESETTING')
+         self.stdin[0].send(b'\ntom says EOL=RESET                           \n')
       if printto:
          self.stdin[0].send(b'\ntom says EOL=PRINTTO                         \n')
       if lines:

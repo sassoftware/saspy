@@ -489,6 +489,11 @@ public class saspy2j
                      t1.join();
                      return;
                      }
+                  else if (eol.contains("RESET"))
+                     {
+                     lang.Reset();
+                     pgm  = pgm.substring(idx + 13 + 33);
+                     }
                   else if (eol.contains("PRINTTO"))
                      {
                      undo = true;

@@ -918,6 +918,15 @@ class SASsession():
         :param GETstatusDelay: Number of seconds to sleep between HTTP calls to poll and see if the submitted code has finished
         :param GETstatusFailcnt: Number of disconnect failures to ignore before failing, when polling to see if the submitted code has finished
 
+        **IOM**
+
+        This boolean kwargs is only available for the IOM Access Method. It's an API call to reset the LanguageServive to an initial state with respect
+        to token scanning Use it to extricate the LanguageService from an error state associated with the execution of invalid syntax or incomplete
+        program source. Note, this was requested by a user, but it's not something that would normally be needed. Also, the reset will happen prior
+        to submitting the code provided.
+
+        :param reset: resets the LanguageService to an initial state with respect to token scanning; default is False
+
 
         :return: a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is 'results' (HTML or TEXT)
 
