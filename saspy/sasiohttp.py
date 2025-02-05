@@ -1245,6 +1245,16 @@ class SASsessionHTTP():
 
          except (KeyboardInterrupt, SystemExit):
             conn.close()
+            if not self._sb.sascfg.prompt:
+               canheaders = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token, "If-Match":Etag}
+               conn.connect()
+               conn.request('PUT', can, headers=canheaders)
+               req = conn.getresponse()
+               resp = req.read()
+               conn.close()
+               logger.warning("Exception caught! Canceled submitted statements. Percolating exception.")
+               raise
+
             print('Exception caught!')
             if cancel:
                msg = "Please enter (C) to Cancel submitted code or (Q) to Quit waiting for results or (W) continue to Wait."
