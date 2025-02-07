@@ -1,6 +1,30 @@
 # Changelog
 
 
+## [5.102.0] - 2025-02-07
+
+### Added
+
+-   `Enhancement` Per user request (#620) I've added a parameter to the Submit*() methods, `reset=` which resets the LanguageService to an initial state with respect to token scanning; the default is False. 
+
+### Changed
+
+-   ` Enhancement ` I've changed the method for acquiring the local IP address of the client for the SSH access method (STDIO over SSH) from using nslookup to using a a socket connect/close (to the remote host) to get the IP. This was a problem with intern
+al systems that happened w/ a VPN application that no longer registers client machines w/ DNS such that the previous method didn't resolve the hostname. This should cause no changes or regressions.
+
+### Fixed
+
+-   `Fix` From another internal consumer, I've fixed a bug in the HTTP access method around interrupt handling for submit*() methods. When processing a keyboard interrupt in submit, while waiting for the code to complete, the user is prompted with choices 
+to take; `C`ancel the submitted code, `Q`uit waiting for the results, or ignore - continue to `W`ait. Cancel is a new feature in this access method, and for the case where Prompt=False (in the configuration file), where there can be no prompting, Cancel is
+ the default for this interrupt. What has been changed/fixed is that in the case of Prompt=False and this interrupt happening and Canceling the submitted statements, that interrupt was not then being raised so the calling code (Prompt=False is used for non
+-interactive scripts) could catch that and do what was needed from the application. For the interactive case where the prompt is displayed, there is no change. So, for the case where Prompt=False and a keyboard interrupt (ctl-C) is taken in submit, the sta
+tements are Canceled (no change with that), and the interrupt is percolated to the caller (this is the change), instead of just returning. 
+
+### Removed
+
+-   `None` Nothing removed
+
+
 ## [5.101.1] - 2024-12-20
 
 ### Added
@@ -8,7 +32,7 @@
 -   `Enhancement` For an internal request to get around a VPN DNS problem, I've enhanced the way I try to get
 the local IP address for the Python machine, when using the SSH access method to connect to a remote server.
 So when the local machine isn't registered in DNS, this can get the local IP to use w/out requiring setting the
-`localhost` key in your configuration. `localhost` will still be used if provided. 
+`localhost` key in your configuration. `localhost` will still be used if provided.
 
 ### Changed
 
