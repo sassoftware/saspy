@@ -245,33 +245,16 @@ class SASconfigSTDIO:
             self.hostip = localhost
          else:
             self.hostip = socks.gethostname()
-            print('No localhost, hostip=', str(self.hostip))
+            sock = socks.socket()
+            sock.bind(('',0))
+            sock.settimeout(1)
             try:
-               x  = subprocess.Popen(('nslookup', self.hostip), stdout=subprocess.PIPE)
-               z  = x.stdout.read()
-               ip = z.rpartition(b'Address:')[2].strip().decode()
-               try:
-                  print('nslookup ip=', str(ip))
-                  socks.gethostbyaddr(ip)
-                  self.hostip = ip
-               except:
-                  sock = socks.socket()
-                  sock.bind(('',0))
-                  sock.settimeout(1)
-                  try:
-                     sock.connect((self.host, 22))
-                  except:
-                     pass
-                  print('sock=', str(sock))
-                  ip = sock.getsockname()[0]
-                  self.hostip = ip
-                  print('self.hostip fom connect is ip=', str(ip))
-                  sock.close()
-               x.stdout.close()
-               x.terminate()
-               x.wait(1)
+               sock.connect((self.host, 22))
+               ip = sock.getsockname()[0]
+               self.hostip = ip
             except:
                pass
+            sock.close()
 
       return
 
