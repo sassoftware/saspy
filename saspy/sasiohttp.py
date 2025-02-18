@@ -105,6 +105,8 @@ class SASconfigHTTP:
       ppw            = cfg.get('proxy_pw', '')
       pauthkey       = cfg.get('proxy_authkey', '')
       self.pkce      = cfg.get('pkce', None)
+      self.delay     = cfg.get('GETstatusDelay'  , 0)
+      self.excpcnt   = cfg.get('GETstatusFailcnt', 5)
 
       try:
          self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -208,6 +210,14 @@ class SASconfigHTTP:
       inauthc = kwargs.get('authcode', None)
       if inauthc is not None:
          authcode = inauthc
+
+      indelay = kwargs.get('GETstatusDelay', None)
+      if indelay is not None:
+         self.delay = indelay
+
+      inexcpcnt = kwargs.get('GETstatusFailcnt', None)
+      if inexcpcnt is not None:
+         self.excpcnt = inexcpcnt
 
       incis = kwargs.get('client_secret', None)
       if incis is not None:
@@ -1225,8 +1235,8 @@ class SASsessionHTTP():
       headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
       done    = False
 
-      delay   = kwargs.get('GETstatusDelay'  , 0)
-      excpcnt = kwargs.get('GETstatusFailcnt', 5)
+      delay   = kwargs.get('GETstatusDelay'  , self.sascfg.delay   )
+      excpcnt = kwargs.get('GETstatusFailcnt', self.sascfg.excpcnt )
 
       while not done:
          try:
