@@ -1278,7 +1278,7 @@ class SASsession():
         if file.lower().startswith("http"):
            code += "url "
 
-        code += "\""+file+"\";\n"
+        code += "'"+file+"';\n"
         code += "proc import datafile=_x out="
         if len(libref):
            code += libref+"."
