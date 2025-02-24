@@ -1342,7 +1342,7 @@ class SASsession():
         dsopts = dsopts if dsopts is not None else {}
         opts   = opts if opts is not None else {}
 
-        code  = "filename _x \""+file+"\";\n"
+        code  = "filename _x '"+file+"';\n"
         code += "options nosource;\n"
         code += "proc export data="
 
