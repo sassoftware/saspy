@@ -11,7 +11,7 @@ installations.
 Installation via pip
 -------------
 
-pip is the default Python package manager that comes with Python when downloaded from [python.org](https://www.python.org/)
+pip is the default Python package manager that comes with Python when downloaded from python.org
 
 To install the latest version using `pip`, you execute the following::
 
@@ -33,6 +33,7 @@ uninstall and then install, picking up the latest production version from PyPI:
     pip uninstall -y saspy
     pip install saspy
 
+.. _python.org: https://www.python.org/
 
 Installation via uv
 -------------
@@ -43,7 +44,7 @@ Installation via uv
     cd name-of-project
     uv add saspy # adds saspy to your project from PyPI
 
-Installing a specific release can be done from the `SASpy project releases page`_, where the X.X.X is the release version you want.
+Installing a specific release can be done from the `SASpy project releases page`_, where the X.X.X is the release version you want.::
 
     uv init name-of-project
     cd name-of-project
@@ -55,7 +56,7 @@ Installing a specific release can be done from the `SASpy project releases page`
 Installation via pixi
 -------------
 
-`pixi`_ is a language-agnostic and cross-platform package management tool built on the foundation of the conda ecosystem. You can install packages from the `conda-forge channel`_, or PyPI.
+`pixi`_ is a language-agnostic and cross-platform package management tool built on the foundation of the conda ecosystem. You can install packages from the `conda-forge channel`_, or PyPI.::
 
     pixi init name-of-project
     pixi cd name-of-project
