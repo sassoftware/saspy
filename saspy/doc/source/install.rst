@@ -56,7 +56,7 @@ Installing a specific release can be done from the `SASpy project releases page`
 Installation via pixi
 -------------
 
-`pixi`_ is a language-agnostic and cross-platform package management tool built on the foundation of the conda ecosystem. You can install packages from the `conda-forge channel`_, or PyPI.::
+`pixi`_ is a language-agnostic and cross-platform package management tool built on the foundation of the conda ecosystem. You can install packages from the `conda-forge channel`_, or `PyPI`_.::
 
     pixi init name-of-project
     pixi cd name-of-project
@@ -70,20 +70,28 @@ Installation via pixi
 
 .. _pixi: https://github.com/prefix-dev/pixi
 .. _conda-forge channel: https://anaconda.org/conda-forge/saspy
+.. _PyPI: https://pypi.org/project/saspy/
 
 Installation via conda
 -------------
 
-If you prefer conda install, you can use that from the conda-forge channel:
+`conda`_ is a cross-platform, language-agnostic binary package manager.::
+
+    conda create --name name-of-my-environment
+    conda install --channel conda-forge saspy # Installs latest version of saspy from conda-forge channel.
+    conda install --channel conda-forge saspy==X.X.X # Where X.X.X is the version you'd like to install.
+
+If you'd like to see more ways to install from the conda-forge channel please look to the repository for the saspy feedstock:
 
     see: https://github.com/conda-forge/saspy-feedstock#installing-saspy
-
 
 To use this module after installation, you need to copy the example sascfg.py file to a
 sascfg_personal.py and edit sascfg_personal.py per the instructions in the next section.
 
 * If you run into any problems, see :doc:`troubleshooting`.
 * If you have questions, open an issue at https://github.com/sassoftware/saspy/issues.
+
+.. _conda: https://github.com/conda/conda
 
 
 
