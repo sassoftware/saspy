@@ -30,7 +30,7 @@ It is expected that the user community can, and will, contribute enhancements.
 
 # Getting Started
 
-All of the doc, including install and configuration information can be found at
+All of the documentation, including installalation and configuration information can be found at
 [sassoftware.github.io/saspy](https://sassoftware.github.io/saspy/).
 
 Also, example Notebooks and use cases can be found at
