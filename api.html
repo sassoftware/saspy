@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; saspy 5.101.1 documentation</title>
+  <title>API Reference &mdash; saspy 5.102.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
 
@@ -38,7 +38,7 @@
             saspy
           </a>
               <div class="version">
-                5.101.1
+                5.102.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -49,7 +49,13 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#installation-via-pip">Installation via pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#installation-via-uv">Installation via uv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#installation-via-pixi">Installation via pixi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#installation-via-conda">Installation via conda</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#sascfg-personal-py">sascfg_personal.py</a></li>
 <li class="toctree-l2"><a class="reference internal" href="configuration.html#sascfg-personal-py-details">sascfg_personal.py details</a></li>
@@ -1635,6 +1641,16 @@ to wait before asking Compute if the code finished.</p>
 <li><p><strong>GETstatusDelay</strong> – Number of seconds to sleep between HTTP calls to poll and see if the submitted code has finished</p></li>
 <li><p><strong>GETstatusFailcnt</strong> – Number of disconnect failures to ignore before failing, when polling to see if the submitted code has finished</p></li>
 </ul>
+</dd>
+</dl>
+<p><strong>IOM</strong></p>
+<p>This boolean kwargs is only available for the IOM Access Method. It’s an API call to reset the LanguageServive to an initial state with respect
+to token scanning Use it to extricate the LanguageService from an error state associated with the execution of invalid syntax or incomplete
+program source. Note, this was requested by a user, but it’s not something that would normally be needed. Also, the reset will happen prior
+to submitting the code provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>reset</strong> – resets the LanguageService to an initial state with respect to token scanning; default is False</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>a Dict containing two keys:values, [LOG, LST]. LOG is text and LST is ‘results’ (HTML or TEXT)</p>
