@@ -28,22 +28,9 @@ It is expected that the user community can, and will, contribute enhancements.
 - Interactive Line mode, Python IDE's or other UI's
 - Batch Python scripts
 
-# Installation
-
-This package can be installed via pip or Conda. This will pull down the latest PyPI package and install it.
-
-    pip install saspy
-
-However, if that's too easy, you can also download a specific release from
-[SASpy project releases page](https://github.com/sassoftware/saspy/releases), or just clone
-the repo and and instll from that. To install a given release, use the following,
-where the X.X.X is the release version you want.
-
-    pip install https://github.com/sassoftware/saspy/archive/vX.X.X.tar.gz
-
 # Getting Started
 
-All of the doc, including install and configuration information can be found at
+All of the documentation, including installalation and configuration information can be found at
 [sassoftware.github.io/saspy](https://sassoftware.github.io/saspy/).
 
 Also, example Notebooks and use cases can be found at
