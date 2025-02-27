@@ -3,13 +3,10 @@
 Installation
 =============
 
-This package can be installed via pip, uv, pixi, or conda.
-This will pull down the latest PyPI package and install it.
-It is a pure Python package and works with Python 3.x
-installations.
+This package can be installed via pip, uv, pixi, or conda. It is a pure Python package and works with Python 3.x installations.
 
 Installation via pip
--------------
+--------------------
 
 pip is the default Python package manager that comes with Python when downloaded from python.org
 
@@ -36,7 +33,7 @@ uninstall and then install, picking up the latest production version from PyPI:
 .. _python.org: https://www.python.org/
 
 Installation via uv
--------------
+-------------------
 
 `uv`_ Is a Python package and project manager, written in Rust.::
 
@@ -54,7 +51,7 @@ Installing a specific release can be done from the `SASpy project releases page`
 .. _SASpy project releases page: https://github.com/sassoftware/saspy/releases
 
 Installation via pixi
--------------
+---------------------
 
 `pixi`_ is a language-agnostic and cross-platform package management tool built on the foundation of the conda ecosystem. You can install packages from the `conda-forge channel`_, or `PyPI`_.::
 
@@ -73,7 +70,7 @@ Installation via pixi
 .. _PyPI: https://pypi.org/project/saspy/
 
 Installation via conda
--------------
+----------------------
 
 `conda`_ is a cross-platform, language-agnostic binary package manager.::
 
