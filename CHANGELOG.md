@@ -1,24 +1,62 @@
 # Changelog
 
 
+## [5.102.1] - 2025-02-28
+
+### Added
+
+-   `Enhancement` PR #635 was contributed by a new contributor @gregorywaynepower who enhanced the install instructions for installing 
+saspy from other package manages and enhanced the conda instructions as well. Appreciate it!
+
+### Changed
+
+-   ` None ` Nothing Changed
+
+### Fixed
+
+-   `Fix` Issue #634 was fixed in this release. The read_csv() and write_csv() methods generated a filename statement with double
+quotes around the physical path. That's fine unless there are special characters that can be configused with marco variables; '&'
+for instance. I fixed this to use single quotes which won't let the SAS parser think there are embedded marco variables to resolve
+in the path specification.
+
+### Removed
+
+-   `None` Nothing removed
+
+## New Contributors
+* @gregorywaynepower  made their first contribution in https://github.com/sassoftware/saspy/pull/635
+
+
+
 ## [5.102.0] - 2025-02-07
 
 ### Added
 
--   `Enhancement` Per user request (#620) I've added a parameter to the Submit*() methods, `reset=` which resets the LanguageService to an initial state with respect to token scanning; the default is False. 
+-   `Enhancement` Per user request (#620) I've added a parameter to the Submit*() methods, `reset=` which
+resets the LanguageService to an initial state with respect to token scanning; the default is False.
 
 ### Changed
 
--   ` Enhancement ` I've changed the method for acquiring the local IP address of the client for the SSH access method (STDIO over SSH) from using nslookup to using a a socket connect/close (to the remote host) to get the IP. This was a problem with intern
-al systems that happened w/ a VPN application that no longer registers client machines w/ DNS such that the previous method didn't resolve the hostname. This should cause no changes or regressions.
+-   ` Enhancement ` I've changed the method for acquiring the local IP address of the client for the
+SSH access method (STDIO over SSH) from using nslookup to using a a socket connect/close (to the remote host)
+to get the IP. This was a problem with internal systems that happened w/ a VPN application that no longer
+registers client machines w/ DNS such that the previous method didn't resolve the hostname. This should
+cause no changes or regressions.
 
 ### Fixed
 
--   `Fix` From another internal consumer, I've fixed a bug in the HTTP access method around interrupt handling for submit*() methods. When processing a keyboard interrupt in submit, while waiting for the code to complete, the user is prompted with choices 
-to take; `C`ancel the submitted code, `Q`uit waiting for the results, or ignore - continue to `W`ait. Cancel is a new feature in this access method, and for the case where Prompt=False (in the configuration file), where there can be no prompting, Cancel is
- the default for this interrupt. What has been changed/fixed is that in the case of Prompt=False and this interrupt happening and Canceling the submitted statements, that interrupt was not then being raised so the calling code (Prompt=False is used for non
--interactive scripts) could catch that and do what was needed from the application. For the interactive case where the prompt is displayed, there is no change. So, for the case where Prompt=False and a keyboard interrupt (ctl-C) is taken in submit, the sta
-tements are Canceled (no change with that), and the interrupt is percolated to the caller (this is the change), instead of just returning. 
+-   `Fix` From another internal consumer, I've fixed a bug in the HTTP access method around interrupt
+handling for submit*() methods. When processing a keyboard interrupt in submit, while waiting for the
+code to complete, the user is prompted with choices to take; `C`ancel the submitted code, `Q`uit waiting
+for the results, or ignore - continue to `W`ait. Cancel is a new feature in this access method, and for
+the case where Prompt=False (in the configuration file), where there can be no prompting, Cancel is
+the default for this interrupt. What has been changed/fixed is that in the case of Prompt=False and
+this interrupt happening and Canceling the submitted statements, that interrupt was not then being
+raised so the calling code (Prompt=False is used for non-interactive scripts) could catch that and do
+what was needed from the application. For the interactive case where the prompt is displayed, there
+is no change. So, for the case where Prompt=False and a keyboard interrupt (ctl-C) is taken in submit,
+the statements are Canceled (no change with that), and the interrupt is percolated to the caller
+(this is the change), instead of just returning.
 
 ### Removed
 
