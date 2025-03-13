@@ -395,7 +395,7 @@ class SASProcCommons:
             # what object type is target
             if isinstance(tgt, str):
                 # if there is special character do nothing
-                if len([word for word in tgt if any(letter in word for letter in '/\:;.%')]) != 0:
+                if len([word for word in tgt if any(letter in word for letter in r'/\:;.%')]) != 0:
                     kwargs['target'] = tgt
                 else:
                     # turn str into list and search for nominals
@@ -437,7 +437,7 @@ class SASProcCommons:
             if isinstance(inputs, str):
                 # if there is only one word or special character do nothing
                 if len(inputs.split()) == 1 or len(
-                        [word for word in inputs if any(letter in word for letter in '-/\\:;.%')]) != 0:
+                        [word for word in inputs if any(letter in word for letter in r'-/\:;.%')]) != 0:
                     kwargs['input'] = inputs
                 else:
                     # turn str into list and search for nominals
