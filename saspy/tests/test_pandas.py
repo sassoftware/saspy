@@ -346,4 +346,20 @@ class TestPandasValidVarname(unittest.TestCase):
         [self.assertIn(name, converted_col_names) for name in correct_names]
         self.assertEqual(len(correct_names), len(converted_col_names))
 
+    def test_one_column_missing(self):
+        """
+        Test bug found in issue 640
+        """
+        df = pd.DataFrame({'A': ["hello", None, "hi", ""]})
+        sd = self.sas.df2sd(df, results='text')
+        d2 = sd.to_df()
+
+        self.assertTrue(df.shape == (4, 1))
+
+        df = pd.DataFrame({'A': [32, None, 12.5]})
+        sd = self.sas.df2sd(df, results='text')
+        d2 = sd.to_df()
+
+        self.assertTrue(df.shape == (3, 1))
+
 

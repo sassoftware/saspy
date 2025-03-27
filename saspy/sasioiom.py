@@ -2269,7 +2269,7 @@ Will use HTML5 for this SASsession.""")
       #self.stdin[0].send(b'\n'+logcodei.encode()+b'\n'+b'tom says EOL='+logcodeb)
 
       try:
-         sockout = _read_sock(io=self, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(),
+         sockout = _read_sock(io=self, method='DISK', rsep=(rowsep+'\n').encode(), rowsep=rowsep.encode(),
                               lstcodeo=lstcodeo.encode(), logcodeb=logcodeb, errors=errors)
 
          df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=dvarlist,
@@ -2629,7 +2629,7 @@ Will use HTML5 for this SASsession.""")
       rows_read = 0
 
       try:
-         sockout = _read_sock(io=self, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(),
+         sockout = _read_sock(io=self, method='DISK', rsep=(rowsep+'\n').encode(), rowsep=rowsep.encode(),
                               lstcodeo=lstcodeo.encode(), logcodeb=logcodeb, errors=errors)
          logging.info("Socket ready, waiting for results...")
 

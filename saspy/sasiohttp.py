@@ -2278,7 +2278,7 @@ class SASsessionHTTP():
       status = req.status
 
 
-      sockout = _read_sock(req=req, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(), errors=errors)
+      sockout = _read_sock(req=req, method='DISK', rsep=(rowsep+'\n').encode(), rowsep=rowsep.encode(), errors=errors)
 
       df = pd.read_csv(sockout, index_col=idx_col, engine=eng, header=None, names=dvarlist,
                        sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, keep_default_na=False,
@@ -2646,7 +2646,7 @@ class SASsessionHTTP():
       rows_read = 0
 
       try:
-         sockout = _read_sock(req=req, method='DISK', rsep=(colsep+rowsep+'\n').encode(), rowsep=rowsep.encode(), errors=errors)
+         sockout = _read_sock(req=req, method='DISK', rsep=(rowsep+'\n').encode(), rowsep=rowsep.encode(), errors=errors)
          logging.info("Socket ready, waiting for results...")
 
          # determine how many chunks should be written into one partition.
