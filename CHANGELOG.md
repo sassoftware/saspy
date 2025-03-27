@@ -1,11 +1,34 @@
 # Changelog
 
 
+## [5.102.2] - 2025-03-27
+
+### Added
+
+-   `None`  Nothing Added
+
+### Changed
+
+-   ` None ` Nothing Changed
+
+### Fixed
+
+-   `Fix` Issue #640 found an edge case in sd2df where a row was dropped for a missing value in a single column data set for IOM
+and HTTP. STDIO didn't have the problem. Pandas read_csv required a column separator for that one case even though it didn't for
+cases with more than one column, even for the last column. I fixed the stream of data being provided to pandas so it handled
+this case.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.102.1] - 2025-02-28
 
 ### Added
 
--   `Enhancement` PR #635 was contributed by a new contributor @gregorywaynepower who enhanced the install instructions for installing 
+-   `Enhancement` PR #635 was contributed by a new contributor @gregorywaynepower who enhanced the install instructions for installing
 saspy from other package manages and enhanced the conda instructions as well. Appreciate it!
 
 ### Changed
