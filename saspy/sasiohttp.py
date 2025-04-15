@@ -105,7 +105,7 @@ class SASconfigHTTP:
       ppw            = cfg.get('proxy_pw', '')
       pauthkey       = cfg.get('proxy_authkey', '')
       self.pkce      = cfg.get('pkce', None)
-      self.delay     = cfg.get('GETstatusDelay'  , 0)
+      self.delay     = cfg.get('GETstatusDelay'  , 30)
       self.excpcnt   = cfg.get('GETstatusFailcnt', 5)
 
       try:
@@ -1209,6 +1209,7 @@ class SASsessionHTTP():
       req = conn.getresponse()
       status = req.status
       resp = req.read()
+      Etag = req.getheader("Etag")
       conn.close()
 
       try:
@@ -1229,29 +1230,36 @@ class SASsessionHTTP():
          if uri and can:
             break
 
-      Etag = req.getheader("Etag")
-
-      conn    = self.sascfg.HTTPConn;
-      headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
-      done    = False
-
       delay   = kwargs.get('GETstatusDelay'  , self.sascfg.delay   )
       excpcnt = kwargs.get('GETstatusFailcnt', self.sascfg.excpcnt )
 
+      conn    = self.sascfg.HTTPConn;
+      done    = False
+
+      # GET Etag for subsequent Status calls
+      headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
+      conn.connect()
+      conn.request('GET', uri, headers=headers)
+      req  = conn.getresponse()
+      resp = req.read()
+      Etag = req.getheader("Etag")
+      conn.close()
+      if resp not in [b'running', b'pending']:
+         done = True
+
+      headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token, "If-None-Match": Etag}
       while not done:
          try:
             while True:
                # GET Status for JOB
                conn.connect()
-               conn.request('GET', uri, headers=headers)
-               req = conn.getresponse()
+               conn.request('GET', uri+"?wait="+str(delay), headers=headers)
+               req  = conn.getresponse()
                resp = req.read()
-               Etag = req.getheader("Etag")
                conn.close()
-               if resp not in [b'running', b'pending']:
+               if resp not in [b'running', b'pending', b'']:
                   done = True
                   break
-               sleep(delay)
 
          except (KeyboardInterrupt, SystemExit):
             conn.close()
@@ -1259,7 +1267,7 @@ class SASsessionHTTP():
                canheaders = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token, "If-Match":Etag}
                conn.connect()
                conn.request('PUT', can, headers=canheaders)
-               req = conn.getresponse()
+               req  = conn.getresponse()
                resp = req.read()
                conn.close()
                logger.warning("Exception caught! Canceled submitted statements. Percolating exception.")
@@ -1279,7 +1287,7 @@ class SASsessionHTTP():
                   canheaders = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token, "If-Match":Etag}
                   conn.connect()
                   conn.request('PUT', can, headers=canheaders)
-                  req = conn.getresponse()
+                  req  = conn.getresponse()
                   resp = req.read()
                   conn.close()
                   print('Canceled submitted statements\n')
