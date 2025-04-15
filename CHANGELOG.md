@@ -1,6 +1,34 @@
 # Changelog
 
 
+## [5.103.0] - 2025-04-15
+
+### Added
+
+-   `None` Nothing Added
+
+### Changed
+
+-   `Enhanced` The submit*() methods of the HTTP Access Method (for Viya) include a GETstatusDelay= option for delaying the 
+HTTP calls to see if the code is finished, which happen in a loop until done. Once done the LOG and LST can then be retrieved. 
+This was implemented as a sleep() call in the loop checking the status. I've found that the API call can take a wait= value such
+that it is a synchronous call with a timeout. I've changed to provide the GETstatusDelay value to the API call instead of being a
+sleep delay in the python code. This will improve this loop by eliminating excessive calls while at the same time being more 
+performant since wait= will return as soon as the job finishes, while sleep will sleep that whole time before making another 
+status call. I've changed the default value of GETstatusDelay from 0 to 30 seconds to take advantage of this functionality, so
+it will be used by default. GETstatusDelay is no longer required to eliminate excessive http status calls, while returning as soon
+as the code finishes.
+
+### Fixed
+
+-   ` None` Nothing Fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.102.2] - 2025-03-27
 
 ### Added
