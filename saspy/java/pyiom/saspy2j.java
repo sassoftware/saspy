@@ -877,6 +877,7 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
           {
           for (int i=0; i < hosts; i++)
              {
+             long start = System.currentTimeMillis();
              try
                 {
                 server = new BridgeServer(Server.CLSID_SAS, iomhosts[i], iomport);
@@ -900,12 +901,24 @@ private static void connect(boolean recon, boolean ods, boolean zero) throws IOE
                    cx = cxf.getConnection(omruser, omrpw, timeout);
                 else
                    cx = cxf.getConnection(omruser, omrpw);
+
+                String msg = "IOM Client connect to "+iomhosts[i]+" time = "+ (System.currentTimeMillis() - start)/1000.000 +" seconds";
+                System.out.print(msg+"\n");
+                errp.write(msg+"\n");
+                errp.flush();
+
                 break;
                 }
              catch (ConnectionFactoryException e)
                 {
                 if (i+1 < hosts)
+                   {
+                   String msg = "IOM Client connect to "+iomhosts[i]+" failed after = "+ (System.currentTimeMillis() - start)/1000.000 +" seconds";
+                   System.out.print(msg+"\n");
+                   errp.write(msg+"\n");
+                   errp.flush();
                    continue;
+                   }
                 String msg = "We failed in getConnection\n"+e.getMessage();
                 System.out.print(msg+"\n");
                 errp.write(msg+"\n");

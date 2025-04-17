@@ -25,6 +25,8 @@ import io
 import atexit
 import re
 
+import time
+
 import logging
 logger = logging.getLogger('saspy')
 
@@ -447,6 +449,8 @@ Will use HTML5 for this SASsession.""")
          else:
             s += parms[i]+' '
 
+      start_time = time.time()
+
       if os.name == 'nt':
          try:
             self.pid = subprocess.Popen(parms, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -575,6 +579,8 @@ Will use HTML5 for this SASsession.""")
             self.stdin[0].send(pw.encode())
 
       self.stdcan = self.sockcan.accept()
+
+      print("Python client connect time = "+str(time.time()-start_time)+" seconds")
 
       enc = self.sascfg.encoding #validating encoding is done next, so handle it not being set for this one call
       if enc == '':
