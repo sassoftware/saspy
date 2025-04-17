@@ -601,6 +601,8 @@ Will use HTML5 for this SASsession.""")
 
       atexit.register(self._endsas)
 
+      print("Python client total startup time = "+str(time.time()-start_time)+" seconds")
+
       return self.pid
 
    def _endsas(self):
