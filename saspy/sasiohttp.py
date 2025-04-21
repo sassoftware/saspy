@@ -958,15 +958,14 @@ class SASsessionHTTP():
       else:
          uri   = self._uri_log
 
+      conn = self.sascfg.HTTPConn; conn.connect()
       while True:
          # GET Log
-         conn = self.sascfg.HTTPConn; conn.connect()
          headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
          conn.request('GET', uri+"?start="+str(start)+"&limit="+str(start+1000), headers=headers)
          req = conn.getresponse()
          status = req.status
          resp = req.read()
-         conn.close()
 
          try:
             js    = json.loads(resp.decode(self.sascfg.encoding))
@@ -981,6 +980,7 @@ class SASsessionHTTP():
 
          logl += log
 
+      conn.close()
       for line in logl:
           logr += line.get('line')+'\n'
 
@@ -1060,14 +1060,13 @@ class SASsessionHTTP():
       else:
          uri   = self._uri_lst
 
+      conn = self.sascfg.HTTPConn; conn.connect()
       while True:
-         conn = self.sascfg.HTTPConn; conn.connect()
          headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
          conn.request('GET', uri+"?start="+str(start)+"&limit="+str(start+1000), headers=headers)
          req = conn.getresponse()
          status = req.status
          resp = req.read()
-         conn.close()
 
          try:
             js    = json.loads(resp.decode(self.sascfg.encoding))
@@ -1083,6 +1082,7 @@ class SASsessionHTTP():
          for line in lst:
              lstr += line.get('line')+'\n'
 
+      conn.close()
       return lstr.replace(chr(12), chr(10))
 
    def _asubmit(self, code, results="html"):
@@ -1248,15 +1248,14 @@ class SASsessionHTTP():
          done = True
 
       headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token, "If-None-Match": Etag}
+      conn.connect()
       while not done:
          try:
             while True:
                # GET Status for JOB
-               conn.connect()
                conn.request('GET', uri+"?wait="+str(delay), headers=headers)
                req  = conn.getresponse()
                resp = req.read()
-               conn.close()
                if resp not in [b'running', b'pending', b'']:
                   done = True
                   break
@@ -1305,6 +1304,7 @@ class SASsessionHTTP():
             if excpcnt < 0:
                raise
 
+      conn.close()
       logs = self._getlog(jobid, lines)
 
       if not lines:
