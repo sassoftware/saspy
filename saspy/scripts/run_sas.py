@@ -75,6 +75,11 @@ def main():
     else:
         sas_session = saspy.SASsession(cfgname=options.cfgname)
 
+    sas_session.submit(
+        f"%let _SASPROGRAMFILE={os.path.normpath(sas_fname[-1])};\n",
+        results=results_format,
+    )
+
     c = sas_session.submit(sas_code_txt,results=results_format)
 
     with open(log_fname, 'w') as f1:
