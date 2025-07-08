@@ -1,6 +1,30 @@
 # Changelog
 
 
+## [5.103.1] - 2025-07-08
+
+### Added
+
+-   `None` Nothing Added
+
+### Changed
+
+-   `Enhanced` The HTTP Access Method (for Viya) has some places where it has to make an HTTP call in a loop. There were
+some of these where I was doing connect() and close() on the connection, inside the loop. Other places I wasn't. There's
+no need to have those in the loops, so I removed that from the places it was doing those. I also changed upload from doing
+'chunked' http transfer manually, to having it done by the http request call itself. I also added try/except aound all of
+the http request calls that didn't have it, to handle unexpected failures better.
+
+### Fixed
+
+-   ` None` Nothing Fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.103.0] - 2025-04-15
 
 ### Added
@@ -9,12 +33,12 @@
 
 ### Changed
 
--   `Enhanced` The submit*() methods of the HTTP Access Method (for Viya) include a GETstatusDelay= option for delaying the 
-HTTP calls to see if the code is finished, which happen in a loop until done. Once done the LOG and LST can then be retrieved. 
+-   `Enhanced` The submit*() methods of the HTTP Access Method (for Viya) include a GETstatusDelay= option for delaying the
+HTTP calls to see if the code is finished, which happen in a loop until done. Once done the LOG and LST can then be retrieved.
 This was implemented as a sleep() call in the loop checking the status. I've found that the API call can take a wait= value such
 that it is a synchronous call with a timeout. I've changed to provide the GETstatusDelay value to the API call instead of being a
-sleep delay in the python code. This will improve this loop by eliminating excessive calls while at the same time being more 
-performant since wait= will return as soon as the job finishes, while sleep will sleep that whole time before making another 
+sleep delay in the python code. This will improve this loop by eliminating excessive calls while at the same time being more
+performant since wait= will return as soon as the job finishes, while sleep will sleep that whole time before making another
 status call. I've changed the default value of GETstatusDelay from 0 to 30 seconds to take advantage of this functionality, so
 it will be used by default. GETstatusDelay is no longer required to eliminate excessive http status calls, while returning as soon
 as the code finishes.
