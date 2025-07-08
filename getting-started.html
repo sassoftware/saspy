@@ -1,24 +1,19 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting started &mdash; saspy 5.103.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+  <title>Getting started &mdash; saspy 5.103.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/documentation_options.js?v=af6c9461"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,9 +32,6 @@
           <a href="index.html" class="icon icon-home">
             saspy
           </a>
-              <div class="version">
-                5.103.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -415,7 +407,7 @@
            <div itemprop="articleBody">
              
   <section id="getting-started">
-<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading">¶</a></h1>
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h1>
 <p>This is an interface module to the SAS System. It connects to SAS 9.4
 (released July 2013) or newer and enables Python programmers to take
 advantage of their licensed SAS infrastructure through Python 3.x.</p>
@@ -439,16 +431,16 @@ then upload it into your Jupyter and run it. It uses SASHELP tables, so it shoul
 on your system already. You can edit it and play around with it directly on your system.
 The direct link to it is: <a class="reference external" href="https://github.com/sassoftware/saspy-examples/blob/main/SAS_contrib/saspy_example_github.ipynb">https://github.com/sassoftware/saspy-examples/blob/main/SAS_contrib/saspy_example_github.ipynb</a></p>
 <section id="initial-import">
-<h2>Initial import<a class="headerlink" href="#initial-import" title="Permalink to this heading">¶</a></h2>
+<h2>Initial import<a class="headerlink" href="#initial-import" title="Link to this heading">¶</a></h2>
 <p>It is assumed you have already done the <a class="reference internal" href="install.html"><span class="doc">installation and configuration</span></a>.
 If you have not, refer to that section for more information.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">saspy</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 </pre></div>
 </div>
 </section>
 <section id="start-a-sas-session">
-<h2>Start a SAS session<a class="headerlink" href="#start-a-sas-session" title="Permalink to this heading">¶</a></h2>
+<h2>Start a SAS session<a class="headerlink" href="#start-a-sas-session" title="Link to this heading">¶</a></h2>
 <p>In the following code we start a SAS session named <code class="docutils literal notranslate"><span class="pre">sas</span></code> using the default
 configuration. Each SAS session is a connection to a separate SAS instance.
 The cfgname parameter specifies the configuration definition (in sascfg_personal.py)
@@ -489,12 +481,12 @@ override things at run time:</p>
 </div>
 </section>
 <section id="load-data-into-sas">
-<h2>Load data into SAS<a class="headerlink" href="#load-data-into-sas" title="Permalink to this heading">¶</a></h2>
+<h2>Load data into SAS<a class="headerlink" href="#load-data-into-sas" title="Link to this heading">¶</a></h2>
 <p>Data can be loaded easily from many sources. The following examples show
 the most common methods. In each case, <code class="docutils literal notranslate"><span class="pre">hr</span></code> is a SASdata object that
 represents a SAS data set.</p>
 <section id="csv">
-<h3>CSV<a class="headerlink" href="#csv" title="Permalink to this heading">¶</a></h3>
+<h3>CSV<a class="headerlink" href="#csv" title="Link to this heading">¶</a></h3>
 <p>In the following example, the CSV file is accessible to Python. The
 <code class="docutils literal notranslate"><span class="pre">sas</span></code> object reads the CSV file and creates a SAS data set in the
 SAS session.</p>
@@ -503,7 +495,7 @@ SAS session.</p>
 </div>
 </section>
 <section id="pandas-dataframe">
-<h3>Pandas DataFrame<a class="headerlink" href="#pandas-dataframe" title="Permalink to this heading">¶</a></h3>
+<h3>Pandas DataFrame<a class="headerlink" href="#pandas-dataframe" title="Link to this heading">¶</a></h3>
 <p>In the following example, the CSV file is accessible to Python. First,
 the CSV file is read into a data frame. Then the <code class="docutils literal notranslate"><span class="pre">sas</span></code> object
 reads the data frame and creates a SAS data set in the SAS session.</p>
@@ -513,7 +505,7 @@ reads the data frame and creates a SAS data set in the SAS session.</p>
 </div>
 </section>
 <section id="existing-sas-data-set">
-<h3>Existing SAS data set<a class="headerlink" href="#existing-sas-data-set" title="Permalink to this heading">¶</a></h3>
+<h3>Existing SAS data set<a class="headerlink" href="#existing-sas-data-set" title="Link to this heading">¶</a></h3>
 <p>In the following example, no data file is accessible to Python. An existing
 SAS data set that is accessible to the SAS session is associated with the
 <code class="docutils literal notranslate"><span class="pre">hr</span></code> object.</p>
@@ -526,49 +518,49 @@ SAS data set that is accessible to the SAS session is associated with the
 </section>
 </section>
 <section id="explore-the-data">
-<h2>Explore the data<a class="headerlink" href="#explore-the-data" title="Permalink to this heading">¶</a></h2>
+<h2>Explore the data<a class="headerlink" href="#explore-the-data" title="Link to this heading">¶</a></h2>
 <p>There are a number of tabular and graphical methods to view your data.
 The following examples show common methods. See the <a class="reference internal" href="api.html"><span class="doc">API Reference</span></a> for a
 complete list.</p>
 <section id="list-the-variables">
-<h3>List the variables<a class="headerlink" href="#list-the-variables" title="Permalink to this heading">¶</a></h3>
+<h3>List the variables<a class="headerlink" href="#list-the-variables" title="Link to this heading">¶</a></h3>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">columnInfo</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="see-the-first-observations">
-<h3>See the first observations<a class="headerlink" href="#see-the-first-observations" title="Permalink to this heading">¶</a></h3>
+<h3>See the first observations<a class="headerlink" href="#see-the-first-observations" title="Link to this heading">¶</a></h3>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="summary-of-numeric-columns">
-<h3>Summary of numeric columns<a class="headerlink" href="#summary-of-numeric-columns" title="Permalink to this heading">¶</a></h3>
+<h3>Summary of numeric columns<a class="headerlink" href="#summary-of-numeric-columns" title="Link to this heading">¶</a></h3>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">means</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
 <section id="basic-bar-chart">
-<h3>Basic bar chart<a class="headerlink" href="#basic-bar-chart" title="Permalink to this heading">¶</a></h3>
+<h3>Basic bar chart<a class="headerlink" href="#basic-bar-chart" title="Link to this heading">¶</a></h3>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="s1">&#39;salary&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="basic-histogram">
-<h3>Basic histogram<a class="headerlink" href="#basic-histogram" title="Permalink to this heading">¶</a></h3>
+<h3>Basic histogram<a class="headerlink" href="#basic-histogram" title="Link to this heading">¶</a></h3>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="s1">&#39;last_evaluation&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="basic-heatmap">
-<h3>Basic heatmap<a class="headerlink" href="#basic-heatmap" title="Permalink to this heading">¶</a></h3>
+<h3>Basic heatmap<a class="headerlink" href="#basic-heatmap" title="Link to this heading">¶</a></h3>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hr</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="s1">&#39;last_evaluation&#39;</span><span class="p">,</span> <span class="s1">&#39;satisfaction_level&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 </section>
 <section id="submit-sas-code-directly-from-python-session">
-<h2>Submit SAS code directly from Python session<a class="headerlink" href="#submit-sas-code-directly-from-python-session" title="Permalink to this heading">¶</a></h2>
+<h2>Submit SAS code directly from Python session<a class="headerlink" href="#submit-sas-code-directly-from-python-session" title="Link to this heading">¶</a></h2>
 <p>The proceeding examples demonstrate commonly used Python
 methods that are available with this module.</p>
 <p>If you encounter a situation where you need to submit SAS
@@ -592,7 +584,7 @@ render the respective output for you.</p>
 </div>
 </section>
 <section id="split-the-data-into-training-and-test">
-<h2>Split the data into training and test<a class="headerlink" href="#split-the-data-into-training-and-test" title="Permalink to this heading">¶</a></h2>
+<h2>Split the data into training and test<a class="headerlink" href="#split-the-data-into-training-and-test" title="Link to this heading">¶</a></h2>
 <p>Partitioning data is essential to avoid overfitting during
 model development. This can be achieved using the partition
 method. In this example, the data is partitioned in-place
@@ -608,7 +600,7 @@ is an interval, then simple random sampling (SRS) is done.</p>
 </div>
 </section>
 <section id="build-an-analytical-model">
-<h2>Build an analytical model<a class="headerlink" href="#build-an-analytical-model" title="Permalink to this heading">¶</a></h2>
+<h2>Build an analytical model<a class="headerlink" href="#build-an-analytical-model" title="Link to this heading">¶</a></h2>
 <p>One of the key activities for this module is analytical modeling. The SAS
 system is capable of modeling in a number of distinct areas
 (statistics, machine learning, econometric time series, and so on).</p>
@@ -712,7 +704,7 @@ target is a list (nominals must be a list).</p>
 </pre></div>
 </div>
 <section id="more-about-the-target-and-input-parameters">
-<h3>More about the target and input parameters<a class="headerlink" href="#more-about-the-target-and-input-parameters" title="Permalink to this heading">¶</a></h3>
+<h3>More about the target and input parameters<a class="headerlink" href="#more-about-the-target-and-input-parameters" title="Link to this heading">¶</a></h3>
 <p>These rules apply to both target and input:</p>
 <ul class="simple">
 <li><p>The parameters accept strings (str), lists (list), or dictionaries (dict) types.</p></li>
@@ -737,7 +729,7 @@ object type.</p>
 </section>
 </section>
 <section id="evaluating-model-diagnostics">
-<h2>Evaluating model diagnostics<a class="headerlink" href="#evaluating-model-diagnostics" title="Permalink to this heading">¶</a></h2>
+<h2>Evaluating model diagnostics<a class="headerlink" href="#evaluating-model-diagnostics" title="Link to this heading">¶</a></h2>
 <p>Perhaps the most important part of modeling is evaluating the quality of the
 model. This is made very easy by leveraging the rich graphical and tabular
 output of <a class="reference external" href="http://support.sas.com/rnd/base/ods/">SAS ODS</a>.</p>

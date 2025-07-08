@@ -1,24 +1,19 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Limitations, restrictions and work arounds &mdash; saspy 5.103.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+  <title>Limitations, restrictions and work arounds &mdash; saspy 5.103.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/documentation_options.js?v=af6c9461"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,9 +32,6 @@
           <a href="index.html" class="icon icon-home">
             saspy
           </a>
-              <div class="version">
-                5.103.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -415,7 +407,7 @@
            <div itemprop="articleBody">
              
   <section id="limitations-restrictions-and-work-arounds">
-<h1>Limitations, restrictions and work arounds<a class="headerlink" href="#limitations-restrictions-and-work-arounds" title="Permalink to this heading">¶</a></h1>
+<h1>Limitations, restrictions and work arounds<a class="headerlink" href="#limitations-restrictions-and-work-arounds" title="Link to this heading">¶</a></h1>
 <p>This chapter covers specific use cases that are problematic, not allowed for some reason, or
 require special handling to be able to work correctly. Hopefully this will be a short chapter.
 It was initiated while working on <a class="reference external" href="https://github.com/sassoftware/saspy/issues/294">Issue 294</a>.
@@ -439,9 +431,9 @@ multiple access methods, for connecting to SAS deployed in different ways. Each 
 is implemented very differently, yet they each provide the same functionality and capabilities; at least
 to the best of my ability to make that the case. Any divergences between those will also be identified here.</p>
 <section id="saslog">
-<h2>SASLOG<a class="headerlink" href="#saslog" title="Permalink to this heading">¶</a></h2>
+<h2>SASLOG<a class="headerlink" href="#saslog" title="Link to this heading">¶</a></h2>
 <section id="proc-printto">
-<h3>Proc Printto<a class="headerlink" href="#proc-printto" title="Permalink to this heading">¶</a></h3>
+<h3>Proc Printto<a class="headerlink" href="#proc-printto" title="Link to this heading">¶</a></h3>
 <p>Let’s start with the first requirement that saspy has access to the SAS Log. SAS has a procedure which
 allows you to redirect the LOG and/or LST out from under the currently existing locations, to files or other locations:
 <a class="reference external" href="https://go.documentation.sas.com/?docsetId=proc&amp;docsetTarget=p1hwvc03z4tqlkn1owzhzo8e7ulu.htm&amp;docsetVersion=9.4&amp;locale=en">proc printto</a>.</p>
@@ -464,9 +456,9 @@ case where that makes sense.</p>
 </section>
 </section>
 <section id="terminating-sas-out-from-under-saspy">
-<h2>Terminating SAS out from under saspy<a class="headerlink" href="#terminating-sas-out-from-under-saspy" title="Permalink to this heading">¶</a></h2>
+<h2>Terminating SAS out from under saspy<a class="headerlink" href="#terminating-sas-out-from-under-saspy" title="Link to this heading">¶</a></h2>
 <section id="abort-macro-and-abort-statement">
-<h3>%abort macro and abort statement<a class="headerlink" href="#abort-macro-and-abort-statement" title="Permalink to this heading">¶</a></h3>
+<h3>%abort macro and abort statement<a class="headerlink" href="#abort-macro-and-abort-statement" title="Link to this heading">¶</a></h3>
 <p>SAS also has statements you can submit which will cause the SAS session to immediately terminate; yes, really.
 So, if you execute one of these statements, guess what? The interactive SAS session saspy that started and is connected to
 vanishes. It’s not there anymore. saspy will no longer get any results, and won’t get the log from that submit() method
@@ -480,7 +472,7 @@ behavior can vary as well.</p>
 the SAS session itself. As termination of the SAS session is pretty cut and dry, the following will be addressing the second behavior.</p>
 </section>
 <section id="canceling-submitted-statements">
-<h3>Canceling submitted statements<a class="headerlink" href="#canceling-submitted-statements" title="Permalink to this heading">¶</a></h3>
+<h3>Canceling submitted statements<a class="headerlink" href="#canceling-submitted-statements" title="Link to this heading">¶</a></h3>
 <p>There are two variations of this second behavior. The first variation is when you supply no argument to the abort statement
 or macro. In this case it only stops executing the current macro and/or data step, but any following submitted statements
 continue to be executed normally. This case is generally not a problem for any access method of saspy.</p>
@@ -496,9 +488,9 @@ terminated it (endsas()). That is a SASism, and nothing that can be changed or f
 </section>
 </section>
 <section id="perfect-storm">
-<h2>Perfect Storm<a class="headerlink" href="#perfect-storm" title="Permalink to this heading">¶</a></h2>
+<h2>Perfect Storm<a class="headerlink" href="#perfect-storm" title="Link to this heading">¶</a></h2>
 <section id="combining-proc-printto-and-abort-cancel">
-<h3>Combining proc printto and abort cancel<a class="headerlink" href="#combining-proc-printto-and-abort-cancel" title="Permalink to this heading">¶</a></h3>
+<h3>Combining proc printto and abort cancel<a class="headerlink" href="#combining-proc-printto-and-abort-cancel" title="Link to this heading">¶</a></h3>
 <p>What happens if you issue a the following code, having proc printto to redirect LOG/LST, and have an abort CANCEL, which gets executed,
 and you have the undo for the proc printto (proc printto;run;) at the end of your code?</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">submitLOG</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
@@ -544,7 +536,7 @@ code it in your program before each ‘abort cancel;’ that could execute.</p>
 </div>
 </section>
 <section id="printto-option-on-submit-methods">
-<h3>printto= option on submit methods<a class="headerlink" href="#printto-option-on-submit-methods" title="Permalink to this heading">¶</a></h3>
+<h3>printto= option on submit methods<a class="headerlink" href="#printto-option-on-submit-methods" title="Link to this heading">¶</a></h3>
 <p>Now, odds are that if you are submitting code like this, you didn’t type it into saspy. You probably
 are reading in some existing SAS batch script (.sas file) and just submitting it, as is. You may not
 even know what SAS code is even in it. In this case, you don’t want to have to edit the file to modify

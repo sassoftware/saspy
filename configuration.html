@@ -1,24 +1,19 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 5.103.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+  <title>Configuration &mdash; saspy 5.103.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/documentation_options.js?v=af6c9461"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,9 +32,6 @@
           <a href="index.html" class="icon icon-home">
             saspy
           </a>
-              <div class="version">
-                5.103.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -415,7 +407,7 @@
            <div itemprop="articleBody">
              
   <section id="configuration">
-<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this heading">¶</a></h1>
+<h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h1>
 <p>This module can connect and start different kinds of SAS sessions. It can connect to SAS
 on Unix, Mainframe, and Windows. It can connect to a local SAS session or remote session.
 Because of the wide range of connection types, there are a number of different access methods
@@ -474,9 +466,9 @@ It is the directory that is the module, so the sascfg.py file is in that directo
 <span class="n">C</span><span class="p">:</span>\<span class="o">&gt;</span><span class="n">python</span>
 <span class="n">Python</span> <span class="mf">3.6.0</span> <span class="o">|</span><span class="n">Anaconda</span> <span class="n">custom</span> <span class="p">(</span><span class="mi">64</span><span class="o">-</span><span class="n">bit</span><span class="p">)</span><span class="o">|</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Dec</span> <span class="mi">23</span> <span class="mi">2016</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span><span class="mi">57</span><span class="p">:</span><span class="mi">41</span><span class="p">)</span> <span class="p">[</span><span class="n">MSC</span> <span class="n">v</span><span class="mf">.1900</span> <span class="mi">64</span> <span class="n">bit</span> <span class="p">(</span><span class="n">AMD64</span><span class="p">)]</span> <span class="n">on</span> <span class="n">win32</span>
 <span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span>
-<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span> <span class="s1">&#39;C:</span><span class="se">\\</span><span class="s1">ProgramData</span><span class="se">\\</span><span class="s1">Anaconda3</span><span class="se">\\</span><span class="s1">lib</span><span class="se">\\</span><span class="s1">site-packages</span><span class="se">\\</span><span class="s1">saspy</span><span class="se">\\</span><span class="s1">__init__.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span><span class="w"> </span><span class="s1">&#39;C:</span><span class="se">\\</span><span class="s1">ProgramData</span><span class="se">\\</span><span class="s1">Anaconda3</span><span class="se">\\</span><span class="s1">lib</span><span class="se">\\</span><span class="s1">site-packages</span><span class="se">\\</span><span class="s1">saspy</span><span class="se">\\</span><span class="s1">__init__.py&#39;</span><span class="o">&gt;</span>
 <span class="o">&gt;&gt;&gt;</span>
 <span class="n">So</span> <span class="n">sascfg</span><span class="o">.</span><span class="n">py</span> <span class="ow">is</span><span class="p">:</span> <span class="n">C</span><span class="p">:</span>\<span class="n">ProgramData</span>\<span class="n">Anaconda3</span>\<span class="n">lib</span>\<span class="n">site</span><span class="o">-</span><span class="n">packages</span>\<span class="n">saspy</span>\<span class="n">sascfg</span><span class="o">.</span><span class="n">py</span>
 
@@ -487,9 +479,9 @@ It is the directory that is the module, so the sascfg.py file is in that directo
 <span class="n">Python</span> <span class="mf">3.5.1</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Jan</span> <span class="mi">19</span> <span class="mi">2016</span><span class="p">,</span> <span class="mi">21</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">20</span><span class="p">)</span>
 <span class="p">[</span><span class="n">GCC</span> <span class="mf">4.4.7</span> <span class="mi">20120313</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">4.4.7</span><span class="o">-</span><span class="mi">16</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
 <span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span>
-<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/opt/tom/github/saspy/saspy/__init__.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span><span class="w"> </span><span class="s1">&#39;/opt/tom/github/saspy/saspy/__init__.py&#39;</span><span class="o">&gt;</span>
 <span class="o">&gt;&gt;&gt;</span>
 <span class="n">So</span> <span class="n">sascfg</span><span class="o">.</span><span class="n">py</span> <span class="ow">is</span><span class="p">:</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sascfg</span><span class="o">.</span><span class="n">py</span>
 
@@ -500,15 +492,15 @@ It is the directory that is the module, so the sascfg.py file is in that directo
 <span class="n">Python</span> <span class="mf">3.5.1</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Jan</span> <span class="mi">19</span> <span class="mi">2016</span><span class="p">,</span> <span class="mi">21</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">20</span><span class="p">)</span>
 <span class="p">[</span><span class="n">GCC</span> <span class="mf">4.4.7</span> <span class="mi">20120313</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">4.4.7</span><span class="o">-</span><span class="mi">16</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
 <span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span>
-<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/usr/lib/python3.5/site-packages/saspy/__init__.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span><span class="w"> </span><span class="s1">&#39;/usr/lib/python3.5/site-packages/saspy/__init__.py&#39;</span><span class="o">&gt;</span>
 <span class="o">&gt;&gt;&gt;</span>
 <span class="n">So</span> <span class="n">sascfg</span><span class="o">.</span><span class="n">py</span> <span class="ow">is</span><span class="p">:</span> <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.5</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sascfg</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <section id="sascfg-personal-py">
-<h2>sascfg_personal.py<a class="headerlink" href="#sascfg-personal-py" title="Permalink to this heading">¶</a></h2>
+<h2>sascfg_personal.py<a class="headerlink" href="#sascfg-personal-py" title="Link to this heading">¶</a></h2>
 <p>Originally, sascfg.py was the config file saspy used. But, since the saspy.cfg file is in the saspy repo, it can be updated
 on occasion and when you do an upgrade it will pull down the repo sascfg.py and replace the one
 you’ve in your installation. If you used that file for your configuration, then you would need to keep
@@ -554,7 +546,7 @@ specify its location:</p>
 </div>
 <p>The python search path can be found by looking at the PYTHONPATH environment variable (if it’s set),
 but more definitively by submitting the following:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
 </pre></div>
 </div>
@@ -571,13 +563,13 @@ search order listed above, in that order.</p>
 <span class="n">Python</span> <span class="mf">3.5.6</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Nov</span> <span class="mi">16</span> <span class="mi">2018</span><span class="p">,</span> <span class="mi">15</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mi">39</span><span class="p">)</span>
 <span class="p">[</span><span class="n">GCC</span> <span class="mf">4.4.7</span> <span class="mi">20120313</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">4.4.7</span><span class="o">-</span><span class="mi">23</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
 <span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">sys</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span>
 <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib64/python35.zip&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib64/python3.5&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib64/python3.5/plat-linux&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib64/python3.5/lib-dynload&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib64/python3.5/site-packages&#39;</span><span class="p">,</span> <span class="s1">&#39;/usr/lib/python3.5/site-packages&#39;</span><span class="p">]</span>
 <span class="o">&gt;&gt;&gt;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span>
-<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span> <span class="s1">&#39;/opt/tom/github/saspy/saspy/__init__.py&#39;</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">module</span> <span class="s1">&#39;saspy&#39;</span> <span class="kn">from</span><span class="w"> </span><span class="s1">&#39;/opt/tom/github/saspy/saspy/__init__.py&#39;</span><span class="o">&gt;</span>
 <span class="o">&gt;&gt;&gt;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SAScfg</span>
 <span class="s1">&#39;/opt/tom/github/saspy/saspy/sascfg_personal.py&#39;</span>
@@ -589,7 +581,7 @@ search order listed above, in that order.</p>
 </div>
 </section>
 <section id="sascfg-personal-py-details">
-<h2>sascfg_personal.py details<a class="headerlink" href="#sascfg-personal-py-details" title="Permalink to this heading">¶</a></h2>
+<h2>sascfg_personal.py details<a class="headerlink" href="#sascfg-personal-py-details" title="Link to this heading">¶</a></h2>
 <p>There are three main parts to this configuration file.</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -642,7 +634,7 @@ For example, if you had SAS installed on your Linux system, your sascfg_personal
 </div>
 </section>
 <section id="choosing-an-access-method">
-<h2>Choosing an Access Method<a class="headerlink" href="#choosing-an-access-method" title="Permalink to this heading">¶</a></h2>
+<h2>Choosing an Access Method<a class="headerlink" href="#choosing-an-access-method" title="Link to this heading">¶</a></h2>
 <p>How do you know how to configure SASPy? Well, the first thing is to know is what SAS
 instance you are trying to connect to. Next is where are you connecting to it from - what
 client are you running SASPy on? These two answers will dictate which access method you
@@ -685,7 +677,7 @@ configuration definitions in the example configuration file, sascfg.py, showing 
 different cases.</p>
 </section>
 <section id="stdio">
-<h2>STDIO<a class="headerlink" href="#stdio" title="Permalink to this heading">¶</a></h2>
+<h2>STDIO<a class="headerlink" href="#stdio" title="Link to this heading">¶</a></h2>
 <p>This is the original access method. This works with Unix only,
 because SAS on Windows platforms does not support line-mode style connections
 (through stdin, stdout, stderr). This connection method is for a local
@@ -755,7 +747,7 @@ keys in the configuration definition.</p>
 </div>
 </section>
 <section id="ssh">
-<h2>SSH<a class="headerlink" href="#ssh" title="Permalink to this heading">¶</a></h2>
+<h2>SSH<a class="headerlink" href="#ssh" title="Link to this heading">¶</a></h2>
 <p>aka: STDIO over SSH</p>
 <p>NEW in V3.6.3, you can use this method from a Windows Client to connect to a
 stand alone SAS install on a remote Linux machine. Before that, it was only supported
@@ -845,7 +837,7 @@ method.</p>
 </div>
 </section>
 <section id="iom">
-<h2>IOM<a class="headerlink" href="#iom" title="Permalink to this heading">¶</a></h2>
+<h2>IOM<a class="headerlink" href="#iom" title="Link to this heading">¶</a></h2>
 <p>aka: IOM using Java</p>
 <p>This connection method opens many connectivity options. This method enables you to
 connect to any Workspace server on any supported platform. It requires Java 7 or higher
@@ -860,7 +852,7 @@ as well as providing client side High Availability (HA) by supporting load balan
 The connection can be to a local SAS installation or a remote IOM Workspace server running
 on any platform, including MVS.</p>
 <section id="authentication">
-<h3>Authentication:<a class="headerlink" href="#authentication" title="Permalink to this heading">¶</a></h3>
+<h3>Authentication:<a class="headerlink" href="#authentication" title="Link to this heading">¶</a></h3>
 <p>The IOM protocol (SAS 9’s client/server interface protocol) supports different forms of authentication. This Access Method
 supports connecting to a Workspace Server on any host, as well as connecting to a Local SAS install of PC SAS
 on that same PC. There are 3 authentication mechanisms that are supported, for various configurations, and one
@@ -894,7 +886,7 @@ authentication mechanism, so it happens by default.</p>
 </ol>
 </section>
 <section id="attn-log4j-vulnerabilities-found-in-dec-2021">
-<h3>ATTN, log4j vulnerabilities found in Dec 2021<a class="headerlink" href="#attn-log4j-vulnerabilities-found-in-dec-2021" title="Permalink to this heading">¶</a></h3>
+<h3>ATTN, log4j vulnerabilities found in Dec 2021<a class="headerlink" href="#attn-log4j-vulnerabilities-found-in-dec-2021" title="Link to this heading">¶</a></h3>
 <p>Update to this for SASPy V4.0.0:
 Replacing the versions with 2.17.1 and 2.12.4 now, as they are currently the latest fix versions.</p>
 <p>There are a number of vulnerabilities in log4j and Apache provided new releases of log4j to address these.
@@ -913,7 +905,7 @@ even initialize it in its Java process it spawns for the IOM client. So none of 
 are exposed via the SASPy client.</p>
 </section>
 <section id="attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file">
-<h3>ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!<a class="headerlink" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file" title="Permalink to this heading">¶</a></h3>
+<h3>ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!<a class="headerlink" href="#attn-as-of-saspy-version-3-3-3-the-classpath-is-no-longer-required-in-your-configuration-file" title="Link to this heading">¶</a></h3>
 <p>The 4 required IOM Java client jars are now included in the saspy repo, and they, along with the saspyiom.jar and the
 thirdparty CORBA jars will be automatically provided as the classpath by saspy. This is generally all that is needed.
 If you require the 3 encryption jars, shown below, they still need to be acquired from your SAS deployment, and then
@@ -921,7 +913,7 @@ put in the saspy/java/iomclient directory of the saspy install (where the 4 incl
 in the classpath for you.</p>
 </section>
 <section id="sas-iom-client-encryption-jars">
-<h3>SAS IOM client Encryption Jars<a class="headerlink" href="#sas-iom-client-encryption-jars" title="Permalink to this heading">¶</a></h3>
+<h3>SAS IOM client Encryption Jars<a class="headerlink" href="#sas-iom-client-encryption-jars" title="Link to this heading">¶</a></h3>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>ATTN: SAS ODA Users!! SAS/On Demand for Academics (ODA) has recently upgraded their SAS server environment to use SAS 9.40M7!
@@ -946,7 +938,7 @@ $SASHome/SASVersionedJarRepository/eclipse/plugins/sastpj.rutil_6.1.0.0_SAS_2012
 </div>
 </section>
 <section id="the-authinfo-file-authinfo-on-windows">
-<h3>The .authinfo file (_authinfo on Windows)<a class="headerlink" href="#the-authinfo-file-authinfo-on-windows" title="Permalink to this heading">¶</a></h3>
+<h3>The .authinfo file (_authinfo on Windows)<a class="headerlink" href="#the-authinfo-file-authinfo-on-windows" title="Link to this heading">¶</a></h3>
 <p>The IOM and HTTP access methods have support for getting the required user/password from an authinfo file in the user’s home directory
 instead of prompting for it. On linux, the file is named .authinfo and on windows, it’s _authinfo. The format of the line in the authinfo file is
 as follows. The first value is the authkey value you specify for <cite>authkey</cite>. Next is the ‘user’ key followed by the value (the user id)
@@ -967,7 +959,7 @@ use those characters in the file. It’s read into Python as is, and thus is exp
 </div>
 </section>
 <section id="remote">
-<h3>Remote<a class="headerlink" href="#remote" title="Permalink to this heading">¶</a></h3>
+<h3>Remote<a class="headerlink" href="#remote" title="Link to this heading">¶</a></h3>
 <p>A remote connection is defined as a connection to any Workspace Server on any SAS platform
 from either a Unix or Windows client. This module does not connect to a SAS Metadata Server (OMR),
 but rather connects directly to an Object Spawner to get access to a Workspace Server. If you already
@@ -1100,7 +1092,7 @@ text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other 
 </div>
 </section>
 <section id="local">
-<h3>Local<a class="headerlink" href="#local" title="Permalink to this heading">¶</a></h3>
+<h3>Local<a class="headerlink" href="#local" title="Link to this heading">¶</a></h3>
 <p>A local connection is defined as a connection to SAS that is running on the same
 Windows machine. You only need the following configuration definition keys. (Do not
 specify any of the others).</p>
@@ -1117,7 +1109,7 @@ the directory–do not include the file itself. For example:</p>
 <p>An alternative to puting this directory in your PATH, is to add it at runtime. You can add this
 to your sascfg_personal.py file, or even submit it before importing saspy and trying to make a conection.
 Obviously, use the correct path for your system:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;PATH&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;;C:</span><span class="se">\\</span><span class="s2">Program Files</span><span class="se">\\</span><span class="s2">SASHome</span><span class="se">\\</span><span class="s2">SASFoundation</span><span class="se">\\</span><span class="s2">9.4</span><span class="se">\\</span><span class="s2">core</span><span class="se">\\</span><span class="s2">sasext&quot;</span>
 </pre></div>
 </div>
@@ -1183,7 +1175,7 @@ text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other 
 </div>
 </section>
 <section id="remote-to-mvs-sas">
-<h3>Remote to MVS SAS<a class="headerlink" href="#remote-to-mvs-sas" title="Permalink to this heading">¶</a></h3>
+<h3>Remote to MVS SAS<a class="headerlink" href="#remote-to-mvs-sas" title="Link to this heading">¶</a></h3>
 <p>Yes, you can even connect to a SAS server running on MVS (Mainframe SAS).
 There are a couple of requirements for this to work right. First, you need version 2.1.5 or higher of this module.
 There were a couple tweaks I needed to make to the IOM access method and those are in 2.1.5.</p>
@@ -1221,7 +1213,7 @@ session instead of remote IOM (it is a different connection type).</p>
 </section>
 </section>
 <section id="http">
-<h2>HTTP<a class="headerlink" href="#http" title="Permalink to this heading">¶</a></h2>
+<h2>HTTP<a class="headerlink" href="#http" title="Link to this heading">¶</a></h2>
 <p>This is the access method for Viya. It does not connect to SAS 9.4. This access method accesses the Compute (micro) Service
 of a SAS Viya deployment. The Compute Service launches Compute Servers, which are MVA SAS sessions found in the SPRE deployment
 of the Viya installation. This is the equivalent of an IOM Workspace server, but in a Viya deployment.
@@ -1400,7 +1392,7 @@ text (str) and to have ERROR:, WARNING: and NOTE: lines colorized like in other 
 </div>
 </section>
 <section id="com">
-<h2>COM<a class="headerlink" href="#com" title="Permalink to this heading">¶</a></h2>
+<h2>COM<a class="headerlink" href="#com" title="Link to this heading">¶</a></h2>
 <p>aka: IOM using COM</p>
 <p>New in 3.1.0, this user contributed access method uses Windows COM to connect to the SAS IOM provider. It is similar to the other IOM access method,
 but there is no Java dependency. Connections from Windows clients to local and remote SAS 9.4 hosts are supported.</p>

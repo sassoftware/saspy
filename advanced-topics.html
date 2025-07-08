@@ -1,24 +1,19 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Advanced topics &mdash; saspy 5.103.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+  <title>Advanced topics &mdash; saspy 5.103.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/documentation_options.js?v=af6c9461"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,9 +32,6 @@
           <a href="index.html" class="icon icon-home">
             saspy
           </a>
-              <div class="version">
-                5.103.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -415,10 +407,10 @@
            <div itemprop="articleBody">
              
   <section id="advanced-topics">
-<h1>Advanced topics<a class="headerlink" href="#advanced-topics" title="Permalink to this heading">¶</a></h1>
+<h1>Advanced topics<a class="headerlink" href="#advanced-topics" title="Link to this heading">¶</a></h1>
 <p>In this chapter we will explore more detailed explanations of specific functionality.</p>
 <section id="using-batch-mode">
-<h2>Using Batch mode<a class="headerlink" href="#using-batch-mode" title="Permalink to this heading">¶</a></h2>
+<h2>Using Batch mode<a class="headerlink" href="#using-batch-mode" title="Link to this heading">¶</a></h2>
 <p>Batch mode is meant to be used when you want to automate your code as Python scripts.</p>
 <p>In batch mode, any method that would normally display results, returns a Python dictionary
 instead and with two keys; LOG, LST. This is the same as how the submit() method works
@@ -433,7 +425,7 @@ view these results by clicking on them. Adjust the filesystem path below and you
 be able to run this code yourself.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="ch">#! /usr/bin/python3.5</span>
 
-<span class="kn">import</span> <span class="nn">saspy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">results</span><span class="o">=</span><span class="s1">&#39;html&#39;</span><span class="p">)</span>
 
 <span class="n">cars</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasdata</span><span class="p">(</span><span class="s1">&#39;cars&#39;</span><span class="p">,</span> <span class="n">libref</span><span class="o">=</span><span class="s1">&#39;sashelp&#39;</span><span class="p">)</span>
@@ -461,7 +453,7 @@ than this few lines of code, you can have the results updated and refreshed by j
 re-running the script.</p>
 </section>
 <section id="prompting">
-<h2>Prompting<a class="headerlink" href="#prompting" title="Permalink to this heading">¶</a></h2>
+<h2>Prompting<a class="headerlink" href="#prompting" title="Link to this heading">¶</a></h2>
 <p>There are two types of prompting that can be performed; meaning to stop processing and
 prompt the user for input and then resume processing.</p>
 <p>The first type of prompting is performed implicity. When you run the
@@ -568,7 +560,7 @@ at runtime for values you want to use in the code, and those values can be
 kept around and used later in the code, or hidden and inaccessible afterward.</p>
 </section>
 <section id="moving-values-between-python-variables-and-sas-macro-variables">
-<h2>Moving values between Python Variables and SAS Macro Variables<a class="headerlink" href="#moving-values-between-python-variables-and-sas-macro-variables" title="Permalink to this heading">¶</a></h2>
+<h2>Moving values between Python Variables and SAS Macro Variables<a class="headerlink" href="#moving-values-between-python-variables-and-sas-macro-variables" title="Link to this heading">¶</a></h2>
 <p>There are two methods on the SASsession object you can use to transfer values between Python and SAS.
 symget() and symput(). To get a value from a SAS Macro Variable and assign it to a Python variable you
 just call symget with the name of the macro variable.</p>
@@ -585,7 +577,7 @@ the macro variable name, and providing the python variable continaing the value.
 <a class="reference external" href="https://github.com/sassoftware/saspy-examples/blob/main/SAS_contrib/Using_SYMGET_and_SYMPUT.ipynb">https://github.com/sassoftware/saspy-examples/blob/main/SAS_contrib/Using_SYMGET_and_SYMPUT.ipynb</a></p>
 </section>
 <section id="moving-data-between-python-and-sas-datatype-conversion">
-<h2>Moving data between Python and SAS - datatype conversion<a class="headerlink" href="#moving-data-between-python-and-sas-datatype-conversion" title="Permalink to this heading">¶</a></h2>
+<h2>Moving data between Python and SAS - datatype conversion<a class="headerlink" href="#moving-data-between-python-and-sas-datatype-conversion" title="Link to this heading">¶</a></h2>
 <p>SASPy has methods to load data from a SAS Data Set (or View) into Python as a Pandas dataframe, as well
 as the reverse; loading a dataframe into a SAS Data Set. This is all documented in the API doc and some
 of the sections below. This section is to document how the data type conversion is done. It’s pretty
@@ -624,7 +616,7 @@ str(*)          character  (any other type in Pandas)
 </div>
 </section>
 <section id="dates-times-and-datetimes-oh-my">
-<h2>Dates, Times and Datetimes, Oh my!<a class="headerlink" href="#dates-times-and-datetimes-oh-my" title="Permalink to this heading">¶</a></h2>
+<h2>Dates, Times and Datetimes, Oh my!<a class="headerlink" href="#dates-times-and-datetimes-oh-my" title="Link to this heading">¶</a></h2>
 <p>The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most
 cases, if you start with a SAS dataset and import it to a dataframe, then send it back to SAS,
 you should end up with the same data in SAS as you started with. However, there are some caveats.
@@ -707,7 +699,7 @@ df2sd(…, datetimes={‘d’ : ‘date’, ‘t’ : ‘time’})</p>
 <a class="reference external" href="https://github.com/sassoftware/saspy-examples/blob/main/Issue_examples/Issue279.ipynb">https://github.com/sassoftware/saspy-examples/blob/main/Issue_examples/Issue279.ipynb</a></p>
 </section>
 <section id="advanced-sd2df-and-df2sd-techniques">
-<h2>Advanced sd2df and df2sd techniques<a class="headerlink" href="#advanced-sd2df-and-df2sd-techniques" title="Permalink to this heading">¶</a></h2>
+<h2>Advanced sd2df and df2sd techniques<a class="headerlink" href="#advanced-sd2df-and-df2sd-techniques" title="Link to this heading">¶</a></h2>
 <p>The sd2df and df2sd methods transfer data between SAS Data Sets and Pandas dataframes. For most cases,
 you don’t need to specify extra options. But, there are extra options to cover a variety of specific
 use cases. The section above describes using the datetime= and outfmts= with df2sd, and this section will
@@ -819,7 +811,7 @@ an Object type, will be a character variable in SAS, with the str() of the objec
 <a class="reference external" href="https://github.com/sassoftware/saspy/issues/279">https://github.com/sassoftware/saspy/issues/279</a> to see where this fuctionality came from.</p>
 </section>
 <section id="slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df">
-<h2>Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )<a class="headerlink" href="#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df" title="Permalink to this heading">¶</a></h2>
+<h2>Slow performance loading SAS data into a Pandas DataFrame ( to_df(), sd2df() )<a class="headerlink" href="#slow-performance-loading-sas-data-into-a-pandas-dataframe-to-df-sd2df" title="Link to this heading">¶</a></h2>
 <p>UPDATE!!!</p>
 <p>As of Version 3.7.0, the MEMORY (default) version of sasdata2dataframe now outperforms all of the various methods.
 So, effectively, the CSV and DISK versions are no longer needed (though, of course they are still there; can’t break your code).
@@ -852,7 +844,7 @@ that reading it into a dataframe w/ Pandas performs much better. This method all
 and newlines, which Pandas can have parsing problem with reading CSV file created from proc export.</p>
 </section>
 <section id="slow-performance-loading-a-dataframe-into-a-sas-data-set-df2sd">
-<h2>Slow performance loading a DataFrame into a SAS data set; df2sd()<a class="headerlink" href="#slow-performance-loading-a-dataframe-into-a-sas-data-set-df2sd" title="Permalink to this heading">¶</a></h2>
+<h2>Slow performance loading a DataFrame into a SAS data set; df2sd()<a class="headerlink" href="#slow-performance-loading-a-dataframe-into-a-sas-data-set-df2sd" title="Link to this heading">¶</a></h2>
 <p>df2sd (dataframe2sasdata) has two main steps, which were both done internal to the method. The second is transferring the data
 but the first is figureing out the necessary metadata to be able to correctly define the SAS Data Set being created. This requires
 identifying each column: it’s name, data type, length (this is the crux here), required conversion type (date/time/datetime), …</p>
@@ -990,7 +982,7 @@ lengths once and just pass in the dict all the times and never have to specd tim
 </div>
 </section>
 <section id="using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports">
-<h2>Using Proc Iomoperate to find Object Spawner hosts and Workspace Server ports<a class="headerlink" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports" title="Permalink to this heading">¶</a></h2>
+<h2>Using Proc Iomoperate to find Object Spawner hosts and Workspace Server ports<a class="headerlink" href="#using-proc-iomoperate-to-find-object-spawner-hosts-and-workspace-server-ports" title="Link to this heading">¶</a></h2>
 <p>If you already use a client to connect to IOM servers, you may have the host and port to OMR
 (the SAS Metadata Server), but not necessarily those of the Object Spawners or Workspace Servers.
 For Remote IOM connections there are three configuration keys that require some of this other information.
@@ -1068,7 +1060,7 @@ convention for these is to use the ‘Server context :’ value as the config na
 to know which server you will be connecting to.</p>
 </section>
 <section id="disconnecting-from-an-iom-session-and-reconnecting-back-to-it">
-<h2>Disconnecting from an IOM session and reconnecting back to it.<a class="headerlink" href="#disconnecting-from-an-iom-session-and-reconnecting-back-to-it" title="Permalink to this heading">¶</a></h2>
+<h2>Disconnecting from an IOM session and reconnecting back to it.<a class="headerlink" href="#disconnecting-from-an-iom-session-and-reconnecting-back-to-it" title="Link to this heading">¶</a></h2>
 <p>The IOM access method has the ability to disconnect from the workspace server and
 reconnect to it (the same one); IF the reconnect setting is configured for that workspace
 server in the Metadata Server. See ‘Client Reconnect’ Advanced Options of the Workspace Server.
@@ -1095,7 +1087,7 @@ a single process, and each time a disconnect happens a new toke is created. But,
 specific case, so it is now available.</p>
 </section>
 <section id="configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue">
-<h2>Configuring Grid Option Sets to have saspy run on a specific Queue.<a class="headerlink" href="#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue" title="Permalink to this heading">¶</a></h2>
+<h2>Configuring Grid Option Sets to have saspy run on a specific Queue.<a class="headerlink" href="#configuring-grid-option-sets-to-have-saspy-run-on-a-specific-queue" title="Link to this heading">¶</a></h2>
 <p>Working with Grid Options Sets is documented here (the ‘Doc’ referred to below):
 <a class="reference external" href="http://support.sas.com/documentation/cdl/en/gridref/67371/HTML/default/viewer.htm#n1inymfs0b7go2n147xdknz0ygpx.htm">http://support.sas.com/documentation/cdl/en/gridref/67371/HTML/default/viewer.htm#n1inymfs0b7go2n147xdknz0ygpx.htm</a></p>
 <p>There is also a SASPy issue with details on this here:
@@ -1114,7 +1106,7 @@ in to the grid options mapping wizard (the first part of the document referenced
 should now be available to choose and you can set this up as you want.</p>
 </section>
 <section id="automatic-checking-for-error-in-the-log-and-the-warnings-module">
-<h2>Automatic checking for ERROR: in the LOG and the warnings module<a class="headerlink" href="#automatic-checking-for-error-in-the-log-and-the-warnings-module" title="Permalink to this heading">¶</a></h2>
+<h2>Automatic checking for ERROR: in the LOG and the warnings module<a class="headerlink" href="#automatic-checking-for-error-in-the-log-and-the-warnings-module" title="Link to this heading">¶</a></h2>
 <p>Based upon an enhancement request, as of version 3.6.7, SASPy now checks for ‘ERROR:’ and issues a message via the warnings module
 to inform you that you should take a look at the log and see if there was a problem. SASPy methods won’t blindly fail just by finding
 the word ERROR in the log, because that doesn’t always mean what was being done failed. Nor does not having that in the log mean everything
@@ -1179,7 +1171,7 @@ submitting it in the program, which will override what was in the config file.</
 <span class="o">&gt;&gt;&gt;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="c1"># You can change the behavior to have the warning issued every time, or some number of times, or even make it throw an exception</span>
 <span class="o">&gt;&gt;&gt;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;always&quot;</span><span class="p">,</span><span class="n">module</span><span class="o">=</span><span class="s1">&#39;saspy&#39;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span><span class="o">.</span><span class="n">list_tables</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
 <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">tom</span><span class="o">/</span><span class="n">github</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">saspy</span><span class="o">/</span><span class="n">sasioiom</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">976</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Noticed</span> <span class="s1">&#39;ERROR:&#39;</span> <span class="ow">in</span> <span class="n">LOG</span><span class="p">,</span> <span class="n">you</span> <span class="n">ought</span> <span class="n">to</span> <span class="n">take</span> <span class="n">a</span> <span class="n">look</span> <span class="ow">and</span> <span class="n">see</span> <span class="k">if</span> <span class="n">there</span> <span class="n">was</span> <span class="n">a</span> <span class="n">problem</span>
@@ -1222,7 +1214,7 @@ submitting it in the program, which will override what was in the config file.</
 not the case. So, checking the log is something that’s necessary sometimes. Hopefully this warning when an ERROR is seen, will make this easier.</p>
 </section>
 <section id="saspy-logger-from-logging-logger-as-of-v3-7-5">
-<h2>saspy.logger from logging.logger as of V3.7.5<a class="headerlink" href="#saspy-logger-from-logging-logger-as-of-v3-7-5" title="Permalink to this heading">¶</a></h2>
+<h2>saspy.logger from logging.logger as of V3.7.5<a class="headerlink" href="#saspy-logger-from-logging-logger-as-of-v3-7-5" title="Link to this heading">¶</a></h2>
 <p>Per a user request to get rid of using print() for variaous messages, and use the logging facility instead, I’ve
 replaced all non-interactive prints() in saspy (print is still used for prompting, as it needs to be) with
 logger calls. The different messages now fall into logging categories (DEBUG, INFO, WARNING, ERROR, FATAL)
@@ -1255,7 +1247,7 @@ so your output looks the same as before.</p>
 as it is imported after the logger is set up, and before any logging would happen. So doing it this way will have
 your configuration in effect every time you use saspy.</p>
 <p>Here’s an example showing how you can change these back to the python defaults (again, add this in the config file).</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
 <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span>  <span class="o">=</span> <span class="p">[]</span>
 <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">level</span>     <span class="o">=</span> <span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
 <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1276,7 +1268,7 @@ it’s default (STDERR) and then all messages in the notebook will be RED, like 
 <span class="n">Python</span> <span class="mf">3.5.6</span> <span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">Nov</span> <span class="mi">16</span> <span class="mi">2018</span><span class="p">,</span> <span class="mi">15</span><span class="p">:</span><span class="mi">50</span><span class="p">:</span><span class="mi">39</span><span class="p">)</span>
 <span class="p">[</span><span class="n">GCC</span> <span class="mf">4.4.7</span> <span class="mi">20120313</span> <span class="p">(</span><span class="n">Red</span> <span class="n">Hat</span> <span class="mf">4.4.7</span><span class="o">-</span><span class="mi">23</span><span class="p">)]</span> <span class="n">on</span> <span class="n">linux</span>
 <span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span><span class="o">,</span> <span class="nn">logging</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span><span class="o">,</span><span class="w"> </span><span class="nn">logging</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">saspy</span><span class="o">.</span><span class="n">logger</span>
 <span class="o">&lt;</span><span class="n">logging</span><span class="o">.</span><span class="n">Logger</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x7f01e9058ac8</span><span class="o">&gt;</span>
 <span class="o">&gt;&gt;&gt;</span>
@@ -1333,12 +1325,12 @@ it’s default (STDERR) and then all messages in the notebook will be RED, like 
 </div>
 </section>
 <section id="sassession-object-as-a-context-manager-as-of-v3-7-5">
-<h2>SASsession object as a context manager as of V3.7.5<a class="headerlink" href="#sassession-object-as-a-context-manager-as-of-v3-7-5" title="Permalink to this heading">¶</a></h2>
+<h2>SASsession object as a context manager as of V3.7.5<a class="headerlink" href="#sassession-object-as-a-context-manager-as-of-v3-7-5" title="Link to this heading">¶</a></h2>
 <p>A user contributed, via PR #401, the ability for a SASsession object to be used as a context manage
 for the ‘with’ statement (see <a class="reference external" href="https://docs.python.org/3.9/reference/datamodel.html#context-managers">https://docs.python.org/3.9/reference/datamodel.html#context-managers</a>).
 This will effectivly issue endsas() upon completion of the with block of code. A convienient way to
 clean up if you only want the session around for that block of code. Here’s an example:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">saspy</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="k">with</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span> <span class="k">as</span> <span class="n">sas</span><span class="p">:</span>
   <span class="n">data_in_py</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">sasdata</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="s1">&#39;lib&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_df</span><span class="p">()</span>
   <span class="c1"># do something with data_in_py</span>
@@ -1403,7 +1395,7 @@ clean up if you only want the session around for that block of code. Here’s an
 </div>
 </section>
 <section id="jupyter-magics">
-<h2>Jupyter magics<a class="headerlink" href="#jupyter-magics" title="Permalink to this heading">¶</a></h2>
+<h2>Jupyter magics<a class="headerlink" href="#jupyter-magics" title="Link to this heading">¶</a></h2>
 <p>Jupyter Notebooks have what they call Magics, which let you submit code from a diferent language
 than the kernel of the notebook, or provide other functionality. SASPy supports a few magics that
 you can use if you are in a Jupyter Notebook. They simply allow you to submit explicit SAS code
@@ -1428,7 +1420,7 @@ results.</p>
 same notebook, you may indicate that a <code class="docutils literal notranslate"><span class="pre">%%SAS</span></code> cell should share the same
 SAS session by passing your existing session as a parameter.</p>
 <p>In a prior cell in the notebook:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">saspy</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="n">my_session</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
 
 <span class="c1"># sending a dataset to SAS as &#39;mydata&#39;</span>

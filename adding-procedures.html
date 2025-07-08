@@ -1,24 +1,19 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contributing new methods &mdash; saspy 5.103.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+  <title>Contributing new methods &mdash; saspy 5.103.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/documentation_options.js?v=af6c9461"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,9 +32,6 @@
           <a href="index.html" class="icon icon-home">
             saspy
           </a>
-              <div class="version">
-                5.103.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -415,9 +407,9 @@
            <div itemprop="articleBody">
              
   <section id="contributing-new-methods">
-<h1>Contributing new methods<a class="headerlink" href="#contributing-new-methods" title="Permalink to this heading">¶</a></h1>
+<h1>Contributing new methods<a class="headerlink" href="#contributing-new-methods" title="Link to this heading">¶</a></h1>
 <section id="overview">
-<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this heading">¶</a></h2>
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
 <p>This module is broken into product areas that largely follow the SAS product areas.
 There are many many procedures, which translate to object methods, that are not
 currently included in the package. The aim of this document is to outline the
@@ -428,7 +420,7 @@ contribution should take less than 30 minutes the first time and less than 15
 minutes for subsequent methods.</p>
 <p>Your contribution and feedback is greatly appreciated!</p>
 <section id="process">
-<h3>Process<a class="headerlink" href="#process" title="Permalink to this heading">¶</a></h3>
+<h3>Process<a class="headerlink" href="#process" title="Link to this heading">¶</a></h3>
 <p>To add a new procedure follow these steps:</p>
 <ol class="arabic">
 <li><p>Identify the product of the procedure (SAS/STAT, SAS/ETS, SAS Enterprise Miner, etc).</p></li>
@@ -443,7 +435,7 @@ minutes for subsequent methods.</p>
 </li>
 <li><p>Call the <cite>doc_convert</cite> method to generate then method call as well as the docstring markup</p>
 <blockquote>
-<div><div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">saspy</span>
+<div><div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">saspy</span><span class="o">.</span><span class="n">sasdecorator</span><span class="o">.</span><span class="n">procDecorator</span><span class="o">.</span><span class="n">doc_convert</span><span class="p">(</span><span class="n">lset</span><span class="p">,</span> <span class="s1">&#39;x11&#39;</span><span class="p">)[</span><span class="s1">&#39;method_stmt&#39;</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">saspy</span><span class="o">.</span><span class="n">sasdecorator</span><span class="o">.</span><span class="n">procDecorator</span><span class="o">.</span><span class="n">doc_convert</span><span class="p">(</span><span class="n">lset</span><span class="p">,</span> <span class="s1">&#39;x11&#39;</span><span class="p">)[</span><span class="s1">&#39;markup_stmt&#39;</span><span class="p">])</span>
 </pre></div>
@@ -456,12 +448,12 @@ minutes for subsequent methods.</p>
 The decorator takes one argument, the required statements for the procedure. If there are no required statements than an empty list <cite>{}</cite> should be passed.
 Here are two examples one with no required arguments:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@procDecorator</span><span class="o">.</span><span class="n">proc_decorator</span><span class="p">({})</span>
-<span class="k">def</span> <span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">esm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 <p>And one with required arguments:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nd">@procDecorator</span><span class="o">.</span><span class="n">proc_decorator</span><span class="p">({</span><span class="s1">&#39;model&#39;</span><span class="p">})</span>
-<span class="k">def</span> <span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">mixed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SASdata&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">...</span>
 </pre></div>
 </div>
 </dd>

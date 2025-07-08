@@ -1,24 +1,19 @@
+
+
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Troubleshooting &mdash; saspy 5.103.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+  <title>Troubleshooting &mdash; saspy 5.103.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+      <script src="_static/documentation_options.js?v=af6c9461"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -37,9 +32,6 @@
           <a href="index.html" class="icon icon-home">
             saspy
           </a>
-              <div class="version">
-                5.103.0
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -415,12 +407,12 @@
            <div itemprop="articleBody">
              
   <section id="troubleshooting">
-<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this heading">¶</a></h1>
+<h1>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h1>
 <p>This chapter covers troubleshooting procedures with this module. While we don’t expect you to have trouble,
 there are some cases where you might not have everything working right. We’ve tried to provide an easy reference
 for diagnosing and fixing those issues here.</p>
 <section id="connection-and-configuration-issues">
-<h2>Connection and configuration issues<a class="headerlink" href="#connection-and-configuration-issues" title="Permalink to this heading">¶</a></h2>
+<h2>Connection and configuration issues<a class="headerlink" href="#connection-and-configuration-issues" title="Link to this heading">¶</a></h2>
 <p>Although setup and configuration is pretty simple, if you do have something not quite right, it
 may be hard to figure out what’s wrong. That’s when you come to this chapter.</p>
 <p>We’ve added quite a bit of self diagnostics and error messages for many of the likely issues that can
@@ -431,7 +423,7 @@ The very first thing to look at is your sascfg_personal.py file (based off the e
 the installation directory). This is where the configurations definition are. The sample file itself has
 documentation and so does <a class="reference internal" href="install.html"><span class="doc">Installation</span></a>.</p>
 <section id="common-diagnostics">
-<h3>Common diagnostics<a class="headerlink" href="#common-diagnostics" title="Permalink to this heading">¶</a></h3>
+<h3>Common diagnostics<a class="headerlink" href="#common-diagnostics" title="Link to this heading">¶</a></h3>
 <p>Although each access method has its own ways something can go wrong, there are some common diagnostics
 you will get and can use to track down the issue.</p>
 <p>The first is that if the SASsession() method fails, it will return any erros it can, as well as the
@@ -445,7 +437,7 @@ Configuration Definition is nothing but a valid path which should work.</p>
 </div>
 <p>When I try to run I get the following:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Linux</span><span class="o">-</span><span class="mi">1</span><span class="o">&gt;</span> <span class="n">python3</span><span class="mf">.5</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
 
 <span class="n">SAS</span> <span class="n">Connection</span> <span class="n">failed</span><span class="o">.</span> <span class="n">No</span> <span class="n">connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Double</span> <span class="n">check</span> <span class="n">your</span> <span class="n">settings</span> <span class="ow">in</span> <span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span> <span class="n">file</span><span class="o">.</span>
@@ -472,7 +464,7 @@ it did say I should try running that command to see if I could get better diagno
 <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">support</span><span class="o">.</span><span class="n">sas</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">repfinder</span> <span class="ow">and</span> <span class="n">provide</span> <span class="n">your</span> <span class="n">site</span> <span class="n">number</span> <span class="mi">70068118</span> <span class="ow">and</span>
 <span class="n">company</span> <span class="n">name</span> <span class="k">as</span> <span class="n">Linux</span> <span class="k">for</span> <span class="n">x64</span> <span class="n">All</span> <span class="n">Compatible</span> <span class="n">Non</span><span class="o">-</span><span class="n">Planning</span> <span class="n">Products</span><span class="o">.</span> <span class="n">On</span> <span class="n">the</span>
 <span class="n">SAS</span> <span class="n">REP</span> <span class="nb">list</span> <span class="n">provided</span><span class="p">,</span> <span class="n">locate</span> <span class="n">the</span> <span class="n">REP</span> <span class="k">for</span> <span class="n">operating</span> <span class="n">system</span> <span class="n">LIN</span> <span class="n">X64</span><span class="o">.</span>
-<span class="n">ERROR</span><span class="p">:</span> <span class="n">Initialization</span> <span class="n">of</span> <span class="n">setinit</span> <span class="n">information</span> <span class="kn">from</span> <span class="nn">SASHELP</span> <span class="n">failed</span><span class="o">.</span>
+<span class="n">ERROR</span><span class="p">:</span> <span class="n">Initialization</span> <span class="n">of</span> <span class="n">setinit</span> <span class="n">information</span> <span class="kn">from</span><span class="w"> </span><span class="nn">SASHELP</span> <span class="n">failed</span><span class="o">.</span>
 <span class="n">NOTE</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">initialize</span> <span class="n">the</span> <span class="n">options</span> <span class="n">subsystem</span><span class="o">.</span>
 <span class="n">ERROR</span><span class="p">:</span> <span class="p">(</span><span class="n">SASXKINI</span><span class="p">):</span> <span class="n">PHASE</span> <span class="mi">3</span> <span class="n">KERNEL</span> <span class="n">INITIALIZATION</span> <span class="n">FAILED</span><span class="o">.</span>
 <span class="n">ERROR</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">initialize</span> <span class="n">the</span> <span class="n">SAS</span> <span class="n">kernel</span><span class="o">.</span>
@@ -483,7 +475,7 @@ it did say I should try running that command to see if I could get better diagno
 various connection methods, see what the errors look like, and how you can determine what the problem is.</p>
 </section>
 <section id="stdio">
-<h3>STDIO<a class="headerlink" href="#stdio" title="Permalink to this heading">¶</a></h3>
+<h3>STDIO<a class="headerlink" href="#stdio" title="Link to this heading">¶</a></h3>
 <p>There are only a couple of things that can go wrong here. First, this only works on Unix, not Windows,
 so if you’re having problems getting to to work from Windows, well there you go.</p>
 <p>Second, the only thing you really need to have right is the path to the SAS startup script in your SAS
@@ -491,7 +483,7 @@ installation. The ‘saspath’ value in your configuration definition needs to 
 <p>If, for instance, you just installed SASPy on your PC and then tried to use it, without configuring it,
 you will see the following error, since the example config only has one configuration definition which
 can’t work on Windows.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
 <span class="n">Using</span> <span class="n">SAS</span> <span class="n">Config</span> <span class="n">named</span><span class="p">:</span> <span class="n">default</span>
 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
@@ -505,7 +497,7 @@ can’t work on Windows.</p>
 <p>If you see that error, go read the configuration doc here: <a class="reference internal" href="configuration.html"><span class="doc">Configuration</span></a></p>
 </section>
 <section id="stdio-over-ssh">
-<h3>STDIO over SSH<a class="headerlink" href="#stdio-over-ssh" title="Permalink to this heading">¶</a></h3>
+<h3>STDIO over SSH<a class="headerlink" href="#stdio-over-ssh" title="Link to this heading">¶</a></h3>
 <p>The same issues in STDIO above are true here, with one extra component: ssh. The ‘saspath’ value has to be right, and
 it has to be right on the remote Linux machine that you are ssh’ing to. That might not be the same path
 as might be on your local SAS deployment.</p>
@@ -515,7 +507,7 @@ Python. If the connection cannot be made, you should see that error message with
 trying to be executed, and you can run it to get better diagnostic error messages that can tell you if its
 a problem with your SSH credentials, the machine you’re trying to reach isn’t listening, or any other
 problem there might be.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;ssh&#39;</span><span class="p">)</span>
 <span class="n">SAS</span> <span class="n">Connection</span> <span class="n">failed</span><span class="o">.</span> <span class="n">No</span> <span class="n">connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Double</span> <span class="n">check</span> <span class="n">your</span> <span class="n">settings</span> <span class="ow">in</span> <span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span> <span class="n">file</span><span class="o">.</span>
 
@@ -589,7 +581,7 @@ For instance, everything seems set up correctly but after running ssh it just sa
 </div>
 </section>
 <section id="iom">
-<h3>IOM<a class="headerlink" href="#iom" title="Permalink to this heading">¶</a></h3>
+<h3>IOM<a class="headerlink" href="#iom" title="Link to this heading">¶</a></h3>
 <p>This access method has the most possibilities of having something misconfigured, because it has more
 components that all have to connect together. But, it also has the most diagnostics to help you out.
 There are basically two possibilities where something can go wrong: Java or IOM. Let’s look at Java first.</p>
@@ -602,7 +594,7 @@ There are basically two possibilities where something can go wrong: Java or IOM.
 </ol>
 </div></blockquote>
 <section id="java-problems">
-<h4>Java problems<a class="headerlink" href="#java-problems" title="Permalink to this heading">¶</a></h4>
+<h4>Java problems<a class="headerlink" href="#java-problems" title="Link to this heading">¶</a></h4>
 <p>This error is descibed below:</p>
 <ol class="arabic simple">
 <li><p>The system cannot find the file specified</p></li>
@@ -638,7 +630,7 @@ there is no c:\java command to execute.</p>
 </div>
 </section>
 <section id="classpath-problems">
-<h4>Classpath problems<a class="headerlink" href="#classpath-problems" title="Permalink to this heading">¶</a></h4>
+<h4>Classpath problems<a class="headerlink" href="#classpath-problems" title="Link to this heading">¶</a></h4>
 <p>So what about CLASSPATH problems? Here are three cases. The first is just the wrong path, so Java won’t be able to find the main class to run.
 The second case has a valid classpath, but is missing one of the IOM jars. The third is a case with EG versions of the jars, not from a SAS 9 install.</p>
 <p>These errors are descibed below:</p>
@@ -657,7 +649,7 @@ java.lang.NoClassDefFoundError: com/sas/services/connection/ConnectionFactoryExc
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Java</span> <span class="n">Error</span><span class="p">:</span>
-<span class="n">Error</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">find</span> <span class="ow">or</span> <span class="n">load</span> <span class="n">main</span> <span class="k">class</span> <span class="nc">pyiom</span><span class="o">.</span><span class="n">saspy2j</span>
+<span class="n">Error</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">find</span> <span class="ow">or</span> <span class="n">load</span> <span class="n">main</span> <span class="k">class</span><span class="w"> </span><span class="nc">pyiom</span><span class="o">.</span><span class="n">saspy2j</span>
 
 
 <span class="n">Subprocess</span> <span class="n">failed</span> <span class="n">to</span> <span class="n">start</span><span class="o">.</span> <span class="n">Double</span> <span class="n">check</span> <span class="n">your</span> <span class="n">settings</span> <span class="ow">in</span> <span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span> <span class="n">file</span><span class="o">.</span>
@@ -674,7 +666,7 @@ java.lang.NoClassDefFoundError: com/sas/services/connection/ConnectionFactoryExc
 </div>
 <p>And if we submit that command, we see the same error that was reported.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">:</span>\<span class="o">&gt;</span><span class="n">java</span> <span class="o">-</span><span class="n">classpath</span> <span class="s2">&quot;.&quot;</span> <span class="n">pyiom</span><span class="o">.</span><span class="n">saspy2j</span> <span class="o">-</span><span class="n">host</span> <span class="n">localhost</span> <span class="o">-</span><span class="n">stdinport</span> <span class="mi">59102</span> <span class="o">-</span><span class="n">stdoutport</span> <span class="mi">59103</span> <span class="o">-</span><span class="n">stderrport</span> <span class="mi">59104</span> <span class="o">-</span><span class="n">zero</span>
-<span class="n">Error</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">find</span> <span class="ow">or</span> <span class="n">load</span> <span class="n">main</span> <span class="k">class</span> <span class="nc">pyiom</span><span class="o">.</span><span class="n">saspy2j</span>
+<span class="n">Error</span><span class="p">:</span> <span class="n">Could</span> <span class="ow">not</span> <span class="n">find</span> <span class="ow">or</span> <span class="n">load</span> <span class="n">main</span> <span class="k">class</span><span class="w"> </span><span class="nc">pyiom</span><span class="o">.</span><span class="n">saspy2j</span>
 </pre></div>
 </div>
 <p>To demonstate the error for a missing JAR file, let’s comment out one of the IOM JAR files:</p>
@@ -780,7 +772,7 @@ Version 11 Java doesn’t even ship CORBA, so the Java IOM client won’t yet wo
 <p>If you see an error like this:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Using</span> <span class="n">SAS</span> <span class="n">Config</span> <span class="n">named</span><span class="p">:</span> <span class="n">winiomwin</span>
 <span class="n">Java</span> <span class="n">Error</span><span class="p">:</span>
-<span class="n">Error</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">initialize</span> <span class="n">main</span> <span class="k">class</span> <span class="nc">pyiom</span><span class="o">.</span><span class="n">saspy2j</span>
+<span class="n">Error</span><span class="p">:</span> <span class="n">Unable</span> <span class="n">to</span> <span class="n">initialize</span> <span class="n">main</span> <span class="k">class</span><span class="w"> </span><span class="nc">pyiom</span><span class="o">.</span><span class="n">saspy2j</span>
 <span class="n">Caused</span> <span class="n">by</span><span class="p">:</span> <span class="n">java</span><span class="o">.</span><span class="n">lang</span><span class="o">.</span><span class="n">NoClassDefFoundError</span><span class="p">:</span> <span class="n">org</span><span class="o">/</span><span class="n">omg</span><span class="o">/</span><span class="n">CORBA</span><span class="o">/</span><span class="n">UserException</span>
 </pre></div>
 </div>
@@ -839,7 +831,7 @@ back to the python process, which isn’t running, thus the connection error. Bu
 </div>
 </section>
 <section id="iom-specific-errors">
-<h4>IOM specific errors<a class="headerlink" href="#iom-specific-errors" title="Permalink to this heading">¶</a></h4>
+<h4>IOM specific errors<a class="headerlink" href="#iom-specific-errors" title="Link to this heading">¶</a></h4>
 <p>So if Java is coming up, but you still fail to connect, then it is a problem connecting to IOM.
 The IOM Error message will be reported, followed by the command that was trying to be run. Below
 are the usual IOM errors and what to do about them.</p>
@@ -903,11 +895,11 @@ be trying to connect you to the wrong App Serever.</p>
 to see how to specify this: <a class="reference external" href="https://sassoftware.github.io/saspy/configuration.html#local">https://sassoftware.github.io/saspy/configuration.html#local</a></p>
 </li>
 </ol>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
 
 <span class="n">The</span> <span class="n">native</span> <span class="n">implementation</span> <span class="n">module</span> <span class="k">for</span> <span class="n">the</span> <span class="n">security</span> <span class="n">package</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">found</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">path</span><span class="o">.</span>
-<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span> <span class="nn">wait</span> <span class="n">was</span><span class="p">:</span> <span class="mi">4294967290</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span><span class="w"> </span><span class="nn">wait</span> <span class="n">was</span><span class="p">:</span> <span class="mi">4294967290</span>
 <span class="n">SAS</span> <span class="n">Connection</span> <span class="n">failed</span><span class="o">.</span> <span class="n">No</span> <span class="n">connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Double</span> <span class="n">check</span> <span class="n">your</span> <span class="n">settings</span> <span class="ow">in</span> <span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span> <span class="n">file</span><span class="o">.</span>
 
 <span class="n">Attempted</span> <span class="n">to</span> <span class="n">run</span> <span class="n">program</span> <span class="n">java</span> <span class="k">with</span> <span class="n">the</span> <span class="n">following</span> <span class="n">parameters</span><span class="p">:[</span><span class="s1">&#39;java&#39;</span><span class="p">,</span> <span class="s1">&#39;-classpath&#39;</span><span class="p">,</span> <span class="s1">&#39;C:</span><span class="se">\\</span><span class="s1">java</span><span class="se">\\</span><span class="s1">sas.svc.connection.jar;C:</span><span class="se">\\</span><span class="s1">java</span><span class="se">\\</span><span class="s1">log4j.jar;C:</span><span class="se">\\</span><span class="s1">jars</span><span class="se">\\</span><span class="s1">sas.security.sspi.jar;C:</span><span class="se">\\</span><span class="s1">jars</span><span class="se">\\</span><span class="s1">saspyiom.jar&#39;</span><span class="p">,</span>
@@ -925,7 +917,7 @@ to see how to specify this: <a class="reference external" href="https://sassoftw
 </ol>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
 <span class="n">The</span> <span class="n">application</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">find</span> <span class="n">a</span> <span class="n">command</span> <span class="n">to</span> <span class="n">launch</span> <span class="n">a</span> <span class="n">SAS</span> <span class="n">Workspace</span> <span class="n">Server</span><span class="o">.</span>
-<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span> <span class="nn">wait</span> <span class="n">was</span><span class="p">:</span> <span class="mi">4294967290</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span><span class="w"> </span><span class="nn">wait</span> <span class="n">was</span><span class="p">:</span> <span class="mi">4294967290</span>
 <span class="n">SAS</span> <span class="n">Connection</span> <span class="n">failed</span><span class="o">.</span> <span class="n">No</span> <span class="n">connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Double</span> <span class="n">check</span> <span class="n">your</span> <span class="n">settings</span> <span class="ow">in</span> <span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span> <span class="n">file</span><span class="o">.</span>
 
 <span class="n">Attempted</span> <span class="n">to</span> <span class="n">run</span> <span class="n">program</span> <span class="n">java</span> <span class="k">with</span> <span class="n">the</span> <span class="n">following</span> <span class="n">parameters</span><span class="p">:[</span><span class="s1">&#39;java&#39;</span><span class="p">,</span> <span class="s1">&#39;-classpath&#39;</span><span class="p">,</span> <span class="s1">&#39;C:</span><span class="se">\\</span><span class="s1">java</span><span class="se">\\</span><span class="s1">sas.svc.connection.jar;C:</span><span class="se">\\</span><span class="s1">java</span><span class="se">\\</span><span class="s1">log4j.jar;C:</span><span class="se">\\</span><span class="s1">jars</span><span class="se">\\</span><span class="s1">sas.security.sspi.jar;C:</span><span class="se">\\</span><span class="s1">jars</span><span class="se">\\</span><span class="s1">saspyiom.jar&#39;</span><span class="p">,</span>
@@ -949,7 +941,7 @@ The work around for this is to use the ‘javaparms’ option on the configurati
 </ol>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">()</span>
 <span class="n">The</span> <span class="n">application</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">log</span> <span class="n">on</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span><span class="o">.</span> <span class="n">The</span> <span class="n">server</span> <span class="n">process</span> <span class="n">did</span> <span class="ow">not</span> <span class="n">start</span><span class="o">.</span>
-<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span> <span class="nn">wait</span> <span class="n">was</span><span class="p">:</span> <span class="mi">4294967290</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span><span class="w"> </span><span class="nn">wait</span> <span class="n">was</span><span class="p">:</span> <span class="mi">4294967290</span>
 <span class="n">SAS</span> <span class="n">Connection</span> <span class="n">failed</span><span class="o">.</span> <span class="n">No</span> <span class="n">connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Double</span> <span class="n">check</span> <span class="n">your</span> <span class="n">settings</span> <span class="ow">in</span> <span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span> <span class="n">file</span><span class="o">.</span>
 
 <span class="n">Attempted</span> <span class="n">to</span> <span class="n">run</span> <span class="n">program</span> <span class="n">java</span> <span class="k">with</span> <span class="n">the</span> <span class="n">following</span> <span class="n">parameters</span><span class="p">:[</span><span class="s1">&#39;java&#39;</span><span class="p">,</span> <span class="s1">&#39;-Dcom.sas.iom.orb.brg.zeroConfigWorkspaceServer.sascmd=C:</span><span class="se">\\</span><span class="s1">PROGRA~1</span><span class="se">\\</span><span class="s1">SASHome</span><span class="se">\\</span><span class="s1">SASFOU~1</span><span class="se">\\</span><span class="s1">9.4</span><span class="se">\\</span><span class="s1">SAS.EXE -config C:</span><span class="se">\\</span><span class="s1">PROGRA~1</span><span class="se">\\</span><span class="s1">SASHome</span><span class="se">\\</span><span class="s1">SASFOU~1</span><span class="se">\\</span><span class="s1">9.4</span><span class="se">\\</span><span class="s1">sasv9.cfg -objectserver</span>
@@ -999,7 +991,7 @@ which failed. If I quote both of the paths in that parameter, then it works.</p>
 
 <span class="n">We</span> <span class="n">failed</span> <span class="ow">in</span> <span class="n">getConnection</span>
 <span class="n">The</span> <span class="n">application</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">log</span> <span class="n">on</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span> <span class="s2">&quot;localhost:0&quot;</span><span class="o">.</span> <span class="n">Integrated</span> <span class="n">Windows</span> <span class="n">authentication</span> <span class="n">failed</span><span class="o">.</span>
-<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span> <span class="nn">wait</span> <span class="n">was</span><span class="p">:</span> <span class="mi">4294967290</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span><span class="w"> </span><span class="nn">wait</span> <span class="n">was</span><span class="p">:</span> <span class="mi">4294967290</span>
 <span class="n">SAS</span> <span class="n">Connection</span> <span class="n">failed</span><span class="o">.</span> <span class="n">No</span> <span class="n">connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Double</span> <span class="n">check</span> <span class="n">your</span> <span class="n">settings</span> <span class="ow">in</span> <span class="n">sascfg_personal</span><span class="o">.</span><span class="n">py</span> <span class="n">file</span><span class="o">.</span>
 
 <span class="n">Attempted</span> <span class="n">to</span> <span class="n">run</span> <span class="n">program</span> <span class="n">java</span> <span class="k">with</span> <span class="n">the</span> <span class="n">following</span> <span class="n">parameters</span><span class="p">:[</span><span class="s1">&#39;java&#39;</span><span class="p">,</span> <span class="s1">&#39;-classpath&#39;</span><span class="p">,</span>
@@ -1029,15 +1021,15 @@ if you need this set for remote IOM connections from saspy, or put it in your sa
 SAS from saspy but need the variable set for other applications that need it.</p>
 </li>
 </ol>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">os</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SAS_IOM_PROXYLIST&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;https://www.sas.com&#39;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SAS_IOM_PROXYLIST&#39;</span><span class="p">]</span>
 <span class="s1">&#39;https://www.sas.com&#39;</span>
 <span class="o">&gt;&gt;&gt;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span><span class="p">;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;winlocal&#39;</span><span class="p">);</span> <span class="n">sas</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span><span class="p">;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;winlocal&#39;</span><span class="p">);</span> <span class="n">sas</span>
 <span class="n">We</span> <span class="n">failed</span> <span class="ow">in</span> <span class="n">getConnection</span>
 <span class="n">The</span> <span class="n">application</span> <span class="n">could</span> <span class="ow">not</span> <span class="n">create</span> <span class="n">a</span> <span class="n">tunnel</span> <span class="n">to</span> <span class="n">the</span> <span class="n">server</span> <span class="s2">&quot;127.0.0.1:54243&quot;</span><span class="o">.</span>
-<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span> <span class="nn">wait</span> <span class="n">was</span><span class="p">:</span> <span class="mi">4294967290</span>
+<span class="n">SAS</span> <span class="n">process</span> <span class="n">has</span> <span class="n">terminated</span> <span class="n">unexpectedly</span><span class="o">.</span> <span class="n">RC</span> <span class="kn">from</span><span class="w"> </span><span class="nn">wait</span> <span class="n">was</span><span class="p">:</span> <span class="mi">4294967290</span>
 
 
 <span class="o">&gt;&gt;&gt;</span> <span class="c1"># unset the variable here now. You can do this in your config file it you need it all the time</span>
@@ -1047,11 +1039,11 @@ SAS from saspy but need the variable set for other applications that need it.</p
 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
   <span class="n">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
   <span class="n">File</span> <span class="s2">&quot;C:\ProgramData\Anaconda3\lib\os.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">669</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__getitem__</span>
-    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="kn">from</span> <span class="kc">None</span>
+    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 <span class="ne">KeyError</span><span class="p">:</span> <span class="s1">&#39;SAS_IOM_PROXYLIST&#39;</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="c1"># it&#39;s been unset now</span>
 <span class="o">&gt;&gt;&gt;</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">saspy</span><span class="p">;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;winlocal&#39;</span><span class="p">);</span> <span class="n">sas</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">saspy</span><span class="p">;</span> <span class="n">sas</span> <span class="o">=</span> <span class="n">saspy</span><span class="o">.</span><span class="n">SASsession</span><span class="p">(</span><span class="n">cfgname</span><span class="o">=</span><span class="s1">&#39;winlocal&#39;</span><span class="p">);</span> <span class="n">sas</span>
 <span class="n">SAS</span> <span class="n">Connection</span> <span class="n">established</span><span class="o">.</span> <span class="n">Subprocess</span> <span class="nb">id</span> <span class="ow">is</span> <span class="mi">37100</span>
 
 <span class="n">Access</span> <span class="n">Method</span>         <span class="o">=</span> <span class="n">IOM</span>
@@ -1091,9 +1083,9 @@ have any problems, it should just work!</p>
 </section>
 </section>
 <section id="problems-running-code">
-<h2>Problems running code<a class="headerlink" href="#problems-running-code" title="Permalink to this heading">¶</a></h2>
+<h2>Problems running code<a class="headerlink" href="#problems-running-code" title="Link to this heading">¶</a></h2>
 <section id="my-model-didn-t-run">
-<h3>My model didn’t run<a class="headerlink" href="#my-model-didn-t-run" title="Permalink to this heading">¶</a></h3>
+<h3>My model didn’t run<a class="headerlink" href="#my-model-didn-t-run" title="Link to this heading">¶</a></h3>
 <p>When you run an analytical method there are a number of things that occur.
 The goal is to have informative messages when things go wrong and in this section we’ll explain what his happening
 and how to check the various stages</p>
