@@ -1,6 +1,28 @@
 # Changelog
 
 
+## [5.103.2] - 2025-07-11
+
+### Added
+
+-   `None` Nothing Added
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Fix` I broke download() in the HTTP access method with that last release! :( 2 days ago. Cut-n-paste error doing all
+of those try: except: around the http calls. This is a one line fix to remove the read I accidently inserted. The problem
+that resulted was not a failure, but rather 0 byte files after the 'successful' download.
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.103.1] - 2025-07-08
 
 ### Added
