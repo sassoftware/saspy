@@ -1637,7 +1637,6 @@ class SASsessionHTTP():
          conn.request('GET', self._uri_files+"/_sp_updn/content", headers=headers)
          req = conn.getresponse()
          status = req.status
-         resp = req.read()
       except:
          fd.close()
          conn.close()
