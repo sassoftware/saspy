@@ -1568,9 +1568,9 @@ class SASsession():
                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.
 
             - dictionary - a dictionary containing the names:lengths of a the character columns you want to specify (all or some). \
-                           This eliminates runmning the code to calculate the lengths (if you provide them all), and goes strainght
+                           This eliminates running the code to calculate the lengths (if you provide them all), and goes straight \
                            to transferring the data. If you only provide some columns, the others will be calculated still. \
-                           This way you canoverride all or some of them. Also, the column names are now case independent.
+                           This way you can override all or some of them. Also, the column names are now case independent.
 
         :return: SASdata object
         """
@@ -1649,7 +1649,7 @@ class SASsession():
                          chars (all the char data is actual only 1 byte), you could specify 1 since it only requires 1 BPC.
 
             - dictionary - a dictionary containing the names:lengths of all of the character columns. This eliminates \
-                           running the code to calculate the lengths, and goes strainght to transferring the data \
+                           running the code to calculate the lengths, and goes straight to transferring the data \
 
 
         :return: SASdata object
