@@ -6,12 +6,12 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 5.103.2 documentation</title>
+  <title>Configuration &mdash; saspy 5.104.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-      <script src="_static/documentation_options.js?v=98941e0b"></script>
+      <script src="_static/documentation_options.js?v=854fe1b6"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -582,15 +582,16 @@ search order listed above, in that order.</p>
 </section>
 <section id="sascfg-personal-py-details">
 <h2>sascfg_personal.py details<a class="headerlink" href="#sascfg-personal-py-details" title="Link to this heading">¶</a></h2>
-<p>There are three main parts to this configuration file.</p>
+<p>There are three main parts to this configuration file. Actually, there is a 4th non-required one too, which isn’t needed normally.</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li><p>SAS_config_names</p></li>
 <li><p>SAS_config_options  # this dictionary isn’t required unless you want to change a default</p></li>
-<li><p>Configuration definitions</p></li>
+<li><p>Configuration Definitions</p></li>
+<li><p>SAS_output_options  # this is available for adjusting some ODS settings. See it documented in the sascfg.py example file.</p></li>
 </ol>
 </div></blockquote>
-<p>In reverse order, the configuration definitions are Python dictionaries. Each dictionary
+<p>In reverse order, the Configuration Definitions are Python dictionaries. Each dictionary
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
 These values are defined in the following sections.</p>
 <p>SAS_config_options now has a fourth option (as ov V4.3.2). This new, fourth, option is <cite>style</cite> and
@@ -620,13 +621,6 @@ it could be named Bob. But then it wouldn’t be obvious that it’s for a WINdo
 <p>So, your sascfg_personal.py file only need a few things in it; not everything in the example sascfg.py file.
 For example, if you had SAS installed on your Linux system, your sascfg_personal.py file may simply be the following:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">SAS_config_names</span>   <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mycfg&#39;</span><span class="p">]</span>
-
-<span class="c1"># this is actually optional, you only have to have it to change the defaults</span>
-<span class="c1">#SAS_config_options = {&#39;lock_down&#39;: False,</span>
-<span class="c1">#                      &#39;verbose&#39;  : True,</span>
-<span class="c1">#                      &#39;prompt&#39;   : True,</span>
-<span class="c1">#                      &#39;style&#39;    : &#39;HTMLBlue&#39;</span>
-<span class="c1">#                     }</span>
 
 <span class="n">mycfg</span>              <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;saspath&#39;</span>  <span class="p">:</span> <span class="s1">&#39;/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8&#39;</span>
                      <span class="p">}</span>
