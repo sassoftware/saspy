@@ -1,6 +1,31 @@
 # Changelog
 
 
+## [5.104.0] - 2025-10-30
+
+### Added
+
+-   `Enhancement` A minor tweak to allow ODS output to be left 'asis' for internal testers here at SAS.
+Since SASPy started, the returned ODS Document from SAS has been tweakd to get it to render in Jupyter
+better than it looks by default. This new key in the `SAS_output_options` configuration option allows for this.
+
+   'asis'   :  False         # defaults to how this has always worked
+
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `None` Nothing Changed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.103.2] - 2025-07-11
 
 ### Added
@@ -39,7 +64,7 @@ the http request calls that didn't have it, to handle unexpected failures better
 
 ### Fixed
 
--   ` None` Nothing Fixed
+-   `None` Nothing Fixed
 
 ### Removed
 
@@ -67,7 +92,7 @@ as the code finishes.
 
 ### Fixed
 
--   ` None` Nothing Fixed
+-   `None` Nothing Fixed
 
 ### Removed
 

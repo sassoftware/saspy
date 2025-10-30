@@ -1111,7 +1111,8 @@ Will use HTML5 for this SASsession.""")
       zz = z[0].rpartition("E3969440A681A24088859985" + prev)
       logd = zz[2].replace(mj.decode(self.sascfg.encoding), '').replace(chr(12), chr(10))
 
-      lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
+      lstd = lstf  if self._sb.sascfg.odsasis else \
+             lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                     '<body class="l body">').replace("font-size: x-small;",
                                                                                      "font-size:  normal;")
       if self._checkLogForError(logd):

@@ -1053,7 +1053,8 @@ class SASsessionHTTP():
          i += 1
       conn.close()
 
-      lstd = htm.replace(chr(12), chr(10)).replace('<body class="c body">',
+      lstd = htm if self._sb.sascfg.odsasis else \
+             htm.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                    '<body class="l body">').replace("font-size: x-small;",
                                                                                     "font-size:  normal;")
       return lstd

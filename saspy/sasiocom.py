@@ -497,7 +497,8 @@ class SASSessionCOM(object):
                except UnicodeDecodeError:
                   lstf = lstf.decode(errors='replace')
 
-            listing = lstf \
+            listing = lstf if self._sb.sascfg.odsasis else \
+                      lstf \
                 .replace(chr(12), chr(10)) \
                 .replace('<body class="c body">', '<body class="l body">') \
                 .replace('font-size: x-small;', 'font-size: normal;')

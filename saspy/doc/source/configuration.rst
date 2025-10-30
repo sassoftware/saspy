@@ -210,13 +210,15 @@ Here's an example showing these (I have one in the saspy install dir, current di
 
 sascfg_personal.py details
 ==========================
-There are three main parts to this configuration file.
+There are three main parts to this configuration file. Actually, there is a 4th non-required one too, which isn't needed normally.
 
         1) SAS_config_names
         2) SAS_config_options  # this dictionary isn't required unless you want to change a default
-        3) Configuration definitions
+        3) Configuration Definitions
 
-In reverse order, the configuration definitions are Python dictionaries. Each dictionary
+        4) SAS_output_options  # this is available for adjusting some ODS settings. See it documented in the sascfg.py example file.
+
+In reverse order, the Configuration Definitions are Python dictionaries. Each dictionary
 has the settings for one connection method (STDIO, SSH, IOM, and so on) to a SAS session.
 These values are defined in the following sections.
 
@@ -255,13 +257,6 @@ For example, if you had SAS installed on your Linux system, your sascfg_personal
 .. code-block:: ipython3
 
     SAS_config_names   = ['mycfg']
-
-    # this is actually optional, you only have to have it to change the defaults
-    #SAS_config_options = {'lock_down': False,
-    #                      'verbose'  : True,
-    #                      'prompt'   : True,
-    #                      'style'    : 'HTMLBlue'
-    #                     }
 
     mycfg              = {'saspath'  : '/opt/sasinside/SASHome/SASFoundation/9.4/bin/sas_u8'
                          }

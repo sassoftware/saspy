@@ -155,8 +155,10 @@ class SASconfig(object):
         try:
            outopts       = getattr(SAScfg, "SAS_output_options")
            self.odsstyle = outopts.get('style', 'HTMLBlue')
+           self.odsasis  = outopts.get('asis', False)
         except:
            self.odsstyle = 'HTMLBlue'
+           self.odsasis  = False
 
         # See if we don't want to allow prompting in this environment
         prompt = self.cfgopts.get('prompt', True)

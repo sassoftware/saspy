@@ -59,14 +59,20 @@ SAS_config_options = {'lock_down': False,
 # properly with HTML 5.0 so it can also be set to HTML 4.0 instead (using "ods html" statement). This option will only work when using IOM
 # in local mode. Note that HTML 4.0 will generate images separately which clutters the workspace and if you download the notebook as HTML,
 # the HTML file will need to be put in the same folder as the images for them to appear.
+#
+# Note that this configuration option (SAS_output_options) is NOT required unless changing any of the defaultd
+#
 # valid keys are:
 #
 # 'output' = ['html5', 'html']
 # 'style'  = any valid style   # this will be the default for SASsession.HTML_Style, which you can also change dynamically in your code
+# 'asis'   = True              # don't tweak the html document (as has always been done) to get it to display better in Jupyter; leave it as is
 #
 #
-SAS_output_options = {'output' : 'html5',       # not required unless changing any of the default
-                      'style'  : 'HTMLBlue'}
+SAS_output_options = {'output' : 'html5',       # change the ODS output destination; not suggested, only for special use case
+                      'style'  : 'HTMLBlue',    # defaults to SAS's default
+                      'asis'   :  False         # defaults to how this has always worked
+                     }
 
 
 # Configuration Definitions

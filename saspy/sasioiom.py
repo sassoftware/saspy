@@ -1081,9 +1081,10 @@ Will use HTML5 for this SASsession.""")
       if len(trip[1]) > 0 and len(trip[2]) < 200:
          lstf = ''
 
-      lstd = lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
-                                                    '<body class="l body">').replace("font-size: x-small;",
-                                                                                     "font-size:  normal;")
+      lstd = lstf if self._sb.sascfg.odsasis else \
+             lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
+                                                   '<body class="l body">').replace("font-size: x-small;",
+                                                                                    "font-size:  normal;")
       logf = logf.decode(errors='replace').replace(chr(12), chr(20))
       self._log += logf
       final = logf.partition(logcodei)
