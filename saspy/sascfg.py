@@ -60,7 +60,7 @@ SAS_config_options = {'lock_down': False,
 # in local mode. Note that HTML 4.0 will generate images separately which clutters the workspace and if you download the notebook as HTML,
 # the HTML file will need to be put in the same folder as the images for them to appear.
 #
-# Note that this configuration option (SAS_output_options) is NOT required unless changing any of the defaultd
+# Note that this configuration option (SAS_output_options) is NOT required unless changing any of the defaults
 #
 # valid keys are:
 #
