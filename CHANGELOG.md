@@ -7,9 +7,8 @@
 
 -   `Enhancement` A minor tweak to allow ODS output to be left 'asis' for internal testers here at SAS.
 Since SASPy started, the returned ODS Document from SAS has been tweakd to get it to render in Jupyter
-better than it looks by default. This new key in the `SAS_output_options` configuration option allows for this.
-
-   'asis'   :  False         # defaults to how this has always worked
+better than it looks by default. This new key in the `SAS_output_options` configuration option allows for this:
+`'asis'   :  False         # defaults to how this has always worked`
 
 
 ### Changed
