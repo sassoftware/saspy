@@ -17,7 +17,7 @@
 For example, in prior versions if you have this DataFrame:
 df=pd.DataFrame({"col1": ["a", "b", None]})
 
-And call dataframe2sasdata on it, the None value was previously being treated as a string: "None", which has a length of 4. So the CHAR column in the SAS dataset was being created with a length of 4, not a length of 1 as expected.
+And call dataframe2sasdata on it, the None value was previously being treated as a string: "None", which has a length of 4. So the CHAR column in the SAS dataset was being created with a length of 4, not a length of 1 as expected. 
 
 # Variable Type Len
 
