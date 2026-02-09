@@ -12,12 +12,7 @@
 
 ### Fixed
 
--   `Fix` In Pandas 3.0.0, a change was made to store "None" as NaN. This caused dataframe2sasdata to throw an exception.  The fix is to call the fillna method to convert the missing values to an empty string when computing the column length. This fixes the issue and also solves another issue in that the length of a CHAR column is now set correctly.
-
-For example, in prior versions if you have this DataFrame:
-df=pd.DataFrame({"col1": ["a", "b", None]})
-
-And call dataframe2sasdata on it, the None value was previously being treated as a string: "None", which has a length of 4. So the CHAR column in the SAS dataset was being created with a length of 4, not a length of 1 as expected.
+-   `Fix` In Pandas 3.0.0, a change was made to store "None" as NaN. This caused dataframe2sasdata to throw an exception.  The fix is to call the fillna method to convert the missing values to an empty string when computing the column length. This fixes the issue and also solves another issue in that the length of a CHAR column is now set correctly.For example, in prior versions if you have this DataFrame:<br/><br/>df=pd.DataFrame({"col1": ["a", "b", None]})<br/><br/>And call dataframe2sasdata on it, the None value was previously being treated as a string: "None", which has a length of 4. So the CHAR column in the SAS dataset was being created with a length of 4, not a length of 1 as expected.
 
 ### Removed
 
