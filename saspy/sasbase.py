@@ -1477,18 +1477,18 @@ class SASsession():
            if col_up not in chr_keys:
               if df.dtypes[name].kind in ('O','S','U','V'):
                  if CnotB:  # calc max Chars not Bytes
-                    col_l = df[name].fillna('').astype(str).map(len).max() * bpc
+                    col_l = df[name].astype(str).map(len).max() * bpc
                  else:
                     if encode_errors == 'fail':
                        try:
-                          col_l = df[name].fillna('').astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding))).max()
+                          col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding))).max()
                        except Exception as e:
                           msg  = "Transcoding error encountered.\n"
                           msg += "DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e)
                           logger.error(msg)
                           return None
                     else:
-                       col_l = df[name].fillna('').astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
+                       col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
                  if not col_l > 0:
                     col_l = 8
                  ret[colname] = col_l
