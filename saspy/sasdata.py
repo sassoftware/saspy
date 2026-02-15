@@ -16,9 +16,9 @@
 
 #so the doc will generate for df methods
 try:
-   import pandas
+    import pandas
 except Exception as e:
-   pass
+    pass
 
 import logging
 logger = logging.getLogger('saspy')
@@ -65,24 +65,24 @@ class SASdata:
         self.sas = sassession
 
         if results == '':
-           results = sassession.results
+            results = sassession.results
 
         failed = 0
         if results.upper() == "HTML":
-           if self.sas.sascfg.display.lower() == 'jupyter':
-              try:
-                 from IPython.display import HTML
-              except:
-                 failed = 1
+            if self.sas.sascfg.display.lower() == 'jupyter':
+                try:
+                    from IPython.display import HTML
+                except:
+                    failed = 1
 
-              if failed and not self.sas.batch:
-                  self.HTML = 0
-              else:
-                  self.HTML = 1
-           else:
-              self.HTML = 1
+                if failed and not self.sas.batch:
+                    self.HTML = 0
+                else:
+                    self.HTML = 1
+            else:
+                self.HTML = 1
         else:
-           self.HTML = 0
+            self.HTML = 0
 
         if len(libref):
             self.libref = libref
@@ -167,7 +167,7 @@ class SASdata:
         :return: Pandas Data Frame
         """
         if self.sas.sascfg.pandas:
-           raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
+            raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
 
         libref = kwargs.get('libref','work')
         ll = self.sas._io.submit(code, 'text')
@@ -182,7 +182,7 @@ class SASdata:
             for t in tablename:
                 # strip leading '_' from names and capitalize for dictionary labels
                 if self.sas.exist(t, libref):
-                   df[t.replace('_', '').capitalize()] = self.sas.sasdata2dataframe(t, libref)
+                    df[t.replace('_', '').capitalize()] = self.sas.sasdata2dataframe(t, libref)
                 self.sas._io.submit("proc delete data=%s.%s; run;" % (libref, t))
         else:
             raise SyntaxError("The tablename must be a string or list %s was submitted" % str(type(tablename)))
@@ -220,14 +220,14 @@ class SASdata:
         optkeys = self.dsopts.keys()
 
         if self.engine != 'SPDE':
-           firstobs = topts.get('firstobs', 1)
-           topts['obs'] = min(topts.get('obs', firstobs+obs-1), firstobs+obs-1)
+            firstobs = topts.get('firstobs', 1)
+            topts['obs'] = min(topts.get('obs', firstobs+obs-1), firstobs+obs-1)
         else:
-           firstobs = topts.get('startobs', 1)
-           topts['endobs'] = min(topts.get('endobs', topts.get('obs', firstobs+obs-1)), firstobs+obs-1)
+            firstobs = topts.get('startobs', 1)
+            topts['endobs'] = min(topts.get('endobs', topts.get('obs', firstobs+obs-1)), firstobs+obs-1)
 
-           if 'obs' in optkeys:
-              del topts['obs']
+            if 'obs' in optkeys:
+                del topts['obs']
 
         code = "proc print data=" + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self.sas._dsopts(topts) + ";run;"
 
@@ -248,7 +248,7 @@ class SASdata:
                     ll = self.sas._io.submit(code)
                     self.sas._lastlog = self.sas._io._log[lastlog:]
                 if not self.sas.batch:
-                   self.sas._render_html_or_log(ll)
+                    self.sas._render_html_or_log(ll)
                 else:
                     return ll
             else:
@@ -284,23 +284,23 @@ class SASdata:
         optkeys = topts.keys()
 
         if self.engine != 'SPDE':
-           firstobs = topts.get('firstobs', 1)
-           lastobs  = topts.get('obs', nobs+firstobs-1)
-           firstobs = max(lastobs - obs+1, firstobs)
+            firstobs = topts.get('firstobs', 1)
+            lastobs  = topts.get('obs', nobs+firstobs-1)
+            firstobs = max(lastobs - obs+1, firstobs)
 
-           topts['obs']      = lastobs
-           topts['firstobs'] = firstobs
+            topts['obs']      = lastobs
+            topts['firstobs'] = firstobs
 
         else:
-           firstobs = topts.get('startobs', 1)
-           lastobs  = topts.get('endobs', topts.get('obs', nobs+firstobs-1))
-           firstobs = max(lastobs - obs+1, firstobs)
+            firstobs = topts.get('startobs', 1)
+            lastobs  = topts.get('endobs', topts.get('obs', nobs+firstobs-1))
+            firstobs = max(lastobs - obs+1, firstobs)
 
-           topts['endobs']   = lastobs
-           topts['startobs'] = firstobs
+            topts['endobs']   = lastobs
+            topts['startobs'] = firstobs
 
-           if 'obs' in optkeys:
-              del topts['obs']
+            if 'obs' in optkeys:
+                del topts['obs']
 
         code  = "proc print data=" + self.libref + ".'"
         code += self.table.replace("'", "''") + "'n " + self.sas._dsopts(topts) + ";run;"
@@ -345,20 +345,20 @@ class SASdata:
         lastlog = len(self.sas._io._log)
 
         if self.engine == 'SPDE':
-           if self.dsopts.get('startobs', None) or self.dsopts.get('endobs', None):
-              force = True
+            if self.dsopts.get('startobs', None) or self.dsopts.get('endobs', None):
+                force = True
 
         code  = "%let lastobs=-1;\n"
         if not force:
-           code += "proc sql;select count(*) format best32. into :lastobs from "+ self.libref + ".'"
-           code +=  self.table.replace("'", "''") + "'n " + self._dsopts() + ";"
-           code += "%put lastobs=&lastobs lastobsend=;\nquit;"
+            code += "proc sql;select count(*) format best32. into :lastobs from "+ self.libref + ".'"
+            code +=  self.table.replace("'", "''") + "'n " + self._dsopts() + ";"
+            code += "%put lastobs=&lastobs lastobsend=;\nquit;"
         else:
-           code += "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+ self.libref + ".'"
-           code +=  self.table.replace("'", "''") + "'n " + self._dsopts() +";run;\n"
-           code += "proc sql;select count(*) format best32. into :lastobs from work.sasdata2dataframe;"
-           code += "%put lastobs=&lastobs lastobsend=;\nquit;\n"
-           code += "proc delete data=work.sasdata2dataframe(memtype=view);run;"
+            code += "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+ self.libref + ".'"
+            code +=  self.table.replace("'", "''") + "'n " + self._dsopts() +";run;\n"
+            code += "proc sql;select count(*) format best32. into :lastobs from work.sasdata2dataframe;"
+            code += "%put lastobs=&lastobs lastobsend=;\nquit;\n"
+            code += "proc delete data=work.sasdata2dataframe(memtype=view);run;"
 
         if self.sas.nosub:
             print(code)
@@ -459,10 +459,10 @@ class SASdata:
                     log = ll['LOG'].rpartition('VARLISTEND=')[0].rpartition('VARLIST=')
 
                     for vari in range(log[2].count('VAR=')):
-                       log = log[2].partition('VAR=')[2].partition(' VAREND=')
-                       numlist.append(log[0].strip())
+                        log = log[2].partition('VAR=')[2].partition(' VAREND=')
+                        numlist.append(log[0].strip())
 
-                   # check if var is in numlist
+                    # check if var is in numlist
                     if isinstance(var, str):
                         tlist = var.split()
                     elif isinstance(var, list):
@@ -704,21 +704,21 @@ class SASdata:
             return df
         else:
             if self.HTML:
-               if not ll:
-                  ll = self.sas._io.submit(code)
-                  self.sas._lastlog = self.sas._io._log[lastlog:]
-               if not self.sas.batch:
-                  self.sas._render_html_or_log(ll)
-               else:
-                  return ll
+                if not ll:
+                    ll = self.sas._io.submit(code)
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
+                if not self.sas.batch:
+                    self.sas._render_html_or_log(ll)
+                else:
+                    return ll
             else:
-               if not ll:
-                  ll = self.sas._io.submit(code, "text")
-                  self.sas._lastlog = self.sas._io._log[lastlog:]
-               if not self.sas.batch:
-                  print(ll['LST'])
-               else:
-                  return ll
+                if not ll:
+                    ll = self.sas._io.submit(code, "text")
+                    self.sas._lastlog = self.sas._io._log[lastlog:]
+                if not self.sas.batch:
+                    print(ll['LST'])
+                else:
+                    return ll
 
     def impute(self, vars: dict, replace: bool = False, prefix: str = 'imp_', out: 'SASdata' = None) -> 'SASdata':
         """
@@ -770,15 +770,15 @@ class SASdata:
         log = ll['LOG'].rpartition('TYPELIST=')[0].rpartition('VARLIST=')
 
         for vari in range(log[2].count('VAR=')):
-           log = log[2].partition('VAR=')[2].partition('VAREND=')
-           varlist.append(log[0].strip().upper())
+            log = log[2].partition('VAR=')[2].partition('VAREND=')
+            varlist.append(log[0].strip().upper())
 
         typelist = []
         log = ll['LOG'].rpartition('END_ALL_VARS_AND_TYPES=')[0].rpartition('TYPELIST=')
 
         for typei in range(log[2].count('VAR=')):
-           log = log[2].partition('TYPE=')[2].partition('TYPEEND=')
-           typelist.append(log[0].strip().upper())
+            log = log[2].partition('TYPE=')[2].partition('TYPEEND=')
+            typelist.append(log[0].strip().upper())
 
         varListType = dict(zip(varlist, typelist))
 
@@ -943,17 +943,17 @@ class SASdata:
         lastlog = len(self.sas._io._log)
 
         if out is not None:
-           if not isinstance(out, SASdata):
-              logger.error("out= needs to be a SASdata object")
-              return None
-           else:
-              outtab = out.libref + ".'" + out.table.replace("'", "''") + "'n " + out._dsopts()
+            if not isinstance(out, SASdata):
+                logger.error("out= needs to be a SASdata object")
+                return None
+            else:
+                outtab = out.libref + ".'" + out.table.replace("'", "''") + "'n " + out._dsopts()
         else:
-           outtab = self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts()
+            outtab = self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts()
 
         code  = "data "+outtab+"; set " + self.libref + ".'" + self.table.replace("'", "''") + "'n " + self._dsopts() + ";\n"
         for key in vars.keys():
-           code += key+" = "+vars[key]+";\n"
+            code += key+" = "+vars[key]+";\n"
         code += "; run;"
 
         if self.sas.nosub:
@@ -1169,73 +1169,73 @@ class SASdata:
                     rowsep: str = '\x01', colsep: str = '\x02',
                     rowrep: str = ' ',    colrep: str = ' ',
                     **kwargs) -> None:
-       """
-       This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet.
+        """
+        This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet.
 
-       :param parquet_file_path: path of the parquet file to create
-       :param pa_parquet_kwargs: Additional parameters to pass to pyarrow.parquet.ParquetWriter (default is {"compression": 'snappy', "flavor": "spark", "write_statistics": False}).
-       :param pa_pandas_kwargs: Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).
-       :param partitioned: Boolean indicating whether the parquet file should be written in partitions (default is False).
-       :param partition_size_mb: The size in MB of each partition in memory (default is 128).
-       :param chunk_size_mb: The chunk size in MB at which the stream is processed (default is 4).
-       :param coerce_timestamp_errors: Whether to coerce errors when converting timestamps (default is True).
-       :param static_columns: List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).
-       :param rowsep: the row seperator character to use; defaults to '\x01'
-       :param colsep: the column seperator character to use; defaults to '\x02'
-       :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
-       :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
+        :param parquet_file_path: path of the parquet file to create
+        :param pa_parquet_kwargs: Additional parameters to pass to pyarrow.parquet.ParquetWriter (default is {"compression": 'snappy', "flavor": "spark", "write_statistics": False}).
+        :param pa_pandas_kwargs: Additional parameters to pass to pyarrow.Table.from_pandas (default is {}).
+        :param partitioned: Boolean indicating whether the parquet file should be written in partitions (default is False).
+        :param partition_size_mb: The size in MB of each partition in memory (default is 128).
+        :param chunk_size_mb: The chunk size in MB at which the stream is processed (default is 4).
+        :param coerce_timestamp_errors: Whether to coerce errors when converting timestamps (default is True).
+        :param static_columns: List of tuples (name, value) representing static columns that will be added to the parquet file (default is None).
+        :param rowsep: the row seperator character to use; defaults to '\x01'
+        :param colsep: the column seperator character to use; defaults to '\x02'
+        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
+        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
 
-       Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
-       be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
-       to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
+        Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
+        be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
+        to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
 
-       :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
-       :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
+        :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp; pandas.Timestamp.min
+        :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp; pandas.Timestamp.max
 
-       :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
-                      They are either access method specific parms or specific pandas parms.
-                      See the specific sasdata2dataframe* method in the access method for valid possibilities.
+        :param kwargs: a dictionary. These vary per access method, and are generally NOT needed.
+                       They are either access method specific parms or specific pandas parms.
+                       See the specific sasdata2dataframe* method in the access method for valid possibilities.
 
-       These two options are for advanced usage. They override how saspy imports data. For more info
-       see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
+        These two options are for advanced usage. They override how saspy imports data. For more info
+        see https://sassoftware.github.io/saspy/advanced-topics.html#advanced-sd2df-and-df2sd-techniques
 
-       :param dtype: this is the parameter to Pandas read_csv, overriding what saspy generates and uses
-       :param my_fmts: bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=
+        :param dtype: this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+        :param my_fmts: bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=
 
-       :return: None
-       """
-       lastlog = len(self.sas._io._log)
+        :return: None
+        """
+        lastlog = len(self.sas._io._log)
 
-       parquet_kwargs = pa_parquet_kwargs if pa_parquet_kwargs is not None else {"compression": 'snappy',
-                                                                                 "flavor":"spark",
-                                                                                 "write_statistics":False
-                                                                                 }
-       pandas_kwargs  = pa_pandas_kwargs if pa_pandas_kwargs  is not None  else {}
+        parquet_kwargs = pa_parquet_kwargs if pa_parquet_kwargs is not None else {"compression": 'snappy',
+                                                                                  "flavor":"spark",
+                                                                                  "write_statistics":False
+                                                                                  }
+        pandas_kwargs  = pa_pandas_kwargs if pa_pandas_kwargs  is not None  else {}
 
-       ll = self._is_valid()
-       self.sas._lastlog = self.sas._io._log[lastlog:]
-       if ll:
-          print(ll['LOG'])
-          return None
-       else:
-          self.sas.sasdata2parquet(parquet_file_path = parquet_file_path,
-                                   table  = self.table,
-                                   libref = self.libref,
-                                   dsopts = self.dsopts,
-                                   pa_parquet_kwargs = parquet_kwargs,
-                                   pa_pandas_kwargs  = pandas_kwargs,
-                                   partitioned = partitioned,
-                                   partition_size_mb = partition_size_mb,
-                                   chunk_size_mb = chunk_size_mb,
-                                   coerce_timestamp_errors=coerce_timestamp_errors,
-                                   static_columns = static_columns,
-                                   rowsep = rowsep,
-                                   colsep = colsep,
-                                   rowrep = rowrep,
-                                   colrep = colrep,
-                                   **kwargs)
-          self.sas._lastlog = self.sas._io._log[lastlog:]
-          return None
+        ll = self._is_valid()
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+        if ll:
+            print(ll['LOG'])
+            return None
+        else:
+            self.sas.sasdata2parquet(parquet_file_path = parquet_file_path,
+                                     table  = self.table,
+                                     libref = self.libref,
+                                     dsopts = self.dsopts,
+                                     pa_parquet_kwargs = parquet_kwargs,
+                                     pa_pandas_kwargs  = pandas_kwargs,
+                                     partitioned = partitioned,
+                                     partition_size_mb = partition_size_mb,
+                                     chunk_size_mb = chunk_size_mb,
+                                     coerce_timestamp_errors=coerce_timestamp_errors,
+                                     static_columns = static_columns,
+                                     rowsep = rowsep,
+                                     colsep = colsep,
+                                     rowrep = rowrep,
+                                     colrep = colrep,
+                                     **kwargs)
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return None
 
     def to_frame(self, **kwargs) -> 'pandas.DataFrame':
         """
@@ -1292,7 +1292,7 @@ class SASdata:
             return None
         else:
             if self.sas.sascfg.pandas:
-               raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
+                raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
             df = self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
@@ -1668,209 +1668,209 @@ class SASdata:
 
     def modify(self, formats: dict=None, informats: dict=None, label: str=None,
               renamevars: dict=None, labelvars: dict=None):
-       """
-       Modify a table, setting formats, informats or changing the data set name itself or renaming variables or adding labels to variables
+        """
+        Modify a table, setting formats, informats or changing the data set name itself or renaming variables or adding labels to variables
 
-       :param formats: dict of variable names and formats to assign
-       :param informats: dict of variable names and informats to assign
-       :param label: string of the label to assign to the data set; if it requires outer quotes, provide them
-       :param renamevars: dict of variable names and new names tr rename the variables
-       :param labelvars: dict of variable names and labels to assign to them; if any lables require outer quotes, provide them
-       :return: SASLOG for this step
-       """
-       lastlog = len(self.sas._io._log)
-       code  = "proc datasets dd="+self.libref+" nolist; modify '"+self.table.replace("'", "''")+"'n "
+        :param formats: dict of variable names and formats to assign
+        :param informats: dict of variable names and informats to assign
+        :param label: string of the label to assign to the data set; if it requires outer quotes, provide them
+        :param renamevars: dict of variable names and new names tr rename the variables
+        :param labelvars: dict of variable names and labels to assign to them; if any lables require outer quotes, provide them
+        :return: SASLOG for this step
+        """
+        lastlog = len(self.sas._io._log)
+        code  = "proc datasets dd="+self.libref+" nolist; modify '"+self.table.replace("'", "''")+"'n "
 
-       if label is not None:
-          code += "(label="+label+")"
-       code += ";\n"
+        if label is not None:
+            code += "(label="+label+")"
+        code += ";\n"
 
-       if formats is not None:
-          code += "format"
-          for var in formats:
-             code += " '"+var.replace("'", "''")+"'n "+formats[var]
-          code += ";\n"
+        if formats is not None:
+            code += "format"
+            for var in formats:
+                code += " '"+var.replace("'", "''")+"'n "+formats[var]
+            code += ";\n"
 
-       if informats is not None:
-          code += "informat"
-          for var in informats:
-             code += " '"+var.replace("'", "''")+"'n "+informats[var]
-          code += ";\n"
+        if informats is not None:
+            code += "informat"
+            for var in informats:
+                code += " '"+var.replace("'", "''")+"'n "+informats[var]
+            code += ";\n"
 
-       if renamevars is not None:
-          code += "rename"
-          for var in renamevars:
-             code += " '"+var.replace("'", "''")+"'n = '"+renamevars[var].replace("'", "''")+"'n"
-          code += ";\n"
+        if renamevars is not None:
+            code += "rename"
+            for var in renamevars:
+                code += " '"+var.replace("'", "''")+"'n = '"+renamevars[var].replace("'", "''")+"'n"
+            code += ";\n"
 
-       if labelvars is not None:
-          code += "label"
-          for var in labelvars:
-             code += " '"+var.replace("'", "''")+"'n = "+labelvars[var]
-          code += ";\n"
+        if labelvars is not None:
+            code += "label"
+            for var in labelvars:
+                code += " '"+var.replace("'", "''")+"'n = "+labelvars[var]
+            code += ";\n"
 
-       code += ";run;quit;"
+        code += ";run;quit;"
 
-       if self.sas.nosub:
-          print(code)
-          return
+        if self.sas.nosub:
+            print(code)
+            return
 
-       ll = self.sas._io.submit(code, results='text')
-       self.sas._lastlog = self.sas._io._log[lastlog:]
-       if not self.sas.batch:
-          print(ll['LOG'])
-       else:
-          return ll['LOG']
+        ll = self.sas._io.submit(code, results='text')
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+        if not self.sas.batch:
+            print(ll['LOG'])
+        else:
+            return ll['LOG']
 
     def rename(self, name: str=None):
-       """
-       Rename this data set
+        """
+        Rename this data set
 
-       :param name: new name for this data set
-       :return: SASLOG for this step
-       """
-       lastlog = len(self.sas._io._log)
-       code  = "proc datasets dd="+self.libref+" nolist;\n"
-       code += "change '"+self.table.replace("'", "''")+"'n = '"+name.replace("'", "''")+"'n;\nrun;quit;"
+        :param name: new name for this data set
+        :return: SASLOG for this step
+        """
+        lastlog = len(self.sas._io._log)
+        code  = "proc datasets dd="+self.libref+" nolist;\n"
+        code += "change '"+self.table.replace("'", "''")+"'n = '"+name.replace("'", "''")+"'n;\nrun;quit;"
 
-       if self.sas.nosub:
-          print(code)
-          return
+        if self.sas.nosub:
+            print(code)
+            return
 
-       if self.sas.exist(name, self.libref):
-          self.sas._lastlog = self.sas._io._log[lastlog:]
-          failmsg = "Data set with new name already exists. Rename failed."
-          if not self.sas.batch:
-             logger.error(failmsg)
-             return None
-          else:
-             return failmsg
-
-       ll = self.sas._io.submit(code, results='text')
-
-       if not self.sas.exist(name, self.libref):
-          failmsg = "New named data set doesn't exist. Rename must have failed.\n"
-       else:
-          failmsg = ""
-          self.table = name
-
-       self.sas._lastlog = self.sas._io._log[lastlog:]
-       if not self.sas.batch:
-          print(failmsg+ll['LOG'])
-          return None
-       else:
-          return failmsg+ll['LOG']
-
-    def delete(self, quiet=False):
-       """
-       Delete this data set; the SASdata object is still available
-
-       :return: SASLOG for this step
-       """
-       lastlog = len(self.sas._io._log)
-       code  = "proc delete data="+self.libref + ".'" + self.table.replace("'", "''") + "'n;run;"
-
-       if self.sas.nosub:
-          print(code)
-          return
-
-       ll = self.sas._io.submit(code, results='text')
-
-       if self.sas.exist(self.table, self.libref):
-          ll['LOG'] = "Data set still exists. Delete must have failed.\n"+ll['LOG']
-
-       self.sas._lastlog = self.sas._io._log[lastlog:]
-
-       if not self.sas.batch:
-          if not quiet:
-             print(ll['LOG'])
-          return None
-       else:
-          return ll['LOG']
-
-    def append(self, data, force: bool=False):
-       """
-       Append 'data' to this SAS Data Set. data can either be another SASdataobject or
-       a Pandas DataFrame, in which case dataframe2sasdata(data) will be run for you to
-       load the data into a SAS data Set which will then be appended to this data set.
-
-       :param data: Either a SASdata object or a Pandas DataFrame
-       :param force: boolean to force appended even if anomolies exist which could cause dropping or truncating
-       :return: SASLOG for this step
-       """
-       lastlog = len(self.sas._io._log)
-       new = None
-
-       if not self.sas.sascfg.pandas:
-          if type(data) is pandas.core.frame.DataFrame:
-             new = 'df'
-       else:
-          new = 'no pandas'
-
-       if type(data) is type(self):
-          new = 'sd'
-
-       if new not in ['df','sd']:
-          failmsg = "The data parameter passed in must be either a SASdata object or a Pandas DataFrame. No data was appended."
-          if not self.sas.batch:
-             logger.error(failmsg)
-             return None
-          else:
-             return failmsg
-
-       if new == 'df':
-          tmp = True
-          new = self.sas.df2sd(data, '_temp_df')
-          if type(new) is not type(self):
-             failmsg = "df2sd on input data failed. Check SASLOG for errors."
-             if not self.sas.batch:
+        if self.sas.exist(name, self.libref):
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            failmsg = "Data set with new name already exists. Rename failed."
+            if not self.sas.batch:
                 logger.error(failmsg)
                 return None
-             else:
+            else:
                 return failmsg
-       else:
-          tmp = False
-          new = data
 
-       if self.sas.nosub:
-          print(code)
-          return
+        ll = self.sas._io.submit(code, results='text')
 
-       if not self.sas.exist(new.table, new.libref):
-          self.sas._lastlog = self.sas._io._log[lastlog:]
-          failmsg = "Data set to be appended doesn't exist. No data was appended."
-          if not self.sas.batch:
-             logger.error(failmsg)
-             return None
-          else:
-             return failmsg
+        if not self.sas.exist(name, self.libref):
+            failmsg = "New named data set doesn't exist. Rename must have failed.\n"
+        else:
+            failmsg = ""
+            self.table = name
 
-       code  = "proc append base="+self.libref+".'"+self.table.replace("'", "''")+"'n\n"
-       code += "            data="+ new.libref+".'"+ new.table.replace("'", "''")+"'n"+new._dsopts()
-       if force:
-          code += "\n   force"
-       code += ";\nrun;"
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+        if not self.sas.batch:
+            print(failmsg+ll['LOG'])
+            return None
+        else:
+            return failmsg+ll['LOG']
 
-       ll = self.sas._io.submit(code, results='text')
-       self.sas._lastlog = self.sas._io._log[lastlog:]
+    def delete(self, quiet=False):
+        """
+        Delete this data set; the SASdata object is still available
 
-       if tmp:
-          new.delete(quiet=True)
+        :return: SASLOG for this step
+        """
+        lastlog = len(self.sas._io._log)
+        code  = "proc delete data="+self.libref + ".'" + self.table.replace("'", "''") + "'n;run;"
 
-       if not self.sas.batch:
-          print(ll['LOG'])
-          return None
-       else:
-          return ll['LOG']
+        if self.sas.nosub:
+            print(code)
+            return
+
+        ll = self.sas._io.submit(code, results='text')
+
+        if self.sas.exist(self.table, self.libref):
+            ll['LOG'] = "Data set still exists. Delete must have failed.\n"+ll['LOG']
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+
+        if not self.sas.batch:
+            if not quiet:
+                print(ll['LOG'])
+            return None
+        else:
+            return ll['LOG']
+
+    def append(self, data, force: bool=False):
+        """
+        Append 'data' to this SAS Data Set. data can either be another SASdataobject or
+        a Pandas DataFrame, in which case dataframe2sasdata(data) will be run for you to
+        load the data into a SAS data Set which will then be appended to this data set.
+
+        :param data: Either a SASdata object or a Pandas DataFrame
+        :param force: boolean to force appended even if anomolies exist which could cause dropping or truncating
+        :return: SASLOG for this step
+        """
+        lastlog = len(self.sas._io._log)
+        new = None
+
+        if not self.sas.sascfg.pandas:
+            if type(data) is pandas.core.frame.DataFrame:
+                new = 'df'
+        else:
+            new = 'no pandas'
+
+        if type(data) is type(self):
+            new = 'sd'
+
+        if new not in ['df','sd']:
+            failmsg = "The data parameter passed in must be either a SASdata object or a Pandas DataFrame. No data was appended."
+            if not self.sas.batch:
+                logger.error(failmsg)
+                return None
+            else:
+                return failmsg
+
+        if new == 'df':
+            tmp = True
+            new = self.sas.df2sd(data, '_temp_df')
+            if type(new) is not type(self):
+                failmsg = "df2sd on input data failed. Check SASLOG for errors."
+                if not self.sas.batch:
+                    logger.error(failmsg)
+                    return None
+                else:
+                    return failmsg
+        else:
+            tmp = False
+            new = data
+
+        if self.sas.nosub:
+            print(code)
+            return
+
+        if not self.sas.exist(new.table, new.libref):
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            failmsg = "Data set to be appended doesn't exist. No data was appended."
+            if not self.sas.batch:
+                logger.error(failmsg)
+                return None
+            else:
+                return failmsg
+
+        code  = "proc append base="+self.libref+".'"+self.table.replace("'", "''")+"'n\n"
+        code += "            data="+ new.libref+".'"+ new.table.replace("'", "''")+"'n"+new._dsopts()
+        if force:
+            code += "\n   force"
+        code += ";\nrun;"
+
+        ll = self.sas._io.submit(code, results='text')
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+
+        if tmp:
+            new.delete(quiet=True)
+
+        if not self.sas.batch:
+            print(ll['LOG'])
+            return None
+        else:
+            return ll['LOG']
 
     def attrs(self):
-       """
-       Get the ATTRN and ATTRC (SAS functions) attributes for the Data Set
+        """
+        Get the ATTRN and ATTRC (SAS functions) attributes for the Data Set
 
-       :return: 1 row Pandas DataFrame containiung each of the ATTRN/ATTRC SAS function values for the data set
-       """
-       lastlog = len(self.sas._io._log)
-       code  = """
+        :return: 1 row Pandas DataFrame containiung each of the ATTRN/ATTRC SAS function values for the data set
+        """
+        lastlog = len(self.sas._io._log)
+        code  = """
        data work._spattr_; drop dsid;
           format MODTE datetime26.2 CRDTE datetime26.2;
           dsid=open("{}");
@@ -1925,13 +1925,13 @@ class SASdata:
        run;
        """.format(self.libref + ".'" + self.table.replace("'", "''")+"'n")
 
-       if self.sas.nosub:
-          print(code)
-          return
+        if self.sas.nosub:
+            print(code)
+            return
 
-       df = self._returnPD(code, '_spattr_', libref='work')
+        df = self._returnPD(code, '_spattr_', libref='work')
 
-       self.sas._lastlog = self.sas._io._log[lastlog:]
+        self.sas._lastlog = self.sas._io._log[lastlog:]
 
-       return df
+        return df
 
