@@ -20,9 +20,15 @@ try:
 except Exception as e:
     pass
 
+try:
+    import pyarrow as pa
+except ImportError:
+    pa = None
+
 import logging
 logger = logging.getLogger('saspy')
 
+import json
 import re
 import saspy as sp2
 
@@ -670,6 +676,274 @@ class SASdata:
         self.sas._lastlog = self.sas._io._log[lastlog:]
         return df
 
+    def schema(self, sasattrs: bool = False , xattrs: bool = False, results: str = 'arrow'):
+        """
+        Get the schema of the SAS dataset as a pyarrow Schema or a dictionary.
+
+        Returns a pyarrow.Schema if pyarrow is installed, otherwise returns a
+        dictionary that can be easily converted to a pyarrow.Schema.
+
+        The dictionary structure is designed to be compatible with pyarrow schema:
+        {
+            "name": "table_name",
+            "libref": "library_reference",
+            "metadata": {
+                "memtype": "DATA|VIEW",
+                "memlabel": "dataset label",
+                "crdate": "datetime",
+                "modate": "datetime",
+                "filesize": 12345,
+                "nobs": 123,
+                "nvar": 4,
+                "encoding": "encoding",
+                "extended_attributes": {
+                    "custom_attr1": "value1",
+                    "custom_attr2": "value2"
+                }
+            },
+            "fields": [
+                {
+                    "name": "variable_name",
+                    "type": "arrow_type_string",
+                    "sortedby": 0,
+                    "nullable": True,
+                    "metadata": '{
+                        "sas_type": "char|num",
+                        "sas_format": "format",
+                        "sas_informat": "informat",
+                        "length": 8,
+                        "label": "variable label",
+                        "extended_attributes": {
+                            "var_attr1": "value1"
+                        }
+                    }'
+                }
+            ]
+        }
+
+        Extended attributes are custom metadata that can be attached to datasets 
+        and variables using PROC DATASETS XATTR statement.
+
+        :param sasattrs: if True, include SAS-specific attributes in the metadata
+        :param xattrs: if True, include extended attributes from DICTIONARY.XATTRS
+        :param results: 'arrow' to return pyarrow.Schema if available, 'dict' to return dictionary
+
+        :return: pyarrow.Schema or dict
+        """
+        
+        pyarrow_available = pa is not None
+
+        lastlog = len(self.sas._io._log)
+
+        # SAS code to get metadata using PROC SQL from DICTIONARY.TABLES and DICTIONARY.COLUMNS
+        # Also get extended attributes from DICTIONARY.XATTRS
+        code = "proc sql noprint;\n"
+        code += "  create table work._schema_attr_ as\n"
+        code += "  select * from dictionary.tables\n"
+        code += "  where libname='%s' and memname='%s';\n" % (self.libref.upper(), self.table.upper().replace("'", "''"))
+        code += "  create table work._schema_vars_ as\n"
+        code += "  select * from dictionary.columns\n"
+        code += "  where libname='%s' and memname='%s'\n" % (self.libref.upper(), self.table.upper().replace("'", "''"))  
+        code += "  order by varnum;\n"  
+        code += "quit;\n"
+        if xattrs:
+            # Get extended attributes
+            code += "proc sql noprint;\n"
+            code += "  create table work._schema_xattr_ as\n"
+            code += "  select * from dictionary.xattrs\n"
+            code += "  where libname='%s' and memname='%s';\n" % (self.libref.upper(), self.table.upper().replace("'", "''"))
+            code += "quit;\n"
+
+        if self.sas.nosub:
+            print(code)
+            return None
+
+        ll = self._is_valid()
+        if ll:
+            logger.error("The SAS Data Set does not exist: %s.%s" % (self.libref, self.table))
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return None
+
+        # Execute the code and get the dataframes
+        # Note: _returnPD transforms list keys via .replace('_', '').capitalize()
+        # e.g. '_schema_attr_' -> 'Schemaattr'
+        try:
+            if xattrs:
+                dfs = self._returnPD(code, ['_schema_attr_', '_schema_vars_', '_schema_xattr_'])
+            else:
+                dfs = self._returnPD(code, ['_schema_attr_', '_schema_vars_'])
+            if dfs is None:
+                self.sas._lastlog = self.sas._io._log[lastlog:]
+                return None
+            attributes_df = dfs.get('Schemaattr')
+            variables_df = dfs.get('Schemavars')
+            xattr_df = dfs.get('Schemaxattr') if xattrs else None
+        except Exception as e:
+            logger.warning("Failed to retrieve schema metadata: %s" % str(e))
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return None
+
+        # Build dataset-level extended attributes dictionary
+        ds_extended_attrs = {}
+        var_extended_attrs = {}  # {var_name: {attr_name: attr_value}}
+        if xattrs and xattr_df is not None and not xattr_df.empty:
+            for _, row in xattr_df.iterrows():
+                attr_name = str(row.get('xattr'))
+                attr_value = str(row.get('xvalue'))
+                var_name = row.get('name') if type(row.get('name')) is str else ''
+
+                if not attr_name:
+                    continue
+
+                if not var_name:
+                    # Dataset-level extended attribute
+                    ds_extended_attrs[attr_name] = attr_value
+                else:
+                    # Variable-level extended attribute
+                    if var_name not in var_extended_attrs:
+                        var_extended_attrs[var_name] = {}
+                    var_extended_attrs[var_name][attr_name] = attr_value
+
+        # Build dataset metadata dictionary from attributes
+        dataset_metadata = {}
+        if attributes_df is not None and not attributes_df.empty:
+            for _, row in attributes_df.iterrows():
+                for col in attributes_df.columns:
+                    if col in ["memtype", "memlabel", "crdate", "modate", "filesize", "nvar", "nobs", "encoding"]:
+                        key = col.strip().lower().replace(' ', '_')
+                        if key in ["filesize", "nobs", "nvar"]:
+                            val = int(row.get(col))
+                        else:
+                            val = row.get(col)
+                        if val is not None and val != '':
+                            dataset_metadata[key] = val
+
+        # Add dataset-level extended attributes to metadata
+        if ds_extended_attrs:
+            dataset_metadata['extended_attributes'] = ds_extended_attrs
+
+        # SAS type to Arrow type mapping function
+        def sas_to_arrow_type(sas_type, sas_format, length):
+            """Map SAS type and format to Arrow type string."""
+            sas_type_lower = sas_type.lower().strip() if sas_type else ''
+            sas_format_upper = sas_format.upper().strip() if sas_format else ''
+
+            if sas_type_lower in ['char', 'character']:
+                return 'string'
+            elif sas_type_lower in ['num', 'numeric']:
+                # Check format for date/time types
+                if any(fmt in sas_format_upper for fmt in ['DATE', 'YYMMDD', 'MMDDYY', 'DDMMYY', 'YYMM', 'MONYY', 'WEEKDATE', 'JULDAY', 'JULIAN']):
+                    return 'date32'
+                elif 'DATETIME' in sas_format_upper or 'DATEAMPM' in sas_format_upper:
+                    return 'timestamp[us]'
+                elif 'TIME' in sas_format_upper or 'HHMM' in sas_format_upper or 'TOD' in sas_format_upper:
+                    return 'time64[us]'
+                elif length and int(length) <= 4:
+                    return 'float32'
+                else:
+                    return 'float64'
+            return 'string'
+
+        # Build fields list from variables dataframe
+        fields = []
+        if variables_df is not None and not variables_df.empty:
+            # Variables table columns: 'name' 'type' 'length' 'format' 'informat' 'label' ...
+            for _, row in variables_df.iterrows():
+                var_name = row.get('name')
+                sas_type = row.get('type')
+                sas_format = row.get('format') if type(row.get('format')) is str else ''
+                sas_informat = row.get('informat', '') if type(row.get('informat')) is str else ''
+                length = int(row.get('length'))
+                label = row.get('label') if type(row.get('label')) is str else ''
+                sortedby = int(row.get('sortedby'))
+                notnull = row.get('notnull')
+
+                arrow_type = sas_to_arrow_type(sas_type, sas_format, length)
+
+                column_metadata = {
+                    "sas_type": sas_type,
+                    "label": label,
+                    "sas_format": sas_format,
+                    "sas_informat": sas_informat,
+                    "length": length,
+                    "sortedby": sortedby,
+                }
+                field_metadata = {k: v for k, v in column_metadata.items() if v is not None and v != ''}
+
+                # Add variable-level extended attributes
+                if var_name in var_extended_attrs.keys():
+                    field_metadata["extended_attributes"] = var_extended_attrs[var_name]
+
+                field = {
+                    "name": var_name,
+                    "type": arrow_type,
+                    "nullable": True if notnull == 'no' else False,
+                    "metadata": field_metadata
+                }
+                fields.append(field)
+
+        # Construct the final schema dictionary
+        schema_dict = {
+            "name": self.table,
+            "libref": self.libref,
+            "metadata": dataset_metadata,
+            "fields": fields
+        }
+
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+
+        if results.lower() == 'dict':
+            return schema_dict
+
+        if pyarrow_available:
+            # Convert dictionary to pyarrow.Schema
+            type_map = {
+                'string': pa.string(),
+                'float32': pa.float32(),
+                'float64': pa.float64(),
+                'int32': pa.int32(),
+                'int64': pa.int64(),
+                'date32': pa.date32(),
+                'timestamp[us]': pa.timestamp('us'),
+                'time64[us]': pa.time64('us'),
+                'bool': pa.bool_()
+            }
+
+            arrow_fields = []
+            for f in schema_dict['fields']:
+                arrow_type = type_map.get(f['type'], pa.string())
+                # Convert metadata values to strings for pyarrow
+                arrow_meta = {}
+                for k, v in f['metadata'].items():
+                    if isinstance(v, (dict, list)):
+                        arrow_meta[k] = json.dumps(v)
+                    else:
+                        arrow_meta[k] = str(v)
+                if sasattrs:
+                    arrow_fields.append(pa.field(f['name'], arrow_type, f['nullable'], metadata=arrow_meta))
+                else:
+                    arrow_fields.append(pa.field(f['name'], arrow_type, f['nullable']))
+
+            # Convert schema-level metadata to strings
+            arrow_schema_meta = {}
+            for k, v in schema_dict['metadata'].items():
+                if isinstance(v, (dict, list)):
+                    arrow_schema_meta[k] = json.dumps(v)
+                else: 
+                    arrow_schema_meta[k] = str(v)
+            arrow_schema_meta['name'] = schema_dict['name']
+            arrow_schema_meta['libref'] = schema_dict['libref']
+
+            if sasattrs:
+                schema = pa.schema(arrow_fields, metadata=arrow_schema_meta)
+            else:
+                schema = pa.schema(arrow_fields)
+
+            return schema
+        else:
+            logger.warning("pyarrow is not installed; returning schema as dictionary")
+            return schema_dict
+
     def describe(self):
         """
         display descriptive statistics for the table; summary statistics.
@@ -1168,6 +1442,8 @@ class SASdata:
                     static_columns:list     = None,
                     rowsep: str = '\x01', colsep: str = '\x02',
                     rowrep: str = ' ',    colrep: str = ' ',
+                    use_arrow: bool = False,
+                    include_attrs: bool = False,
                     **kwargs) -> None:
         """
         This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet.
@@ -1184,6 +1460,11 @@ class SASdata:
         :param colsep: the column seperator character to use; defaults to '\x02'
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
+        :param use_arrow: Boolean to use Arrow as intermediate format (default is False).
+                         When True, converts to Arrow Table first then writes Parquet.
+                         When False, uses the original streaming method. 
+        :param include_attrs: Boolean, if True include SAS extended attributes in Parquet metadata.
+                                      Defaults to False for compatibility.
 
         Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
         be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
@@ -1233,6 +1514,8 @@ class SASdata:
                                      colsep = colsep,
                                      rowrep = rowrep,
                                      colrep = colrep,
+                                     use_arrow = use_arrow,
+                                     include_attrs = include_attrs,
                                      **kwargs)
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return None
@@ -1365,6 +1648,65 @@ class SASdata:
         :rtype: 'pd.DataFrame'
         """
         return self.to_df(method='DISK', rowsep=rowsep, colsep=colsep, rowrep=rowrep, colrep=colrep, **kwargs)
+
+    def to_arrow(self, 
+                 pa_arrow_kwargs = None,
+                 include_attrs: bool = False,
+                 chunk_size_mb     = 4,
+                 coerce_timestamp_errors = True,
+                 static_columns:list     = None,
+                 rowsep: str = '\x01', colsep: str = '\x02',
+                 rowrep: str = ' ',    colrep: str = ' ',
+                 **kwargs) -> 'pa.Table':
+        """
+        Export this SAS Data Set to a PyArrow Table.
+
+        :param pa_arrow_kwargs: Additional parameters to pass to pyarrow.Table.
+        :param include_attrs: bool, if True include SAS attributes in the Arrow schema metadata. (default is False).
+        :param chunk_size_mb: The chunk size in MB at which the stream is processed (default is 4).
+        :param coerce_timestamp_errors: Whether to coerce errors when converting timestamps (default is True).
+        :param static_columns: List of tuples (name, value) representing static columns (default is None).
+        :param rowsep: the row separator character to use; defaults to '\x01'
+        :param colsep: the column separator character to use; defaults to '\x02'
+        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to ' '
+        :param colrep: the char to convert to for any embedded colsep chars, defaults to ' '
+        
+        :param tsmin: str(Timestamp) used to replace SAS datetime and dates that are earlier than supported by Pandas Timestamp
+        :param tsmax: str(Timestamp) used to replace SAS datetime and dates that are later   than supported by Pandas Timestamp
+        :param dtype: this is the parameter to Pandas read_csv, overriding what saspy generates and uses
+        :param my_fmts: bool, if True, overrides the formats saspy would use, using those on the data set or in dsopts=
+
+        :return: PyArrow Table
+        :rtype: 'pa.Table'
+        """
+        if pa is None:
+            raise ImportError("pyarrow is required for to_arrow(). Install it with: pip install pyarrow")
+
+        lastlog = len(self.sas._io._log)
+        ll = self._is_valid()
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+        if ll:
+            print(ll['LOG'])
+            return None
+
+        # Get data directly as Arrow Table via IO-level streaming
+        arrow_table = self.sas.sasdata2arrow(
+            table  = self.table,
+            libref = self.libref,
+            dsopts = self.dsopts,
+            pa_arrow_kwargs = pa_arrow_kwargs,
+            chunk_size_mb     = chunk_size_mb,
+            coerce_timestamp_errors = coerce_timestamp_errors,
+            static_columns   = static_columns,
+            rowsep = rowsep,
+            colsep = colsep,
+            rowrep = rowrep,
+            colrep = colrep,
+            include_attrs = include_attrs,
+            **kwargs
+        )
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+        return arrow_table
 
     def to_json(self, pretty: bool = False, sastag: bool = False, **kwargs) -> str:
         """

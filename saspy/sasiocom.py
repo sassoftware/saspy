@@ -864,6 +864,29 @@ class SASSessionCOM(object):
         logger.error("This access method doesn't support this method. Try the IOM access method instead.")
         return None
 
+    def sasdata2arrow(self, table: str, libref: str ='',
+                      dsopts: dict = None,
+                      chunk_size_mb = 4, coerce_timestamp_errors=True,
+                      static_columns:list = None,
+                      rowsep: str = '\x01', colsep: str = '\x02',
+                      rowrep: str = ' ',    colrep: str = ' ',
+                      **kwargs) -> 'pa.Table':
+
+        logger.error("This access method doesn't support this method. Try the IOM access method instead.")
+        return None
+
+    def arrow2sasdata(self, table: 'pa.Table', tablename: str ='a',
+                      libref: str ="", keep_outer_quotes: bool=False,
+                      embedded_newlines: bool=True,
+                      LF: str = '\x01', CR: str = '\x02',
+                      colsep: str = '\x03', colrep: str = ' ',
+                      datetimes: dict={}, outfmts: dict={}, labels: dict={},
+                      outdsopts: dict={}, encode_errors = None, char_lengths = None,
+                      **kwargs):
+
+        logger.error("This access method doesn't support this method. Try the IOM access method instead.")
+        return None
+
     def upload(self, local: str, remote: str, overwrite: bool=True, permission: str='', **kwargs):
         """
         Upload a file to the SAS server.

@@ -53,8 +53,12 @@ try:
     import pyarrow         as pa
     import pyarrow.compute as pc
     import pyarrow.parquet as pq
+    import pyarrow.csv     as pa_csv
 except ImportError:
     pa = None
+    pc = None
+    pq = None
+    pa_csv = None
     pass
 
 from queue     import Queue, Empty
@@ -2192,6 +2196,421 @@ Will use HTML5 for this SASsession.""")
         ll = self.submit("", 'text')
         return None
 
+    def arrow2sasdata(self, table: 'pa.Table', tablename: str ='a',
+                      libref: str ="", keep_outer_quotes: bool=False,
+                                       embedded_newlines: bool=True,
+                      LF: str = '\x01', CR: str = '\x02',
+                      colsep: str = '\x03', colrep: str = ' ',
+                      datetimes: dict={}, outfmts: dict={}, labels: dict={},
+                      outdsopts: dict={}, encode_errors = None, char_lengths = None,
+                      **kwargs):
+        """
+        This method imports a PyArrow Table to a SAS Data Set, returning None on success.
+        table   - PyArrow Table to import to a SAS Data Set
+        tablename - the name of the SAS Data Set to create
+        libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+        keep_outer_quotes - for character columns, have SAS keep any outer quotes instead of stripping them off.
+        embedded_newlines - if any char columns have embedded CR or LF, set this to True to get them imported into the SAS data set
+        LF - if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to '\x01'
+        CR - if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to '\x02'
+        colsep - the column seperator character used for streaming the delimmited data to SAS defaults to '\x03'
+        datetimes - dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
+        outfmts - dict with column names and SAS formats to assign to the new SAS data set
+        labels  - dict with column names and SAS Labels to assign to the new SAS data set
+        outdsopts - a dictionary containing output data set options for the table being created
+        encode_errors - 'fail' or 'replace' - default is to 'fail', other choice is to 'replace' invalid chars with the replacement char
+        char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set
+        """
+        input   = ""
+        xlate   = ""
+        card    = ""
+        format  = ""
+        length  = ""
+        label   = ""
+        dts     = []
+        ncols   = table.num_columns
+        nrows   = table.num_rows
+        lf      = "'"+'%02x' % ord(LF.encode(self.sascfg.encoding))+"'x"
+        cr      = "'"+'%02x' % ord(CR.encode(self.sascfg.encoding))+"'x "
+        delim   = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
+
+        dts_upper = {k.upper():v for k,v in datetimes.items()}
+        dts_keys  = dts_upper.keys()
+        fmt_upper = {k.upper():v for k,v in outfmts.items()}
+        fmt_keys  = fmt_upper.keys()
+        lab_upper = {k.upper():v for k,v in labels.items()}
+        lab_keys  = lab_upper.keys()
+
+        if encode_errors is None:
+            encode_errors = 'fail'
+
+        CnotB = kwargs.pop('CnotB', None)
+
+        if char_lengths is None:
+            return -1
+
+        chr_upper = {k.upper():v for k,v in char_lengths.items()}
+
+        longname = False
+        for i in range(ncols):
+            field = table.schema.field(i)
+            name = field.name
+            colname = str(name).replace("'", "''")
+            if len(colname.encode(self.sascfg.encoding)) > 32:
+                warnings.warn("Column '{}' in table is too long for SAS. Rename to 32 bytes or less".format(colname),
+                         RuntimeWarning)
+                longname = True
+            col_up  = str(name).upper()
+            input  += "input '"+colname+"'n "
+            if col_up in lab_keys:
+                label += "label '"+colname+"'n ="+lab_upper[col_up]+";\n"
+            if col_up in fmt_keys:
+                format += "'"+colname+"'n "+fmt_upper[col_up]+" "
+
+            if pa.types.is_string(field.type) or pa.types.is_large_string(field.type):
+                try:
+                    length += " '"+colname+"'n $"+str(chr_upper[col_up])
+                except KeyError as e:
+                    logger.error("Dictionary provided as char_lengths is missing column: "+colname)
+                    raise e
+                if keep_outer_quotes:
+                    input  += "~ "
+                dts.append('C')
+                if embedded_newlines:
+                    xlate += " '"+colname+"'n = translate('"+colname+"'n, '0A'x, "+lf+");\n"
+                    xlate += " '"+colname+"'n = translate('"+colname+"'n, '0D'x, "+cr+");\n"
+            else:
+                if pa.types.is_timestamp(field.type) or pa.types.is_date(field.type) or pa.types.is_time(field.type):
+                    length += " '"+colname+"'n 8"
+                    input  += ":B8601DT26.6 "
+                    if col_up not in dts_keys:
+                        if col_up not in fmt_keys:
+                            format += "'"+colname+"'n E8601DT26.6 "
+                    else:
+                        if dts_upper[col_up].lower() == 'date':
+                            if col_up not in fmt_keys:
+                                format += "'"+colname+"'n E8601DA. "
+                            xlate  += " '"+colname+"'n = datepart('"+colname+"'n);\n"
+                        else:
+                            if dts_upper[col_up].lower() == 'time':
+                                if col_up not in fmt_keys:
+                                    format += "'"+colname+"'n E8601TM. "
+                                xlate  += " '"+colname+"'n = timepart('"+colname+"'n);\n"
+                            else:
+                                logger.warning("invalid value for datetimes for column "+colname+". Using default.")
+                                if col_up not in fmt_keys:
+                                    format += "'"+colname+"'n E8601DT26.6 "
+                    dts.append('D')
+                else:
+                    length += " '"+colname+"'n 8"
+                    if pa.types.is_boolean(field.type):
+                        dts.append('B')
+                    else:
+                        dts.append('N')
+            input += ';\n'
+
+        if longname:
+            raise SASDFNamesToLongError(Exception)
+
+        port =  kwargs.get('port', 0)
+
+        if self.sascfg.ssh and self.sascfg.rtunnel and port == 0:
+            # we are using a rtunnel; default to that port
+            server = True
+            port = self.sascfg.rtunnel
+            host = 'localhost'
+            code = """filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=V termstr=LF lrecl=32767;\n"""
+        else:
+            server = False
+            if port==0 and self.sascfg.tunnel:
+                # we are using a tunnel; default to that port
+                port = self.sascfg.tunnel
+
+            if self.sascfg.ssh:
+                if not self.sascfg.tunnel:
+                    host = self.sascfg.hostip
+                else:
+                    host = 'localhost'
+            else:
+                host = 'localhost'
+
+            try:
+                sock = socks.socket()
+                if self.sascfg.tunnel:
+                    sock.bind(('localhost', port))
+                else:
+                    sock.bind(('', port))
+                port = sock.getsockname()[1]
+            except OSError as e:
+                raise e
+            code  = """filename sock socket '"""+host+""":"""+str(port)+"""' recfm=V termstr=LF lrecl=32767;\n"""
+
+        code += "data "
+        if len(libref):
+            code += libref+"."
+        code += "'"+tablename.strip().replace("'", "''")+"'n"
+
+        if len(outdsopts):
+            code += '('
+            for key in outdsopts:
+                code += key+'='+str(outdsopts[key]) + ' '
+            code += ");\n"
+        else:
+            code += ";\n"
+
+        if len(length):
+            code += "length"+length+";\n"
+        if len(format):
+            code += "format "+format+";\n"
+        code += label
+        code += "infile sock nbyte=nb delimiter="+delim+" STOPOVER;\n"
+        code += "input @;\nif _infile_ = '' then delete;\nelse do;\n"
+        code +=  input+xlate+";\n"
+        code += "end;\n"
+        code += "run;\nfilename sock;\n"
+
+        if not server:
+            sock.listen(1)
+
+        self._asubmit(code, "text")
+
+        if server:
+            sleep(1)
+            sock = socks.socket()
+            sock.connect((host, port))
+            ssock = sock
+
+        if not server:
+            if sel.select([sock],[],[],10)[0] == []:
+                logger.error("error occured in SAS during data transfer. Check the LOG for issues.")
+                sock.close()
+                ll = self.submit("", 'text')
+                return {'Success' : False,
+                        'LOG'     : "Failure in upload.\n"+ll['LOG']}
+            newsock = (0,0)
+            try:
+                newsock = sock.accept()
+            except (KeyboardInterrupt, Exception) as e:
+                try:
+                    if newsock[0]:
+                        try:
+                            newsock[0].shutdown(socks.SHUT_RDWR)
+                        except:
+                            pass
+                        newsock[0].close()
+                except:
+                    pass
+                sock.close()
+                logger.error("error occured in SAS during data transfer. Check the LOG for issues.")
+                ll = self.submit("", 'text')
+                return {'Success' : False,
+                        'LOG'     : "Download was interrupted. Returning the SAS log:\n\n"+str(e)+"\n\n"+ll['LOG']}
+            ssock = newsock[0]
+
+        logf  = b''
+        first = True
+        fail  = False
+        blksz = int(kwargs.get('blocksize', 32767))
+        row_num = 0
+        code = ""
+
+        # Pre-extract columns as Python lists for fast row iteration
+        columns_data = [table.column(i).to_pylist() for i in range(ncols)]
+
+        for row_idx in range(nrows):
+            row_num += 1
+            card  = ""
+            for col in range(ncols):
+                val = columns_data[col][row_idx]
+                var = str(val) if val is not None else 'nan'
+
+                if   dts[col] == 'N' and (var == 'nan' or val is None):
+                    var = '.'
+                elif dts[col] == 'C':
+                    if   var == 'nan' or val is None or len(var) == 0:
+                        var = ' '+colsep
+                    elif len(var) == var.count(' '):
+                        var += colsep
+                    else:
+                        var = var.replace(colsep, colrep)
+                elif dts[col] == 'B':
+                    var = str(int(val)) if val is not None else '.'
+                elif dts[col] == 'D':
+                    if val is None:
+                        var = '.'
+                    else:
+                        var = val.isoformat()[:26] if hasattr(val, 'isoformat') else str(val)[:26]
+
+                if embedded_newlines:
+                    var = var.replace(LF, colrep).replace(CR, colrep)
+                    var = var.replace('\n', LF).replace('\r', CR)
+
+                card += var+"\n"
+
+            code += card
+
+            if len(code) > blksz:
+                first = False
+                if encode_errors != 'replace':
+                    try:
+                        code = code.encode(self.sascfg.encoding)
+                    except Exception as e:
+                        try:
+                            if server:
+                                sock.shutdown(socks.SHUT_RDWR)
+                            else:
+                                if newsock[0]:
+                                    try:
+                                        newsock[0].shutdown(socks.SHUT_RDWR)
+                                    except:
+                                        pass
+                                    newsock[0].close()
+                        except:
+                            pass
+                        sock.close()
+
+                        logd = logf.decode(self.sascfg.encoding, errors='replace')
+                        self._log += logd
+                        if self._checkLogForError(logd):
+                            warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+                            self._sb.check_error_log = True
+
+                        ll = self.submit("", 'text')
+                        logger.error("Transcoding error encountered. Data transfer stopped on or before row "+str(row_num))
+                        logger.error("Table contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                        return row_num
+                else:
+                    code = code.encode(self.sascfg.encoding, errors='replace')
+
+                sent = 0
+                send = len(code)
+                blen = send
+                while send:
+                    try:
+                        sent = 0
+                        sent = ssock.send(code[blen-send:blen])
+                    except (BlockingIOError):
+                        pass
+                    except (OSError) as e:
+                        if fail:
+                            try:
+                                if server:
+                                    sock.shutdown(socks.SHUT_RDWR)
+                                else:
+                                    if newsock[0]:
+                                        try:
+                                            newsock[0].shutdown(socks.SHUT_RDWR)
+                                        except:
+                                            pass
+                                        newsock[0].close()
+                            except:
+                                pass
+                            sock.close()
+                            logger.error("Failed connecting to server socket. Check the SASLOG to see the error")
+                            ll = self.submit("", 'text')
+                            return row_num
+                        fail = True
+                        if server:
+                            sock.close()
+                            sock = socks.socket()
+                            sock.connect((host, port))
+                            ssock = sock
+                            sleep(1)
+                        pass
+                    send -= sent
+                code = ""
+
+                try:
+                    log = self.stderr.get_nowait()
+                except Empty:
+                    log = b''
+
+                if len(log) > 0:
+                    logf += log
+
+        logd = logf.decode(self.sascfg.encoding, errors='replace')
+        self._log += logd
+        if self._checkLogForError(logd):
+            warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+            self._sb.check_error_log = True
+
+        if len(code):
+            if encode_errors != 'replace':
+                try:
+                    code = code.encode(self.sascfg.encoding)
+                except Exception as e:
+                    try:
+                        if server:
+                            sock.shutdown(socks.SHUT_RDWR)
+                        else:
+                            if newsock[0]:
+                                try:
+                                    newsock[0].shutdown(socks.SHUT_RDWR)
+                                except:
+                                    pass
+                                newsock[0].close()
+                    except:
+                        pass
+                    sock.close()
+                    ll = self.submit("", 'text')
+                    logger.error("Transcoding error encountered. Data transfer stopped on row "+str(row_num))
+                    logger.error("Table contains characters that can't be transcoded into the SAS session encoding.\n"+str(e))
+                    return row_num
+            else:
+                code = code.encode(self.sascfg.encoding, errors='replace')
+
+            sent = 0
+            send = len(code)
+            blen = send
+            while send:
+                try:
+                    sent = 0
+                    sent = ssock.send(code[blen-send:blen])
+                except (BlockingIOError):
+                    pass
+                except (OSError) as e:
+                    if not first:
+                        try:
+                            if server:
+                                sock.shutdown(socks.SHUT_RDWR)
+                            else:
+                                if newsock[0]:
+                                    try:
+                                        newsock[0].shutdown(socks.SHUT_RDWR)
+                                    except:
+                                        pass
+                                    newsock[0].close()
+                        except:
+                            pass
+                        sock.close()
+                        logger.error("Failed connecting to server socket. Check the SASLOG to see the error")
+                        ll = self.submit("", 'text')
+                        return row_num
+                    first = False
+                    if server:
+                        sock.close()
+                        sock = socks.socket()
+                        sock.connect((host, port))
+                        ssock = sock
+                        sleep(1)
+                    pass
+                send -= sent
+        try:
+            if server:
+                sock.shutdown(socks.SHUT_RDWR)
+            else:
+                try:
+                    newsock[0].shutdown(socks.SHUT_RDWR)
+                except:
+                    pass
+                newsock[0].close()
+        except:
+            pass
+        sock.close()
+
+        ll = self.submit("", 'text')
+        return None
+
     def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
                           rowsep: str = '\x01', colsep: str = '\x02',
                           rowrep: str = ' ',    colrep: str = ' ',
@@ -3183,6 +3602,370 @@ Will use HTML5 for this SASsession.""")
                 parquet_writer.close()
 
         return
+
+    def sasdata2arrow(self,
+                      table: str,
+                      libref: str ='',
+                      dsopts: dict = None,
+                      chunk_size_mb     = 4,
+                      coerce_timestamp_errors=True,
+                      static_columns:list = None,
+                      rowsep: str = '\x01',
+                      colsep: str = '\x02',
+                      rowrep: str = ' ',
+                      colrep: str = ' ',
+                      port: int=0, wait: int=10,
+                      **kwargs) -> 'pa.Table':
+        """
+        This method exports the SAS Data Set to a PyArrow Table.
+        table                   - the name of the SAS Data Set you want to export
+        libref                  - the libref for the SAS Data Set.
+        dsopts                  - data set options for the input SAS Data Set
+        chunk_size_mb           - The chunk size in MB at which the stream is processed (default is 4).
+        coerce_timestamp_errors - Whether to coerce errors when converting timestamps (default is True).
+        static_columns          - List of tuples (name, value) representing static columns (default is None).
+        rowsep                  - the row seperator character to use; defaults to '\x01'
+        colsep                  - the column seperator character to use; defaults to '\x02'
+        rowrep                  - the char to convert to for any embedded rowsep chars, defaults to  ' '
+        colrep                  - the char to convert to for any embedded colsep chars, defaults to  ' '
+        port                    - port to use for socket connection
+        """
+        if not pa:
+            logger.error("pyarrow was not imported. This method can't be used without it.")
+            return None
+
+        tsmax = kwargs.pop('tsmax', None)
+        tsmin = kwargs.pop('tsmin', None)
+        tscode = ''
+
+        errors = kwargs.pop('errors', 'strict')
+        dsopts = dsopts if dsopts is not None else {}
+
+        if port==0 and self.sascfg.tunnel:
+            port = self.sascfg.tunnel
+
+        if libref:
+            tabname = libref+".'"+table.strip().replace("'", "''")+"'n "
+        else:
+            tabname = "'"+table.strip().replace("'", "''")+"'n "
+
+        code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+        code += "data _null_; file STDERR;d = open('work.sasdata2dataframe');\n"
+        code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
+        code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
+        code += "put lr lrecl; put vn nvars; put vl;\n"
+        code += "do i = 1 to nvars; var = varname(d, i); put var; end;\n"
+        code += "put vt;\n"
+        code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
+        code += "run;"
+
+        ll = self.submit(code, "text")
+
+        try:
+            l2 = ll['LOG'].rpartition("LRECL= ")
+            l2 = l2[2].partition("\n")
+            lrecl = int(l2[0])
+
+            l2 = l2[2].partition("VARNUMS= ")
+            l2 = l2[2].partition("\n")
+            nvars = int(l2[0])
+
+            l2 = l2[2].partition("\n")
+            varlist = l2[2].split("\n", nvars)
+            del varlist[nvars]
+
+            dvarlist = list(varlist)
+            for i in range(len(varlist)):
+                varlist[i] = varlist[i].replace("'", "''")
+
+            l2 = l2[2].partition("VARTYPE=")
+            l2 = l2[2].partition("\n")
+            vartype = l2[2].split("\n", nvars)
+            del vartype[nvars]
+        except Exception as e:
+            logger.error("Invalid output produced durring sasdata2arrow step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+            return None
+
+        topts = dict(dsopts)
+        topts.pop('firstobs', None)
+        topts.pop('obs', None)
+
+        code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+        code += "data work._n_u_l_l_;output;run;\n"
+        code += "data _null_; file STDERR; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+
+        for i in range(nvars):
+            code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
+        code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
+
+        ll = self.submit(code, "text")
+
+        try:
+            l2 = ll['LOG'].rpartition("FMT_CATS=")
+            l2 = l2[2].partition("\n")
+            varcat = l2[2].split("\n", nvars)
+            del varcat[nvars]
+        except Exception as e:
+            logger.error("Invalid output produced durring sasdata2arrow step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+            return None
+
+        try:
+            sock = socks.socket()
+            if not self.sascfg.ssh or self.sascfg.tunnel:
+                sock.bind(('localhost', port))
+            else:
+                sock.bind(('', port))
+            port = sock.getsockname()[1]
+        except OSError:
+            logger.error('Error try to open a socket in the sasdata2arrow method. Call failed.')
+            return None
+
+        if self.sascfg.ssh and not self.sascfg.tunnel:
+            host = self.sascfg.hostip
+        else:
+            host = 'localhost'
+
+        lreclx = max(self.sascfg.lrecl, (lrecl + nvars + 1))
+
+        code = "filename sock socket '"+host+":"+str(port)+"' recfm=s encoding='utf-8' lrecl={};\n".format(str(lreclx))
+
+        rdelim = "'"+'%02x' % ord(rowsep.encode(self.sascfg.encoding))+"'x"
+        cdelim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x"
+
+        my_fmts = kwargs.pop('my_fmts',   False)
+        k_dts   = kwargs.pop('dtype',     None)
+        if k_dts is None and my_fmts:
+            logger.warning("my_fmts option only valid when dtype= is specified. Ignoring and using necessary formatting for data transfer.")
+            my_fmts = False
+
+        code += "data _null_; set "+tabname+self._sb._dsopts(dsopts)+";\n"
+
+        if not my_fmts:
+            for i in range(nvars):
+                if vartype[i] == 'N':
+                    code += "format '"+varlist[i]+"'n "
+                    if varcat[i] in self._sb.sas_date_fmts:
+                        code += 'E8601DA10.'
+                        if tsmax:
+                            tscode += "if {} GE 110405 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmax)
+                            if tsmin:
+                                tscode += "else if {} LE -103099 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
+                        elif tsmin:
+                            tscode += "if {} LE -103099 then {} = datepart('{}'dt);\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
+                    else:
+                        if varcat[i] in self._sb.sas_time_fmts:
+                            code += 'E8601TM15.6'
+                        else:
+                            if varcat[i] in self._sb.sas_datetime_fmts:
+                                code += 'E8601DT26.6'
+                                if tsmax:
+                                    tscode += "if {} GE  9538991236.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmax)
+                                    if tsmin:
+                                        tscode += "else if {} LE -8907752836.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
+                                elif tsmin:
+                                    tscode += "if {} LE -8907752836.85477 then {} = '{}'dt;\n".format("'"+varlist[i]+"'n", "'"+varlist[i]+"'n",tsmin)
+                            else:
+                                code += 'best32.'
+                    code += '; '
+                    if i % 10 == 9:
+                        code +='\n'
+
+        miss  = {}
+        code += "\nfile sock dlm="+cdelim+";\n"
+        for i in range(nvars):
+            if vartype[i] != 'N':
+                code += "'"+varlist[i]+"'n = translate('"
+                code +=     varlist[i]+"'n, '{}'x, '{}'x); ".format(   \
+                            '%02x%02x' %                               \
+                            (ord(rowrep.encode(self.sascfg.encoding)), \
+                             ord(colrep.encode(self.sascfg.encoding))),
+                            '%02x%02x' %                               \
+                            (ord(rowsep.encode(self.sascfg.encoding)), \
+                             ord(colsep.encode(self.sascfg.encoding))))
+                miss[dvarlist[i]] = ' '
+            else:
+                code += "if missing('"+varlist[i]+"'n) then '"+varlist[i]+"'n = .; "
+                miss[dvarlist[i]] = '.'
+            if i % 10 == 9:
+                code +='\n'
+        code += "\nput "
+        for i in range(nvars):
+            code += " '"+varlist[i]+"'n "
+            if i % 10 == 9:
+                code +='\n'
+        code += rdelim+";\nrun;\nfilename sock;"
+
+        if k_dts is None:
+            dts = {}
+            for i in range(nvars):
+                if vartype[i] == 'N':
+                    if varcat[i] not in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                        dts[dvarlist[i]] = 'float'
+                    else:
+                        dts[dvarlist[i]] = 'str'
+                else:
+                    dts[dvarlist[i]] = 'str'
+        else:
+            dts = k_dts
+
+        sock.listen(1)
+        self._asubmit(code, 'text')
+
+        if wait > 0 and sel.select([sock],[],[],wait)[0] == []:
+            logger.error("error occured in SAS during sasdata2arrow. Trying to return the saslog instead of a table.")
+            sock.close()
+            ll = self.submit("", 'text')
+            return ll['LOG']
+
+        ##### DEFINE SCHEMA #####
+        # Build column types for pa_csv: timestamp columns are initially parsed as strings
+        csv_col_types = {}
+        ts_cols = []  # indices of timestamp columns
+        for i in range(nvars):
+            col_name = dvarlist[i]
+            if k_dts is not None:
+                if dts[col_name] == 'float':
+                    csv_col_types[col_name] = pa.float64()
+                elif dts[col_name] == 'int':
+                    csv_col_types[col_name] = pa.int64()
+                else:
+                    csv_col_types[col_name] = pa.string()
+            elif vartype[i] == 'N':
+                if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
+                    csv_col_types[col_name] = pa.string()  # parse as string first, convert later
+                    ts_cols.append(i)
+                else:
+                    csv_col_types[col_name] = pa.float64()
+            else:
+                csv_col_types[col_name] = pa.string()
+
+        # Build final schema with proper timestamp types
+        final_fields = []
+        for i in range(nvars):
+            col_name = dvarlist[i]
+            if i in ts_cols:
+                final_fields.append(pa.field(col_name, pa.timestamp('ms')))
+            else:
+                final_fields.append(pa.field(col_name, csv_col_types[col_name]))
+        if static_columns:
+            for sc_name, sc_value in static_columns:
+                if isinstance(sc_value, (int, float)):
+                    final_fields.append(pa.field(sc_name, pa.float64()))
+                else:
+                    final_fields.append(pa.field(sc_name, pa.string()))
+        arrow_schema = pa.schema(final_fields)
+
+        ##### START STREAM #####
+        tables = []
+        loop = 1
+        chunk_size = chunk_size_mb * 1024 * 1024
+        data_read = 0
+        rows_read = 0
+
+        newsock = (0, 0)
+        try:
+            newsock = sock.accept()
+
+            sockout = _read_sock(newsock=newsock, rowsep=rowsep.encode(), errors=errors)
+            logging.info("Socket ready, waiting for results...")
+
+            while True:
+                chunk = sockout.read(chunk_size)
+                if loop == 1:
+                    logging.info("Stream ready")
+                if loop == 1 and chunk == '':
+                    logging.warning("Query returned no rows.")
+                    return None
+
+                if chunk == '':
+                    logging.info("Done")
+                    break
+
+                try:
+                    # Collect null values from miss dict
+                    null_vals = list(set(miss.values()))
+
+                    read_opts = pa_csv.ReadOptions(column_names=dvarlist)
+                    parse_opts = pa_csv.ParseOptions(delimiter=colsep, quote_char=False)
+                    convert_opts = pa_csv.ConvertOptions(
+                       column_types=csv_col_types,
+                       null_values=null_vals,
+                       strings_can_be_null=True
+                    )
+                    pa_table = pa_csv.read_csv(
+                       # Replace custom rowsep with \n for pyarrow CSV parser
+                       io.BytesIO(chunk.replace(colsep+rowsep, '\n').encode('utf-8')),
+                       read_options=read_opts,
+                       parse_options=parse_opts,
+                       convert_options=convert_opts
+                    )
+
+                    rows_read += pa_table.num_rows
+
+                    # Add static columns
+                    if static_columns:
+                        for sc_name, sc_value in static_columns:
+                            static_arr = pa.array([sc_value] * pa_table.num_rows)
+                            pa_table = pa_table.append_column(sc_name, static_arr)
+
+                    # Convert timestamp string columns to pa.timestamp('ms')
+                    if k_dts is None:
+                        for i in ts_cols:
+                            col_name = dvarlist[i]
+                            str_col = pa_table.column(col_name)
+                            if varcat[i] in self._sb.sas_date_fmts:
+                                fmt = '%Y-%m-%d'
+                            elif varcat[i] in self._sb.sas_time_fmts:
+                                fmt = '%H:%M:%S.%f'
+                            else:
+                                fmt = '%Y-%m-%dT%H:%M:%S.%f'
+                            try:
+                                ts_col = pc.strptime(str_col, format=fmt, unit='ms', error_is_null=coerce_timestamp_errors)
+                            except Exception:
+                                if not coerce_timestamp_errors:
+                                    raise ValueError(f"The column {col_name} contains an unparseable timestamp. "
+                                       "Set coerce_timestamp_errors=True to cast as Null")
+                                ts_col = pc.strptime(str_col, format=fmt, unit='ms', error_is_null=True)
+                            pa_table = pa_table.set_column(pa_table.column_names.index(col_name), col_name, ts_col)
+
+                    # Ensure schema matches for concat
+                    pa_table = pa_table.cast(arrow_schema)
+                    tables.append(pa_table)
+
+                except Exception as e:
+                    failed_path = os.path.abspath("sasdata2arrow_failed")
+                    logging.error(f"Parsing chunk #{loop} failed, see {failed_path}/failedchunk.csv")
+                    if os.path.isdir(failed_path):
+                        shutil.rmtree(failed_path)
+                    os.makedirs(failed_path)
+                    with open(f"{failed_path}/failedchunk.csv", "w", encoding='utf-8') as log:
+                        log.write(chunk)
+                    raise e
+
+                loop += 1
+                data_read += chunk_size
+                if loop % 30 == 0:
+                    logging.info(f"{round(data_read/1024/1024/1024,3)} GB / {rows_read} rows read so far")
+
+            logging.info(f"Finished reading {round(data_read/1024/1024/1024,3)} GB / {rows_read} rows.")
+        except:
+            raise
+        finally:
+            try:
+                if newsock[0]:
+                    try:
+                        newsock[0].shutdown(socks.SHUT_RDWR)
+                    except:
+                        pass
+                    newsock[0].close()
+            except:
+                pass
+            sock.close()
+            ll = self.submit("", 'text')
+
+        return pa.concat_tables(tables) if tables else None
 
 class _read_sock(io.StringIO):
     def __init__(self, **kwargs):

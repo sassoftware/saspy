@@ -43,6 +43,13 @@ except Exception as e:
     pass
 
 try:
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    import pyarrow.compute as pc
+except Exception as e:
+    pass
+
+try:
     from pygments.formatters import HtmlFormatter
     from pygments import highlight
     from saspy.SASLogLexer import SASLogStyle, SASLogLexer
@@ -1496,6 +1503,70 @@ class SASsession():
                 ret[colname] = chr_upper[col_up]
         return ret
 
+    def arrow_char_lengths(self, arrow_table, encode_errors = None, char_lengths = None,
+                           **kwargs) -> dict:
+        """
+        This is a utility method for arrow2sd, similar to df_char_lenght for df2sd.
+
+        :param arrow_table: PyArrow Table to compute character column lengths for
+
+        :param encode_errors: 'fail', 'replace' - default is to 'fail', other choice is to 'replace' \
+                              invalid chars with the replacement char.
+
+        :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
+                             Same semantics as dataframe2sasdata / df_char_lengths.
+
+        :return: dict of {column_name: byte_length}
+        """
+        ret = {}
+        if encode_errors is None:
+            encode_errors = 'fail'
+
+        if char_lengths and str(char_lengths) == 'exact':
+            CnotB = False
+        else:
+            if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
+                bpc = int(char_lengths)
+            else:
+                bpc = self.pyenc[0]
+
+            CnotB = bpc == 1
+
+        if type(char_lengths) is dict:
+            chr_upper = {k.upper():v for k,v in char_lengths.items()}
+            chr_keys  = chr_upper.keys()
+        else:
+            chr_upper = {}
+            chr_keys  = chr_upper.keys()
+
+        for field in arrow_table.schema:
+            colname = field.name
+            col_up  = colname.upper()
+            if col_up not in chr_keys:
+                if pa.types.is_string(field.type) or pa.types.is_large_string(field.type):
+                    col = arrow_table.column(colname)
+                    if CnotB:  # calc max Chars not Bytes
+                        # use PyArrow compute for fast max string length
+                        lengths = pc.utf8_length(col)
+                        max_len = pc.max(lengths).as_py()
+                        col_l = (max_len if max_len else 0) * bpc
+                    else:
+                        if encode_errors == 'fail':
+                            try:
+                                col_l = max((len(str(v).encode(self._io.sascfg.encoding)) for v in col.to_pylist() if v is not None), default=0)
+                            except Exception as e:
+                                msg  = "Transcoding error encountered.\n"
+                                msg += "Arrow Table contains characters that can't be transcoded into the SAS session encoding.\n"+str(e)
+                                logger.error(msg)
+                                return None
+                        else:
+                            col_l = max((len(str(v).encode(self._io.sascfg.encoding, errors='replace')) for v in col.to_pylist() if v is not None), default=0)
+                    if not col_l > 0:
+                        col_l = 8
+                    ret[colname] = col_l
+            else:
+                ret[colname] = chr_upper[col_up]
+        return ret
 
     def df2sd(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '',
               results: str = '', keep_outer_quotes: bool = False,
@@ -2024,6 +2095,8 @@ class SASsession():
                         static_columns:list     = None,
                         rowsep: str = '\x01', colsep: str = '\x02',
                         rowrep: str = ' ',    colrep: str = ' ',
+                        use_arrow: bool = False,
+                        include_attrs: bool = False,  
                         **kwargs) -> None:
         """
         This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet. This is a user contributed method
@@ -2045,7 +2118,9 @@ class SASsession():
         :param colsep: the column seperator character to use; defaults to '\x02'
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
-
+        :param use_arrow: whether to use PyArrow for writing the parquet file (default is False).
+        :param include_attrs: whether to include SAS attributes in the parquet file metadata (default is False).
+        
         Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
         be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
         to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
@@ -2090,6 +2165,8 @@ class SASsession():
                                     colsep = colsep,
                                     rowrep = rowrep,
                                     colrep = colrep,
+                                    use_arrow = use_arrow,
+                                    include_attrs = include_attrs,
                                     **kwargs)
 
 
@@ -2109,6 +2186,8 @@ class SASsession():
                        colsep: str = '\x02',
                        rowrep: str = ' ',
                        colrep: str = ' ',
+                       use_arrow: bool = False,
+                       include_attrs: bool = False,
                        **kwargs) -> None:
         """
         This method exports the SAS Data Set to a Parquet file. This is a user contributed method created to work around data sets that
@@ -2130,6 +2209,8 @@ class SASsession():
         :param colsep: the column seperator character to use; defaults to '\x02'
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
+        :param use_arrow: whether to use PyArrow for writing the parquet file (default is False).
+        :param include_attrs: whether to include SAS attributes in the parquet file metadata (default is False).
 
         Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
         be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
@@ -2171,6 +2252,30 @@ class SASsession():
 
         if self.nosub:
             print("too complicated to show the code, read the source :), sorry.")
+        elif use_arrow:
+            arrow_table = self.sasdata2arrow(
+                              table = table,
+                              libref = libref,
+                              dsopts = dsopts,
+                              chunk_size_mb = chunk_size_mb,
+                              coerce_timestamp_errors=coerce_timestamp_errors,
+                              static_columns = static_columns,
+                              rowsep = rowsep,
+                              colsep = colsep,
+                              rowrep = rowrep,
+                              colrep = colrep,
+                              include_attrs = include_attrs,
+                              **kwargs)
+
+            if arrow_table is None:
+                return None
+            # Write to Parquet using PyArrow
+            if partitioned:
+                import os
+                os.makedirs(parquet_file_path, exist_ok=True)
+                pq.write_to_dataset(arrow_table, root_path=parquet_file_path, **parquet_kwargs)
+            else:
+                pq.write_table(arrow_table, parquet_file_path, **parquet_kwargs)
         else:
             self._io.sasdata2parquet(
                         parquet_file_path = parquet_file_path,
@@ -2191,6 +2296,411 @@ class SASsession():
                         **kwargs)
         self._lastlog = self._io._log[lastlog:]
         return None
+
+    def sd2arrow(self, table: str, libref: str ='', dsopts: dict = None,
+                  pa_arrow_kwargs = None,
+                  chunk_size_mb     = 4,
+                  coerce_timestamp_errors = True,
+                  static_columns:list     = None,
+                  rowsep: str = '\x01', colsep: str = '\x02',
+                  rowrep: str = ' ',    colrep: str = ' ',
+                  include_attrs: bool = True,
+                  **kwargs) -> 'pa.Table':
+        """
+        This is an alias for 'sasdata2arrow'.
+
+        :param table: the name of the SAS Data Set you want to export to a PyArrow Table
+        :param libref: the libref for the SAS Data Set.
+        :param dsopts: data set options for the input SAS Data Set
+        :param pa_arrow_kwargs: additional keyword arguments to pass to PyArrow (default is None).
+        :param chunk_size_mb: The chunk size in MB at which the stream is processed (default is 4).
+        :param coerce_timestamp_errors: Whether to coerce errors when converting timestamps (default is True).
+        :param static_columns: List of tuples (name, value) representing static columns (default is None).
+        :param rowsep: the row seperator character to use; defaults to '\x01'
+        :param colsep: the column seperator character to use; defaults to '\x02'
+        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
+        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
+        :param include_attrs: whether to include column attributes in the PyArrow Table metadata (default is True).
+
+        :return: PyArrow Table
+        """
+        dsopts = dsopts if dsopts is not None else {}
+
+        return self.sasdata2arrow(table = table,
+                                  libref = libref,
+                                  dsopts = dsopts,
+                                  pa_arrow_kwargs = pa_arrow_kwargs,
+                                  chunk_size_mb = chunk_size_mb,
+                                  coerce_timestamp_errors=coerce_timestamp_errors,
+                                  static_columns = static_columns,
+                                  rowsep = rowsep,
+                                  colsep = colsep,
+                                  rowrep = rowrep,
+                                  colrep = colrep,
+                                  include_attrs = include_attrs,
+                                  **kwargs)
+
+    def sasdata2arrow(self,
+                      table: str,
+                      libref: str       ='',
+                      dsopts: dict      = None,
+                      pa_arrow_kwargs = None,
+                      chunk_size_mb     = 4,
+                      coerce_timestamp_errors = True,
+                      static_columns:list     = None,
+                      rowsep: str = '\x01',
+                      colsep: str = '\x02',
+                      rowrep: str = ' ',
+                      colrep: str = ' ',
+                      include_attrs: bool = True,
+                      **kwargs) -> 'pa.Table':
+        """
+        This method exports the SAS Data Set to a PyArrow Table.
+
+        :param table: the name of the SAS Data Set you want to export to a PyArrow Table
+        :param libref: the libref for the SAS Data Set.
+        :param dsopts: data set options for the input SAS Data Set
+        :param pa_arrow_kwargs: additional keyword arguments to pass to PyArrow (default is None).
+        :param chunk_size_mb: The chunk size in MB at which the stream is processed (default is 4).
+        :param coerce_timestamp_errors: Whether to coerce errors when converting timestamps (default is True).
+        :param static_columns: List of tuples (name, value) representing static columns (default is None).
+        :param rowsep: the row seperator character to use; defaults to '\x01'
+        :param colsep: the column seperator character to use; defaults to '\x02'
+        :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
+        :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
+        :param include_attrs: whether to include SAS attributes in the PyArrow Table metadata (default is True).
+
+        :return: PyArrow Table
+        """
+        lastlog = len(self._io._log)
+
+        dsopts = dsopts if dsopts is not None else {}
+        arrow_kwargs = pa_arrow_kwargs if pa_arrow_kwargs is not None else {}
+
+        if self.exist(table, libref) == 0:
+            logger.error('The SAS Data Set ' + libref + '.' + table + ' does not exist')
+            if self.sascfg.bcv < 3007009:
+                return None
+            else:
+                raise FileNotFoundError('The SAS Data Set ' + libref + '.' + table + ' does not exist')
+
+        if self.nosub:
+            print("too complicated to show the code, read the source :), sorry.")
+            return None
+        else:
+            arrow_table = self._io.sasdata2arrow(
+                        table = table,
+                        libref = libref,
+                        dsopts = dsopts,
+                        chunk_size_mb = chunk_size_mb,
+                        coerce_timestamp_errors=coerce_timestamp_errors,
+                        static_columns = static_columns,
+                        rowsep = rowsep,
+                        colsep = colsep,
+                        rowrep = rowrep,
+                        colrep = colrep,
+                        **kwargs)
+        if arrow_table is None:
+            return None
+        if arrow_kwargs:
+            arrow_table = pa.table(arrow_table, **arrow_kwargs)
+
+        # Get Arrow schema with SAS metadata via schema() method
+        if include_attrs and "schema" not in arrow_kwargs:
+            try:
+                sd = SASdata(self, libref, table, dsopts=dsopts)
+                schema = sd.schema(sasattrs=include_attrs, xattrs=include_attrs)
+            except Exception:
+                schema = None
+            if schema is not None and isinstance(schema, pa.Schema):
+                arrow_table = arrow_table.cast(schema)
+
+        self._lastlog = self._io._log[lastlog:]
+        return arrow_table
+
+    def arrow2sd(self, arrow_table: 'pa.Table', table: str = '_arrow', libref: str = '',
+                  results: str = '', keep_outer_quotes: bool = False, 
+                                     embedded_newlines: bool = True,
+                  LF: str = '\x01', CR: str = '\x02',
+                  colsep: str = '\x03', colrep: str = ' ',
+                  datetimes: dict = {}, outfmts: dict = {}, labels: dict = {}, 
+                  outdsopts: dict = {}, encode_errors = None, char_lengths = None, **kwargs) -> 'SASdata':
+        """
+        This is an alias for 'arrow2sasdata'. 
+
+        :param arrow_table: PyArrow Table to import to a SAS Data Set
+        :param table: the name of the SAS Data Set to create
+        :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
+        :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them imported into the SAS data set
+        :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)
+        :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)
+        :param colsep: the column separator character used for streaming the delimmited data to SAS defaults to hex(3)
+        :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
+        :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
+        :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
+        :param labels: dict with column names and labels to assign to the new SAS data set
+        :param outdsopts: a dictionary containing output data set options for the table being created
+        :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail'
+        :param char_lengths: How to determine (and declare) lengths for CHAR variables
+
+        :return: SASdata object
+        """
+        return self.arrow2sasdata(arrow_table, table, libref, results, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep, datetimes, outfmts,
+                                  labels, outdsopts, encode_errors, char_lengths, **kwargs)
+
+    def arrow2sasdata(self, arrow_table: 'pa.Table', table: str = '_arrow', libref: str = '',
+                       results: str = '', keep_outer_quotes: bool = False,
+                                          embedded_newlines: bool = True,
+                       LF: str = '\x01', CR: str = '\x02',
+                       colsep: str = '\x03', colrep: str = ' ',                 
+                       datetimes: dict = {}, outfmts: dict = {}, labels: dict = {}, 
+                       outdsopts: dict = {}, encode_errors = None, char_lengths = None, **kwargs) -> 'SASdata':
+        """
+        This method imports a PyArrow Table to a SAS Data Set, returning the SASdata object for the new Data Set.
+
+        :param arrow_table: PyArrow Table to import to a SAS Data Set
+        :param table: the name of the SAS Data Set to create
+        :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :param keep_outer_quotes: the defualt is for SAS to strip outer quotes from delimitted data. This lets you keep them
+        :param embedded_newlines: if any char columns have embedded CR or LF, set this to True to get them imported into the SAS data set
+        :param LF: if embedded_newlines=True, the chacter to use for LF when transferring the data; defaults to hex(1)
+        :param CR: if embedded_newlines=True, the chacter to use for CR when transferring the data; defaults to hex(2)
+        :param colsep: the column separator character used for streaming the delimmited data to SAS defaults to hex(3)
+        :param colrep: the char to convert to for any embedded colsep, LF, CR chars in the data; defaults to  ' '
+        :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
+        :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
+        :param labels: dict with column names and labels to assign to the new SAS data set
+        :param outdsopts: a dictionary containing output data set options for the table being created \
+                          for instance, compress=, encoding=, index=, outrep=, replace=, rename= ... \
+                          the options will be generated simply as key=value, so if a value needs quotes or parentheses, provide them in the value
+
+            .. code-block:: python
+
+                             {'compress' : 'yes' ,
+                              'encoding' : 'latin9' ,
+                              'replace'  : 'NO' ,
+                              'index'    : 'coli' ,
+                              'rename'   : "(col1 = Column_one  col2 = 'Column Two'n)"
+                             }
+
+        :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail', other choice is to 'replace' \
+                              invalid chars with the replacement char. 'ignore' doesn't try to transcode in python, so you \
+                              get whatever happens in SAS based upon the data you send over. Note 'ignore' is only valid for IOM and HTTP
+        :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
+                             SAS declares lengths in bytes, not characters, so multibyte encodings require more bytes per character (BPC)
+
+            - 'exact'  - the default if SAS is in a multibyte encoding. calculate the max number of bytes, in SAS encoding, \
+                         required for the longest actual value. This is slowest but most accurate.
+
+            - 'safe'   - use char len of the longest values in the column, multiplied by max BPC of the SAS multibyte \
+                         encoding. This is much faster, but could declare SAS Char variables longer than absolutely required.
+
+            - [1|2|3|4]- this is 'safe' except the number is the multiplier to use (BPC) instead of the default.
+
+            - dictionary - a dictionary containing the names:lengths of the character columns you want to specify.
+
+        :return: SASdata object
+        """
+        if pa is None:
+            raise ImportError("pyarrow is required for arrow2sasdata(). Install it with: pip install pyarrow")
+
+        lastlog = len(self._io._log)
+
+        if libref != '':
+            if libref.upper() not in self.assigned_librefs():
+                logger.error("The libref specified is not assigned in this SAS Session.")
+                return None
+
+        # Convert unsupported complex types to strings
+        import json
+        import base64
+        new_arrays = []
+        new_fields = []
+        converted_count = 0
+
+        for i, field in enumerate(arrow_table.schema):
+            col = arrow_table.column(i)
+
+            # Check if type is supported: numeric (including float16/halffloat, float32, float64/double), 
+            # string, boolean, or specific datetime types
+            # SAS supports: date, timestamp (datetime), but NOT time, duration, or interval
+            is_supported = (pa.types.is_integer(field.type) or 
+                           pa.types.is_floating(field.type) or
+                           pa.types.is_decimal(field.type) or
+                           pa.types.is_string(field.type) or 
+                           pa.types.is_boolean(field.type) or
+                           pa.types.is_date(field.type) or
+                           pa.types.is_timestamp(field.type))
+
+            if not is_supported:
+                # Convert unsupported types to strings
+                converted_count += 1
+                try:
+                    if pa.types.is_dictionary(field.type):
+                        # Dictionary: decode to actual values first
+                        col = pc.dictionary_decode(col)
+                        col = pc.cast(col, pa.string())
+                    elif pa.types.is_binary(field.type) or pa.types.is_fixed_size_binary(field.type):
+                        # Binary: convert to base64 string for safe text representation
+                        col = pa.array([base64.b64encode(row.as_py()).decode('ascii') if row.is_valid else None for row in col])
+                    elif pa.types.is_time(field.type) or pa.types.is_duration(field.type):
+                        # Time/Duration: convert to string representation
+                        col = pa.array([str(row.as_py()) if row.is_valid else None for row in col])
+                    else:
+                        # Complex types (List, Struct, Map, etc.): convert to JSON string
+                        col = pa.array([json.dumps(row.as_py()) if row.is_valid else None for row in col])
+
+                    new_arrays.append(col)
+                    new_fields.append(pa.field(field.name, pa.string()))
+                except Exception as e:
+                    error_msg = (f"Failed to convert column '{field.name}' with type {field.type} to string. "
+                                f"Error: {str(e)}")
+                    logger.error(error_msg)
+                    raise ValueError(error_msg) from e
+            else:
+                # Keep supported types as-is
+                new_arrays.append(col)
+                new_fields.append(field)
+
+        if converted_count > 0:
+            logger.info(f"Converted {converted_count} column(s) with complex types to strings.")
+            arrow_table = pa.table(new_arrays, schema=pa.schema(new_fields))
+
+        # support oringinal implementation of outencoding - should have done it as a ds option to begin with
+        outencoding = kwargs.pop('outencoding', None)
+        if outencoding:
+            outdsopts['encoding'] = outencoding
+
+        if results == '':
+            results = self.results
+        if self.nosub:
+            print("too complicated to show the code, read the source :), sorry.")
+            return None
+
+        if self.sascfg.mode != 'COM':
+            if char_lengths and str(char_lengths) == 'exact':
+                CnotB = False
+            else:
+                if char_lengths and str(char_lengths).strip() in ['1','2','3','4']:
+                    bpc = int(char_lengths)
+                else:
+                    bpc = self.pyenc[0]
+                CnotB = bpc == 1
+
+            if type(char_lengths) is not dict or len(char_lengths) < len(arrow_table.schema):
+                charlens = self.arrow_char_lengths(arrow_table, encode_errors, char_lengths)
+            else:
+                charlens = char_lengths
+
+            rc = self._io.arrow2sasdata(arrow_table, table, libref, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
+                                        datetimes, outfmts, labels, outdsopts, encode_errors, charlens, CnotB=CnotB, **kwargs)
+
+        else:
+            rc = self._io.arrow2sasdata(arrow_table, table, libref, keep_outer_quotes, embedded_newlines, LF, CR, colsep, colrep,
+                                        datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths, **kwargs)
+
+        if rc is None:
+            if self.exist(table, libref):
+                dsopts = {}
+                if outencoding:
+                    dsopts['encoding'] = outencoding
+                sd = SASdata(self, libref, table, results, dsopts)
+            else:
+                sd = None
+        else:
+            sd = None
+
+        self._lastlog = self._io._log[lastlog:]
+        return sd
+
+    def pq2sd(self, parquet_file_path: str, pa_parquet_kwargs=None, table: str = '_parquet', libref: str = '',
+               results: str = '', datetimes: dict = {}, outfmts: dict = {},
+               labels: dict = {}, outdsopts: dict = {}, encode_errors = None,
+               char_lengths = None, **kwargs) -> 'SASdata':
+        """
+        This is an alias for 'parquet2sasdata'.
+
+        :param parquet_file_path: path to the Parquet file or directory to read
+        :param pa_parquet_kwargs: dictionary of keyword arguments to pass to pyarrow.parquet.read_table
+        :param table: the name of the SAS Data Set to create
+        :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
+        :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
+        :param labels: dict with column names and labels to assign to the new SAS data set
+        :param outdsopts: a dictionary containing output data set options for the table being created
+        :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail'
+        :param char_lengths: How to determine (and declare) lengths for CHAR variables
+
+        :return: SASdata object
+        """
+        return self.parquet2sasdata(parquet_file_path, pa_parquet_kwargs, table, libref, results, datetimes, outfmts,
+                                    labels, outdsopts, encode_errors, char_lengths, **kwargs)
+
+    def parquet2sasdata(self, parquet_file_path: str, pa_parquet_kwargs=None, table: str = '_parquet', libref: str = '',
+                         results: str = '', datetimes: dict = {}, outfmts: dict = {},
+                         labels: dict = {}, outdsopts: dict = {}, encode_errors = None,
+                         char_lengths = None, **kwargs) -> 'SASdata':
+        """
+        This method imports a Parquet file to a SAS Data Set, returning the SASdata object for the new Data Set.
+
+        The conversion reads the Parquet file into a PyArrow Table, then uses arrow2sasdata to create the SAS Data Set.
+
+        :param parquet_file_path: path to the Parquet file or directory to read. Can be a single file
+                                 or a directory containing partitioned Parquet files.
+        :param pa_parquet_kwargs: dictionary of keyword arguments to pass to pyarrow.parquet.read_table
+        :param table: the name of the SAS Data Set to create
+        :param libref: the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT are the alternatives
+        :param datetimes: dict with column names as keys and values of 'date' or 'time' to create SAS date or times instead of datetimes
+        :param outfmts: dict with column names and SAS formats to assign to the new SAS data set
+        :param labels: dict with column names and labels to assign to the new SAS data set
+        :param outdsopts: a dictionary containing output data set options for the table being created \
+                          for instance, compress=, encoding=, index=, outrep=, replace=, rename= ... \
+                          the options will be generated simply as key=value, so if a value needs quotes or parentheses, provide them in the value
+
+            .. code-block:: python
+
+                             {'compress' : 'yes' ,
+                              'encoding' : 'latin9' ,
+                              'replace'  : 'NO' ,
+                              'index'    : 'coli' ,
+                              'rename'   : "(col1 = Column_one  col2 = 'Column Two'n)"
+                             }
+
+        :param encode_errors: 'fail', 'replace' or 'ignore' - default is to 'fail', other choice is to 'replace' \
+                              invalid chars with the replacement char. 'ignore' doesn't try to transcode in python, so you \
+                              get whatever happens in SAS based upon the data you send over. Note 'ignore' is only valid for IOM and HTTP
+        :param char_lengths: How to determine (and declare) lengths for CHAR variables in the output SAS data set \
+                             See dataframe2sasdata for detailed documentation.
+
+        :return: SASdata object
+        """
+        if pa is None or pq is None:
+            raise ImportError("pyarrow is required for parquet2sasdata(). Install it with: pip install pyarrow")
+
+        lastlog = len(self._io._log)
+
+        # Read Parquet file into Arrow Table
+        pa_parquet_kwargs = pa_parquet_kwargs if pa_parquet_kwargs is not None else {}
+        try:
+            arrow_table = pq.read_table(parquet_file_path, **pa_parquet_kwargs)
+        except Exception as e:
+            logger.error("Failed to read Parquet file: {}".format(str(e)))
+            raise
+
+        # Use arrow2sasdata to convert to SAS
+        sd = self.arrow2sasdata(arrow_table, table, libref, results,
+                                datetimes=datetimes, outfmts=outfmts,
+                                labels=labels, outdsopts=outdsopts,
+                                encode_errors=encode_errors, char_lengths=char_lengths,
+                                **kwargs)
+
+        self._lastlog = self._io._log[lastlog:]
+        return sd
 
     def _dsopts(self, dsopts):
         """
@@ -2574,11 +3084,12 @@ class SASsession():
         return dirlist
 
 
-    def list_tables(self, libref: str='work', results: str = 'list') -> list:
+    def list_tables(self, libref: str='work', results: str = 'list', label: bool = False) -> list:
         """
         This method returns a list of tuples containing MEMNAME, MEMTYPE of members in the library of memtype data or view
 
         If you would like a Pandas DataFrame returned instead of a list, specify results='pandas'
+        If you specify label=True, the method will also return the MEMLABEL in the list of tuples or dataframe
         """
         lastlog = len(self._io._log)
 
@@ -2602,7 +3113,7 @@ class SASsession():
         proc sql;
            create table work._saspy_lib_list as select distinct * from work._saspy_lib_list;
         quit;
-        """.replace('librefx', libref)
+        """.replace('librefx', libref).replace('keep=memname memtype', 'keep=memname memtype memlabel' if label else 'keep=memname memtype')
 
         if self.nosub:
             print(code)
@@ -2623,6 +3134,10 @@ class SASsession():
               put 'MEMSTART=';
            put %upcase('memNAME=') memname %upcase('memNAMEEND=');
            put %upcase('memTYPE=') memtype %upcase('memTYPEEND=');
+        """
+        if label:
+            code += " put %upcase('memLABEL=') memlabel %upcase('memLABELEND=');\n"
+        code += """
            if last then
               put 'MEMEND=';
         run;
@@ -2639,6 +3154,12 @@ class SASsession():
             key = log[0]
             log = log[2].partition('MEMTYPE=')[2].partition(' MEMTYPEEND=')
             val = log[0]
+            if label:
+                log = log[2].partition('MEMLABEL=')[2].partition(' MEMLABELEND=')
+                val = {"memtype": val}
+                if log:
+                    val["memlabel"] = log[0]
+
             if results == 'list':
                 tablist.append(tuple((key, val)))
             else:
