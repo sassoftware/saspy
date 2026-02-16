@@ -305,8 +305,8 @@ class SASSessionCOM(object):
         self._log += result
 
         if re.search(r'\nERROR[ \d-]*:', result):
-           warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
-           self._sb.check_error_log = True
+            warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
+            self._sb.check_error_log = True
 
         return result
 
@@ -425,7 +425,7 @@ class SASSessionCOM(object):
             val = self.sascfg._prompt('Enter value for macro variable {} '.format(key), pw=hide)
 
             if val is None:
-               raise RuntimeError("No value for prompted macro variable provided.")
+                raise RuntimeError("No value for prompted macro variable provided.")
 
             if val:
                 input_ok = True
@@ -490,12 +490,12 @@ class SASSessionCOM(object):
             #   3. Increase font size
             lstf = self._getfile(self._gethtmlfn())
             try:
-               lstf = lstf.decode()
+                lstf = lstf.decode()
             except UnicodeDecodeError: # older SAS used session encoding instead of utf8 like newer SAS
-               try:
-                  lstf = lstf.decode(self.sascfg.encoding)
-               except UnicodeDecodeError:
-                  lstf = lstf.decode(errors='replace')
+                try:
+                    lstf = lstf.decode(self.sascfg.encoding)
+                except UnicodeDecodeError:
+                    lstf = lstf.decode(errors='replace')
 
             listing = lstf if self._sb.sascfg.odsasis else \
                       lstf \
@@ -513,8 +513,8 @@ class SASSessionCOM(object):
         self._reset()
 
         if printto:
-           self._asubmit("\nproc printto;run;\n", 'text')
-           log += self._getlog()
+            self._asubmit("\nproc printto;run;\n", 'text')
+            log += self._getlog()
 
         self._sb._lastlog = log
         return {'LOG': log, 'LST': listing}
@@ -545,11 +545,11 @@ class SASSessionCOM(object):
 
         code  = 'data _null_; e = exist("'
         if len(libref):
-           code += libref+"."
+            code += libref+"."
         code += "'"+table.strip()+"'n"+'"'+");\n"
         code += 'v = exist("'
         if len(libref):
-           code += libref+"."
+            code += libref+"."
         code += "'"+table.strip()+"'n"+'"'+", 'VIEW');\n if e or v then e = 1;\n"
         code += "te='TABLE_EXISTS='; put te e;run;\n"
 
@@ -636,38 +636,38 @@ class SASSessionCOM(object):
         DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%f'
 
         if self.sascfg.verbose:
-           if keep_outer_quotes != False:
-              logger.warning("'keep_outer_quotes=' is not used with this access method. option ignored.")
-           if embedded_newlines != True:
-              logger.warning("'embedded_newlines=' is not used with this access method. option ignored.")
-           if LF != '\x01' or CR != '\x02' or colsep != '\x03':
-              logger.warning("'LF=, CR= and colsep=' are not used with this access method. option(s) ignored.")
-           if datetimes != {}:
-              logger.warning("'datetimes=' is not used with this access method. option ignored.")
-           if outfmts != {}:
-              logger.warning("'outfmts=' is not used with this access method. option ignored.")
-           if labels != {}:
-              logger.warning("'labels=' is not used with this access method. option ignored.")
-           if outdsopts != {}:
-              logger.warning("'outdsopts=' is not used with this access method. option ignored.")
-           if encode_errors:
-              logger.warning("'encode_errors=' is not used with this access method. option ignored.")
-           if char_lengths:
-              logger.warning("'char_lengths=' is not used with this access method. option ignored.")
+            if keep_outer_quotes != False:
+                logger.warning("'keep_outer_quotes=' is not used with this access method. option ignored.")
+            if embedded_newlines != True:
+                logger.warning("'embedded_newlines=' is not used with this access method. option ignored.")
+            if LF != '\x01' or CR != '\x02' or colsep != '\x03':
+                logger.warning("'LF=, CR= and colsep=' are not used with this access method. option(s) ignored.")
+            if datetimes != {}:
+                logger.warning("'datetimes=' is not used with this access method. option ignored.")
+            if outfmts != {}:
+                logger.warning("'outfmts=' is not used with this access method. option ignored.")
+            if labels != {}:
+                logger.warning("'labels=' is not used with this access method. option ignored.")
+            if outdsopts != {}:
+                logger.warning("'outdsopts=' is not used with this access method. option ignored.")
+            if encode_errors:
+                logger.warning("'encode_errors=' is not used with this access method. option ignored.")
+            if char_lengths:
+                logger.warning("'char_lengths=' is not used with this access method. option ignored.")
 
         tablepath = self._tablepath(table, libref=libref)
 
         if type(df.index) != pd.RangeIndex:
-           warnings.warn("Note that Indexes are not transferred over as columns. Only actual columns are transferred")
+            warnings.warn("Note that Indexes are not transferred over as columns. Only actual columns are transferred")
 
         longname = False
         columns  = []
         formats  = {}
         for i, name in enumerate(df.columns):
             if len(name.encode(self.sascfg.encoding)) > 32:
-               warnings.warn("Column '{}' in DataFrame is too long for SAS. Rename to 32 bytes or less".format(name),
-                        RuntimeWarning)
-               longname = True
+                warnings.warn("Column '{}' in DataFrame is too long for SAS. Rename to 32 bytes or less".format(name),
+                         RuntimeWarning)
+                longname = True
             if df[name].dtypes.kind in self.PD_NUM_TYPE:
                 # Numeric type
                 definition = "'{}'n num".format(name)
@@ -694,7 +694,7 @@ class SASSessionCOM(object):
             columns.append(definition)
 
         if longname:
-           raise SASDFNamesToLongError(Exception)
+            raise SASDFNamesToLongError(Exception)
 
         sql_values = []
         for index, row in df.iterrows():
@@ -731,8 +731,8 @@ class SASSessionCOM(object):
         colrep = kwargs.pop('colrep', ' ')
 
         if method.upper() == 'DISK':
-           logger.error("This access method doesn't support the DISK method. Try CSV or MEMORY")
-           return None
+            logger.error("This access method doesn't support the DISK method. Try CSV or MEMORY")
+            return None
 
         if method.upper() == 'CSV':
             df = self.sasdata2dataframeCSV(table, libref, dsopts=dsopts, **kwargs)
@@ -740,19 +740,19 @@ class SASSessionCOM(object):
             my_fmts = kwargs.pop('my_fmts', False)
             k_dts   = kwargs.pop('dtype',   None)
             if self.sascfg.verbose:
-               if my_fmts != False:
-                  logger.warning("'my_fmts=' is not supported in this access method. option ignored.")
-               if k_dts is not None:
-                  logger.warning("'dtype=' is only used with the CSV version of this method. option ignored.")
+                if my_fmts != False:
+                    logger.warning("'my_fmts=' is not supported in this access method. option ignored.")
+                if k_dts is not None:
+                    logger.warning("'dtype=' is only used with the CSV version of this method. option ignored.")
 
             header, rows, meta = self.read_sasdata(table, libref, dsopts=dsopts)
             df = pd.DataFrame.from_records(rows, columns=header, **kwargs)
 
             for col in meta.keys():
-               if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts:
-                  df[col] = pd.to_datetime(df[col], errors='coerce')
-               elif meta[col]['DATA_TYPE'] == 5:
-                  df[col] = pd.to_numeric(df[col], errors='coerce')
+                if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts:
+                    df[col] = pd.to_datetime(df[col], errors='coerce')
+                elif meta[col]['DATA_TYPE'] == 5:
+                    df[col] = pd.to_numeric(df[col], errors='coerce')
 
         return df
 
@@ -784,8 +784,8 @@ class SASSessionCOM(object):
         k_dts   = kwargs.get('dtype',   None)
         my_fmts = kwargs.pop('my_fmts', False)
         if self.sascfg.verbose:
-           if my_fmts != False:
-              logger.warning("'my_fmts=' is not supported in this access method. option ignored.")
+            if my_fmts != False:
+                logger.warning("'my_fmts=' is not supported in this access method. option ignored.")
 
         sas_csv = '{}saspy_sd2df.csv'.format(self._sb.workpath)
         dopts = self._sb._dsopts(dsopts) if dsopts is not None else ''
@@ -817,13 +817,13 @@ class SASSessionCOM(object):
                 col_precis = col['FORMAT_DECIMAL']
 
             if col['FORMAT_NAME']:
-               full_format = FORMAT_STRING.format(
-                   column=col['COLUMN_NAME'],
-                   format=col_format,
-                   length=col_length,
-                   precision=col_precis)
+                full_format = FORMAT_STRING.format(
+                    column=col['COLUMN_NAME'],
+                    format=col_format,
+                    length=col_length,
+                    precision=col_precis)
 
-               fmtlist.append(full_format)
+                fmtlist.append(full_format)
 
         export = EXPORT.format(fmt=' '.join(fmtlist),
             tbl=tablepath,
@@ -846,9 +846,9 @@ class SASSessionCOM(object):
         df = pd.read_csv(io.StringIO(outstring), parse_dates=datecols, **kwargs)
 
         if k_dts is None:  # don't override these if user provided their own dtypes
-           for col in meta.keys():
-              if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts:
-                 df[col] = pd.to_datetime(df[col], errors='coerce')
+            for col in meta.keys():
+                if meta[col]['FORMAT_NAME'] in self._sb.sas_date_fmts + self._sb.sas_datetime_fmts:
+                    df[col] = pd.to_datetime(df[col], errors='coerce')
 
         return df
 
@@ -861,8 +861,31 @@ class SASSessionCOM(object):
                         rowrep: str = ' ',    colrep: str = ' ',
                         **kwargs) -> None:
 
-       logger.error("This access method doesn't support this method. Try the IOM access method instead.")
-       return None
+        logger.error("This access method doesn't support this method. Try the IOM access method instead.")
+        return None
+
+    def sasdata2arrow(self, table: str, libref: str ='',
+                      dsopts: dict = None,
+                      chunk_size_mb = 4, coerce_timestamp_errors=True,
+                      static_columns:list = None,
+                      rowsep: str = '\x01', colsep: str = '\x02',
+                      rowrep: str = ' ',    colrep: str = ' ',
+                      **kwargs) -> 'pa.Table':
+
+        logger.error("This access method doesn't support this method. Try the IOM access method instead.")
+        return None
+
+    def arrow2sasdata(self, table: 'pa.Table', tablename: str ='a',
+                      libref: str ="", keep_outer_quotes: bool=False,
+                      embedded_newlines: bool=True,
+                      LF: str = '\x01', CR: str = '\x02',
+                      colsep: str = '\x03', colrep: str = ' ',
+                      datetimes: dict={}, outfmts: dict={}, labels: dict={},
+                      outdsopts: dict={}, encode_errors = None, char_lengths = None,
+                      **kwargs):
+
+        logger.error("This access method doesn't support this method. Try the IOM access method instead.")
+        return None
 
     def upload(self, local: str, remote: str, overwrite: bool=True, permission: str='', **kwargs):
         """
