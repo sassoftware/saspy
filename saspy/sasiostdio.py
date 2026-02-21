@@ -36,6 +36,11 @@ from saspy.sasexceptions import (SASDFNamesToLongError,
                                 )
 
 try:
+   import narwhals as nw
+except ImportError:
+   pass
+
+try:
    import pandas as pd
    import numpy  as np
    from warnings import simplefilter
@@ -1807,6 +1812,18 @@ Will use HTML5 for this SASsession.""")
 
       char_lengths - How to determine (and declare) lengths for CHAR variables in the output SAS data set
       """
+      try:
+          ndf = nw.from_native(df)
+          if hasattr(ndf, 'collect'):
+              ndf = ndf.collect()
+          df = ndf.to_pandas()
+      except:
+          try:
+              import polars as pl
+              if isinstance(df, pl.DataFrame):
+                  df = df.to_pandas()
+          except ImportError:
+              pass
       input   = ""
       xlate   = ""
       card    = ""

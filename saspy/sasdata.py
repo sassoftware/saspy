@@ -20,6 +20,11 @@ try:
 except Exception as e:
    pass
 
+try:
+   import narwhals as nw
+except ImportError:
+   pass
+
 import logging
 logger = logging.getLogger('saspy')
 
@@ -1294,6 +1299,30 @@ class SASdata:
             if self.sas.sascfg.pandas:
                raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
             df = self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
+            if df is not None:
+                res_up = self.results.upper()
+                if res_up == 'POLARS':
+                    try:
+                        import polars as pl
+                        df = pl.from_pandas(df)
+                    except ImportError:
+                        logger.error("The 'polars' package is required to return a Polars DataFrame.")
+                        return None
+                elif res_up == 'PYARROW':
+                    try:
+                        import pyarrow as pa
+                        df = pa.Table.from_pandas(df)
+                    except ImportError:
+                        logger.error("The 'pyarrow' package is required to return a PyArrow Table.")
+                        return None
+                elif res_up == 'DUCKDB':
+                    try:
+                        import duckdb
+                        df = duckdb.from_df(df)
+                    except ImportError:
+                        logger.error("The 'duckdb' package is required to return a DuckDB relation.")
+                        return None
+
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
 

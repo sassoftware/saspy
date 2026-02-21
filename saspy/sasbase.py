@@ -43,6 +43,11 @@ except Exception as e:
    pass
 
 try:
+   import narwhals as nw
+except ImportError:
+   pass
+
+try:
    from pygments.formatters import HtmlFormatter
    from pygments import highlight
    from saspy.SASLogLexer import SASLogStyle, SASLogLexer
@@ -1454,6 +1459,14 @@ class SASsession():
         if encode_errors is None:
            encode_errors = 'fail'
 
+        try:
+           ndf = nw.from_native(df)
+           if hasattr(ndf, 'collect'):
+               ndf = ndf.collect()
+           df = ndf.to_pandas()
+        except:
+           pass
+
         if char_lengths and str(char_lengths) == 'exact':
            CnotB = False
         else:
@@ -1477,18 +1490,18 @@ class SASsession():
            if col_up not in chr_keys:
               if df.dtypes[name].kind in ('O','S','U','V'):
                  if CnotB:  # calc max Chars not Bytes
-                    col_l = df[name].fillna('').astype(str).map(len).max() * bpc
+                    col_l = df[name].astype(str).map(len).max() * bpc
                  else:
                     if encode_errors == 'fail':
                        try:
-                          col_l = df[name].fillna('').astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding))).max()
+                          col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding))).max()
                        except Exception as e:
                           msg  = "Transcoding error encountered.\n"
                           msg += "DataFrame contains characters that can't be transcoded into the SAS session encoding.\n"+str(e)
                           logger.error(msg)
                           return None
                     else:
-                       col_l = df[name].fillna('').astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
+                       col_l = df[name].astype(str).apply(lambda x: len(x.encode(self._io.sascfg.encoding, errors='replace'))).max()
                  if not col_l > 0:
                     col_l = 8
                  ret[colname] = col_l
@@ -1659,6 +1672,19 @@ class SASsession():
         lastlog = len(self._io._log)
         if self.sascfg.pandas:
            raise type(self.sascfg.pandas)(self.sascfg.pandas.msg)
+
+        try:
+            ndf = nw.from_native(df)
+            if hasattr(ndf, 'collect'):
+                ndf = ndf.collect()
+            df = ndf.to_pandas()
+        except:
+            try:
+                import polars as pl
+                if isinstance(df, pl.DataFrame):
+                    df = df.to_pandas()
+            except ImportError:
+                pass
 
         if libref != '':
            if libref.upper() not in self.assigned_librefs():
