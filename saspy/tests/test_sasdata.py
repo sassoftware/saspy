@@ -185,7 +185,7 @@ class TestSASdataObject(unittest.TestCase):
 
         self.cars.set_results('pandas')
         ll = self.cars.describe()
-        actual = ll.iloc[0][0]
+        actual = ll.iloc[0,0]
 
         self.assertEqual(EXPECTED, actual, msg="cars.describe() result didn't contain expected result")
 
