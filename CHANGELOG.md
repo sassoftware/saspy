@@ -1,6 +1,26 @@
 # Changelog
 
 
+## [5.105.1] - 2026-03-25
+
+### Added
+
+-   `None` Nothing added
+
+### Changed
+
+-   `Enhancement` Added Don/Phil as authors and updated contact email
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.105.0] - 2026-03-25
 
 ### Added
