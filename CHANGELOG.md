@@ -22,7 +22,7 @@
 
 ### Fixed
 
--   `Fix` Fixed tests, updated deprecated syntax so tests would run correctly:
+-   `Fix` Fixed tests; updated deprecated syntax so tests would run correctly:
 
 1. test_pandas.test_wide_data
 2. test_sasdatatest_sasdata_describe_pandas_chars
