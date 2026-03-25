@@ -9,7 +9,7 @@
 
 ### Changed
 
--   `Enhancement` Added Don/Phil as authors and updated contact email.
+-   `Enhancement` Added Don/Phil as authors and updated contact email
 
 ### Fixed
 
