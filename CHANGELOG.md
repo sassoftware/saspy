@@ -17,7 +17,7 @@
 
 ### Changed
 
--   `Enhance` Applied autopep8 to fix indentation issues (E101, E11, W191). Some files had inconsistent indentation (width of 3 spaces), which has been standardized.
+-   `Enhancement` Applied autopep8 to fix indentation issues (E101, E11, W191). Some files had inconsistent indentation (width of 3 spaces), which has been standardized.
 
 ### Fixed
 
