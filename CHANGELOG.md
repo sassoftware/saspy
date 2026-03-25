@@ -1,5 +1,37 @@
 # Changelog
 
+## [5.105.0] - 2026-03-25
+
+### Added
+
+-   `Enhancement` Added Apache Arrow support:
+
+1. Conversion between SAS datasets and Apache Arrow tables
+2. Arrow-based Parquet conversion with optional parameter
+3. Support for converting Parquet files to SAS datasets via Arrow
+
+- `Enhancement` Enhanced metadata retrieval:
+
+1. Add labels parameter to list_tables() to optionally retrieve dataset labels
+2. Add schema() method to SASdata to retrieve comprehensive schema information including extended attributes
+
+### Changed
+
+-   `Enhancement` Applied autopep8 to fix indentation issues (E101, E11, W191). Some files had inconsistent indentation (width of 3 spaces), which has been standardized.
+
+### Fixed
+
+-   `Fix` Fixed tests, updated deprecated syntax so tests would run correctly:
+
+1. test_pandas.test_wide_data
+2. test_sasdatatest_sasdata_describe_pandas_chars
+
+### Removed
+
+-   `None` Nothing removed
+
+
+
 ## [5.104.1] - 2026-02-09
 
 ### Added
