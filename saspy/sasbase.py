@@ -1788,6 +1788,248 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return sd
 
+    def duckdb_to_sas(self, con: 'duckdb.DuckDBPyConnection',
+                      query: str = '',
+                      table: str = '_ddb',
+                      libref: str = '',
+                      results: str = '',
+                      outfmts: dict = {},
+                      labels: dict = {},
+                      outdsopts: dict = {},
+                      char_lengths: dict = {},
+                      datetimes: dict = {},
+                      tempdir: str = '',
+                      tempkeep: bool = False,
+                      **kwargs) -> 'SASdata':
+        """
+        Export a DuckDB query result to a SAS dataset, bypassing pandas.
+
+        Uses DuckDB's native COPY to write a CSV, then submits a generated
+        SAS DATA step to read it. Much faster than df2sd for large datasets
+        because it avoids Python row-by-row serialization.
+
+        :param con: DuckDB connection (duckdb.DuckDBPyConnection)
+        :param query: SQL query or table/view name to export
+        :param table: name of the SAS Data Set to create
+        :param libref: libref for the SAS Data Set. Defaults to WORK, or USER if assigned
+        :param results: format of results, SASsession.results is default, PANDAS, HTML or TEXT
+        :param outfmts: dict with column names and SAS formats to assign
+        :param labels: dict with column names and labels to assign
+        :param outdsopts: dict with output data set options (compress, encoding, etc.)
+        :param char_lengths: dict with column names and character byte lengths. \
+                             Columns not listed are computed via a single DuckDB aggregate query.
+        :param datetimes: dict with column names as keys and 'date' or 'time' as values, \
+                          to override type inference from DuckDB schema
+        :param tempdir: directory for the temporary CSV file. Must be accessible from SAS. \
+                        Defaults to a system temp directory.
+        :param tempkeep: if True, keep the CSV file after import; if False (default), delete it
+
+        :return: SASdata object
+        """
+        lastlog = len(self._io._log)
+
+        try:
+            import duckdb as _duckdb
+        except ImportError:
+            logger.error("duckdb package is not installed. Install it with: pip install duckdb")
+            return None
+
+        if not query:
+            logger.error("query parameter is required")
+            return None
+
+        if libref != '':
+            if libref.upper() not in self.assigned_librefs():
+                logger.error("The libref specified is not assigned in this SAS Session.")
+                return None
+
+        if results == '':
+            results = self.results
+        if self.nosub:
+            print("too complicated to show the code, read the source :), sorry.")
+            return None
+
+        # Normalize query: bare table/view name → SELECT *
+        query_sql = query if ' ' in query.strip() else f"select * from {query}"
+
+        # --- Step 1: Get column schema from DuckDB ---
+        try:
+            col_info = con.execute(f"describe {query_sql} limit 0").df()
+        except Exception as e:
+            logger.error(f"Failed to describe query: {e}")
+            return None
+        col_info.columns = col_info.columns.str.lower()
+
+        col_names = list(col_info['column_name'])
+        col_types = dict(zip(col_info['column_name'], col_info['column_type']))
+
+        # --- Step 2: Classify columns and compute char lengths ---
+        fmt_upper  = {k.upper(): v for k, v in outfmts.items()}
+        lab_upper  = {k.upper(): v for k, v in labels.items()}
+        chr_upper  = {k.upper(): v for k, v in char_lengths.items()}
+        dts_upper  = {k.upper(): v for k, v in datetimes.items()}
+
+        # Identify VARCHAR columns needing length computation
+        unmapped_chars = []
+        for col in col_names:
+            dtype = col_types[col]
+            if dtype in ('VARCHAR', 'CHAR') and col.upper() not in chr_upper:
+                unmapped_chars.append(col)
+
+        # Single aggregate query for all unmapped char column lengths
+        computed_lengths = {}
+        if unmapped_chars:
+            agg_parts = [f"max(length(\"{c}\"))" for c in unmapped_chars]
+            agg_sql = f"select {', '.join(agg_parts)} from ({query_sql})"
+            try:
+                row = con.execute(agg_sql).fetchone()
+                for i, col in enumerate(unmapped_chars):
+                    val = row[i]
+                    computed_lengths[col.upper()] = max(val, 1) if val is not None else 200
+            except Exception:
+                for col in unmapped_chars:
+                    computed_lengths[col.upper()] = 200
+
+        # Merge: explicit char_lengths > computed > fallback 200
+        all_char_lengths = {}
+        for col in col_names:
+            if col_types[col] in ('VARCHAR', 'CHAR'):
+                all_char_lengths[col.upper()] = chr_upper.get(
+                    col.upper(), computed_lengths.get(col.upper(), 200)
+                )
+
+        # --- Step 3: Write CSV via DuckDB COPY ---
+        # Cast BOOLEAN columns to INTEGER so DuckDB writes 1/0 instead of true/false
+        has_bool = any(col_types[c] == 'BOOLEAN' for c in col_names)
+        if has_bool:
+            select_parts = []
+            for col in col_names:
+                if col_types[col] == 'BOOLEAN':
+                    select_parts.append(f"\"{col}\"::integer as \"{col}\"")
+                else:
+                    select_parts.append(f"\"{col}\"")
+            copy_sql = f"select {', '.join(select_parts)} from ({query_sql})"
+        else:
+            copy_sql = query_sql
+
+        if tempdir:
+            csv_dir = tempdir
+            os.makedirs(csv_dir, exist_ok=True)
+        else:
+            csv_dir = tempfile.mkdtemp(prefix='saspy_ddb_')
+
+        csv_path = os.path.join(csv_dir, f'{table}.csv')
+
+        try:
+            con.execute(
+                f"copy ({copy_sql}) to '{csv_path}' "
+                f"(format csv, header true, nullstr '')"
+            )
+        except Exception as e:
+            logger.error(f"DuckDB COPY failed: {e}")
+            return None
+
+        # --- Step 4: Generate SAS DATA step ---
+        length_parts = []
+        format_parts = []
+        label_lines  = []
+        input_parts  = []
+
+        for col in col_names:
+            dtype    = col_types[col]
+            colname  = col.replace("'", "''")
+            col_up   = col.upper()
+
+            # Labels
+            if col_up in lab_upper:
+                label_lines.append(
+                    f"    label '{colname}'n = \"{lab_upper[col_up]}\";"
+                )
+
+            # Formats from metadata
+            if col_up in fmt_upper:
+                format_parts.append(f"'{colname}'n {fmt_upper[col_up]}")
+
+            # Type classification
+            if dtype in ('VARCHAR', 'CHAR'):
+                clen = all_char_lengths.get(col_up, 200)
+                length_parts.append(f"'{colname}'n ${clen}")
+                input_parts.append(f"'{colname}'n : $")
+
+            elif dtype == 'DATE' or (
+                dtype == 'TIMESTAMP' and col_up in dts_upper
+                and dts_upper[col_up].lower() == 'date'
+            ):
+                length_parts.append(f"'{colname}'n 8")
+                input_parts.append(f"'{colname}'n :yymmdd10.")
+                if col_up not in fmt_upper:
+                    format_parts.append(f"'{colname}'n E8601DA.")
+
+            elif dtype == 'TIMESTAMP':
+                length_parts.append(f"'{colname}'n 8")
+                input_parts.append(f"'{colname}'n :ymddttm19.")
+                if col_up not in fmt_upper:
+                    format_parts.append(f"'{colname}'n E8601DT26.6")
+
+            elif dtype == 'BOOLEAN':
+                length_parts.append(f"'{colname}'n 8")
+                input_parts.append(f"'{colname}'n")
+                if col_up not in fmt_upper:
+                    format_parts.append(f"'{colname}'n 1.")
+
+            else:
+                # Numeric: INTEGER, BIGINT, DOUBLE, FLOAT, DECIMAL, etc.
+                length_parts.append(f"'{colname}'n 8")
+                input_parts.append(f"'{colname}'n")
+
+        # Build the DATA step
+        code = "data "
+        if libref:
+            code += libref + "."
+        code += f"'{table}'n"
+
+        if outdsopts:
+            opts = ' '.join(f'{k}={v}' for k, v in outdsopts.items())
+            code += f"({opts})"
+        code += ";\n"
+
+        if length_parts:
+            code += f"    length {' '.join(length_parts)};\n"
+        if format_parts:
+            code += f"    format {' '.join(format_parts)};\n"
+        if label_lines:
+            code += "\n".join(label_lines) + "\n"
+
+        code += f"    infile '{csv_path}' dlm=',' dsd firstobs=2 missover lrecl=1048576;\n"
+        code += f"    input {' '.join(input_parts)};\n"
+        code += "run;\n"
+
+        # --- Step 5: Submit to SAS ---
+        ll = self.submit(code, results='text')
+
+        # Check for errors in log
+        log_text = ll.get('LOG', '')
+        if 'ERROR' in log_text:
+            logger.error(f"SAS errors during duckdb_to_sas import:\n{log_text}")
+
+        # --- Step 6: Clean up CSV ---
+        if not tempkeep:
+            try:
+                os.remove(csv_path)
+                if not tempdir and os.path.isdir(csv_dir) and not os.listdir(csv_dir):
+                    os.rmdir(csv_dir)
+            except OSError:
+                pass
+
+        # --- Step 7: Return SASdata object ---
+        if self.exist(table, libref):
+            sd = SASdata(self, libref, table, results)
+        else:
+            sd = None
+
+        self._lastlog = self._io._log[lastlog:]
+        return sd
+
     def sd2df(self, table: str, libref: str = '', dsopts: dict = None,
               method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
