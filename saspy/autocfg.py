@@ -7,13 +7,13 @@ from saspy import sascfg as ac
 def main(cfgfile: str = None, SASHome: str = None, java: str = None):
 
     if os.name != 'nt':
-       print('This function will only run on Windows and create a saspy config file for an IOM Local connection')
-       return
+        print('This function will only run on Windows and create a saspy config file for an IOM Local connection')
+        return
 
     saspydir = ac.__file__.replace('sascfg.py', '')
 
     if not cfgfile:
-       cfgfile = saspydir+'sascfg_personal.py'
+        cfgfile = saspydir+'sascfg_personal.py'
 
     # if the file already exists, don't replace it.
     if os.path.exists(cfgfile):
@@ -22,10 +22,10 @@ def main(cfgfile: str = None, SASHome: str = None, java: str = None):
 
     # handles users who could have different versions
     if not SASHome:
-       SASHome = "C:\\Program Files\\SASHome"
+        SASHome = "C:\\Program Files\\SASHome"
 
     if not java:
-       java = 'java'
+        java = 'java'
 
     depDir  = SASHome+"\\SASDeploymentManager\\"
 
@@ -38,14 +38,14 @@ def main(cfgfile: str = None, SASHome: str = None, java: str = None):
                 "(or q to exit): "
             )
             if SASHome == 'q':
-               return
+                return
             try:
-               print("Trying "+SASHome)
-               depDir  = SASHome+"\\SASDeploymentManager\\"
-               dirList = os.listdir(depDir)
-               break
+                print("Trying "+SASHome)
+                depDir  = SASHome+"\\SASDeploymentManager\\"
+                dirList = os.listdir(depDir)
+                break
             except:
-               continue
+                continue
 
     # prompts the user to enter the version of SAS they want to use if more
     # than one are detected
@@ -102,6 +102,6 @@ def main(cfgfile: str = None, SASHome: str = None, java: str = None):
 
 if __name__ == "__main__":
     for i in range(len(sys.argv)):
-       if sys.argv[i] == 'None':
-          sys.argv[i] =   None
+        if sys.argv[i] == 'None':
+            sys.argv[i] =   None
     main(*sys.argv[1:])
