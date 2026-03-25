@@ -209,15 +209,11 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         y = 'y\ny'*12767
         z = 'z z'*12767
         df = pd.DataFrame([{'x' : x[:32767], 'y' : y[:32767], 'z' : z[:32767], 'z2' : 'z'*32767}])
-        df = df.append(df, ignore_index=True)
-        df = df.append(df, ignore_index=True)
-        df = df.append(df, ignore_index=True)
-        df = df.append(df, ignore_index=True)
-        df = df.append(df, ignore_index=True)
-        df['x' ][0] = np.NaN
-        df['y' ][1] = np.NaN
-        df['z' ][2] = np.NaN
-        df['z2'][3] = np.NaN
+        df = pd.concat([df, df, df, df, df, df], ignore_index=True)
+        df['x' ][0] = np.nan
+        df['y' ][1] = np.nan
+        df['z' ][2] = np.nan
+        df['z2'][3] = np.nan
 
         sde = self.sas.df2sd(df, 'wide', results='text')
         x   = sde.to_df()
