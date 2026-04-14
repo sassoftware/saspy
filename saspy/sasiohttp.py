@@ -111,6 +111,8 @@ class SASconfigHTTP:
         self.pkce      = cfg.get('pkce', None)
         self.delay     = cfg.get('GETstatusDelay'  , 30)
         self.excpcnt   = cfg.get('GETstatusFailcnt', 5)
+        self.resession = cfg.get('reuse_session', False)
+        self.sess_started = False
 
         try:
             self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -256,6 +258,13 @@ class SASconfigHTTP:
                 logger.warning("Parameter 'inactive' passed to SAS_session was ignored due to configuration restriction.")
             else:
                 self.inactive = inito
+
+        inrs = kwargs.get('reuse_session', None)
+        if inrs is not None:
+            if lock and self.resession:
+                logger.warning("Parameter 'reuse_session' passed to SAS_session was ignored due to configuration restriction.")
+            else:
+                self.resession = inrs
 
         inak = kwargs.get('authkey', '')
         if len(inak) > 0:
@@ -764,7 +773,7 @@ class SASsessionHTTP():
         self._log       = "\nNo SAS session established, something must have failed trying to connect\n"
         self.sascfg     = SASconfigHTTP(self, **kwargs)
 
-        if self.sascfg._token:
+        if self._session == None and self.sascfg._token:
             self._startsas()
         else:
             None
@@ -774,51 +783,115 @@ class SASsessionHTTP():
             self._endsas()
         self._sb.SASpid = None
         return
+     
+    def _get_session(self, sessionId = None):
+         conn = self.sascfg.HTTPConn
+         headers = {}
+         uri = None
+        
+         if self.sascfg._token:
+            headers["Authorization"] = "Bearer " + self.sascfg._token
+            
+         if sessionId == None:
+           # get the session id from the server
+           
+           for ld in self.sascfg.ctx.get('links', []):
+               if ld.get('method') == 'GET' and ld.get('rel') == 'sessions':
+                   uri = ld.get('uri')
+                   break
 
-    def _startsas(self):
-        if self.pid:
-            return self.pid
+           if not uri:
+               return None
 
-        if len(self.sascfg.options):
-            options = '[';
-            for opt in self.sascfg.options:
-                options += '"'+opt+'", '
-            options = (options.rpartition(','))[0]+']'
-        else:
-            options = '[]'
-
-        # POST Session
-        uri = None
-        for ld in self.sascfg.ctx.get('links'):
-            if ld.get('method') == 'POST' and ld.get('rel') == 'createSession':
-                uri = ld.get('uri')
-                break
-
-        if not uri:
-            raise SASHTTPconnectionError(msg=
-            "POST uri not found in context info. You may not have permission to use this context.\n{}".format(self.sascfg.ctx))
-
-        conn = self.sascfg.HTTPConn; conn.connect()
-        d1  = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":'+options+'}'
-        d1 += ',"attributes": {"sessionInactiveTimeout": '+str(int(float(self.sascfg.inactive)*60))+'}}'
-        headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/vnd.sas.compute.session.request+json",
-                 "Authorization":"Bearer "+self.sascfg._token}
-
-        try:
-            conn.request('POST', uri, body=d1, headers=headers)
+           conn.connect()
+           headers = {"Accept": "application/vnd.sas.collection+json"}
+           
+         else:
+           uri = f'/compute/sessions/{sessionId}'
+           headers = {"Accept": "application/vnd.sas.compute.session+json"}
+         
+         #get the session or sessions
+         try:
+            conn.request('GET', uri, headers=headers)
             req = conn.getresponse()
             status = req.status
             resp = req.read()
             conn.close()
-        except:
+         except:
             conn.close()
-            raise SASHTTPconnectionError(msg="Could not acquire a SAS Session for context: "+self.sascfg.ctxname+". Exception info:\n"+str(sys.exc_info()))
+            return None
 
-        if status > 299:
-            msg="Could not acquire a SAS Session for context: "+self.sascfg.ctxname+". Exception info:\nStatus="+str(status)+"\nResponse="+str(resp)
-            raise SASHTTPconnectionError(msg)
+         if status > 299:
+            return None
 
-        self._session = json.loads(resp.decode(self.sascfg.encoding))
+         js = json.loads(resp.decode(self.sascfg.encoding))
+         
+         if sessionId == None:
+            sessions = js.get('items', [])
+            if not sessions:
+                return None
+
+            # The above session is a description. We need to return the full session so get the session by id
+            return self._get_session(sessions[0]['id'])
+         else:
+            return js
+
+
+    def _startsas(self):
+        if self.pid:
+            return self.pid
+        
+        conn = self.sascfg.HTTPConn; conn.connect()
+         
+        if self.sascfg.resession and self.sascfg.serverid:
+            self._session = self._get_session()
+            if self._session:
+                self.pid = self._session.get('id')
+                logger.info("Reusing existing session with id "+self.pid)
+            else:
+                logger.warning("No existing session found to reuse, starting a new session.") 
+        
+        if self._session is None:
+            if len(self.sascfg.options):
+                  options = '[';
+                  for opt in self.sascfg.options:
+                     options += '"'+opt+'", '
+                  options = (options.rpartition(','))[0]+']'
+            else:
+                  options = '[]'
+
+            # POST Session
+            uri = None
+            for ld in self.sascfg.ctx.get('links'):
+                  if ld.get('method') == 'POST' and ld.get('rel') == 'createSession':
+                     uri = ld.get('uri')
+                     break
+
+            if not uri:
+                  raise SASHTTPconnectionError(msg=
+                  "POST uri not found in context info. You may not have permission to use this context.\n{}".format(self.sascfg.ctx))
+
+            d1  = '{"name":"'+self.sascfg.ctxname+'", "description":"saspy session", "version":1, "environment":{"options":'+options+'}'
+            d1 += ',"attributes": {"sessionInactiveTimeout": '+str(int(float(self.sascfg.inactive)*60))+'}}'
+            headers={"Accept":"application/vnd.sas.compute.session+json","Content-Type":"application/vnd.sas.compute.session.request+json",
+                     "Authorization":"Bearer "+self.sascfg._token}
+
+            try:
+                  conn.request('POST', uri, body=d1, headers=headers)
+                  req = conn.getresponse()
+                  status = req.status
+                  resp = req.read()
+                  conn.close()
+            except:
+                  conn.close()
+                  raise SASHTTPconnectionError(msg="Could not acquire a SAS Session for context: "+self.sascfg.ctxname+". Exception info:\n"+str(sys.exc_info()))
+
+            if status > 299:
+                  msg="Could not acquire a SAS Session for context: "+self.sascfg.ctxname+". Exception info:\nStatus="+str(status)+"\nResponse="+str(resp)
+                  raise SASHTTPconnectionError(msg)
+
+            self._session = json.loads(resp.decode(self.sascfg.encoding))
+            self.sess_started = True
 
         if self._session == None:
             logger.error("Could not acquire a SAS Session for context: "+self.sascfg.ctxname)
@@ -889,7 +962,8 @@ class SASsessionHTTP():
 
     def _endsas(self):
         rc = 0
-        if self._session:
+        # only delete the session if we started it
+        if self._session and self.sess_started:
             # DELETE Session
             conn = self.sascfg.HTTPConn; conn.connect()
             headers={"Accept":"application/json","Authorization":"Bearer "+self.sascfg._token}
