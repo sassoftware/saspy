@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.106.0] - 2026-04-20
+
+### Added
+
+-   `Enhancement` Added "reuse_session" option to HTTP access method.
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
 
 ## [5.105.1] - 2026-03-25
 
