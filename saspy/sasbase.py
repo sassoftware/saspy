@@ -926,6 +926,10 @@ class SASsession():
 
         :param GETstatusDelay: Number of seconds to sleep between HTTP calls to poll and see if the submitted code has finished
         :param GETstatusFailcnt: Number of disconnect failures to ignore before failing, when polling to see if the submitted code has finished
+        :param submit_timeout: Optional wall-clock deadline in seconds (float). If the submitted code does not finish within this
+            many seconds, the job is cancelled via the Compute REST API and :class:`~saspy.sasexceptions.SASsubmitTimeout` is raised.
+            Default is ``None`` (no deadline — existing behaviour). Note: this is distinct from the ``timeout`` configuration key,
+            which sets the socket-level HTTP connection timeout.
 
         **IOM**
 

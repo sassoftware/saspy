@@ -34,11 +34,14 @@ import tempfile as tf
 from time import sleep
 from threading import Thread
 
+import time
+
 from saspy.sasexceptions import (SASHTTPauthenticateError,
                                  SASHTTPconnectionError,
                                  SASHTTPsubmissionError,
                                  SASDFNamesToLongError,
-                                 SASIOConnectionTerminated
+                                 SASIOConnectionTerminated,
+                                 SASsubmitTimeout
                                 )
 
 import logging
@@ -963,7 +966,7 @@ class SASsessionHTTP():
     def _endsas(self):
         rc = 0
         # only delete the session if we started it
-        if self._session and self.sess_started:
+        if self._session and self.sascfg.sess_started:
             # DELETE Session
             conn = self.sascfg.HTTPConn; conn.connect()
             headers={"Accept":"application/json","Authorization":"Bearer "+self.sascfg._token}
@@ -1261,6 +1264,7 @@ class SASsessionHTTP():
         printto = kwargs.pop('undo', False)
         cancel  = kwargs.pop('cancel', False)
         lines   = kwargs.pop('loglines', False)
+        submit_timeout = kwargs.pop('submit_timeout', None)   # wall-clock deadline
 
         odsopen  = json.dumps("ods listing close;ods "+self.sascfg.output+" (id=saspy_internal) options(bitmap_mode='inline') device=svg style="+self._sb.HTML_Style+"; ods graphics on / outputfmt=png;\n")
         odsclose = json.dumps("ods "+self.sascfg.output+" (id=saspy_internal) close;ods listing;\n")
@@ -1339,6 +1343,11 @@ class SASsessionHTTP():
 
         done    = False
 
+        # Wall-clock deadline support
+        _deadline = None
+        if submit_timeout is not None:
+            _deadline = time.monotonic() + float(submit_timeout)
+
         # GET Etag for subsequent Status calls
         headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token}
         try:
@@ -1358,6 +1367,27 @@ class SASsessionHTTP():
             try:
                 headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token, "If-None-Match": Etag}
                 while True:
+                    # Check wall-clock deadline before each poll
+                    if _deadline is not None and time.monotonic() >= _deadline:
+                        conn.close()
+                        if can:
+                            try:
+                                canheaders = {
+                                    "Accept": "text/plain",
+                                    "Authorization": "Bearer " + self.sascfg._token,
+                                    "If-Match": Etag,
+                                }
+                                conn.connect()
+                                conn.request('PUT', can, headers=canheaders)
+                                req  = conn.getresponse()
+                                req.read()
+                            except Exception:
+                                pass
+                            finally:
+                                conn.close()
+                        raise SASsubmitTimeout(
+                            f"SAS job did not complete within {submit_timeout} s"
+                        )
                     # GET Status for JOB
                     conn.request('GET', uri+"?wait="+str(delay), headers=headers)
                     req  = conn.getresponse()
