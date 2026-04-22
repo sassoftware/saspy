@@ -1087,6 +1087,27 @@ timeout -
     (Optional) HTTPConnection timeout value, in seconds. Defaults to None. This is passed to HTTPConnection;
     it's not part of the Viya API but rather the http.client API.
 
+submit_timeout -
+    (Optional) A per-call wall-clock deadline, in seconds (float), that can be passed as a keyword argument
+    to :meth:`~saspy.SASsession.submit`. If the submitted SAS job does not complete within this many seconds,
+    the job is cancelled via the Compute REST API and :exc:`~saspy.sasexceptions.SASsubmitTimeout` is raised.
+    Default is ``None`` (no deadline).
+
+    This is intentionally named differently from the ``timeout`` configuration key above: ``timeout`` sets the
+    low-level socket timeout for every HTTP request, whereas ``submit_timeout`` is a job-level wall-clock
+    deadline applied only to a specific ``submit()`` call. Using the name ``timeout`` for both would create
+    an ambiguous collision.
+
+    .. code-block:: python
+
+        from saspy.sasexceptions import SASsubmitTimeout
+
+        try:
+            results = sas.submit(long_running_code, submit_timeout=30)
+        except SASsubmitTimeout:
+            # The job was hung; it has been cancelled on the server.
+            ...
+
 inactive -
     (Optional) An integer specifying the Inactive Time Out in minutes for the Compute Session. This is a SAS
     Compute Service option and controls when the Compute Service self terminates based upon inactivity. The regular

@@ -113,4 +113,8 @@ class SASDFNamesToLongError(Exception):
         return 'Column name(s) in DataFrame are too long for SAS. Rename to 32 bytes (in SAS Session encoding) or less.\n'
 
 
+class SASsubmitTimeout(Exception):
+    """Raised when a submitted SAS job does not complete within submit_timeout seconds."""
+
+
 
