@@ -6,12 +6,12 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Configuration &mdash; saspy 5.105.1 documentation</title>
+  <title>Configuration &mdash; saspy 5.107.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
 
   
-      <script src="_static/documentation_options.js?v=50e22ff6"></script>
+      <script src="_static/documentation_options.js?v=17303f5d"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
@@ -1332,6 +1332,24 @@ prompt you for which one to use.</p>
 </dd>
 <dt>timeout -</dt><dd><p>(Optional) HTTPConnection timeout value, in seconds. Defaults to None. This is passed to HTTPConnection;
 it’s not part of the Viya API but rather the http.client API.</p>
+</dd>
+<dt>submit_timeout -</dt><dd><p>(Optional) A per-call wall-clock deadline, in seconds (float), that can be passed as a keyword argument
+to <code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code>. If the submitted SAS job does not complete within this many seconds,
+the job is cancelled via the Compute REST API and <code class="xref py py-exc docutils literal notranslate"><span class="pre">SASsubmitTimeout</span></code> is raised.
+Default is <code class="docutils literal notranslate"><span class="pre">None</span></code> (no deadline).</p>
+<p>This is intentionally named differently from the <code class="docutils literal notranslate"><span class="pre">timeout</span></code> configuration key above: <code class="docutils literal notranslate"><span class="pre">timeout</span></code> sets the
+low-level socket timeout for every HTTP request, whereas <code class="docutils literal notranslate"><span class="pre">submit_timeout</span></code> is a job-level wall-clock
+deadline applied only to a specific <code class="docutils literal notranslate"><span class="pre">submit()</span></code> call. Using the name <code class="docutils literal notranslate"><span class="pre">timeout</span></code> for both would create
+an ambiguous collision.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">saspy.sasexceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">SASsubmitTimeout</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">sas</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">long_running_code</span><span class="p">,</span> <span class="n">submit_timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">SASsubmitTimeout</span><span class="p">:</span>
+    <span class="c1"># The job was hung; it has been cancelled on the server.</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
 </dd>
 <dt>inactive -</dt><dd><p>(Optional) An integer specifying the Inactive Time Out in minutes for the Compute Session. This is a SAS
 Compute Service option and controls when the Compute Service self terminates based upon inactivity. The regular
