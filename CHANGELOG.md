@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.107.0] - 2026-04-22
+
+### Added
+
+-   `Enhancement` Added "submit_timeout" option to HTTP access method.
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.106.0] - 2026-04-20
 
 ### Added
