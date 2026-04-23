@@ -1363,6 +1363,14 @@ class SASsessionHTTP():
         if resp not in [b'running', b'pending']:
             done = True
 
+        # When a submit_timeout deadline is active, cap each individual poll
+        # at (delay + 10) seconds so that a CPU-starved server cannot block
+        # conn.getresponse() indefinitely and prevent the deadline check from
+        # ever firing.  The original timeout is restored when submit() returns.
+        _poll_saved_timeout = conn.timeout
+        if submit_timeout is not None and conn.timeout is None:
+            conn.timeout = delay + 10
+
         while not done:
             try:
                 headers = {"Accept":"text/plain", "Authorization":"Bearer "+self.sascfg._token, "If-None-Match": Etag}
@@ -1372,6 +1380,12 @@ class SASsessionHTTP():
                         conn.close()
                         if can:
                             try:
+                                # Use a short hard timeout so a CPU-starved or
+                                # dead server cannot block the cancel request
+                                # indefinitely and prevent SASsubmitTimeout
+                                # from being raised.
+                                _saved_timeout = conn.timeout
+                                conn.timeout = 5
                                 canheaders = {
                                     "Accept": "text/plain",
                                     "Authorization": "Bearer " + self.sascfg._token,
@@ -1385,13 +1399,23 @@ class SASsessionHTTP():
                                 pass
                             finally:
                                 conn.close()
+                                conn.timeout = _saved_timeout
+                        conn.timeout = _poll_saved_timeout
                         raise SASsubmitTimeout(
                             f"SAS job did not complete within {submit_timeout} s"
                         )
                     # GET Status for JOB
-                    conn.request('GET', uri+"?wait="+str(delay), headers=headers)
-                    req  = conn.getresponse()
-                    resp = req.read()
+                    try:
+                        conn.request('GET', uri+"?wait="+str(delay), headers=headers)
+                        req  = conn.getresponse()
+                        resp = req.read()
+                    except TimeoutError:
+                        # The server did not respond within (delay + 10) s —
+                        # it is likely CPU-starved.  Close and loop back so
+                        # the deadline check at the top can fire.
+                        conn.close()
+                        conn.connect()
+                        continue
                     if resp not in [b'running', b'pending', b'']:
                         done = True
                         conn.close()
