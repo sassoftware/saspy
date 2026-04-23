@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.107.1] - 2026-04-23
+
+### Added
+
+-   `None` Nothing Added
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Fixed `submit_timeout` not raising `SASsubmitTimeout` when the SAS job doesn't respond to the cancel request.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.107.0] - 2026-04-22
 
 ### Added
