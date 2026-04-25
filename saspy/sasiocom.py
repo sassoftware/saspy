@@ -34,11 +34,6 @@ except ImportError:
     pass
 
 try:
-    import narwhals as nw
-except ImportError:
-    pass
-
-try:
     import pandas as pd
 except ImportError:
     pass
@@ -637,18 +632,6 @@ class SASSessionCOM(object):
         encode_errors - not implemented yet in this access method
         char_lengths - not implemented yet in this access method
         """
-        try:
-            ndf = nw.from_native(df)
-            if hasattr(ndf, 'collect'):
-                ndf = ndf.collect()
-            df = ndf.to_pandas()
-        except:
-            try:
-                import polars as pl
-                if isinstance(df, pl.DataFrame):
-                    df = df.to_pandas()
-            except ImportError:
-                pass
         DATETIME_NAME = 'DATETIME26.6'
         DATETIME_FMT = '%Y-%m-%dT%H:%M:%S.%f'
 
