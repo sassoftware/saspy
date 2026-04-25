@@ -1247,9 +1247,36 @@ class SASdata:
         """
         return self.to_df(**kwargs)
 
+    def to_polars(self, method: str = 'MEMORY', **kwargs) -> 'polars.DataFrame':
+        """
+        Export this SAS Data Set to a Polars Data Frame
+
+        :param method: defaults to MEMORY;
+           - MEMORY the original method. Streams the data over and builds the dataframe on the fly in memory
+           - CSV    uses an intermediary Proc Export csv file and polars read_csv() to import it; faster for large data
+           - DISK   uses the original (MEMORY) method, but persists to disk and uses polars read to import.
+
+        :param polars_mode: 'EAGER' (default) or 'LAZY'. If 'LAZY', returns a Polars LazyFrame.
+        :param kwargs: a dictionary. These vary per access method.
+
+        :return: Polars DataFrame or LazyFrame
+        """
+        lastlog = len(self.sas._io._log)
+        ll = self._is_valid()
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+        if ll:
+            print(ll['LOG'])
+            return None
+        else:
+            if self.sas.sascfg.polars:
+               raise type(self.sas.sascfg.polars)(self.sas.sascfg.polars.msg)
+            df = self.sas.sasdata2polars(self.table, self.libref, self.dsopts, method, **kwargs)
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return df
+
     def to_df(self, method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
-        Export this SAS Data Set to a Pandas Data Frame
+        Export this SAS Data Set to a Pandas Data Frame (or Polars if session results is set to Polars)
 
         :param method: defaults to MEMORY; As of V3.7.0 all 3 of these now stream directly into read_csv() with no disk I/O\
                        and have much improved performance. MEM, the default, is now as fast as the others.
@@ -1282,7 +1309,7 @@ class SASdata:
                        They are either access method specific parms or specific pandas parms.
                        See the specific sasdata2dataframe* method in the access method for valid possibilities.
 
-        :return: Pandas data frame
+        :return: Pandas data frame (or Polars if session results is set to Polars)
         """
         lastlog = len(self.sas._io._log)
         ll = self._is_valid()
@@ -1291,6 +1318,8 @@ class SASdata:
             print(ll['LOG'])
             return None
         else:
+            if self.results.upper() == 'POLARS':
+               return self.to_polars(method, **kwargs)
             if self.sas.sascfg.pandas:
                raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
             df = self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)

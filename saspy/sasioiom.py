@@ -1789,6 +1789,41 @@ Will use HTML5 for this SASsession.""")
          logger.error("Rendering the error from the Java layer:\n\n"+ll['LOG'].partition("END We failed in Submit\n")[0])
       return None
 
+   def sasdata2polars(self, table: str, libref: str ='', dsopts: dict = None,
+                      rowsep: str = '\x01', colsep: str = '\x02',
+                      rowrep: str = ' ',    colrep: str = ' ',
+                      **kwargs) -> '<Polars Data Frame object>':
+      """
+      This method exports the SAS Data Set to a Polars Data Frame, returning the Data Frame object.
+      """
+      # Fallback to pandas conversion for IOM if native not easily implemented
+      # But the user asked for native, so let's try to follow the same logic as STDIO if possible
+      # For now, leveraging the existing to_pandas approach as a base
+      pdf = self.sasdata2dataframe(table, libref, dsopts, rowsep, colsep, rowrep, colrep, **kwargs)
+      import polars as pl
+      df = pl.from_pandas(pdf)
+      if kwargs.get('polars_mode', 'EAGER').upper() == 'LAZY':
+         df = df.lazy()
+      return df
+
+   def polars2sasdata(self, df: '<Polars Data Frame object>', table: str ='a',
+                      libref: str ="", keep_outer_quotes: bool=False,
+                                       embedded_newlines: bool=True,
+                      LF: str = '\x01', CR: str = '\x02',
+                      colsep: str = '\x03', colrep: str = ' ',
+                      datetimes: dict={}, outfmts: dict={}, labels: dict={},
+                      outdsopts: dict={}, encode_errors = None, char_lengths = None,
+                      **kwargs):
+      """
+      This method imports a Polars Data Frame to a SAS Data Set.
+      """
+      import polars as pl
+      if hasattr(df, 'collect'):
+         df = df.collect()
+      return self.dataframe2sasdata(df.to_pandas(), table, libref, keep_outer_quotes,
+                                    embedded_newlines, LF, CR, colsep, colrep,
+                                    datetimes, outfmts, labels, outdsopts, encode_errors, char_lengths, **kwargs)
+
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
                          rowsep: str = '\x01', colsep: str = '\x02',
                          rowrep: str = ' ',    colrep: str = ' ',

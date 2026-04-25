@@ -1781,6 +1781,205 @@ Will use HTML5 for this SASsession.""")
    def _getbytelenR(self, x):
       return len(x.encode(self.sascfg.encoding, errors='replace'))
 
+   def polars2sasdata(self, df: '<Polars Data Frame object>', table: str ='a',
+                      libref: str ="", keep_outer_quotes: bool=False,
+                                       embedded_newlines: bool=True,
+                      LF: str = '\x01', CR: str = '\x02',
+                      colsep: str = '\x03', colrep: str = ' ',
+                      datetimes: dict={}, outfmts: dict={}, labels: dict={},
+                      outdsopts: dict={}, encode_errors = None, char_lengths = None,
+                      **kwargs):
+      """
+      This method imports a Polars Data Frame to a SAS Data Set, returning the SASdata object for the new Data Set.
+      df      - Polars Data Frame to import to a SAS Data Set
+      table   - the name of the SAS Data Set to create
+      libref  - the libref for the SAS Data Set being created. Defaults to WORK, or USER if assigned
+      """
+      import polars as pl
+      import datetime
+
+      # Handle LazyFrame
+      if hasattr(df, 'collect'):
+         streaming = kwargs.get('streaming', False)
+         df = df.collect(streaming=streaming)
+
+      input   = ""
+      xlate   = ""
+      card    = ""
+      format  = ""
+      length  = ""
+      label   = ""
+      dts     = []
+      ncols   = len(df.columns)
+      lf      = "'"+'%02x' % ord(LF.encode(self.sascfg.encoding))+"'x"
+      cr      = "'"+'%02x' % ord(CR.encode(self.sascfg.encoding))+"'x "
+      delim   = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
+
+      dts_upper = {k.upper():v for k,v in datetimes.items()}
+      dts_keys  = dts_upper.keys()
+      fmt_upper = {k.upper():v for k,v in outfmts.items()}
+      fmt_keys  = fmt_upper.keys()
+      lab_upper = {k.upper():v for k,v in labels.items()}
+      lab_keys  = lab_upper.keys()
+
+      if encode_errors is None:
+         encode_errors = 'fail'
+
+      if char_lengths is None:
+         # Need to calculate char lengths for Polars
+         char_lengths = {}
+         for col in df.columns:
+            if df[col].dtype == pl.String:
+               max_len = df[col].str.len_bytes().max()
+               if max_len is None: max_len = 8
+               char_lengths[col] = max_len
+
+      chr_upper = {k.upper():v for k,v in char_lengths.items()}
+
+      longname = False
+      for name in df.columns:
+         colname = str(name).replace("'", "''")
+         if len(colname.encode(self.sascfg.encoding)) > 32:
+            warnings.warn("Column '{}' in Polars DataFrame is too long for SAS. Rename to 32 bytes or less".format(colname),
+                     RuntimeWarning)
+            longname = True
+         col_up  = str(name).upper()
+         input  += "input '"+colname+"'n "
+         if col_up in lab_keys:
+            label += "label '"+colname+"'n ="+lab_upper[col_up]+";\n"
+         if col_up in fmt_keys:
+            format += "'"+colname+"'n "+fmt_upper[col_up]+" "
+
+         if df[name].dtype == pl.String:
+            try:
+               length += " '"+colname+"'n $"+str(chr_upper[col_up])
+            except KeyError as e:
+               length += " '"+colname+"'n $"+str(max(8, int(df[name].str.len_bytes().max() or 8)))
+            if keep_outer_quotes:
+               input  += "~ "
+            dts.append('C')
+            if embedded_newlines:
+               xlate += " '"+colname+"'n = translate('"+colname+"'n, '0A'x, "+lf+");\n"
+               xlate += " '"+colname+"'n = translate('"+colname+"'n, '0D'x, "+cr+");\n"
+         elif df[name].dtype in [pl.Date, pl.Datetime, pl.Time]:
+            length += " '"+colname+"'n 8"
+            input  += ":B8601DT26.6 "
+            if col_up not in dts_keys:
+               if col_up not in fmt_keys:
+                  format += "'"+colname+"'n E8601DT26.6 "
+            else:
+               if dts_upper[col_up].lower() == 'date':
+                  if col_up not in fmt_keys:
+                     format += "'"+colname+"'n E8601DA. "
+                  xlate  += " '"+colname+"'n = datepart('"+colname+"'n);\n"
+               else:
+                  if dts_upper[col_up].lower() == 'time':
+                     if col_up not in fmt_keys:
+                        format += "'"+colname+"'n E8601TM. "
+                     xlate  += " '"+colname+"'n = timepart('"+colname+"'n);\n"
+                  else:
+                     if col_up not in fmt_keys:
+                        format += "'"+colname+"'n E8601DT26.6 "
+            dts.append('D')
+         elif df[name].dtype == pl.Boolean:
+            length += " '"+colname+"'n 8"
+            dts.append('B')
+         else:
+            length += " '"+colname+"'n 8"
+            dts.append('N')
+         input += ';\n'
+
+      if longname:
+         raise SASDFNamesToLongError(Exception)
+
+      port =  kwargs.get('port', 0)
+      if self.sascfg.ssh and self.sascfg.rtunnel and port == 0:
+         server = True
+         port = self.sascfg.rtunnel
+         host = 'localhost'
+         code = """filename sock socket ':"""+str(port)+"""' server reconn=0 recfm=V termstr=LF lrecl=32767;\n"""
+      else:
+         server = False
+         if port==0 and self.sascfg.tunnel:
+            port = self.sascfg.tunnel
+         host = 'localhost' if not self.sascfg.ssh or self.sascfg.tunnel else self.sascfg.hostip
+         try:
+            sock = socks.socket()
+            sock.bind(('localhost' if self.sascfg.tunnel or not self.sascfg.ssh else '', port))
+            port = sock.getsockname()[1]
+         except OSError as e:
+            raise e
+         code  = """filename sock socket '"""+host+""":"""+str(port)+"""' recfm=V termstr=LF lrecl=32767;\n"""
+
+      code += "data "
+      if len(libref):
+         code += libref+"."
+      code += "'"+table.strip().replace("'", "''")+"'n"
+      code += "(" + ' '.join([f"{k}={v}" for k, v in outdsopts.items()]) + ");\n" if outdsopts else ";\n"
+      if len(length): code += "length"+length+";\n"
+      if len(format): code += "format "+format+";\n"
+      code += label
+      code += "infile sock nbyte=nb delimiter="+delim+" STOPOVER;\n"
+      code += "input @;\nif _infile_ = '' then delete;\nelse do;\n"
+      code +=  input+xlate+";\n"
+      code += "end;\nrun;\nfilename sock;\n"
+
+      if not server: sock.listen(1)
+      self._asubmit(code, "text")
+
+      if server:
+         sleep(1)
+         sock = socks.socket()
+         sock.connect((host, port))
+         ssock = sock
+      else:
+         if sel.select([sock],[],[],10)[0] == []:
+            sock.close()
+            return {'Success' : False, 'LOG' : "Failure in upload.\n"+self.submit("", 'text')['LOG']}
+         newsock = sock.accept()
+         ssock = newsock[0]
+
+      blksz = int(kwargs.get('blocksize', 32767))
+      row_num = 0
+      code = ""
+      for row in df.iter_rows():
+         row_num += 1
+         card = ""
+         for col in range(ncols):
+            val = row[col]
+            if val is None:
+               var = '.' if dts[col] != 'C' else ' '+colsep
+            elif dts[col] == 'C':
+               var = str(val).replace(colsep, colrep)
+               if len(var) == var.count(' '): var += colsep
+            elif dts[col] == 'B':
+               var = '1' if val else '0'
+            elif dts[col] == 'D':
+               var = val.isoformat()[:26]
+            else:
+               var = str(val)
+
+            if embedded_newlines and dts[col] == 'C':
+               var = var.replace(LF, colrep).replace(CR, colrep).replace('\n', LF).replace('\r', CR)
+            card += var+"\n"
+         
+         code += card
+         if len(code) > blksz:
+            ssock.sendall(code.encode(self.sascfg.encoding, errors='replace'))
+            code = ""
+
+      if len(code):
+         ssock.sendall(code.encode(self.sascfg.encoding, errors='replace'))
+
+      if server:
+         sock.shutdown(socks.SHUT_RDWR)
+      else:
+         ssock.shutdown(socks.SHUT_RDWR)
+         ssock.close()
+      sock.close()
+      ll = self.submit("", 'text')
+      return None
+
    def dataframe2sasdata(self, df: '<Pandas Data Frame object>', table: str ='a',
                          libref: str ="", keep_outer_quotes: bool=False,
                                           embedded_newlines: bool=True,
@@ -2191,6 +2390,229 @@ Will use HTML5 for this SASsession.""")
 
       ll = self.submit("", 'text')
       return None
+
+   def sasdata2polars(self, table: str, libref: str ='', dsopts: dict = None,
+                      rowsep: str = '\x01', colsep: str = '\x02',
+                      rowrep: str = ' ',    colrep: str = ' ',
+                      port: int=0, wait: int=10, **kwargs) -> '<Polars Data Frame object>':
+      """
+      This method exports the SAS Data Set to a Polars Data Frame, returning the Data Frame object.
+      table   - the name of the SAS Data Set you want to export to a Polars Data Frame
+      libref  - the libref for the SAS Data Set.
+      rowsep  - the row seperator character to use; defaults to '\x01'
+      colsep  - the column seperator character to use; defaults to '\x02'
+      rowrep  - the char to convert to for any embedded rowsep chars, defaults to  ' '
+      colrep  - the char to convert to for any embedded colsep chars, defaults to  ' '
+      port    - port to use for socket. Defaults to 0 which uses a random available ephemeral port
+      wait    - seconds to wait for socket connection from SAS; catches hang if an error in SAS. 0 = no timeout
+      """
+      dsopts = dsopts if dsopts is not None else {}
+
+      # Currently we'll focus on the high-performance MEMORY-like stream for Polars
+      return self.sasdata2polarsDISK(table, libref, dsopts, rowsep, colsep,
+                                     rowrep, colrep, port=port, wait=wait, **kwargs)
+
+   def sasdata2polarsDISK(self, table: str, libref: str ='', dsopts: dict = None,
+                             rowsep: str = '\x01', colsep: str = '\x02',
+                             rowrep: str = ' ',    colrep: str = ' ', port: int=0,
+                             wait: int=10, **kwargs) -> '<Polars Data Frame object>':
+      """
+      This method exports the SAS Data Set to a Polars Data Frame, returning the Data Frame object.
+      table    - the name of the SAS Data Set you want to export to a Polars Data Frame
+      libref   - the libref for the SAS Data Set.
+      dsopts   - data set options for the input SAS Data Set
+      rowsep   - the row seperator character to use; defaults to '\x01'
+      colsep   - the column seperator character to use; defaults to '\x02'
+      rowrep   - the char to convert to for any embedded rowsep chars, defaults to  ' '
+      colrep   - the char to convert to for any embedded colsep chars, defaults to  ' '
+      port     - port to use for socket. Defaults to 0 which uses a random available ephemeral port
+      wait     - seconds to wait for socket connection from SAS; catches hang if an error in SAS. 0 = no timeout
+
+      polars_mode - 'EAGER' (default) or 'LAZY'
+      """
+      import polars as pl
+      import io
+
+      tsmax = kwargs.pop('tsmax', None)
+      tsmin = kwargs.pop('tsmin', None)
+      tscode = ''
+
+      errors = kwargs.pop('errors', 'strict')
+      dsopts = dsopts if dsopts is not None else {}
+
+      if port==0 and self.sascfg.tunnel:
+         # we are using a tunnel; default to that port
+         port = self.sascfg.tunnel
+
+      if libref:
+         tabname = libref+".'"+table.strip().replace("'", "''")+"'n "
+      else:
+         tabname = "'"+table.strip().replace("'", "''")+"'n "
+
+      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      code += "data _null_; file STDERR;d = open('work.sasdata2dataframe');\n"
+      code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
+      code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
+      code += "put lr lrecl; put vn nvars; put vl;\n"
+      code += "do i = 1 to nvars; var = varname(d, i); put var; end;\n"
+      code += "put vt;\n"
+      code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
+      code += "run;"
+
+      ll = self.submit(code, "text")
+
+      try:
+         l2 = ll['LOG'].rpartition("LRECL= ")
+         l2 = l2[2].partition("\n")
+         lrecl = int(l2[0])
+
+         l2 = l2[2].partition("VARNUMS= ")
+         l2 = l2[2].partition("\n")
+         nvars = int(l2[0])
+
+         l2 = l2[2].partition("\n")
+         varlist = l2[2].split("\n", nvars)
+         del varlist[nvars]
+
+         dvarlist = list(varlist)
+         for i in range(len(varlist)):
+            varlist[i] = varlist[i].replace("'", "''")
+
+         l2 = l2[2].partition("VARTYPE=")
+         l2 = l2[2].partition("\n")
+         vartype = l2[2].split("\n", nvars)
+         del vartype[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2polars step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
+
+      topts = dict(dsopts)
+      topts.pop('firstobs', None)
+      topts.pop('obs', None)
+
+      code  = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+      code += "data work._n_u_l_l_;output;run;\n"
+      code += "data _null_; file STDERR; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+
+      for i in range(nvars):
+         code += "_tom = vformatn('"+varlist[i]+"'n);put _tom;\n"
+      code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
+
+      ll = self.submit(code, "text")
+
+      try:
+         l2 = ll['LOG'].rpartition("FMT_CATS=")
+         l2 = l2[2].partition("\n")
+         varcat = l2[2].split("\n", nvars)
+         del varcat[nvars]
+      except Exception as e:
+         logger.error("Invalid output produced durring sasdata2polars step. Step failed.\
+         \nPrinting the error: {}\nPrinting the SASLOG as diagnostic\n{}".format(str(e), ll['LOG']))
+         return None
+
+      try:
+         sock = socks.socket()
+         if not self.sascfg.ssh or self.sascfg.tunnel:
+            sock.bind(('localhost', port))
+         else:
+            sock.bind(('', port))
+         port = sock.getsockname()[1]
+      except OSError:
+         logger.error('Error try to open a socket in the sasdata2polars method. Call failed.')
+         return None
+
+      if self.sascfg.ssh and not self.sascfg.tunnel:
+         host = self.sascfg.hostip  #socks.gethostname()
+      else:
+         host = 'localhost'
+      code  = "filename sock socket '"+host+":"+str(port)+"' lrecl="+str(self.sascfg.lrecl)+" recfm=v encoding='utf-8';\n"
+      code += "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";\nformat "
+
+      for i in range(nvars):
+         if vartype[i] == 'N':
+            if varcat[i] in self._sb.sas_date_fmts:
+               code += "'"+varlist[i]+"'n E8601DA. "
+            elif varcat[i] in self._sb.sas_time_fmts:
+               code += "'"+varlist[i]+"'n E8601TM. "
+            elif varcat[i] in self._sb.sas_datetime_fmts:
+               code += "'"+varlist[i]+"'n E8601DT26.6 "
+      code += ";\nfile sock nbyte=nb delimiter='"+colsep+"' STOPOVER;\nput "
+
+      miss  = []
+      dts   = {}
+      for i in range(nvars):
+         colname = dvarlist[i]
+         if vartype[i] == 'C':
+            code += "'"+varlist[i]+"'n ~ "
+            dts[colname] = pl.String
+         else:
+            code += "'"+varlist[i]+"'n "
+            if varcat[i] in self._sb.sas_date_fmts:
+               dts[colname] = pl.Date
+            elif varcat[i] in self._sb.sas_time_fmts:
+               dts[colname] = pl.Time
+            elif varcat[i] in self._sb.sas_datetime_fmts:
+               dts[colname] = pl.Datetime
+            else:
+               dts[colname] = pl.Float64
+               miss.append(colname)
+      code += ";\nrun;\nfilename sock;\n"
+
+      sock.listen(1)
+      self._asubmit(code, "text")
+
+      try:
+         newsock = sock.accept()
+         sockout = _read_sock(newsock=newsock, rowsep=rowsep.encode(), errors=errors)
+         
+         # Polars read_csv from file-like object
+         # We need to wrap sockout to provide a byte stream if polars expects bytes, 
+         # but _read_sock returns strings currently. 
+         # Let's adjust to use a wrapper that polars can consume.
+         
+         polars_mode = kwargs.get('polars_mode', 'EAGER').upper()
+         
+         # For Polars, it's often better to read the whole thing if it's small, 
+         # or use a more efficient path.
+         df = pl.read_csv(io.BytesIO(sockout.read().encode('utf-8')), 
+                          has_header=False, 
+                          new_columns=dvarlist,
+                          separator=colsep,
+                          quote_char='"',
+                          schema_overrides=dts,
+                          null_values='.',
+                          ignore_errors=True)
+
+         if polars_mode == 'LAZY':
+            df = df.lazy()
+
+      except (KeyboardInterrupt, Exception) as e:
+         logger.error(e)
+         logger.error("sasdata2polars was interrupted. Trying to return the saslog instead of a data frame.")
+         try:
+            if newsock[0]:
+               try: # Mac OS Python has bugs with this call
+                  newsock[0].shutdown(socks.SHUT_RDWR)
+               except:
+                  pass
+               newsock[0].close()
+         except:
+            pass
+         sock.close()
+         ll = self.submit("", 'text')
+         return str(e)+"\n\n"+ll['LOG']
+
+      try: # Mac OS Python has bugs with this call
+         newsock[0].shutdown(socks.SHUT_RDWR)
+      except:
+         pass
+      newsock[0].close()
+      sock.close()
+
+      ll = self.submit("", 'text')
+
+      return df
 
    def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
                          rowsep: str = '\x01', colsep: str = '\x02',
