@@ -1,56 +1,79 @@
 Contributor Agreement
 
-Version 1.1
+Version 1.2
 
-Contributions to this software are accepted only when they are
-properly accompanied by a Contributor Agreement. The Contributor
-Agreement for this software is the Developer's Certificate of Origin
-1.1 (DCO) as provided with and required for accepting contributions
-to the Linux kernel.
+To contribute to this project, you must (1) attest to your right to offer your 
+contribution and (2) clearly indicate whether you used artificial intelligence 
+tools to develop your contribution.
 
-In each contribution proposed to be included in this software, the
-developer must include a "sign-off" that denotes consent to the
-terms of the Developer's Certificate of Origin.  The sign-off is
-a line of text in the description that accompanies the change,
-certifying that you have the right to provide the contribution
-to be included.  For changes provided in source code control (for
-example, via a Git pull request) the sign-off must be included in
-the commit message in source code control.  For changes provided
-in email or issue tracking, the sign-off must be included in the
-email or the issue, and the sign-off will be incorporated into the
-permanent commit message if the contribution is accepted into the
-official source code.
+== (1) Your Right to Contribute ==
 
-If you can certify the below:
+You must agree to and comply with the terms of the following agreement.
+Complying with the agreement does not alter your right to use your
+contributions for any other purpose.
 
         Developer's Certificate of Origin 1.1
 
         By making a contribution to this project, I certify that:
 
-        (a) The contribution was created in whole or in part by me and I
-            have the right to submit it under the open source license
-            indicated in the file; or
+        (a) The contribution was created in whole or in part by me and I have 
+            the right to submit it under the open source license indicated in 
+            the file; or
 
-        (b) The contribution is based upon previous work that, to the best
-            of my knowledge, is covered under an appropriate open source
-            license and I have the right under that license to submit that
-            work with modifications, whether created in whole or in part
-            by me, under the same open source license (unless I am
-            permitted to submit under a different license), as indicated
-            in the file; or
+        (b) The contribution is based upon previous work that, to the best of 
+            my knowledge, is covered under an appropriate open source license 
+            and I have the right under that license to submit that work with 
+            modifications, whether created in whole or in part by me, under 
+            the same open source license (unless I am permitted to submit 
+            under a different license), as indicated in the file; or
 
-        (c) The contribution was provided directly to me by some other
-            person who certified (a), (b) or (c) and I have not modified
-            it.
+        (c) The contribution was provided directly to me by some other person 
+            who certified (a), (b) or (c) and I have not modified it.
 
-        (d) I understand and agree that this project and the contribution
-            are public and that a record of the contribution (including all
-            personal information I submit with it, including my sign-off) is
-            maintained indefinitely and may be redistributed consistent with
+        (d) I understand and agree that this project and the contribution are 
+            public and that a record of the contribution (including all 
+            personal information I submit with it, including my sign-off) is 
+            maintained indefinitely and may be redistributed consistent with 
             this project or the open source license(s) involved.
 
-then you just add a line saying
+Indicate your acceptance of the agreement by including a "sign-off" in any 
+contribution you propose. The sign-off is a line of text that accompanies your 
+proposed contribution, attesting that you have the right to provide it.
 
-        Signed-off-by: Random J Developer <random@developer.example.org>
+When proposing changes via source control systems (such as Git), you can 
+comply with the agreement by adding the following line to your commit message:
 
-using your real name (sorry, no pseudonyms or anonymous contributions.)
+	Signed-off-by: Firstname Lastname <user@domain>
+
+For example:
+
+	Signed-off-by: Random J. Developer <random@developer.example.org>
+
+Please provide your real name (no pseudonyms or anonymous contributions). All 
+changes accepted into the project's official source code must be accompanied 
+by this sign-off.
+
+== (2) Your Use of Generative AI Tools ==
+
+You must note contributions generated in whole or in part by artificial
+intelligence tools. In your comments or commit messages, provide any context
+reviewers might need to understand the change, and explain which part(s) of
+your proposed change came from the tool. Then follow the instructions below.
+
+If you used a generative artificial intelligence tool to create your entire 
+contribution, add the following additional line to your commit message:
+
+	Generated-by: Assistant Name
+
+For example:
+
+	Generated-by: Claude Code
+
+If you used a generative artificial intelligence tool to assist you in 
+creating your contribution, add the following line to your commit message:
+
+	Assisted-by: Assistant Name
+
+For example:
+
+	Assisted-by: GitHub Copilot
