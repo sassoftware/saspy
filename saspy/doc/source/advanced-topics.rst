@@ -63,6 +63,159 @@ than this few lines of code, you can have the results updated and refreshed by j
 re-running the script.
 
 
+Using Polars
+============
+
+SASPy provides native support for Polars DataFrames, offering several advantages over
+Pandas for large datasets:
+
+- **Zero-copy parsing** for CSV and Parquet files
+- **Streaming mode** for processing data in batches without loading everything into memory
+- **Lazy evaluation** for query optimization
+- **Better memory efficiency** for large datasets
+
+Prerequisites
+-------------
+
+Install the Polars package:
+
+.. code-block:: bash
+
+    pip install polars
+
+Converting SAS Datasets to Polars
+---------------------------------
+
+There are multiple methods to convert SAS datasets to Polars DataFrames:
+
+.. code-block:: ipython3
+
+    # Basic conversion - loads all data into memory
+    df = sas.sasdata2polars('mylib', 'mytable')
+
+    # Using SASdata object
+    sasdata_obj = sas.sasdata('mytable', 'mylib')
+    df = sasdata_obj.to_polars()
+
+    # Streaming mode - processes data in batches (recommended for large datasets)
+    stream = sasdata_obj.sasdata2polarsSTREAM()
+    for batch in stream:
+        print(f"Processed {len(batch)} rows")
+
+    # Disk-based mode - writes to temporary CSV files for very large datasets
+    disk_result = sasdata_obj.sasdata2polarsDISK()
+
+Converting Polars to SAS Datasets
+---------------------------------
+
+.. code-block:: ipython3
+
+    import polars as pl
+
+    # From Polars DataFrame
+    df = pl.read_csv("data.csv")
+    sasdata = sas.polars2sasdata(df, 'mytable', 'mylib')
+
+    # From Polars LazyFrame
+    lazy_df = pl.scan_csv("large_file.csv")  # doesn't load data
+    sasdata = sas.polars2sasdata(lazy_df, 'mytable', 'mylib')
+
+    # Streaming from LazyFrame
+    sasdata = sas.polars2sasdataSTREAM(lazy_df, 'mytable', 'mylib')
+
+Type Mapping
+------------
+
+SASPy automatically maps between SAS and Polars data types:
+
+================== ==================
+SAS Data Type       Polars Data Type
+================== ==================
+CHAR               String
+VARCHAR            String
+NUMERIC            Int64/Float64
+DATE               Date
+DATETIME           Datetime
+BINARY             String (base64)
+================== ==================
+
+Performance Tips
+----------------
+
+1. **Use streaming for large datasets** - ``sasdata2polarsSTREAM()`` and ``polars2sasdataSTREAM()``
+   process data in chunks without loading everything into memory.
+
+2. **Use lazy evaluation** - Use ``pl.scan_csv()`` and ``pl.scan_parquet()`` instead of
+   ``pl.read_csv()`` and ``pl.read_parquet()`` for better performance with large files.
+
+3. **Batch processing** - Process data in batches using the streaming methods when
+   dealing with datasets larger than available memory.
+
+4. **Parquet format** - Use Parquet for intermediate storage as it's more efficient
+   than CSV for data exchange.
+
+
+Using Apache Arrow
+==================
+
+SASPy supports Apache Arrow as an intermediate format for efficient data exchange.
+
+Prerequisites
+-------------
+
+.. code-block:: bash
+
+    pip install pyarrow
+
+Converting SAS Datasets to Arrow
+--------------------------------
+
+.. code-block:: ipython3
+
+    # Get Arrow Table from SAS dataset
+    arrow_table = sasdata_obj.to_arrow()
+
+    # Get schema information
+    schema = sasdata_obj.schema(results='arrow')
+
+    # Convert to Parquet file
+    sasdata_obj.to_parquet('output.parquet', use_arrow=True)
+
+Converting Arrow to SAS
+-----------------------
+
+.. code-block:: ipython3
+
+    import pyarrow as pa
+
+    # From Arrow Table
+    table = pa Table.from_pandas(df)
+    sasdata = sas.arrow2sd(table, 'mytable', 'mylib')
+
+    # From Parquet file
+    sasdata = sas.parquet2sasdata('input.parquet', 'mytable', 'mylib')
+
+Arrow Schema Methods
+--------------------
+
+.. code-block:: ipython3
+
+    # Get comprehensive schema information
+    schema_dict = sasdata_obj.schema()
+
+    # Returns dictionary with:
+    # - name: table name
+    # - libref: library name
+    # - engine: SAS engine used
+    # - columns: list of column definitions
+    #   - name: column name
+    #   - type: SAS data type
+    #   - length: column length
+    #   - format: SAS format
+    #   - label: column label
+    #   - is_null: whether nullable
+
+
 Prompting
 =========
 

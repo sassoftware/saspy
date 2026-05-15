@@ -35,6 +35,12 @@ The APIs provide interfaces for the following:
 Additional functionality such as machine learning, econometrics, and quality
 control are organized in Python classes.
 
+SASPy also supports alternative DataFrame libraries:
+
+- **Pandas** - Default DataFrame support (included in dependencies)
+- **Polars** - High-performance DataFrame with streaming support (optional)
+- **Apache Arrow** - Efficient columnar format for data exchange (optional)
+
 See :doc:`getting-started` for programming examples.
 
 
