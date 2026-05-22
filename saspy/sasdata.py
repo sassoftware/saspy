@@ -93,7 +93,7 @@ class SASdata:
         if len(libref):
             self.libref = libref
 
-            code  = "%let engine=BAD;\n"
+            code = "%let engine=BAD;\n"
             code += "proc sql;select distinct engine into :engine from "
             code += "sashelp.VLIBNAM where libname = '{}';".format(libref.upper())
             code += ";%put engstart=&engine engend=;\nquit;"
@@ -113,9 +113,9 @@ class SASdata:
             if self.sas.sascfg.mode == 'HTTP':
                 self.libref = 'WORK'
 
-        self.table    = table.strip()
-        self.dsopts   = dsopts if dsopts is not None else {}
-        self.results  = results
+        self.table = table.strip()
+        self.dsopts = dsopts if dsopts is not None else {}
+        self.results = results
         self.tabulate = sp2.Tabulate(sassession, self)
 
     def __getitem__(self, key):
@@ -128,7 +128,7 @@ class SASdata:
 
         :return: output
         """
-        x  = "Libref  = %s\n" % self.libref
+        x = "Libref  = %s\n" % self.libref
         x += "Table   = %s\n" % self.table
         x += "Dsopts  = %s\n" % str(self.dsopts)
         x += "Results = %s\n" % self.results
@@ -222,7 +222,7 @@ class SASdata:
         """
         lastlog = len(self.sas._io._log)
 
-        topts   = dict(self.dsopts)
+        topts = dict(self.dsopts)
         optkeys = self.dsopts.keys()
 
         if self.engine != 'SPDE':
@@ -286,7 +286,7 @@ class SASdata:
         if nobs < obs:
             obs = nobs
 
-        topts   = dict(self.dsopts)
+        topts = dict(self.dsopts)
         optkeys = topts.keys()
 
         if self.engine != 'SPDE':
@@ -684,42 +684,45 @@ class SASdata:
         dictionary that can be easily converted to a pyarrow.Schema.
 
         The dictionary structure is designed to be compatible with pyarrow schema:
-        {
-            "name": "table_name",
-            "libref": "library_reference",
-            "metadata": {
-                "memtype": "DATA|VIEW",
-                "memlabel": "dataset label",
-                "crdate": "datetime",
-                "modate": "datetime",
-                "filesize": 12345,
-                "nobs": 123,
-                "nvar": 4,
-                "encoding": "encoding",
-                "extended_attributes": {
-                    "custom_attr1": "value1",
-                    "custom_attr2": "value2"
-                }
-            },
-            "fields": [
-                {
-                    "name": "variable_name",
-                    "type": "arrow_type_string",
-                    "sortedby": 0,
-                    "nullable": True,
-                    "metadata": '{
-                        "sas_type": "char|num",
-                        "sas_format": "format",
-                        "sas_informat": "informat",
-                        "length": 8,
-                        "label": "variable label",
-                        "extended_attributes": {
-                            "var_attr1": "value1"
+
+        .. code-block:: json
+
+            {
+                "name": "table_name",
+                "libref": "library_reference",
+                "metadata": {
+                    "memtype": "DATA|VIEW",
+                    "memlabel": "dataset label",
+                    "crdate": "datetime",
+                    "modate": "datetime",
+                    "filesize": 12345,
+                    "nobs": 123,
+                    "nvar": 4,
+                    "encoding": "encoding",
+                    "extended_attributes": {
+                        "custom_attr1": "value1",
+                        "custom_attr2": "value2"
+                    }
+                },
+                "fields": [
+                    {
+                        "name": "variable_name",
+                        "type": "arrow_type_string",
+                        "sortedby": 0,
+                        "nullable": true,
+                        "metadata": {
+                            "sas_type": "char|num",
+                            "sas_format": "format",
+                            "sas_informat": "informat",
+                            "length": 8,
+                            "label": "variable label",
+                            "extended_attributes": {
+                                "var_attr1": "value1"
+                            }
                         }
-                    }'
-                }
-            ]
-        }
+                    }
+                ]
+            }
 
         Extended attributes are custom metadata that can be attached to datasets 
         and variables using PROC DATASETS XATTR statement.
@@ -1530,6 +1533,102 @@ class SASdata:
         """
         return self.to_df(**kwargs)
 
+    def to_polars(self, method: str = 'STREAM', **kwargs) -> 'polars.DataFrame':
+        """
+        Export this SAS Data Set to a Polars Data Frame
+
+        :param method: defaults to STREAM;
+
+           - STREAM the default method. Pipes data directly from the SAS socket to Polars
+             without intermediate pandas or temporary files. Support EAGER and LAZY modes.
+           - DISK   uses a temporary CSV file on disk. For EAGER, reads with pl.read_csv.
+             For LAZY, uses pl.scan_csv for true on-demand reading.
+           - MEMORY legacy alias for STREAM.
+           - CSV    uses Proc Export to CSV, then reads with polars. Falls back to this when STREAM/DISK fail.
+
+        :param polars_mode: 'EAGER' (default) or 'LAZY'. If 'LAZY', returns a Polars LazyFrame.
+        :param kwargs: a dictionary. These vary per access method.
+
+        :return: Polars DataFrame or LazyFrame
+        """
+        polars_mode = kwargs.get('polars_mode', 'EAGER').upper()
+        if polars_mode not in ('EAGER', 'LAZY'):
+            raise ValueError(
+                f"Invalid polars_mode '{polars_mode}'. Must be 'EAGER' or 'LAZY'."
+            )
+
+        lastlog = len(self.sas._io._log)
+        ll = self._is_valid()
+        self.sas._lastlog = self.sas._io._log[lastlog:]
+        if ll:
+            print(ll['LOG'])
+            return None
+        else:
+            if self.sas.sascfg.polars:
+                raise type(self.sas.sascfg.polars)(self.sas.sascfg.polars.msg)
+
+            # Try native method first
+            df = self.sas.sasdata2polars(
+                self.table, self.libref, self.dsopts, method, **kwargs
+            )
+
+            # Fallback to DISK + from_pandas if native method fails or returns empty/incorrect data
+            needs_conversion = False
+            if df is None:
+                needs_conversion = True
+            elif hasattr(df, 'shape'):
+                if df.shape[0] == 0:
+                    import polars as pl
+                    if isinstance(df, pl.DataFrame) and len(df.schema) > 0:
+                        needs_conversion = False
+                    else:
+                        needs_conversion = True
+                else:
+                    import polars as pl
+                    if isinstance(df, pl.DataFrame):
+                        needs_conversion = False
+                    else:
+                        import pandas as pd
+                        if isinstance(df, pd.DataFrame):
+                            needs_conversion = True
+            elif hasattr(df, 'collect'):
+                needs_conversion = False
+            else:
+                needs_conversion = True
+            if needs_conversion:
+                try:
+                    import polars as pl
+                    from .polars_types import PolarsTypeMapper
+
+                    pdf = self.sas.sasdata2dataframe(
+                        self.table, self.libref, self.dsopts, 'CSV', **kwargs
+                    )
+                    if pdf is not None and len(pdf) > 0:
+                        df = pl.from_pandas(pdf)
+                    else:
+                        # Get schema directly from SAS metadata for empty datasets
+                        schema = PolarsTypeMapper.get_schema_from_sasdata(
+                            self.sas, self.table, self.libref, self.dsopts
+                        )
+                        if schema:
+                            df = pl.DataFrame(schema=schema)
+                        else:
+                            df = pl.DataFrame()
+                    if polars_mode == 'LAZY':
+                        df = df.lazy()
+                except Exception:
+                    pass
+
+            # Post-process: convert numeric columns that represent booleans/integers
+            import polars as pl
+            if isinstance(df, pl.DataFrame) and df.shape[0] > 0:
+                from .polars_types import PolarsTypeMapper
+                df = PolarsTypeMapper.convert_numeric_to_boolean(df)
+                df = PolarsTypeMapper.convert_numeric_to_integer(df)
+
+            self.sas._lastlog = self.sas._io._log[lastlog:]
+            return df
+
     def to_df(self, method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':
         """
         Export this SAS Data Set to a Pandas Data Frame
@@ -1576,7 +1675,10 @@ class SASdata:
         else:
             if self.sas.sascfg.pandas:
                 raise type(self.sas.sascfg.pandas)(self.sas.sascfg.pandas.msg)
-            df = self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
+            if getattr(self.sas, 'results', '').upper() == 'POLARS':
+                df = self.sas.sasdata2polars(self.table, self.libref, self.dsopts, method, **kwargs)
+            else:
+                df = self.sas.sasdata2dataframe(self.table, self.libref, self.dsopts, method, **kwargs)
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return df
 

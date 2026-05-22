@@ -43,6 +43,11 @@ except Exception as e:
     pass
 
 try:
+    import polars
+except Exception as e:
+    pass
+
+try:
     import pyarrow as pa
     import pyarrow.parquet as pq
     import pyarrow.compute as pc
@@ -147,10 +152,16 @@ class SASconfig(object):
         self.curver  = curver[0]*1000000+curver[1]*1000+curver[2]*1
 
         try:
-            import pandas
-            self.pandas  = None
+           import pandas
+           self.pandas  = None
         except Exception as e:
-            self.pandas  = e
+           self.pandas  = e
+
+        try:
+           import polars
+           self.polars  = None
+        except Exception as e:
+           self.polars  = e
 
         SAScfg = self._find_config(cfg_override=kwargs.get('cfgfile'))
         self.SAScfg = SAScfg
@@ -576,6 +587,10 @@ class SASsession():
         if self.sascfg.pandas and self.results.lower() == 'pandas':
             self.results       = 'HTML'
             logger.warning('Pandas module not available. Setting results to HTML')
+        if self.sascfg.polars and self.results.lower() == 'polars':
+           self.results       = 'HTML'
+           logger.warning('Polars module not available. Setting results to HTML')
+
         self.workpath          = ''
         self.sasver            = ''
         self.version           = sys.modules['saspy'].__version__
@@ -1021,7 +1036,7 @@ class SASsession():
         """
         This method set the results attribute for the SASsession object; it stays in effect till changed
 
-        :param results: set the default result type for this SASdata object. ``'Pandas' or 'HTML' or 'TEXT'``.
+        :param results: set the default result type for this SASdata object. ``'Pandas' or 'Polars' or 'HTML' or 'TEXT'``.
         :return: string of the return type
         :rtype: str
         """
@@ -1791,6 +1806,114 @@ class SASsession():
 
         self._lastlog = self._io._log[lastlog:]
         return sd
+
+    def sd2pl(self, table: str, libref: str = '', dsopts: dict = None,
+              method: str = 'STREAM', **kwargs) -> 'polars.DataFrame':
+        """
+        This is an alias for 'sasdata2polars'. Why type all that?
+
+        :param table: the name of the SAS Data Set you want to export to a Polars DataFrame
+        :param libref: the libref for the SAS Data Set.
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+        :param method: defaults to STREAM;
+        :param kwargs: a dictionary.
+        :return: Polars DataFrame
+        """
+        return self.sasdata2polars(table, libref, dsopts, method, **kwargs)
+
+    def sasdata2polars(self, table: str, libref: str = '', dsopts: dict = None,
+                          method: str = 'STREAM', **kwargs) -> 'polars.DataFrame':
+        """
+        This method exports the SAS Data Set to a Polars DataFrame, returning the DataFrame object.
+
+        :param table: the name of the SAS Data Set you want to export to a Polars DataFrame
+        :param libref: the libref for the SAS Data Set.
+        :param dsopts: a dictionary containing any of the following SAS data set options(where, drop, keep, obs, firstobs):
+        :param method: defaults to STREAM;
+           - STREAM: pipes data directly from SAS socket to Polars.
+           - DISK:   uses a temporary CSV file for transfer.
+        :param kwargs: a dictionary.
+        :return: Polars DataFrame or LazyFrame
+        """
+        lastlog = len(self._io._log)
+        if self.sascfg.polars:
+           raise type(self.sascfg.polars)(self.sascfg.polars.msg)
+
+        if method.lower() not in ['memory', 'csv', 'disk', 'stream']:
+            logger.error("The specified method is not valid. Supported methods are MEMORY, CSV, DISK and STREAM")
+            return None
+
+        dsopts = dsopts if dsopts is not None else {}
+        if self.exist(table, libref) == 0:
+            logger.error('The SAS Data Set ' + libref + '.' + table + ' does not exist')
+            if self.sascfg.bcv < 3007009:
+               return None
+            else:
+               raise FileNotFoundError('The SAS Data Set ' + libref + '.' + table + ' does not exist')
+
+        if self.nosub:
+            print("too complicated to show the code, read the source :), sorry.")
+            df = None
+        else:
+            df = self._io.sasdata2polars(table, libref, dsopts, method=method, **kwargs)
+
+        self._lastlog = self._io._log[lastlog:]
+        return df
+
+    def pl2sd(self, df: 'polars.DataFrame', table: str = '_df', libref: str = '',
+              results: str = '', **kwargs) -> 'SASdata':
+        """
+        This is an alias for 'polars2sasdata'. Why type all that?
+        """
+        return self.polars2sasdata(df, table, libref, results, **kwargs)
+
+    def polars2sasdata(self, df: 'polars.DataFrame', table: str = '_df', libref: str = '',
+                          results: str = '', method: str = 'STREAM', **kwargs) -> 'SASdata':
+        """
+        This method imports a Polars DataFrame or LazyFrame to a SAS Data Set, returning the SASdata object.
+
+        :param df: Polars DataFrame or LazyFrame to import to a SAS Data Set
+        :param table: the name of the SAS Data Set to create
+        :param libref: the libref for the SAS Data Set being created.
+        :param results: format of results
+        :param method: 'STREAM' (default) or 'DISK'.
+        :return: SASdata object
+        """
+        lastlog = len(self._io._log)
+        if self.sascfg.polars:
+           raise type(self.sascfg.polars)(self.sascfg.polars.msg)
+
+        if libref != '':
+           if libref.upper() not in self.assigned_librefs():
+              logger.error("The libref specified is not assigned in this SAS Session.")
+              return None
+
+        if results == '':
+           results = self.results
+        if self.nosub:
+           print("too complicated to show the code, read the source :), sorry.")
+           return None
+
+        # If the access method has polars2sasdata, use it.
+        if hasattr(self._io, 'polars2sasdata'):
+           res = self._io.polars2sasdata(df, table, libref, method=method, **kwargs)
+        else:
+           # Fallback: convert to pandas if possible or implement in IO.
+           if hasattr(df, 'collect'):
+              streaming = kwargs.get('streaming', False)
+              df = df.collect(streaming=streaming)
+
+           if not self.sascfg.pandas:
+              import pandas as pd
+              return self.dataframe2sasdata(df.to_pandas(), table, libref, results, **kwargs)
+           else:
+              logger.error("Neither Polars native upload nor Pandas fallback is available.")
+              return None
+
+        if res is None:
+           return SASdata(self, libref, table)
+        else:
+           return None
 
     def sd2df(self, table: str, libref: str = '', dsopts: dict = None,
               method: str = 'MEMORY', **kwargs) -> 'pandas.DataFrame':

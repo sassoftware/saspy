@@ -109,6 +109,8 @@ class SASresults(object):
 
             if self.sas.results.upper() == 'PANDAS':
                df = self.sas.sasdata2dataframe(attr, libref=lref)
+            elif self.sas.results.upper() == 'POLARS':
+               df = self.sas.sasdata2polars(attr, libref=lref)
             else:
                code = '%%getdata(%s, %s);' % (self._name, attr)
                df   = self.sas._io.submit(code)

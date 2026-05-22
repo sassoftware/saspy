@@ -2017,6 +2017,608 @@ Will use HTML5 for this SASsession.""")
             logger.error("Rendering the error from the Java layer:\n\n"+ll['LOG'].partition("END We failed in Submit\n")[0])
         return None
 
+
+    def sasdata2polars(
+        self,
+        table: str,
+        libref: str = '',
+        dsopts: dict = None,
+        method: str = 'STREAM',
+        **kwargs,
+    ) -> '<Polars Data Frame object>':
+        """
+        This method exports the SAS Data Set to a Polars Data Frame, returning the Data Frame object.
+        """
+        from .polars_types import PolarsTypeMapper, POLARS_AVAILABLE
+
+        if not POLARS_AVAILABLE:
+            raise ImportError("polars is not installed")
+
+        import polars as pl
+
+        dsopts = dsopts if dsopts is not None else {}
+        rowsep = kwargs.get('rowsep', '\x01')
+        colsep = kwargs.get('colsep', '\x02')
+        rowrep = kwargs.get('rowrep', ' ')
+        colrep = kwargs.get('colrep', ' ')
+
+        tsmax = kwargs.get('tsmax', None)
+        tsmin = kwargs.get('tsmin', None)
+        tscode = ''
+
+        # 1. Gather Metadata (similar to sasdata2dataframeDISK)
+        logf = b""
+        lstf = b""
+        logn = self._logcnt()
+        logcodei = "%put E3969440A681A24088859985" + logn + ';'
+        lstcodeo = 'E3969440A681A24088859985' + logn
+        logcodeo = '\nE3969440A681A24088859985' + logn
+        logcodeb = logcodeo.encode()
+
+        if libref:
+            tabname = libref + ".'" + table.strip().replace("'", "''") + "'n "
+        else:
+            tabname = "'" + table.strip().replace("'", "''") + "'n "
+
+        code = (
+            "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "
+            + tabname
+            + self._sb._dsopts(dsopts)
+            + ";run;\n"
+        )
+        code += "data _null_; file LOG; d = open('work.sasdata2dataframe');\n"
+        code += "length var $256;\n"
+        code += "lrecl = attrn(d, 'LRECL'); nvars = attrn(d, 'NVARS');\n"
+        code += "lr='LRECL='; vn='VARNUMS='; vl='VARLIST='; vt='VARTYPE=';\n"
+        code += "put lr lrecl; put vn nvars; put vl;\n"
+        code += (
+            "do i = 1 to nvars; var = compress(varname(d, i), '00'x); put var; end;\n"
+        )
+        code += "put vt;\n"
+        code += "do i = 1 to nvars; var = vartype(d, i); put var; end;\n"
+        code += "run;"
+
+        ll = self.submit(code, 'text')
+
+        try:
+            l2 = ll['LOG'].rpartition('LRECL= ')
+            l2 = l2[2].partition('\n')
+            lrecl = int(l2[0])
+            l2 = l2[2].partition('VARNUMS= ')
+            l2 = l2[2].partition('\n')
+            nvars = int(l2[0])
+            l2 = l2[2].partition('\n')
+            varlist = l2[2].split('\n', nvars)
+            del varlist[nvars]
+            dvarlist = list(varlist)
+            for i in range(len(varlist)):
+                varlist[i] = varlist[i].replace("'", "''")
+            l2 = l2[2].partition('VARTYPE=')
+            l2 = l2[2].partition('\n')
+            vartype = l2[2].split('\n', nvars)
+            del vartype[nvars]
+        except Exception as e:
+            logger.error(f"Failed to gather metadata for Polars conversion: {e}")
+            return None
+
+        topts = dict(dsopts)
+        topts.pop('firstobs', None)
+        topts.pop('obs', None)
+
+        code = "proc delete data=work.sasdata2dataframe(memtype=view);run;\n"
+        code += "data work._n_u_l_l_;output;run;\n"
+        code += (
+            "data _null_; set work._n_u_l_l_ "
+            + tabname
+            + self._sb._dsopts(topts)
+            + ";put 'FMT_CATS=';\n"
+        )
+        for i in range(nvars):
+            code += "_tom = vformatn('" + varlist[i] + "'n);put _tom;\n"
+        code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
+
+        ll = self.submit(code, 'text')
+        try:
+            l2 = ll['LOG'].rpartition('FMT_CATS=')
+            l2 = l2[2].partition('\n')
+            varcat = l2[2].split('\n', nvars)
+            del varcat[nvars]
+        except Exception as e:
+            logger.error(f"Failed to gather format metadata for Polars conversion: {e}")
+            return None
+
+        # 2. Build Polars Schema
+        schema = {
+            dvarlist[i]: PolarsTypeMapper.get_polars_dtype(vartype[i], varcat[i])
+            for i in range(nvars)
+        }
+
+        # 3. Generate Export Code
+        rdelim = "'" + "%02x" % ord(rowsep.encode(self.sascfg.encoding)) + "'x"
+        cdelim = "'" + "%02x" % ord(colsep.encode(self.sascfg.encoding)) + "'x "
+
+        code = 'data _null_; set ' + tabname + self._sb._dsopts(dsopts) + ';\n'
+        for i in range(nvars):
+            if vartype[i] == 'N':
+                code += "format '" + varlist[i] + "'n "
+                if varcat[i] in self._sb.sas_date_fmts:
+                    code += 'E8601DA10.'
+                elif varcat[i] in self._sb.sas_time_fmts:
+                    code += 'E8601TM15.6'
+                elif varcat[i] in self._sb.sas_datetime_fmts:
+                    code += 'E8601DT26.6'
+                else:
+                    code += 'best32.'
+                code += '; '
+                if i % 10 == 9:
+                    code += '\n'
+
+        lreclx = max(self.sascfg.lrecl, (lrecl + nvars + 1))
+        code += (
+            '\nfile '
+            + self._tomods1.decode()
+            + ' lrecl='
+            + str(lreclx)
+            + ' dlm='
+            + cdelim
+            + " recfm=v termstr=NL encoding='utf-8';\n"
+        )
+        for i in range(nvars):
+            if vartype[i] != 'N':
+                code += f"'{varlist[i]}'n = translate('{varlist[i]}'n, '{ord(rowrep):02x}{ord(colrep):02x}'x, '{ord(rowsep):02x}{ord(colsep):02x}'x); "
+            if i % 10 == 9:
+                code += '\n'
+        code += '\nput '
+        for i in range(nvars):
+            code += " '" + varlist[i] + "'n "
+            if i % 10 == 9:
+                code += '\n'
+        code += rdelim + ';\nrun;'
+
+        # 4. Stream to Polars
+        ll = self._asubmit(code, 'text')
+        self.stdin[0].send(b"\ntom says EOL=" + logcodeb)
+
+        polars_mode = kwargs.get('polars_mode', 'EAGER').upper()
+
+        try:
+            if method.upper() == 'DISK':
+                import tempfile
+
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp:
+                    tmp_path = tmp.name
+                with open(tmp_path, 'wb') as f:
+                    sockout = _read_sock(
+                        io=self,
+                        method='DISK',
+                        rsep=(rowsep + '\n').encode(),
+                        rowsep=rowsep.encode(),
+                        lstcodeo=lstcodeo.encode(),
+                        logcodeb=logcodeb,
+                    )
+                    while True:
+                        chunk = sockout.read(32768)
+                        if not chunk:
+                            break
+                        decoded = chunk
+                        if isinstance(decoded, bytes):
+                            decoded = decoded.decode('utf-8')
+                        if decoded.startswith('\ufeff'):
+                            decoded = decoded[1:]
+                        lines = decoded.split(rowsep)
+                        cleaned_lines = [line.rstrip('\x02').strip() for line in lines if line.strip()]
+                        f.write(('\n'.join(cleaned_lines) + '\n').encode('utf-8'))
+
+                with open(tmp_path, 'rb') as f:
+                    content_bytes = f.read()
+                content = content_bytes.decode('utf-8')
+                logger.info(
+                    f"sasdata2polars DISK temp file size: {len(content)} bytes, content: {repr(content[:200])}"
+                )
+
+                if len(content) == 0:
+                    logger.warning(
+                        "sasdata2polars DISK: temp file is empty, returning empty DataFrame"
+                    )
+                    schema_clean = {}
+                    for k, v in schema.items():
+                        if v is not None:
+                            schema_clean[k] = v
+                    return (
+                        pl.DataFrame(schema=schema_clean)
+                        if schema_clean
+                        else pl.DataFrame()
+                    )
+
+                if polars_mode == 'LAZY':
+                    df = pl.scan_csv(
+                        tmp_path,
+                        has_header=False,
+                        new_columns=dvarlist,
+                        separator=colsep,
+                        schema_overrides=schema,
+                        null_values='.',
+                        ignore_errors=True,
+                        truncate_ragged_lines=True,
+                    )
+                else:
+                    df = pl.read_csv(
+                        tmp_path,
+                        has_header=False,
+                        new_columns=dvarlist,
+                        separator=colsep,
+                        schema=schema,
+                        null_values='.',
+                        ignore_errors=True,
+                        truncate_ragged_lines=True,
+                    )
+                    if os.path.exists(tmp_path):
+                        os.unlink(tmp_path)
+                    df = PolarsTypeMapper.convert_numeric_to_boolean(df)
+            else:
+                rsep = rowsep + '\n'
+                import tempfile
+
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp:
+                    tmp_path = tmp.name
+                with open(tmp_path, 'wb') as f:
+                    sockout = _read_sock(
+                        io=self,
+                        method='STREAM',
+                        rsep=rsep.encode(),
+                        rowsep=rowsep.encode(),
+                        lstcodeo=lstcodeo.encode(),
+                        logcodeb=logcodeb,
+                    )
+                    while True:
+                        chunk = sockout.read(32768)
+                        if not chunk:
+                            break
+                        decoded = chunk
+                        if isinstance(decoded, bytes):
+                            decoded = decoded.decode('utf-8')
+                        if decoded.startswith('\ufeff'):
+                            decoded = decoded[1:]
+                        lines = decoded.split(rsep)
+                        cleaned_lines = [
+                            line.rstrip(rowsep).rstrip('\x02').strip()
+                            for line in lines if line.strip()
+                        ]
+                        f.write(('\n'.join(cleaned_lines) + '\n').encode('utf-8'))
+
+                with open(tmp_path, 'rb') as f:
+                    content_bytes = f.read()
+                content = content_bytes.decode('utf-8')
+                logger.info(
+                    f"sasdata2polars STREAM temp file size: {len(content)} bytes, content: {repr(content[:200])}"
+                )
+
+                if len(content) == 0:
+                    logger.warning(
+                        "sasdata2polars STREAM: temp file is empty, returning empty DataFrame"
+                    )
+                    if os.path.exists(tmp_path):
+                        os.unlink(tmp_path)
+                    schema_clean = {}
+                    for k, v in schema.items():
+                        if v is not None:
+                            schema_clean[k] = v
+                    return (
+                        pl.DataFrame(schema=schema_clean)
+                        if schema_clean
+                        else pl.DataFrame()
+                    )
+
+                if polars_mode == 'LAZY':
+                    df = pl.scan_csv(
+                        tmp_path,
+                        has_header=False,
+                        new_columns=dvarlist,
+                        separator=colsep,
+                        schema_overrides=schema,
+                        null_values='.',
+                        ignore_errors=True,
+                        truncate_ragged_lines=True,
+                    )
+                    # Don't delete temp file for LAZY mode - it needs to persist until collect()
+                else:
+                    df = pl.read_csv(
+                        tmp_path,
+                        has_header=False,
+                        new_columns=dvarlist,
+                        separator=colsep,
+                        schema=schema,
+                        null_values='.',
+                        ignore_errors=True,
+                        truncate_ragged_lines=True,
+                    )
+                    if os.path.exists(tmp_path):
+                        os.unlink(tmp_path)
+                    df = PolarsTypeMapper.convert_numeric_to_boolean(df)
+            return df
+        except Exception as e:
+            logger.error(f"Error in sasdata2polars native transfer: {e}")
+            return None
+
+    def polars2sasdata(
+        self,
+        df: '<Polars Data Frame object>',
+        table: str = 'a',
+        libref: str = '',
+        keep_outer_quotes: bool = False,
+        embedded_newlines: bool = True,
+        LF: str = '\x01',
+        CR: str = '\x02',
+        colsep: str = '\x03',
+        colrep: str = ' ',
+        datetimes: dict = {},
+        outfmts: dict = {},
+        labels: dict = {},
+        outdsopts: dict = {},
+        encode_errors=None,
+        char_lengths=None,
+        **kwargs,
+    ):
+        """
+        This method imports a Polars Data Frame to a SAS Data Set.
+        """
+        from .polars_types import PolarsTypeMapper, POLARS_AVAILABLE
+
+        if not POLARS_AVAILABLE:
+            raise ImportError("polars is not installed")
+
+        import polars as pl
+
+        # Validate table name - must start with letter or underscore
+        if table and not table[0].isalpha() and table[0] != '_':
+            raise ValueError(
+                f"Invalid table name '{table}': must start with a letter or underscore"
+            )
+
+        # Validate column names - check for invalid characters
+        invalid_chars = set('!@#$%^&*()+={}[]|\\:;"<>,?/`~')
+        for col in (df.collect_schema().names() if hasattr(df, 'collect_schema') else df.columns):
+            if any(c in invalid_chars for c in str(col)):
+                raise ValueError(
+                    f"Invalid column name '{col}': contains invalid characters"
+                )
+
+        # Handle LazyFrame
+        if hasattr(df, 'collect'):
+            streaming = kwargs.get('streaming', False)
+            if streaming:
+                df = df.collect(engine='streaming')
+            else:
+                df = df.collect()
+
+        # Generate char_lengths from Polars dataframe (native, no pandas)
+        if char_lengths is None:
+            char_lengths = {}
+            for col in df.columns:
+                is_string = df.schema[col] == pl.String
+                if not is_string and len(df) > 0:
+                    sample = df.select(pl.col(col).head(1)).to_numpy().flatten()
+                    if len(sample) > 0 and isinstance(sample[0], str):
+                        is_string = True
+                if is_string:
+                    if df.schema[col] == pl.String:
+                        if len(df) > 0:
+                            max_len = df.select(
+                                pl.col(col).str.len_bytes().max()
+                            ).item()
+                            if max_len is None:
+                                max_len = 8
+                            max_len = max(int(max_len), 8)
+                        else:
+                            max_len = 8
+                        char_lengths[col.upper()] = str(max_len)
+                    else:
+                        char_lengths[col.upper()] = '8'
+                else:
+                    char_lengths[col.upper()] = '8'
+
+        method = kwargs.get('method', 'STREAM').upper()
+
+        if method == 'STREAM':
+            # Native STREAM: write Polars data directly via datalines, no pandas conversion
+            input_stmt = ""
+            xlate_stmt = ""
+            format_stmt = ""
+            length_stmt = ""
+            label_stmt = ""
+            dts = []
+            ncols = len(df.columns)
+            lf_char = LF
+            cr_char = CR
+            delim = "'" + '%02x' % ord(colsep.encode(self.sascfg.encoding)) + "'x "
+
+            dts_upper = {k.upper(): v for k, v in datetimes.items()}
+            dts_keys = dts_upper.keys()
+            fmt_upper = {k.upper(): v for k, v in outfmts.items()}
+            fmt_keys = fmt_upper.keys()
+            lab_upper = {k.upper(): v for k, v in labels.items()}
+            lab_keys = lab_upper.keys()
+            chr_upper = {k.upper(): v for k, v in char_lengths.items()}
+
+            if encode_errors is None:
+                encode_errors = 'fail'
+
+            longname = False
+            for name in df.columns:
+                colname = str(name).replace("'", "''")
+                if len(colname.encode(self.sascfg.encoding)) > 32:
+                    warnings.warn("Column '{}' in Polars DataFrame is too long for SAS. Rename to 32 bytes or less".format(colname),
+                             RuntimeWarning)
+                    longname = True
+                col_up = str(name).upper()
+                input_stmt += "input '" + colname + "'n "
+                if col_up in lab_keys:
+                    label_stmt += "label '" + colname + "'n =" + lab_upper[col_up] + ";\n"
+                if col_up in fmt_keys:
+                    format_stmt += "'" + colname + "'n " + fmt_upper[col_up] + " "
+
+                dtype = df.schema[name]
+                if dtype == pl.String:
+                    try:
+                        length_stmt += " '" + colname + "'n $" + str(chr_upper[col_up])
+                    except KeyError:
+                        length_stmt += " '" + colname + "'n $" + str(max(8, int(df.select(pl.col(name).str.len_bytes().max()).item() or 8)))
+                    if keep_outer_quotes:
+                        input_stmt += "~ "
+                    dts.append('C')
+                    if embedded_newlines:
+                        xlate_stmt += " '" + colname + "'n = translate('" + colname + "'n, '0A'x, '" + '%02x' % ord(LF.encode(self.sascfg.encoding)) + "'x);\n"
+                        xlate_stmt += " '" + colname + "'n = translate('" + colname + "'n, '0D'x, '" + '%02x' % ord(CR.encode(self.sascfg.encoding)) + "'x);\n"
+                elif dtype in (pl.Date, pl.Datetime, pl.Time):
+                    length_stmt += " '" + colname + "'n 8"
+                    input_stmt += ":B8601DT26.6 "
+                    if col_up not in dts_keys:
+                        if col_up not in fmt_keys:
+                            format_stmt += "'" + colname + "'n E8601DT26.6 "
+                    else:
+                        if dts_upper[col_up].lower() == 'date':
+                            if col_up not in fmt_keys:
+                                format_stmt += "'" + colname + "'n E8601DA. "
+                            xlate_stmt += " '" + colname + "'n = datepart('" + colname + "'n);\n"
+                        elif dts_upper[col_up].lower() == 'time':
+                            if col_up not in fmt_keys:
+                                format_stmt += "'" + colname + "'n E8601TM. "
+                            xlate_stmt += " '" + colname + "'n = timepart('" + colname + "'n);\n"
+                        else:
+                            if col_up not in fmt_keys:
+                                format_stmt += "'" + colname + "'n E8601DT26.6 "
+                    dts.append('D')
+                elif dtype == pl.Boolean:
+                    length_stmt += " '" + colname + "'n 8"
+                    dts.append('B')
+                else:
+                    length_stmt += " '" + colname + "'n 8"
+                    dts.append('N')
+                input_stmt += ';\n'
+
+            if longname:
+                raise SASDFNamesToLongError(Exception)
+
+            # Build SAS data step code
+            code = "data "
+            if len(libref):
+                code += libref + "."
+            code += "'" + table.strip().replace("'", "''") + "'n"
+            if outdsopts:
+                code += '(' + ' '.join([f"{k}={v}" for k, v in outdsopts.items()]) + ');\n'
+            else:
+                code += ";\n"
+            if length_stmt:
+                code += "length" + length_stmt + ";\n"
+            if format_stmt:
+                code += "format " + format_stmt + ";\n"
+            code += label_stmt
+            code += "infile datalines delimiter=" + delim + " STOPOVER;\n"
+            code += "input @;\nif _infile_ = '' then delete;\nelse do;\n"
+            code += input_stmt + xlate_stmt + ";\n"
+            code += "end;\n"
+            code += "datalines4;"
+            self._asubmit(code, "text")
+
+            # Write data rows from Polars directly (no pandas)
+            blksz = int(kwargs.get('blocksize', 32767))
+            noencode = self._sb.sascei == 'utf-8' or encode_errors == 'ignore'
+            row_num = 0
+            data_code = ""
+
+            for row in df.iter_rows():
+                row_num += 1
+                card = ""
+                for col_idx in range(ncols):
+                    val = row[col_idx]
+                    if dts[col_idx] == 'N':
+                        var = '.' if val is None or (isinstance(val, float) and val != val) else str(val)
+                    elif dts[col_idx] == 'C':
+                        if val is None:
+                            var = ' ' + colsep
+                        else:
+                            var = str(val)
+                            if len(var) == 0 or len(var) == var.count(' '):
+                                var += colsep
+                            else:
+                                if var.startswith(';;;;'):
+                                    var = ' ' + var
+                                var = var.replace(colsep, colrep)
+                    elif dts[col_idx] == 'B':
+                        var = str(int(val)) if val is not None else '.'
+                    elif dts[col_idx] == 'D':
+                        if val is None:
+                            var = '.'
+                        else:
+                            var = str(val)[:26]
+
+                    if embedded_newlines:
+                        var = var.replace(LF, colrep).replace(CR, colrep)
+                        var = var.replace('\n', LF).replace('\r', CR)
+
+                    card += var + "\n"
+
+                data_code += card
+
+                if len(data_code) > blksz:
+                    if not noencode:
+                        if encode_errors == 'fail':
+                            try:
+                                data_code.encode(self.sascfg.encoding)
+                            except Exception as e:
+                                self._asubmit(";;;;\n;;;;", "text")
+                                self.submit("quit;", 'text')
+                                logger.error("Transcoding error encountered. Data transfer stopped on or before row " + str(row_num))
+                                logger.error("Polars DataFrame contains characters that can't be transcoded.\n" + str(e))
+                                return row_num
+                        else:
+                            data_code = data_code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
+
+                    self._asubmit(data_code, "text")
+                    data_code = ""
+
+            # Send remaining data and terminate datalines
+            if data_code:
+                if not noencode:
+                    if encode_errors == 'fail':
+                        try:
+                            data_code.encode(self.sascfg.encoding)
+                        except Exception as e:
+                            self._asubmit(";;;;\n;;;;", "text")
+                            self.submit("quit;", 'text')
+                            logger.error("Transcoding error encountered.\n" + str(e))
+                            return row_num
+                    else:
+                        data_code = data_code.encode(self.sascfg.encoding, errors='replace').decode(self.sascfg.encoding)
+                self._asubmit(data_code, "text")
+
+            self._asubmit(";;;;\n;;;;", "text")
+            ll = self.submit("quit;", 'text')
+            if "We failed in Submit" in ll['LOG']:
+                logger.error("Failure in the IOM client code, likely a transcoding error.\n" + ll['LOG'].partition("END We failed in Submit\n")[0])
+            return None
+
+        # Fallback to dataframe2sasdata via pandas for DISK method
+        pdf = df.to_pandas()
+        return self.dataframe2sasdata(
+            pdf,
+            table,
+            libref,
+            keep_outer_quotes,
+            embedded_newlines,
+            LF,
+            CR,
+            colsep,
+            colrep,
+            datetimes,
+            outfmts,
+            labels,
+            outdsopts,
+            encode_errors,
+            char_lengths,
+            **kwargs,
+        )
+
     def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
                           rowsep: str = '\x01', colsep: str = '\x02',
                           rowrep: str = ' ',    colrep: str = ' ',
@@ -3434,6 +4036,3 @@ sas_linetype_mapping = {
 8 : "Note",
 9 : "Message"
 }
-
-
-
