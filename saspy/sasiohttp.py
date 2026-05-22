@@ -74,9 +74,9 @@ except ImportError:
     pass
 
 class SASconfigHTTP:
-    '''
+    """
     This object is not intended to be used directly. Instantiate a SASsession object instead
-    '''
+    """
     def __init__(self, session, **kwargs):
         self._kernel   = kwargs.get('kernel', None)
         SAScfg         = session._sb.sascfg.SAScfg
@@ -2242,6 +2242,192 @@ class SASsessionHTTP():
         self._log += self._getlog(jobid)
         ll = self.submit("quit;", 'text')
         return None
+
+    def sasdata2polars(self, table: str, libref: str ='', dsopts: dict = None,
+                      method: str = 'STREAM', **kwargs) -> '<Polars Data Frame object>':
+      """
+      This method exports the SAS Data Set to a Polars Data Frame, returning the Data Frame object.
+      """
+      from .polars_types import PolarsTypeMapper, POLARS_AVAILABLE
+      if not POLARS_AVAILABLE:
+         raise ImportError("polars is not installed")
+
+      import polars as pl
+      import json
+      dsopts = dsopts if dsopts is not None else {}
+      
+      tsmax = kwargs.get('tsmax', None)
+      tsmin = kwargs.get('tsmin', None)
+
+      if libref:
+         tabname = libref+".'"+table.strip().replace("'", "''")+"'n "
+      else:
+         tabname = "'"+table.strip().replace("'", "''")+"'n "
+
+      # 1. Gather Metadata via JSON API
+      code  = "data work.sasdata2dataframe / view=work.sasdata2dataframe; set "+tabname+self._sb._dsopts(dsopts)+";run;\n"
+      ll = self.submit(code, "text")
+
+      conn = self.sascfg.HTTPConn; conn.connect()
+      headers={"Accept":"application/vnd.sas.collection+json", "Authorization":"Bearer "+self.sascfg._token}
+      try:
+         conn.request('GET', f"/compute/sessions/{self.pid}/data/work/sasdata2dataframe/columns?start=0&limit=9999999", headers=headers)
+         req = conn.getresponse()
+         status = req.status
+         resp = req.read()
+      except:
+         conn.close()
+         raise
+
+      try:
+         js = json.loads(resp.decode(self.sascfg.encoding))
+         varlist, vartype = [], []
+         nvars = js.get('count')
+         lst = js.get('items')
+         for i in range(len(lst)):
+            varlist.append(lst[i].get('name'))
+            vartype.append(lst[i].get('type'))
+         dvarlist = list(varlist)
+         for i in range(len(varlist)):
+            varlist[i] = varlist[i].replace("'", "''")
+      except Exception as e:
+         logger.error(f"Failed to gather metadata for Polars conversion: {e}")
+         conn.close()
+         return None
+
+      # 2. Gather Format Info
+      topts = dict(dsopts)
+      topts.pop('firstobs', None)
+      topts.pop('obs', None)
+      code = "data work._n_u_l_l_;output;run;\ndata _null_; set work._n_u_l_l_ "+tabname+self._sb._dsopts(topts)+";put 'FMT_CATS=';\n"
+      for i in range(nvars):
+         code += f"_tom = vformatn('{varlist[i]}'n);put _tom;\n"
+      code += "stop;\nrun;\nproc delete data=work._n_u_l_l_;run;"
+      ll = self.submit(code, "text")
+      try:
+         l2 = ll['LOG'].rpartition("FMT_CATS=")
+         l2 = l2[2].partition("\n")
+         varcat = l2[2].split("\n", nvars)
+         del varcat[nvars]
+      except Exception as e:
+         logger.error(f"Failed to gather format metadata for Polars conversion: {e}")
+         conn.close()
+         return None
+
+      # 3. Build Schema and Export Code
+      schema = {dvarlist[i]: PolarsTypeMapper.get_polars_dtype('NUM' if vartype[i]=='FLOAT' else 'CHAR', varcat[i]) for i in range(nvars)}
+      
+      # Use Proc Export to CSV for native reading
+      code = f"filename _tomodsx '{self._sb.workpath}_tomodsx' lrecl={self.sascfg.lrecl} recfm=v encoding='utf-8';\n"
+      code += "proc export data=work.sasdata2dataframe outfile=_tomodsx dbms=csv replace; run;\n"
+      code += "proc delete data=work.sasdata2dataframe(memtype=view);run;\nfilename _tomodsx;"
+      ll = self.submit(code, 'text')
+      
+      code = f"filename _sp_updn '{self._sb.workpath}_tomodsx' recfm=F encoding=binary lrecl=4096;"
+      self.submit(code, "text")
+
+      # 4. Stream to Polars
+      headers={"Accept":"*/*","Content-Type":"application/octet-stream", "Authorization":"Bearer "+self.sascfg._token}
+      polars_mode = kwargs.get('polars_mode', 'EAGER').upper()
+      try:
+         conn.request('GET', f"{self._uri_files}/_sp_updn/content", headers=headers)
+         req = conn.getresponse()
+         
+         if method.upper() == 'DISK':
+            import tempfile
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
+               tmp_path = tmp.name
+            with open(tmp_path, 'wb') as f:
+               while True:
+                  chunk = req.read(32768)
+                  if not chunk: break
+                  f.write(chunk)
+            
+            if polars_mode == 'LAZY':
+               df = pl.scan_csv(tmp_path, has_header=True, schema_overrides=schema, null_values='.', ignore_errors=True)
+               # Don't delete temp file for LAZY mode - it needs to persist until collect()
+            else:
+               df = pl.read_csv(tmp_path, has_header=True, schema_overrides=schema, null_values='.', ignore_errors=True)
+               if os.path.exists(tmp_path): os.unlink(tmp_path)
+         else:
+            # req is a http.client.HTTPResponse, which is file-like.
+            # However, it might not be fully compatible with pl.read_csv if it's not seekable.
+            # But pl.read_csv should handle streams.
+            df = pl.read_csv(req, has_header=True, schema_overrides=schema, null_values='.', ignore_errors=True)
+            if polars_mode == 'LAZY':
+               df = df.lazy()
+         return df
+      except Exception as e:
+         logger.error(f"Error in sasdata2polars native transfer: {e}")
+         return None
+      finally:
+         conn.close()
+         self.submit("data _null_; rc = fdelete('_sp_updn'); run;\nfilename _sp_updn;", "text")
+
+    def polars2sasdata(self, df: '<Polars Data Frame object>', table: str ='a',
+                      libref: str ="", keep_outer_quotes: bool=False,
+                                       embedded_newlines: bool=True,
+                      LF: str = '\x01', CR: str = '\x02',
+                      colsep: str = '\x03', colrep: str = ' ',
+                      datetimes: dict={}, outfmts: dict={}, labels: dict={},
+                      outdsopts: dict={}, encode_errors = None, char_lengths = None,
+                      **kwargs):
+      """
+      This method imports a Polars Data Frame to a SAS Data Set.
+      """
+      from .polars_types import PolarsTypeMapper, POLARS_AVAILABLE
+      if not POLARS_AVAILABLE:
+         raise ImportError("polars is not installed")
+
+      import polars as pl
+      # Handle LazyFrame
+      if hasattr(df, 'collect'):
+         streaming = kwargs.get('streaming', False)
+         df = df.collect(streaming=streaming)
+
+      # 1. Generate Metadata and SAS Code
+      meta = PolarsTypeMapper.get_sas_transfer_metadata(
+         df, datetimes, outfmts, labels, char_lengths, 
+         keep_outer_quotes, embedded_newlines, LF, CR
+      )
+      
+      delim = "'"+'%02x' % ord(colsep.encode(self.sascfg.encoding))+"'x "
+      
+      tabname = table.strip().replace("'", "''")
+      code = "data "
+      if len(libref): code += libref+"."
+      code += f"'{tabname}'n"
+      code += "(" + ' '.join([f"{k}={v}" for k, v in outdsopts.items()]) + ");\n" if outdsopts else ";\n"
+      if meta['length']: code += f"length {meta['length']};\n"
+      if meta['format']: code += f"format {meta['format']};\n"
+      code += meta['label']
+      code += f"infile datalines delimiter={delim} STOPOVER;\n"
+      code += "input @;\nif _infile_ = '' then delete;\nelse do;\n"
+      code += f" {meta['input']} {meta['xlate']};\n"
+      code += "end;\nrun;\ndatalines4;\n"
+      # 2. Submit header and stream data in chunks
+      jobid = self._asubmit(code, "text")
+      self._log += self._getlog(jobid)
+
+      blksz = int(kwargs.get('blocksize', 1000000))
+      
+      # Use Polars write_csv to generate the data stream
+      import io
+      bio = io.BytesIO()
+      df.write_csv(bio, separator=colsep, include_header=False, null_value='.', quote_style='always')
+      
+      data = bio.getvalue()
+      for i in range(0, len(data), blksz):
+         chunk = data[i:i+blksz].decode('utf-8', errors='replace')
+         jobid = self._asubmit(chunk, "text")
+         self._log += self._getlog(jobid)
+
+      # 3. Finalize
+      jobid = self._asubmit(";;;;\n;;;;", "text")
+      self._log += self._getlog(jobid)
+      ll = self.submit("quit;", 'text')
+      
+      return self._sas_data_object(table, libref)
 
     def sasdata2dataframe(self, table: str, libref: str ='', dsopts: dict = None,
                           rowsep: str = '\x01', colsep: str = '\x02',

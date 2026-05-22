@@ -85,6 +85,17 @@ If you'd like to see more ways to install from the conda-forge channel please lo
 To use this module after installation, you need to copy the example sascfg.py file to a
 sascfg_personal.py and edit sascfg_personal.py per the instructions in the next section.
 
+Optional Dependencies
+---------------------
+
+SASPy has several optional dependencies that enable additional functionality:
+
+- **pyarrow** - Required for Apache Arrow and Parquet support. Install with: ``pip install pyarrow``
+- **polars** - Required for Polars DataFrame integration. Install with: ``pip install polars``
+
+These dependencies are automatically detected at runtime. If not installed, the corresponding
+features will be disabled with a warning message.
+
 * If you run into any problems, see :doc:`troubleshooting`.
 * If you have questions, open an issue at https://github.com/sassoftware/saspy/issues.
 

@@ -132,6 +132,39 @@ reads the data frame and creates a SAS data set in the SAS session.
     hr = sas.df2sd(hr_pd)  # the short form of: hr = sas.dataframe2sasdata(hr_pd)
 
 
+Polars DataFrame
+~~~~~~~~~~~~~~~~
+SASPy supports Polars DataFrames for efficient data exchange. Polars provides
+streaming data processing which is beneficial for large datasets.
+
+.. code-block:: ipython3
+
+    import polars as pl
+
+    # Read CSV into Polars DataFrame
+    hr_pl = pl.read_csv("./HR_comma_sep.csv")
+
+    # Convert to SAS dataset
+    hr = sas.df2sd(hr_pl)  # or: sas.polars2sasdata(hr_pl)
+
+    # Convert SAS dataset back to Polars
+    hr_polars = hr.to_polars()  # or: sas.sasdata2polars(hr)
+
+For very large datasets, you can use the streaming engine to avoid loading
+entire datasets into memory:
+
+.. code-block:: ipython3
+
+    # Streaming conversion from SAS to Polars
+    stream = hr.sasdata2polarsSTREAM()
+    for batch in stream:
+        process(batch)
+
+    # Streaming conversion from Polars to SAS
+    lazy_df = pl.scan_csv("./large_file.csv")
+    sas.polars2sasdataSTREAM(lazy_df)
+
+
 Existing SAS data set
 ~~~~~~~~~~~~~~~~~~~~~
 In the following example, no data file is accessible to Python. An existing

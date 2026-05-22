@@ -83,6 +83,15 @@
 2. Arrow-based Parquet conversion with optional parameter
 3. Support for converting Parquet files to SAS datasets via Arrow
 
+-   `Enhancement` Added Polars DataFrame support:
+
+1. Native Polars DataFrame to SAS dataset conversion (polars2sasdata)
+2. SAS dataset to Polars DataFrame conversion (sasdata2polars)
+3. Streaming engine for large datasets (sasdata2polarsSTREAM, polars2sasdataSTREAM)
+4. Disk-based mode for very large datasets (sasdata2polarsDISK)
+5. LazyFrame support for query optimization
+6. Automatic type mapping between SAS and Polars data types
+
 - `Enhancement` Enhanced metadata retrieval:
 
 1. Add labels parameter to list_tables() to optionally retrieve dataset labels
