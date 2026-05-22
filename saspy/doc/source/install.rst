@@ -86,7 +86,7 @@ To use this module after installation, you need to copy the example sascfg.py fi
 sascfg_personal.py and edit sascfg_personal.py per the instructions in the next section.
 
 Optional Dependencies
---------------------
+---------------------
 
 SASPy has several optional dependencies that enable additional functionality:
 
