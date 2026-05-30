@@ -1786,7 +1786,7 @@ Will use HTML5 for this SASsession.""")
         return len(x.encode(self.sascfg.encoding, errors='replace'))
 
     def polars2sasdata(self, df: '<Polars Data Frame object>', table: str ='a',
-                      libref: str ="", keep_outer_quotes: bool=False,
+                      libref: str ='', keep_outer_quotes: bool=False,
                                        embedded_newlines: bool=True,
                       LF: str = '\x01', CR: str = '\x02',
                       colsep: str = '\x03', colrep: str = ' ',
