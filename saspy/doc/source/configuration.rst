@@ -558,30 +558,6 @@ Which authentication mechanism you use depends upon how the Workspace server was
 
 
 
-ATTN, log4j vulnerabilities found in Dec 2021
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Update to this for SASPy V4.0.0:
-Replacing the versions with 2.17.1 and 2.12.4 now, as they are currently the latest fix versions.
-
-There are a number of vulnerabilities in log4j and Apache provided new releases of log4j to address these.
-At the time of this writing (SASPy V3.7.8), 2.16.0 was the current newest release that fixed these, and 2.12.2 was added
-to address them in a version that still supports Java 7. But the current versions are now 2.17.1 and 2.12.4.
-
-SASPy still provides support for Java 7 so both
-2.12.4 and 2.17.1 are included in the SASPy deployment. SASPy configures the classpath by default and uses
-the 2.12.4 jars to maintain compatibility with Java 7. There is a new configuration definition key, 'log4j',
-that can be used to cause SASPy to use the 2.17.1 version instead. If there is another version you want to
-use, it can be done by providing the 'classpath' key to override the classpath SASPy would generate, specifying
-whichever log4j jar file you want to use (you have to provide the files themselves). Note that if doing this, you
-should use the same classpath as SASPy generates, just replacing the log4j jar files with the ones you
-want to use.
-
-Also note that SASPy does NOT expose any of the log4j vulnerabilities because it doesn't use log4j and doesn't
-even initialize it in its Java process it spawns for the IOM client. So none of the various log4j vulnerabilities
-are exposed via the SASPy client.
-
-
 ATTN, as of saspy version 3.3.3, the classpath is no longer required in your configuration file!
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -672,9 +648,6 @@ iomhost -
     This provides Grid HA (High Availability)
 iomport -
     (Required) The port that object spawner is listening on for workspace server connections (workspace server port - not object spawner port!).
-log4j -
-    SASPy, as of V4.0.0 now uses V2.12.4 log4j (by default) to mitigate the vulnerabilities found in Dec 2021. V2.17.1 is also included
-    in the deployment, but it doesn't support Java 7. '2.12.4' and '2.17.1' are the 2 valid values for this key, to chose which version to use.
 classpath -
     (No longer Required) As of V3.3.3 this is no longer required. See instuctions above (ATTN, as of saspy version 3.3.3, the classpath is no longer required!)
     Note that you can still provide this and override the classpath SASPy generates, but that is not recommended under any normal circumstance.
@@ -830,9 +803,6 @@ Obviously, use the correct path for your system:
 
 java      -
     (Required) The path to the Java executable to use.
-log4j -
-    SASPy, as of V4.0.0 now uses V2.12.4 log4j (by default) to mitigate the vulnerabilities found in Dec 2021. V2.17.1 is also included
-    in the deployment, but it doesn't support Java 7. '2.12.4' and '2.17.1' are the 2 valid values for this key, to chose which version to use.
 classpath -
     (No longer Required) As of V3.3.3 this is no longer required. See instuctions above (ATTN, as of saspy version 3.3.3, the classpath is no longer required!)
     Note that you can still provide this and override the classpath SASPy generates, but that is not recommended under any normal circumstance.

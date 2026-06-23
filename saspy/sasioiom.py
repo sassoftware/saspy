@@ -192,9 +192,9 @@ class SASconfigIOM:
                 logger.warning("Parameter 'log4j' passed to SAS_session was invalid. Using the default of 2.12.4.")
                 self.log4j = '2.12.4'
 
-            cp   += delim+cpath+"log4j-1.2-api-{}.jar".format(self.log4j)
-            cp   += delim+cpath+"log4j-api-{}.jar".format(self.log4j)
-            cp   += delim+cpath+"log4j-core-{}.jar".format(self.log4j)
+            #cp   += delim+cpath+"log4j-1.2-api-{}.jar".format(self.log4j)
+            #cp   += delim+cpath+"log4j-api-{}.jar".format(self.log4j)
+            #cp   += delim+cpath+"log4j-core-{}.jar".format(self.log4j)
 
             cp   += delim+cpath+"sas.security.sspi.jar"
             cp   += delim+cpath+"sas.core.jar"
