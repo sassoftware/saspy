@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.108.0] - 2026-06-23
+
+### Added
+
+-   `None` Nothing Added
+### Changed
+
+-   `Enhancement` Upgrade to new version of sas.svc.connection.jar that no longer has a required dependency on log4j.
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.107.1] - 2026-04-23
 
 ### Added
