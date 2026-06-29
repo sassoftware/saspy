@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.108.1] - 2026-06-29
+
+### Added
+
+-   `None` Nothing Added
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Fixed IOM connection method on windows with IWA failing due to log4j changes in version 5.108.0.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.108.0] - 2026-06-23
 
 ### Added
