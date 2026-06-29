@@ -11,7 +11,7 @@
 
 ### Fixed
 
--   `Bug Fix` Fixed IOM connection method on windows using IWA failing due to log4j changes in version 5.108.0.
+-   `Bug Fix` Fixed IOM connection method on windows with IWA failing due to log4j changes in version 5.108.0.
 
 ### Removed
 
