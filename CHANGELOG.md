@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.108.2] - 2026-06-30
+
+### Added
+
+-   `None` Nothing Added
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Fix for using IOM connection method with Java7.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.108.1] - 2026-06-29
 
 ### Added
