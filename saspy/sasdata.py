@@ -709,7 +709,7 @@ class SASdata:
                         "name": "variable_name",
                         "type": "arrow_type_string",
                         "sortedby": 0,
-                        "nullable": true,
+                        "nullable": True,
                         "metadata": {
                             "sas_type": "char|num",
                             "sas_format": "format",
