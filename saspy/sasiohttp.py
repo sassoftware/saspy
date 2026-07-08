@@ -115,7 +115,6 @@ class SASconfigHTTP:
         self.delay     = cfg.get('GETstatusDelay'  , 30)
         self.excpcnt   = cfg.get('GETstatusFailcnt', 5)
         self.resession = cfg.get('reuse_session', False)
-        self.sess_started = False
 
         try:
             self.outopts = getattr(SAScfg, "SAS_output_options")
@@ -786,18 +785,18 @@ class SASsessionHTTP():
             self._endsas()
         self._sb.SASpid = None
         return
-     
+
     def _get_session(self, sessionId = None):
          conn = self.sascfg.HTTPConn
          headers = {}
          uri = None
-        
+
          if self.sascfg._token:
             headers["Authorization"] = "Bearer " + self.sascfg._token
-            
+
          if sessionId == None:
            # get the session id from the server
-           
+
            for ld in self.sascfg.ctx.get('links', []):
                if ld.get('method') == 'GET' and ld.get('rel') == 'sessions':
                    uri = ld.get('uri')
@@ -808,11 +807,11 @@ class SASsessionHTTP():
 
            conn.connect()
            headers = {"Accept": "application/vnd.sas.collection+json"}
-           
+
          else:
            uri = f'/compute/sessions/{sessionId}'
            headers = {"Accept": "application/vnd.sas.compute.session+json"}
-         
+
          #get the session or sessions
          try:
             conn.request('GET', uri, headers=headers)
@@ -828,7 +827,7 @@ class SASsessionHTTP():
             return None
 
          js = json.loads(resp.decode(self.sascfg.encoding))
-         
+
          if sessionId == None:
             sessions = js.get('items', [])
             if not sessions:
@@ -843,17 +842,17 @@ class SASsessionHTTP():
     def _startsas(self):
         if self.pid:
             return self.pid
-        
+
         conn = self.sascfg.HTTPConn; conn.connect()
-         
+
         if self.sascfg.resession and self.sascfg.serverid:
             self._session = self._get_session()
             if self._session:
                 self.pid = self._session.get('id')
                 logger.info("Reusing existing session with id "+self.pid)
             else:
-                logger.warning("No existing session found to reuse, starting a new session.") 
-        
+                logger.warning("No existing session found to reuse, starting a new session.")
+
         if self._session is None:
             if len(self.sascfg.options):
                   options = '[';
@@ -966,7 +965,7 @@ class SASsessionHTTP():
     def _endsas(self):
         rc = 0
         # only delete the session if we started it
-        if self._session and self.sascfg.sess_started:
+        if self._session and self.sess_started:
             # DELETE Session
             conn = self.sascfg.HTTPConn; conn.connect()
             headers={"Accept":"application/json","Authorization":"Bearer "+self.sascfg._token}
