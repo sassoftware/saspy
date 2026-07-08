@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.108.3] - 2026-07-08
+
+### Added
+
+-   `None` Nothing Added
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` HTTP access method - call DELETE properly on HTTP endssas calls
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.108.2] - 2026-06-30
 
 ### Added
