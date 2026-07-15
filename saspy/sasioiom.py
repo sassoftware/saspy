@@ -24,6 +24,11 @@ import warnings
 import io
 import atexit
 import re
+#import debugpy
+#debugpy.listen(5678)
+#print("Waiting for debugger attach")
+#debugpy.wait_for_client()
+#debugpy.breakpoint()
 
 import logging
 logger = logging.getLogger('saspy')
@@ -1089,6 +1094,7 @@ Will use HTML5 for this SASsession.""")
                lstf.replace(chr(12), chr(10)).replace('<body class="c body">',
                                                      '<body class="l body">').replace("font-size: x-small;",
                                                                                       "font-size:  normal;")
+        
         logf = logf.decode(errors='replace').replace(chr(12), chr(20))
         self._log += logf
         final = logf.partition(logcodei)
@@ -1097,6 +1103,16 @@ Will use HTML5 for this SASsession.""")
         prev = '%08d' %  (self._log_cnt - 1)
         zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
         logd = zz[2].replace(mj.decode(), '')
+
+        IOMLogger = logging.getLogger("IOMLogger")
+        IOMLogger.debug("DEBUG raw log start ->\n{0}\n<- DEBUG - raw log end\n".format(logf))
+        #IOMLogger.debug("DEBUG - final={0}\n".format(final))
+        #IOMLogger.debug("DEBUG - types={0}\n".format(types))
+        #IOMLogger.debug("DEBUG - z={0}\n".format(z))
+        #IOMLogger.debug("DEBUG - prev={0}\n".format(prev))
+        #IOMLogger.debug("DEBUG - zz={0}\n".format(zz))
+        IOMLogger.debug("DEBUG - clean log start ->\n{0}\n<- DEBUG - clean log end\n".format(logd))
+        IOMLogger.debug("DEBUG - clean lst start ->\n{0}\n<- DEBUG - clean lst end\n".format(lstd))
 
         if re.search(r'\nERROR[ \d-]*:', logd):
             warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
@@ -1115,10 +1131,20 @@ Will use HTML5 for this SASsession.""")
             sas_linetype_mapping
             types = types.partition(b"TomSaysTypes=")[2]
             types = list(types.rpartition(logcodeo)[0].decode(errors='replace'))
+            IOMLogger.debug("DEBUG - processing 'lines' - types={0}\n".format(types))
 
             logl = []
             logs = logd.split('\n')
-            for i in range(len(logs)):
+
+            l_logs = len(logs)
+            l_types = len(types)
+            maxlines=l_logs if l_logs <= l_types else l_types
+
+            IOMLogger.debug("DEBUG - processing 'lines' - l_logs={0}".format(l_logs))
+            IOMLogger.debug("DEBUG - processing 'lines' - l_types={0}".format(l_types))
+            IOMLogger.debug("DEBUG - processing 'lines' - maxlines={0}".format(maxlines))
+
+            for i in range(maxlines):
                 logl.append({'line':logs[i], 'type':sas_linetype_mapping[int(types[i])]})
             logd = logl
 

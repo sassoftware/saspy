@@ -34,6 +34,11 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 logger.setLevel(logging.INFO)
 logger.propagate=False
 
+IOMLogger = logging.getLogger("IOMLogger")
+IOMLogger.addHandler(logging.StreamHandler(sys.stdout))
+IOMLogger.setLevel(logging.INFO)
+IOMLogger.propagate=False
+
 def _isnotebook():
     try:
         shell = get_ipython().__class__.__name__
