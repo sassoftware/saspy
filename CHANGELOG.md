@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.108.4] - 2026-07-15
+
+### Added
+
+-   `Enhancement` Add debug logging to IOM.submit method to help solve issue.
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Make sure we don't attempt to use an index that is out of range when processing IOM.submit loglines parameter
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.108.3] - 2026-07-08
 
 ### Added
