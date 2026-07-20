@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.108.5] - 2026-07-20
+
+### Added
+
+-   `None` Nothing Added
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Fix for IOM.submit loglines parameter.  If IOM process is slow, then python process might continue on before receiving the line types.  Also cleaned up the logging in IOM access method.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.108.4] - 2026-07-15
 
 ### Added
