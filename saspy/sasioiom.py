@@ -31,7 +31,8 @@ import re
 #debugpy.breakpoint()
 
 import logging
-logger = logging.getLogger('saspy')
+# __name__ will be saspy.sasioiom
+logger = logging.getLogger(__name__)
 
 from saspy.sasexceptions import (SASDFNamesToLongError,
                                  SASIOConnectionTerminated
@@ -463,7 +464,7 @@ Will use HTML5 for this SASsession.""")
             except OSError as e:
                 msg  = "The OS Error was:\n"+e.strerror+'\n'
                 msg += "SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n"
-                msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
+                msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n\n"
                 msg += "If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n"
                 logger.fatal(msg)
                 return None
@@ -517,7 +518,7 @@ Will use HTML5 for this SASsession.""")
                 except OSError as e:
                     msg  = "The OS Error was:\n"+e.strerror+'\n'
                     msg += "SAS Connection failed. No connection established. Double check your settings in sascfg_personal.py file.\n"
-                    msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
+                    msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n\n"
                     msg += "If no OS Error above, try running the following command (where saspy is running) manually to see what is wrong:\n"+s+"\n"
                     logger.fatal(msg)
                     os._exit(-6)
@@ -531,7 +532,7 @@ Will use HTML5 for this SASsession.""")
                 logger.fatal("Java Error:\n"+error)
 
                 msg  = "Subprocess failed to start. Double check your settings in sascfg_personal.py file.\n"
-                msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
+                msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n\n"
                 msg += "If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n"
                 logger.fatal(msg)
                 self.pid = None
@@ -557,7 +558,7 @@ Will use HTML5 for this SASsession.""")
                 error += self.stdoutp.read1(4096).decode()
                 logger.fatal("Java Error:\n"+error)
                 msg  = "SAS Connection failed. No connection established. Staus="+str(rc)+"  Double check your settings in sascfg_personal.py file.\n"
-                msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n"
+                msg += "Attempted to run program "+pgm+" with the following parameters:"+str(parms)+"\n\n"
                 msg += "If no Java Error above, try running the following command (where saspy is running) manually to see if it's a problem starting Java:\n"+s+"\n"
                 logger.fatal(msg)
                 self.pid = None
@@ -1104,15 +1105,14 @@ Will use HTML5 for this SASsession.""")
         zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
         logd = zz[2].replace(mj.decode(), '')
 
-        IOMLogger = logging.getLogger("IOMLogger")
-        IOMLogger.debug("DEBUG raw log start ->\n{0}\n<- DEBUG - raw log end\n".format(logf))
-        #IOMLogger.debug("DEBUG - final={0}\n".format(final))
-        #IOMLogger.debug("DEBUG - types={0}\n".format(types))
-        #IOMLogger.debug("DEBUG - z={0}\n".format(z))
-        #IOMLogger.debug("DEBUG - prev={0}\n".format(prev))
-        #IOMLogger.debug("DEBUG - zz={0}\n".format(zz))
-        IOMLogger.debug("DEBUG - clean log start ->\n{0}\n<- DEBUG - clean log end\n".format(logd))
-        IOMLogger.debug("DEBUG - clean lst start ->\n{0}\n<- DEBUG - clean lst end\n".format(lstd))
+        logger.debug("DEBUG raw log start ->\n{0}\n<- DEBUG - raw log end\n".format(logf))
+        #logger.debug("DEBUG - final={0}\n".format(final))
+        #logger.debug("DEBUG - types={0}\n".format(types))
+        #logger.debug("DEBUG - z={0}\n".format(z))
+        #logger.debug("DEBUG - prev={0}\n".format(prev))
+        #logger.debug("DEBUG - zz={0}\n".format(zz))
+        logger.debug("DEBUG - clean log start ->\n{0}\n<- DEBUG - clean log end\n".format(logd))
+        logger.debug("DEBUG - clean lst start ->\n{0}\n<- DEBUG - clean lst end\n".format(lstd))
 
         if re.search(r'\nERROR[ \d-]*:', logd):
             warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
@@ -1126,12 +1126,16 @@ Will use HTML5 for this SASsession.""")
                     types += self.stderr[0].recv(4096000)
                 except (BlockingIOError):
                     pass
-                if types.count(logcodeo) >= 1:
+                # Need to keep reading until we get both logcodeo and "TomSaysTypes=".
+                # Looking for logcodeo to appear at least once is not enough because it appears at the end of the log
+                # and at the end of the "TomSaysTypes=" line.  So if the java process is slow, we may only get the first
+                # logcodeo value without the "TomSaysTypes=" line.
+                if types.count(logcodeo) >= 1 and types.count(b"TomSaysTypes=") >= 1:
                     break
             sas_linetype_mapping
             types = types.partition(b"TomSaysTypes=")[2]
             types = list(types.rpartition(logcodeo)[0].decode(errors='replace'))
-            IOMLogger.debug("DEBUG - processing 'lines' - types={0}\n".format(types))
+            logger.debug("DEBUG - processing 'lines' - types={0}\n".format(types))
 
             logl = []
             logs = logd.split('\n')
@@ -1140,9 +1144,9 @@ Will use HTML5 for this SASsession.""")
             l_types = len(types)
             maxlines=l_logs if l_logs <= l_types else l_types
 
-            IOMLogger.debug("DEBUG - processing 'lines' - l_logs={0}".format(l_logs))
-            IOMLogger.debug("DEBUG - processing 'lines' - l_types={0}".format(l_types))
-            IOMLogger.debug("DEBUG - processing 'lines' - maxlines={0}".format(maxlines))
+            logger.debug("DEBUG - processing 'lines' - l_logs={0}".format(l_logs))
+            logger.debug("DEBUG - processing 'lines' - l_types={0}".format(l_types))
+            logger.debug("DEBUG - processing 'lines' - maxlines={0}".format(maxlines))
 
             for i in range(maxlines):
                 logl.append({'line':logs[i], 'type':sas_linetype_mapping[int(types[i])]})
