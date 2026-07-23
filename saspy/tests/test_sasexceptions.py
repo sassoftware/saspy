@@ -41,28 +41,28 @@ class TestSASExceptions(unittest.TestCase):
         path, not a file-like object when passed a `cfgfile`.
         """
         # STDIO config file
-        with tempfile.NamedTemporaryFile("w", delete=False) as tf:
+        with tempfile.NamedTemporaryFile('w', suffix='.py', delete=False) as tf:
             tf.write(CONFIG_STDIO)
             cls.config_stdio = tf.name
 
         # SSH config file
-        with tempfile.NamedTemporaryFile("w", delete=False) as tf:
+        with tempfile.NamedTemporaryFile('w', suffix='.py', delete=False) as tf:
             tf.write(CONFIG_SSH)
             cls.config_ssh = tf.name
 
         # Windows IOM config file
-        with tempfile.NamedTemporaryFile("w", delete=False) as tf:
+        with tempfile.NamedTemporaryFile('w', suffix='.py', delete=False) as tf:
             tf.write(CONFIG_IOMWIN)
             cls.config_iomwin = tf.name
 
         # Invalid config file
-        with tempfile.NamedTemporaryFile("w", delete=False) as tf:
+        with tempfile.NamedTemporaryFile('w', suffix='.py', delete=False) as tf:
             tf.write(CONFIG_INVALID)
             cls.config_invalid = tf.name
 
         # Empty config file
-        with tempfile.NamedTemporaryFile("w", delete=False) as tf:
-            tf.write("")
+        with tempfile.NamedTemporaryFile('w', suffix='.py', delete=False) as tf:
+            tf.write('')
             cls.config_empty = tf.name
 
     @classmethod

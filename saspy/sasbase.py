@@ -111,14 +111,25 @@ def dbHTML(x):
     return(x)
 
 def list_configs() -> list:
+    """
+    Informational method which shows you what sascfg_personal.py files are found in the
+    search order used by SASPy.
+    
+    :return: list of fully qualified paths to sascfg_personal.py files found
+    """
+    
     cfg   = []
     sp    = []
     sp[:] = sys.path
     sp[0] = os.path.abspath(sp[0])
+
+    # Add the user folder after the local folder, but before the rest of the sys.path    
     sp.insert(1, os.path.expanduser('~/.config/saspy'))
+    # Add the saspy package/library folder to the front of the path (global sascfg_personal.py file)
     sp.insert(0, __file__.rsplit(os.sep+'sasbase.py')[0])
 
     for dir in sp:
+        logger.debug('Checking folder for config file: %s', dir)
         f1 = dir+os.sep+'sascfg_personal.py'
         if os.path.isfile(f1):
             cfg.append(f1)
@@ -350,8 +361,8 @@ class SASconfig(object):
             # functions, but we must support Python versions <= 3.4 (all EOL).
             cfg_expand = os.path.expanduser(cfg_override)
 
-            # Check file exists before proceeding
-            if not os.path.exists(cfg_expand):
+            # Check file exists, it is a file, and it is a python file. 
+            if not os.path.exists(cfg_expand) or not os.path.isfile(cfg_expand) or not cfg_expand.endswith('.py'):
                 raise SASConfigNotFoundError(cfg_expand)
             self.origin = cfg_expand
 
@@ -360,7 +371,8 @@ class SASconfig(object):
             tempdir       = tempfile.TemporaryDirectory()
             tempname      = "sascfg"+'%03d' % _cfgfile_cnt
 
-            shutil.copyfile(cfg_expand, os.path.join(tempdir.name, tempname+'.py'))
+            f = os.path.join(tempdir.name, tempname+'.py')
+            shutil.copyfile(cfg_expand, f)
             sys.path.append(tempdir.name)
 
             #import sascfgfile as SAScfg

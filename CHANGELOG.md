@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.108.6] - 2026-07-23
+
+### Added
+
+-   `Enhancement` Enhanced the error checking and logging on configuration file loading and increased the test coverage for configuration files in the unit tests.
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Unit tests` Fixed the unit tests related to configuration file loading
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.108.5] - 2026-07-20
 
 ### Added
