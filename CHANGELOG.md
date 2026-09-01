@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.108.7] - 2026-09-01
+
+### Added
+
+-   `None` Nothing Added
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Fix typo in appserver variable name.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.108.6] - 2026-07-23
 
 ### Added
