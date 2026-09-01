@@ -228,7 +228,7 @@ class SASconfigIOM:
 
         inapp = kwargs.get('appserver', '')
         if len(inapp) > 0:
-            if lock and len(self.apserver):
+            if lock and len(self.appserver):
                 logger.warning("Parameter 'appserver' passed to SAS_session was ignored due to configuration restriction.")
             else:
                 self.appserver = inapp
