@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.109.0] - 2026-09-03
+
+### Added
+
+-   `Feature` Polars DataFrame support: Native Polars DataFrame to SAS dataset conversion (polars2sasdata), SAS dataset to Polars DataFrame conversion (sasdata2polars), SAS dataset to Apache Arrow Table conversion (sasdata2arrow), streaming support for large datasets, automatic type mapping between SAS and Polars data types.
+-   `Feature` Optional dependency group `[polars]` for installing Polars and pyarrow extras: `pip install saspy[polars]`
+-   `Documentation` Added Polars and Apache Arrow documentation to getting started, advanced topics, and install guides.
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `None` Nothing Fixed
+
+### Removed
+
+-   `None` Nothing Removed
+
 ## [5.108.7] - 2026-09-01
 
 ### Added
