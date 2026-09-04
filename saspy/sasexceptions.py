@@ -69,7 +69,7 @@ class SASIOConnectionError(Exception):
 
 
 class SASIOConnectionTerminated(Exception):
-    def __init__(self, msg: str):
+    def __init__(self, msg: str=""):
         self.msg = msg
 
     def __str__(self):
