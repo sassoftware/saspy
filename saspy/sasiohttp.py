@@ -28,13 +28,11 @@ import re
 
 import secrets
 import hashlib
-import base64
 
 import tempfile as tf
-from time import sleep
-from threading import Thread
-
 import time
+from threading import Event, Thread
+import weakref
 
 from saspy.sasexceptions import (SASHTTPauthenticateError,
                                  SASHTTPconnectionError,
@@ -774,11 +772,21 @@ class SASsessionHTTP():
         self._sb        = kwargs.get('sb', None)
         self._log       = "\nNo SAS session established, something must have failed trying to connect\n"
         self.sascfg     = SASconfigHTTP(self, **kwargs)
+        self._stop_refresh_thread = Event()
+        self._refthd    = None
+
+        self_ref = weakref.ref(self)
+        def _cleanup():
+            obj = self_ref()
+            if obj is not None:
+                obj._endsas()
+        self._atexit_cb = _cleanup
 
         if self._session == None and self.sascfg._token:
             self._startsas()
         else:
             None
+        
 
     def __del__(self):
         if self._session:
@@ -850,6 +858,7 @@ class SASsessionHTTP():
             if self._session:
                 self.pid = self._session.get('id')
                 logger.info("Reusing existing session with id "+self.pid)
+                self.sess_started = False
             else:
                 logger.warning("No existing session found to reuse, starting a new session.")
 
@@ -956,42 +965,61 @@ class SASsessionHTTP():
 
         self._refthd = Thread(target=self._refresh_thread, args=())
         self._refthd.daemon = True
+        self._stop_refresh_thread.clear()
         self._refthd.start()
 
-        atexit.register(self._endsas)
+        # Register cleanup function for atexit, note that this is using a weakref to avoid leaving object open
+        atexit.register(self._atexit_cb)
 
         return self.pid
 
     def _endsas(self):
         rc = 0
-        # only delete the session if we started it
-        if self._session and self.sess_started:
-            # DELETE Session
-            conn = self.sascfg.HTTPConn; conn.connect()
-            headers={"Accept":"application/json","Authorization":"Bearer "+self.sascfg._token}
-            try:
-                conn.request('DELETE', self._uri_del, headers=headers)
-                req = conn.getresponse()
-                resp = req.read()
-            except:
-                pass
+        
+        if self._session :
+            # only delete the session if we started it
+            if self.sess_started:
+                # DELETE Session
+                conn = self.sascfg.HTTPConn; conn.connect()
+                headers={"Accept":"application/json","Authorization":"Bearer "+self.sascfg._token}
+                try:
+                    conn.request('DELETE', self._uri_del, headers=headers)
+                    req = conn.getresponse()
+                    resp = req.read()
+                except:
+                    pass
 
-            conn.close()
+                conn.close()
 
-            self._refthd.join(1)
+            self._stop_refresh_thread.set()
+            if self._refthd is not None and self._refthd.is_alive():
+                self._refthd.join(1)
 
             if self.sascfg.verbose:
                 logger.info("SAS server terminated for SESSION_ID="+self._session.get('id'))
             self._session   = None
             self.pid        = None
             self._sb.SASpid = None
+
+        try:
+            # Unregister our function so the object is not held in memory by atexit.
+            # Do this unconditionally
+            atexit.unregister(self._atexit_cb)
+        except ValueError:
+            pass
+
         return rc
 
     def _refresh_thread(self):
         while True:
-            sleep(3000)
-            if self.pid is None:
+            #sleep(3000)
+            if self._stop_refresh_thread.wait(3000):
+                # If we got the 'stop signal', exit the thread
                 return
+            if self.pid is None:
+                # If the session is no longer valid, exit the thread
+                return
+            # Otherwise, refresh the token because the wait timeout has elapsed and we are still active
             self._refresh_token()
 
     def _refresh_token(self):

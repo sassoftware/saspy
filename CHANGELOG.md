@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.108.8] - 2026-09-09
+
+### Added
+
+-   `None` Nothing Added
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Fixed some issues with threads and cleanup routines that were causing HTTP sessions to stay open for long periods of time.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.108.7] - 2026-09-01
 
 ### Added
