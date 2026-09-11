@@ -11,7 +11,7 @@ class TestSASets(unittest.TestCase):
         util = Utilities(cls.sas)
         procNeeded = ['arima', 'timeseries', 'ucm', 'esm', 'timeid', 'timedata']
         if not util.procFound(procNeeded):
-            cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
+            raise unittest.SkipTest("Not all of these procedures were found: %s" % str(procNeeded))
 
     @classmethod
     def tearDownClass(cls):

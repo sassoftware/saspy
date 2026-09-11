@@ -3061,7 +3061,7 @@ class SASsessionHTTP():
                     logging.warning(f"Unknown data type '{dtype} of column {column_name}. Will try cast to string")
                     pa_type = pa.string()
             # account for timestamp columns
-                if vartype[i] == 'N':
+                if vartype[i] == 'FLOAT':
                     if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
                         pa_type = pa.timestamp('ms')
                 fields.append(pa.field(column_name, pa_type))
@@ -3111,13 +3111,15 @@ class SASsessionHTTP():
                 if loop == 1:
                     logging.info("Stream ready")
                 if loop == 1 and chunk == '':
-                    logging.warning("Query returned no rows.")
-                    return
+                    logging.info("Query returned no rows, will create empty parquet table with correct schema.")
+                    # Do not exit loop if there was no data in the sas dataset, we can still create an empty parquet file with the correct schema.
+                    #return
                 # create directory if partitioned
                 elif loop == 1 and partitioned:
                     os.makedirs(parquet_file_path)
 
-                if chunk == '':
+                # do not exit the loop on the first iteration, even if the chunk is empty.  This will set up everything so that we can create a parquet file with just the schema but no rows.
+                if loop != 1 and chunk == '':
                     logging.info("Done")
                     break
                 # for spark, it is better if large files are split over multiple partitions,
@@ -3149,7 +3151,7 @@ class SASsessionHTTP():
 
                     if k_dts is None:  # don't override these if user provided their own dtypes
                         for i in range(nvars):
-                            if vartype[i] == 'N':
+                            if vartype[i] == 'FLOAT':
                                 if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
 
                                     if coerce_timestamp_errors:
@@ -3166,7 +3168,7 @@ class SASsessionHTTP():
                     if not custom_schema:
                         #cast the int64 columns to timestamp
                         for i in range(nvars):
-                            if vartype[i] == 'N':
+                            if vartype[i] == 'FLOAT':
                                 if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
                                     # Cast the integer column to the timestamp type using pyarrow.compute.cast
                                     casted_column = pc.cast(pa_table[dvarlist[i]], pa.timestamp('ms'))
@@ -3498,8 +3500,8 @@ class SASsessionHTTP():
                 if loop == 1:
                     logging.info("Stream ready")
                 if loop == 1 and chunk == '':
-                    logging.warning("Query returned no rows.")
-                    return None
+                    logging.info("Query returned no rows, will return empty arrow table with correct schema.")
+                    return arrow_schema.empty_table()  # Return empty table with schema
 
                 if chunk == '':
                     logging.info("Done")

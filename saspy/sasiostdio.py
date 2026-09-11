@@ -3479,13 +3479,15 @@ Will use HTML5 for this SASsession.""")
                 if loop == 1:
                     logging.info("Stream ready")
                 if loop == 1 and chunk == '':
-                    logging.warning("Query returned no rows.")
-                    return
+                    logging.info("Query returned no rows, will create empty parquet table with correct schema.")
+                    # Do not exit loop if there was no data in the sas dataset, we can still create an empty parquet file with the correct schema.
+                    #return
                 # create directory if partitioned
                 elif loop == 1 and partitioned:
                     os.makedirs(parquet_file_path)
 
-                if chunk == '':
+                # do not exit the loop on the first iteration, even if the chunk is empty.  This will set up everything so that we can create a parquet file with just the schema but no rows.
+                if loop != 1 and chunk == '':
                     logging.info("Done")
                     break
                 # for spark, it is better if large files are split over multiple partitions,
@@ -3876,8 +3878,8 @@ Will use HTML5 for this SASsession.""")
                 if loop == 1:
                     logging.info("Stream ready")
                 if loop == 1 and chunk == '':
-                    logging.warning("Query returned no rows.")
-                    return None
+                    logging.info("Query returned no rows, will return empty arrow table with correct schema.")
+                    return arrow_schema.empty_table()  # Return empty table with schema
 
                 if chunk == '':
                     logging.info("Done")

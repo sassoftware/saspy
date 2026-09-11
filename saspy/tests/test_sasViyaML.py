@@ -2,7 +2,6 @@ import unittest
 import saspy
 from saspy.tests.util import Utilities
 
-
 class TestSASViyaML(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -11,13 +10,17 @@ class TestSASViyaML(unittest.TestCase):
         procNeeded = ['factmac', 'fastknn', 'forest', 'gradboost', 'nnet', 'svdd', 'svmachine']
         if not util.procFound(procNeeded):
             cls.skipTest("Not all of these procedures were found: %s" % str(procNeeded))
-        cls.sas.submit("""
+        casOutput = cls.sas.submit("""
         cas mysession;
         libname mycas cas;
         data mycas.class;
         set sashelp.class;
         run;
         """)
+
+        if casOutput['LOG'].find('ERROR: The request to start or connect to a session failed. Specify a UUID to connect to an existing session') >= 0:
+            #This could be changed out for a skipTest, but then there wouldn't be any indication that we weren't using the CAS procs, so assert False for now.  Maybe change later...
+            assert False, "CAS session failed to start."
 
     @classmethod
     def tearDownClass(cls):

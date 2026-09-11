@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
 import json
-
+import weakref
+from threading import Event
 
 class TestEndsasDeletesSession(unittest.TestCase):
     def _make_session(self, sess_started: bool):
@@ -28,6 +29,14 @@ class TestEndsasDeletesSession(unittest.TestCase):
         obj._refthd = MagicMock()
         obj.pid = "abc123"
         obj._sb = MagicMock()
+        self_ref = weakref.ref(self)
+        def _cleanup():
+            obj = self_ref()
+            if obj is not None:
+                obj._endsas()
+        obj._atexit_cb = _cleanup
+        obj._stop_refresh_thread = Event()
+
         obj.sess_started = sess_started  # the attribute under test
 
         return obj, mock_conn
@@ -99,6 +108,14 @@ class TestSASsubmitTimeout(unittest.TestCase):
         io._uri_exe = "/compute/sessions/fake/jobs"
         # Prevent __del__ from complaining when the mock object is garbage-collected.
         io._refthd = MagicMock()
+        self_ref = weakref.ref(self)
+        def _cleanup():
+            obj = self_ref()
+            if obj is not None:
+                obj._endsas()
+        io._atexit_cb = _cleanup
+        io._stop_refresh_thread = Event()
+        io.sess_started = True
 
         # --- Build mock HTTP connection ---
         # POST response: job accepted (200)
