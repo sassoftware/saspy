@@ -3,7 +3,7 @@ Test suite for Arrow-related features in saspy.
 
 Tests the following functionality:
 1. Metadata enhancement: list_tables with labels, sasdata.schema
-2. Arrow support: arrow_char_lengths, sasdata2arrow, arrow2sasdata
+2. Arrow support: arrow_char_lengths, sasdata2arrow, arrow2sasdata,  importing sas datasets with no rows
 """
 
 import saspy
@@ -166,6 +166,33 @@ class TestArrowSupport(unittest.TestCase):
         df = result.to_df()
         self.assertEqual(len(df), 3)
 
+    def test_sas_dataset_with_no_rows(self):
+        """Test sasdata2arrow with sas dataset containing no rows"""
+        self.sas.submit("""proc sql; create table work.empty as select * from work.test_data where 1=0; quit;""")
+        arrow_table_empty = self.sas.sasdata2arrow(table='empty', libref='work')
+        #print("Arrow_table_empty = %s\n" % arrow_table_empty)
+        #print("Arrow_table_empty schema = %s \n" % arrow_table_empty.schema)
+        #print("Arrow_table_empty num_rows = %d\n" % arrow_table_empty.num_rows)
+        self.assertIsInstance(arrow_table_empty, pa.Table, "arrow_table_empty should be a pyarrow.Table but was %s" % type(arrow_table_empty))
+        self.assertEqual(arrow_table_empty.num_rows, 0, "The number of rows should have been 0 but was %d" % arrow_table_empty.num_rows)
+        self.assertEqual(arrow_table_empty.num_columns, 4, "The number of columns should have been 4 but was %d" % arrow_table_empty.num_columns)  # id, name, age, height
+
+        s1 = arrow_table_empty.schema
+
+        self.assertIn('id', s1.names, "The column names should have included 'id' but were %s" % arrow_table_empty.schema.names)
+        self.assertIn('name', s1.names, "The column names should have included 'id' but were %s" % arrow_table_empty.schema.names)
+        self.assertIn('age', s1.names, "The column names should have included 'id' but were %s" % arrow_table_empty.schema.names)
+        self.assertIn('height', s1.names, "The column names should have included 'id' but were %s" % arrow_table_empty.schema.names)
+
+        f1 = s1.field("id")
+        f2 = s1.field("name")
+        f3 = s1.field("age")
+        f4 = s1.field("height")
+
+        self.assertEqual(f1.type, pa.float64(), "The column type for 'id' should have been double but was %s" % f1.type)
+        self.assertEqual(f2.type, pa.string(), "The column type for 'name' should have been string but was %s" % f2.type)
+        self.assertEqual(f3.type, pa.float64(), "The column type for 'age' should have been double but was %s" % f3.type)
+        self.assertEqual(f4.type, pa.float64(), "The column type for 'height' should have been double but was %s" % f4.type)
 
 @unittest.skipIf(not PYARROW_AVAILABLE, "pyarrow is not installed")
 class TestArrowSpecialTypes(unittest.TestCase):

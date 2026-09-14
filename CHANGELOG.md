@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.109.0] - 2026-09-11
+
+### Added
+
+-   `Enhancement` sasdata2parquet() and sasdata2arrow() will now create empty parquet/arrow tables if the sas dataset is empty.  Added test cases for this behavior.
+
+### Changed
+
+-   `Enhancement` Cleanup debug messages in IOM access method
+
+### Fixed
+
+-   `Bug Fix` LOCAL IOM connection method was creating an extra SAS process on Windows and the extra process was orphaned.  This problem should now be fixed and only one process will be created and destroyed at the end of the session.
+
+-   `Bug Fix` When HTTP access method was used, sasdatat2parquet() was importing DATE types as a STRING.  That has been corrected.
+
+-   `Bug Fix` Cleanup test failures.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.108.8] - 2026-09-09
 
 ### Added

@@ -1105,14 +1105,14 @@ Will use HTML5 for this SASsession.""")
         zz = z[0].rpartition("\nE3969440A681A24088859985" + prev +'\n')
         logd = zz[2].replace(mj.decode(), '')
 
-        logger.debug("DEBUG raw log start ->\n{0}\n<- DEBUG - raw log end\n".format(logf))
-        #logger.debug("DEBUG - final={0}\n".format(final))
-        #logger.debug("DEBUG - types={0}\n".format(types))
-        #logger.debug("DEBUG - z={0}\n".format(z))
-        #logger.debug("DEBUG - prev={0}\n".format(prev))
-        #logger.debug("DEBUG - zz={0}\n".format(zz))
-        logger.debug("DEBUG - clean log start ->\n{0}\n<- DEBUG - clean log end\n".format(logd))
-        logger.debug("DEBUG - clean lst start ->\n{0}\n<- DEBUG - clean lst end\n".format(lstd))
+        logger.debug("DEBUG raw log start ->\n%s\n<- DEBUG - raw log end\n", logf)
+        #logger.debug("DEBUG - final=%s\n", final)
+        #logger.debug("DEBUG - types=%s\n", types)
+        #logger.debug("DEBUG - z=%s\n", z)
+        #logger.debug("DEBUG - prev=%s\n", prev)
+        #logger.debug("DEBUG - zz=%s\n", zz)
+        logger.debug("DEBUG - clean log start ->\n%s\n<- DEBUG - clean log end\n", logd)
+        logger.debug("DEBUG - clean lst start ->\n%s\n<- DEBUG - clean lst end\n", lstd)
 
         if re.search(r'\nERROR[ \d-]*:', logd):
             warnings.warn("Noticed 'ERROR:' in LOG, you ought to take a look and see if there was a problem")
@@ -1135,7 +1135,7 @@ Will use HTML5 for this SASsession.""")
             sas_linetype_mapping
             types = types.partition(b"TomSaysTypes=")[2]
             types = list(types.rpartition(logcodeo)[0].decode(errors='replace'))
-            logger.debug("DEBUG - processing 'lines' - types={0}\n".format(types))
+            logger.debug("DEBUG - processing 'lines' - types=%s\n", types)
 
             logl = []
             logs = logd.split('\n')
@@ -1144,9 +1144,9 @@ Will use HTML5 for this SASsession.""")
             l_types = len(types)
             maxlines=l_logs if l_logs <= l_types else l_types
 
-            logger.debug("DEBUG - processing 'lines' - l_logs={0}".format(l_logs))
-            logger.debug("DEBUG - processing 'lines' - l_types={0}".format(l_types))
-            logger.debug("DEBUG - processing 'lines' - maxlines={0}".format(maxlines))
+            logger.debug("DEBUG - processing 'lines' - l_logs=%d", l_logs)
+            logger.debug("DEBUG - processing 'lines' - l_types=%d", l_types)
+            logger.debug("DEBUG - processing 'lines' - maxlines=%d", maxlines)
 
             for i in range(maxlines):
                 logl.append({'line':logs[i], 'type':sas_linetype_mapping[int(types[i])]})
@@ -2904,13 +2904,15 @@ Will use HTML5 for this SASsession.""")
                 if loop == 1:
                     logging.info("Stream ready")
                 if loop == 1 and chunk == '':
-                    logging.warning("Query returned no rows.")
-                    return
+                    logging.info("Query returned no rows.")
+                    # Do not exit loop if there was no data in the sas dataset, we can still create an empty parquet file with the correct schema.
+                    #return
                 # create directory if partitioned
                 elif loop == 1 and partitioned:
                     os.makedirs(parquet_file_path)
 
-                if chunk == '':
+                # do not exit the loop on the first iteration, even if the chunk is empty.  This will set up everything so that we can create a parquet file with just the schema but no rows.
+                if loop != 1 and chunk == '':
                     logging.info("Done")
                     break
                 # for spark, it is better if large files are split over multiple partitions,
@@ -3285,8 +3287,8 @@ Will use HTML5 for this SASsession.""")
                 if loop == 1:
                     logging.info("Stream ready")
                 if loop == 1 and chunk == '':
-                    logging.warning("Query returned no rows.")
-                    return None
+                    logging.info("Query returned no rows, will return empty arrow table with correct schema.")
+                    return arrow_schema.empty_table()  # Return empty table with schema
 
                 if chunk == '':
                     logging.info("Done")
