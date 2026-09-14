@@ -2904,7 +2904,7 @@ Will use HTML5 for this SASsession.""")
                 if loop == 1:
                     logging.info("Stream ready")
                 if loop == 1 and chunk == '':
-                    logging.info("Query returned no rows.")
+                    logging.info("Query returned no rows, will return empty parquet table with correct schema.")
                     # Do not exit loop if there was no data in the sas dataset, we can still create an empty parquet file with the correct schema.
                     #return
                 # create directory if partitioned
