@@ -166,6 +166,46 @@ class TestArrowSupport(unittest.TestCase):
         df = result.to_df()
         self.assertEqual(len(df), 3)
 
+    def test_sd2arrow_format_inference(self):
+        """Test sd2arrow(include_attrs=True) resolves SAS date/time/datetime formats correctly.
+
+        Covers: a format missing an explicit width (date9), formats that were previously missing
+        from the canonical format lists and crashed with ArrowNotImplementedError (e8601da,
+        mdyampm, pdjulg, b8601tx), the NLSTRQTR collision (a numeric format whose name contains
+        'QTR' as a substring, which must stay numeric), and a character column with date-like
+        content (which must stay string rather than being swept into date detection).
+        """
+        self.sas.submit("""
+            data work.test_fmt_inference;
+                _d  = '15SEP2026'd;
+                _dt = dhms(_d, 13, 4, 22);
+
+                date_date9   = _d;  format date_date9   date9.;
+                date_iso     = _d;  format date_iso     e8601da.;
+                date_pdjulg  = _d;  format date_pdjulg  pdjulg.;
+                dt_datetime  = _dt; format dt_datetime  datetime.;
+                dt_mdyampm   = _dt; format dt_mdyampm   mdyampm.;
+                time_b8601tx = _dt; format time_b8601tx b8601tx.;
+                num_nlstrqtr = 2;   format num_nlstrqtr nlstrqtr5.;
+                char_date9   = put(_d, date9.);
+
+                drop _d _dt;
+            run;
+        """)
+
+        arrow_table = self.sas.sd2arrow(table='test_fmt_inference', libref='work', include_attrs=True)
+        self.assertIsInstance(arrow_table, pa.Table)
+        s = arrow_table.schema
+
+        self.assertEqual(s.field('date_date9').type, pa.date32())
+        self.assertEqual(s.field('date_iso').type, pa.date32())
+        self.assertEqual(s.field('date_pdjulg').type, pa.date32())
+        self.assertEqual(s.field('dt_datetime').type, pa.timestamp('us'))
+        self.assertEqual(s.field('dt_mdyampm').type, pa.timestamp('us'))
+        self.assertEqual(s.field('time_b8601tx').type, pa.time64('us'))
+        self.assertEqual(s.field('num_nlstrqtr').type, pa.float64())
+        self.assertEqual(s.field('char_date9').type, pa.string())
+
     def test_sas_dataset_with_no_rows(self):
         """Test sasdata2arrow with sas dataset containing no rows"""
         self.sas.submit("""proc sql; create table work.empty as select * from work.test_data where 1=0; quit;""")
