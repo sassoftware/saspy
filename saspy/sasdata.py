@@ -783,6 +783,30 @@ class SASdata:
             self.sas._lastlog = self.sas._io._log[lastlog:]
             return None
 
+        # Get each variable's format family (e.g. DATE9. -> DATE) via vformatn(), so date/time/datetime
+        # resolution below can match on the exact SAS format name instead of the width/decimal-qualified
+        # string from dictionary.columns (which would otherwise false-match, e.g. NLSTRQTR containing QTR).
+        fmtcat_map = {}
+        var_names = [str(n) for n in variables_df['name'].tolist()] if variables_df is not None and not variables_df.empty else []
+        if var_names:
+            try:
+                fmtcode  = "data work._schema_nul_;output;run;\n"
+                fmtcode += "data _null_; set work._schema_nul_ %s.'%s'n;\n" % (self.libref, self.table.replace("'", "''"))
+                fmtcode += "put 'FMTCATS_START=';\n"
+                for vn in var_names:
+                    vn_esc = vn.replace("'", "''")
+                    fmtcode += "_tom_ = vformatn('%s'n); put '%s=' _tom_;\n" % (vn_esc, vn_esc)
+                fmtcode += "put 'FMTCATS_END=';\n"
+                fmtcode += "stop;\nrun;\nproc delete data=work._schema_nul_;run;\n"
+                llf = self.sas._io.submit(fmtcode, "text")
+                block = llf['LOG'].rpartition('FMTCATS_START=')[2].partition('FMTCATS_END=')[0]
+                for line in block.strip().splitlines():
+                    if '=' in line:
+                        vname, _, cat = line.partition('=')
+                        fmtcat_map[vname.strip().upper()] = cat.strip().upper()
+            except Exception as e:
+                logger.warning("Failed to retrieve format categories for schema(): %s" % str(e))
+
         # Build dataset-level extended attributes dictionary
         ds_extended_attrs = {}
         var_extended_attrs = {}  # {var_name: {attr_name: attr_value}}
@@ -823,21 +847,20 @@ class SASdata:
             dataset_metadata['extended_attributes'] = ds_extended_attrs
 
         # SAS type to Arrow type mapping function
-        def sas_to_arrow_type(sas_type, sas_format, length):
-            """Map SAS type and format to Arrow type string."""
+        def sas_to_arrow_type(sas_type, fmtcat, length):
+            """Map SAS type and format family (from vformatn()) to Arrow type string."""
             sas_type_lower = sas_type.lower().strip() if sas_type else ''
-            sas_format_upper = sas_format.upper().strip() if sas_format else ''
+            fmtcat_upper = fmtcat.upper().strip() if fmtcat else ''
 
             if sas_type_lower in ['char', 'character']:
                 return 'string'
             elif sas_type_lower in ['num', 'numeric']:
-                # Check the variable's actual SAS format against the canonical format lists.
-                # Datetime/time are checked before date since, e.g., 'DATE' is a substring of 'DATETIME'.
-                if any(fmt in sas_format_upper for fmt in self.sas.sas_datetime_fmts):
+                # Exact match on the format family against the canonical format lists.
+                if fmtcat_upper in self.sas.sas_datetime_fmts:
                     return 'timestamp[us]'
-                elif any(fmt in sas_format_upper for fmt in self.sas.sas_time_fmts):
+                elif fmtcat_upper in self.sas.sas_time_fmts:
                     return 'time64[us]'
-                elif any(fmt in sas_format_upper for fmt in self.sas.sas_date_fmts):
+                elif fmtcat_upper in self.sas.sas_date_fmts:
                     return 'date32'
                 elif length and int(length) <= 4:
                     return 'float32'
@@ -858,8 +881,9 @@ class SASdata:
                 label = row.get('label') if type(row.get('label')) is str else ''
                 sortedby = int(row.get('sortedby'))
                 notnull = row.get('notnull')
+                fmtcat = fmtcat_map.get(str(var_name).upper(), '')
 
-                arrow_type = sas_to_arrow_type(sas_type, sas_format, length)
+                arrow_type = sas_to_arrow_type(sas_type, fmtcat, length)
 
                 column_metadata = {
                     "sas_type": sas_type,
