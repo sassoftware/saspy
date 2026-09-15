@@ -831,13 +831,14 @@ class SASdata:
             if sas_type_lower in ['char', 'character']:
                 return 'string'
             elif sas_type_lower in ['num', 'numeric']:
-                # Check format for date/time types
-                if any(fmt in sas_format_upper for fmt in ['DATE', 'YYMMDD', 'MMDDYY', 'DDMMYY', 'YYMM', 'MONYY', 'WEEKDATE', 'JULDAY', 'JULIAN']):
-                    return 'date32'
-                elif 'DATETIME' in sas_format_upper or 'DATEAMPM' in sas_format_upper:
+                # Check the variable's actual SAS format against the canonical format lists.
+                # Datetime/time are checked before date since, e.g., 'DATE' is a substring of 'DATETIME'.
+                if any(fmt in sas_format_upper for fmt in self.sas.sas_datetime_fmts):
                     return 'timestamp[us]'
-                elif 'TIME' in sas_format_upper or 'HHMM' in sas_format_upper or 'TOD' in sas_format_upper:
+                elif any(fmt in sas_format_upper for fmt in self.sas.sas_time_fmts):
                     return 'time64[us]'
+                elif any(fmt in sas_format_upper for fmt in self.sas.sas_date_fmts):
+                    return 'date32'
                 elif length and int(length) <= 4:
                     return 'float32'
                 else:
