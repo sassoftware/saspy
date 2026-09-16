@@ -2434,6 +2434,59 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return arrow_table
 
+    def _parse_sas_ts_string(self, str_col: 'pa.Array', varcat: str, col_name: str,
+                              coerce_timestamp_errors: bool) -> 'pa.Array':
+        """
+        Parse a PyArrow string column of SAS date/time/datetime values into pa.timestamp('ms').
+        Common to all access methods' sasdata2arrow/sasdata2parquet implementations.
+
+        Every SAS date format (DATE9., MMDDYY10., PDJULG., ...), time format (TIME., HHMM.,
+        B8601TX., ...), and datetime format (DATETIME., MDYAMPM., B8601DX., ...) -- i.e. every
+        format in sas_date_fmts/sas_time_fmts/sas_datetime_fmts -- is temporarily re-FORMATted
+        by the access method to one of exactly three fixed wire formats before it's ever streamed
+        out of SAS: E8601DA10. for dates, E8601TM15.6 for times, E8601DT26.6 for datetimes (see
+        the "format ... E8601DA10./E8601TM15.6/E8601DT26.6" blocks in each sasio*.py). So by the
+        time a string reaches this function, its original SAS format no longer matters -- it is
+        guaranteed to be in one of those three shapes, decided by which of the three format lists
+        `varcat` was found in.
+
+        pc.strptime() doesn't support the %f (fractional seconds) directive, and the transfer
+        format for time/datetime values always includes exactly 6 fractional digits, so those
+        are parsed separately here and added back as a millisecond duration.
+
+        Malformed values become null per-element when coerce_timestamp_errors is True (the
+        default); otherwise raises ValueError naming col_name on any unparseable value.
+
+        :param str_col: the raw string column as streamed from SAS, in the wire format described above
+        :param varcat: the column's format family, from vformatn()/varcat[i]
+        :param col_name: the column name, used only for the ValueError message
+        :param coerce_timestamp_errors: whether unparseable values become null (True) or raise (False)
+        :return: pa.Array of type pa.timestamp('ms')
+        """
+        if varcat in self.sas_date_fmts:
+            fmt, frac_col = '%Y-%m-%d', None
+        elif varcat in self.sas_time_fmts:
+            fmt, frac_col = '%H:%M:%S', pc.utf8_slice_codeunits(str_col, -6, None)
+        else:
+            fmt, frac_col = '%Y-%m-%dT%H:%M:%S', pc.utf8_slice_codeunits(str_col, -6, None)
+        main_col = str_col if frac_col is None else pc.utf8_slice_codeunits(str_col, 0, -7)
+        try:
+            ts_col = pc.strptime(main_col, format=fmt, unit='ms', error_is_null=coerce_timestamp_errors)
+        except Exception:
+            if not coerce_timestamp_errors:
+                raise ValueError(f"The column {col_name} contains an unparseable timestamp. "
+                   "Set coerce_timestamp_errors=True to cast as Null")
+            ts_col = pc.strptime(main_col, format=fmt, unit='ms', error_is_null=True)
+        if frac_col is not None:
+            valid_frac = pc.utf8_is_decimal(frac_col)
+            if not coerce_timestamp_errors and not pc.all(pc.fill_null(valid_frac, False)).as_py():
+                raise ValueError(f"The column {col_name} contains an unparseable timestamp. "
+                   "Set coerce_timestamp_errors=True to cast as Null")
+            safe_frac = pc.if_else(valid_frac, frac_col, '000000')
+            frac_ms = pc.cast(pc.divide(pc.cast(safe_frac, pa.int64()), 1000), pa.duration('ms'))
+            ts_col = pc.if_else(valid_frac, pc.add(ts_col, frac_ms), pa.scalar(None, type=ts_col.type))
+        return ts_col
+
     def arrow2sd(self, arrow_table: 'pa.Table', table: str = '_arrow', libref: str = '',
                   results: str = '', keep_outer_quotes: bool = False, 
                                      embedded_newlines: bool = True,

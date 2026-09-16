@@ -3539,31 +3539,7 @@ class SASsessionHTTP():
                         for i in ts_cols:
                             col_name = dvarlist[i]
                             str_col = pa_table.column(col_name)
-                            if varcat[i] in self._sb.sas_date_fmts:
-                                fmt, frac_col = '%Y-%m-%d', None
-                            elif varcat[i] in self._sb.sas_time_fmts:
-                                fmt, frac_col = '%H:%M:%S', pc.utf8_slice_codeunits(str_col, -6, None)
-                            else:
-                                fmt, frac_col = '%Y-%m-%dT%H:%M:%S', pc.utf8_slice_codeunits(str_col, -6, None)
-                            # pc.strptime doesn't support the %f directive, so for time/datetime
-                            # (which always carry 6 fractional digits in the transfer format) the
-                            # fractional seconds are parsed separately and added back as a duration.
-                            main_col = str_col if frac_col is None else pc.utf8_slice_codeunits(str_col, 0, -7)
-                            try:
-                                ts_col = pc.strptime(main_col, format=fmt, unit='ms', error_is_null=coerce_timestamp_errors)
-                            except Exception:
-                                if not coerce_timestamp_errors:
-                                    raise ValueError(f"The column {col_name} contains an unparseable timestamp. "
-                                       "Set coerce_timestamp_errors=True to cast as Null")
-                                ts_col = pc.strptime(main_col, format=fmt, unit='ms', error_is_null=True)
-                            if frac_col is not None:
-                                valid_frac = pc.utf8_is_decimal(frac_col)
-                                if not coerce_timestamp_errors and not pc.all(pc.fill_null(valid_frac, False)).as_py():
-                                    raise ValueError(f"The column {col_name} contains an unparseable timestamp. "
-                                       "Set coerce_timestamp_errors=True to cast as Null")
-                                safe_frac = pc.if_else(valid_frac, frac_col, '000000')
-                                frac_ms = pc.cast(pc.divide(pc.cast(safe_frac, pa.int64()), 1000), pa.duration('ms'))
-                                ts_col = pc.if_else(valid_frac, pc.add(ts_col, frac_ms), pa.scalar(None, type=ts_col.type))
+                            ts_col = self._sb._parse_sas_ts_string(str_col, varcat[i], col_name, coerce_timestamp_errors)
                             pa_table = pa_table.set_column(pa_table.column_names.index(col_name), col_name, ts_col)
 
                     # Ensure schema matches for concat
