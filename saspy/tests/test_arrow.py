@@ -175,21 +175,24 @@ class TestArrowSupport(unittest.TestCase):
         'QTR' as a substring, which must stay numeric), and a character column with date-like
         content (which must stay string rather than being swept into date detection).
         """
+        import datetime
+
         self.sas.submit("""
             data work.test_fmt_inference;
-                _d  = '15SEP2026'd;
-                _dt = dhms(_d, 13, 4, 22);
+                _d   = '15SEP2026'd;
+                _dt  = dhms(_d, 13, 4, 22.5);
+                _tod = hms(13, 4, 22.5);
 
-                date_date9   = _d;  format date_date9   date9.;
-                date_iso     = _d;  format date_iso     e8601da.;
-                date_pdjulg  = _d;  format date_pdjulg  pdjulg.;
-                dt_datetime  = _dt; format dt_datetime  datetime.;
-                dt_mdyampm   = _dt; format dt_mdyampm   mdyampm.;
-                time_b8601tx = _dt; format time_b8601tx b8601tx.;
-                num_nlstrqtr = 2;   format num_nlstrqtr nlstrqtr5.;
+                date_date9   = _d;   format date_date9   date9.;
+                date_iso     = _d;   format date_iso     e8601da.;
+                date_pdjulg  = _d;   format date_pdjulg  pdjulg.;
+                dt_datetime  = _dt;  format dt_datetime  datetime.;
+                dt_mdyampm   = _dt;  format dt_mdyampm   mdyampm.;
+                time_b8601tx = _tod; format time_b8601tx b8601tx.;
+                num_nlstrqtr = 2;    format num_nlstrqtr nlstrqtr5.;
                 char_date9   = put(_d, date9.);
 
-                drop _d _dt;
+                drop _d _dt _tod;
             run;
         """)
 
@@ -205,6 +208,16 @@ class TestArrowSupport(unittest.TestCase):
         self.assertEqual(s.field('time_b8601tx').type, pa.time64('us'))
         self.assertEqual(s.field('num_nlstrqtr').type, pa.float64())
         self.assertEqual(s.field('char_date9').type, pa.string())
+
+        # Type alone isn't enough: pc.strptime doesn't support the %f directive, which
+        # previously made every datetime/time value (they always carry fractional seconds
+        # on the wire) come back as a silent null despite the column reporting the correct
+        # type. Check the actual values, including the fractional-second component.
+        for col in ('dt_datetime', 'dt_mdyampm', 'time_b8601tx'):
+            self.assertEqual(arrow_table.column(col).null_count, 0, "%s came back null" % col)
+        df = arrow_table.to_pandas()
+        self.assertEqual(df['dt_datetime'][0], datetime.datetime(2026, 9, 15, 13, 4, 22, 500000))
+        self.assertEqual(df['time_b8601tx'][0], datetime.time(13, 4, 22, 500000))
 
     def test_sas_dataset_with_no_rows(self):
         """Test sasdata2arrow with sas dataset containing no rows"""
