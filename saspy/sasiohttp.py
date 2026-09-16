@@ -3079,7 +3079,7 @@ class SASsessionHTTP():
             return schema
 
 
-        # derive parque schema if not defined by user.
+        # derive parquet schema if not defined by user.
         if "schema" not in parquet_kwargs or parquet_kwargs["schema"] is None:
             custom_schema = False
             parquet_kwargs["schema"] = dts_to_pyarrow_schema(dts)
@@ -3140,16 +3140,17 @@ class SASsessionHTTP():
                                      sep=colsep, lineterminator=rowsep, dtype=dts, na_values=miss, keep_default_na=False,
                                      encoding='utf-8', quoting=quoting, **kwargs)
 
-                    for col in df.columns:
-                        if df[col].isnull().all():
-                            df[col] = df[col].astype(dts[col])
-                            df[col] = np.nan
+                    if not custom_schema:  # from_pandas(schema=...) already handles all-null columns correctly
+                        for col in df.columns:
+                            if df[col].isnull().all():
+                                df[col] = df[col].astype(dts[col])
+                                df[col] = np.nan
 
                     rows_read += len(df)
                     if static_columns:
                         df[[col[0] for col in static_columns]] = tuple([col[1] for col in static_columns])
 
-                    if k_dts is None:  # don't override these if user provided their own dtypes
+                    if k_dts is None and not custom_schema:  # don't override these if user provided their own dtypes or schema
                         for i in range(nvars):
                             if vartype[i] == 'FLOAT':
                                 if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
