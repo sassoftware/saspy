@@ -3539,19 +3539,7 @@ class SASsessionHTTP():
                         for i in ts_cols:
                             col_name = dvarlist[i]
                             str_col = pa_table.column(col_name)
-                            if varcat[i] in self._sb.sas_date_fmts:
-                                fmt = '%Y-%m-%d'
-                            elif varcat[i] in self._sb.sas_time_fmts:
-                                fmt = '%H:%M:%S.%f'
-                            else:
-                                fmt = '%Y-%m-%dT%H:%M:%S.%f'
-                            try:
-                                ts_col = pc.strptime(str_col, format=fmt, unit='ms', error_is_null=coerce_timestamp_errors)
-                            except Exception:
-                                if not coerce_timestamp_errors:
-                                    raise ValueError(f"The column {col_name} contains an unparseable timestamp. "
-                                       "Set coerce_timestamp_errors=True to cast as Null")
-                                ts_col = pc.strptime(str_col, format=fmt, unit='ms', error_is_null=True)
+                            ts_col = self._sb._parse_sas_ts_string(str_col, varcat[i], col_name, coerce_timestamp_errors)
                             pa_table = pa_table.set_column(pa_table.column_names.index(col_name), col_name, ts_col)
 
                     # Ensure schema matches for concat

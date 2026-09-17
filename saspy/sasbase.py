@@ -2434,6 +2434,59 @@ class SASsession():
         self._lastlog = self._io._log[lastlog:]
         return arrow_table
 
+    def _parse_sas_ts_string(self, str_col: 'pa.Array', varcat: str, col_name: str,
+                              coerce_timestamp_errors: bool) -> 'pa.Array':
+        """
+        Parse a PyArrow string column of SAS date/time/datetime values into pa.timestamp('ms').
+        Common to all access methods' sasdata2arrow/sasdata2parquet implementations.
+
+        Every SAS date format (DATE9., MMDDYY10., PDJULG., ...), time format (TIME., HHMM.,
+        B8601TX., ...), and datetime format (DATETIME., MDYAMPM., B8601DX., ...) -- i.e. every
+        format in sas_date_fmts/sas_time_fmts/sas_datetime_fmts -- is temporarily re-FORMATted
+        by the access method to one of exactly three fixed wire formats before it's ever streamed
+        out of SAS: E8601DA10. for dates, E8601TM15.6 for times, E8601DT26.6 for datetimes (see
+        the "format ... E8601DA10./E8601TM15.6/E8601DT26.6" blocks in each sasio*.py). So by the
+        time a string reaches this function, its original SAS format no longer matters -- it is
+        guaranteed to be in one of those three shapes, decided by which of the three format lists
+        `varcat` was found in.
+
+        pc.strptime() doesn't support the %f (fractional seconds) directive, and the transfer
+        format for time/datetime values always includes exactly 6 fractional digits, so those
+        are parsed separately here and added back as a millisecond duration.
+
+        Malformed values become null per-element when coerce_timestamp_errors is True (the
+        default); otherwise raises ValueError naming col_name on any unparseable value.
+
+        :param str_col: the raw string column as streamed from SAS, in the wire format described above
+        :param varcat: the column's format family, from vformatn()/varcat[i]
+        :param col_name: the column name, used only for the ValueError message
+        :param coerce_timestamp_errors: whether unparseable values become null (True) or raise (False)
+        :return: pa.Array of type pa.timestamp('ms')
+        """
+        if varcat in self.sas_date_fmts:
+            fmt, frac_col = '%Y-%m-%d', None
+        elif varcat in self.sas_time_fmts:
+            fmt, frac_col = '%H:%M:%S', pc.utf8_slice_codeunits(str_col, -6, None)
+        else:
+            fmt, frac_col = '%Y-%m-%dT%H:%M:%S', pc.utf8_slice_codeunits(str_col, -6, None)
+        main_col = str_col if frac_col is None else pc.utf8_slice_codeunits(str_col, 0, -7)
+        try:
+            ts_col = pc.strptime(main_col, format=fmt, unit='ms', error_is_null=coerce_timestamp_errors)
+        except Exception:
+            if not coerce_timestamp_errors:
+                raise ValueError(f"The column {col_name} contains an unparseable timestamp. "
+                   "Set coerce_timestamp_errors=True to cast as Null")
+            ts_col = pc.strptime(main_col, format=fmt, unit='ms', error_is_null=True)
+        if frac_col is not None:
+            valid_frac = pc.utf8_is_decimal(frac_col)
+            if not coerce_timestamp_errors and not pc.all(pc.fill_null(valid_frac, False)).as_py():
+                raise ValueError(f"The column {col_name} contains an unparseable timestamp. "
+                   "Set coerce_timestamp_errors=True to cast as Null")
+            safe_frac = pc.if_else(valid_frac, frac_col, '000000')
+            frac_ms = pc.cast(pc.divide(pc.cast(safe_frac, pa.int64()), 1000), pa.duration('ms'))
+            ts_col = pc.if_else(valid_frac, pc.add(ts_col, frac_ms), pa.scalar(None, type=ts_col.type))
+        return ts_col
+
     def arrow2sd(self, arrow_table: 'pa.Table', table: str = '_arrow', libref: str = '',
                   results: str = '', keep_outer_quotes: bool = False, 
                                      embedded_newlines: bool = True,
@@ -3537,11 +3590,11 @@ sas_date_fmts = (
     'MACDFDE', 'MACDFDE', 'MACDFDN', 'MACDFDWN', 'MACDFMN', 'MACDFMY', 'MACDFMY', 'MACDFWDX', 'MACDFWKX', 'MINGUO',
     'MINGUO', 'MMDDYY', 'MMDDYY', 'MMDDYYB', 'MMDDYYC', 'MMDDYYD', 'MMDDYYN', 'MMDDYYP', 'MMDDYYS', 'MMYY', 'MMYYC',
     'MMYYD', 'MMYYN', 'MMYYP', 'MMYYS', 'MONNAME', 'MONTH', 'MONYY', 'MONYY', 'ND8601DA', 'NENGO', 'NENGO', 'NLDATE',
-    'NLDATE', 'NLDATEL', 'NLDATEM', 'NLDATEMD', 'NLDATEMDL', 'NLDATEMDM', 'NLDATEMDS', 'NLDATEMN', 'NLDATES', 'NLDATEW',
+    'NLDATE', 'NLDATECP', 'NLDATEL', 'NLDATEM', 'NLDATEMD', 'NLDATEMDL', 'NLDATEMDM', 'NLDATEMDS', 'NLDATEMN', 'NLDATES', 'NLDATEW',
     'NLDATEW', 'NLDATEWN', 'NLDATEYM', 'NLDATEYML', 'NLDATEYMM', 'NLDATEYMS', 'NLDATEYQ', 'NLDATEYQL', 'NLDATEYQM',
     'NLDATEYQS', 'NLDATEYR', 'NLDATEYW', 'NLDDFDD', 'NLDDFDE', 'NLDDFDE', 'NLDDFDN', 'NLDDFDWN', 'NLDDFMN', 'NLDDFMY',
     'NLDDFMY', 'NLDDFWDX', 'NLDDFWKX', 'NORDFDD', 'NORDFDE', 'NORDFDE', 'NORDFDN', 'NORDFDWN', 'NORDFMN', 'NORDFMY',
-    'NORDFMY', 'NORDFWDX', 'NORDFWKX', 'POLDFDD', 'POLDFDE', 'POLDFDE', 'POLDFDN', 'POLDFDWN', 'POLDFMN', 'POLDFMY',
+    'NORDFMY', 'NORDFWDX', 'NORDFWKX', 'PDJULG', 'PDJULI', 'POLDFDD', 'POLDFDE', 'POLDFDE', 'POLDFDN', 'POLDFDWN', 'POLDFMN', 'POLDFMY',
     'POLDFMY', 'POLDFWDX', 'POLDFWKX', 'PTGDFDD', 'PTGDFDE', 'PTGDFDE', 'PTGDFDN', 'PTGDFDWN', 'PTGDFMN', 'PTGDFMY',
     'PTGDFMY', 'PTGDFWDX', 'PTGDFWKX', 'QTR', 'QTRR', 'RUSDFDD', 'RUSDFDE', 'RUSDFDE', 'RUSDFDN', 'RUSDFDWN', 'RUSDFMN',
     'RUSDFMY', 'RUSDFMY', 'RUSDFWDX', 'RUSDFWKX', 'SLODFDD', 'SLODFDE', 'SLODFDE', 'SLODFDN', 'SLODFDWN', 'SLODFMN',
@@ -3554,21 +3607,21 @@ sas_date_fmts = (
 )
 
 sas_time_fmts = (
-    'ANYDTTME', 'B8601LZ', 'B8601LZ', 'B8601TM', 'B8601TM', 'B8601TZ', 'B8601TZ', 'E8601LZ', 'E8601LZ', 'E8601TM',
-    'E8601TM', 'E8601TZ', 'E8601TZ', 'HHMM', 'HOUR', 'IS8601LZ', 'IS8601LZ', 'IS8601TM', 'IS8601TM', 'IS8601TZ',
+    'ANYDTTME', 'B8601LZ', 'B8601LZ', 'B8601TM', 'B8601TM', 'B8601TX', 'B8601TZ', 'B8601TZ', 'E8601LZ', 'E8601LZ', 'E8601TM',
+    'E8601TM', 'E8601TX', 'E8601TZ', 'E8601TZ', 'HHMM', 'HOUR', 'IS8601LZ', 'IS8601LZ', 'IS8601TM', 'IS8601TM', 'IS8601TZ',
     'IS8601TZ', 'JTIMEH', 'JTIMEHM', 'JTIMEHMS', 'JTIMEHW', 'JTIMEMW', 'JTIMESW', 'MMSS', 'ND8601TM', 'ND8601TZ',
     'NLTIMAP', 'NLTIMAP', 'NLTIME', 'NLTIME', 'STIMER', 'TIME', 'TIMEAMPM', 'TOD',
 )
 
 sas_datetime_fmts = (
-    'AFRDFDT', 'AFRDFDT', 'ANYDTDTM', 'B8601DN', 'B8601DN', 'B8601DT', 'B8601DT', 'B8601DZ', 'B8601DZ', 'CATDFDT',
+    'AFRDFDT', 'AFRDFDT', 'ANYDTDTM', 'B8601DN', 'B8601DN', 'B8601DT', 'B8601DT', 'B8601DX', 'B8601DZ', 'B8601DZ', 'B8601LX', 'CATDFDT',
     'CATDFDT', 'CRODFDT', 'CRODFDT', 'CSYDFDT', 'CSYDFDT', 'DANDFDT', 'DANDFDT', 'DATEAMPM', 'DATETIME', 'DATETIME',
     'DESDFDT', 'DESDFDT', 'DEUDFDT', 'DEUDFDT', 'DTDATE', 'DTMONYY', 'DTWKDATX', 'DTYEAR', 'DTYYQC', 'E8601DN',
-    'E8601DN', 'E8601DT', 'E8601DT', 'E8601DZ', 'E8601DZ', 'ENGDFDT', 'ENGDFDT', 'ESPDFDT', 'ESPDFDT', 'EURDFDT',
+    'E8601DN', 'E8601DT', 'E8601DT', 'E8601DX', 'E8601DZ', 'E8601DZ', 'E8601LX', 'ENGDFDT', 'ENGDFDT', 'ESPDFDT', 'ESPDFDT', 'EURDFDT',
     'EURDFDT', 'FINDFDT', 'FINDFDT', 'FRADFDT', 'FRADFDT', 'FRSDFDT', 'FRSDFDT', 'HUNDFDT', 'HUNDFDT', 'IS8601DN',
     'IS8601DN', 'IS8601DT', 'IS8601DT', 'IS8601DZ', 'IS8601DZ', 'ITADFDT', 'ITADFDT', 'JDATEYT', 'JDATEYTW', 'JNENGOT',
     'JNENGOTW', 'MACDFDT', 'MACDFDT', 'MDYAMPM', 'MDYAMPM', 'ND8601DN', 'ND8601DT', 'ND8601DZ', 'NLDATM', 'NLDATM',
-    'NLDATMAP', 'NLDATMAP', 'NLDATMDT', 'NLDATML', 'NLDATMM', 'NLDATMMD', 'NLDATMMDL', 'NLDATMMDM', 'NLDATMMDS',
+    'NLDATMAP', 'NLDATMAP', 'NLDATMCP', 'NLDATMDT', 'NLDATML', 'NLDATMM', 'NLDATMMD', 'NLDATMMDL', 'NLDATMMDM', 'NLDATMMDS',
     'NLDATMMN', 'NLDATMS', 'NLDATMTM', 'NLDATMTZ', 'NLDATMW', 'NLDATMW', 'NLDATMWN', 'NLDATMWZ', 'NLDATMYM', 'NLDATMYML',
     'NLDATMYMM', 'NLDATMYMS', 'NLDATMYQ', 'NLDATMYQL', 'NLDATMYQM', 'NLDATMYQS', 'NLDATMYR', 'NLDATMYW', 'NLDATMZ',
     'NLDDFDT', 'NLDDFDT', 'NORDFDT', 'NORDFDT', 'POLDFDT', 'POLDFDT', 'PTGDFDT', 'PTGDFDT', 'RUSDFDT', 'RUSDFDT',
