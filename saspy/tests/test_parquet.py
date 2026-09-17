@@ -1,6 +1,11 @@
 import unittest
 import saspy
-import pyarrow.parquet as pq
+
+try:
+    import pyarrow.parquet as pq
+except ImportError:
+    pq = None
+
 import os
 #import debugpy
 #debugpy.listen(5678)
