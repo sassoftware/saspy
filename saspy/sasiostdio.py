@@ -3452,6 +3452,14 @@ Will use HTML5 for this SASsession.""")
             custom_schema = True
         pandas_kwargs["schema"] = parquet_kwargs["schema"]
 
+        # from_pandas has no string->time64 cast kernel, so those columns are streamed as
+        # strings and routed through _parse_sas_ts_string afterwards instead, as sasdata2arrow
+        # does, rather than letting from_pandas attempt (and fail) the cast itself.
+        time64_idx = [i for i in range(nvars) if pa.types.is_time(parquet_kwargs["schema"].field(dvarlist[i]).type)]
+        if time64_idx:
+            pandas_kwargs["schema"] = pa.schema([pa.field(f.name, pa.string()) if i in time64_idx else f
+                                                  for i, f in enumerate(parquet_kwargs["schema"])])
+
         ##### START STERAM #####
         parquet_writer = None
         partition = 1
@@ -3533,6 +3541,11 @@ Will use HTML5 for this SASsession.""")
    Consider setting a different pd_timestamp_format or set coerce_timestamp_errors = True and they will be cast as Null""")
 
                     pa_table = pa.Table.from_pandas(df,**pandas_kwargs)
+
+                    for i in time64_idx:
+                        col_name = dvarlist[i]
+                        ts_col = pc.cast(self._sb._parse_sas_ts_string(pa_table.column(col_name), varcat[i], col_name, coerce_timestamp_errors), pa.time64('us'))
+                        pa_table = pa_table.set_column(pa_table.column_names.index(col_name), col_name, ts_col)
 
                     if not custom_schema:
                         #cast the int64 columns to timestamp
