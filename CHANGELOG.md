@@ -1,5 +1,29 @@
 # Changelog
 
+## [5.109.1] - 2026-09-17
+
+### Added
+
+-   `Enhancement` Makes sd2pq/sasdata2parquet resolve SAS dates, datetimes, and times as date32, timestamp, and time64 instead of a generic timestamp. The native use_arrow=False path now uses the same schema resolution as use_arrow=True.
+
+-   `Enhancement` Added missing date/time formats to canonical SAS date, time, datetime format lists.
+
+-   `Enhancement` Changed include_attrs to default to True in sd2pq, matching sd2arrow.
+
+-   `Enhancement` Added test cases.
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Fixes SAS to Arrow/Parquet type handling in sd2arrow and sd2pq(use_arrow=True) when include_attrs=True. Some types may cause errors when attempting to convert. Also added a fix where dates/datetimes may silently convert as null values but have a date or time type in an Arrow table.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.109.0] - 2026-09-11
 
 ### Added
