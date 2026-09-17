@@ -2112,7 +2112,7 @@ class SASsession():
                         rowsep: str = '\x01', colsep: str = '\x02',
                         rowrep: str = ' ',    colrep: str = ' ',
                         use_arrow: bool = False,
-                        include_attrs: bool = False,  
+                        include_attrs: bool = True,
                         **kwargs) -> None:
         """
         This method exports the SAS Data Set to a Parquet file. This is an alias for sasdata2parquet. This is a user contributed method
@@ -2135,8 +2135,11 @@ class SASsession():
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
         :param use_arrow: whether to use PyArrow for writing the parquet file (default is False).
-        :param include_attrs: whether to include SAS attributes in the parquet file metadata (default is False).
-        
+        :param include_attrs: whether to resolve each column's real SAS date/time/datetime type (date32,
+                               timestamp, or time64, instead of a single generic timestamp) and include SAS
+                               attributes in the parquet file metadata. Behaves the same regardless of
+                               use_arrow (default is True).
+
         Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
         be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
         to use to replace Nat's with in the dataframe. This works for both SAS datetime and date values.
@@ -2203,7 +2206,7 @@ class SASsession():
                        rowrep: str = ' ',
                        colrep: str = ' ',
                        use_arrow: bool = False,
-                       include_attrs: bool = False,
+                       include_attrs: bool = True,
                        **kwargs) -> None:
         """
         This method exports the SAS Data Set to a Parquet file. This is a user contributed method created to work around data sets that
@@ -2226,7 +2229,10 @@ class SASsession():
         :param rowrep: the char to convert to for any embedded rowsep chars, defaults to  ' '
         :param colrep: the char to convert to for any embedded colsep chars, defaults to  ' '
         :param use_arrow: whether to use PyArrow for writing the parquet file (default is False).
-        :param include_attrs: whether to include SAS attributes in the parquet file metadata (default is False).
+        :param include_attrs: whether to resolve each column's real SAS date/time/datetime type (date32,
+                               timestamp, or time64, instead of a single generic timestamp) and include SAS
+                               attributes in the parquet file metadata. Behaves the same regardless of
+                               use_arrow (default is True).
 
         Two new kwargs args as of V5.100.0 are for dealing with SAS dates and datetimes that are out of range of Pandats Timestamps. These values will
         be converted to NaT in the dataframe. The new feature is to specify a Timestamp value (str(Timestamp)) for the high value and/or low value
@@ -2293,6 +2299,18 @@ class SASsession():
             else:
                 pq.write_table(arrow_table, parquet_file_path, **parquet_kwargs)
         else:
+            # Get the same Arrow schema sd2arrow/sd2pq(use_arrow=True) resolve via schema(),
+            # and hand it to the native path through its existing custom-schema override, so
+            # type inference is independent of use_arrow.
+            if include_attrs and "schema" not in parquet_kwargs:
+                try:
+                    sd = SASdata(self, libref, table, dsopts=dsopts)
+                    schema = sd.schema(sasattrs=include_attrs, xattrs=include_attrs)
+                except Exception:
+                    schema = None
+                if schema is not None and isinstance(schema, pa.Schema):
+                    parquet_kwargs["schema"] = schema
+
             self._io.sasdata2parquet(
                         parquet_file_path = parquet_file_path,
                         table = table,
