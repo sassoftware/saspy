@@ -210,10 +210,10 @@ class TestPandasDataFrameIntegration(unittest.TestCase):
         z = 'z z'*12767
         df = pd.DataFrame([{'x' : x[:32767], 'y' : y[:32767], 'z' : z[:32767], 'z2' : 'z'*32767}])
         df = pd.concat([df, df, df, df, df, df], ignore_index=True)
-        df['x' ][0] = np.nan
-        df['y' ][1] = np.nan
-        df['z' ][2] = np.nan
-        df['z2'][3] = np.nan
+        df.loc[0, 'x'] = np.nan
+        df.loc[1, 'y'] = np.nan
+        df.loc[2, 'z'] = np.nan
+        df.loc[3, 'z2'] = np.nan
 
         sde = self.sas.df2sd(df, 'wide', results='text')
         x   = sde.to_df()
