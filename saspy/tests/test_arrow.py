@@ -16,7 +16,11 @@ try:
     PYARROW_AVAILABLE = True
 except ImportError:
     PYARROW_AVAILABLE = False
-
+#import debugpy
+#debugpy.listen(5678)
+#print("Waiting for debugger attach")
+#debugpy.wait_for_client()
+#debugpy.breakpoint()
 
 @unittest.skipIf(not PYARROW_AVAILABLE, "pyarrow is not installed")
 class TestMetadataEnhancement(unittest.TestCase):
