@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.109.2] - 2026-09-17
+
+### Added
+
+-   `None` Nothing Added
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Fix so that date/time/datime datatypes will be detected correctly in HTTP access method.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.109.1] - 2026-09-17
 
 ### Added

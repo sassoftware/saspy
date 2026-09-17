@@ -3460,7 +3460,7 @@ class SASsessionHTTP():
                     csv_col_types[col_name] = pa.int64()
                 else:
                     csv_col_types[col_name] = pa.string()
-            elif vartype[i] == 'N':
+            elif vartype[i] == 'FLOAT':
                 if varcat[i] in self._sb.sas_date_fmts + self._sb.sas_time_fmts + self._sb.sas_datetime_fmts:
                     csv_col_types[col_name] = pa.string()  # parse as string first, convert later
                     ts_cols.append(i)
