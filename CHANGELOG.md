@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.109.3] - 2026-09-18
+
+### Added
+
+-   `None` Nothing Added
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Fixes date/time/datetime handling in sd2pq(use_arrow=False/include_attrs=True).  For date/time/datetime columns, data needs to be loaded as a string because from_pandas does not have a string->timestamp/string->time64/string->date32 cast kernel.  After loaded the data can be casted to the appropriate type.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.109.2] - 2026-09-17
 
 ### Added
