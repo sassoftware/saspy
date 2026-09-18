@@ -3080,21 +3080,25 @@ class SASsessionHTTP():
 
 
         # derive parquet schema if not defined by user.
+        timestamp_idx = []
+        time64_idx = []
+        date32_idx = []
         if "schema" not in parquet_kwargs or parquet_kwargs["schema"] is None:
             custom_schema = False
             parquet_kwargs["schema"] = dts_to_pyarrow_schema(dts)
         else:
             custom_schema = True
+            
+            # from_pandas has no string->timestamp/string->time64/string->date32 cast kernel,
+            # so those columns are streamed as strings and routed through _parse_sas_ts_string
+            # afterwards instead, as sasdata2arrow does, rather than letting from_pandas attempt
+            # (and fail) the cast itself.
+            timestamp_idx = [i for i in range(nvars) if pa.types.is_timestamp(parquet_kwargs["schema"].field(dvarlist[i]).type)]
+            time64_idx = [i for i in range(nvars) if pa.types.is_time(parquet_kwargs["schema"].field(dvarlist[i]).type)]
+            date32_idx = [i for i in range(nvars) if pa.types.is_date32(parquet_kwargs["schema"].field(dvarlist[i]).type)]
         pandas_kwargs["schema"] = parquet_kwargs["schema"]
 
-        # from_pandas has no string->timestamp/string->time64/string->date32 cast kernel,
-        # so those columns are streamed as strings and routed through _parse_sas_ts_string
-        # afterwards instead, as sasdata2arrow does, rather than letting from_pandas attempt
-        # (and fail) the cast itself.
-        timestamp_idx = [i for i in range(nvars) if pa.types.is_timestamp(parquet_kwargs["schema"].field(dvarlist[i]).type)]
-        time64_idx = [i for i in range(nvars) if pa.types.is_time(parquet_kwargs["schema"].field(dvarlist[i]).type)]
-        date32_idx = [i for i in range(nvars) if pa.types.is_date32(parquet_kwargs["schema"].field(dvarlist[i]).type)]
-
+        #if any timestamp, time64, or date32 columns are present, override the schema for those columns to string so that from_pandas doesn't attempt to cast them and fail
         use_str_idx = timestamp_idx + time64_idx + date32_idx
         if use_str_idx:
             pandas_kwargs["schema"] = pa.schema([pa.field(f.name, pa.string()) if i in use_str_idx else f
