@@ -18,3 +18,7 @@ build/
 dist/
 misc/
 saspy/__pycache__/
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md
