@@ -954,3 +954,175 @@ class SASSessionCOM(object):
 
         return {'Success': True,
             'LOG': 'File successfully read using FileService.'}
+
+    def sasdata2polars(
+        self,
+        table: str,
+        libref: str = '',
+        dsopts: dict = None,
+        method: str = 'STREAM',
+        **kwargs,
+    ):
+        """
+        Export the SAS Data Set to a Polars Data Frame via COM/FileService.
+        Falls back to disk-based CSV transfer using FileService and Polars' CSV readers.
+        Supports Polars eager and lazy modes via polars_mode kwarg ('EAGER' or 'LAZY').
+        """
+        from .polars_types import PolarsTypeMapper, POLARS_AVAILABLE
+        from .polars_stream import sasdata2polarsDISK as pl_disk
+        import polars as pl
+        import tempfile
+        import io
+
+        if not POLARS_AVAILABLE:
+            raise ImportError("polars is not installed; install with extras 'polars'")
+
+        # Create a temporary CSV on the SAS side and download it via FileService
+        sas_csv = f"{self._sb.workpath}saspy_sd2pl.csv"
+        dopts = self._sb._dsopts(dsopts) if dsopts is not None else ''
+
+        EXPORT = """
+            data _saspy_sd2pl;
+                set {tbl} {dopt};
+            run;
+
+            proc export data=_saspy_sd2pl {dopt}
+                    outfile="{out}"
+                    dbms=csv replace;
+            run;
+        """
+
+        tablepath = self._tablepath(table, libref=libref)
+        export = EXPORT.format(tbl=tablepath, dopt=dopts, out=sas_csv)
+
+        # Submit and retrieve CSV bytes
+        self.workspace.LanguageService.Submit(export)
+        content = self._getfile(sas_csv)
+
+        # Write to a local temp file for Polars to read (scan_csv requires a path)
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.csv') as tmp:
+            tmp_path = tmp.name
+            tmp.write(content)
+
+        try:
+            # Build schema overrides from SAS metadata
+            schema = PolarsTypeMapper.get_schema_from_sasdata(self, table, libref, dsopts)
+            polars_mode = kwargs.get('polars_mode', 'EAGER').upper()
+
+            # Use polars_stream helper which handles LAZY vs EAGER
+            df = pl_disk(tmp_path, list(schema.keys()), schema, colsep=',', polars_mode=polars_mode)
+
+            # Convert numeric 0/1 to boolean where appropriate
+            try:
+                df = PolarsTypeMapper.convert_numeric_to_boolean(df)
+            except Exception:
+                pass
+
+            return df
+        finally:
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+
+    def polars2sasdata(
+        self,
+        df,
+        table: str = 'a',
+        libref: str = '',
+        keep_outer_quotes: bool = False,
+        embedded_newlines: bool = True,
+        LF: str = '\x01',
+        CR: str = '\x02',
+        colsep: str = '\x03',
+        colrep: str = ' ',
+        datetimes: dict = {},
+        outfmts: dict = {},
+        labels: dict = {},
+        outdsopts: dict = None,
+        encode_errors=None,
+        char_lengths=None,
+        **kwargs,
+    ):
+        """
+        Import a Polars Data Frame to a SAS Data Set via COM/FileService.
+        This implementation uploads a temporary CSV and uses PROC IMPORT on the server.
+        """
+        from .polars_types import PolarsTypeMapper, POLARS_AVAILABLE
+        import polars as pl
+        import tempfile
+        import os
+
+        if not POLARS_AVAILABLE:
+            raise ImportError("polars is not installed; install with extras 'polars'")
+
+        # Handle LazyFrame
+        if hasattr(df, 'collect'):
+            streaming = kwargs.get('streaming', False)
+            if streaming:
+                df = df.collect(engine='streaming')
+            else:
+                df = df.collect()
+
+        # Ensure Polars DataFrame
+        if not hasattr(df, 'write_csv'):
+            try:
+                df = pl.from_pandas(df)
+            except Exception:
+                raise TypeError("df must be a Polars or convertible pandas DataFrame")
+
+        # Write to local temp CSV
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.csv', mode='wb') as tmp:
+            tmp_path = tmp.name
+            # Use Polars to write; write_csv accepts path or file-like object
+            try:
+                # polars write_csv to file path
+                df.write_csv(tmp_path, separator=colsep, include_header=True, null_value='.', quote_style='always')
+            except Exception:
+                # Fallback to pandas
+                try:
+                    df.to_pandas().to_csv(tmp_path, index=False)
+                except Exception as e:
+                    try:
+                        os.unlink(tmp_path)
+                    except Exception:
+                        pass
+                    raise
+
+        # Upload to SAS workpath
+        remote = self._sb.workpath + os.path.basename(tmp_path)
+        self.upload(tmp_path, remote, overwrite=True)
+
+        # Build PROC IMPORT statement
+        tablepath = self._tablepath(table, libref=libref)
+        IMPORT = f"proc import datafile=\"{remote}\" out={tablepath} dbms=csv replace; getnames=yes; guessingrows=32767; run;"
+
+        self.workspace.LanguageService.Submit(IMPORT)
+
+        try:
+            return self._sas_data_object(table, libref)
+        finally:
+            # cleanup local temp
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+
+    def sasdata2polarsSTREAM(
+        self, table: str, libref: str = '', dsopts: dict = None, **kwargs
+    ):
+        """
+        Stream-conversion wrapper for COM: falls back to disk-backed CSV transfer.
+        True socket-style streaming isn't available for COM FileService; use DISK fallback.
+        """
+        # For COM, streaming via socket isn't available; use DISK fallback
+        return self.sasdata2polars(table, libref=libref, dsopts=dsopts, method='DISK', **kwargs)
+
+    def sasdata2polarsDISK(
+        self, table: str, libref: str = '', dsopts: dict = None, **kwargs
+    ):
+        """
+        Disk-backed conversion using FileService + temporary local file.
+        """
+        # Reuse sasdata2polars implementation which uses DISK via CSV export
+        return self.sasdata2polars(table, libref=libref, dsopts=dsopts, method='DISK', **kwargs)
