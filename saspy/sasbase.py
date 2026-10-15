@@ -66,8 +66,8 @@ import re
 import shutil
 import tempfile
 import typing
-
 import logging
+
 logger = logging.getLogger('saspy')
 
 from saspy.sasiostdio    import SASsessionSTDIO
@@ -1583,6 +1583,116 @@ class SASsession():
             else:
                 ret[colname] = chr_upper[col_up]
         return ret
+
+    def copy(self, 
+             table: str|list, 
+             source_libref: str, 
+             dest_libref: str, 
+             member_types: str|list|None = None, 
+             move: bool|None = None, 
+             clone: bool|None = None,
+             force: bool|None = None,
+             cas_acceleration: bool|None = None,
+             copy_constraints: bool|None = None, 
+             copy_timestamps: bool|None = None, 
+             copy_indexes: bool|None = None, 
+             encryption_key: str|None = None,
+             alter_password: str|None = None,
+             override_options: dict | None = None, 
+             exclude: bool = False,
+             **kwargs):
+
+        # Translate booleans to SAS option values. None = pass nothing.
+        options_map = {
+            "move": {
+                None: None,
+                True: "move",
+                False: None
+            },
+            "clone": {
+                None: None,
+                True: "clone",
+                False: "noclone",
+            },
+           "force": {
+                None: None,
+                True: "force",
+                False: None,
+            },
+            "cas_acceleration": {
+                None: None,
+                True: "accel",
+                False: "noaccel",
+            },
+            "copy_constraints": {
+                None: None,
+                True: "constraint=yes",
+                False: "constraint=no",
+            },
+            "copy_timestamps": {
+                None: None,
+                True: "datecopy",
+                False: None
+            },
+            "copy_indexes": {
+                None: None,
+                True: "index=yes",
+                False: "index=no"
+            },
+            "exclude": {
+                None: None,
+                True: "exclude",
+                False: "select"
+            }
+        }
+
+        if isinstance(table, str):
+            table = [table]
+
+        # Ignore 'select' from the proc_options list, since it is handled separately below.
+        ignore_args = {"exclude"}
+
+        proc_options = [
+            mapping[locals()[name]]
+            for name, mapping in options_map.items()
+            if name not in ignore_args
+            and mapping[locals()[name]] is not None
+        ]
+
+        if member_types is not None:
+            if isinstance(member_types, str):
+                member_types = [member_types]
+            proc_options.append(f"memtype={' '.join(member_types)}")
+
+        if encryption_key is not None:
+            proc_options.append(f"encryption_key='{encryption_key}'")
+
+        if alter_password is not None:
+            proc_options.append(f"alter_password='{alter_password}'")
+
+        if override_options is not None:
+            for key, value in override_options.items():
+                proc_options.append(f"{key}={value}")
+
+        # PROC COPY normally uses select, otherwise use exclude.
+        if exclude:
+            select_or_exclude = "exclude"
+        else:
+            select_or_exclude = "select"
+
+        # Submit full PROC COPY code to SAS.
+        code = f'''
+            proc copy in={source_libref} out={dest_libref} {" ".join(proc_options)};
+                {select_or_exclude} {" ".join(table)};
+            run;
+        '''
+        
+        if self.nosub:
+            print(code)
+        else:
+            ll = self._io.submit(code, results='text')['LOG']
+        
+        return ll
 
     def df2sd(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '',
               results: str = '', keep_outer_quotes: bool = False,
