@@ -1600,8 +1600,33 @@ class SASsession():
              alter_password: str|None = None,
              override_options: dict | None = None, 
              exclude: bool = False,
+             quiet: bool = False,
              **kwargs):
+        """
+        Copy or move one or more members from one SAS library to another using PROC COPY.
 
+        For the boolean options below, None (the default) passes nothing to PROC COPY, so the SAS default is used.
+
+        :param table: name, or list of names, of the members to copy
+        :param source_libref: libref of the library to copy members from
+        :param dest_libref: libref of the library to copy members to
+        :param member_types: member type, or list of member types, to process (data, view, catalog, ...); SAS default is all member types
+        :param move: True moves the members, deleting them from the source library (MOVE)
+        :param clone: True copies data set attributes such as compression and buffer size (CLONE); False does not (NOCLONE)
+        :param force: True allows a data set with an audit trail to be moved (FORCE)
+        :param cas_acceleration: True uses the SAS In-Database Code Accelerator when possible (ACCEL); False does not (NOACCEL)
+        :param copy_constraints: True copies integrity constraints (CONSTRAINT=YES); False does not (CONSTRAINT=NO)
+        :param copy_timestamps: True keeps the creation and last modified dates of the source members (DATECOPY)
+        :param copy_indexes: True copies indexes (INDEX=YES); False does not (INDEX=NO)
+        :param encryption_key: key value for AES encrypted data sets (ENCRYPTKEY=); passed quoted, so it is case sensitive
+        :param alter_password: alter password for members that are alter-protected (ALTER=)
+        :param override_options: dictionary of additional PROC COPY options, passed through as option=value
+        :param exclude: True copies every member except those in table (EXCLUDE); False copies only those in table (SELECT)
+        :param quiet: True suppresses printing the SAS messages when not in batch mode
+        :return: the NOTE, WARNING and ERROR messages from the SAS log if in batch mode, otherwise None (the messages \
+                 are printed). Use lastlog() for the full SAS log.
+        """
+        
         # Translate booleans to SAS option values. None = pass nothing.
         options_map = {
             "move": {
@@ -1662,13 +1687,13 @@ class SASsession():
         if member_types is not None:
             if isinstance(member_types, str):
                 member_types = [member_types]
-            proc_options.append(f"memtype={' '.join(member_types)}")
+            proc_options.append(f"memtype=({' '.join(member_types)})")
 
         if encryption_key is not None:
-            proc_options.append(f"encryption_key='{encryption_key}'")
+            proc_options.append(f"encryptkey='{encryption_key}'")
 
         if alter_password is not None:
-            proc_options.append(f"alter_password='{alter_password}'")
+            proc_options.append(f"alter='{alter_password}'")
 
         if override_options is not None:
             for key, value in override_options.items():
@@ -1689,10 +1714,22 @@ class SASsession():
         
         if self.nosub:
             print(code)
+            return
+
+        lastlog = len(self._io._log)
+        ll = self._io.submit(code, results='text')
+        self._lastlog = self._io._log[lastlog:]
+
+        # Keep only the NOTE, WARNING and ERROR messages (with their indented continuation lines), minus the timing note
+        msgs = '\n'.join(m for m in re.findall(r'^(?:NOTE|WARNING|ERROR)[ \d-]*:.*(?:\n {6,}\S.*)*', ll['LOG'], re.M)
+                         if 'used (Total process time)' not in m)
+
+        if not self.batch:
+            if not quiet:
+                print(msgs)
+            return None
         else:
-            ll = self._io.submit(code, results='text')['LOG']
-        
-        return ll
+            return msgs
 
     def df2sd(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '',
               results: str = '', keep_outer_quotes: bool = False,
