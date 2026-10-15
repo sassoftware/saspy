@@ -1623,8 +1623,18 @@ class SASsession():
         :param override_options: dictionary of additional PROC COPY options, passed through as option=value
         :param exclude: True copies every member except those in table (EXCLUDE); False copies only those in table (SELECT)
         :param quiet: True suppresses printing the SAS messages when not in batch mode
-        :return: the NOTE, WARNING and ERROR messages from the SAS log if in batch mode, otherwise None (the messages \
+        :return: the NOTE, WARNING and ERROR messages from the SAS log if in batch mode, otherwise None (the messages
                  are printed). Use lastlog() for the full SAS log.
+
+        .. code-block:: python
+
+            # copy one data set, or a list of them
+            sas.copy('cars', 'sashelp', 'work')
+            sas.copy(['cars', 'class'], 'sashelp', 'work')
+
+            # move every data set except cars, keeping indexes and creation dates
+            sas.copy('cars', 'mylib', 'archive', member_types='data', exclude=True,
+                     move=True, copy_indexes=True, copy_timestamps=True)
         """
         
         # Translate booleans to SAS option values. None = pass nothing.
