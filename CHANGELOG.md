@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.109.4] - 2026-10-16
+
+### Added
+
+-   `None` Nothing Added
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `Bug Fix` Fixes extended attribute issue in schema method.  If extended attributes were created without the same case as the dataset column, the the schema method was not adding them to it's output.  This fix normalizes the extended attribute column names in order to fix this issue.
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.109.3] - 2026-09-18
 
 ### Added
