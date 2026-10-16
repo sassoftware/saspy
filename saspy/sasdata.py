@@ -817,7 +817,7 @@ class SASdata:
             for _, row in xattr_df.iterrows():
                 attr_name = str(row.get('xattr'))
                 attr_value = str(row.get('xvalue'))
-                var_name = row.get('name') if type(row.get('name')) is str else ''
+                var_name = row.get('name').lower() if type(row.get('name')) is str else ''
 
                 if not attr_name:
                     continue
@@ -899,8 +899,8 @@ class SASdata:
                 field_metadata = {k: v for k, v in column_metadata.items() if v is not None and v != ''}
 
                 # Add variable-level extended attributes
-                if var_name in var_extended_attrs.keys():
-                    field_metadata["extended_attributes"] = var_extended_attrs[var_name]
+                if var_name.lower() in var_extended_attrs.keys():
+                    field_metadata["extended_attributes"] = var_extended_attrs[var_name.lower()]
 
                 field = {
                     "name": var_name,

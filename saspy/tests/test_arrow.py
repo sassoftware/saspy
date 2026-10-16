@@ -8,6 +8,7 @@ Tests the following functionality:
 
 import saspy
 import unittest
+import json
 from decimal import Decimal
 
 try:
@@ -45,7 +46,8 @@ class TestMetadataEnhancement(unittest.TestCase):
             proc datasets lib=work nolist;
                 modify test_label;
                 xattr add ds attr="ds attribute" ;
-                 xattr add var id (attr="var attribute") ;
+                xattr add var id (attr="var attribute") ;
+                xattr add var Id (test="case insensitive") ;
             quit;
         """)
 
@@ -87,7 +89,8 @@ class TestMetadataEnhancement(unittest.TestCase):
         self.assertIn('name', field_names)
         self.assertIn('age', field_names)
         self.assertEqual(schema.metadata.get(b'extended_attributes'), b'{"attr": "ds attribute"}')
-        self.assertEqual(schema.field(b'id').metadata.get(b'extended_attributes'), b'{"attr": "var attribute"}')
+        self.assertIn(("attr", "var attribute"), json.loads(schema.field(b'id').metadata.get(b'extended_attributes')).items())
+        self.assertIn(("test", "case insensitive"), json.loads(schema.field(b'id').metadata.get(b'extended_attributes')).items())
 
     def test_schema_as_dict(self):
         """Test sasdata.schema can return dict when pyarrow not available"""
