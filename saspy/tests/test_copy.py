@@ -165,10 +165,10 @@ class TestSASsessionCopy(unittest.TestCase):
         """
         Test that encryption_key and alter_password generate quoted ENCRYPTKEY= and ALTER= options
         """
+        # The values themselves are masked in teach_me_SAS mode; test_copy_encrypted checks them when submitted
         stmt = self.helper_proc_stmt(encryption_key='Secret', alter_password='pw')
 
-        self.assertIn("encryptkey='Secret'", stmt)
-        self.assertIn("alter='pw'", stmt)
+        self.assertEqual(stmt, f"proc copy in={SRC} out={DST} encryptkey='*****' alter='*****';")
 
     def test_copy_syntax_override_options(self):
         """
@@ -178,6 +178,172 @@ class TestSASsessionCopy(unittest.TestCase):
 
         self.assertIn('memtype=data', stmt)
         self.assertIn('index=no', stmt)
+
+    def test_copy_syntax_masks_passwords(self):
+        """
+        Test that teach_me_SAS mode never shows a password or encryption key, however it is passed,
+        and that each one is replaced with the mask in place
+        """
+        # Every password contains SECRET, so finding SECRET anywhere in the output means a (partial) leak
+        SECRET = 'S3cret'
+        SCENARIOS = {
+            # name:                        (copy() arguments,                                                expected masked text)
+            'encryption_key':              (dict(encryption_key=SECRET),                                    "encryptkey='*****'"),
+            'encryption_key apostrophe':   (dict(encryption_key=f"{SECRET}'{SECRET}"),                      "encryptkey='*****'"),
+            'alter_password':              (dict(alter_password=SECRET),                                    "alter='*****'"),
+            'alter_password apostrophe':   (dict(alter_password=f"{SECRET}'{SECRET}"),                      "alter='*****'"),
+            'override encryptkey':         (dict(override_options={'encryptkey': f"'{SECRET}'"}),           "encryptkey='*****'"),
+            'override ALTER':              (dict(override_options={'ALTER': f"'{SECRET}'"}),                "ALTER='*****'"),
+            'override pw':                 (dict(override_options={'pw': f"'{SECRET}'"}),                   "pw='*****'"),
+            'override Protect':            (dict(override_options={'Protect': f"'{SECRET}'"}),              "Protect='*****'"),
+            'override unquoted':           (dict(override_options={'pw': SECRET}),                          "pw='*****'"),
+            'override double quoted':      (dict(override_options={'pw': f'"{SECRET} {SECRET}"'}),          "pw='*****'"),
+            'override doubled quote':      (dict(override_options={'pw': f"'{SECRET}''{SECRET}'"}),         "pw='*****'"),
+            'override space before =':     (dict(override_options={'pw ': f"'{SECRET}'"}),                  "pw='*****'"),
+            'override OVERRIDE=':          (dict(override_options={'override': f"(alter='{SECRET}')"}),     "override=(alter='*****')"),
+            'member alter':                (dict(table=f"cars(alter='{SECRET}')"),                          "select cars(alter='*****');"),
+            'member read':                 (dict(table=f"cars(read='{SECRET}')"),                           "select cars(read='*****');"),
+            'member write':                (dict(table=f"cars(write='{SECRET}')"),                          "select cars(write='*****');"),
+            'member list':                 (dict(table=[f"cars(alter={SECRET})", f"cars1(read={SECRET})"]), "select cars(alter='*****') cars1(read='*****');"),
+            'member exclude':              (dict(table=f"cars(alter='{SECRET}')", exclude=True),            "exclude cars(alter='*****');"),
+        }
+
+        for scenario, (kwargs, expected) in SCENARIOS.items():
+            with self.subTest(scenario=scenario):
+                table = kwargs.pop('table', 'cars')
+                code = ' '.join(self.helper_code(table, SRC, DST, **kwargs))
+
+                self.assertNotIn(SECRET, code, msg="password shown in teach_me_SAS output")
+                self.assertIn(expected, code)
+
+    def test_copy_syntax_masks_all_passwords(self):
+        """
+        Test that every password in one statement is masked, with teach_me_SAS turned on as teach_me_SAS(1)
+        """
+        captured = StringIO()
+        with redirect_stdout(captured):
+            self.sas.teach_me_SAS(1)
+            try:
+                self.sas.copy("cars(read='r1')", SRC, DST, encryption_key='k1', alter_password='a1',
+                              override_options={'pw': "'p1'", 'protect': "'p2'", 'override': "(write='w1')"})
+            finally:
+                self.sas.teach_me_SAS(0)
+        code = ' '.join(captured.getvalue().split())
+
+        self.assertEqual(code, f"proc copy in={SRC} out={DST} encryptkey='*****' alter='*****' pw='*****' protect='*****' "
+                               f"override=(write='*****'); select cars(read='*****'); run;")
+
+    def test_copy_syntax_masks_only_passwords(self):
+        """
+        Test that options and member names that are not passwords, even ones that look similar, are not masked
+        """
+        code = ' '.join(self.helper_code(['altered', 'readme', 'pw_cars', 'write_log', 'cars(memtype=data)'], SRC, DST,
+                                         copy_indexes=False, override_options={'memtype': 'data', 'protected': 'no'}))
+
+        self.assertEqual(code, f"proc copy in={SRC} out={DST} index=no memtype=data protected=no; "
+                               f"select altered readme pw_cars write_log cars(memtype=data); run;")
+
+    def test_copy_passwords_not_masked_when_submitted(self):
+        """
+        Test that the real encryption key and alter password are used when not in teach_me_SAS mode,
+        and that the SAS log does not show them
+        """
+        self.sas.submit(f"data {SRC}.enc(encrypt=aes encryptkey='S3cret' alter='Pw9'); set sashelp.cars; run;")
+        try:
+            log = self.sas.copy('enc', SRC, DST, encryption_key='S3cret', alter_password='Pw9')
+
+            self.helper_assert_copied(log)
+            self.assertTrue(self.helper_exist(DST, 'enc'))
+            self.assertNotIn('S3cret', self.sas.lastlog())
+            self.assertNotIn('Pw9', self.sas.lastlog())
+        finally:
+            self.sas.submit(f"""
+                proc datasets lib={SRC} nolist; delete enc(alter='Pw9'); quit;
+                proc datasets lib={DST} nolist; delete enc(alter='Pw9'); quit;
+            """)
+
+    def test_copy_encryption_key_quotes(self):
+        """
+        Test that encryption keys containing quotes, which SAS allows, reach SAS unchanged: each data set is
+        created with the key written independently as a double quoted SAS literal, then copied with copy()
+        """
+        KEYS = ["it's", "a''b", "''", "'start", "end'", 'say "hi"', "x'y'z", "with spaces 'and' quotes", "Q'" * 32]
+
+        for key in KEYS:
+            with self.subTest(key=key):
+                literal = key.replace('"', '""')
+                self.sas.submit(f"""
+                    proc datasets lib={DST} kill nolist; quit;
+                    data {SRC}.enc(encrypt=aes encryptkey="{literal}"); set sashelp.cars; run;
+                """)
+                self.sas.check_error_log = False
+
+                # A wrong key must fail, so a successful copy proves SAS received exactly this key
+                self.assertIn('ERROR', self.sas.copy('enc', SRC, DST, encryption_key=key + 'x'))
+                self.sas.check_error_log = False
+
+                log = self.sas.copy('enc', SRC, DST, encryption_key=key)
+                self.helper_assert_copied(log)
+                self.assertTrue(self.helper_exist(DST, 'enc'))
+
+    def test_copy_encryption_key_quotes_multiple_members(self):
+        """
+        Test moving several AES encrypted, alter protected data sets in one step with a key containing quotes
+        """
+        KEY = "it's a ''key''"
+        self.sas.submit(f"""
+            data {SRC}.e1(encrypt=aes encryptkey="{KEY}" alter=Pw9) {SRC}.e2(encrypt=aes encryptkey="{KEY}" alter=Pw9);
+                set sashelp.cars;
+            run;
+        """)
+        try:
+            log = self.sas.copy(['e1', 'e2'], SRC, DST, encryption_key=KEY, alter_password='Pw9', move=True)
+
+            self.helper_assert_copied(log)
+            self.assertEqual(self.helper_members(DST), {'E1', 'E2'})
+            self.assertFalse(self.helper_exist(SRC, 'e1') or self.helper_exist(SRC, 'e2'))
+        finally:
+            self.sas.submit(f"""
+                proc datasets lib={SRC} nolist; delete e1(alter=Pw9) e2(alter=Pw9); quit;
+                proc datasets lib={DST} nolist; delete e1(alter=Pw9) e2(alter=Pw9); quit;
+            """)
+
+    def test_copy_password_aliases_when_submitted(self):
+        """
+        Test that the password routes masked in teach_me_SAS mode are real ones: PW=, PROTECT= and a member level
+        ALTER= all let PROC COPY move an alter protected data set
+        """
+        SCENARIOS = {
+            'override pw':      dict(override_options={'pw': "'Pw9'"}),
+            'override protect': dict(override_options={'protect': "'Pw9'"}),
+            'member alter':     dict(table="enc(alter='Pw9')"),
+        }
+
+        for scenario, kwargs in SCENARIOS.items():
+            with self.subTest(scenario=scenario):
+                self.sas.submit(f"""
+                    proc datasets lib={DST} nolist; delete enc(alter='Pw9'); quit;
+                    data {SRC}.enc(alter='Pw9'); set sashelp.cars; run;
+                """)
+                self.sas.check_error_log = False
+                table = kwargs.pop('table', 'enc')
+
+                log = self.sas.copy(table, SRC, DST, move=True, **kwargs)
+
+                self.helper_assert_copied(log)
+                self.assertFalse(self.helper_exist(SRC, 'enc'), msg="alter protected data set was not moved")
+                self.assertTrue(self.helper_exist(DST, 'enc'))
+
+        self.sas.submit(f"proc datasets lib={DST} nolist; delete enc(alter='Pw9'); quit;")
+
+    def test_copy_unknown_argument(self):
+        """
+        Test that a misspelled argument raises TypeError instead of being silently ignored
+        """
+        with self.assertRaises(TypeError):
+            self.sas.copy('cars', SRC, DST, copy_index=True)
+
+        self.assertFalse(self.helper_exist(DST, 'cars'), msg="copy ran despite the invalid argument")
 
     def test_copy_nosub(self):
         """

@@ -56,6 +56,7 @@ try:
 except:
     pass
 
+import code
 import os
 import sys
 import datetime
@@ -1600,8 +1601,8 @@ class SASsession():
              alter_password: str|None = None,
              override_options: dict | None = None, 
              exclude: bool = False,
-             quiet: bool = False,
-             **kwargs):
+             quiet: bool = False
+            ):
         """
         Copy or move one or more members from one SAS library to another using PROC COPY.
 
@@ -1684,7 +1685,7 @@ class SASsession():
         if isinstance(table, str):
             table = [table]
 
-        # Ignore 'select' from the proc_options list, since it is handled separately below.
+        # Arguments to ignore when generating the PROC COPY options list
         ignore_args = {"exclude"}
 
         proc_options = [
@@ -1700,9 +1701,11 @@ class SASsession():
             proc_options.append(f"memtype=({' '.join(member_types)})")
 
         if encryption_key is not None:
+            encryption_key = encryption_key.replace("'", "''")
             proc_options.append(f"encryptkey='{encryption_key}'")
 
         if alter_password is not None:
+            alter_password = alter_password.replace("'", "''")
             proc_options.append(f"alter='{alter_password}'")
 
         if override_options is not None:
@@ -1715,15 +1718,19 @@ class SASsession():
         else:
             select_or_exclude = "select"
 
-        # Submit full PROC COPY code to SAS.
+        # Create full PROC COPY code for SAS.
         code = f'''
             proc copy in={source_libref} out={dest_libref} {" ".join(proc_options)};
                 {select_or_exclude} {" ".join(table)};
             run;
         '''
-        
+
+        # If nosub is True, mask sensitive options and print the code instead of submitting it.
         if self.nosub:
-            print(code)
+            masked_options = ['encryptkey', 'alter', 'pw', 'protect', 'read', 'write']
+            masked_value   = r"""(?:'[^']*'|"[^"]*")+|[^\s;)]+"""
+            masked_code    = re.sub(rf"\b({'|'.join(masked_options)})\s*=\s*(?:{masked_value})", r"\1='*****'", code, flags=re.I)
+            print(masked_code)
             return
 
         lastlog = len(self._io._log)
