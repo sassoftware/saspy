@@ -56,6 +56,7 @@ try:
 except:
     pass
 
+import code
 import os
 import sys
 import datetime
@@ -66,8 +67,8 @@ import re
 import shutil
 import tempfile
 import typing
-
 import logging
+
 logger = logging.getLogger('saspy')
 
 from saspy.sasiostdio    import SASsessionSTDIO
@@ -1583,6 +1584,169 @@ class SASsession():
             else:
                 ret[colname] = chr_upper[col_up]
         return ret
+
+    def copy(self, 
+             table: str|list, 
+             source_libref: str, 
+             dest_libref: str, 
+             member_types: str|list|None = None, 
+             move: bool|None = None, 
+             clone: bool|None = None,
+             force: bool|None = None,
+             cas_acceleration: bool|None = None,
+             copy_constraints: bool|None = None, 
+             copy_timestamps: bool|None = None, 
+             copy_indexes: bool|None = None, 
+             encryption_key: str|None = None,
+             alter_password: str|None = None,
+             override_options: dict | None = None, 
+             exclude: bool = False,
+             quiet: bool = False
+            ):
+        """
+        Copy or move one or more members from one SAS library to another using PROC COPY.
+
+        For the boolean options below, None (the default) passes nothing to PROC COPY, so the SAS default is used.
+
+        :param table: name, or list of names, of the members to copy
+        :param source_libref: libref of the library to copy members from
+        :param dest_libref: libref of the library to copy members to
+        :param member_types: member type, or list of member types, to process (data, view, catalog, ...); SAS default is all member types
+        :param move: True moves the members, deleting them from the source library (MOVE)
+        :param clone: True copies data set attributes such as compression and buffer size (CLONE); False does not (NOCLONE)
+        :param force: True allows a data set with an audit trail to be moved (FORCE)
+        :param cas_acceleration: True uses the SAS In-Database Code Accelerator when possible (ACCEL); False does not (NOACCEL)
+        :param copy_constraints: True copies integrity constraints (CONSTRAINT=YES); False does not (CONSTRAINT=NO)
+        :param copy_timestamps: True keeps the creation and last modified dates of the source members (DATECOPY)
+        :param copy_indexes: True copies indexes (INDEX=YES); False does not (INDEX=NO)
+        :param encryption_key: key value for AES encrypted data sets (ENCRYPTKEY=); passed quoted, so it is case sensitive
+        :param alter_password: alter password for members that are alter-protected (ALTER=)
+        :param override_options: dictionary of additional PROC COPY options, passed through as option=value
+        :param exclude: True copies every member except those in table (EXCLUDE); False copies only those in table (SELECT)
+        :param quiet: True suppresses printing the SAS messages when not in batch mode
+        :return: the NOTE, WARNING and ERROR messages from the SAS log if in batch mode, otherwise None (the messages
+                 are printed). Use lastlog() for the full SAS log.
+
+        .. code-block:: python
+
+            # copy one data set, or a list of them
+            sas.copy('cars', 'sashelp', 'work')
+            sas.copy(['cars', 'class'], 'sashelp', 'work')
+
+            # move every data set except cars, keeping indexes and creation dates
+            sas.copy('cars', 'mylib', 'archive', member_types='data', exclude=True,
+                     move=True, copy_indexes=True, copy_timestamps=True)
+        """
+        
+        # Translate booleans to SAS option values. None = pass nothing.
+        options_map = {
+            "move": {
+                None: None,
+                True: "move",
+                False: None
+            },
+            "clone": {
+                None: None,
+                True: "clone",
+                False: "noclone",
+            },
+           "force": {
+                None: None,
+                True: "force",
+                False: None,
+            },
+            "cas_acceleration": {
+                None: None,
+                True: "accel",
+                False: "noaccel",
+            },
+            "copy_constraints": {
+                None: None,
+                True: "constraint=yes",
+                False: "constraint=no",
+            },
+            "copy_timestamps": {
+                None: None,
+                True: "datecopy",
+                False: None
+            },
+            "copy_indexes": {
+                None: None,
+                True: "index=yes",
+                False: "index=no"
+            },
+            "exclude": {
+                None: None,
+                True: "exclude",
+                False: "select"
+            }
+        }
+
+        if isinstance(table, str):
+            table = [table]
+
+        # Arguments to ignore when generating the PROC COPY options list
+        ignore_args = {"exclude"}
+
+        proc_options = [
+            mapping[locals()[name]]
+            for name, mapping in options_map.items()
+            if name not in ignore_args
+            and mapping[locals()[name]] is not None
+        ]
+
+        if member_types is not None:
+            if isinstance(member_types, str):
+                member_types = [member_types]
+            proc_options.append(f"memtype=({' '.join(member_types)})")
+
+        if encryption_key is not None:
+            encryption_key = encryption_key.replace("'", "''")
+            proc_options.append(f"encryptkey='{encryption_key}'")
+
+        if alter_password is not None:
+            alter_password = alter_password.replace("'", "''")
+            proc_options.append(f"alter='{alter_password}'")
+
+        if override_options is not None:
+            for key, value in override_options.items():
+                proc_options.append(f"{key}={value}")
+
+        # PROC COPY normally uses select, otherwise use exclude.
+        if exclude:
+            select_or_exclude = "exclude"
+        else:
+            select_or_exclude = "select"
+
+        # Create full PROC COPY code for SAS.
+        code = f'''
+            proc copy in={source_libref} out={dest_libref} {" ".join(proc_options)};
+                {select_or_exclude} {" ".join(table)};
+            run;
+        '''
+
+        # If nosub is True, mask sensitive options and print the code instead of submitting it.
+        if self.nosub:
+            masked_options = ['encryptkey', 'alter', 'pw', 'protect', 'read', 'write']
+            masked_value   = r"""(?:'[^']*'|"[^"]*")+|[^\s;)]+"""
+            masked_code    = re.sub(rf"\b({'|'.join(masked_options)})\s*=\s*(?:{masked_value})", r"\1='*****'", code, flags=re.I)
+            print(masked_code)
+            return
+
+        lastlog = len(self._io._log)
+        ll = self._io.submit(code, results='text')
+        self._lastlog = self._io._log[lastlog:]
+
+        # Keep only the NOTE, WARNING and ERROR messages (with their indented continuation lines), minus the timing note
+        msgs = '\n'.join(m for m in re.findall(r'^(?:NOTE|WARNING|ERROR)[ \d-]*:.*(?:\n {6,}\S.*)*', ll['LOG'], re.M)
+                         if 'used (Total process time)' not in m)
+
+        if not self.batch:
+            if not quiet:
+                print(msgs)
+            return None
+        else:
+            return msgs
 
     def df2sd(self, df: 'pandas.DataFrame', table: str = '_df', libref: str = '',
               results: str = '', keep_outer_quotes: bool = False,
