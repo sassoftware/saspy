@@ -56,7 +56,6 @@ try:
 except:
     pass
 
-import code
 import os
 import sys
 import datetime
@@ -68,6 +67,11 @@ import shutil
 import tempfile
 import typing
 import logging
+#import debugpy
+#debugpy.listen(5678)
+#print("Waiting for debugger attach")
+#debugpy.wait_for_client()
+#debugpy.breakpoint()
 
 logger = logging.getLogger('saspy')
 
@@ -1586,20 +1590,20 @@ class SASsession():
         return ret
 
     def copy(self, 
-             table: str|list, 
+             table: typing.Union[str, list], 
              source_libref: str, 
              dest_libref: str, 
-             member_types: str|list|None = None, 
-             move: bool|None = None, 
-             clone: bool|None = None,
-             force: bool|None = None,
-             cas_acceleration: bool|None = None,
-             copy_constraints: bool|None = None, 
-             copy_timestamps: bool|None = None, 
-             copy_indexes: bool|None = None, 
-             encryption_key: str|None = None,
-             alter_password: str|None = None,
-             override_options: dict | None = None, 
+             member_types: typing.Union[str, list, None] = None, 
+             move: typing.Union[bool, None] = None, 
+             clone: typing.Union[bool, None] = None,
+             force: typing.Union[bool, None] = None,
+             cas_acceleration: typing.Union[bool, None] = None,
+             copy_constraints: typing.Union[bool, None] = None, 
+             copy_timestamps: typing.Union[bool, None] = None, 
+             copy_indexes: typing.Union[bool, None] = None, 
+             encryption_key: typing.Union[str, None] = None,
+             alter_password: typing.Union[str, None] = None,
+             override_options: typing.Union[dict, None] = None, 
              exclude: bool = False,
              quiet: bool = False
             ):
@@ -1688,11 +1692,12 @@ class SASsession():
         # Arguments to ignore when generating the PROC COPY options list
         ignore_args = {"exclude"}
 
+        copy_parameters = locals()
         proc_options = [
-            mapping[locals()[name]]
+            mapping[copy_parameters[name]]
             for name, mapping in options_map.items()
             if name not in ignore_args
-            and mapping[locals()[name]] is not None
+            and mapping[copy_parameters[name]] is not None
         ]
 
         if member_types is not None:

@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.110.0] - 2026-10-20
+
+### Added
+
+-   `Enhancement` Add new copy method that is a wrapper for PROC COPY.  New tests and documentation were added for this feature as well.
+
+### Changed
+
+-   `None` Nothing Changed
+
+### Fixed
+
+-   `None` Nothing fixed
+
+### Removed
+
+-   `None` Nothing removed
+
 ## [5.109.4] - 2026-10-16
 
 ### Added
