@@ -2,6 +2,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 import unittest
 import saspy
+import re
 
 SRC = 'cpsrc'
 DST = 'cpdst'
@@ -490,16 +491,23 @@ class TestSASsessionCopy(unittest.TestCase):
 
     def test_copy_table_name_literal(self):
         """
-        Test copying a data set with a name literal when VALIDMEMNAME=EXTEND
+        Test copying data sets that need a name literal when VALIDMEMNAME=EXTEND, given as name literals, alongside
+        a standard name
         """
-        self.sas.submit(f"options validmemname=extend; data {SRC}.'my cars'n; set sashelp.cars; run;")
+        self.sas.submit(f"""
+            %let _cpvmn = %sysfunc(getoption(validmemname));
+            options validmemname=extend;
+            data {SRC}.'my cars'n {SRC}."it's"n; set sashelp.cars; run;
+        """)
         try:
-            log = self.sas.copy("'my cars'n", SRC, DST)
+            log = self.sas.copy(["'my cars'n", '''"it's"n''', 'cars'], SRC, DST)
 
             self.helper_assert_copied(log)
             self.assertTrue(self.helper_exist(DST, 'my cars'))
+            self.assertTrue(self.helper_exist(DST, "it's"))
+            self.assertTrue(self.helper_exist(DST, 'cars'))
         finally:
-            self.sas.submit("options validmemname=compat;")
+            self.sas.submit("options validmemname=&_cpvmn;")
 
     def test_copy_exclude(self):
         """
@@ -727,6 +735,274 @@ class TestSASsessionCopy(unittest.TestCase):
         self.helper_assert_copied(log)
         self.assertTrue(self.helper_exist(DST, 'formats', 'catalog'))
         self.assertFalse(self.helper_exist(DST, 'cars'))
+
+    # ------------------------------------------------------------------
+    # SASdata.copy
+    # ------------------------------------------------------------------
+
+    def helper_shape(self, libref: str, member: str) -> tuple:
+        """
+        Get the number of observations and variables of a data set.
+        """
+        self.sas.submit(f"""
+            %let _cpnobs = ; %let _cpnvar = ;
+            proc sql noprint;
+                select nobs, nvar into :_cpnobs trimmed, :_cpnvar trimmed from dictionary.tables
+                where libname = "{libref.upper()}" and memname = "{member.upper()}";
+            quit;
+        """)
+        return self.sas.symget('_cpnobs', outtype='int'), self.sas.symget('_cpnvar', outtype='int')
+
+    def helper_sasdata_shape(self, sd) -> tuple:
+        """
+        Get the number of observations and variables a SASdata object shows, with its dsopts applied.
+        """
+        log = self.sas.submit(f"data work._cpchk; set {sd.libref}.'{sd.table}'n {sd._dsopts()}; run;")['LOG']
+        found = re.search(r'WORK\._CPCHK has (\d+) observations and (\d+) variables', log)
+        return (int(found.group(1)), int(found.group(2))) if found else None
+
+    def helper_sasdata_code(self, sd, **kwargs) -> list:
+        """
+        Get the code SASdata.copy prints in teach_me_SAS mode, as stripped, non-blank lines, and its return value.
+        """
+        captured = StringIO()
+        with redirect_stdout(captured):
+            self.sas.teach_me_SAS(True)
+            try:
+                ret = sd.copy(DST, **kwargs)
+            finally:
+                self.sas.teach_me_SAS(False)
+        return [l.strip() for l in captured.getvalue().splitlines() if l.strip()], ret
+
+    def test_sasdata_copy(self):
+        """
+        Test that SASdata.copy copies the data set and returns a SASdata object for the copy, leaving the original
+        SASdata object pointing at the source, with lastlog() showing the PROC COPY log
+        """
+        sd = self.sas.sasdata('cars', SRC, results='text')
+
+        sd2 = sd.copy(DST)
+
+        self.assertIn('proc copy', self.sas.lastlog().lower(), msg="lastlog() is not the PROC COPY log")
+        self.assertNotIn('ERROR', self.sas.lastlog())
+        self.assertIsInstance(sd2, saspy.SASdata)
+        self.assertEqual((sd2.table, sd2.libref, sd2.results), ('cars', DST, 'text'))
+        self.assertEqual(self.helper_shape(DST, 'cars'), (428, 15))
+        self.assertTrue(self.helper_exist(SRC, 'cars'))
+        self.assertEqual(sd.libref, SRC)
+
+    def test_sasdata_copy_syntax(self):
+        """
+        Test that teach_me_SAS mode prints PROC COPY for this data set as a name literal, with options passed through
+        and the password masked, returns None and copies nothing
+        """
+        sd = self.sas.sasdata('cars', SRC)
+
+        code, ret = self.helper_sasdata_code(sd, move=True, copy_indexes=False, alter_password='Pw9')
+
+        self.assertIsNone(ret)
+        self.assertEqual(code, [f"proc copy in={SRC} out={DST} move index=no alter='*****';", 'select cars;', 'run;'])
+        self.assertFalse(self.helper_exist(DST, 'cars'))
+        self.assertEqual(sd.libref, SRC)
+
+    def test_sasdata_copy_name_literal(self):
+        """
+        Test that data sets whose names need a name literal (VALIDMEMNAME=EXTEND) are copied, with the literal in
+        double quotes, in double quotes around a single quote, and in single quotes around an ampersand
+        """
+        NAMES = {'my cars': '"my cars"n', "it's": '"it\'s"n', 'a&b': "'a&b'n"}
+
+        self.sas.submit(f"""
+            %let _cpvmn = %sysfunc(getoption(validmemname));
+            options validmemname=extend;
+            data {SRC}."my cars"n {SRC}."it's"n {SRC}.'a&b'n; set sashelp.cars; run;
+        """)
+        try:
+            for name, literal in NAMES.items():
+                with self.subTest(name=name):
+                    code, _ = self.helper_sasdata_code(self.sas.sasdata(name, SRC))
+                    self.assertEqual(code[1], f'select {literal};')
+
+                    sd2 = self.sas.sasdata(name, SRC).copy(DST)
+
+                    self.assertIsInstance(sd2, saspy.SASdata)
+                    self.assertEqual(sd2.table, name)
+                    self.assertTrue(self.helper_exist(DST, name))
+        finally:
+            self.sas.submit("options validmemname=&_cpvmn;")
+
+    def test_sasdata_copy_move(self):
+        """
+        Test that a move returns a SASdata object for the moved data set and leaves the original SASdata object
+        unchanged; a move whose source can't be deleted copies the data set but returns None
+        """
+        sd2 = self.sas.sasdata('cars', SRC).copy(DST, move=True)
+
+        self.assertEqual(sd2.libref, DST)
+        self.assertTrue(self.helper_exist(DST, 'cars'))
+        self.assertFalse(self.helper_exist(SRC, 'cars'))
+
+        # The wrong alter password: PROC COPY copies the data set, then can't delete the source, which is an error
+        self.sas.submit(f"data {SRC}.alt(alter=Pw9); set sashelp.cars; run;")
+        sd = self.sas.sasdata('alt', SRC)
+        try:
+            with self.assertLogs('saspy', level='ERROR'):
+                self.assertIsNone(sd.copy(DST, move=True, alter_password='wrong'))
+
+            self.assertIn('Invalid or missing ALTER password', self.sas.lastlog())
+            self.assertTrue(self.helper_exist(DST, 'alt'))
+            self.assertTrue(self.helper_exist(SRC, 'alt'))
+            self.assertEqual(sd.libref, SRC)
+        finally:
+            self.sas.submit(f"""
+                proc datasets lib={SRC} nolist; delete alt(alter=Pw9); quit;
+                proc datasets lib={DST} nolist; delete alt(alter=Pw9); quit;
+            """)
+
+    def test_sasdata_copy_error(self):
+        """
+        Test that a failed copy returns None, logs an error pointing to lastlog(), and leaves an older data set of the
+        same name in the destination unchanged
+        """
+        self.sas.submit(f"data {SRC}.enc(encrypt=aes encryptkey='S3cret'); set sashelp.cars; run;")
+        sd = self.sas.sasdata('enc', SRC)
+
+        for existing in (False, True):
+            with self.subTest(existing=existing):
+                self.sas.submit(f"proc datasets lib={DST} kill nolist; quit;")
+                if existing:
+                    self.sas.submit(f"data {DST}.enc; set sashelp.class; run;")
+
+                with self.assertLogs('saspy', level='ERROR') as logs:
+                    self.assertIsNone(sd.copy(DST, encryption_key='wrong'))
+
+                self.assertIn('Check lastlog()', logs.output[0])
+                self.assertIn('Invalid ENCRYPTKEY value', self.sas.lastlog())
+                self.assertEqual(self.helper_exist(DST, 'enc'), existing)
+                if existing:
+                    self.assertEqual(self.helper_shape(DST, 'enc'), (19, 5), msg="older data set was changed")
+
+        with self.assertLogs('saspy', level='ERROR'):
+            self.assertIsNone(self.sas.sasdata('notable', SRC).copy(DST))
+
+    def test_sasdata_copy_after_error(self):
+        """
+        Test repeated submits after errors: each failed copy is reported, a copy after a failed copy succeeds, and an
+        error in an earlier, unrelated submit doesn't make the next copy fail
+        """
+        self.sas.submit(f"data {SRC}.enc(encrypt=aes encryptkey='S3cret'); set sashelp.cars; run;")
+        enc  = self.sas.sasdata('enc', SRC)
+        cars = self.sas.sasdata('cars', SRC)
+
+        for attempt in (1, 2):
+            with self.subTest(failed_copy=attempt), self.assertLogs('saspy', level='ERROR'):
+                self.assertIsNone(enc.copy(DST, encryption_key='wrong'))
+
+        self.assertIsInstance(cars.copy(DST), saspy.SASdata)
+        self.assertNotIn('ERROR', self.sas.lastlog())
+
+        self.sas.submit("data _null_; set work.no_such_data_set; run;")
+        self.assertIsInstance(enc.copy(DST, encryption_key='S3cret'), saspy.SASdata)
+        self.assertEqual(self.helper_members(DST), {'CARS', 'ENC'})
+
+    def test_sasdata_copy_messages(self):
+        """
+        Test that the SAS messages are printed when not in batch mode, unless quiet=True
+        """
+        sd = self.sas.sasdata('cars', SRC)
+        self.sas.set_batch(False)
+        try:
+            for quiet in (False, True):
+                with self.subTest(quiet=quiet):
+                    captured = StringIO()
+                    with redirect_stdout(captured):
+                        sd2 = sd.copy(DST, quiet=quiet)
+
+                    self.assertIsInstance(sd2, saspy.SASdata)
+                    self.assertEqual('NOTE: Copying' in captured.getvalue(), not quiet)
+        finally:
+            self.sas.set_batch(True)
+
+    def test_sasdata_copy_dsopts(self):
+        """
+        Test that the whole data set is copied, and the returned SASdata object has the same dsopts, as its own dict,
+        so it shows the same subset of the copy
+        """
+        dsopts = {'where': 'msrp > 50000', 'keep': 'make model msrp'}
+        sd = self.sas.sasdata('cars', SRC, dsopts=dsopts)
+
+        sd2 = sd.copy(DST)
+
+        self.assertEqual(self.helper_shape(DST, 'cars'), (428, 15))
+        self.assertEqual(sd2.dsopts, dsopts)
+        self.assertEqual(self.helper_sasdata_shape(sd2), (52, 3))
+
+        sd2.dsopts['obs'] = 5
+        self.assertNotIn('obs', sd.dsopts, msg="the returned SASdata object shares its dsopts dict")
+
+    def test_sasdata_copy_dsopts_passwords(self):
+        """
+        Test that passwords in dsopts are passed to PROC COPY as written and replace the matching argument with a
+        warning, and that the returned SASdata object can read the copy with them
+        """
+        SCENARIOS = {
+            # name:          (source protection,                 dsopts passwords,             copy() arguments)
+            'encryptkey':    ("encrypt=aes2 encryptkey='it''s'", {'encryptkey': "'it''s'"},    dict(encryption_key='wrong')),
+            'ENCRYPTKEY':    ("encrypt=aes encryptkey='it''s'",  {'ENCRYPTKEY': "'it''s'"},    dict(encryption_key='wrong')),
+            'pw, for move':  ("alter=Pw9",                       {'pw': 'Pw9'},                dict(alter_password='wrong', move=True)),
+        }
+
+        for name, (protection, passwords, arguments) in SCENARIOS.items():
+            with self.subTest(dsopts=name):
+                self.sas.submit(f"""
+                    proc datasets lib={DST} kill nolist; quit;
+                    data {SRC}.enc({protection}); set sashelp.cars; run;
+                """)
+                sd = self.sas.sasdata('enc', SRC, dsopts={'where': 'msrp > 50000', **passwords})
+                try:
+                    with self.assertLogs('saspy', level='WARNING') as logs:
+                        sd2 = sd.copy(DST, **arguments)
+
+                    self.assertIn('Passwords in dsopts', logs.output[0])
+                    self.assertIsInstance(sd2, saspy.SASdata)
+                    self.assertEqual(self.helper_sasdata_shape(sd2), (52, 15))
+                finally:
+                    self.sas.submit(f"""
+                        proc datasets lib={SRC} nolist; delete enc(alter=Pw9); quit;
+                        proc datasets lib={DST} nolist; delete enc(alter=Pw9); quit;
+                    """)
+
+    def test_sasdata_copy_dsopts_passwords_syntax(self):
+        """
+        Test that passwords in dsopts are added to the PROC COPY statement in place of the matching arguments and are
+        masked in teach_me_SAS mode; an argument that doesn't match a dsopts password is kept, without a warning
+        """
+        sd = self.sas.sasdata('cars', SRC, dsopts={'where': 'msrp > 50000', 'encryptkey': "'it''s'", 'pw': 'Pw9'})
+
+        with self.assertLogs('saspy', level='WARNING'):
+            code, _ = self.helper_sasdata_code(sd, encryption_key='wrong', alter_password='wrong',
+                                               override_options={'index': 'no'})
+
+        self.assertEqual(code[0], f"proc copy in={SRC} out={DST} index=no encryptkey='*****' pw='*****';")
+
+        sd = self.sas.sasdata('cars', SRC, dsopts={'alter': 'Pw9'})
+
+        with self.assertRaises(AssertionError), self.assertLogs('saspy', level='WARNING'):
+            code, _ = self.helper_sasdata_code(sd, encryption_key='k1')
+
+        self.assertEqual(code[0], f"proc copy in={SRC} out={DST} encryptkey='*****' alter='*****';")
+
+    def test_sasdata_copy_removed_arguments(self):
+        """
+        Test that the member list arguments of SASsession.copy, and the removed ignore_dsopts, are not accepted
+        by SASdata.copy
+        """
+        sd = self.sas.sasdata('cars', SRC)
+
+        for arg in ('exclude', 'member_types', 'ignore_dsopts'):
+            with self.subTest(arg=arg):
+                with self.assertRaises(TypeError):
+                    sd.copy(DST, **{arg: True})
 
 
 if __name__ == "__main__":

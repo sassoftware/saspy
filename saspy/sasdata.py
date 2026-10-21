@@ -26,6 +26,7 @@ except ImportError:
     pa = None
 
 import logging
+from turtle import clone
 logger = logging.getLogger('saspy')
 
 import json
@@ -2305,3 +2306,116 @@ class SASdata:
 
         return df
 
+    def copy(self,
+             dest_libref: str,
+             move: bool|None = None,
+             clone: bool|None = None,
+             force: bool|None = None,
+             cas_acceleration: bool|None = None,
+             copy_constraints: bool|None = None,
+             copy_timestamps: bool|None = None,
+             copy_indexes: bool|None = None,
+             encryption_key: str|None = None,
+             alter_password: str|None = None,
+             override_options: dict | None = None,
+             quiet: bool = False
+            ) -> 'SASdata | None':
+        """
+        Copy or move this SAS data set to another library using PROC COPY, and return a SASdata object for the copy.
+
+        The whole data set is copied as-is. dsopts (where, keep, obs, format, ...) are applied whenever a SASdata object
+        is used, so the returned object gets the same dsopts and shows the same subset of the copy. Rows and columns that
+        dsopts leave out are still copied; to copy only a subset, create it with a DATA step first.
+
+        Passwords in dsopts (encryptkey, alter, pw) are passed to PROC COPY as written. They are used instead of the
+        matching encryption_key or alter_password argument, and a warning is logged when they replace one.
+
+        For the boolean options below, None (the default) passes nothing to PROC COPY, so the SAS default is used.
+
+        :param dest_libref: libref of the library to copy the data set to
+        :param move: True moves the data set, deleting it from the source library (MOVE). Use the returned SASdata
+                     object for the moved data set; this one still refers to the source library
+        :param clone: True copies data set attributes such as compression and buffer size (CLONE); False does not (NOCLONE)
+        :param force: True allows a data set with an audit trail to be moved (FORCE)
+        :param cas_acceleration: True uses the SAS In-Database Code Accelerator when possible (ACCEL); False does not (NOACCEL)
+        :param copy_constraints: True copies integrity constraints (CONSTRAINT=YES); False does not (CONSTRAINT=NO)
+        :param copy_timestamps: True keeps the creation and last modified dates of the source data set (DATECOPY)
+        :param copy_indexes: True copies indexes (INDEX=YES); False does not (INDEX=NO)
+        :param encryption_key: key value for AES encrypted data sets (ENCRYPTKEY=); passed quoted, so it is case sensitive
+        :param alter_password: alter password for an alter-protected data set (ALTER=)
+        :param override_options: dictionary of additional PROC COPY options, passed through as option=value
+        :param quiet: True suppresses printing the SAS messages when not in batch mode
+        :return: a SASdata object for the copy, with the same dsopts and results setting as this one. None if PROC
+                 COPY had an error (SYSERR above 6), which is logged; use lastlog() for the SAS log. None in
+                 teach_me_SAS mode, which prints the code with passwords and encryption keys masked.
+
+        .. code-block:: python
+
+            # copy sashelp.cars to the WORK library
+            sd  = sas.sasdata('cars', 'sashelp', dsopts={'where': 'msrp > 50000'})
+            sd2 = sd.copy('work')    # work.cars has all 428 rows; sd2 shows the 52 where msrp > 50000
+
+            # move work.cars to the ARCHIVE library, keeping indexes and creation dates
+            sd = sas.sasdata('cars', 'work')
+            sd.copy('archive', move=True, copy_indexes=True, copy_timestamps=True)
+        """
+
+        # Passwords in dsopts are already SAS syntax, so pass them to PROC COPY as written, ahead of the arguments
+        dsopts_passwords = {key: value for key, value in self.dsopts.items()
+                            if key.lower() in ('encryptkey', 'alter', 'pw')}
+        
+        # Place them in the override options rather than the values of the encryption_key and alter_password arguments,
+        # so they are passed to PROC COPY as written. This also helps confirm to the user that dsopts were passed instead
+        # when they look at the log.
+        if dsopts_passwords:
+            names            = {key.lower() for key in dsopts_passwords}
+            replaces_key     = 'encryptkey' in names and encryption_key is not None
+            replaces_alterpw = bool(names & {'alter', 'pw'}) and alter_password is not None
+
+            if replaces_key or replaces_alterpw:
+                logger.warning("Passwords in dsopts (encryptkey, alter, pw) are used instead of the encryption_key and "
+                               "alter_password arguments.")
+
+            if 'encryptkey' in names:
+                encryption_key = None
+
+            if names & {'alter', 'pw'}:
+                alter_password = None
+
+            override_options = {**(override_options or {}), **dsopts_passwords}
+
+        self.sas.copy(
+            self.sas.nliteral(self.table),
+            self.libref,
+            dest_libref,
+            move=move,
+            clone=clone,
+            force=force,
+            cas_acceleration=cas_acceleration,
+            copy_constraints=copy_constraints,
+            copy_timestamps=copy_timestamps,
+            copy_indexes=copy_indexes,
+            encryption_key=encryption_key,
+            alter_password=alter_password,
+            override_options=override_options,
+            quiet=quiet
+        )
+
+        if self.sas.nosub:
+            return None
+
+        copy_log  = self.sas.lastlog()
+        sas_error = self.sas.symget('syserr', outtype='int') > 6
+
+        if sas_error:
+            logger.error(f"Copying {self.libref.upper()}.{self.table.upper()} to {dest_libref.upper()} did not complete "
+                         f"successfully. Check lastlog() for errors.")
+            sd = None
+        else:
+            # Give the copy its own dsopts dict, so changing one object's dsopts doesn't change the other's
+            sd = self.sas.sasdata(self.table, dest_libref, self.results, dict(self.dsopts))
+
+        # sasdata() replaces lastlog(), so restore the PROC COPY log
+        self.sas._lastlog = copy_log
+
+        return sd
