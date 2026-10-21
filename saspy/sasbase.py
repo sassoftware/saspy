@@ -799,6 +799,86 @@ class SASsession():
 
         return self._io._asubmit(code, results)
 
+    def _masktxt(self,
+                 txt: str,
+                 masked_options: list = ['encryptkey', 'alter', 'pw', 'protect', 'read', 'write'] 
+                ) -> str:
+        
+        '''
+        This helper method is used to mask sensitive information when teach_me_SAS(1) is enabled, 
+        such as passwords or other confidential data. It replaces any occurrences of sensitive information
+        with asterisks or other masking characters.
+        '''
+
+        masked_value = r"""(?:'[^']*'|"[^"]*")+|[^\s;)]+"""
+        masked_txt = re.sub(rf"\b({'|'.join(masked_options)})\s*=\s*(?:{masked_value})", r"\1='*****'", 
+                            txt, flags=re.I)
+        return masked_txt
+
+    def nliteral(self, name: str) -> str:
+        '''
+        Return a name so it can be used in SAS code: unchanged if it is a valid SAS name or already a name literal,
+        otherwise as a SAS name literal (``'name'n`` or ``"name"n``).
+
+        A valid SAS name begins with an English letter or an underscore, and the rest are English letters,
+        underscores or digits. Any other name is enclosed in quotes:
+
+            - single quotes if the name contains an ampersand (&) or percent sign (%), so macro references aren't
+              resolved, or more double quotes than single quotes
+            - double quotes otherwise
+
+        Names that contain & or % are not resolved as macro variables or functions. Where possible, build a name 
+        in Python rather than with SAS macro references: use an f-string with Python variables, and symget() to 
+        get the value of a SAS macro variable. To have SAS resolve macro references in a name instead, 
+        pass a name literal in double quotes, such as ``"&name"n``; it is returned unchanged.
+
+        :param name: the name to return as a SAS name
+        :return: name unchanged, or as a name literal
+        :raises ValueError: if name is empty or blank
+        
+        .. code-block:: python
+
+            sas.nliteral('cars')        # cars
+            sas.nliteral('my cars')     # "my cars"n
+            sas.nliteral("it's")        # "it's"n
+            sas.nliteral('R&D')         # 'R&D'n
+            sas.nliteral("'my cars'n")  # 'my cars'n
+
+            # Build names in Python, getting SAS macro variable values with symget()
+            region = 'west'
+            sas.nliteral(f'{region} sales')                     # "west sales"n
+            sas.nliteral(f"{sas.symget('region')} sales")       # "east sales"n, if macro variable region is east
+
+            # Or let SAS resolve the macro reference, with a name literal in double quotes
+            sas.nliteral('"&region sales"n')                    # "&region sales"n
+
+            sd = sas.sasdata('my cars', 'work')
+            sas.submit(f"proc print data=work.{sas.nliteral(sd.table)}; run;")
+        '''
+        name = name.strip()
+
+        if not name:
+            raise ValueError("Name cannot be empty or blank")
+        
+        # Already a name literal: return unchanged. The quote character can only appear inside it doubled.
+        if re.fullmatch(r"""'(?:[^']|'')*'n|"(?:[^"]|"")*"n""", name, flags=re.I):
+            return name
+
+        # Valid SAS name: return unchanged
+        if re.fullmatch(r'[a-z_][a-z0-9_]*', name, flags=re.I | re.ASCII):
+            return name
+
+        # Return in single quotation marks, so SAS doesn't resolve & or % in the name as macro references,
+        # or if there are more double quotes than single quotes in the name
+        if '&' in name or '%' in name or name.count('"') > name.count("'"):
+            escaped_name = name.replace("'", "''")
+            return f"'{escaped_name}'n"
+
+        # Otherwise return in double quotation marks
+        escaped_name = name.replace('"', '""')
+
+        return f'"{escaped_name}"n'
+        
     def submitLOG(self, code, results: str = '', prompt: dict = None, printto=False, **kwargs):
         '''
         This method is a convenience wrapper around the submit() method. It executes the submit then prints the LOG that was returned.
@@ -1608,7 +1688,7 @@ class SASsession():
 
         For the boolean options below, None (the default) passes nothing to PROC COPY, so the SAS default is used.
 
-        :param table: name, or list of names, of the members to copy
+        :param table: name, or list of names, of the members to copy. Supports SAS shortcuts. Name literals should be used if necessary.
         :param source_libref: libref of the library to copy members from
         :param dest_libref: libref of the library to copy members to
         :param member_types: member type, or list of member types, to process (data, view, catalog, ...); SAS default is all member types
@@ -1625,7 +1705,8 @@ class SASsession():
         :param exclude: True copies every member except those in table (EXCLUDE); False copies only those in table (SELECT)
         :param quiet: True suppresses printing the SAS messages when not in batch mode
         :return: the NOTE, WARNING and ERROR messages from the SAS log if in batch mode, otherwise None (the messages
-                 are printed). Use lastlog() for the full SAS log.
+                 are printed). Use lastlog() for the full SAS log. In teach_me_SAS mode the code is printed instead,
+                 with passwords and encryption keys masked.
 
         .. code-block:: python
 
@@ -1725,12 +1806,9 @@ class SASsession():
             run;
         '''
 
-        # If nosub is True, mask sensitive options and print the code instead of submitting it.
+        # If nosub is True, mask sensitive options that can be applied by this method.
         if self.nosub:
-            masked_options = ['encryptkey', 'alter', 'pw', 'protect', 'read', 'write']
-            masked_value   = r"""(?:'[^']*'|"[^"]*")+|[^\s;)]+"""
-            masked_code    = re.sub(rf"\b({'|'.join(masked_options)})\s*=\s*(?:{masked_value})", r"\1='*****'", code, flags=re.I)
-            print(masked_code)
+            print(self._masktxt(code))
             return
 
         lastlog = len(self._io._log)
