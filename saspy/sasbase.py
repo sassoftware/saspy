@@ -801,15 +801,15 @@ class SASsession():
 
     def _masktxt(self,
                  txt: str,
-                 masked_options: list = ['encryptkey', 'alter', 'pw', 'protect', 'read', 'write'] 
+                 masked_options: tuple = ('encryptkey', 'alter', 'pw', 'protect', 'read', 'write') 
                 ) -> str:
         
         '''
         This helper method is used to mask sensitive information when teach_me_SAS(1) is enabled, 
         such as passwords or other confidential data. It replaces any occurrences of sensitive information
-        with asterisks or other masking characters.
+        with asterisks.
         '''
-
+        
         masked_value = r"""(?:'[^']*'|"[^"]*")+|[^\s;)]+"""
         masked_txt = re.sub(rf"\b({'|'.join(masked_options)})\s*=\s*(?:{masked_value})", r"\1='*****'", 
                             txt, flags=re.I)
